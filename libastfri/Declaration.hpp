@@ -1,17 +1,19 @@
-#pragma once
+#ifndef LIBASTFRI_DECLARATION_HPP
+#define LIBASTFRI_DECLARATION_HPP
 
-#include <libastfri/utils/OutputVisitor.hpp>
+#include <libastfri/Visitor.hpp>
+#include <libastfri/impl/Utils.hpp>
 
 #include <string>
 #include <vector>
 
-namespace libastfri::structures
+namespace astfri
 {
 struct Type;
 struct Expression;
 struct CompoundStatement;
 
-struct Declaration : virtual utils::IOutputVisitable
+struct Declaration : virtual IVisitable
 {
 };
 
@@ -33,7 +35,7 @@ struct BaseVariableDefintion : Declaration
 // premenna
 struct VariableDefintion :
     BaseVariableDefintion,
-    utils::OutputVisitable<VariableDefintion>
+    details::MakeVisitable<VariableDefintion>
 {
     VariableDefintion(
         std::string name,
@@ -45,7 +47,7 @@ struct VariableDefintion :
 // parameter
 struct ParameterDefinition :
     BaseVariableDefintion,
-    utils::OutputVisitable<ParameterDefinition>
+    details::MakeVisitable<ParameterDefinition>
 {
     ParameterDefinition(
         std::string name,
@@ -57,7 +59,7 @@ struct ParameterDefinition :
 // funkcia
 struct FunctionDefinition :
     Declaration,
-    utils::OutputVisitable<FunctionDefinition>
+    details::MakeVisitable<FunctionDefinition>
 {
     std::string name;
     std::vector<ParameterDefinition*> parameters;
@@ -74,7 +76,7 @@ struct FunctionDefinition :
 
 struct UknownDeclaration :
     Declaration,
-    utils::OutputVisitable<UknownDeclaration>
+    details::MakeVisitable<UknownDeclaration>
 {
     std::string message;
 
@@ -82,3 +84,5 @@ struct UknownDeclaration :
 };
 
 } // namespace libastfri::structures
+
+#endif

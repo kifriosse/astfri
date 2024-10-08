@@ -1,15 +1,16 @@
-#pragma once
+#ifndef LIBASTFRI_TYPE_HPP
+#define LIBASTFRI_TYPE_HPP
 
 #include <libastfri/utils/OutputVisitor.hpp>
 
 #include <string>
 
-namespace libastfri::structures
+namespace astfri
 {
 // typ
-struct Type : virtual utils::IOutputVisitable
+struct Type : virtual IOutputVisitable
 {
-    std::string name;
+    std::string name_;
 
     Type(std::string name);
 };
@@ -20,34 +21,36 @@ struct PrimitiveType : Type
     PrimitiveType(std::string name);
 };
 
-struct IntType : PrimitiveType, utils::OutputVisitable<IntType>
+struct IntType : PrimitiveType, OutputVisitable<IntType>
 {
     IntType();
 };
 
-struct FloatType : PrimitiveType, utils::OutputVisitable<FloatType>
+struct FloatType : PrimitiveType, OutputVisitable<FloatType>
 {
     FloatType();
 };
 
-struct CharType : PrimitiveType, utils::OutputVisitable<CharType>
+struct CharType : PrimitiveType, OutputVisitable<CharType>
 {
     CharType();
 };
 
-struct BoolType : PrimitiveType, utils::OutputVisitable<BoolType>
+struct BoolType : PrimitiveType, OutputVisitable<BoolType>
 {
     BoolType();
 };
 
-struct VoidType : PrimitiveType, utils::OutputVisitable<VoidType>
+struct VoidType : PrimitiveType, OutputVisitable<VoidType>
 {
     VoidType();
 };
 
 //// uzivatelske typy
-struct UserType : Type, utils::OutputVisitable<UserType>
+struct UserType : Type, OutputVisitable<UserType>
 {
     UserType(std::string name);
 };
 } // namespace libastfri::structures
+
+#endif

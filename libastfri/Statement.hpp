@@ -1,20 +1,21 @@
-#pragma once
+#ifndef LIBASTFRI_STATEMENT_HPP
+#define LIBASTFRI_STATEMENT_HPP
 
-#include <libastfri/structures/Declaration.hpp>
-#include <libastfri/structures/Expression.hpp>
-
-#include <libastfri/utils/OutputVisitor.hpp>
+#include <libastfri/Declaration.hpp>
+#include <libastfri/Expression.hpp>
+#include <libastfri/Visitor.hpp>
+#include <libastfri/impl/Utils.hpp>
 
 #include <string>
 #include <vector>
 
-namespace libastfri::structures
+namespace astfri
 {
 /**
  * @brief pre reprazentaciu celeho vstupneho bloku kodu / suboru
  *
  */
-struct TranslationUnit : utils::OutputVisitable<TranslationUnit>
+struct TranslationUnit : details::MakeVisitable<TranslationUnit>
 {
     std::vector<FunctionDefinition*> functions;
 
@@ -22,12 +23,12 @@ struct TranslationUnit : utils::OutputVisitable<TranslationUnit>
 };
 
 // "riadok" v kode
-struct Statement : virtual utils::IOutputVisitable
+struct Statement : virtual IVisitable
 {
     Statement() = default;
 };
 
-struct CompoundStatement : Statement, utils::OutputVisitable<CompoundStatement>
+struct CompoundStatement : Statement, details::MakeVisitable<CompoundStatement>
 {
     std::vector<Statement*> statements;
 
@@ -36,7 +37,7 @@ struct CompoundStatement : Statement, utils::OutputVisitable<CompoundStatement>
 
 struct DeclarationStatement :
     Statement,
-    utils::OutputVisitable<DeclarationStatement>
+    details::MakeVisitable<DeclarationStatement>
 {
     Declaration* declaration;
 
@@ -45,7 +46,7 @@ struct DeclarationStatement :
 
 struct DeclarationAndAssigmentStatement :
     Statement,
-    utils::OutputVisitable<DeclarationAndAssigmentStatement>
+    details::MakeVisitable<DeclarationAndAssigmentStatement>
 {
     Declaration* declaration;
     Expression* expression;
@@ -56,7 +57,7 @@ struct DeclarationAndAssigmentStatement :
     );
 };
 
-struct ReturnStatement : Statement, utils::OutputVisitable<ReturnStatement>
+struct ReturnStatement : Statement, details::MakeVisitable<ReturnStatement>
 {
     Expression* value;
 
@@ -65,7 +66,7 @@ struct ReturnStatement : Statement, utils::OutputVisitable<ReturnStatement>
 
 struct ExpressionStatement :
     Statement,
-    utils::OutputVisitable<ExpressionStatement>
+    details::MakeVisitable<ExpressionStatement>
 {
     Expression* expression;
 
@@ -80,7 +81,7 @@ struct ConditionalStatement : Statement
     ConditionalStatement(Expression* condition);
 };
 
-struct IfStatement : ConditionalStatement, utils::OutputVisitable<IfStatement>
+struct IfStatement : ConditionalStatement, details::MakeVisitable<IfStatement>
 {
     CompoundStatement* thenBody;
     CompoundStatement* elseBody;
@@ -101,19 +102,19 @@ struct LoopStatement : Statement
     LoopStatement(Expression* condition, CompoundStatement* body);
 };
 
-struct WhileStatement : LoopStatement, utils::OutputVisitable<WhileStatement>
+struct WhileStatement : LoopStatement, details::MakeVisitable<WhileStatement>
 {
     WhileStatement(Expression* condition, CompoundStatement* body);
 };
 
 struct DoWhileStatement :
     LoopStatement,
-    utils::OutputVisitable<DoWhileStatement>
+    details::MakeVisitable<DoWhileStatement>
 {
     DoWhileStatement(Expression* condition, CompoundStatement* body);
 };
 
-struct ForStatement : LoopStatement, utils::OutputVisitable<ForStatement>
+struct ForStatement : LoopStatement, details::MakeVisitable<ForStatement>
 {
     Statement* init;
     Expression* step;
@@ -126,10 +127,12 @@ struct ForStatement : LoopStatement, utils::OutputVisitable<ForStatement>
     );
 };
 
-struct UnknownStatement : Statement, utils::OutputVisitable<UnknownStatement>
+struct UnknownStatement : Statement, details::MakeVisitable<UnknownStatement>
 {
     std::string message;
 
     UnknownStatement(std::string message);
 };
 } // namespace libastfri::structures
+
+#endif

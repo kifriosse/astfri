@@ -10,12 +10,15 @@ project(
 )
 
 option(
-    ASTFRI_BUILD_CPP_FRONTEND "Build module libastri-cpp depending on clang." OFF
+    ASTFRI_BUILD_CPP_FRONTEND "Build module libastri-cpp." OFF
 )
 
 add_subdirectory(libastfri)
+
 if (ASTFRI_BUILD_CPP_FRONTEND)
     add_subdirectory(libastfri-cpp)
 endif()
+
 add_subdirectory(libastfri-output)
+
 add_subdirectory(examples)

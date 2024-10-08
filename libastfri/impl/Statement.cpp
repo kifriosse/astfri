@@ -2,7 +2,7 @@
 
 #include "libastfri/structures/Declaration.hpp"
 
-namespace libastfri::structures
+namespace astfri
 {
 
 TranslationUnit::TranslationUnit(std::vector<FunctionDefinition*> functions) :

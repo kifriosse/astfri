@@ -1,18 +1,20 @@
-#pragma once
+#ifndef LIBASTFRI_EXPRESSION_HPP
+#define LIBASTFRI_EXPRESSION_HPP
 
-#include <libastfri/structures/Declaration.hpp>
-
-#include <libastfri/utils/OutputVisitor.hpp>
+#include <libastfri/Declaration.hpp>
+#include <libastfri/Visitor.hpp>
+#include <libastfri/impl/Utils.hpp>
 
 #include <string>
+#include <vector>
 
-namespace libastfri::structures
+namespace astfri
 {
 struct VariableDefintion;
 struct ParameterDefinition;
 
 // vyraz
-struct Expression : virtual utils::IOutputVisitable
+struct Expression : virtual IVisitable
 {
 };
 
@@ -27,29 +29,29 @@ struct Literal : Expression
     }
 };
 
-struct IntLiteral : Literal<int>, utils::OutputVisitable<IntLiteral>
+struct IntLiteral : Literal<int>, details::MakeVisitable<IntLiteral>
 {
     IntLiteral(int value);
 };
 
-struct FloatLiteral : Literal<float>, utils::OutputVisitable<FloatLiteral>
+struct FloatLiteral : Literal<float>, details::MakeVisitable<FloatLiteral>
 {
     FloatLiteral(float value);
 };
 
-struct CharLiteral : Literal<char>, utils::OutputVisitable<CharLiteral>
+struct CharLiteral : Literal<char>, details::MakeVisitable<CharLiteral>
 {
     CharLiteral(char value);
 };
 
 struct StringLiteral :
     Literal<std::string>,
-    utils::OutputVisitable<StringLiteral>
+    details::MakeVisitable<StringLiteral>
 {
     StringLiteral(std::string value);
 };
 
-struct BoolLiteral : Literal<bool>, utils::OutputVisitable<BoolLiteral>
+struct BoolLiteral : Literal<bool>, details::MakeVisitable<BoolLiteral>
 {
     BoolLiteral(bool value);
 };
@@ -78,7 +80,7 @@ enum class UnaryOperators
 };
 
 //// vyrazy
-struct BinaryExpression : Expression, utils::OutputVisitable<BinaryExpression>
+struct BinaryExpression : Expression, details::MakeVisitable<BinaryExpression>
 {
     Expression* left;
     BinaryOperators op;
@@ -87,7 +89,7 @@ struct BinaryExpression : Expression, utils::OutputVisitable<BinaryExpression>
     BinaryExpression(Expression* left, BinaryOperators op, Expression* right);
 };
 
-struct UnaryExpression : Expression, utils::OutputVisitable<UnaryExpression>
+struct UnaryExpression : Expression, details::MakeVisitable<UnaryExpression>
 {
     UnaryOperators op;
     Expression* arg;
@@ -102,7 +104,7 @@ struct RefExpression : Expression
 
 struct ParamRefExpression :
     RefExpression,
-    utils::OutputVisitable<ParamRefExpression>
+    details::MakeVisitable<ParamRefExpression>
 {
     ParameterDefinition* parameter;
 
@@ -111,7 +113,7 @@ struct ParamRefExpression :
 
 struct VarRefExpression :
     RefExpression,
-    utils::OutputVisitable<VarRefExpression>
+    details::MakeVisitable<VarRefExpression>
 {
     VariableDefintion* variable;
 
@@ -121,7 +123,7 @@ struct VarRefExpression :
 // volanie funkcie
 struct FunctionCallExpression :
     RefExpression,
-    utils::OutputVisitable<FunctionCallExpression>
+    details::MakeVisitable<FunctionCallExpression>
 {
     // FunctionDefinition* function;
     std::string functionName;
@@ -133,7 +135,7 @@ struct FunctionCallExpression :
     );
 };
 
-struct UnknownExpression : Expression, utils::OutputVisitable<UnknownExpression>
+struct UnknownExpression : Expression, details::MakeVisitable<UnknownExpression>
 {
     std::string message;
 
@@ -141,3 +143,5 @@ struct UnknownExpression : Expression, utils::OutputVisitable<UnknownExpression>
 };
 
 } // namespace libastfri::structures
+
+#endif

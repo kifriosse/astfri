@@ -1,11 +1,15 @@
-file(GLOB SOURCES structures/*.cpp factories/*.cpp utils/*.cpp)
-
 add_library(
-    astfri-core STATIC ${SOURCES}
+    astfri-core DYNAMIC
+        impl/Declaration.cpp
+        impl/DeclarationFactory.cpp
+        impl/Expression.cpp
+        impl/ExpressionFactory.cpp
+        impl/Statement.cpp
+        impl/StatementFactory.cpp
+        impl/Type.cpp
+        impl/TypeFactory.cpp
 )
 
-target_compile_options(
-    astfri-core PUBLIC -Wall -Wextra -Wpedantic
-)
+target_compile_options(astfri-core PRIVATE -Wall -Wextra -Wpedantic)
 
 target_include_directories(astfri-core PUBLIC ${PROJECT_SOURCE_DIR})

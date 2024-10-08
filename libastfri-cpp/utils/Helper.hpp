@@ -1,9 +1,10 @@
-#pragma once
+#ifndef LIBASTFRI_CPP_HELPER_HPP
+#define LIBASTFRI_CPP_HELPER_HPP
 
 #include <map>
 #include <string>
 
-namespace libastfri::structures
+namespace astfri_cpp
 {
 enum class BinaryOperators;
 enum class UnaryOperators;
@@ -25,8 +26,8 @@ public:
         Emplacer customEmplace
     );
 
-    static std::string convertBinaryOperator (structures::BinaryOperators op);
-    static std::string convertUnaryOperator (structures::UnaryOperators op);
+    static std::string convertBinaryOperator (BinaryOperators op);
+    static std::string convertUnaryOperator (UnaryOperators op);
 };
 
 template<typename K, typename T, typename Emplacer>
@@ -43,3 +44,5 @@ T& Helper::getValueFromMap(K key, std::map<K, T>& map, Emplacer customEmplace)
     return newIt->second;
 }
 } // namespace libastfri::utils
+
+#endif

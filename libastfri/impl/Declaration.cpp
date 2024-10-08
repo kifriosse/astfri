@@ -1,6 +1,6 @@
 #include <libastfri/structures/Declaration.hpp>
 
-namespace libastfri::structures
+namespace astfri
 {
 
 BaseVariableDefintion::BaseVariableDefintion(

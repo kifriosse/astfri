@@ -1,6 +1,6 @@
 #include <libastfri/structures/Expression.hpp>
 
-namespace libastfri::structures
+namespace astfri
 {
 
 IntLiteral::IntLiteral(int value) : Literal(value)

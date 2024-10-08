@@ -2,9 +2,7 @@
 
 #include <libastfri/utils/Helper.hpp>
 
-namespace lsfu = libastfri::utils;
-
-namespace libastfri::factories
+namespace astfri
 {
 
 //// LiteralFactory
@@ -18,34 +16,34 @@ LiteralFactory& LiteralFactory::getInstance()
 template<typename K, typename T>
 T* LiteralFactory::getLiteralFromMap(K key, UsedMap<K, T>& map)
 {
-    return &lsfu::Helper::getValueFromMap(
+    return &Helper::getValueFromMap(
         key,
         map,
         [] (auto& p_map, K p_key) { return p_map.emplace(p_key, T(p_key)); }
     );
 }
 
-lsfs::IntLiteral* LiteralFactory::getIntLiteral(int literal)
+IntLiteral* LiteralFactory::getIntLiteral(int literal)
 {
     return getLiteralFromMap(literal, this->intLiterals);
 }
 
-lsfs::FloatLiteral* LiteralFactory::getFloatLiteral(float literal)
+FloatLiteral* LiteralFactory::getFloatLiteral(float literal)
 {
     return getLiteralFromMap(literal, this->floatLiterals);
 }
 
-lsfs::CharLiteral* LiteralFactory::getCharLiteral(char literal)
+CharLiteral* LiteralFactory::getCharLiteral(char literal)
 {
     return getLiteralFromMap(literal, this->charLiterals);
 }
 
-lsfs::StringLiteral* LiteralFactory::getStringLiteral(std::string literal)
+StringLiteral* LiteralFactory::getStringLiteral(std::string literal)
 {
     return getLiteralFromMap(std::move(literal), this->stringLiterals);
 }
 
-lsfs::BoolLiteral* LiteralFactory::getBoolLiteral(bool literal)
+BoolLiteral* LiteralFactory::getBoolLiteral(bool literal)
 {
     return getLiteralFromMap(literal, this->boolLiterals);
 }
@@ -67,34 +65,34 @@ ExpressionFactory::~ExpressionFactory()
     expressions.clear();
 }
 
-lsfs::UnaryExpression* ExpressionFactory::createUnaryExpression(
-    lsfs::UnaryOperators op,
-    lsfs::Expression* operand
+UnaryExpression* ExpressionFactory::createUnaryExpression(
+    UnaryOperators op,
+    Expression* operand
 )
 {
-    auto* expr = new lsfs::UnaryExpression(op, operand);
+    auto* expr = new UnaryExpression(op, operand);
     this->expressions.emplace_back(expr);
 
     return expr;
 }
 
-lsfs::BinaryExpression* ExpressionFactory::createBinaryExpression(
-    lsfs::BinaryOperators op,
-    lsfs::Expression* left,
-    lsfs::Expression* right
+BinaryExpression* ExpressionFactory::createBinaryExpression(
+    BinaryOperators op,
+    Expression* left,
+    Expression* right
 )
 {
-    auto* expr = new lsfs::BinaryExpression(left, op, right);
+    auto* expr = new BinaryExpression(left, op, right);
     this->expressions.emplace_back(expr);
 
     return expr;
 }
 
-lsfs::UnknownExpression* ExpressionFactory::createUnknownExpression(
+UnknownExpression* ExpressionFactory::createUnknownExpression(
     std::string message
 )
 {
-    auto* expr = new lsfs::UnknownExpression(std::move(message));
+    auto* expr = new UnknownExpression(std::move(message));
 
     return expr;
 }
@@ -116,32 +114,32 @@ ReferenceFactory::~ReferenceFactory()
     refExpressions.clear();
 }
 
-lsfs::VarRefExpression* ReferenceFactory::createVarRefExpression(
-    lsfs::VariableDefintion* variable
+VarRefExpression* ReferenceFactory::createVarRefExpression(
+    VariableDefintion* variable
 )
 {
-    lsfs::VarRefExpression* expr = new lsfs::VarRefExpression(variable);
+    VarRefExpression* expr = new VarRefExpression(variable);
     this->refExpressions.push_back(expr);
 
     return expr;
 }
 
-lsfs::ParamRefExpression* ReferenceFactory::createParamRefExpression(
-    lsfs::ParameterDefinition* parameter
+ParamRefExpression* ReferenceFactory::createParamRefExpression(
+    ParameterDefinition* parameter
 )
 {
-    lsfs::ParamRefExpression* expr = new lsfs::ParamRefExpression(parameter);
+    ParamRefExpression* expr = new ParamRefExpression(parameter);
     this->refExpressions.push_back(expr);
 
     return expr;
 }
 
-lsfs::FunctionCallExpression* ReferenceFactory::createFunctionCallExpression(
+FunctionCallExpression* ReferenceFactory::createFunctionCallExpression(
     std::string functionName,
-    std::vector<lsfs::Expression*> arguments
+    std::vector<Expression*> arguments
 )
 {
-    lsfs::FunctionCallExpression* expr = new lsfs::FunctionCallExpression(
+    FunctionCallExpression* expr = new FunctionCallExpression(
         std::move(functionName),
         std::move(arguments)
     );

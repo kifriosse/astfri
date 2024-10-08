@@ -1,6 +1,6 @@
 #include <libastfri/structures/Type.hpp>
 
-namespace libastfri::structures
+namespace astfri
 {
 
 Type::Type(std::string name) : name(std::move(name))

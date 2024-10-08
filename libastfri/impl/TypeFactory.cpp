@@ -2,9 +2,7 @@
 
 #include <libastfri/utils/Helper.hpp>
 
-namespace lsfu = libastfri::utils;
-
-namespace libastfri::factories
+namespace astfri
 {
 
 TypeFactory& TypeFactory::getInstance()
@@ -14,38 +12,38 @@ TypeFactory& TypeFactory::getInstance()
     return instance;
 }
 
-lsfs::IntType* TypeFactory::getIntType()
+IntType* TypeFactory::getIntType()
 {
     return &this->intType;
 }
 
-lsfs::FloatType* TypeFactory::getFloatType()
+FloatType* TypeFactory::getFloatType()
 {
     return &this->floatType;
 }
 
-lsfs::CharType* TypeFactory::getCharType()
+CharType* TypeFactory::getCharType()
 {
     return &this->charType;
 }
 
-lsfs::BoolType* TypeFactory::getBoolType()
+BoolType* TypeFactory::getBoolType()
 {
     return &this->boolType;
 }
 
-lsfs::VoidType* TypeFactory::getVoidType()
+VoidType* TypeFactory::getVoidType()
 {
     return &this->voidType;
 }
 
-lsfs::UserType* TypeFactory::getUserType(std::string name)
+UserType* TypeFactory::getUserType(std::string name)
 {
-    return &lsfu::Helper::getValueFromMap(
+    return &Helper::getValueFromMap(
         name,
         userTypes,
         [] (auto& p_map, auto p_key)
-        { return p_map.emplace(p_key, lsfs::UserType {{p_key}}); }
+        { return p_map.emplace(p_key, UserType {{p_key}}); }
     );
 }
 } // namespace libastfri::factories
