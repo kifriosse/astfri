@@ -91,11 +91,8 @@ private:
     ~ReferenceFactory();
 
 public:
-    VarRefExpression* createVarRefExpression (
-        VariableDefintion* variable
-    );
-    ParamRefExpression* createParamRefExpression (
-        ParameterDefinition* variable
+    VarRefExpression* createVarRefExpression (VariableDefintion* variable);
+    ParamRefExpression* createParamRefExpression (ParameterDefinition* variable
     );
     FunctionCallExpression* createFunctionCallExpression (
         std::string functionName,
@@ -105,6 +102,6 @@ public:
     ReferenceFactory(ReferenceFactory const&) = delete;
     void operator= (ReferenceFactory const&)  = delete;
 };
-} // namespace libastfri::factories
+} // namespace astfri
 
 #endif

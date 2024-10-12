@@ -50,4 +50,4 @@ UknownDeclaration::UknownDeclaration(std::string message) :
 {
 }
 
-} // namespace libastfri::structures
+} // namespace astfri

@@ -148,4 +148,4 @@ FunctionCallExpression* ReferenceFactory::createFunctionCallExpression(
     return expr;
 }
 
-} // namespace libastfri::factories
+} // namespace astfri

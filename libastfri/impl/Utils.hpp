@@ -7,19 +7,19 @@ namespace astfri
 {
 namespace details
 {
-/**
- * @brief CRTP mixin that makes @c This child class visitable.
- * @tparam This Type of the child class.
- */
-template<typename This>
-struct MakeVisitable : virtual public IVisitable
-{
-    void accept (IVisitor& visitor) override
+    /**
+     * @brief CRTP mixin that makes @c This child class visitable.
+     * @tparam This Type of the child class.
+     */
+    template<typename This>
+    struct MakeVisitable : IVisitable
     {
-        visitor.Visit(static_cast<This const&>(*this));
-    }
-};
-}
-}
+        void accept (IVisitor& visitor) override
+        {
+            visitor.visit(static_cast<This const&>(*this));
+        }
+    };
+} // namespace details
+} // namespace astfri
 
 #endif

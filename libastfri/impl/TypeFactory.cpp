@@ -46,4 +46,4 @@ UserType* TypeFactory::getUserType(std::string name)
         { return p_map.emplace(p_key, UserType {{p_key}}); }
     );
 }
-} // namespace libastfri::factories
+} // namespace astfri

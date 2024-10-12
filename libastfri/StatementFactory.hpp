@@ -1,8 +1,8 @@
 #ifndef LIBASTFRI_STATEMENT_FACTORY_HPP
 #define LIBASTFRI_STATEMENT_FACTORY_HPP
 
-#include <libastfri/ExpressionFactory.hpp>
 #include <libastfri/Declaration.hpp>
+#include <libastfri/ExpressionFactory.hpp>
 #include <libastfri/Statement.hpp>
 #include <libastfri/Type.hpp>
 
@@ -19,8 +19,7 @@ private:
 
     StatementFactory() = default;
     ~StatementFactory();
-    CompoundStatement* tryGetCompoundStatement (Statement* Statement
-    );
+    CompoundStatement* tryGetCompoundStatement (Statement* Statement);
 
 public:
     StatementFactory(StatementFactory const&) = delete;
@@ -32,20 +31,15 @@ public:
     CompoundStatement* createCompoundStatement (
         std::vector<Statement*> statements
     );
-    DeclarationStatement* createDeclarationStatement (
-        Declaration* declaration
+    DeclarationStatement* createDeclarationStatement (Declaration* declaration);
+    DeclarationAndAssigmentStatement* createDeclarationAndAssigmentStatement (
+        Declaration* declaration,
+        Expression* expression
     );
-    DeclarationAndAssigmentStatement*
-        createDeclarationAndAssigmentStatement (
-            Declaration* declaration,
-            Expression* expression
-        );
 
     ReturnStatement* createReturnStatement (Expression* value);
 
-    ExpressionStatement* createExpressionStatement (
-        Expression* expression
-    );
+    ExpressionStatement* createExpressionStatement (Expression* expression);
 
     IfStatement* createIfConditionalStatement (
         Expression* condition,
@@ -80,6 +74,6 @@ public:
 
     UnknownStatement* createUnknownStatement (std::string message);
 };
-} // namespace libastfri::factories
+} // namespace astfri
 
 #endif

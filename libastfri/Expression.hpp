@@ -1,7 +1,6 @@
 #ifndef LIBASTFRI_EXPRESSION_HPP
 #define LIBASTFRI_EXPRESSION_HPP
 
-#include <libastfri/Declaration.hpp>
 #include <libastfri/Visitor.hpp>
 #include <libastfri/impl/Utils.hpp>
 
@@ -10,40 +9,51 @@
 
 namespace astfri
 {
-struct VariableDefintion;
-struct ParameterDefinition;
-
-// vyraz
-struct Expression : virtual IVisitable
+/**
+ * @brief TODO
+ */
+struct Expr
 {
+    virtual ~Expr() = default;
 };
 
-//// konstaty (literals) pouzivane v vyrazoch su vlastne tiez vyrazy
+/**
+ * @brief TODO
+ */
 template<typename T>
-struct Literal : Expression
+struct Literal : Expr
 {
-    T value;
-
-    Literal(T value) : value(value)
-    {
-    }
+    T value_;
+    Literal(T value);
 };
 
+/**
+ * @brief TODO
+ */
 struct IntLiteral : Literal<int>, details::MakeVisitable<IntLiteral>
 {
     IntLiteral(int value);
 };
 
+/**
+ * @brief TODO
+ */
 struct FloatLiteral : Literal<float>, details::MakeVisitable<FloatLiteral>
 {
     FloatLiteral(float value);
 };
 
+/**
+ * @brief TODO
+ */
 struct CharLiteral : Literal<char>, details::MakeVisitable<CharLiteral>
 {
     CharLiteral(char value);
 };
 
+/**
+ * @brief TODO
+ */
 struct StringLiteral :
     Literal<std::string>,
     details::MakeVisitable<StringLiteral>
@@ -51,13 +61,41 @@ struct StringLiteral :
     StringLiteral(std::string value);
 };
 
+/**
+ * @brief TODO
+ */
 struct BoolLiteral : Literal<bool>, details::MakeVisitable<BoolLiteral>
 {
     BoolLiteral(bool value);
 };
 
-//// operatory pouzivane v vyrazoch
-enum class BinaryOperators
+/**
+ * @brief TODO
+ */
+ struct NullLiteral : Expr, details::MakeVisitable<NullLiteral>
+ {
+ };
+
+/**
+ * @brief TODO
+ */
+struct IfExpr : Expr, details::MakeVisitable<IfExpr>
+{
+    Expr* cond_;
+    Expr* iftrue_;
+    Expr* iffalse_;
+
+    IfExpr(
+        Expr* cond,
+        Expr* iftrue,
+        Expr* iffalse
+    );
+};
+
+/**
+ * @brief TODO
+ */
+enum class BinOpType
 {
     Assign,
     Add,
@@ -72,76 +110,141 @@ enum class BinaryOperators
     Greater,
     GreaterEqual
 };
-enum class UnaryOperators
+
+/**
+ * @brief TODO
+ */
+struct BinOpExpr : Expr, details::MakeVisitable<BinOpExpr>
 {
-    Not,
-    Negative,
-    GetValue
+    Expr* left_;
+    BinOpType op_;
+    Expr* right_;
+
+    BinOpExpr(Expr* left, BinOpType op, Expr* right);
 };
 
-//// vyrazy
-struct BinaryExpression : Expression, details::MakeVisitable<BinaryExpression>
+/**
+ * @brief TODO
+ */
+enum class UnaryOpType
 {
-    Expression* left;
-    BinaryOperators op;
-    Expression* right;
-
-    BinaryExpression(Expression* left, BinaryOperators op, Expression* right);
+    LogicalNot,
+    Minus,
+    Plus,
+    Dereference,
+    AddressOf
 };
 
-struct UnaryExpression : Expression, details::MakeVisitable<UnaryExpression>
+/**
+ * @brief TODO
+ */
+struct UnaryOpExpr : Expr, details::MakeVisitable<UnaryOpExpr>
 {
-    UnaryOperators op;
-    Expression* arg;
+    UnaryOpType op_;
+    Expr* arg_;
 
-    UnaryExpression(UnaryOperators op, Expression* arg);
+    UnaryOpExpr(UnaryOpType op, Expr* arg);
 };
 
-//// referencie na premenne
-struct RefExpression : Expression
+/**
+ * @brief TODO
+ */
+struct AssignExpr : Expr, details::MakeVisitable<AssignExpr>
+{
+    Expr* lhs_;
+    Expr* rhs_;
+
+    AssignExpr(Expr* lhs, Expr* rhs);
+};
+
+/**
+ * @brief TODO
+ */
+struct CompoundAssignExpr : Expr, details::MakeVisitable<CompoundAssignExpr>
+{
+    Expr* lhs_;
+    Expr* rhs_;
+    BinOpType op_;
+
+    CompoundAssignExpr(Expr* lhs, Expr* rhs);
+};
+
+/**
+ * @brief TODO
+ */
+struct RefExpr : Expr
 {
 };
 
-struct ParamRefExpression :
-    RefExpression,
-    details::MakeVisitable<ParamRefExpression>
+/**
+ * @brief TODO
+ */
+struct ParamVarRefExpr : RefExpr, details::MakeVisitable<ParamVarRefExpr>
 {
-    ParameterDefinition* parameter;
+    // TODO later this should be a pointer to ParamVarDef
+    std::string param_;
 
-    ParamRefExpression(ParameterDefinition* parameter);
+    ParamVarRefExpr(std::string param);
 };
 
-struct VarRefExpression :
-    RefExpression,
-    details::MakeVisitable<VarRefExpression>
+/**
+ * @brief TODO
+ */
+struct LocalVarRefExpr : RefExpr, details::MakeVisitable<LocalVarRefExpr>
 {
-    VariableDefintion* variable;
+    // TODO later this should be a pointer to LocalVarDef
+    std::string var_;
 
-    VarRefExpression(VariableDefintion* variable);
+    LocalVarRefExpr(std::string var);
 };
 
-// volanie funkcie
-struct FunctionCallExpression :
-    RefExpression,
-    details::MakeVisitable<FunctionCallExpression>
+/**
+ * @brief TODO
+ */
+struct MemberVarRefExpr : RefExpr, details::MakeVisitable<MemberVarRefExpr>
 {
-    // FunctionDefinition* function;
-    std::string functionName;
-    std::vector<Expression*> arguments;
+    // TODO later this should be a pointer to MemberVarDef
+    std::string member_;
 
-    FunctionCallExpression(
-        std::string functionName,
-        std::vector<Expression*> arguments = {}
-    );
+    MemberVarRefExpr(std::string member);
 };
 
-struct UnknownExpression : Expression, details::MakeVisitable<UnknownExpression>
+/**
+ * @brief TODO
+ */
+struct FunctionCallExpr : RefExpr, details::MakeVisitable<FunctionCallExpr>
 {
-    std::string message;
+    // TODO later this sould be a pointer to FunctionDecl
+    std::string name_;
+    std::vector<Expr*> args_;
 
-    UnknownExpression(std::string message);
+    FunctionCallExpr(std::string name, std::vector<Expr*> args);
 };
 
-} // namespace libastfri::structures
+/**
+ * @brief TODO
+ */
+struct MethodCallExpr : RefExpr, details::MakeVisitable<MethodCallExpr>
+{
+    Expr* owner_;
+    // TODO later this sould be a pointer to MethodDecl
+    std::string name_;
+    std::vector<Expr*> args_;
+
+    MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args);
+};
+
+/**
+ * @brief TODO
+ */
+struct UnknownExpr : Expr, details::MakeVisitable<UnknownExpr>
+{
+    std::string message_;
+
+    UnknownExpr(std::string message);
+};
+} // namespace astfri
+
+#include <libastfri/impl/Expression.inl>
 
 #endif

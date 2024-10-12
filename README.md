@@ -55,5 +55,6 @@ TODO
 - Function names follow [snake case](https://en.wikipedia.org/wiki/Snake_case) notation, e.g. `create_int`  
 - Variable names follow lower [cammel case](https://en.wikipedia.org/wiki/Camel_case) notation, e.g. `variableName`  
 - Member variables use underscore as suffix, e.g. `statements_`  
+- File names follow upper [cammel case](https://en.wikipedia.org/wiki/Camel_case) notation, e.g. `ExpressionFactory.hpp`  
 - Code must compile with at least `-Wall -Wextra -Wpedantic` with no warnings  
 - Code formatting is ensured by `clang-format` configured in `.clang-format` (for now, it has to be invoked manually -- we will change it to pre-commit hook)

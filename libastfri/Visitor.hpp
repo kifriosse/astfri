@@ -3,249 +3,111 @@
 
 namespace astfri
 {
-// stmt
+// Stmt TODO
 struct TranslationUnit;
-struct CompoundStatement;
-struct DeclarationStatement;
-struct DeclarationAndAssigmentStatement;
-struct ReturnStatement;
-struct ExpressionStatement;
-struct IfStatement;
-struct WhileStatement;
-struct DoWhileStatement;
-struct ForStatement;
-struct UnknownStatement;
+struct CompoundStmt;
+struct DeclarationStmt;
+struct DeclarationAndAssigmentStmt;
+struct ReturnStmt;
+struct ExpressionStmt;
+struct IfStmt;
+struct WhileStmt;
+struct DoWhileStmt;
+struct ForStmt;
+struct UnknownStmt;
 
-// expr
 struct IntLiteral;
 struct FloatLiteral;
 struct CharLiteral;
 struct StringLiteral;
 struct BoolLiteral;
-struct BinaryExpression;
-struct UnaryExpression;
-struct ParamRefExpression;
-struct VarRefExpression;
-struct FunctionCallExpression;
-struct UnknownExpression;
+struct BinOpExpr;
+struct UnaryOpExpr;
+struct ParamVarRefExpr;
+struct LocalVarRefExpr;
+struct MemberVarRefExpr;
+struct FunctionCallExpr;
+struct MethodCallExpr;
+struct UnknownExpr;
 
-// decl
+// Decl TODO
 struct VariableDefintion;
 struct ParameterDefinition;
-struct FunctionDefinition;
+struct FunctionDef;
+struct ClassDef;
 struct UknownDeclaration;
 
-// type
-struct Type;
 struct IntType;
 struct FloatType;
 struct CharType;
 struct BoolType;
 struct VoidType;
 struct UserType;
-} // namespace libastfri::structures
+struct IndirectionType;
+struct UnknownType;
 
-namespace astfri
+/**
+ * @brief TODO
+ */
+struct IVisitor
 {
-
-// sem definovat len hlavicky, prehliadku nechat na implementacii
-class IVisitor
-{
-public:
     // stmt
-    virtual void Visit (TranslationUnit const& stmt)      = 0;
-    virtual void Visit (CompoundStatement const& stmt)    = 0;
-    virtual void Visit (DeclarationStatement const& stmt) = 0;
-    virtual void Visit (DeclarationAndAssigmentStatement const& stmt
-    )                                                                 = 0;
-    virtual void Visit (ReturnStatement const& stmt)      = 0;
-    virtual void Visit (ExpressionStatement const& stmt)  = 0;
-    virtual void Visit (IfStatement const& stmt)          = 0;
-    virtual void Visit (WhileStatement const& stmt)       = 0;
-    virtual void Visit (DoWhileStatement const& stmt)     = 0;
-    virtual void Visit (ForStatement const& stmt)         = 0;
-    virtual void Visit (UnknownStatement const& stmt)     = 0;
+    virtual void visit (TranslationUnit const& stmt)                  = 0;
+    virtual void visit (CompoundStmt const& stmt)                = 0;
+    virtual void visit (DeclarationStmt const& stmt)             = 0;
+    virtual void visit (DeclarationAndAssigmentStmt const& stmt) = 0;
+    virtual void visit (ReturnStmt const& stmt)                  = 0;
+    virtual void visit (ExpressionStmt const& stmt)              = 0;
+    virtual void visit (IfStmt const& stmt)                      = 0;
+    virtual void visit (WhileStmt const& stmt)                   = 0;
+    virtual void visit (DoWhileStmt const& stmt)                 = 0;
+    virtual void visit (ForStmt const& stmt)                     = 0;
+    virtual void visit (UnknownStmt const& stmt)                 = 0;
 
-    // expr
-    virtual void Visit (IntLiteral const& expr)             = 0;
-    virtual void Visit (FloatLiteral const& expr)           = 0;
-    virtual void Visit (CharLiteral const& expr)            = 0;
-    virtual void Visit (StringLiteral const& expr)          = 0;
-    virtual void Visit (BoolLiteral const& expr)            = 0;
-    virtual void Visit (BinaryExpression const& expr)       = 0;
-    virtual void Visit (UnaryExpression const& expr)        = 0;
-    virtual void Visit (ParamRefExpression const& expr)     = 0;
-    virtual void Visit (VarRefExpression const& expr)       = 0;
-    virtual void Visit (FunctionCallExpression const& expr) = 0;
-    virtual void Visit (UnknownExpression const& expr)      = 0;
+    virtual void visit (IntLiteral const& expr) = 0;
+    virtual void visit (FloatLiteral const& expr) = 0;
+    virtual void visit (CharLiteral const& expr) = 0;
+    virtual void visit (StringLiteral const& expr) = 0;
+    virtual void visit (BoolLiteral const& expr) = 0;
+    virtual void visit (BinOpExpr const& expr) = 0;
+    virtual void visit (UnaryOpExpr const& expr) = 0;
+    virtual void visit (ParamVarRefExpr const& expr) = 0;
+    virtual void visit (LocalVarRefExpr const& expr) = 0;
+    virtual void visit (MemberVarRefExpr const& expr) = 0;
+    virtual void visit (FunctionCallExpr const& expr) = 0;
+    virtual void visit (MethodCallExpr const& expr) = 0;
+    virtual void visit (UnknownExpr const& expr) = 0;
 
     // decl
-    virtual void Visit (VariableDefintion const& decl)   = 0;
-    virtual void Visit (ParameterDefinition const& decl) = 0;
-    virtual void Visit (FunctionDefinition const& decl)  = 0;
-    virtual void Visit (UknownDeclaration const& decl)   = 0;
 
-    // type
-    virtual void Visit (Type const& type)      = 0;
-    virtual void Visit (IntType const& type)   = 0;
-    virtual void Visit (FloatType const& type) = 0;
-    virtual void Visit (CharType const& type)  = 0;
-    virtual void Visit (BoolType const& type)  = 0;
-    virtual void Visit (VoidType const& type)  = 0;
-    virtual void Visit (UserType const& type)  = 0;
+    virtual void visit (IntType const& type) = 0;
+    virtual void visit (FloatType const& type) = 0;
+    virtual void visit (CharType const& type) = 0;
+    virtual void visit (BoolType const& type) = 0;
+    virtual void visit (VoidType const& type) = 0;
+    virtual void visit (UserType const& type) = 0;
+    virtual void visit (IndirectionType const& type) = 0;
+    virtual void visit (UnknownType const& type) = 0;
 
-    virtual ~IVisitor()                              = default;
+    virtual ~IVisitor()                        = default;
 };
 
-class VisitorAdapter : public IVisitor
+/**
+ * @brief TODO
+ */
+struct VisitorAdapter : IVisitor
 {
-public:
-    VisitorAdapter() = default;
-
-    // stmt
-    virtual void Visit (TranslationUnit const&) override
-    {
-    }
-
-    virtual void Visit (CompoundStatement const&) override
-    {
-    }
-
-    virtual void Visit (DeclarationStatement const&) override
-    {
-    }
-
-    virtual void Visit (DeclarationAndAssigmentStatement const&)
-        override
-    {
-    }
-
-    virtual void Visit (ReturnStatement const&) override
-    {
-    }
-
-    virtual void Visit (ExpressionStatement const&) override
-    {
-    }
-
-    virtual void Visit (IfStatement const&) override
-    {
-    }
-
-    virtual void Visit (WhileStatement const&) override
-    {
-    }
-
-    virtual void Visit (DoWhileStatement const&) override
-    {
-    }
-
-    virtual void Visit (ForStatement const&) override
-    {
-    }
-
-    virtual void Visit (UnknownStatement const&) override
-    {
-    }
-
-    // expr
-    virtual void Visit (IntLiteral const&) override
-    {
-    }
-
-    virtual void Visit (FloatLiteral const&) override
-    {
-    }
-
-    virtual void Visit (CharLiteral const&) override
-    {
-    }
-
-    virtual void Visit (StringLiteral const&) override
-    {
-    }
-
-    virtual void Visit (BoolLiteral const&) override
-    {
-    }
-
-    virtual void Visit (BinaryExpression const&) override
-    {
-    }
-
-    virtual void Visit (UnaryExpression const&) override
-    {
-    }
-
-    virtual void Visit (ParamRefExpression const&) override
-    {
-    }
-
-    virtual void Visit (VarRefExpression const&) override
-    {
-    }
-
-    virtual void Visit (FunctionCallExpression const&) override
-    {
-    }
-
-    virtual void Visit (UnknownExpression const&) override
-    {
-    }
-
-    // decl
-    virtual void Visit (VariableDefintion const&) override
-    {
-    }
-
-    virtual void Visit (ParameterDefinition const&) override
-    {
-    }
-
-    virtual void Visit (FunctionDefinition const&) override
-    {
-    }
-
-    virtual void Visit (UknownDeclaration const&) override
-    {
-    }
-
-    // type
-    virtual void Visit (Type const&) override
-    {
-    }
-
-    virtual void Visit (IntType const&) override
-    {
-    }
-
-    virtual void Visit (FloatType const&) override
-    {
-    }
-
-    virtual void Visit (CharType const&) override
-    {
-    }
-
-    virtual void Visit (BoolType const&) override
-    {
-    }
-
-    virtual void Visit (VoidType const&) override
-    {
-    }
-
-    virtual void Visit (UserType const&) override
-    {
-    }
+    // TODO empty impls
 };
 
-class IVisitable
+/**
+ * @brief TODO
+ */
+struct IVisitable
 {
-public:
     virtual void accept (IVisitor& visitor) = 0;
     virtual ~IVisitable()                   = default;
 };
-} // namespace libastfri::utils
+} // namespace astfri
 
 #endif

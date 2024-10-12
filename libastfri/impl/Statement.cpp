@@ -1,11 +1,9 @@
-#include <libastfri/structures/Statement.hpp>
-
-#include "libastfri/structures/Declaration.hpp"
+#include <libastfri/Statement.hpp>
 
 namespace astfri
 {
 
-TranslationUnit::TranslationUnit(std::vector<FunctionDefinition*> functions) :
+TranslationUnit::TranslationUnit(std::vector<FunctionDef*> functions) :
     functions(std::move(functions))
 {
 }
@@ -90,4 +88,4 @@ UnknownStatement::UnknownStatement(std::string message) :
 {
 }
 
-} // namespace libastfri::structures
+} // namespace astfri

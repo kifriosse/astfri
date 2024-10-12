@@ -1,8 +1,9 @@
 #ifndef LIBASTFRI_DECLARATION_FACTORY_HPP
 #define LIBASTFRI_DECLARATION_FACTORY_HPP
 
-#include <libastfri/ExpressionFactory.hpp>
 #include <libastfri/Declaration.hpp>
+#include <libastfri/ExpressionFactory.hpp>
+
 #include <string>
 
 namespace astfri
@@ -43,6 +44,6 @@ public:
     DeclarationFactory(DeclarationFactory const&) = delete;
     void operator= (DeclarationFactory const&)    = delete;
 };
-} // namespace libastfri::factories
+} // namespace astfri
 
 #endif

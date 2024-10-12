@@ -1,4 +1,4 @@
-#include <libastfri/structures/Expression.hpp>
+#include <libastfri/Expression.hpp>
 
 namespace astfri
 {
@@ -23,45 +23,61 @@ BoolLiteral::BoolLiteral(bool value) : Literal(value)
 {
 }
 
-BinaryExpression::BinaryExpression(
-    Expression* left,
-    BinaryOperators op,
-    Expression* right
+BinOpExpr::BinOpExpr(
+    Expr* left,
+    BinOpType op,
+    Expr* right
 ) :
-    left(left),
-    op(op),
-    right(right)
+    left_(left),
+    op_(op),
+    right_(right)
 {
 }
 
-UnaryExpression::UnaryExpression(UnaryOperators op, Expression* arg) :
-    op(op),
-    arg(arg)
+UnaryOpExpr::UnaryOpExpr(UnaryOpType op, Expr* arg) :
+    op_(op),
+    arg_(arg)
 {
 }
 
-ParamRefExpression::ParamRefExpression(ParameterDefinition* parameter) :
-    parameter(parameter)
+ParamVarRefExpr::ParamVarRefExpr(std::string param) :
+    param_(std::move(param))
 {
 }
 
-VarRefExpression::VarRefExpression(VariableDefintion* variable) :
-    variable(variable)
+LocalVarRefExpr::LocalVarRefExpr(std::string var) :
+    var_(std::move(var))
 {
 }
 
-FunctionCallExpression::FunctionCallExpression(
-    std::string functionName,
-    std::vector<Expression*> arguments
+MemberVarRefExpr::MemberVarRefExpr(std::string member) :
+    member_(std::move(member))
+{
+}
+
+FunctionCallExpr::FunctionCallExpr(
+    std::string name,
+    std::vector<Expr*> args
 ) :
-    functionName(std::move(functionName)),
-    arguments(std::move(arguments))
+    name_(std::move(name)),
+    args_(std::move(args))
 {
 }
 
-UnknownExpression::UnknownExpression(std::string message) :
-    message(std::move(message))
+MethodCallExpr::MethodCallExpr(
+    Expr* owner,
+    std::string name,
+    std::vector<Expr*> args
+) :
+    owner_(owner),
+    name_(std::move(name)),
+    args_(std::move(args))
 {
 }
 
-} // namespace libastfri::structures
+UnknownExpr::UnknownExpr(std::string message) :
+    message_(std::move(message))
+{
+}
+
+} // namespace astfri

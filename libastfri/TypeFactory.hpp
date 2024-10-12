@@ -31,11 +31,11 @@ public:
     CharType* getCharType ();
     BoolType* getBoolType ();
     VoidType* getVoidType ();
-    UserType* getUserType (const std::string& name);
+    UserType* getUserType (std::string const& name);
 
     TypeFactory(TypeFactory const&)     = delete;
     void operator= (TypeFactory const&) = delete;
 };
-} // namespace libastfri::factories
+} // namespace astfri
 
 #endif

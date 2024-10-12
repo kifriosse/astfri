@@ -56,8 +56,7 @@ FunctionDefinition* DeclarationFactory::createFunction(
     Type* returnType
 )
 {
-    auto* function
-        = new FunctionDefinition(name, parameters, body, returnType);
+    auto* function = new FunctionDefinition(name, parameters, body, returnType);
     functions.emplace_back(function);
 
     return function;
@@ -72,4 +71,4 @@ UknownDeclaration* DeclarationFactory::createUknownDeclaration(
     return declaration;
 }
 
-} // namespace libastfri::factories
+} // namespace astfri

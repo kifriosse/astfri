@@ -50,8 +50,7 @@ TranslationUnit* StatementFactory::createTranslationUnit(
     std::vector<FunctionDefinition*> functions
 )
 {
-    auto* translationUnitStatement
-        = new TranslationUnit {std::move(functions)};
+    auto* translationUnitStatement = new TranslationUnit {std::move(functions)};
     translationUnits.emplace_back(translationUnitStatement);
 
     return translationUnitStatement;
@@ -61,8 +60,7 @@ CompoundStatement* StatementFactory::createCompoundStatement(
     std::vector<Statement*> statements
 )
 {
-    auto* compoundStatement
-        = new CompoundStatement(std::move(statements));
+    auto* compoundStatement = new CompoundStatement(std::move(statements));
     statements.emplace_back(compoundStatement);
 
     return compoundStatement;
@@ -91,9 +89,7 @@ DeclarationAndAssigmentStatement* StatementFactory::
     return declarationAndAssigmentStatement;
 }
 
-ReturnStatement* StatementFactory::createReturnStatement(
-    Expression* value
-)
+ReturnStatement* StatementFactory::createReturnStatement(Expression* value)
 {
     auto* returnStatement = new ReturnStatement(value);
     statements.emplace_back(returnStatement);
@@ -190,9 +186,7 @@ ForStatement* StatementFactory::createForStatement(
     return forStatement;
 }
 
-UnknownStatement* StatementFactory::createUnknownStatement(
-    std::string message
-)
+UnknownStatement* StatementFactory::createUnknownStatement(std::string message)
 {
     auto* unknownStatement = new UnknownStatement(message);
     statements.emplace_back(unknownStatement);
@@ -200,4 +194,4 @@ UnknownStatement* StatementFactory::createUnknownStatement(
     return unknownStatement;
 }
 
-} // namespace libastfri::factories
+} // namespace astfri
