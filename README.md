@@ -2,16 +2,17 @@
 
 Táto knižnica je napísaná v jazyku C++ a obsahuje štruktúry pre univerzálnu reprezentáciu zdrojového kódu a nástroje pre vstupnú a výstupnú manipuláciu s týmito štruktúrami.
 
-## Moduly knižnice
+## Modules
 
 ### libastfri
 
 Obsahuje štruktúry pre reprezentáciu zdrojového kódu. Tieto štruktúry sú nezávislé na konkrétnom jazyku a slúžia na univerzálnu reprezentáciu zdrojového kódu. Tiež obashuje definícií rozhraní pre analýzy/transformácie, formátovanie a zápis spracovaných štruktúr.
 
-Pre prácu s týmto modulom nie je potrebné inštalovať žiadne ďalšie závislosti.
-
-#### dependencies
+#### Dependencies
 The core module does not have any dependencies -- besides standard library.
+
+#### Examples
+TODO
 
 ### libastfri-output
 
@@ -27,8 +28,10 @@ Implementované **formátovače** (`IOutputFormatter`):
 Implementované **zapisovače** (`IOutputWriter`):
 - `StreamWriter` - zapisuje výstup do `std::ostream` streamu
 
-#### dependencies
+#### Dependencies
+TODO
 
+#### Examples
 TODO
 
 ### libastfri-cpp
@@ -37,47 +40,20 @@ Obsahuje implementáciu parseru pre načítanie zdrojového kódu v jazyku C++ d
 
 Tento modul je závislý na module `libastfri` a zároveň na balíčkoch [`LLVM` a `Clang`](https://llvm.org/docs/GettingStartedTutorials.html), pozri  [CMakeLists.txt](./libastfri-cpp/CMakeLists.txt).
 
-#### dependencies
-
+#### Dependencies
 TODO
 
-### examples
-
-Obsahuje príklady použitia knižnice:
-- `manual_structure.cpp` - príklad manuálneho vytvorenia štruktúr zdrojového kódu a ich výpisu
-- `cpp_frontend.cpp` - príklad načítania zdrojového kódu v jazyku C++ a jeho výpisu. Pre spustenie je potrebné mať nainštalované závislosti pre modul `libastfri-cpp`
-
-#### dependencies
-
+#### Examples
 TODO
 
-## Spustenie projektu
+## Build and install
+TODO
 
-### Skompilovanie a spustenie príkladu `cpp_frontend.cpp`:
-```bash
-# Vytvorenie build adresára
-mkdir build
-cd build
-
-# Konfigurácia projektu
-cmake -DCMAKE_BUILD_TYPE=Release -DASTFRI_BUILD_CPP_FRONTEND=ON ..
-
-make astfri-example-cpp
-
-# Spustenie príkladu
-./examples/astfri-example-cpp ../examples/input/math.cpp
-```
-### Skompilovanie a spustenie príkladu `manual_structure.cpp`:
-```bash
-# Vytvorenie build adresára
-mkdir build
-cd build
-
-# Konfigurácia projektu
-cmake -DCMAKE_BUILD_TYPE=Release ..
-
-make astfri-example-manual
-
-# Spustenie príkladu
-./examples/astfri-example-manual
-```
+## For Developers
+- C++ standard is C++20  
+- Class names follow upper [cammel case](https://en.wikipedia.org/wiki/Camel_case) notation, e.g. `class ForLoop`  
+- Function names follow [snake case](https://en.wikipedia.org/wiki/Snake_case) notation, e.g. `create_int`  
+- Variable names follow lower [cammel case](https://en.wikipedia.org/wiki/Camel_case) notation, e.g. `variableName`  
+- Member variables use underscore as suffix, e.g. `statements_`  
+- Code must compile with at least `-Wall -Wextra -Wpedantic` with no warnings  
+- Code formatting is ensured by `clang-format` configured in `.clang-format` (for now, it has to be invoked manually -- we will change it to pre-commit hook)
