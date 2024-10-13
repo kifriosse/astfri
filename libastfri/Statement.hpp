@@ -15,7 +15,7 @@ struct Expr;
 /**
  * @brief TODO
  */
-struct Stmt
+struct Stmt : virtual IVisitable
 {
     virtual ~Stmt() = default;
 };
@@ -35,7 +35,7 @@ struct VarDef : Stmt
 /**
  * @brief TODO
  */
-struct LocalVarDef : VarDef, details::MakeVisitable<LocalVarDef>
+struct LocalVarDef : VarDef, details::MkVisitable<LocalVarDef>
 {
     LocalVarDef(std::string name, Type* type, Expr* initializer);
 };
@@ -43,7 +43,7 @@ struct LocalVarDef : VarDef, details::MakeVisitable<LocalVarDef>
 /**
  * @brief TODO
  */
-struct ParamVarDef : VarDef, details::MakeVisitable<ParamVarDef>
+struct ParamVarDef : VarDef, details::MkVisitable<ParamVarDef>
 {
     ParamVarDef(std::string name, Type* type, Expr* initializer);
 };
@@ -51,7 +51,7 @@ struct ParamVarDef : VarDef, details::MakeVisitable<ParamVarDef>
 /**
  * @brief TODO
  */
-struct MemberVarDef : VarDef, details::MakeVisitable<MemberVarDef>
+struct MemberVarDef : VarDef, details::MkVisitable<MemberVarDef>
 {
     MemberVarDef(std::string name, Type* type, Expr* initializer);
 };
@@ -59,7 +59,7 @@ struct MemberVarDef : VarDef, details::MakeVisitable<MemberVarDef>
 /**
  * @brief TODO
  */
-struct GlobalVarDef : VarDef, details::MakeVisitable<GlobalVarDef>
+struct GlobalVarDef : VarDef, details::MkVisitable<GlobalVarDef>
 {
     GlobalVarDef(std::string name, Type* type, Expr* initializer);
 };
@@ -67,7 +67,7 @@ struct GlobalVarDef : VarDef, details::MakeVisitable<GlobalVarDef>
 /**
  * @brief TODO
  */
-struct FunctionDef : Stmt, details::MakeVisitable<FunctionDef>
+struct FunctionDef : Stmt, details::MkVisitable<FunctionDef>
 {
     std::string name_;
     std::vector<ParamVarDef*> params_;
@@ -85,7 +85,7 @@ struct FunctionDef : Stmt, details::MakeVisitable<FunctionDef>
 /**
  * @brief TODO
  */
-struct MethodDef : Stmt, details::MakeVisitable<MethodDef>
+struct MethodDef : Stmt, details::MkVisitable<MethodDef>
 {
     ClassDef* owner_;
     FunctionDef* func_;
@@ -99,17 +99,27 @@ struct MethodDef : Stmt, details::MakeVisitable<MethodDef>
 /**
  * @brief TODO
  */
-struct ClassDef : Stmt, details::MakeVisitable<ClassDef>
+struct ClassDef : Stmt, details::MkVisitable<ClassDef>
 {
     std::string name_;
     std::vector<MemberVarDef*> vars_;
-    std::vector<std::string> tparams_;
+    std::vector<GenericParam*> tparams_;
 };
 
 /**
  * @brief TODO
  */
-struct CompoundStmt : Stmt, details::MakeVisitable<CompoundStmt>
+struct GenericParam
+{
+    // TODO later, this could be pointer to a concept
+    std::string constraint_;
+    std::string name_;
+};
+
+/**
+ * @brief TODO
+ */
+struct CompoundStmt : Stmt, details::MkVisitable<CompoundStmt>
 {
     std::vector<Stmt*> stmts_;
 
@@ -119,7 +129,7 @@ struct CompoundStmt : Stmt, details::MakeVisitable<CompoundStmt>
 /**
  * @brief TODO
  */
-struct ReturnStmt : Stmt, details::MakeVisitable<ReturnStmt>
+struct ReturnStmt : Stmt, details::MkVisitable<ReturnStmt>
 {
     Expr* val_;
 
@@ -129,7 +139,7 @@ struct ReturnStmt : Stmt, details::MakeVisitable<ReturnStmt>
 /**
  * @brief TODO
  */
-struct ExprStmt : Stmt, details::MakeVisitable<ExprStmt>
+struct ExprStmt : Stmt, details::MkVisitable<ExprStmt>
 {
     Expr* expr_;
 
@@ -139,7 +149,7 @@ struct ExprStmt : Stmt, details::MakeVisitable<ExprStmt>
 /**
  * @brief TODO
  */
-struct IfStmt : Stmt, details::MakeVisitable<IfStmt>
+struct IfStmt : Stmt, details::MkVisitable<IfStmt>
 {
     Expr* cond_;
     Stmt* iftrue_;
@@ -161,19 +171,19 @@ struct LoopStatement : Stmt
     LoopStatement(Expr* condition, CompoundStmt* body);
 };
 
-struct WhileStatement : LoopStatement, details::MakeVisitable<WhileStatement>
+struct WhileStatement : LoopStatement, details::MkVisitable<WhileStatement>
 {
     WhileStatement(Expr* condition, CompoundStmt* body);
 };
 
 struct DoWhileStatement :
     LoopStatement,
-    details::MakeVisitable<DoWhileStatement>
+    details::MkVisitable<DoWhileStatement>
 {
     DoWhileStatement(Expr* condition, CompoundStmt* body);
 };
 
-struct ForStatement : LoopStatement, details::MakeVisitable<ForStatement>
+struct ForStatement : LoopStatement, details::MkVisitable<ForStatement>
 {
     Stmt* init;
     Expr* step;
@@ -181,7 +191,7 @@ struct ForStatement : LoopStatement, details::MakeVisitable<ForStatement>
     ForStatement(Stmt* init, Expr* condition, Expr* step, CompoundStmt* body);
 };
 
-struct UnknownStatement : Stmt, details::MakeVisitable<UnknownStatement>
+struct UnknownStatement : Stmt, details::MkVisitable<UnknownStatement>
 {
     std::string message;
 
@@ -191,7 +201,7 @@ struct UnknownStatement : Stmt, details::MakeVisitable<UnknownStatement>
 /**
  * @brief TODO
  */
-struct TranslationUnit : details::MakeVisitable<TranslationUnit>
+struct TranslationUnit : details::MkVisitable<TranslationUnit>
 {
     std::vector<ClassDef*> classes_;
     std::vector<FunctionDef*> functions_;

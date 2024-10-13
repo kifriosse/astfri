@@ -12,7 +12,7 @@ namespace astfri
 /**
  * @brief TODO
  */
-struct Expr
+struct Expr : virtual IVisitable
 {
     virtual ~Expr() = default;
 };
@@ -23,63 +23,61 @@ struct Expr
 template<typename T>
 struct Literal : Expr
 {
-    T value_;
-    Literal(T value);
+    T val_;
+    Literal(T val);
 };
 
 /**
  * @brief TODO
  */
-struct IntLiteral : Literal<int>, details::MakeVisitable<IntLiteral>
+struct IntLiteral : Literal<int>, details::MkVisitable<IntLiteral>
 {
-    IntLiteral(int value);
+    IntLiteral(int val);
 };
 
 /**
  * @brief TODO
  */
-struct FloatLiteral : Literal<float>, details::MakeVisitable<FloatLiteral>
+struct FloatLiteral : Literal<float>, details::MkVisitable<FloatLiteral>
 {
-    FloatLiteral(float value);
+    FloatLiteral(float val);
 };
 
 /**
  * @brief TODO
  */
-struct CharLiteral : Literal<char>, details::MakeVisitable<CharLiteral>
+struct CharLiteral : Literal<char>, details::MkVisitable<CharLiteral>
 {
-    CharLiteral(char value);
+    CharLiteral(char val);
 };
 
 /**
  * @brief TODO
  */
-struct StringLiteral :
-    Literal<std::string>,
-    details::MakeVisitable<StringLiteral>
+struct StringLiteral : Literal<std::string>, details::MkVisitable<StringLiteral>
 {
-    StringLiteral(std::string value);
+    StringLiteral(std::string val);
 };
 
 /**
  * @brief TODO
  */
-struct BoolLiteral : Literal<bool>, details::MakeVisitable<BoolLiteral>
+struct BoolLiteral : Literal<bool>, details::MkVisitable<BoolLiteral>
 {
-    BoolLiteral(bool value);
+    BoolLiteral(bool val);
 };
 
 /**
  * @brief TODO
  */
- struct NullLiteral : Expr, details::MakeVisitable<NullLiteral>
+ struct NullLiteral : Expr, details::MkVisitable<NullLiteral>
  {
  };
 
 /**
  * @brief TODO
  */
-struct IfExpr : Expr, details::MakeVisitable<IfExpr>
+struct IfExpr : Expr, details::MkVisitable<IfExpr>
 {
     Expr* cond_;
     Expr* iftrue_;
@@ -114,7 +112,7 @@ enum class BinOpType
 /**
  * @brief TODO
  */
-struct BinOpExpr : Expr, details::MakeVisitable<BinOpExpr>
+struct BinOpExpr : Expr, details::MkVisitable<BinOpExpr>
 {
     Expr* left_;
     BinOpType op_;
@@ -138,7 +136,7 @@ enum class UnaryOpType
 /**
  * @brief TODO
  */
-struct UnaryOpExpr : Expr, details::MakeVisitable<UnaryOpExpr>
+struct UnaryOpExpr : Expr, details::MkVisitable<UnaryOpExpr>
 {
     UnaryOpType op_;
     Expr* arg_;
@@ -149,7 +147,7 @@ struct UnaryOpExpr : Expr, details::MakeVisitable<UnaryOpExpr>
 /**
  * @brief TODO
  */
-struct AssignExpr : Expr, details::MakeVisitable<AssignExpr>
+struct AssignExpr : Expr, details::MkVisitable<AssignExpr>
 {
     Expr* lhs_;
     Expr* rhs_;
@@ -160,7 +158,7 @@ struct AssignExpr : Expr, details::MakeVisitable<AssignExpr>
 /**
  * @brief TODO
  */
-struct CompoundAssignExpr : Expr, details::MakeVisitable<CompoundAssignExpr>
+struct CompoundAssignExpr : Expr, details::MkVisitable<CompoundAssignExpr>
 {
     Expr* lhs_;
     Expr* rhs_;
@@ -179,7 +177,7 @@ struct RefExpr : Expr
 /**
  * @brief TODO
  */
-struct ParamVarRefExpr : RefExpr, details::MakeVisitable<ParamVarRefExpr>
+struct ParamVarRefExpr : RefExpr, details::MkVisitable<ParamVarRefExpr>
 {
     // TODO later this should be a pointer to ParamVarDef
     std::string param_;
@@ -190,7 +188,7 @@ struct ParamVarRefExpr : RefExpr, details::MakeVisitable<ParamVarRefExpr>
 /**
  * @brief TODO
  */
-struct LocalVarRefExpr : RefExpr, details::MakeVisitable<LocalVarRefExpr>
+struct LocalVarRefExpr : RefExpr, details::MkVisitable<LocalVarRefExpr>
 {
     // TODO later this should be a pointer to LocalVarDef
     std::string var_;
@@ -201,7 +199,7 @@ struct LocalVarRefExpr : RefExpr, details::MakeVisitable<LocalVarRefExpr>
 /**
  * @brief TODO
  */
-struct MemberVarRefExpr : RefExpr, details::MakeVisitable<MemberVarRefExpr>
+struct MemberVarRefExpr : RefExpr, details::MkVisitable<MemberVarRefExpr>
 {
     // TODO later this should be a pointer to MemberVarDef
     std::string member_;
@@ -212,7 +210,7 @@ struct MemberVarRefExpr : RefExpr, details::MakeVisitable<MemberVarRefExpr>
 /**
  * @brief TODO
  */
-struct FunctionCallExpr : RefExpr, details::MakeVisitable<FunctionCallExpr>
+struct FunctionCallExpr : RefExpr, details::MkVisitable<FunctionCallExpr>
 {
     // TODO later this sould be a pointer to FunctionDecl
     std::string name_;
@@ -224,7 +222,7 @@ struct FunctionCallExpr : RefExpr, details::MakeVisitable<FunctionCallExpr>
 /**
  * @brief TODO
  */
-struct MethodCallExpr : RefExpr, details::MakeVisitable<MethodCallExpr>
+struct MethodCallExpr : RefExpr, details::MkVisitable<MethodCallExpr>
 {
     Expr* owner_;
     // TODO later this sould be a pointer to MethodDecl
@@ -237,7 +235,7 @@ struct MethodCallExpr : RefExpr, details::MakeVisitable<MethodCallExpr>
 /**
  * @brief TODO
  */
-struct UnknownExpr : Expr, details::MakeVisitable<UnknownExpr>
+struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr>
 {
     std::string message_;
 

@@ -12,7 +12,7 @@ namespace details
      * @tparam This Type of the child class.
      */
     template<typename This>
-    struct MakeVisitable : IVisitable
+    struct MkVisitable : virtual IVisitable
     {
         void accept (IVisitor& visitor) override
         {

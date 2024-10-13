@@ -5,7 +5,7 @@
 namespace astfri
 {
 template<typename T>
-Literal<T>::Literal(T value) : value_(std::move(value))
+Literal<T>::Literal(T val) : val_(std::move(val))
 {
 }
 }

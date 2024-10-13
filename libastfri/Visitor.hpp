@@ -36,6 +36,7 @@ struct ParameterDefinition;
 struct FunctionDef;
 struct ClassDef;
 struct UknownDeclaration;
+struct GenericParam;
 
 struct IntType;
 struct FloatType;
