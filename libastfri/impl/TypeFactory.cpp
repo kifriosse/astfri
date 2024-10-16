@@ -1,49 +1,60 @@
-#include <libastfri/factories/TypeFactory.hpp>
-
-#include <libastfri/utils/Helper.hpp>
+#include <libastfri/TypeFactory.hpp>
 
 namespace astfri
 {
-
-TypeFactory& TypeFactory::getInstance()
+TypeFactory& TypeFactory::get_instance()
 {
     static TypeFactory instance;
-
     return instance;
 }
 
-IntType* TypeFactory::getIntType()
+IntType* TypeFactory::mk_int()
 {
-    return &this->intType;
+    return &int_;
 }
 
-FloatType* TypeFactory::getFloatType()
+FloatType* TypeFactory::mk_float()
 {
-    return &this->floatType;
+    return &float_;
 }
 
-CharType* TypeFactory::getCharType()
+CharType* TypeFactory::mk_char()
 {
-    return &this->charType;
+    return &char_;
 }
 
-BoolType* TypeFactory::getBoolType()
+BoolType* TypeFactory::mk_bool()
 {
-    return &this->boolType;
+    return &bool_;
 }
 
-VoidType* TypeFactory::getVoidType()
+VoidType* TypeFactory::mk_void()
 {
-    return &this->voidType;
+    return &void_;
 }
 
-UserType* TypeFactory::getUserType(std::string name)
+UnknownType* TypeFactory::mk_unknown()
 {
-    return &Helper::getValueFromMap(
-        name,
-        userTypes,
-        [] (auto& p_map, auto p_key)
-        { return p_map.emplace(p_key, UserType {{p_key}}); }
-    );
+    return &unknown_;
+}
+
+IndirectionType* TypeFactory::mk_indirect(Type* type)
+{
+    const auto it = indirect_.find(type);
+    if (it != indirect_.end())
+    {
+        return &it->second;
+    }
+    return &indirect_.try_emplace(type, type).first->second;
+}
+
+UserType* TypeFactory::mk_user(const std::string& name)
+{
+    const auto it = user_.find(name);
+    if (it != user_.end())
+    {
+        return &it->second;
+    }
+    return &user_.try_emplace(name, name).first->second;
 }
 } // namespace astfri

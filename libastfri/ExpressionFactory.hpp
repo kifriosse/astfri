@@ -1,7 +1,6 @@
 #ifndef LIBASTFRI_EXPRESSION_FACTORY_HPP
 #define LIBASTFRI_EXPRESSION_FACTORY_HPP
 
-#include <libastfri/Declaration.hpp>
 #include <libastfri/Expression.hpp>
 
 #include <map>
@@ -10,97 +9,49 @@
 
 namespace astfri
 {
-template<typename T>
-using UsedList = std::vector<T>;
-
-template<typename K, typename T>
-using UsedMap = std::map<K, T>;
-
-class BaseExpressionFactory
-{
-};
-
-class LiteralFactory : BaseExpressionFactory
+class ExpressionFactory
 {
 public:
-    static LiteralFactory& getInstance ();
-
-private:
-    template<typename K, typename T>
-    T* getLiteralFromMap (K literal, UsedMap<K, T>& map);
-
-    UsedMap<int, IntLiteral> intLiterals;
-    UsedMap<float, FloatLiteral> floatLiterals;
-    UsedMap<char, CharLiteral> charLiterals;
-    UsedMap<std::string, StringLiteral> stringLiterals;
-    UsedMap<bool, BoolLiteral> boolLiterals;
-
-    LiteralFactory()  = default;
-    ~LiteralFactory() = default;
+    static ExpressionFactory& getInstance();
 
 public:
-    IntLiteral* getIntLiteral (int literal);
-    FloatLiteral* getFloatLiteral (float literal);
-    CharLiteral* getCharLiteral (char literal);
-    StringLiteral* getStringLiteral (std::string literal);
-    BoolLiteral* getBoolLiteral (bool literal);
-
-    LiteralFactory(LiteralFactory const&)  = delete;
-    void operator= (LiteralFactory const&) = delete;
-};
-
-class ExpressionFactory : BaseExpressionFactory
-{
-public:
-    static ExpressionFactory& getInstance ();
-
-private:
-    UsedList<Expression*> expressions;
-
-    ExpressionFactory() = default;
     ~ExpressionFactory();
 
-public:
-    UnaryExpression* createUnaryExpression (
-        UnaryOperators op,
-        Expression* operand
-    );
-    BinaryExpression* createBinaryExpression (
-        BinaryOperators op,
-        Expression* left,
-        Expression* right
-    );
-
-    UnknownExpression* createUnknownExpression (std::string message);
-
-    ExpressionFactory(ExpressionFactory const&) = delete;
-    void operator= (ExpressionFactory const&)   = delete;
-};
-
-// for VarRefExpression, FunctionCallExpression, ArrayRefExpression...
-class ReferenceFactory : BaseExpressionFactory
-{
-public:
-    static ReferenceFactory& getInstance ();
+    IntLiteralExpr* mk_int_literal(int val);
+    FloatLiteralExpr* mk_float_literal(float val);
+    CharLiteralExpr* mk_char_literal(char val);
+    StringLiteralExpr* mk_string_literal(const std::string& val);
+    BoolLiteralExpr* mk_bool_literal(bool val);
+    NullLiteralExpr* mk_null_literal();
+    IfExpr* mk_if();
+    BinOpExpr* mk_bin_on();
+    UnaryOpExpr* mk_unary_op();
+    AssignExpr* mk_assign();
+    CompoundAssignExpr* mk_compound_assign();
+    ParamVarRefExpr* mk_param_var_ref();
+    LocalVarRefExpr* mk_local_var_ref();
+    MemberVarRefExpr* mk_member_var_ref();
+    FunctionCallExpr* mk_function_call();
+    MethodCallExpr* mk_method_call();
+    LambdaExpr* mk_lambda_expr();
+    ThisExpr* mk_this();
+    UnknownExpr* mk_unknown();
 
 private:
-    // FUTURE - vyriesit recyklaciu pomocou unikatnej kombinacie nazvu a typu
-    UsedList<RefExpression*> refExpressions;
+    ExpressionFactory() = default;
+    ExpressionFactory(ExpressionFactory const&) = delete;
+    void operator= (ExpressionFactory const&)   = delete;
 
-    ReferenceFactory() = default;
-    ~ReferenceFactory();
+private:
+    std::vector<Expr*> exprs_;
 
-public:
-    VarRefExpression* createVarRefExpression (VariableDefintion* variable);
-    ParamRefExpression* createParamRefExpression (ParameterDefinition* variable
-    );
-    FunctionCallExpression* createFunctionCallExpression (
-        std::string functionName,
-        std::vector<Expression*> arguments
-    );
+    std::map<int, IntLiteralExpr> ints_;
+    std::map<char, CharLiteralExpr> chars_;
+    std::map<std::string, StringLiteralExpr> strings_;
 
-    ReferenceFactory(ReferenceFactory const&) = delete;
-    void operator= (ReferenceFactory const&)  = delete;
+    NullLiteralExpr null_;
+    BoolLiteralExpr false_{false};
+    BoolLiteralExpr true_{true};
 };
 } // namespace astfri
 

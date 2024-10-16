@@ -1,32 +1,34 @@
 #ifndef LIBASTFRI_IMPL_TYPE_QUERIS_HPP
 #define LIBASTFRI_IMPL_TYPE_QUERIS_HPP
 
-namespace astfri
+#include <libastfri/impl/TypeFwd.hpp>
+
+namespace astfri::details
 {
 struct ITypeQueries
 {
     virtual ~ITypeQueries() = default;
 
-    virtual bool is_dynamic() const noexcept = 0;
-    virtual bool is_int() const noexcept = 0;
-    virtual bool is_float() const noexcept = 0;
-    virtual bool is_char() const noexcept = 0;
-    virtual bool is_bool() const noexcept = 0;
-    virtual bool is_void() const noexcept = 0;
-    virtual bool is_user() const noexcept = 0;
-    virtual bool is_indirection() const noexcept = 0;
+    virtual DynamicType* as_dynamic() noexcept = 0;
+    virtual IntType* as_int() noexcept = 0;
+    virtual FloatType* as_float() noexcept = 0;
+    virtual CharType* as_char() noexcept = 0;
+    virtual BoolType* as_bool() noexcept = 0;
+    virtual VoidType* as_void() noexcept = 0;
+    virtual UserType* as_user() noexcept = 0;
+    virtual IndirectionType* as_indirection() noexcept = 0;
 };
 
 struct TypeQueriesAdapter : ITypeQueries
 {
-    bool is_dynamic() const noexcept override;
-    bool is_int() const noexcept override;
-    bool is_float() const noexcept override;
-    bool is_char() const noexcept override;
-    bool is_bool() const noexcept override;
-    bool is_void() const noexcept override;
-    bool is_user() const noexcept override;
-    bool is_indirection() const noexcept override;
+    DynamicType* as_dynamic() noexcept override;
+    IntType* as_int() noexcept override;
+    FloatType* as_float() noexcept override;
+    CharType* as_char() noexcept override;
+    BoolType* as_bool() noexcept override;
+    VoidType* as_void() noexcept override;
+    UserType* as_user() noexcept override;
+    IndirectionType* as_indirection() noexcept override;
 };
 }
 

@@ -1,151 +1,40 @@
-#include <libastfri/factories/ExpressionFactory.hpp>
-
-#include <libastfri/utils/Helper.hpp>
+#include <libastfri/ExpressionFactory.hpp>
+#include <libastfri/impl/Utils.hpp>
 
 namespace astfri
 {
-
-//// LiteralFactory
-LiteralFactory& LiteralFactory::getInstance()
+IntLiteralExpr* ExpressionFactory::mk_int_literal(const int val)
 {
-    static LiteralFactory instance;
-
-    return instance;
+    return details::emplace_get<IntLiteralExpr>(val, ints_, val);
 }
 
-template<typename K, typename T>
-T* LiteralFactory::getLiteralFromMap(K key, UsedMap<K, T>& map)
+FloatLiteralExpr* ExpressionFactory::mk_float_literal(float val)
 {
-    return &Helper::getValueFromMap(
-        key,
-        map,
-        [] (auto& p_map, K p_key) { return p_map.emplace(p_key, T(p_key)); }
-    );
+    auto* e = new FloatLiteralExpr(val);
+    exprs_.push_back(e);
+    return e;
 }
 
-IntLiteral* LiteralFactory::getIntLiteral(int literal)
+CharLiteralExpr* ExpressionFactory::mk_char_literal(const char val)
 {
-    return getLiteralFromMap(literal, this->intLiterals);
+    return details::emplace_get<CharLiteralExpr>(val, chars_, val);
 }
 
-FloatLiteral* LiteralFactory::getFloatLiteral(float literal)
+StringLiteralExpr* ExpressionFactory::mk_string_literal(const std::string& val)
 {
-    return getLiteralFromMap(literal, this->floatLiterals);
+    return details::emplace_get<StringLiteralExpr>(val, strings_, val);
 }
 
-CharLiteral* LiteralFactory::getCharLiteral(char literal)
+BoolLiteralExpr* ExpressionFactory::mk_bool_literal(const bool val)
 {
-    return getLiteralFromMap(literal, this->charLiterals);
+    return val ? &true_ : &false_;
 }
 
-StringLiteral* LiteralFactory::getStringLiteral(std::string literal)
+NullLiteralExpr* ExpressionFactory::mk_null_literal()
 {
-    return getLiteralFromMap(std::move(literal), this->stringLiterals);
+    return &null_;
 }
 
-BoolLiteral* LiteralFactory::getBoolLiteral(bool literal)
-{
-    return getLiteralFromMap(literal, this->boolLiterals);
-}
 
-//// ExpressionFactory
-ExpressionFactory& ExpressionFactory::getInstance()
-{
-    static ExpressionFactory instance;
-
-    return instance;
-}
-
-ExpressionFactory::~ExpressionFactory()
-{
-    for (auto expr : this->expressions)
-    {
-        delete expr;
-    }
-    expressions.clear();
-}
-
-UnaryExpression* ExpressionFactory::createUnaryExpression(
-    UnaryOperators op,
-    Expression* operand
-)
-{
-    auto* expr = new UnaryExpression(op, operand);
-    this->expressions.emplace_back(expr);
-
-    return expr;
-}
-
-BinaryExpression* ExpressionFactory::createBinaryExpression(
-    BinaryOperators op,
-    Expression* left,
-    Expression* right
-)
-{
-    auto* expr = new BinaryExpression(left, op, right);
-    this->expressions.emplace_back(expr);
-
-    return expr;
-}
-
-UnknownExpression* ExpressionFactory::createUnknownExpression(
-    std::string message
-)
-{
-    auto* expr = new UnknownExpression(std::move(message));
-
-    return expr;
-}
-
-//// ReferenceFactory
-ReferenceFactory& ReferenceFactory::getInstance()
-{
-    static ReferenceFactory instance;
-
-    return instance;
-}
-
-ReferenceFactory::~ReferenceFactory()
-{
-    for (auto expr : this->refExpressions)
-    {
-        delete expr;
-    }
-    refExpressions.clear();
-}
-
-VarRefExpression* ReferenceFactory::createVarRefExpression(
-    VariableDefintion* variable
-)
-{
-    VarRefExpression* expr = new VarRefExpression(variable);
-    this->refExpressions.push_back(expr);
-
-    return expr;
-}
-
-ParamRefExpression* ReferenceFactory::createParamRefExpression(
-    ParameterDefinition* parameter
-)
-{
-    ParamRefExpression* expr = new ParamRefExpression(parameter);
-    this->refExpressions.push_back(expr);
-
-    return expr;
-}
-
-FunctionCallExpression* ReferenceFactory::createFunctionCallExpression(
-    std::string functionName,
-    std::vector<Expression*> arguments
-)
-{
-    FunctionCallExpression* expr = new FunctionCallExpression(
-        std::move(functionName),
-        std::move(arguments)
-    );
-    this->refExpressions.push_back(expr);
-
-    return expr;
-}
 
 } // namespace astfri

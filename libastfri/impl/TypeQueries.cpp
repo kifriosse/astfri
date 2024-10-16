@@ -2,43 +2,43 @@
 
 namespace astfri
 {
-bool TypeQueriesAdapter::is_dynamic() const noexcept
+DynamicType* TypeQueriesAdapter::as_dynamic() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_int() const noexcept
+IntType* TypeQueriesAdapter::as_int() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_float() const noexcept
+FloatType* TypeQueriesAdapter::as_float() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_char() const noexcept
+CharType* TypeQueriesAdapter::as_char() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_bool() const noexcept
+BoolType* TypeQueriesAdapter::as_bool() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_void() const noexcept
+VoidType* TypeQueriesAdapter::as_void() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_user() const noexcept
+UserType* TypeQueriesAdapter::as_user() const noexcept
 {
-    return false;
+    return nullptr;
 }
 
-bool TypeQueriesAdapter::is_indirection() const noexcept
+IndirectionType* TypeQueriesAdapter::as_indirection() const noexcept
 {
-    return false;
+    return nullptr;
 }
 }

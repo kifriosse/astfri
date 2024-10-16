@@ -1,0 +1,10 @@
+InlayHints:
+  DeducedTypes: No
+  Designators: No
+  Enabled: Yes
+  ParameterNames: No
+
+CompileFlags:
+  Add: [-std=c++20]
+
+# TODO add clang-tidy

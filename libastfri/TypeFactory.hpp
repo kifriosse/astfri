@@ -11,30 +11,35 @@ namespace astfri
 class TypeFactory
 {
 public:
-    static TypeFactory& getInstance ();
-
-private:
-    IntType intType;
-    FloatType floatType;
-    CharType charType;
-    BoolType boolType;
-    VoidType voidType;
-
-    std::map<std::string, UserType> userTypes;
-
-    TypeFactory()  = default;
-    ~TypeFactory() = default;
+    static TypeFactory& get_instance();
 
 public:
-    IntType* getIntType ();
-    FloatType* getFloatType ();
-    CharType* getCharType ();
-    BoolType* getBoolType ();
-    VoidType* getVoidType ();
-    UserType* getUserType (std::string const& name);
+    IntType* mk_int ();
+    FloatType* mk_float ();
+    CharType* mk_char ();
+    BoolType* mk_bool ();
+    VoidType* mk_void ();
+    UnknownType* mk_unknown();
+    IndirectionType* mk_indirect(Type* type);
+    UserType* mk_user (const std::string& name);
 
+public:
     TypeFactory(TypeFactory const&)     = delete;
     void operator= (TypeFactory const&) = delete;
+
+private:
+    TypeFactory() = default;
+
+private:
+    IntType int_;
+    FloatType float_;
+    CharType char_;
+    BoolType bool_;
+    VoidType void_;
+    UnknownType unknown_;
+    DynamicType dynamic_;
+    std::map<Type*, IndirectionType> indirect_;
+    std::map<std::string, UserType> user_;
 };
 } // namespace astfri
 
