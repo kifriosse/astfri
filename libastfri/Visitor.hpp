@@ -1,104 +1,66 @@
 #ifndef LIBASTFRI_VISITOR_HPP
 #define LIBASTFRI_VISITOR_HPP
 
+#include <libastfri/impl/TypeFwd.hpp>
+#include <libastfri/impl/ExpressionFwd.hpp>
+#include <libastfri/impl/StatementFwd.hpp>
+
 namespace astfri
 {
-// Stmt TODO
-struct TranslationUnit;
-struct CompoundStmt;
-struct DeclarationStmt;
-struct DeclarationAndAssigmentStmt;
-struct ReturnStmt;
-struct ExpressionStmt;
-struct IfStmt;
-struct WhileStmt;
-struct DoWhileStmt;
-struct ForStmt;
-struct UnknownStmt;
-
-struct IntLiteral;
-struct FloatLiteral;
-struct CharLiteral;
-struct StringLiteral;
-struct BoolLiteral;
-struct BinOpExpr;
-struct UnaryOpExpr;
-struct ParamVarRefExpr;
-struct LocalVarRefExpr;
-struct MemberVarRefExpr;
-struct FunctionCallExpr;
-struct MethodCallExpr;
-struct UnknownExpr;
-
-// Decl TODO
-struct VariableDefintion;
-struct ParameterDefinition;
-struct FunctionDef;
-struct ClassDef;
-struct UknownDeclaration;
-struct GenericParam;
-
-struct IntType;
-struct FloatType;
-struct CharType;
-struct BoolType;
-struct VoidType;
-struct UserType;
-struct IndirectionType;
-struct UnknownType;
-
 /**
  * @brief TODO
  */
 struct IVisitor
 {
-    // stmt
-    virtual void visit (TranslationUnit const& stmt)                  = 0;
-    virtual void visit (CompoundStmt const& stmt)                = 0;
-    virtual void visit (DeclarationStmt const& stmt)             = 0;
-    virtual void visit (DeclarationAndAssigmentStmt const& stmt) = 0;
-    virtual void visit (ReturnStmt const& stmt)                  = 0;
-    virtual void visit (ExpressionStmt const& stmt)              = 0;
-    virtual void visit (IfStmt const& stmt)                      = 0;
-    virtual void visit (WhileStmt const& stmt)                   = 0;
-    virtual void visit (DoWhileStmt const& stmt)                 = 0;
-    virtual void visit (ForStmt const& stmt)                     = 0;
-    virtual void visit (UnknownStmt const& stmt)                 = 0;
+    virtual void visit(const DynamicType& type) = 0;
+    virtual void visit(const IntType& type) = 0;
+    virtual void visit(const FloatType& type) = 0;
+    virtual void visit(const CharType& type) = 0;
+    virtual void visit(const BoolType& type) = 0;
+    virtual void visit(const VoidType& type) = 0;
+    virtual void visit(const UserType& type) = 0;
+    virtual void visit(const IndirectionType& type) = 0;
+    virtual void visit(const UnknownType& type) = 0;
 
-    virtual void visit (IntLiteral const& expr) = 0;
-    virtual void visit (FloatLiteral const& expr) = 0;
-    virtual void visit (CharLiteral const& expr) = 0;
-    virtual void visit (StringLiteral const& expr) = 0;
-    virtual void visit (BoolLiteral const& expr) = 0;
-    virtual void visit (BinOpExpr const& expr) = 0;
-    virtual void visit (UnaryOpExpr const& expr) = 0;
-    virtual void visit (ParamVarRefExpr const& expr) = 0;
-    virtual void visit (LocalVarRefExpr const& expr) = 0;
-    virtual void visit (MemberVarRefExpr const& expr) = 0;
-    virtual void visit (FunctionCallExpr const& expr) = 0;
-    virtual void visit (MethodCallExpr const& expr) = 0;
-    virtual void visit (UnknownExpr const& expr) = 0;
+    virtual void visit(const IntLiteralExpr& expr) = 0;
+    virtual void visit(const FloatLiteralExpr& expr) = 0;
+    virtual void visit(const CharLiteralExpr& expr) = 0;
+    virtual void visit(const StringLiteralExpr& expr) = 0;
+    virtual void visit(const BoolLiteralExpr& expr) = 0;
+    virtual void visit(const NullLiteralExpr& expr) = 0;
+    virtual void visit(const IfExpr& expr) = 0;
+    virtual void visit(const BinOpExpr& expr) = 0;
+    virtual void visit(const UnaryOpExpr& expr) = 0;
+    virtual void visit(const AssignExpr& expr) = 0;
+    virtual void visit(const CompoundAssignExpr& expr) = 0;
+    virtual void visit(const ParamVarRefExpr& expr) = 0;
+    virtual void visit(const LocalVarRefExpr& expr) = 0;
+    virtual void visit(const MemberVarRefExpr& expr) = 0;
+    virtual void visit(const FunctionCallExpr& expr) = 0;
+    virtual void visit(const MethodCallExpr& expr) = 0;
+    virtual void visit(const LambdaExpr& expr) = 0;
+    virtual void visit(const ThisExpr& expr) = 0;
+    virtual void visit(const UnknownExpr& expr) = 0;
 
-    // decl
-
-    virtual void visit (IntType const& type) = 0;
-    virtual void visit (FloatType const& type) = 0;
-    virtual void visit (CharType const& type) = 0;
-    virtual void visit (BoolType const& type) = 0;
-    virtual void visit (VoidType const& type) = 0;
-    virtual void visit (UserType const& type) = 0;
-    virtual void visit (IndirectionType const& type) = 0;
-    virtual void visit (UnknownType const& type) = 0;
+    virtual void visit(const TranslationUnit& stmt) = 0;
+    virtual void visit(const CompoundStmt& stmt) = 0;
+    virtual void visit(const DeclarationStmt& stmt) = 0;
+    virtual void visit(const DeclarationAndAssigmentStmt& stmt) = 0;
+    virtual void visit(const ReturnStmt& stmt) = 0;
+    virtual void visit(const ExpressionStmt& stmt) = 0;
+    virtual void visit(const IfStmt& stmt) = 0;
+    virtual void visit(const WhileStmt& stmt) = 0;
+    virtual void visit(const DoWhileStmt& stmt) = 0;
+    virtual void visit(const ForStmt& stmt) = 0;
+    virtual void visit(const UnknownStmt& stmt) = 0;
+    virtual void visit(const VariableDefintion& stmt) = 0;
+    virtual void visit(const ParamVarDef& stmt) = 0;
+    virtual void visit(const FunctionDef& stmt) = 0;
+    virtual void visit(const ClassDef& stmt) = 0;
+    virtual void visit(const UknownDeclaration& stmt) = 0;
+    virtual void visit(const GenericParam& stmt) = 0;
 
     virtual ~IVisitor()                        = default;
-};
-
-/**
- * @brief TODO
- */
-struct VisitorAdapter : IVisitor
-{
-    // TODO empty impls
 };
 
 /**
@@ -108,6 +70,58 @@ struct IVisitable
 {
     virtual void accept (IVisitor& visitor) = 0;
     virtual ~IVisitable()                   = default;
+};
+
+/**
+ * @brief TODO
+ */
+struct VisitorAdapter : IVisitor
+{
+    void visit(const DynamicType& /*type*/) override {}
+    void visit(const IntType& /*type*/) override {}
+    void visit(const FloatType& /*type*/) override {}
+    void visit(const CharType& /*type*/) override {}
+    void visit(const BoolType& /*type*/) override {}
+    void visit(const VoidType& /*type*/) override {}
+    void visit(const UserType& /*type*/) override {}
+    void visit(const IndirectionType& /*type*/) override {}
+    void visit(const UnknownType& /*type*/) override {}
+    void visit(const IntLiteralExpr& /*expr*/) override {}
+    void visit(const FloatLiteralExpr& /*expr*/) override {}
+    void visit(const CharLiteralExpr& /*expr*/) override {}
+    void visit(const StringLiteralExpr& /*expr*/) override {}
+    void visit(const BoolLiteralExpr& /*expr*/) override {}
+    void visit(const NullLiteralExpr& /*expr*/) override {}
+    void visit(const IfExpr& /*expr*/) override {}
+    void visit(const BinOpExpr& /*expr*/) override {}
+    void visit(const UnaryOpExpr& /*expr*/) override {}
+    void visit(const AssignExpr& /*expr*/) override {}
+    void visit(const CompoundAssignExpr& /*expr*/) override {}
+    void visit(const ParamVarRefExpr& /*expr*/) override {}
+    void visit(const LocalVarRefExpr& /*expr*/) override {}
+    void visit(const MemberVarRefExpr& /*expr*/) override {}
+    void visit(const FunctionCallExpr& /*expr*/) override {}
+    void visit(const MethodCallExpr& /*expr*/) override {}
+    void visit(const LambdaExpr& /*expr*/) override {}
+    void visit(const ThisExpr& /*expr*/) override {}
+    void visit(const UnknownExpr& /*expr*/) override {}
+    void visit(const TranslationUnit& /*stmt*/) override {}
+    void visit(const CompoundStmt& /*stmt*/) override {}
+    void visit(const DeclarationStmt& /*stmt*/) override {}
+    void visit(const DeclarationAndAssigmentStmt& /*stmt*/) override {}
+    void visit(const ReturnStmt& /*stmt*/) override {}
+    void visit(const ExpressionStmt& /*stmt*/) override {}
+    void visit(const IfStmt& /*stmt*/) override {}
+    void visit(const WhileStmt& /*stmt*/) override {}
+    void visit(const DoWhileStmt& /*stmt*/) override {}
+    void visit(const ForStmt& /*stmt*/) override {}
+    void visit(const UnknownStmt& /*stmt*/) override {}
+    void visit(const VariableDefintion& /*stmt*/) override {}
+    void visit(const ParamVarDef& /*stmt*/) override {}
+    void visit(const FunctionDef& /*stmt*/) override {}
+    void visit(const ClassDef& /*stmt*/) override {}
+    void visit(const UknownDeclaration& /*stmt*/) override {}
+    void visit(const GenericParam& /*stmt*/) override {}
 };
 } // namespace astfri
 

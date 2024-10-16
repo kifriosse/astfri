@@ -2,7 +2,6 @@
 #define LIBASTFRI_TYPE_HPP
 
 #include <libastfri/impl/Utils.hpp>
-#include <libastfri/Visitor.hpp>
 
 #include <string>
 
@@ -13,6 +12,7 @@ namespace astfri
  */
 struct Type
 {
+    virtual ~Type() = default;
 };
 
 /**
@@ -67,13 +67,6 @@ struct VoidType : PrimitiveType, details::MkVisitable<VoidType>
 /**
  * @brief TODO
  */
-struct UnknownType : PrimitiveType, details::MkVisitable<VoidType>
-{
-};
-
-/**
- * @brief TODO
- */
 struct UserType: Type, details::MkVisitable<UserType>
 {
     std::string name_;
@@ -89,6 +82,13 @@ struct IndirectionType : Type, details::MkVisitable<IndirectionType>
     Type* indirect_;
 
     IndirectionType(Type* indirect);
+};
+
+/**
+ * @brief TODO
+ */
+struct UnknownType : PrimitiveType, details::MkVisitable<VoidType>
+{
 };
 } // namespace astfri
 

@@ -1,7 +1,6 @@
 #ifndef LIBASTFRI_STATEMENT_HPP
 #define LIBASTFRI_STATEMENT_HPP
 
-#include <libastfri/Visitor.hpp>
 #include <libastfri/impl/Utils.hpp>
 
 #include <string>
@@ -9,9 +8,6 @@
 
 namespace astfri
 {
-struct Type;
-struct Expr;
-
 /**
  * @brief TODO
  */
@@ -90,10 +86,7 @@ struct MethodDef : Stmt, details::MkVisitable<MethodDef>
     ClassDef* owner_;
     FunctionDef* func_;
 
-    MethodDef(
-        ClassDef* owner,
-        FunctionDef* func
-    );
+    MethodDef(ClassDef* owner, FunctionDef* func);
 };
 
 /**
@@ -104,6 +97,12 @@ struct ClassDef : Stmt, details::MkVisitable<ClassDef>
     std::string name_;
     std::vector<MemberVarDef*> vars_;
     std::vector<GenericParam*> tparams_;
+
+    ClassDef(
+        std::string name,
+        std::vector<MemberVarDef*> vars,
+        std::vector<GenericParam*> tparams
+    );
 };
 
 /**
@@ -114,6 +113,8 @@ struct GenericParam
     // TODO later, this could be pointer to a concept
     std::string constraint_;
     std::string name_;
+
+    GenericParam(std::string constraint, std::string name);
 };
 
 /**
@@ -143,7 +144,7 @@ struct ExprStmt : Stmt, details::MkVisitable<ExprStmt>
 {
     Expr* expr_;
 
-    ExprStmt(Expr* expression);
+    ExprStmt(Expr* expr);
 };
 
 /**
@@ -158,44 +159,84 @@ struct IfStmt : Stmt, details::MkVisitable<IfStmt>
     IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse);
 };
 
-
-// TODO continue here
-
-
-// Loop statement
-struct LoopStatement : Stmt
+/**
+ * @brief TODO
+ */
+struct CaseStmt : Stmt, details::MkVisitable<CaseStmt>
 {
-    Expr* condition;
-    CompoundStmt* body;
+    Expr* expr_;
+    Stmt* body_;
 
-    LoopStatement(Expr* condition, CompoundStmt* body);
+    CaseStmt(Expr* expr, Stmt* body);
 };
 
-struct WhileStatement : LoopStatement, details::MkVisitable<WhileStatement>
+/**
+ * @brief TODO
+ */
+struct SwitchStmt : Stmt, details::MkVisitable<Stmt>
 {
-    WhileStatement(Expr* condition, CompoundStmt* body);
+    Expr* expr_;
+    std::vector<CaseStmt*> cases_;
+
+    SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases);
 };
 
-struct DoWhileStatement :
-    LoopStatement,
-    details::MkVisitable<DoWhileStatement>
+/**
+ * @brief TODO
+ */
+struct LoopStmt : Stmt
 {
-    DoWhileStatement(Expr* condition, CompoundStmt* body);
+    Expr* cond_;
+    CompoundStmt* body_;
+
+    LoopStmt(Expr* cond, CompoundStmt* body);
 };
 
-struct ForStatement : LoopStatement, details::MkVisitable<ForStatement>
+/**
+ * @brief TODO
+ */
+struct WhileStmt : LoopStmt, details::MkVisitable<WhileStmt>
 {
-    Stmt* init;
-    Expr* step;
-
-    ForStatement(Stmt* init, Expr* condition, Expr* step, CompoundStmt* body);
+    WhileStmt(Expr* cond, CompoundStmt* body);
 };
 
-struct UnknownStatement : Stmt, details::MkVisitable<UnknownStatement>
+/**
+ * @brief TODO
+ */
+struct DoWhileStmt : LoopStmt, details::MkVisitable<DoWhileStmt>
 {
-    std::string message;
+    DoWhileStmt(Expr* cond, CompoundStmt* body);
+};
 
-    UnknownStatement(std::string message);
+/**
+ * @brief TODO
+ */
+struct ForStmt : LoopStmt, details::MkVisitable<ForStmt>
+{
+    Stmt* init_;
+    Stmt* step_;
+
+    ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
+};
+
+/**
+ * @brief TODO
+ */
+struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
+{
+    Expr* val_;
+
+    ThrowStmt(Expr* val);
+};
+
+/**
+ * @brief TODO
+ */
+struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>
+{
+    std::string message_;
+
+    UnknownStmt(std::string message);
 };
 
 /**

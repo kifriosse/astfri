@@ -1,7 +1,6 @@
 #ifndef LIBASTFRI_EXPRESSION_HPP
 #define LIBASTFRI_EXPRESSION_HPP
 
-#include <libastfri/Visitor.hpp>
 #include <libastfri/impl/Utils.hpp>
 
 #include <string>
@@ -30,47 +29,47 @@ struct Literal : Expr
 /**
  * @brief TODO
  */
-struct IntLiteral : Literal<int>, details::MkVisitable<IntLiteral>
+struct IntLiteralExpr : Literal<int>, details::MkVisitable<IntLiteralExpr>
 {
-    IntLiteral(int val);
+    IntLiteralExpr(int val);
 };
 
 /**
  * @brief TODO
  */
-struct FloatLiteral : Literal<float>, details::MkVisitable<FloatLiteral>
+struct FloatLiteralExpr : Literal<float>, details::MkVisitable<FloatLiteralExpr>
 {
-    FloatLiteral(float val);
+    FloatLiteralExpr(float val);
 };
 
 /**
  * @brief TODO
  */
-struct CharLiteral : Literal<char>, details::MkVisitable<CharLiteral>
+struct CharLiteralExpr : Literal<char>, details::MkVisitable<CharLiteralExpr>
 {
-    CharLiteral(char val);
+    CharLiteralExpr(char val);
 };
 
 /**
  * @brief TODO
  */
-struct StringLiteral : Literal<std::string>, details::MkVisitable<StringLiteral>
+struct StringLiteralExpr : Literal<std::string>, details::MkVisitable<StringLiteralExpr>
 {
-    StringLiteral(std::string val);
+    StringLiteralExpr(std::string val);
 };
 
 /**
  * @brief TODO
  */
-struct BoolLiteral : Literal<bool>, details::MkVisitable<BoolLiteral>
+struct BoolLiteralExpr : Literal<bool>, details::MkVisitable<BoolLiteralExpr>
 {
-    BoolLiteral(bool val);
+    BoolLiteralExpr(bool val);
 };
 
 /**
  * @brief TODO
  */
- struct NullLiteral : Expr, details::MkVisitable<NullLiteral>
+ struct NullLiteralExpr : Expr, details::MkVisitable<NullLiteralExpr>
  {
  };
 
@@ -230,6 +229,24 @@ struct MethodCallExpr : RefExpr, details::MkVisitable<MethodCallExpr>
     std::vector<Expr*> args_;
 
     MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args);
+};
+
+/**
+ * @brief TODO
+ */
+struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
+{
+    std::vector<ParamVarDef*> params_;
+    Stmt* body_;
+
+    LambdaExpr(std::vector<ParamVarDef*> params, Stmt* body);
+};
+
+/**
+ * @brief TODO
+ */
+struct ThisExpr : Expr, details::MkVisitable<ThisExpr>
+{
 };
 
 /**
