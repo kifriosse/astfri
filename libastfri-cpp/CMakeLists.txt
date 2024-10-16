@@ -1,7 +1,3 @@
-file(
-    GLOB SOURCES ./*.cpp
-)
-
 # https://github.com/firolino/clang-tool/tree/master
 
 set(
@@ -10,30 +6,22 @@ set(
     "${PROJECT_SOURCE_DIR}/cmake/modules"
 )
 
-find_package(
-    LLVM REQUIRED
-)
-
-find_package(
-    Clang REQUIRED
-)
+find_package(LibClangTooling REQUIRED)
 
 add_library(
-    astfri-cpp STATIC ${SOURCES}
+    astfri-cpp STATIC
+        ClangManagement.cpp
+        ClangVisitor.cpp
 )
 
 target_compile_options(
     astfri-cpp PUBLIC "-fno-rtti"
 )
 
-target_link_libraries(
-    astfri-cpp PUBLIC ${CLANG_LIBS} ${LLVM_LIBS_CORE} ${LLVM_LDFLAGS}
-)
-
-target_link_libraries(
-    astfri-cpp PUBLIC astfri-core
-)
-
 target_include_directories(
-    astfri-cpp PUBLIC ${PROJECT_SOURCE_DIR}
+    astfri-cpp PUBLIC ${LibClangTooling_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    astfri-cpp PUBLIC ${LibClangTooling_LIBRARIES} astfri-core
 )

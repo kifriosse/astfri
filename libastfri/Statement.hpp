@@ -19,60 +19,60 @@ struct Stmt : virtual IVisitable
 /**
  * @brief TODO
  */
-struct VarDef : Stmt
+struct VarDefStmt : Stmt
 {
     std::string name_;
     Type* type_;
     Expr* initializer_;
 
-    VarDef(std::string name, Type* type, Expr* initializer);
+    VarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
  * @brief TODO
  */
-struct LocalVarDef : VarDef, details::MkVisitable<LocalVarDef>
+struct LocalVarDefStmt : VarDefStmt, details::MkVisitable<LocalVarDefStmt>
 {
-    LocalVarDef(std::string name, Type* type, Expr* initializer);
+    LocalVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
  * @brief TODO
  */
-struct ParamVarDef : VarDef, details::MkVisitable<ParamVarDef>
+struct ParamVarDefStmt : VarDefStmt, details::MkVisitable<ParamVarDefStmt>
 {
-    ParamVarDef(std::string name, Type* type, Expr* initializer);
+    ParamVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
  * @brief TODO
  */
-struct MemberVarDef : VarDef, details::MkVisitable<MemberVarDef>
+struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt>
 {
-    MemberVarDef(std::string name, Type* type, Expr* initializer);
+    MemberVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
  * @brief TODO
  */
-struct GlobalVarDef : VarDef, details::MkVisitable<GlobalVarDef>
+struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
 {
-    GlobalVarDef(std::string name, Type* type, Expr* initializer);
+    GlobalVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
  * @brief TODO
  */
-struct FunctionDef : Stmt, details::MkVisitable<FunctionDef>
+struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
 {
     std::string name_;
-    std::vector<ParamVarDef*> params_;
+    std::vector<ParamVarDefStmt*> params_;
     Type* retType_;
     CompoundStmt* body_;
 
-    FunctionDef(
+    FunctionDefStmt(
         std::string name,
-        std::vector<ParamVarDef*> params,
+        std::vector<ParamVarDefStmt*> params,
         Type* retType,
         CompoundStmt* body
     );
@@ -81,26 +81,26 @@ struct FunctionDef : Stmt, details::MkVisitable<FunctionDef>
 /**
  * @brief TODO
  */
-struct MethodDef : Stmt, details::MkVisitable<MethodDef>
+struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
-    ClassDef* owner_;
-    FunctionDef* func_;
+    ClassDefStmt* owner_;
+    FunctionDefStmt* func_;
 
-    MethodDef(ClassDef* owner, FunctionDef* func);
+    MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func);
 };
 
 /**
  * @brief TODO
  */
-struct ClassDef : Stmt, details::MkVisitable<ClassDef>
+struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
 {
     std::string name_;
-    std::vector<MemberVarDef*> vars_;
+    std::vector<MemberVarDefStmt*> vars_;
     std::vector<GenericParam*> tparams_;
 
-    ClassDef(
+    ClassDefStmt(
         std::string name,
-        std::vector<MemberVarDef*> vars,
+        std::vector<MemberVarDefStmt*> vars,
         std::vector<GenericParam*> tparams
     );
 };
@@ -173,7 +173,7 @@ struct CaseStmt : Stmt, details::MkVisitable<CaseStmt>
 /**
  * @brief TODO
  */
-struct SwitchStmt : Stmt, details::MkVisitable<Stmt>
+struct SwitchStmt : Stmt, details::MkVisitable<SwitchStmt>
 {
     Expr* expr_;
     std::vector<CaseStmt*> cases_;
@@ -244,14 +244,14 @@ struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>
  */
 struct TranslationUnit : details::MkVisitable<TranslationUnit>
 {
-    std::vector<ClassDef*> classes_;
-    std::vector<FunctionDef*> functions_;
-    std::vector<GlobalVarDef*> globals_;
+    std::vector<ClassDefStmt*> classes_;
+    std::vector<FunctionDefStmt*> functions_;
+    std::vector<GlobalVarDefStmt*> globals_;
 
     TranslationUnit(
-        std::vector<ClassDef*> classes,
-        std::vector<FunctionDef*> functions,
-        std::vector<GlobalVarDef*> globals
+        std::vector<ClassDefStmt*> classes,
+        std::vector<FunctionDefStmt*> functions,
+        std::vector<GlobalVarDefStmt*> globals
     );
 };
 } // namespace astfri

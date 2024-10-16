@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libastfri/structures/Statement.hpp>
+#include <libastfri/Statement.hpp>
 
 #include <libastfri-cpp/ClangVisitor.hpp>
 
@@ -13,24 +13,24 @@
 #include <clang/Tooling/Tooling.h>
 #include <memory>
 
-namespace libastfri::cpp
+namespace astfri::cpp
 {
 class ClangConsumer : public clang::ASTConsumer
 {
 public:
     clang::ASTContext* context;
-    libastfri::structures::TranslationUnit* visitedTranslationUnit;
+    astfri::TranslationUnit* visitedTranslationUnit;
 
     ClangConsumer(
         clang::ASTContext& context,
-        libastfri::structures::TranslationUnit& visitedTranslationUnit
+        astfri::TranslationUnit& visitedTranslationUnit
     );
     void HandleTranslationUnit (clang::ASTContext& p_context);
 };
 
 class ClangTraverseAction : public clang::ASTFrontendAction
 {
-    using TUnit = libastfri::structures::TranslationUnit;
+    using TUnit = astfri::TranslationUnit;
     TUnit* visitedTranslationUnit;
 
 public:

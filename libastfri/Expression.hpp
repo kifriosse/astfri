@@ -236,10 +236,10 @@ struct MethodCallExpr : RefExpr, details::MkVisitable<MethodCallExpr>
  */
 struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
 {
-    std::vector<ParamVarDef*> params_;
+    std::vector<ParamVarDefStmt*> params_;
     Stmt* body_;
 
-    LambdaExpr(std::vector<ParamVarDef*> params, Stmt* body);
+    LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body);
 };
 
 /**

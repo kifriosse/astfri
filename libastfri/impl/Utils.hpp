@@ -31,7 +31,7 @@ namespace astfri::details
         {
             return &it->second;
         }
-        return &map.try_emplace(std::move(key), std::forward<Args>(args)...);
+        return &map.try_emplace(std::move(key), std::forward<Args>(args)...).first->second;
     }
 }
 

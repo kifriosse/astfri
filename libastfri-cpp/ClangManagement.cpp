@@ -1,12 +1,10 @@
-#include <libastfri/factories/ExpressionFactory.hpp>
-
 #include <libastfri-cpp/ClangManagement.hpp>
 
-namespace libastfri::cpp
+namespace astfri::cpp
 {
 ClangConsumer::ClangConsumer(
     clang::ASTContext& context,
-    libastfri::structures::TranslationUnit& visitedTranslationUnit
+    astfri::TranslationUnit& visitedTranslationUnit
 ) :
     context(&context),
     visitedTranslationUnit(&visitedTranslationUnit)
@@ -21,7 +19,7 @@ void ClangConsumer::HandleTranslationUnit(clang::ASTContext& p_context)
 }
 
 ClangTraverseAction::ClangTraverseAction(
-    libastfri::structures::TranslationUnit& visitedTranslationUnit
+    astfri::TranslationUnit& visitedTranslationUnit
 ) :
     visitedTranslationUnit(&visitedTranslationUnit)
 {

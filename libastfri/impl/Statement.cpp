@@ -2,36 +2,36 @@
 
 namespace astfri
 {
-VarDef::VarDef(std::string name, Type* type, Expr* initializer) :
+VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
     name_(std::move(name)),
     type_(type),
     initializer_(initializer)
 {
 }
 
-LocalVarDef::LocalVarDef(std::string name, Type* type, Expr* initializer) :
-    VarDef(name, type, initializer)
+LocalVarDefStmt::LocalVarDefStmt(std::string name, Type* type, Expr* initializer) :
+    VarDefStmt(name, type, initializer)
 {
 }
 
-ParamVarDef::ParamVarDef(std::string name, Type* type, Expr* initializer) :
-    VarDef(name, type, initializer)
+ParamVarDefStmt::ParamVarDefStmt(std::string name, Type* type, Expr* initializer) :
+    VarDefStmt(name, type, initializer)
 {
 }
 
-MemberVarDef::MemberVarDef(std::string name, Type* type, Expr* initializer) :
-    VarDef(name, type, initializer)
+MemberVarDefStmt::MemberVarDefStmt(std::string name, Type* type, Expr* initializer) :
+    VarDefStmt(name, type, initializer)
 {
 }
 
-GlobalVarDef::GlobalVarDef(std::string name, Type* type, Expr* initializer) :
-    VarDef(name, type, initializer)
+GlobalVarDefStmt::GlobalVarDefStmt(std::string name, Type* type, Expr* initializer) :
+    VarDefStmt(name, type, initializer)
 {
 }
 
-FunctionDef::FunctionDef(
+FunctionDefStmt::FunctionDefStmt(
     std::string name,
-    std::vector<ParamVarDef*> params,
+    std::vector<ParamVarDefStmt*> params,
     Type* retType,
     CompoundStmt* body
 ) :
@@ -42,15 +42,15 @@ FunctionDef::FunctionDef(
 {
 }
 
-MethodDef::MethodDef(ClassDef* owner, FunctionDef* func) :
+MethodDefStmt::MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func) :
     owner_(owner),
     func_(func)
 {
 }
 
-ClassDef::ClassDef(
+ClassDefStmt::ClassDefStmt(
     std::string name,
-    std::vector<MemberVarDef*> vars,
+    std::vector<MemberVarDefStmt*> vars,
     std::vector<GenericParam*> tparams
 ) :
     name_(std::move(name)),
@@ -133,9 +133,9 @@ UnknownStmt::UnknownStmt(std::string message) :
 }
 
 TranslationUnit::TranslationUnit(
-    std::vector<ClassDef*> classes,
-    std::vector<FunctionDef*> functions,
-    std::vector<GlobalVarDef*> globals
+    std::vector<ClassDefStmt*> classes,
+    std::vector<FunctionDefStmt*> functions,
+    std::vector<GlobalVarDefStmt*> globals
 ) :
     classes_(std::move(classes)),
     functions_(std::move(functions)),
