@@ -1,4 +1,4 @@
-#include <libastfri/Statement.hpp>
+#include <libastfri/inc/Stmt.hpp>
 
 namespace astfri
 {
@@ -9,22 +9,38 @@ VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
 {
 }
 
-LocalVarDefStmt::LocalVarDefStmt(std::string name, Type* type, Expr* initializer) :
+LocalVarDefStmt::LocalVarDefStmt(
+    std::string name,
+    Type* type,
+    Expr* initializer
+) :
     VarDefStmt(name, type, initializer)
 {
 }
 
-ParamVarDefStmt::ParamVarDefStmt(std::string name, Type* type, Expr* initializer) :
+ParamVarDefStmt::ParamVarDefStmt(
+    std::string name,
+    Type* type,
+    Expr* initializer
+) :
     VarDefStmt(name, type, initializer)
 {
 }
 
-MemberVarDefStmt::MemberVarDefStmt(std::string name, Type* type, Expr* initializer) :
+MemberVarDefStmt::MemberVarDefStmt(
+    std::string name,
+    Type* type,
+    Expr* initializer
+) :
     VarDefStmt(name, type, initializer)
 {
 }
 
-GlobalVarDefStmt::GlobalVarDefStmt(std::string name, Type* type, Expr* initializer) :
+GlobalVarDefStmt::GlobalVarDefStmt(
+    std::string name,
+    Type* type,
+    Expr* initializer
+) :
     VarDefStmt(name, type, initializer)
 {
 }
@@ -51,10 +67,12 @@ MethodDefStmt::MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func) :
 ClassDefStmt::ClassDefStmt(
     std::string name,
     std::vector<MemberVarDefStmt*> vars,
+    std::vector<MethodDefStmt*> methods,
     std::vector<GenericParam*> tparams
 ) :
     name_(std::move(name)),
     vars_(std::move(vars)),
+    methods_(std::move(methods)),
     tparams_(std::move(tparams))
 {
 }
@@ -65,20 +83,13 @@ GenericParam::GenericParam(std::string constraint, std::string name) :
 {
 }
 
-CompoundStmt::CompoundStmt(std::vector<Stmt*> stmts) :
-    stmts_(std::move(stmts))
+CompoundStmt::CompoundStmt(std::vector<Stmt*> stmts) : stmts_(std::move(stmts))
 {
 }
 
-ReturnStmt::ReturnStmt(Expr* val) :
-    val_(val)
-{
-}
+ReturnStmt::ReturnStmt(Expr* val) : val_(val) { }
 
-ExprStmt::ExprStmt(Expr* expr) :
-    expr_(expr)
-{
-}
+ExprStmt::ExprStmt(Expr* expr) : expr_(expr) { }
 
 IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
     cond_(cond),
@@ -87,11 +98,7 @@ IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
 {
 }
 
-CaseStmt::CaseStmt(Expr* expr, Stmt* body) :
-    expr_(expr),
-    body_(body)
-{
-}
+CaseStmt::CaseStmt(Expr* expr, Stmt* body) : expr_(expr), body_(body) { }
 
 SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases) :
     expr_(expr),
@@ -101,17 +108,11 @@ SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases) :
 
 LoopStmt::LoopStmt(Expr* cond, CompoundStmt* body) :
     cond_(cond),
-    body_(body)
-{
-}
+    body_(body) { }
 
-WhileStmt::WhileStmt(Expr* cond, CompoundStmt* body) :
-    LoopStmt(cond, body)
-{
-}
+WhileStmt::WhileStmt(Expr* cond, CompoundStmt* body) : LoopStmt(cond, body) { }
 
-DoWhileStmt::DoWhileStmt(Expr* cond, CompoundStmt* body) :
-    LoopStmt(cond, body)
+DoWhileStmt::DoWhileStmt(Expr* cond, CompoundStmt* body) : LoopStmt(cond, body)
 {
 }
 
@@ -122,15 +123,7 @@ ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body) :
 {
 }
 
-ThrowStmt::ThrowStmt(Expr* val) :
-    val_(val)
-{
-}
-
-UnknownStmt::UnknownStmt(std::string message) :
-    message_(std::move(message))
-{
-}
+ThrowStmt::ThrowStmt(Expr* val) : val_(val) { }
 
 TranslationUnit::TranslationUnit(
     std::vector<ClassDefStmt*> classes,

@@ -1,7 +1,7 @@
 #ifndef LIBASTFRI_TYPE_FACTORY
 #define LIBASTFRI_TYPE_FACTORY
 
-#include <libastfri/Type.hpp>
+#include <libastfri/inc/Type.hpp>
 
 #include <map>
 #include <string>
@@ -11,7 +11,7 @@ namespace astfri
 class TypeFactory
 {
 public:
-    static TypeFactory& get_instance();
+    static TypeFactory& get_instance ();
 
 public:
     IntType* mk_int ();
@@ -19,9 +19,9 @@ public:
     CharType* mk_char ();
     BoolType* mk_bool ();
     VoidType* mk_void ();
-    UnknownType* mk_unknown();
-    IndirectionType* mk_indirect(Type* type);
-    UserType* mk_user (const std::string& name);
+    UnknownType* mk_unknown ();
+    IndirectionType* mk_indirect (Type* type);
+    UserType* mk_user (std::string const& name);
 
 public:
     TypeFactory(TypeFactory const&)     = delete;

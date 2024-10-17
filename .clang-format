@@ -12,7 +12,7 @@ AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortCompoundRequirementOnASingleLine: true
+# AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
@@ -45,9 +45,9 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
-BreakAfterAttributes: Leave
+# BreakAfterAttributes: Leave
 BreakBeforeBinaryOperators: All
-BreakBeforeConceptDeclarations: Always
+# BreakBeforeConceptDeclarations: Always
 BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
@@ -97,7 +97,7 @@ IndentCaseBlocks: false
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
 IndentExternBlock: AfterExternBlock
-IndentRequiresClause: false
+# IndentRequiresClause: false
 IndentWidth: 4
 IndentWrappedFunctionNames: true
 InsertTrailingCommas: None
@@ -118,9 +118,9 @@ PointerAlignment: Left
 PPIndentWidth: -1
 ReferenceAlignment: Pointer
 ReflowComments:  true
-RemoveSemicolon: true
-RequiresClausePosition: OwnLine
-RequiresExpressionIndentation: OuterScope
+# RemoveSemicolon: true
+# RequiresClausePosition: OwnLine
+# RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Always
 ShortNamespaceLines: 1
 SortIncludes: CaseInsensitive
@@ -139,8 +139,8 @@ SpaceBeforeParensOptions:
   AfterFunctionDefinitionName: true
   AfterIfMacros: true
   AfterOverloadedOperator: true
-  AfterRequiresInClause: false
-  AfterRequiresInExpression: false
+  # AfterRequiresInClause: false
+  # AfterRequiresInExpression: false
   BeforeNonEmptyParentheses: false
 SpaceAroundPointerQualifiers: Default
 SpaceBeforeRangeBasedForLoopColon: true
@@ -162,4 +162,3 @@ TabWidth:        8
 UseCRLF:         false
 UseTab:          Never
 ...
-

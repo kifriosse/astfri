@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libastfri/Statement.hpp>
+#include <libastfri/inc/Stmt.hpp>
 
 #include <libastfri-cpp/ClangVisitor.hpp>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <libastfri/impl/ExpressionFwd.hpp>
-#include <libastfri/impl/StatementFwd.hpp>
+#include <libastfri/impl/ExprFwd.hpp>
+#include <libastfri/impl/StmtFwd.hpp>
 #include <libastfri/impl/TypeFwd.hpp>
 
 #include <clang/AST/ASTConsumer.h>

@@ -1,4 +1,4 @@
-#include <libastfri/Type.hpp>
+#include <libastfri/inc/Type.hpp>
 
 namespace astfri
 {
@@ -42,13 +42,7 @@ IndirectionType* IndirectionType::as_indirection() noexcept
     return this;
 }
 
-UserType::UserType(std::string name) :
-    name_(std::move(name))
-{
-}
+UserType::UserType(std::string name) : name_(std::move(name)) { }
 
-IndirectionType::IndirectionType(Type* const indirect) :
-    indirect_(indirect)
-{
-}
+IndirectionType::IndirectionType(Type* const indirect) : indirect_(indirect) { }
 } // namespace astfri

@@ -18,11 +18,12 @@ struct CompoundAssignExpr;
 struct ParamVarRefExpr;
 struct LocalVarRefExpr;
 struct MemberVarRefExpr;
+struct GlobalVarRefExpr;
 struct FunctionCallExpr;
 struct MethodCallExpr;
 struct LambdaExpr;
 struct ThisExpr;
 struct UnknownExpr;
-}
+} // namespace astfri
 
 #endif

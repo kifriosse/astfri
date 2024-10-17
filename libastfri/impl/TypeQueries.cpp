@@ -41,4 +41,4 @@ IndirectionType* TypeQueriesAdapter::as_indirection() noexcept
 {
     return nullptr;
 }
-}
+} // namespace astfri::details

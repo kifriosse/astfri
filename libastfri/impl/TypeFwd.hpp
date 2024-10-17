@@ -11,4 +11,4 @@ struct VoidType;
 struct UserType;
 struct IndirectionType;
 struct UnknownType;
-}
+} // namespace astfri

@@ -1,4 +1,4 @@
-#include <libastfri/TypeFactory.hpp>
+#include <libastfri/inc/TypeFactory.hpp>
 
 namespace astfri
 {
@@ -40,7 +40,7 @@ UnknownType* TypeFactory::mk_unknown()
 
 IndirectionType* TypeFactory::mk_indirect(Type* type)
 {
-    const auto it = indirect_.find(type);
+    auto const it = indirect_.find(type);
     if (it != indirect_.end())
     {
         return &it->second;
@@ -48,9 +48,9 @@ IndirectionType* TypeFactory::mk_indirect(Type* type)
     return &indirect_.try_emplace(type, type).first->second;
 }
 
-UserType* TypeFactory::mk_user(const std::string& name)
+UserType* TypeFactory::mk_user(std::string const& name)
 {
-    const auto it = user_.find(name);
+    auto const it = user_.find(name);
     if (it != user_.end())
     {
         return &it->second;

@@ -53,7 +53,9 @@ struct CharLiteralExpr : Literal<char>, details::MkVisitable<CharLiteralExpr>
 /**
  * @brief TODO
  */
-struct StringLiteralExpr : Literal<std::string>, details::MkVisitable<StringLiteralExpr>
+struct StringLiteralExpr :
+    Literal<std::string>,
+    details::MkVisitable<StringLiteralExpr>
 {
     StringLiteralExpr(std::string val);
 };
@@ -69,9 +71,9 @@ struct BoolLiteralExpr : Literal<bool>, details::MkVisitable<BoolLiteralExpr>
 /**
  * @brief TODO
  */
- struct NullLiteralExpr : Expr, details::MkVisitable<NullLiteralExpr>
- {
- };
+struct NullLiteralExpr : Expr, details::MkVisitable<NullLiteralExpr>
+{
+};
 
 /**
  * @brief TODO
@@ -82,11 +84,7 @@ struct IfExpr : Expr, details::MkVisitable<IfExpr>
     Expr* iftrue_;
     Expr* iffalse_;
 
-    IfExpr(
-        Expr* cond,
-        Expr* iftrue,
-        Expr* iffalse
-    );
+    IfExpr(Expr* cond, Expr* iftrue, Expr* iffalse);
 };
 
 /**
@@ -160,10 +158,10 @@ struct AssignExpr : Expr, details::MkVisitable<AssignExpr>
 struct CompoundAssignExpr : Expr, details::MkVisitable<CompoundAssignExpr>
 {
     Expr* lhs_;
-    Expr* rhs_;
     BinOpType op_;
+    Expr* rhs_;
 
-    CompoundAssignExpr(Expr* lhs, Expr* rhs);
+    CompoundAssignExpr(Expr* lhs, BinOpType op, Expr* rhs);
 };
 
 /**
@@ -204,6 +202,17 @@ struct MemberVarRefExpr : RefExpr, details::MkVisitable<MemberVarRefExpr>
     std::string member_;
 
     MemberVarRefExpr(std::string member);
+};
+
+/**
+ * @brief TODO
+ */
+struct GlobalVarRefExpr : RefExpr, details::MkVisitable<GlobalVarRefExpr>
+{
+    // TODO later this should be a pointer to GlobalVarDef
+    std::string global_;
+
+    GlobalVarRefExpr(std::string global);
 };
 
 /**
@@ -254,12 +263,9 @@ struct ThisExpr : Expr, details::MkVisitable<ThisExpr>
  */
 struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr>
 {
-    std::string message_;
-
-    UnknownExpr(std::string message);
 };
 } // namespace astfri
 
-#include <libastfri/impl/Expression.inl>
+#include <libastfri/impl/Expr.inl>
 
 #endif

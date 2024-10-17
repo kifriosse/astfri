@@ -92,22 +92,6 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 /**
  * @brief TODO
  */
-struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
-{
-    std::string name_;
-    std::vector<MemberVarDefStmt*> vars_;
-    std::vector<GenericParam*> tparams_;
-
-    ClassDefStmt(
-        std::string name,
-        std::vector<MemberVarDefStmt*> vars,
-        std::vector<GenericParam*> tparams
-    );
-};
-
-/**
- * @brief TODO
- */
 struct GenericParam
 {
     // TODO later, this could be pointer to a concept
@@ -115,6 +99,24 @@ struct GenericParam
     std::string name_;
 
     GenericParam(std::string constraint, std::string name);
+};
+
+/**
+ * @brief TODO
+ */
+struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
+{
+    std::string name_;
+    std::vector<MemberVarDefStmt*> vars_;
+    std::vector<MethodDefStmt*> methods_;
+    std::vector<GenericParam*> tparams_;
+
+    ClassDefStmt(
+        std::string name,
+        std::vector<MemberVarDefStmt*> vars,
+        std::vector<MethodDefStmt*> methods,
+        std::vector<GenericParam*> tparams
+    );
 };
 
 /**
@@ -234,15 +236,12 @@ struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
  */
 struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>
 {
-    std::string message_;
-
-    UnknownStmt(std::string message);
 };
 
 /**
  * @brief TODO
  */
-struct TranslationUnit : details::MkVisitable<TranslationUnit>
+struct TranslationUnit : Stmt, details::MkVisitable<TranslationUnit>
 {
     std::vector<ClassDefStmt*> classes_;
     std::vector<FunctionDefStmt*> functions_;
