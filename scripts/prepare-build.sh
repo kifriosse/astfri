@@ -16,7 +16,9 @@ cd build/release
 cmake -DCMAKE_CXX_COMPILER=$COMPILER     \
       -DCMAKE_BUILD_TYPE=Release         \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-      -DASTFRI_BUILD_CPP_FRONTEND=ON     \
+      -DASTFRI_BUILD_CPP_INPUT=ON        \
+      -DASTFRI_BUILD_JAVA_INPUT=ON       \
+      -DASTFRI_BUILD_UML_OUTPUT=ON       \
       ../..
 
 # Generate debug Makefile
@@ -24,7 +26,9 @@ cd ../debug
 cmake -DCMAKE_CXX_COMPILER=$COMPILER     \
       -DCMAKE_BUILD_TYPE=Debug           \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-      -DASTFRI_BUILD_CPP_FRONTEND=ON     \
+      -DASTFRI_BUILD_CPP_INPUT=ON        \
+      -DASTFRI_BUILD_JAVA_INPUT=ON       \
+      -DASTFRI_BUILD_UML_OUTPUT=ON       \
       ../..
 
 # Move compile commnads out of the build directory

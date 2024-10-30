@@ -1,11 +1,3 @@
-# https://github.com/firolino/clang-tool/tree/master
-
-set(
-    CMAKE_MODULE_PATH
-    ${CMAKE_MODULE_PATH}
-    "${PROJECT_SOURCE_DIR}/cmake/modules"
-)
-
 find_package(LibClangTooling REQUIRED)
 
 add_library(

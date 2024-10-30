@@ -9,19 +9,26 @@ project(
     LANGUAGES   CXX
 )
 
-option(ASTFRI_BUILD_CPP_FRONTEND "Build module libastri-cpp." OFF)
-option(ASTFRI_BUILD_JAVA_FRONTEND "Build module libastri-java." OFF)
+set(
+    CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    "${PROJECT_SOURCE_DIR}/cmake/modules"
+)
+
+option(ASTFRI_BUILD_CPP_INPUT "Build module libastri-cpp." OFF)
+option(ASTFRI_BUILD_JAVA_INPUT "Build module libastri-java." OFF)
+option(ASTFRI_BUILD_UML_OUTPUT "Build module libastri-uml." OFF)
 
 add_subdirectory(libastfri)
 
-if (ASTFRI_BUILD_CPP_FRONTEND)
+if (ASTFRI_BUILD_CPP_INPUT)
     add_subdirectory(libastfri-cpp)
 endif()
 
-if (ASTFRI_BUILD_JAVA_FRONTEND)
+if (ASTFRI_BUILD_JAVA_INPUT)
     add_subdirectory(libastfri-java)
 endif()
 
-# add_subdirectory(libastfri-output)
-
-# add_subdirectory(examples)
+if (ASTFRI_BUILD_UML_OUTPUT)
+    add_subdirectory(libastfri-uml)
+endif()
