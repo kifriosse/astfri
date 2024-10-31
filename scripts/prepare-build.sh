@@ -12,6 +12,7 @@ mkdir -p build/release
 mkdir -p build/debug
 
 # Generate release Makefile
+echo "# Generating realease config"
 cd build/release
 cmake -DCMAKE_CXX_COMPILER=$COMPILER     \
       -DCMAKE_BUILD_TYPE=Release         \
@@ -20,8 +21,10 @@ cmake -DCMAKE_CXX_COMPILER=$COMPILER     \
       -DASTFRI_BUILD_JAVA_INPUT=ON       \
       -DASTFRI_BUILD_UML_OUTPUT=ON       \
       ../..
+echo ""
 
 # Generate debug Makefile
+echo "# Generating debug config"
 cd ../debug
 cmake -DCMAKE_CXX_COMPILER=$COMPILER     \
       -DCMAKE_BUILD_TYPE=Debug           \
