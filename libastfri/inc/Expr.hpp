@@ -31,7 +31,7 @@ struct Literal : Expr
  */
 struct IntLiteralExpr : Literal<int>, details::MkVisitable<IntLiteralExpr>
 {
-    IntLiteralExpr(int val);
+    explicit IntLiteralExpr(int val);
 };
 
 /**
@@ -39,7 +39,7 @@ struct IntLiteralExpr : Literal<int>, details::MkVisitable<IntLiteralExpr>
  */
 struct FloatLiteralExpr : Literal<float>, details::MkVisitable<FloatLiteralExpr>
 {
-    FloatLiteralExpr(float val);
+    explicit FloatLiteralExpr(float val);
 };
 
 /**
@@ -47,7 +47,7 @@ struct FloatLiteralExpr : Literal<float>, details::MkVisitable<FloatLiteralExpr>
  */
 struct CharLiteralExpr : Literal<char>, details::MkVisitable<CharLiteralExpr>
 {
-    CharLiteralExpr(char val);
+    explicit CharLiteralExpr(char val);
 };
 
 /**
@@ -57,7 +57,7 @@ struct StringLiteralExpr :
     Literal<std::string>,
     details::MkVisitable<StringLiteralExpr>
 {
-    StringLiteralExpr(std::string val);
+    explicit StringLiteralExpr(std::string val);
 };
 
 /**
@@ -65,7 +65,7 @@ struct StringLiteralExpr :
  */
 struct BoolLiteralExpr : Literal<bool>, details::MkVisitable<BoolLiteralExpr>
 {
-    BoolLiteralExpr(bool val);
+    explicit BoolLiteralExpr(bool val);
 };
 
 /**
@@ -179,7 +179,7 @@ struct ParamVarRefExpr : RefExpr, details::MkVisitable<ParamVarRefExpr>
     // TODO later this should be a pointer to ParamVarDef
     std::string param_;
 
-    ParamVarRefExpr(std::string param);
+    explicit ParamVarRefExpr(std::string param);
 };
 
 /**
@@ -190,7 +190,7 @@ struct LocalVarRefExpr : RefExpr, details::MkVisitable<LocalVarRefExpr>
     // TODO later this should be a pointer to LocalVarDef
     std::string var_;
 
-    LocalVarRefExpr(std::string var);
+    explicit LocalVarRefExpr(std::string var);
 };
 
 /**
@@ -201,7 +201,7 @@ struct MemberVarRefExpr : RefExpr, details::MkVisitable<MemberVarRefExpr>
     // TODO later this should be a pointer to MemberVarDef
     std::string member_;
 
-    MemberVarRefExpr(std::string member);
+    explicit MemberVarRefExpr(std::string member);
 };
 
 /**
@@ -212,7 +212,7 @@ struct GlobalVarRefExpr : RefExpr, details::MkVisitable<GlobalVarRefExpr>
     // TODO later this should be a pointer to GlobalVarDef
     std::string global_;
 
-    GlobalVarRefExpr(std::string global);
+    explicit GlobalVarRefExpr(std::string global);
 };
 
 /**
