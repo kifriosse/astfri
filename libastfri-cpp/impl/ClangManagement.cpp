@@ -1,4 +1,4 @@
-#include <libastfri-cpp/ClangManagement.hpp>
+#include <libastfri-cpp/impl/ClangManagement.hpp>
 
 namespace astfri::cpp
 {

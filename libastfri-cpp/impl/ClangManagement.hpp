@@ -2,7 +2,7 @@
 
 #include <libastfri/inc/Stmt.hpp>
 
-#include <libastfri-cpp/ClangVisitor.hpp>
+#include <libastfri-cpp/inc/ClangVisitor.hpp>
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>

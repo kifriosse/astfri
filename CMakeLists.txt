@@ -9,7 +9,7 @@ project(
     LANGUAGES   CXX
 )
 
-option(ASTFRI_BUILD_CPP_FRONTEND "Build module libastri-cpp." OFF)
+option(ASTFRI_BUILD_CPP_FRONTEND "Build module libastri-cpp." ON)
 option(ASTFRI_BUILD_JAVA_FRONTEND "Build module libastri-java." OFF)
 
 add_subdirectory(libastfri)
