@@ -1,4 +1,4 @@
-#include <libastfri-cpp/ClangVisitor.hpp>
+#include <libastfri-cpp/inc/ClangVisitor.hpp>
 
 namespace astfri::cpp
 {
