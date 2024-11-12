@@ -8,6 +8,9 @@
 
 namespace astfri
 {
+/**
+ * @brief TODO
+ */
 class TypeFactory
 {
 public:
