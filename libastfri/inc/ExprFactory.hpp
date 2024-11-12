@@ -16,10 +16,10 @@ namespace astfri
 class ExprFactory
 {
 public:
-    static ExprFactory& getInstance ();
+    static ExprFactory& get_instance ();
 
 public:
-    ~ExprFactory();
+    ~ExprFactory() = default;
 
     IntLiteralExpr* mk_int_literal (int val);
     FloatLiteralExpr* mk_float_literal (float val);

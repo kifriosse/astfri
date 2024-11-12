@@ -2,6 +2,12 @@
 
 namespace astfri
 {
+StmtFactory& StmtFactory::get_instance()
+{
+    static StmtFactory instance;
+    return instance;
+}
+
 LocalVarDefStmt* StmtFactory::mk_local_var_def(std::string name, Type* type, Expr* initializer)
 {
     return details::emplace_get<LocalVarDefStmt>(stmts_, std::move(name), type, initializer);

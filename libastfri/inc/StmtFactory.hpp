@@ -11,7 +11,7 @@ namespace astfri
 class StmtFactory
 {
 public:
-    static StmtFactory& getInstance ();
+    static StmtFactory& get_instance ();
 
 public:
     LocalVarDefStmt* mk_local_var_def(std::string name, Type* type, Expr* initializer);
