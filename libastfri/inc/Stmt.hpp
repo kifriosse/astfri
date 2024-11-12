@@ -126,7 +126,7 @@ struct CompoundStmt : Stmt, details::MkVisitable<CompoundStmt>
 {
     std::vector<Stmt*> stmts_;
 
-    CompoundStmt(std::vector<Stmt*> stmts);
+    explicit CompoundStmt(std::vector<Stmt*> stmts);
 };
 
 /**
@@ -136,7 +136,7 @@ struct ReturnStmt : Stmt, details::MkVisitable<ReturnStmt>
 {
     Expr* val_;
 
-    ReturnStmt(Expr* val);
+    explicit ReturnStmt(Expr* val);
 };
 
 /**
@@ -146,7 +146,7 @@ struct ExprStmt : Stmt, details::MkVisitable<ExprStmt>
 {
     Expr* expr_;
 
-    ExprStmt(Expr* expr);
+    explicit ExprStmt(Expr* expr);
 };
 
 /**
@@ -228,7 +228,7 @@ struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
 {
     Expr* val_;
 
-    ThrowStmt(Expr* val);
+    explicit ThrowStmt(Expr* val);
 };
 
 /**
