@@ -9,8 +9,8 @@ add_library(
     TypeQueries.cpp
 )
 
-target_compile_features(astfri-core PUBLIC cxx_std_20)
+target_compile_options(astfri-core PRIVATE -Wall -Wextra -Wpedantic)
 
-target_compile_options(astfri-core PRIVATE "-Wall" "-Wextra" "-Wpedantic")
+target_compile_options(astfri-core PUBLIC -std=c++20)
 
 target_include_directories(astfri-core PUBLIC ${PROJECT_SOURCE_DIR})

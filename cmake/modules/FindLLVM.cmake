@@ -33,15 +33,23 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-if (NOT "${LLVM_LIBS}" STREQUAL "" AND NOT "${LLVM_SYSTEM_LIBS}" STREQUAL "")
-  set(LLVM_LIBRARIES ${LLVM_LIBS} ${LLVM_SYSTEM_LIBS})
-endif()
+# Remove trailing and leading spaces, most importantly, newlines!
+string(STRIP "${LLVM_OPTIONS}" LLVM_OPTIONS)
+string(STRIP "${LLVM_INCLUDE_DIR}" LLVM_INCLUDE_DIR)
+string(STRIP "${LLVM_LIB_DIR}" LLVM_LIB_DIR)
+string(STRIP "${LLVM_VERSION}" LLVM_VERSION)
+string(STRIP "${LLVM_SYSTEM_LIBS}" LLVM_SYSTEM_LIBS)
+string(STRIP "${LLVM_LIBS}" LLVM_LIBS)
 
-if (NOT "${LLVM_INCLUDE_DIR}" STREQUAL "")
-  set(LLVM_INCLUDE_DIRS ${LLVM_INCLUDE_DIR})
-endif()
+# Replace spaces with ; to turn it into list
+# target_* functions work better with lists---
+# avoiding quotes and ugly spaces
+string(REGEX REPLACE " +" ";" LLVM_OPTIONS "${LLVM_OPTIONS}")
 
-set(LLVM_OPTIONS ${LLVM_OPTIONS} "-fno-rtti")
+list(APPEND LLVM_INCLUDE_DIRS ${LLVM_INCLUDE_DIR})
+list(APPEND LLVM_LIBRARIES ${LLVM_SYSTEM_LIBS})
+list(APPEND LLVM_LIBRARIES ${LLVM_LIBS})
+list(APPEND LLVM_OPTIONS "-fno-rtti")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
