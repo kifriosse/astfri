@@ -5,14 +5,12 @@ find_package(LLVM REQUIRED)
 set(
   CLANG_LIBS
     clang
-    clang-cpp
     clangAPINotes
     clangARCMigrate
     clangAST
     clangASTMatchers
     clangAnalysis
     clangAnalysisFlowSensitive
-    clangAnalysisFlowSensitiveModels
     clangApplyReplacements
     clangBasic
     clangChangeNamespace
@@ -26,13 +24,11 @@ set(
     clangDriver
     clangDynamicASTMatchers
     clangEdit
-    clangExtractAPI
     clangFormat
     clangFrontend
     clangFrontendTool
     clangHandleCXX
     clangHandleLLVM
-    clangIncludeCleaner
     clangIncludeFixer
     clangIncludeFixerPlugin
     clangIndex
@@ -41,10 +37,6 @@ set(
     clangLex
     clangMove
     clangParse
-    clangPseudo
-    clangPseudoCLI
-    clangPseudoCXX
-    clangPseudoGrammar
     clangQuery
     clangReorderFields
     clangRewrite
@@ -54,7 +46,6 @@ set(
     clangStaticAnalyzerCheckers
     clangStaticAnalyzerCore
     clangStaticAnalyzerFrontend
-    clangSupport
     clangTidy
     clangTidyAbseilModule
     clangTidyAlteraModule
@@ -87,11 +78,9 @@ set(
     clangToolingASTDiff
     clangToolingCore
     clangToolingInclusions
-    clangToolingInclusionsStdlib
     clangToolingRefactoring
     clangToolingSyntax
     clangTransformer
-    clangdMain
     clangdRemoteIndex
     clangdSupport
 )
@@ -101,6 +90,7 @@ foreach (lib ${CLANG_LIBS})
   list(APPEND Clang_LIBRARIES ${Clang_${lib}_LIBRARY})
 endforeach()
 
+list(APPEND Clang_LIBRARIES ${LLVM_LIBRARIES})
 list(APPEND Clang_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS})
 list(APPEND Clang_OPTIONS ${LLVM_OPTIONS})
 
