@@ -17,6 +17,8 @@ set(
 
 option(ASTFRI_BUILD_CPP_INPUT "Build module libastri-cpp." OFF)
 option(ASTFRI_BUILD_JAVA_INPUT "Build module libastri-java." OFF)
+option(ASTFRI_BUILD_SERIALIZED_INPUT "Build module libastri-serialize." OFF)
+option(ASTFRI_BUILD_TEXT_OUTPUT "Build module libastri-text." OFF)
 option(ASTFRI_BUILD_UML_OUTPUT "Build module libastri-uml." OFF)
 
 add_subdirectory(libastfri)
@@ -27,6 +29,14 @@ endif()
 
 if (ASTFRI_BUILD_JAVA_INPUT)
     add_subdirectory(libastfri-java)
+endif()
+
+if (ASTFRI_BUILD_SERIALIZED_INPUT)
+    add_subdirectory(libastfri-serialize)
+endif()
+
+if (ASTFRI_BUILD_TEXT_OUTPUT)
+    add_subdirectory(libastfri-text)
 endif()
 
 if (ASTFRI_BUILD_UML_OUTPUT)
