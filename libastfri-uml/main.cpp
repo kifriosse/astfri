@@ -17,10 +17,10 @@ int largest_even_number(int lowerBound, int upperBound)
     return result;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-  auto& statements = astfri::StmtFactory::getInstance();
-  auto& expressions = astfri::ExprFactory::getInstance();
+  auto& statements = astfri::StmtFactory::get_instance();
+  auto& expressions = astfri::ExprFactory::get_instance();
   auto& types = astfri::TypeFactory::get_instance();
 
   //difference between: ?
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   );
 
   std::cout << "Hello, world!" << std::endl;
-  std::cout << largest_even_number(0, 100);
+  std::cout << largest_even_number(0, 100) << std::endl;
 
   return 0;
 }
