@@ -3,6 +3,12 @@
 
 namespace astfri
 {
+ExprFactory& ExprFactory::get_instance()
+{
+    static ExprFactory instance;
+    return instance;
+}
+
 IntLiteralExpr* ExprFactory::mk_int_literal(int const val)
 {
     return details::emplace_get<IntLiteralExpr>(val, ints_, val);

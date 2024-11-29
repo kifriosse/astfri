@@ -8,41 +8,60 @@
 
 namespace astfri
 {
+/**
+ * @brief TODO
+ */
 class StmtFactory
 {
 public:
-    static StmtFactory& getInstance ();
+    static StmtFactory& get_instance ();
 
 public:
-    LocalVarDefStmt* mk_local_var_def(std::string name, Type* type, Expr* initializer);
-    ParamVarDefStmt* mk_param_var_def(std::string name, Type* type, Expr* initializer);
-    MemberVarDefStmt* mk_member_var_def(std::string name, Type* type, Expr* initializer);
-    GlobalVarDefStmt* mk_global_var_def(std::string name, Type* type, Expr* initializer);
-    FunctionDefStmt* mk_function_def(
+    LocalVarDefStmt* mk_local_var_def (
+        std::string name,
+        Type* type,
+        Expr* initializer
+    );
+    ParamVarDefStmt* mk_param_var_def (
+        std::string name,
+        Type* type,
+        Expr* initializer
+    );
+    MemberVarDefStmt* mk_member_var_def (
+        std::string name,
+        Type* type,
+        Expr* initializer
+    );
+    GlobalVarDefStmt* mk_global_var_def (
+        std::string name,
+        Type* type,
+        Expr* initializer
+    );
+    FunctionDefStmt* mk_function_def (
         std::string name,
         std::vector<ParamVarDefStmt*> params,
         Type* retType,
         CompoundStmt* body
     );
-    MethodDefStmt* mk_method_def(ClassDefStmt* owner, FunctionDefStmt* func);
-    ClassDefStmt* mk_class_def(
+    MethodDefStmt* mk_method_def (ClassDefStmt* owner, FunctionDefStmt* func);
+    ClassDefStmt* mk_class_def (
         std::string name,
         std::vector<MemberVarDefStmt*> vars,
         std::vector<MethodDefStmt*> methods,
         std::vector<GenericParam*> tparams
     );
-    CompoundStmt* mk_compound(std::vector<Stmt*> stmts);
-    ReturnStmt* mk_return(Expr* val);
-    ExprStmt* mk_expr(Expr* expr);
-    IfStmt* mk_if(Expr* cond, Stmt* iftrue, Stmt* iffalse);
-    CaseStmt* mk_case(Expr* expr, Stmt* body);
-    SwitchStmt* mk_switch(Expr* expr, std::vector<CaseStmt*> cases);
-    WhileStmt* mk_while(Expr* cond, CompoundStmt* body);
-    DoWhileStmt* mk_do_while(Expr* cond, CompoundStmt* body);
-    ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
-    ThrowStmt* mk_throw(Expr* val);
-    UnknownStmt* mk_uknown();
-    TranslationUnit* mk_translation_unit(
+    CompoundStmt* mk_compound (std::vector<Stmt*> stmts);
+    ReturnStmt* mk_return (Expr* val);
+    ExprStmt* mk_expr (Expr* expr);
+    IfStmt* mk_if (Expr* cond, Stmt* iftrue, Stmt* iffalse);
+    CaseStmt* mk_case (Expr* expr, Stmt* body);
+    SwitchStmt* mk_switch (Expr* expr, std::vector<CaseStmt*> cases);
+    WhileStmt* mk_while (Expr* cond, CompoundStmt* body);
+    DoWhileStmt* mk_do_while (Expr* cond, CompoundStmt* body);
+    ForStmt* mk_for (Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
+    ThrowStmt* mk_throw (Expr* val);
+    UnknownStmt* mk_uknown ();
+    TranslationUnit* mk_translation_unit (
         std::vector<ClassDefStmt*> classes,
         std::vector<FunctionDefStmt*> functions,
         std::vector<GlobalVarDefStmt*> globals
