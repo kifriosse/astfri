@@ -5,9 +5,10 @@ TODO
 ### Tree-sitter
 Install tree-sitter from source:
 ```sh
-git clone git@github.com:tree-sitter/tree-sitter-json.git
+git clone git@github.com:tree-sitter/tree-sitter.git
 cd tree-sitter
 git checkout e445532a1fea3b1dda93cee61c534f5b9acc9c16
+cd lib
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
