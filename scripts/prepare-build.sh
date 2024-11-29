@@ -29,7 +29,7 @@ echo ""
 echo "# Generating debug config"
 cd ../debug
 cmake -DCMAKE_CXX_COMPILER=$COMPILER     \
-      -DCMAKE_BUILD_TYPE=Release         \
+      -DCMAKE_BUILD_TYPE=Debug           \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
       -DASTFRI_BUILD_CPP_INPUT=ON        \
       -DASTFRI_BUILD_JAVA_INPUT=ON       \
