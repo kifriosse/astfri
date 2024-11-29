@@ -1,6 +1,25 @@
 # astfri
 TODO
 
+# Subprojects (modules) and build
+THe project follows standard cmake build procedure. By default, only the `libastfri-core` module is enabled. Other modules can be enabled using following cmake options:
+- ASTFRI_BUILD_CPP_INPUT
+- ASTFRI_BUILD_JAVA_INPUT
+- ASTFRI_BUILD_SERIALIZED_INPUT
+- ASTFRI_BUILD_TEXT_OUTPUT
+- ASTFRI_BUILD_UML_OUTPUT  
+
+by setting them to the value `ON`. For example, to build the project with java frontend submodule:
+```sh
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug -DASTFRI_BUILD_JAVA_INPUT=ON ..
+make
+```
+
+# Dependencies
+Each subproject contains section on dependencies in its README.
+
 # For Developers
 
 ## File structure
