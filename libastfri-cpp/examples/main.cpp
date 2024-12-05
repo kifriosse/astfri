@@ -1,33 +1,96 @@
-#include <clang-c/Index.h>
-#include <iostream>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Stmt.hpp"
 
-int main(int argc, char** argv) {
+// int add(int a, int b) {
+//   return a + b;
+// }
 
-    auto& StmtFactory = astfri::StmtFactory::get_instance();
-    auto& ExprFactory = astfri::ExprFactory::get_instance();
-    auto& TypeFactory = astfri::TypeFactory::get_instance();
 
-    auto* funkcia = StmtFactory.mk_function_def("spocitaj",
-    std::vector<astfri::ParamVarDefStmt *> {},
-    TypeFactory.mk_int(),
-    StmtFactory.mk_compound(std::vector<astfri::Stmt *> {
-        StmtFactory.mk_if(
-            ExprFactory.mk_int_literal(1),
-            StmtFactory.mk_return(ExprFactory.mk_int_literal(1)),
-            StmtFactory.mk_return(ExprFactory.mk_int_literal(0))
+// toto chcem spravit
+// int get_distance(int a, int c) {
+//   int x = 0;
+//   while (a < c) {
+//     a = a + 1;
+//     x = x + 1;
+//   }
+//   return x;
+// }
+// ja viem ze tuto metodu by nepouzil nik, ale je to len na otestovanie :D
+
+
+int main() {
+  auto& statements = astfri::StmtFactory::get_instance();
+  auto& expressions = astfri::ExprFactory::get_instance();
+  auto& types = astfri::TypeFactory::get_instance();
+
+
+  astfri::CompoundStmt* get_distance_body = statements.mk_compound(
+    {
+      statements.mk_local_var_def("x", types.mk_int(), expressions.mk_int_literal(0)),
+      statements.mk_while(
+        expressions.mk_bin_on(
+          expressions.mk_param_var_ref("a"),
+          astfri::BinOpType::Less,
+          expressions.mk_param_var_ref("c")),
+        statements.mk_compound(
+        {
+          statements.mk_expr(
+            expressions.mk_assign(
+              expressions.mk_param_var_ref("a"),
+              expressions.mk_bin_on(
+                expressions.mk_param_var_ref("a"),
+                astfri::BinOpType::Add,
+                expressions.mk_int_literal(1)
+              )
+            )
+          ),
+          statements.mk_expr(
+            expressions.mk_assign(
+              expressions.mk_param_var_ref("x"),
+              expressions.mk_bin_on(
+                expressions.mk_param_var_ref("x"),
+                astfri::BinOpType::Add,
+                expressions.mk_int_literal(1)
+              )
+            )
+          )
+        }
         )
-    }));
+      ),
+      statements.mk_return(expressions.mk_param_var_ref("x"))
+    });
 
-    auto* transUnit = StmtFactory.mk_translation_unit(
-        std::vector<astfri::ClassDefStmt*> {},
-        std::vector<astfri::FunctionDefStmt*> { funkcia },
-        std::vector<astfri::GlobalVarDefStmt*> {});
+  astfri::FunctionDefStmt* get_distance_Func = statements.mk_function_def(
+    "get_distance",
+    {
+      statements.mk_param_var_def("a", types.mk_int(), nullptr),
+      statements.mk_param_var_def("c", types.mk_int(), nullptr)
+    },
+    types.mk_int(),
+    get_distance_body);
 
-        std::cout << "Koniec mainu" << std::endl;
+  // std::vector<astfri::ParamVarDefStmt *> params = {
+  //   statements.mk_param_var_def("a", types.mk_int(), nullptr),
+  //   statements.mk_param_var_def("b", types.mk_int(), nullptr)
+  // };
 
-    return 0;
+  // astfri::CompoundStmt* body = statements.mk_compound({
+  //   statements.mk_return(
+  //     expressions.mk_bin_on(
+  //       expressions.mk_param_var_ref("a"),
+  //       astfri::BinOpType::Add,
+  //       expressions.mk_param_var_ref("b")
+  //     )
+  //   )
+  // });
 
+  // astfri::FunctionDefStmt* func = statements.mk_function_def(
+  //   "add",
+  //   std::move(params),
+  //   types.mk_int(),
+  //   body
+  // );
 }
