@@ -1,8 +1,8 @@
 namespace jojoNamespace {
 
-    class JojoClass {
+    class AstClass {
         private:
-        const char* name = "jojo";
+        const char* name = "Name";
         public:
         int spocitaj(int a, int b) {
             return a + b;
