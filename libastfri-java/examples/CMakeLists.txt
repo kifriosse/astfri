@@ -8,3 +8,6 @@ target_link_libraries(ts-json PRIVATE tree-sitter tree-sitter-json)
 add_executable(ts-java java.cpp)
 target_compile_options(ts-java PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(ts-java PRIVATE libastfri-java)
+
+add_executable(example_ak main.cpp)
+target_link_libraries(example_ak PRIVATE astfri-java)
