@@ -1,11 +1,10 @@
-#include <iostream>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include "CodeVisitor.cpp"
 
 int main() {
 
-    std::cout << "Ahoj!" << std::endl;
+    CodeVisitor a;
+
+    std::cout << a.getA() << std::endl;
 
     auto& statements = astfri::StmtFactory::get_instance();
     auto& expressions = astfri::ExprFactory::get_instance();
