@@ -1,10 +1,3 @@
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(PROJECT_SOURCE_DIR /home/makuch/astfri)
-
-add_executable(example exampleFunction.cpp )
-
-
-
-target_include_directories(example PRIVATE ${PROJECT_SOURCE_DIR})
-target_link_libraries(example PRIVATE ${PROJECT_SOURCE_DIR}/libastfri-core.so)
+add_executable(example-serialize exampleFunction.cpp )
+target_compile_options(example-serialize PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(example-serialize PRIVATE astfri-core)

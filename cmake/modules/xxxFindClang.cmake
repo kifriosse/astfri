@@ -46,34 +46,6 @@ set(
     clangStaticAnalyzerCheckers
     clangStaticAnalyzerCore
     clangStaticAnalyzerFrontend
-    clangTidy
-    clangTidyAbseilModule
-    clangTidyAlteraModule
-    clangTidyAndroidModule
-    clangTidyBoostModule
-    clangTidyBugproneModule
-    clangTidyCERTModule
-    clangTidyConcurrencyModule
-    clangTidyCppCoreGuidelinesModule
-    clangTidyDarwinModule
-    clangTidyFuchsiaModule
-    clangTidyGoogleModule
-    clangTidyHICPPModule
-    clangTidyLLVMLibcModule
-    clangTidyLLVMModule
-    clangTidyLinuxKernelModule
-    clangTidyMPIModule
-    clangTidyMain
-    clangTidyMiscModule
-    clangTidyModernizeModule
-    clangTidyObjCModule
-    clangTidyOpenMPModule
-    clangTidyPerformanceModule
-    clangTidyPlugin
-    clangTidyPortabilityModule
-    clangTidyReadabilityModule
-    clangTidyUtils
-    clangTidyZirconModule
     clangTooling
     clangToolingASTDiff
     clangToolingCore
