@@ -6,7 +6,7 @@ project(
     astfri
     VERSION     0.0.1
     DESCRIPTION "Library for universal code representation."
-    LANGUAGES   CXX
+    LANGUAGES   C CXX
 )
 
 set(
