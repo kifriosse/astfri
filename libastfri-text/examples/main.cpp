@@ -1,71 +1,42 @@
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
-#include <libastfri/inc/Visitor.hpp>
-#include <iostream>
-
-// int add(int a, int b) {
-//   return a + b;
-// }
-
-struct CodeVisitor : astfri::VisitorAdapter
-{
-    void visit (astfri::FunctionDefStmt const& stmt) override
-    {
-        std::cout << "func " << stmt.name_ << "(";
-        for (astfri::ParamVarDefStmt* param : stmt.params_)
-        {
-            this->visit(*param);
-        }
-        std::cout << ") {\n";
-        this->visit(*stmt.body_);
-        std::cout << "}\n";
-    }
-
-    void visit (astfri::ParamVarDefStmt const& param) override
-    {
-        param.type_->accept(*this);
-        std::cout << " " << param.name_ << ", ";
-    }
-
-    void visit (astfri::IntType const& /*type*/) override
-    {
-        std::cout << "int";
-    }
-
-    void visit (astfri::CompoundStmt const& /*stmt*/) override
-    {
-        std::cout << "body\n";
-    }
-};
+#include "ClassVisitor.hpp"
 
 int main() {
-  auto& statements = astfri::StmtFactory::get_instance();
-  auto& expressions = astfri::ExprFactory::get_instance();
-  auto& types = astfri::TypeFactory::get_instance();
-
-  std::vector<astfri::ParamVarDefStmt *> params = {
-    statements.mk_param_var_def("a", types.mk_int(), nullptr),
-    statements.mk_param_var_def("b", types.mk_int(), nullptr)
+  astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
+  astfri::StmtFactory& statements = astfri::StmtFactory::get_instance();
+  astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
+  /*
+  class TestClass {
+  private:
+    int a;
+    int b = 1;
+    std::string s = "textik";
+  public:
+    TestClass(int cislo1, int cislo2 = 5) : a(cislo1), b(cislo2) {}
+    ~TestClass();
+    inline int getCislo() const { return a * b; }
+  }
+  */
+  astfri::ClassDefStmt* cds = statements.mk_class_def("TestClass", {}, {}, {});
+  std::vector<astfri::MemberVarDefStmt*> atributes{
+    statements.mk_member_var_def("a", types.mk_int(), nullptr),
+    statements.mk_member_var_def("b", types.mk_int(), expressions.mk_int_literal(1)),
+    statements.mk_member_var_def("s", types.mk_user("string"), expressions.mk_string_literal("textik"))
   };
-
-  astfri::CompoundStmt* body = statements.mk_compound({
-    statements.mk_return(
-      expressions.mk_bin_on(
-        expressions.mk_param_var_ref("a"),
-        astfri::BinOpType::Add,
-        expressions.mk_param_var_ref("b")
-      )
-    )
-  });
-
-  astfri::FunctionDefStmt* func = statements.mk_function_def(
-    "add",
-    std::move(params),
-    types.mk_int(),
-    body
-  );
-
-  CodeVisitor cv;
-  cv.visit(*func);
+  std::vector<astfri::ParamVarDefStmt*> constructorParams{
+    statements.mk_param_var_def("cislo1", types.mk_int(), nullptr),
+    statements.mk_param_var_def("cislo2", types.mk_int(), expressions.mk_int_literal(5))
+  };
+  std::vector<astfri::MethodDefStmt*> methods{
+    statements.mk_method_def(cds, statements.mk_function_def(cds->name_, constructorParams, types.mk_user(cds->name_), statements.mk_compound({
+        statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("a"), expressions.mk_param_var_ref("cislo1"))),
+        statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("b"), expressions.mk_param_var_ref("cislo2")))
+    }))),
+    statements.mk_method_def(cds, statements.mk_function_def("~TestClass", {}, types.mk_unknown(), {})),
+    statements.mk_method_def(cds, statements.mk_function_def("getCislo", {}, types.mk_int(), statements.mk_compound({
+      statements.mk_return(expressions.mk_bin_on(expressions.mk_member_var_ref("a"), astfri::BinOpType::Multiply, expressions.mk_member_var_ref("b")))
+    })))
+  };
+  cds = statements.mk_class_def(cds->name_, atributes, methods, {});
+  ClassVisitor cv;
+  cv.visit(*cds);
 }
