@@ -1,5 +1,5 @@
 #ifndef LIBASTFRI_EXPRESSION_HPP
-#    include <libastfri/inc/Expression.hpp>
+#    include <libastfri/inc/Expr.hpp>
 #endif
 
 namespace astfri
