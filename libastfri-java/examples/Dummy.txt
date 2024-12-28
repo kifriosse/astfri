@@ -1,0 +1,16 @@
+public class Dummy {
+
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    public boolean printout(boolean s) {
+        s = true;
+        return s;
+    }
+
+    public String printString(String s) {
+        return s;
+    }
+
+}
