@@ -1,7 +1,6 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
-#include <libastfri/inc/Visitor.hpp>
 #include <iostream>
 
 struct ClassVisitor : astfri::VisitorAdapter {

@@ -1,9 +1,13 @@
 #include "ClassVisitor.hpp"
+#include "TestVisitor.hpp"
 
 int main() {
+  
   astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
   astfri::StmtFactory& statements = astfri::StmtFactory::get_instance();
   astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
+  TestVisitor t;
+  expressions.mk_if(expressions.mk_bool_literal(true), expressions.mk_unknown(), expressions.mk_this())->accept(t);
   /*
   class TestClass {
   private:
@@ -38,5 +42,5 @@ int main() {
   };
   cds = statements.mk_class_def(cds->name_, atributes, methods, {});
   ClassVisitor cv;
-  cv.visit(*cds);
+  //cv.visit(*cds);
 }
