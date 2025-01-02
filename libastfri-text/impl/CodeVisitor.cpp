@@ -1,20 +1,5 @@
 #include "libastfri-text/inc/CodeVisitor.hpp"
 
-void CodeVisitor::visit(astfri::FloatLiteralExpr const& expr) {
-    this->vypisVyraz(std::to_string(expr.val_));
-    std::cout << "f";
-}
-
-void CodeVisitor::visit(astfri::CharLiteralExpr const& expr) {
-    this->vypisVyraz("'");
-    std::cout << expr.val_ << "'";
-}
-
-void CodeVisitor::visit(astfri::StringLiteralExpr const& expr) {
-    this->vypisVyraz("\"");
-    std::cout << expr.val_ << "\"";
-}
-
 void CodeVisitor::visit(astfri::IfExpr const& expr) {
     this->vypisVyraz("if (");
     if (expr.cond_) {
@@ -41,18 +26,18 @@ void CodeVisitor::visit(astfri::BinOpExpr const& expr) {
     if (expr.left_ && expr.right_) {
         expr.left_->accept(*this);
         switch (expr.op_) {
-            case astfri::BinOpType::Add: std::cout << " + "; break;
-            case astfri::BinOpType::Assign: std::cout << " = "; break;
-            case astfri::BinOpType::Divide: std::cout << " / "; break;
-            case astfri::BinOpType::Equal: std::cout << " == "; break;
-            case astfri::BinOpType::GreaterEqual: std::cout << " >= "; break;
-            case astfri::BinOpType::Greater: std::cout << " > "; break;
-            case astfri::BinOpType::LessEqual: std::cout << " <= "; break;
-            case astfri::BinOpType::Less: std::cout << " < "; break;
-            case astfri::BinOpType::NotEqual: std::cout << " != "; break;
-            case astfri::BinOpType::Modulo: std::cout << " % "; break;
-            case astfri::BinOpType::Subtract: std::cout << " - "; break;
-            case astfri::BinOpType::Multiply: std::cout << " * "; break;
+            case astfri::BinOpType::Add: this->output_->append(" + "); break;
+            case astfri::BinOpType::Assign: this->output_->append(" = "); break;
+            case astfri::BinOpType::Divide: this->output_->append(" / "); break;
+            case astfri::BinOpType::Equal: this->output_->append(" == "); break;
+            case astfri::BinOpType::GreaterEqual: this->output_->append(" >= "); break;
+            case astfri::BinOpType::Greater: this->output_->append(" > "); break;
+            case astfri::BinOpType::LessEqual: this->output_->append(" <= "); break;
+            case astfri::BinOpType::Less: this->output_->append(" < "); break;
+            case astfri::BinOpType::NotEqual: this->output_->append(" != "); break;
+            case astfri::BinOpType::Modulo: this->output_->append(" % "); break;
+            case astfri::BinOpType::Subtract: this->output_->append(" - "); break;
+            case astfri::BinOpType::Multiply: this->output_->append(" * "); break;
         }
         expr.right_->accept(*this);
     }
@@ -75,7 +60,7 @@ void CodeVisitor::visit(astfri::UnaryOpExpr const& expr) {
 void CodeVisitor::visit(astfri::AssignExpr const& expr) {
     if (expr.lhs_ && expr.rhs_) {
         expr.lhs_->accept(*this);
-        std::cout << " = ";
+        this->output_->append(" = ");
         expr.rhs_->accept(*this);
     }
 }
@@ -86,45 +71,45 @@ void CodeVisitor::visit(astfri::CompoundAssignExpr const& expr) {
     }
     expr.lhs_->accept(*this);
     switch (expr.op_) {
-        case astfri::BinOpType::Add: std::cout << " += "; break;
-        case astfri::BinOpType::Divide: std::cout << " /= "; break;
-        case astfri::BinOpType::Modulo: std::cout << " %= "; break;
-        case astfri::BinOpType::Subtract: std::cout << " -= "; break;
-        case astfri::BinOpType::Multiply: std::cout << " *= "; break;
-        default: std::cout << " "; break;
+        case astfri::BinOpType::Add: this->output_->append(" += "); break;
+        case astfri::BinOpType::Divide: this->output_->append(" /= "); break;
+        case astfri::BinOpType::Modulo: this->output_->append(" %= "); break;
+        case astfri::BinOpType::Subtract: this->output_->append(" -= "); break;
+        case astfri::BinOpType::Multiply: this->output_->append(" *= "); break;
+        default: this->output_->append(" "); break;
     }
     expr.rhs_->accept(*this);
 }
 
 void CodeVisitor::visit(astfri::FunctionCallExpr const& expr) {
     this->vypisVyraz(expr.name_);
-    std::cout << "(";
+    this->output_->append("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
             expr.args_.at(i)->accept(*this);
             if (i < expr.args_.size() - 1) {
-                std::cout << ", ";
+                this->output_->append(", ");
             }
         }
     }
-    std::cout << ")";
+    this->output_->append(")");
 }
 
 void CodeVisitor::visit(astfri::MethodCallExpr const& expr) {
     if (expr.owner_) {
         expr.owner_->accept(*this);
-        std::cout << "::";
+        this->output_->append("::");
     }
     this->vypisVyraz(expr.name_ + "(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
             expr.args_.at(i)->accept(*this);
             if (i < expr.args_.size() - 1) {
-                std::cout << ", ";
+                this->output_->append(", ");
             }
         }
     }
-    std::cout << ")";
+    this->output_->append(")");
 }
 
 void CodeVisitor::visit(astfri::LambdaExpr const& expr) {
@@ -133,7 +118,7 @@ void CodeVisitor::visit(astfri::LambdaExpr const& expr) {
         if (expr.params_.at(i)) {
             expr.params_.at(i)->accept(*this);
             if (i < expr.params_.size() - 1) {
-                std::cout << ", ";
+                this->output_->append(", ");
             }
         }
     }
@@ -272,15 +257,15 @@ void CodeVisitor::visit(astfri::DoWhileStmt const& stmt) {
     }
     this->vypisVyraz("} while (");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    std::cout << ")";
+    this->output_->append(")");
 }
 
 void CodeVisitor::visit(astfri::ForStmt const& stmt) {
     this->vypisVyraz("for (");
     stmt.init_ ? stmt.init_->accept(*this) : void();
-    std::cout << "; ";
+    this->output_->append("; ");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    std::cout << "; ";
+    this->output_->append("; ");
     stmt.step_ ? stmt.step_->accept(*this) : void();
     this->vypisVyraz(") {\n", true);
     if (stmt.body_) {
@@ -302,9 +287,9 @@ void CodeVisitor::visit(astfri::ThrowStmt const& stmt) {
 void CodeVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        std::cout << " " << stmt.name_;
+        this->output_->append(" " + stmt.name_);
         if (stmt.initializer_) {
-            std::cout << " = ";
+            this->output_->append(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -313,9 +298,9 @@ void CodeVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
 void CodeVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        std::cout << " " << stmt.name_;
+        this->output_->append(" " + stmt.name_);
         if (stmt.initializer_) {
-            std::cout << " = ";
+            this->output_->append(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -324,9 +309,9 @@ void CodeVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
 void CodeVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        std::cout << " " << stmt.name_;
+        this->output_->append(" " + stmt.name_);
         if (stmt.initializer_) {
-            std::cout << " = ";
+            this->output_->append(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -335,9 +320,9 @@ void CodeVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
 void CodeVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        std::cout << " " << stmt.name_;
+        this->output_->append(" " + stmt.name_);
         if (stmt.initializer_) {
-            std::cout << " = ";
+            this->output_->append(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -348,12 +333,12 @@ void CodeVisitor::visit(astfri::FunctionDefStmt const& stmt) {
         return;
     }
     stmt.retType_->accept(*this);
-    std::cout << " " << stmt.name_ << "(";
+    this->output_->append(" " + stmt.name_ + "(");
     for (size_t i = 0; i < stmt.params_.size(); ++i) {
         if (stmt.params_.at(i)) {
             stmt.params_.at(i)->accept(*this);
             if (i < stmt.params_.size() - 1) {
-                std::cout << ", ";
+                this->output_->append(", ");
             }
         }
     }
@@ -372,12 +357,12 @@ void CodeVisitor::visit(astfri::MethodDefStmt const& stmt) {
         return;
     }
     stmt.func_->retType_->accept(*this);
-    std::cout << " " << stmt.owner_->name_ << "::" << stmt.func_->name_ << "(";
+    this->output_->append(" " + stmt.owner_->name_ + "::" + stmt.func_->name_ + "(");
     for (size_t i = 0; i < stmt.func_->params_.size(); ++i) {
         if (stmt.func_->params_.at(i)) {
             stmt.func_->params_.at(i)->accept(*this);
             if (i < stmt.func_->params_.size() - 1) {
-                std::cout << ", ";
+                this->output_->append(", ");
             }
         }
     }
@@ -396,9 +381,9 @@ void CodeVisitor::visit(astfri::ClassDefStmt const& stmt) {
         this->vypisVyraz("<");
         for (size_t i = 0; i < stmt.tparams_.size(); ++i) {
             if (stmt.tparams_.at(i)) {
-                std::cout << stmt.tparams_.at(i)->name_ << " : " << stmt.tparams_.at(i)->constraint_;
+                this->vypisVyraz(stmt.tparams_.at(i)->name_ + " : " + stmt.tparams_.at(i)->constraint_);
                 if (i < stmt.tparams_.size() - 1) {
-                    std::cout << ", ";
+                    this->output_->append(", ");
                 }
             }
         }

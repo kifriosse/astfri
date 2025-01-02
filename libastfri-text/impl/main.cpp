@@ -1,8 +1,32 @@
 #include "CodeVisitor.cpp"
-#include "CodeLoader.cpp"
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+
+void vypis(std::string*& output) {
+    std::string userInput;
+    std::cout << "Pre výpis do súboru zadaj \"yes\" , inak sa vypíše do konzoly: ";
+    std::getline(std::cin, userInput);
+    if (userInput == "yes") {
+        namespace fs = std::filesystem;
+        std::cout << "Zadaj názov súboru bez prípony: ";
+        std::getline(std::cin, userInput);
+        userInput.append(".txt");
+        fs::path cestaKAstfri_text = fs::current_path().parent_path().parent_path().parent_path() / "libastfri-text" / "impl" / userInput;
+        std::ofstream file(cestaKAstfri_text);
+        if (file) {
+            file << *output;
+            std::cout << "Zápis prebehol úspešne!\n";
+        }
+        file.close();
+    } else {
+        std::cout << *output;
+    }
+}
 
 int main() {
-    CodeVisitor cv;
+    std::string* basicOutput = new std::string();
+    CodeVisitor cv(basicOutput);
 
     /*{ // priestor pre testovanie
         astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
@@ -23,7 +47,7 @@ int main() {
         statements.mk_class_def("krj", {}, {}, {{}, {}})->accept(cv);
     }*/
 
-    /*{ // priklad s jednoduchou triedou
+    { // priklad s jednoduchou triedou
         //class TestClass {
         //private:
         //    int a;
@@ -59,11 +83,13 @@ int main() {
         };
         cds = statements.mk_class_def(cds->name_, atributes, methods, {});
         cds->accept(cv);
-    }*/
+    }
 
     /*{ // priklad s komplexnejsiou triedou s pouzitim TU
         // treba navrhnut zlozitejsi vstupny kod
         astfri::TranslationUnit inputCode{{}, {}, {}};
         cv.visit(inputCode);
     }*/
+
+    vypis(basicOutput);
 }

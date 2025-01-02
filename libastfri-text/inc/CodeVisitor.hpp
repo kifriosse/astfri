@@ -1,13 +1,14 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
-#include <iostream>
 
 struct CodeVisitor : astfri::IVisitor {
 private:
     int aktualnyStupenOdsadenia_ = 0;
     bool zacatyRiadok_ = false;
+    std::string*& output_;
 public:
+    inline CodeVisitor(std::string*& output) : output_(output) {};
     void visit(astfri::TranslationUnit const& stmt) override;
 private:
     inline void visit(astfri::DynamicType const& /*type*/) override { this->vypisVyraz("dynamic"); }
@@ -21,9 +22,9 @@ private:
     inline void visit(astfri::UnknownType const& /*type*/) override { this->vypisVyraz("UNKNOWN_TYPE"); }
 
     inline void visit(astfri::IntLiteralExpr const& expr) override { this->vypisVyraz(std::to_string(expr.val_)); }
-    void visit(astfri::FloatLiteralExpr const& expr) override;
-    void visit(astfri::CharLiteralExpr const& expr) override;
-    void visit(astfri::StringLiteralExpr const& expr) override;
+    inline void visit(astfri::FloatLiteralExpr const& expr) override { this->vypisVyraz(std::to_string(expr.val_) + "f"); }
+    inline void visit(astfri::CharLiteralExpr const& expr) override { this->vypisVyraz("'" + std::to_string(expr.val_) + "'"); }
+    inline void visit(astfri::StringLiteralExpr const& expr) override { this->vypisVyraz("\"" + expr.val_ + "\""); }
     inline void visit(astfri::BoolLiteralExpr const& expr) override { expr.val_ ? this->vypisVyraz("true") : this->vypisVyraz("false"); }
     inline void visit(astfri::NullLiteralExpr const& /*expr*/) override { this->vypisVyraz("NULL"); }
     void visit(astfri::IfExpr const& expr) override;
@@ -62,17 +63,15 @@ private:
 private:
     inline void odsad() {
         for (int i = 0; i < this->aktualnyStupenOdsadenia_; ++i) {
-            std::cout << "    ";
+            this->output_->append("    ");
             this->zacatyRiadok_ = true;
         }
     }
     inline void vypisVyraz(const std::string& s, bool mamNovyRiadok = false) {
-        if (this->zacatyRiadok_) {
-            std::cout << s;
-        } else {
+        if (!this->zacatyRiadok_) {
             this->odsad();
-            std::cout << s;
-        }
+        } 
+        this->output_->append(s);
         if (mamNovyRiadok) {
             this->zacatyRiadok_ = false;
         }
