@@ -1,49 +1,46 @@
-#include "CodeVisitor.cpp"
+#include "ClassVisitor.hpp"
+#include "TestVisitor.hpp"
 
 int main() {
-
-    CodeVisitor a;
-
-    std::cout << a.getA() << std::endl;
-
-    auto& statements = astfri::StmtFactory::get_instance();
-    auto& expressions = astfri::ExprFactory::get_instance();
-    auto& types = astfri::TypeFactory::get_instance();
-
-    // int add(int a, int b) {
-    //   return a + b;
-    // }
-    std::vector<astfri::ParamVarDefStmt *> params = {
-        statements.mk_param_var_def("a", types.mk_int(), nullptr),
-        statements.mk_param_var_def("b", types.mk_int(), nullptr)
-    };
-    astfri::CompoundStmt* body = statements.mk_compound({
-        statements.mk_return(
-            expressions.mk_bin_on(expressions.mk_param_var_ref("a"), astfri::BinOpType::Add, expressions.mk_param_var_ref("b"))
-        )
-    });
-    astfri::FunctionDefStmt* func = statements.mk_function_def("add", std::move(params), types.mk_int(), body);
-
-
-    // void cyklus(int cislo) {
-    //     for (int i = 0; i < 5; ++i) {
-    //         std::cout << i + cislo << std::endl;
-    //     }
-    // }
-    std::vector<astfri::ParamVarDefStmt *> parametre = { statements.mk_param_var_def("cislo", types.mk_int(), nullptr) }; // params fcie
-
-    astfri::CompoundStmt* telo = statements.mk_compound({ //telo fcie cyklus
-        statements.mk_for( // vytvori for cyklus
-            statements.mk_local_var_def("i", types.mk_int(), expressions.mk_int_literal(0)), // int i = 0
-            expressions.mk_bin_on(expressions.mk_local_var_ref("i"), astfri::BinOpType::Less, expressions.mk_int_literal(5)), // i < 5
-            statements.mk_expr(expressions.mk_bin_on(expressions.mk_local_var_ref("i"), astfri::BinOpType::Add, expressions.mk_int_literal(1))), // i++
-            statements.mk_compound({
-                statements.mk_expr( // i + cislo      ako spravit cout?
-                    expressions.mk_bin_on(expressions.mk_local_var_ref("i"), astfri::BinOpType::Add, expressions.mk_param_var_ref("cislo"))
-                )
-            })
-        )
-    });
-
-    astfri::FunctionDefStmt* funkcia = statements.mk_function_def("cyklus", std::move(parametre), types.mk_void(), telo); // definicia fcie
+  
+  astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
+  astfri::StmtFactory& statements = astfri::StmtFactory::get_instance();
+  astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
+  TestVisitor t;
+  expressions.mk_if(expressions.mk_bool_literal(true), expressions.mk_unknown(), expressions.mk_this())->accept(t);
+  /*
+  class TestClass {
+  private:
+    int a;
+    int b = 1;
+    std::string s = "textik";
+  public:
+    TestClass(int cislo1, int cislo2 = 5) : a(cislo1), b(cislo2) {}
+    ~TestClass();
+    inline int getCislo() const { return a * b; }
+  }
+  */
+  astfri::ClassDefStmt* cds = statements.mk_class_def("TestClass", {}, {}, {});
+  std::vector<astfri::MemberVarDefStmt*> atributes{
+    statements.mk_member_var_def("a", types.mk_int(), nullptr),
+    statements.mk_member_var_def("b", types.mk_int(), expressions.mk_int_literal(1)),
+    statements.mk_member_var_def("s", types.mk_user("string"), expressions.mk_string_literal("textik"))
+  };
+  std::vector<astfri::ParamVarDefStmt*> constructorParams{
+    statements.mk_param_var_def("cislo1", types.mk_int(), nullptr),
+    statements.mk_param_var_def("cislo2", types.mk_int(), expressions.mk_int_literal(5))
+  };
+  std::vector<astfri::MethodDefStmt*> methods{
+    statements.mk_method_def(cds, statements.mk_function_def(cds->name_, constructorParams, types.mk_user(cds->name_), statements.mk_compound({
+        statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("a"), expressions.mk_param_var_ref("cislo1"))),
+        statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("b"), expressions.mk_param_var_ref("cislo2")))
+    }))),
+    statements.mk_method_def(cds, statements.mk_function_def("~TestClass", {}, types.mk_unknown(), {})),
+    statements.mk_method_def(cds, statements.mk_function_def("getCislo", {}, types.mk_int(), statements.mk_compound({
+      statements.mk_return(expressions.mk_bin_on(expressions.mk_member_var_ref("a"), astfri::BinOpType::Multiply, expressions.mk_member_var_ref("b")))
+    })))
+  };
+  cds = statements.mk_class_def(cds->name_, atributes, methods, {});
+  ClassVisitor cv;
+  //cv.visit(*cds);
 }

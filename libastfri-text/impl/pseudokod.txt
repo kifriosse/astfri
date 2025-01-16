@@ -1,0 +1,22 @@
+class TestClass {
+private:
+    int a
+    int b = 1
+    string s = "textik"
+public:
+    TestClass(int cislo1, int cislo2 = 5)
+    ~TestClass()
+    int getCislo()
+}
+
+TestClass TestClass::TestClass(int cislo1, int cislo2 = 5) {
+    a = cislo1
+    b = cislo2
+}
+
+void TestClass::~TestClass() {
+}
+
+int TestClass::getCislo() {
+    return a * b
+}
