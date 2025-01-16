@@ -148,14 +148,14 @@ int main() {
   std::cout << result << std::endl;
   std::cout << ts_node_type(ts_tree_cursor_current_node(&cursor)) << std::endl;
 
-auto& exprFactory = astfri::ExprFactory::get_instance();
-auto& stmtFactory = astfri::StmtFactory::get_instance();
-auto& typeFactory = astfri::TypeFactory::get_instance();
+  auto& exprFactory = astfri::ExprFactory::get_instance();
+  auto& stmtFactory = astfri::StmtFactory::get_instance();
+  auto& typeFactory = astfri::TypeFactory::get_instance();
 
-std::vector<astfri::FunctionDefStmt*> functions;
-std::vector<astfri::ParamVarDefStmt*> params;
+  std::vector<astfri::FunctionDefStmt*> functions;
+  std::vector<astfri::ParamVarDefStmt*> params;
 
-for (ulong i = 0; i < named_nodes.size(); i++) {
+  for (ulong i = 0; i < named_nodes.size(); i++) {
     if (ts_node_child_count(nodes[i]) > 0) {
         Tree_Sitter_Node node;
         node.node = nodes[i];
@@ -163,15 +163,15 @@ for (ulong i = 0; i < named_nodes.size(); i++) {
         
         // Get child nodes and filter out "modifiers" if present
         std::vector<TSNode> children = get_nodes(nodes[i]);
-        if (ts_node_type(children[0]) == "modifiers") {
+        if (std::string_view(ts_node_type(children[0])) == "modifiers") { // string_view
             children.erase(children.begin());
         }
 
-        auto function_return_type = typeFactory.mk_void();
+        astfri::Type* function_return_type = typeFactory.mk_void();
         
         // Check if the node is a method declaration
         if (node.type == "method_declaration") {
-            if (ts_node_type(children[0]) == "integral_type") {
+            if (std::string_view(ts_node_type(children[0])) == "integral_type") {
                 function_return_type = typeFactory.mk_int();
             }
 
@@ -191,8 +191,8 @@ for (ulong i = 0; i < named_nodes.size(); i++) {
                 param_node.type = ts_node_type(param);
                 param_node.children = get_named_nodes(param);
 
-                int* param_type = nullptr;
-                if (ts_node_type(param_node.children[0]) == "integral_type") {
+                astfri::Type* param_type = nullptr;
+                if (std::string_view(ts_node_type(param_node.children[0])) == "integral_type") {
                     param_type = typeFactory.mk_int();
                 }
 
@@ -209,10 +209,11 @@ for (ulong i = 0; i < named_nodes.size(); i++) {
             body_node.type = ts_node_type(children[3]);
             body_node.children = get_named_nodes(children[3]);
 
-            auto body = stmtFactory.mk_compound({
-                stmtFactory.mk_return(stmtFactory.mk_expr(
-                    exprFactory.mk_bin_on(params[0], astfri::BinOpType::Add, params[1])
-                ))
+            astfri::ParamVarRefExpr* param1 = exprFactory.mk_param_var_ref("a");
+            astfri::ParamVarRefExpr* param2 = exprFactory.mk_param_var_ref("b");
+
+            auto body = stmtFactory.mk_compound(std::vector<astfri::Stmt*>{
+              stmtFactory.mk_expr(exprFactory.mk_bin_on(param1, astfri::BinOpType::Add, param2))
             });
 
             auto function = stmtFactory.mk_function_def(function_name, params, function_return_type, body);
