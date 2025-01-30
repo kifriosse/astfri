@@ -1,43 +1,43 @@
 #include "libastfri-text/inc/CodeVisitor.hpp"
 
 void CodeVisitor::visit(astfri::IfExpr const& expr) {
-    this->vypisVyraz("if (");
+    exp_->write_word("if (");
     if (expr.cond_) {
         expr.cond_->accept(*this);
     }
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (expr.iftrue_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         expr.iftrue_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("} else {\n", true);
+    exp_->write_word("} else {\n", true);
     if (expr.iffalse_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         expr.iffalse_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::BinOpExpr const& expr) {
     if (expr.left_ && expr.right_) {
         expr.left_->accept(*this);
         switch (expr.op_) {
-            case astfri::BinOpType::Add: this->output_->append(" + "); break;
-            case astfri::BinOpType::Assign: this->output_->append(" = "); break;
-            case astfri::BinOpType::Divide: this->output_->append(" / "); break;
-            case astfri::BinOpType::Equal: this->output_->append(" == "); break;
-            case astfri::BinOpType::GreaterEqual: this->output_->append(" >= "); break;
-            case astfri::BinOpType::Greater: this->output_->append(" > "); break;
-            case astfri::BinOpType::LessEqual: this->output_->append(" <= "); break;
-            case astfri::BinOpType::Less: this->output_->append(" < "); break;
-            case astfri::BinOpType::NotEqual: this->output_->append(" != "); break;
-            case astfri::BinOpType::Modulo: this->output_->append(" % "); break;
-            case astfri::BinOpType::Subtract: this->output_->append(" - "); break;
-            case astfri::BinOpType::Multiply: this->output_->append(" * "); break;
+            case astfri::BinOpType::Add: exp_->write_word(" + "); break;
+            case astfri::BinOpType::Assign: exp_->write_word(" = "); break;
+            case astfri::BinOpType::Divide: exp_->write_word(" / "); break;
+            case astfri::BinOpType::Equal: exp_->write_word(" == "); break;
+            case astfri::BinOpType::GreaterEqual: exp_->write_word(" >= "); break;
+            case astfri::BinOpType::Greater: exp_->write_word(" > "); break;
+            case astfri::BinOpType::LessEqual: exp_->write_word(" <= "); break;
+            case astfri::BinOpType::Less: exp_->write_word(" < "); break;
+            case astfri::BinOpType::NotEqual: exp_->write_word(" != "); break;
+            case astfri::BinOpType::Modulo: exp_->write_word(" % "); break;
+            case astfri::BinOpType::Subtract: exp_->write_word(" - "); break;
+            case astfri::BinOpType::Multiply: exp_->write_word(" * "); break;
         }
         expr.right_->accept(*this);
     }
@@ -48,11 +48,11 @@ void CodeVisitor::visit(astfri::UnaryOpExpr const& expr) {
         return;
     }
     switch (expr.op_) {
-        case astfri::UnaryOpType::AddressOf: this->vypisVyraz("&"); break;
-        case astfri::UnaryOpType::Dereference: this->vypisVyraz("*"); break;
-        case astfri::UnaryOpType::LogicalNot: this->vypisVyraz("!"); break;
-        case astfri::UnaryOpType::Minus: this->vypisVyraz("-"); break;
-        case astfri::UnaryOpType::Plus: this->vypisVyraz("+"); break;
+        case astfri::UnaryOpType::AddressOf: exp_->write_word("&"); break;
+        case astfri::UnaryOpType::Dereference: exp_->write_word("*"); break;
+        case astfri::UnaryOpType::LogicalNot: exp_->write_word("!"); break;
+        case astfri::UnaryOpType::Minus: exp_->write_word("-"); break;
+        case astfri::UnaryOpType::Plus: exp_->write_word("+"); break;
     }
     expr.arg_->accept(*this);
 }
@@ -60,7 +60,7 @@ void CodeVisitor::visit(astfri::UnaryOpExpr const& expr) {
 void CodeVisitor::visit(astfri::AssignExpr const& expr) {
     if (expr.lhs_ && expr.rhs_) {
         expr.lhs_->accept(*this);
-        this->output_->append(" = ");
+        exp_->write_word(" = ");
         expr.rhs_->accept(*this);
     }
 }
@@ -71,65 +71,65 @@ void CodeVisitor::visit(astfri::CompoundAssignExpr const& expr) {
     }
     expr.lhs_->accept(*this);
     switch (expr.op_) {
-        case astfri::BinOpType::Add: this->output_->append(" += "); break;
-        case astfri::BinOpType::Divide: this->output_->append(" /= "); break;
-        case astfri::BinOpType::Modulo: this->output_->append(" %= "); break;
-        case astfri::BinOpType::Subtract: this->output_->append(" -= "); break;
-        case astfri::BinOpType::Multiply: this->output_->append(" *= "); break;
-        default: this->output_->append(" "); break;
+        case astfri::BinOpType::Add: exp_->write_word(" += "); break;
+        case astfri::BinOpType::Divide: exp_->write_word(" /= "); break;
+        case astfri::BinOpType::Modulo: exp_->write_word(" %= "); break;
+        case astfri::BinOpType::Subtract: exp_->write_word(" -= "); break;
+        case astfri::BinOpType::Multiply: exp_->write_word(" *= "); break;
+        default: exp_->write_word(" "); break;
     }
     expr.rhs_->accept(*this);
 }
 
 void CodeVisitor::visit(astfri::FunctionCallExpr const& expr) {
-    this->vypisVyraz(expr.name_);
-    this->output_->append("(");
+    exp_->write_word(expr.name_);
+    exp_->write_word("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
             expr.args_.at(i)->accept(*this);
             if (i < expr.args_.size() - 1) {
-                this->output_->append(", ");
+                exp_->write_word(", ");
             }
         }
     }
-    this->output_->append(")");
+    exp_->write_word(")");
 }
 
 void CodeVisitor::visit(astfri::MethodCallExpr const& expr) {
     if (expr.owner_) {
         expr.owner_->accept(*this);
-        this->output_->append("::");
+        exp_->write_word("::");
     }
-    this->vypisVyraz(expr.name_ + "(");
+    exp_->write_word(expr.name_ + "(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
             expr.args_.at(i)->accept(*this);
             if (i < expr.args_.size() - 1) {
-                this->output_->append(", ");
+                exp_->write_word(", ");
             }
         }
     }
-    this->output_->append(")");
+    exp_->write_word(")");
 }
 
 void CodeVisitor::visit(astfri::LambdaExpr const& expr) {
-    this->vypisVyraz("(");
+    exp_->write_word("(");
     for (size_t i = 0; i < expr.params_.size(); ++i) {
         if (expr.params_.at(i)) {
             expr.params_.at(i)->accept(*this);
             if (i < expr.params_.size() - 1) {
-                this->output_->append(", ");
+                exp_->write_word(", ");
             }
         }
     }
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (expr.body_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         expr.body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::TranslationUnit const& stmt) {
@@ -137,24 +137,24 @@ void CodeVisitor::visit(astfri::TranslationUnit const& stmt) {
     for (auto a : stmt.globals_) {
         if (a) {
             a->accept(*this);
-            this->vypisVyraz("\n", true);
+            exp_->write_word("\n", true);
             predch = true;
         }
     }
     for (auto a : stmt.functions_) {
         if (a) {
             if (predch) {
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
             }
             a->accept(*this);
-            this->vypisVyraz("\n", true);
+            exp_->write_word("\n", true);
             predch = true;
         }
     }
     for (auto a : stmt.classes_) {
         if (a) {
             if (predch) {
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
             }
             a->accept(*this);
             predch = true;
@@ -167,7 +167,7 @@ void CodeVisitor::visit(astfri::CompoundStmt const& stmt) {
         if (stmt.stmts_.at(i)) {
             stmt.stmts_.at(i)->accept(*this);
             if (i < stmt.stmts_.size() - 1) {
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
             }
         }
     }
@@ -175,111 +175,111 @@ void CodeVisitor::visit(astfri::CompoundStmt const& stmt) {
 
 void CodeVisitor::visit(astfri::ReturnStmt const& stmt) {
     if (stmt.val_) {
-        this->vypisVyraz("return ");
+        exp_->write_word("return ");
         stmt.val_->accept(*this);
     }
 }
 
 void CodeVisitor::visit(astfri::IfStmt const& stmt) {
-    this->vypisVyraz("if (");
+    exp_->write_word("if (");
     if (stmt.cond_) {
         stmt.cond_->accept(*this);
     }
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (stmt.iftrue_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.iftrue_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("} else {\n", true);
+    exp_->write_word("} else {\n", true);
     if (stmt.iffalse_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.iffalse_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::CaseStmt const& stmt) {
-    this->vypisVyraz("case ");
+    exp_->write_word("case ");
     if (stmt.expr_) {
         stmt.expr_->accept(*this);
     }
-    this->vypisVyraz(":");
+    exp_->write_word(":");
     if (stmt.body_) {
-        this->vypisVyraz("\n", true);
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->write_word("\n", true);
+        exp_->increase_indentation();
         stmt.body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
+        exp_->decrease_indentation();
     }
 }
 
 void CodeVisitor::visit(astfri::SwitchStmt const& stmt) {
-    this->vypisVyraz("switch (");
+    exp_->write_word("switch (");
     stmt.expr_ ? stmt.expr_->accept(*this) : void();
-    this->vypisVyraz(") {\n", true);
-    ++this->aktualnyStupenOdsadenia_;
+    exp_->write_word(") {\n", true);
+    exp_->increase_indentation();
     for (size_t i = 0; i < stmt.cases_.size(); ++i) {
         if (stmt.cases_.at(i)) {
             stmt.cases_.at(i)->accept(*this);
             if (i < stmt.cases_.size() - 1) {
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
             }
         }
     }
-    --this->aktualnyStupenOdsadenia_;
-    this->vypisVyraz("\n", true);
-    this->vypisVyraz("}");
+    exp_->decrease_indentation();
+    exp_->write_word("\n", true);
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::WhileStmt const& stmt) {
-    this->vypisVyraz("while (");
+    exp_->write_word("while (");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (stmt.body_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::DoWhileStmt const& stmt) {
-    this->vypisVyraz("do {\n", true);
+    exp_->write_word("do {\n", true);
     if (stmt.body_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("} while (");
+    exp_->write_word("} while (");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    this->output_->append(")");
+    exp_->write_word(")");
 }
 
 void CodeVisitor::visit(astfri::ForStmt const& stmt) {
-    this->vypisVyraz("for (");
+    exp_->write_word("for (");
     stmt.init_ ? stmt.init_->accept(*this) : void();
-    this->output_->append("; ");
+    exp_->write_word("; ");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    this->output_->append("; ");
+    exp_->write_word("; ");
     stmt.step_ ? stmt.step_->accept(*this) : void();
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (stmt.body_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::ThrowStmt const& stmt) {
     if (stmt.val_) {
-        this->vypisVyraz("throw ");
+        exp_->write_word("throw ");
         stmt.val_->accept(*this);
     }
 }
@@ -287,9 +287,9 @@ void CodeVisitor::visit(astfri::ThrowStmt const& stmt) {
 void CodeVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        this->output_->append(" " + stmt.name_);
+        exp_->write_word(" " + stmt.name_);
         if (stmt.initializer_) {
-            this->output_->append(" = ");
+            exp_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -298,9 +298,9 @@ void CodeVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
 void CodeVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        this->output_->append(" " + stmt.name_);
+        exp_->write_word(" " + stmt.name_);
         if (stmt.initializer_) {
-            this->output_->append(" = ");
+            exp_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -309,9 +309,9 @@ void CodeVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
 void CodeVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        this->output_->append(" " + stmt.name_);
+        exp_->write_word(" " + stmt.name_);
         if (stmt.initializer_) {
-            this->output_->append(" = ");
+            exp_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -320,9 +320,9 @@ void CodeVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
 void CodeVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        this->output_->append(" " + stmt.name_);
+        exp_->write_word(" " + stmt.name_);
         if (stmt.initializer_) {
-            this->output_->append(" = ");
+            exp_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -333,23 +333,23 @@ void CodeVisitor::visit(astfri::FunctionDefStmt const& stmt) {
         return;
     }
     stmt.retType_->accept(*this);
-    this->output_->append(" " + stmt.name_ + "(");
+    exp_->write_word(" " + stmt.name_ + "(");
     for (size_t i = 0; i < stmt.params_.size(); ++i) {
         if (stmt.params_.at(i)) {
             stmt.params_.at(i)->accept(*this);
             if (i < stmt.params_.size() - 1) {
-                this->output_->append(", ");
+                exp_->write_word(", ");
             }
         }
     }
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (stmt.body_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::MethodDefStmt const& stmt) {
@@ -357,82 +357,82 @@ void CodeVisitor::visit(astfri::MethodDefStmt const& stmt) {
         return;
     }
     stmt.func_->retType_->accept(*this);
-    this->output_->append(" " + stmt.owner_->name_ + "::" + stmt.func_->name_ + "(");
+    exp_->write_word(" " + stmt.owner_->name_ + "::" + stmt.func_->name_ + "(");
     for (size_t i = 0; i < stmt.func_->params_.size(); ++i) {
         if (stmt.func_->params_.at(i)) {
             stmt.func_->params_.at(i)->accept(*this);
             if (i < stmt.func_->params_.size() - 1) {
-                this->output_->append(", ");
+                exp_->write_word(", ");
             }
         }
     }
-    this->vypisVyraz(") {\n", true);
+    exp_->write_word(") {\n", true);
     if (stmt.func_->body_) {
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->increase_indentation();
         stmt.func_->body_->accept(*this);
-        --this->aktualnyStupenOdsadenia_;
-        this->vypisVyraz("\n", true);
+        exp_->decrease_indentation();
+        exp_->write_word("\n", true);
     }
-    this->vypisVyraz("}");
+    exp_->write_word("}");
 }
 
 void CodeVisitor::visit(astfri::ClassDefStmt const& stmt) {
     if (!stmt.tparams_.empty()) {
-        this->vypisVyraz("<");
+        exp_->write_word("<");
         for (size_t i = 0; i < stmt.tparams_.size(); ++i) {
             if (stmt.tparams_.at(i)) {
-                this->vypisVyraz(stmt.tparams_.at(i)->name_ + " : " + stmt.tparams_.at(i)->constraint_);
+                exp_->write_word(stmt.tparams_.at(i)->name_ + " : " + stmt.tparams_.at(i)->constraint_);
                 if (i < stmt.tparams_.size() - 1) {
-                    this->output_->append(", ");
+                    exp_->write_word(", ");
                 }
             }
         }
-        this->vypisVyraz(">\n", true);
+        exp_->write_word(">\n", true);
     }
-    this->vypisVyraz("class " + stmt.name_ + " {\n", true);
+    exp_->write_word("class " + stmt.name_ + " {\n", true);
     if (!stmt.vars_.empty()) {
-        this->vypisVyraz("private:\n", true);
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->write_word("private:\n", true);
+        exp_->increase_indentation();
         for (size_t i = 0; i < stmt.vars_.size(); ++i) {
             if (stmt.vars_.at(i)) {
                 stmt.vars_.at(i)->accept(*this);
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
             }
         }
-        --this->aktualnyStupenOdsadenia_;
+        exp_->decrease_indentation();
     }
     if (!stmt.methods_.empty()) {
-        this->vypisVyraz("public:\n", true);
-        ++this->aktualnyStupenOdsadenia_;
+        exp_->write_word("public:\n", true);
+        exp_->increase_indentation();
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
             if (stmt.methods_.at(i)) {
                 if (stmt.methods_.at(i)->owner_->name_ != stmt.methods_.at(i)->func_->name_ && stmt.methods_.at(i)->func_->name_.at(0) != '~') {
                     stmt.methods_.at(i)->func_->retType_->accept(*this);
-                    this->vypisVyraz(" ");
+                    exp_->write_word(" ");
                 }
-                this->vypisVyraz(stmt.methods_.at(i)->func_->name_ + "(");
+                exp_->write_word(stmt.methods_.at(i)->func_->name_ + "(");
                 if (!stmt.methods_.at(i)->func_->params_.empty()) {
                     for (size_t j = 0; j < stmt.methods_.at(i)->func_->params_.size(); ++j) {
                         if (stmt.methods_.at(i)->func_->params_.at(j)) {
                             stmt.methods_.at(i)->func_->params_.at(j)->accept(*this);
                             if (j < stmt.methods_.at(i)->func_->params_.size() - 1) {
-                                this->vypisVyraz(", ");
+                                exp_->write_word(", ");
                             }
                         }
                     }
                 }
-                this->vypisVyraz(")\n", true);
+                exp_->write_word(")\n", true);
             }
         }
-        --this->aktualnyStupenOdsadenia_;
+        exp_->decrease_indentation();
     }
-    this->vypisVyraz("}\n", true);
+    exp_->write_word("}\n", true);
     if (!stmt.methods_.empty()) {
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
             if (stmt.methods_.at(i)) {
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
                 stmt.methods_.at(i)->accept(*this);
-                this->vypisVyraz("\n", true);
+                exp_->write_word("\n", true);
             }
         }
     }

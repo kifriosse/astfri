@@ -25,8 +25,9 @@ void vypis(std::string*& output) {
 }
 
 int main() {
-    std::string* basicOutput = new std::string();
-    CodeVisitor cv(basicOutput);
+    std::stringstream* basicOutput = new std::stringstream();
+    const Configurator* config = new Configurator();
+    CodeVisitor cv(config, basicOutput);
 
     /*{ // priestor pre testovanie
         astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
@@ -91,5 +92,7 @@ int main() {
         cv.visit(inputCode);
     }*/
 
-    vypis(basicOutput);
+
+    std::cout << basicOutput->str();
+    //vypis(basicOutput);
 }
