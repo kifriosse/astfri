@@ -1,6 +1,6 @@
-#include "libastfri-text/inc/CodeVisitor.hpp"
+#include <libastfri-text/inc/ASTVisitor.hpp>
 
-void CodeVisitor::visit(astfri::IfExpr const& expr) {
+void ASTVisitor::visit(astfri::IfExpr const& expr) {
     exp_->write_word("if (");
     if (expr.cond_) {
         expr.cond_->accept(*this);
@@ -22,7 +22,7 @@ void CodeVisitor::visit(astfri::IfExpr const& expr) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::BinOpExpr const& expr) {
+void ASTVisitor::visit(astfri::BinOpExpr const& expr) {
     if (expr.left_ && expr.right_) {
         expr.left_->accept(*this);
         switch (expr.op_) {
@@ -43,7 +43,7 @@ void CodeVisitor::visit(astfri::BinOpExpr const& expr) {
     }
 }
 
-void CodeVisitor::visit(astfri::UnaryOpExpr const& expr) {
+void ASTVisitor::visit(astfri::UnaryOpExpr const& expr) {
     if (!expr.arg_) {
         return;
     }
@@ -57,7 +57,7 @@ void CodeVisitor::visit(astfri::UnaryOpExpr const& expr) {
     expr.arg_->accept(*this);
 }
 
-void CodeVisitor::visit(astfri::AssignExpr const& expr) {
+void ASTVisitor::visit(astfri::AssignExpr const& expr) {
     if (expr.lhs_ && expr.rhs_) {
         expr.lhs_->accept(*this);
         exp_->write_word(" = ");
@@ -65,7 +65,7 @@ void CodeVisitor::visit(astfri::AssignExpr const& expr) {
     }
 }
 
-void CodeVisitor::visit(astfri::CompoundAssignExpr const& expr) {
+void ASTVisitor::visit(astfri::CompoundAssignExpr const& expr) {
     if (!expr.lhs_ || !expr.rhs_) {
         return;
     }
@@ -81,7 +81,7 @@ void CodeVisitor::visit(astfri::CompoundAssignExpr const& expr) {
     expr.rhs_->accept(*this);
 }
 
-void CodeVisitor::visit(astfri::FunctionCallExpr const& expr) {
+void ASTVisitor::visit(astfri::FunctionCallExpr const& expr) {
     exp_->write_word(expr.name_);
     exp_->write_word("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
@@ -95,7 +95,7 @@ void CodeVisitor::visit(astfri::FunctionCallExpr const& expr) {
     exp_->write_word(")");
 }
 
-void CodeVisitor::visit(astfri::MethodCallExpr const& expr) {
+void ASTVisitor::visit(astfri::MethodCallExpr const& expr) {
     if (expr.owner_) {
         expr.owner_->accept(*this);
         exp_->write_word("::");
@@ -112,7 +112,7 @@ void CodeVisitor::visit(astfri::MethodCallExpr const& expr) {
     exp_->write_word(")");
 }
 
-void CodeVisitor::visit(astfri::LambdaExpr const& expr) {
+void ASTVisitor::visit(astfri::LambdaExpr const& expr) {
     exp_->write_word("(");
     for (size_t i = 0; i < expr.params_.size(); ++i) {
         if (expr.params_.at(i)) {
@@ -132,7 +132,7 @@ void CodeVisitor::visit(astfri::LambdaExpr const& expr) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::TranslationUnit const& stmt) {
+void ASTVisitor::visit(astfri::TranslationUnit const& stmt) {
     bool predch = false;
     for (auto a : stmt.globals_) {
         if (a) {
@@ -162,7 +162,7 @@ void CodeVisitor::visit(astfri::TranslationUnit const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::CompoundStmt const& stmt) {
+void ASTVisitor::visit(astfri::CompoundStmt const& stmt) {
     for (size_t i = 0; i < stmt.stmts_.size(); ++i) {
         if (stmt.stmts_.at(i)) {
             stmt.stmts_.at(i)->accept(*this);
@@ -173,14 +173,14 @@ void CodeVisitor::visit(astfri::CompoundStmt const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::ReturnStmt const& stmt) {
+void ASTVisitor::visit(astfri::ReturnStmt const& stmt) {
     if (stmt.val_) {
         exp_->write_word("return ");
         stmt.val_->accept(*this);
     }
 }
 
-void CodeVisitor::visit(astfri::IfStmt const& stmt) {
+void ASTVisitor::visit(astfri::IfStmt const& stmt) {
     exp_->write_word("if (");
     if (stmt.cond_) {
         stmt.cond_->accept(*this);
@@ -202,7 +202,7 @@ void CodeVisitor::visit(astfri::IfStmt const& stmt) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::CaseStmt const& stmt) {
+void ASTVisitor::visit(astfri::CaseStmt const& stmt) {
     exp_->write_word("case ");
     if (stmt.expr_) {
         stmt.expr_->accept(*this);
@@ -216,7 +216,7 @@ void CodeVisitor::visit(astfri::CaseStmt const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::SwitchStmt const& stmt) {
+void ASTVisitor::visit(astfri::SwitchStmt const& stmt) {
     exp_->write_word("switch (");
     stmt.expr_ ? stmt.expr_->accept(*this) : void();
     exp_->write_word(") {\n", true);
@@ -234,7 +234,7 @@ void CodeVisitor::visit(astfri::SwitchStmt const& stmt) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::WhileStmt const& stmt) {
+void ASTVisitor::visit(astfri::WhileStmt const& stmt) {
     exp_->write_word("while (");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
     exp_->write_word(") {\n", true);
@@ -247,7 +247,7 @@ void CodeVisitor::visit(astfri::WhileStmt const& stmt) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::DoWhileStmt const& stmt) {
+void ASTVisitor::visit(astfri::DoWhileStmt const& stmt) {
     exp_->write_word("do {\n", true);
     if (stmt.body_) {
         exp_->increase_indentation();
@@ -260,7 +260,7 @@ void CodeVisitor::visit(astfri::DoWhileStmt const& stmt) {
     exp_->write_word(")");
 }
 
-void CodeVisitor::visit(astfri::ForStmt const& stmt) {
+void ASTVisitor::visit(astfri::ForStmt const& stmt) {
     exp_->write_word("for (");
     stmt.init_ ? stmt.init_->accept(*this) : void();
     exp_->write_word("; ");
@@ -277,14 +277,14 @@ void CodeVisitor::visit(astfri::ForStmt const& stmt) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::ThrowStmt const& stmt) {
+void ASTVisitor::visit(astfri::ThrowStmt const& stmt) {
     if (stmt.val_) {
         exp_->write_word("throw ");
         stmt.val_->accept(*this);
     }
 }
 
-void CodeVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exp_->write_word(" " + stmt.name_);
@@ -295,7 +295,7 @@ void CodeVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exp_->write_word(" " + stmt.name_);
@@ -306,7 +306,7 @@ void CodeVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exp_->write_word(" " + stmt.name_);
@@ -317,7 +317,7 @@ void CodeVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exp_->write_word(" " + stmt.name_);
@@ -328,7 +328,7 @@ void CodeVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
     }
 }
 
-void CodeVisitor::visit(astfri::FunctionDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::FunctionDefStmt const& stmt) {
     if (!stmt.retType_) {
         return;
     }
@@ -352,7 +352,7 @@ void CodeVisitor::visit(astfri::FunctionDefStmt const& stmt) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::MethodDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
     if (!stmt.func_ || !stmt.owner_ || !stmt.func_->retType_) {
         return;
     }
@@ -376,7 +376,7 @@ void CodeVisitor::visit(astfri::MethodDefStmt const& stmt) {
     exp_->write_word("}");
 }
 
-void CodeVisitor::visit(astfri::ClassDefStmt const& stmt) {
+void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     if (!stmt.tparams_.empty()) {
         exp_->write_word("<");
         for (size_t i = 0; i < stmt.tparams_.size(); ++i) {

@@ -1,21 +1,22 @@
+#include <libastfri-text/inc/Exporter.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
-#include "Exporter.hpp"
 
-struct CodeVisitor : astfri::IVisitor {
+struct ASTVisitor : astfri::IVisitor {
 private:
     const Configurator* config_;
     Exporter* exp_;
 public:
-    CodeVisitor(const Configurator* conf, std::stringstream* output) {
+    ASTVisitor(const Configurator* conf, std::stringstream* output) {
         config_ = conf;
         exp_ = new TxtFileExporter(config_, output);
     };
-    ~CodeVisitor() {
+    ~ASTVisitor() {
         delete exp_;
         config_ = nullptr;
     };
+    void write_file() { exp_->make_export(); };
     void visit(astfri::DynamicType const& /*type*/) override { exp_->write_word("dynamic"); };
     void visit(astfri::IntType const& /*type*/) override { exp_->write_int_type(); };
     void visit(astfri::FloatType const& /*type*/) override { exp_->write_word("float"); };

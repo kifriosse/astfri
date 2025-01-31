@@ -1,10 +1,12 @@
-#include "Configurator.hpp"
+#include <libastfri-text/inc/Configurator.hpp>
+#include <filesystem>
+#include <iostream>
+#include <fstream>
 
 struct Exporter {
-protected:
+private:
     const Configurator* config_;
     std::stringstream* output_;
-private:
     int currentIndentation_;
     bool startedLine_;
 public:
@@ -14,8 +16,12 @@ public:
         currentIndentation_ = 0;
         startedLine_ = false;
     };
-    virtual ~Exporter() = default;
+    virtual ~Exporter() {
+        config_ = nullptr;
+        output_ = nullptr;
+    };
     virtual void make_export() = 0;
+    std::stringstream* get_output() { return output_; };
     void increase_indentation() { ++currentIndentation_; };
     void decrease_indentation() { --currentIndentation_; };
     void write_word(const std::string ss, bool newLine = false) {
@@ -40,7 +46,20 @@ public:
 
 struct TxtFileExporter : Exporter {
     TxtFileExporter(const Configurator* conf, std::stringstream* output) : Exporter(conf, output) {};
-    void make_export() override {};
+    void make_export() override {
+        namespace fs = std::filesystem;
+        std::string userInput;
+        std::cout << "Zadaj názov súboru bez prípony: ";
+        std::getline(std::cin, userInput);
+        userInput.append(".txt");
+        fs::path filePath = fs::current_path().parent_path().parent_path() / userInput;
+        std::ofstream file(filePath);
+        if (file) {
+            file << get_output()->str();
+            std::cout << "Zápis prebehol úspešne!\n";
+        }
+        file.close();
+    };
 };
 
 struct RtfFileExporter : Exporter {
