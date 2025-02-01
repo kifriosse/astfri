@@ -1,0 +1,8 @@
+{
+    "basic_formatting":{
+        "indentation":"   "
+    },
+    "data_types":{
+        "int":"CELECISLO"
+    }
+}

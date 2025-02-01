@@ -1,5 +1,15 @@
 #include <libastfri-text/inc/ASTVisitor.hpp>
 
+ASTVisitor::ASTVisitor(const Configurator* conf, std::stringstream* output) {
+    config_ = conf;
+    exp_ = new TxtFileExporter(config_, output);
+}
+
+ASTVisitor::~ASTVisitor() {
+    delete exp_;
+    config_ = nullptr;
+}
+
 void ASTVisitor::visit(astfri::IfExpr const& expr) {
     exp_->write_word("if (");
     if (expr.cond_) {

@@ -1,4 +1,5 @@
-#include <libastfri-text/inc/Exporter.hpp>
+#include <libastfri-text/inc/TxtFileExporter.hpp>
+#include <libastfri-text/inc/RtfFileExporter.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
@@ -8,14 +9,8 @@ private:
     const Configurator* config_;
     Exporter* exp_;
 public:
-    ASTVisitor(const Configurator* conf, std::stringstream* output) {
-        config_ = conf;
-        exp_ = new TxtFileExporter(config_, output);
-    };
-    ~ASTVisitor() {
-        delete exp_;
-        config_ = nullptr;
-    };
+    ASTVisitor(const Configurator* conf, std::stringstream* output);
+    ~ASTVisitor();
     void write_file() { exp_->make_export(); };
     void visit(astfri::DynamicType const& /*type*/) override { exp_->write_word("dynamic"); };
     void visit(astfri::IntType const& /*type*/) override { exp_->write_int_type(); };
