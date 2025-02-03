@@ -2,52 +2,73 @@
 
 ASTVisitor::ASTVisitor(const Configurator* conf, std::stringstream* output) {
     config_ = conf;
-    exp_ = new TxtFileExporter(config_, output);
+    std::string format = config_->get_output_format()->str();
+    if (format == "txt") {
+        exporter_ = new TxtFileExporter(config_, output);
+    } else if (format == "rtf") {
+        exporter_ = new RtfFileExporter(config_, output);
+    } else {
+        exporter_ = new TxtFileExporter(config_, output);
+    }
 }
 
 ASTVisitor::~ASTVisitor() {
-    delete exp_;
+    delete exporter_;
     config_ = nullptr;
 }
 
 void ASTVisitor::visit(astfri::IfExpr const& expr) {
-    exp_->write_word("if (");
+    exporter_->write_if_word();
+    exporter_->write_space();
+    exporter_->write_round_bracket("(");
     if (expr.cond_) {
         expr.cond_->accept(*this);
     }
-    exp_->write_word(") {\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
+    }
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
     if (expr.iftrue_) {
-        exp_->increase_indentation();
+        exporter_->increase_indentation();
         expr.iftrue_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
     }
-    exp_->write_word("} else {\n", true);
+    exporter_->write_curl_bracket("}");
+    exporter_->write_space();
+    exporter_->write_else_word();
+    exporter_->write_space();
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
     if (expr.iffalse_) {
-        exp_->increase_indentation();
+        exporter_->increase_indentation();
         expr.iffalse_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
     }
-    exp_->write_word("}");
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::BinOpExpr const& expr) {
     if (expr.left_ && expr.right_) {
         expr.left_->accept(*this);
         switch (expr.op_) {
-            case astfri::BinOpType::Add: exp_->write_word(" + "); break;
-            case astfri::BinOpType::Assign: exp_->write_word(" = "); break;
-            case astfri::BinOpType::Divide: exp_->write_word(" / "); break;
-            case astfri::BinOpType::Equal: exp_->write_word(" == "); break;
-            case astfri::BinOpType::GreaterEqual: exp_->write_word(" >= "); break;
-            case astfri::BinOpType::Greater: exp_->write_word(" > "); break;
-            case astfri::BinOpType::LessEqual: exp_->write_word(" <= "); break;
-            case astfri::BinOpType::Less: exp_->write_word(" < "); break;
-            case astfri::BinOpType::NotEqual: exp_->write_word(" != "); break;
-            case astfri::BinOpType::Modulo: exp_->write_word(" % "); break;
-            case astfri::BinOpType::Subtract: exp_->write_word(" - "); break;
-            case astfri::BinOpType::Multiply: exp_->write_word(" * "); break;
+            case astfri::BinOpType::Add: exporter_->write_word(" + "); break;
+            case astfri::BinOpType::Assign: exporter_->write_word(" = "); break;
+            case astfri::BinOpType::Divide: exporter_->write_word(" / "); break;
+            case astfri::BinOpType::Equal: exporter_->write_word(" == "); break;
+            case astfri::BinOpType::GreaterEqual: exporter_->write_word(" >= "); break;
+            case astfri::BinOpType::Greater: exporter_->write_word(" > "); break;
+            case astfri::BinOpType::LessEqual: exporter_->write_word(" <= "); break;
+            case astfri::BinOpType::Less: exporter_->write_word(" < "); break;
+            case astfri::BinOpType::NotEqual: exporter_->write_word(" != "); break;
+            case astfri::BinOpType::Modulo: exporter_->write_word(" % "); break;
+            case astfri::BinOpType::Subtract: exporter_->write_word(" - "); break;
+            case astfri::BinOpType::Multiply: exporter_->write_word(" * "); break;
         }
         expr.right_->accept(*this);
     }
@@ -58,11 +79,11 @@ void ASTVisitor::visit(astfri::UnaryOpExpr const& expr) {
         return;
     }
     switch (expr.op_) {
-        case astfri::UnaryOpType::AddressOf: exp_->write_word("&"); break;
-        case astfri::UnaryOpType::Dereference: exp_->write_word("*"); break;
-        case astfri::UnaryOpType::LogicalNot: exp_->write_word("!"); break;
-        case astfri::UnaryOpType::Minus: exp_->write_word("-"); break;
-        case astfri::UnaryOpType::Plus: exp_->write_word("+"); break;
+        case astfri::UnaryOpType::AddressOf: exporter_->write_word("&"); break;
+        case astfri::UnaryOpType::Dereference: exporter_->write_word("*"); break;
+        case astfri::UnaryOpType::LogicalNot: exporter_->write_word("!"); break;
+        case astfri::UnaryOpType::Minus: exporter_->write_word("-"); break;
+        case astfri::UnaryOpType::Plus: exporter_->write_word("+"); break;
     }
     expr.arg_->accept(*this);
 }
@@ -70,7 +91,7 @@ void ASTVisitor::visit(astfri::UnaryOpExpr const& expr) {
 void ASTVisitor::visit(astfri::AssignExpr const& expr) {
     if (expr.lhs_ && expr.rhs_) {
         expr.lhs_->accept(*this);
-        exp_->write_word(" = ");
+        exporter_->write_word(" = ");
         expr.rhs_->accept(*this);
     }
 }
@@ -81,65 +102,69 @@ void ASTVisitor::visit(astfri::CompoundAssignExpr const& expr) {
     }
     expr.lhs_->accept(*this);
     switch (expr.op_) {
-        case astfri::BinOpType::Add: exp_->write_word(" += "); break;
-        case astfri::BinOpType::Divide: exp_->write_word(" /= "); break;
-        case astfri::BinOpType::Modulo: exp_->write_word(" %= "); break;
-        case astfri::BinOpType::Subtract: exp_->write_word(" -= "); break;
-        case astfri::BinOpType::Multiply: exp_->write_word(" *= "); break;
-        default: exp_->write_word(" "); break;
+        case astfri::BinOpType::Add: exporter_->write_word(" += "); break;
+        case astfri::BinOpType::Divide: exporter_->write_word(" /= "); break;
+        case astfri::BinOpType::Modulo: exporter_->write_word(" %= "); break;
+        case astfri::BinOpType::Subtract: exporter_->write_word(" -= "); break;
+        case astfri::BinOpType::Multiply: exporter_->write_word(" *= "); break;
+        default: exporter_->write_space(); break;
     }
     expr.rhs_->accept(*this);
 }
 
 void ASTVisitor::visit(astfri::FunctionCallExpr const& expr) {
-    exp_->write_word(expr.name_);
-    exp_->write_word("(");
+    exporter_->write_word(expr.name_);
+    exporter_->write_round_bracket("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
             expr.args_.at(i)->accept(*this);
             if (i < expr.args_.size() - 1) {
-                exp_->write_word(", ");
+                exporter_->write_word(", ");
             }
         }
     }
-    exp_->write_word(")");
+    exporter_->write_round_bracket(")");
 }
 
 void ASTVisitor::visit(astfri::MethodCallExpr const& expr) {
-    if (expr.owner_) {
-        expr.owner_->accept(*this);
-        exp_->write_word("::");
-    }
-    exp_->write_word(expr.name_ + "(");
+    exporter_->write_word(expr.name_);
+    exporter_->write_round_bracket("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
             expr.args_.at(i)->accept(*this);
             if (i < expr.args_.size() - 1) {
-                exp_->write_word(", ");
+                exporter_->write_word(", ");
             }
         }
     }
-    exp_->write_word(")");
+    exporter_->write_round_bracket(")");
 }
 
 void ASTVisitor::visit(astfri::LambdaExpr const& expr) {
-    exp_->write_word("(");
+    exporter_->write_round_bracket("(");
     for (size_t i = 0; i < expr.params_.size(); ++i) {
         if (expr.params_.at(i)) {
             expr.params_.at(i)->accept(*this);
             if (i < expr.params_.size() - 1) {
-                exp_->write_word(", ");
+                exporter_->write_word(", ");
             }
         }
     }
-    exp_->write_word(") {\n", true);
-    if (expr.body_) {
-        exp_->increase_indentation();
-        expr.body_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
     }
-    exp_->write_word("}");
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (expr.body_) {
+        exporter_->increase_indentation();
+        expr.body_->accept(*this);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
+    }
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::TranslationUnit const& stmt) {
@@ -147,24 +172,24 @@ void ASTVisitor::visit(astfri::TranslationUnit const& stmt) {
     for (auto a : stmt.globals_) {
         if (a) {
             a->accept(*this);
-            exp_->write_word("\n", true);
+            exporter_->write_new_line();
             predch = true;
         }
     }
     for (auto a : stmt.functions_) {
         if (a) {
             if (predch) {
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
             }
             a->accept(*this);
-            exp_->write_word("\n", true);
+            exporter_->write_new_line();
             predch = true;
         }
     }
     for (auto a : stmt.classes_) {
         if (a) {
             if (predch) {
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
             }
             a->accept(*this);
             predch = true;
@@ -177,7 +202,7 @@ void ASTVisitor::visit(astfri::CompoundStmt const& stmt) {
         if (stmt.stmts_.at(i)) {
             stmt.stmts_.at(i)->accept(*this);
             if (i < stmt.stmts_.size() - 1) {
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
             }
         }
     }
@@ -185,111 +210,164 @@ void ASTVisitor::visit(astfri::CompoundStmt const& stmt) {
 
 void ASTVisitor::visit(astfri::ReturnStmt const& stmt) {
     if (stmt.val_) {
-        exp_->write_word("return ");
+        exporter_->write_word("return ");
         stmt.val_->accept(*this);
     }
 }
 
 void ASTVisitor::visit(astfri::IfStmt const& stmt) {
-    exp_->write_word("if (");
+    exporter_->write_if_word();
+    exporter_->write_space();
+    exporter_->write_round_bracket("(");
     if (stmt.cond_) {
         stmt.cond_->accept(*this);
     }
-    exp_->write_word(") {\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
+    }
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
     if (stmt.iftrue_) {
-        exp_->increase_indentation();
+        exporter_->increase_indentation();
         stmt.iftrue_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
     }
-    exp_->write_word("} else {\n", true);
+    exporter_->write_curl_bracket("}");
+    exporter_->write_space();
+    exporter_->write_else_word();
+    exporter_->write_space();
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
     if (stmt.iffalse_) {
-        exp_->increase_indentation();
+        exporter_->increase_indentation();
         stmt.iffalse_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
     }
-    exp_->write_word("}");
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::CaseStmt const& stmt) {
-    exp_->write_word("case ");
+    exporter_->write_word("case ");
     if (stmt.expr_) {
         stmt.expr_->accept(*this);
     }
-    exp_->write_word(":");
+    exporter_->write_word(":");
     if (stmt.body_) {
-        exp_->write_word("\n", true);
-        exp_->increase_indentation();
+        exporter_->write_new_line();
+        exporter_->increase_indentation();
         stmt.body_->accept(*this);
-        exp_->decrease_indentation();
+        exporter_->decrease_indentation();
     }
 }
 
 void ASTVisitor::visit(astfri::SwitchStmt const& stmt) {
-    exp_->write_word("switch (");
+    exporter_->write_word("switch");
+    exporter_->write_space();
+    exporter_->write_round_bracket("(");
     stmt.expr_ ? stmt.expr_->accept(*this) : void();
-    exp_->write_word(") {\n", true);
-    exp_->increase_indentation();
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
+    }
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    exporter_->increase_indentation();
     for (size_t i = 0; i < stmt.cases_.size(); ++i) {
         if (stmt.cases_.at(i)) {
             stmt.cases_.at(i)->accept(*this);
             if (i < stmt.cases_.size() - 1) {
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
             }
         }
     }
-    exp_->decrease_indentation();
-    exp_->write_word("\n", true);
-    exp_->write_word("}");
+    exporter_->decrease_indentation();
+    exporter_->write_new_line();
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::WhileStmt const& stmt) {
-    exp_->write_word("while (");
+    exporter_->write_while_word();
+    exporter_->write_space();
+    exporter_->write_round_bracket("(");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    exp_->write_word(") {\n", true);
-    if (stmt.body_) {
-        exp_->increase_indentation();
-        stmt.body_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
     }
-    exp_->write_word("}");
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (stmt.body_) {
+        exporter_->increase_indentation();
+        stmt.body_->accept(*this);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
+    }
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::DoWhileStmt const& stmt) {
-    exp_->write_word("do {\n", true);
-    if (stmt.body_) {
-        exp_->increase_indentation();
-        stmt.body_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+    exporter_->write_word("do");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
     }
-    exp_->write_word("} while (");
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (stmt.body_) {
+        exporter_->increase_indentation();
+        stmt.body_->accept(*this);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
+    }
+    exporter_->write_curl_bracket("}");
+    exporter_->write_space();
+    exporter_->write_while_word();
+    exporter_->write_space();
+    exporter_->write_round_bracket("(");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    exp_->write_word(")");
+    exporter_->write_round_bracket(")");
 }
 
 void ASTVisitor::visit(astfri::ForStmt const& stmt) {
-    exp_->write_word("for (");
+    exporter_->write_for_word();
+    exporter_->write_space();
+    exporter_->write_round_bracket("(");
     stmt.init_ ? stmt.init_->accept(*this) : void();
-    exp_->write_word("; ");
+    exporter_->write_word("; ");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
-    exp_->write_word("; ");
+    exporter_->write_word("; ");
     stmt.step_ ? stmt.step_->accept(*this) : void();
-    exp_->write_word(") {\n", true);
-    if (stmt.body_) {
-        exp_->increase_indentation();
-        stmt.body_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
     }
-    exp_->write_word("}");
+    exporter_->write_space();
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (stmt.body_) {
+        exporter_->increase_indentation();
+        stmt.body_->accept(*this);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
+    }
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::ThrowStmt const& stmt) {
     if (stmt.val_) {
-        exp_->write_word("throw ");
+        exporter_->write_word("throw ");
         stmt.val_->accept(*this);
     }
 }
@@ -297,9 +375,10 @@ void ASTVisitor::visit(astfri::ThrowStmt const& stmt) {
 void ASTVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        exp_->write_word(" " + stmt.name_);
+        exporter_->write_space();
+        exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exp_->write_word(" = ");
+            exporter_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -308,9 +387,10 @@ void ASTVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
 void ASTVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        exp_->write_word(" " + stmt.name_);
+        exporter_->write_space();
+        exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exp_->write_word(" = ");
+            exporter_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -319,9 +399,10 @@ void ASTVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
 void ASTVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        exp_->write_word(" " + stmt.name_);
+        exporter_->write_space();
+        exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exp_->write_word(" = ");
+            exporter_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -330,9 +411,10 @@ void ASTVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
 void ASTVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
-        exp_->write_word(" " + stmt.name_);
+        exporter_->write_space();
+        exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exp_->write_word(" = ");
+            exporter_->write_word(" = ");
             stmt.initializer_->accept(*this);
         }
     }
@@ -343,23 +425,32 @@ void ASTVisitor::visit(astfri::FunctionDefStmt const& stmt) {
         return;
     }
     stmt.retType_->accept(*this);
-    exp_->write_word(" " + stmt.name_ + "(");
+    exporter_->write_space();
+    exporter_->write_word(stmt.name_);
+    exporter_->write_round_bracket("(");
     for (size_t i = 0; i < stmt.params_.size(); ++i) {
         if (stmt.params_.at(i)) {
             stmt.params_.at(i)->accept(*this);
             if (i < stmt.params_.size() - 1) {
-                exp_->write_word(", ");
+                exporter_->write_word(", ");
             }
         }
     }
-    exp_->write_word(") {\n", true);
-    if (stmt.body_) {
-        exp_->increase_indentation();
-        stmt.body_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
     }
-    exp_->write_word("}");
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (stmt.body_ && config_->show_function_body()) {
+        exporter_->increase_indentation();
+        stmt.body_->accept(*this);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
+    }
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
@@ -367,82 +458,106 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
         return;
     }
     stmt.func_->retType_->accept(*this);
-    exp_->write_word(" " + stmt.owner_->name_ + "::" + stmt.func_->name_ + "(");
+    exporter_->write_space();
+    exporter_->write_word(stmt.owner_->name_ + "::" + stmt.func_->name_);
+    exporter_->write_round_bracket("(");
     for (size_t i = 0; i < stmt.func_->params_.size(); ++i) {
         if (stmt.func_->params_.at(i)) {
             stmt.func_->params_.at(i)->accept(*this);
             if (i < stmt.func_->params_.size() - 1) {
-                exp_->write_word(", ");
+                exporter_->write_word(", ");
             }
         }
     }
-    exp_->write_word(") {\n", true);
-    if (stmt.func_->body_) {
-        exp_->increase_indentation();
-        stmt.func_->body_->accept(*this);
-        exp_->decrease_indentation();
-        exp_->write_word("\n", true);
+    exporter_->write_round_bracket(")");
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
     }
-    exp_->write_word("}");
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (stmt.func_->body_ && config_->show_method_body()) {
+        exporter_->increase_indentation();
+        stmt.func_->body_->accept(*this);
+        exporter_->decrease_indentation();
+        exporter_->write_new_line();
+    }
+    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     if (!stmt.tparams_.empty()) {
-        exp_->write_word("<");
+        exporter_->write_word("<");
         for (size_t i = 0; i < stmt.tparams_.size(); ++i) {
             if (stmt.tparams_.at(i)) {
-                exp_->write_word(stmt.tparams_.at(i)->name_ + " : " + stmt.tparams_.at(i)->constraint_);
+                exporter_->write_word(stmt.tparams_.at(i)->name_ + " : " + stmt.tparams_.at(i)->constraint_);
                 if (i < stmt.tparams_.size() - 1) {
-                    exp_->write_word(", ");
+                    exporter_->write_word(", ");
                 }
             }
         }
-        exp_->write_word(">\n", true);
+        exporter_->write_word(">");
+        exporter_->write_new_line();
     }
-    exp_->write_word("class " + stmt.name_ + " {\n", true);
-    if (!stmt.vars_.empty()) {
-        exp_->write_word("private:\n", true);
-        exp_->increase_indentation();
+    exporter_->write_class_word();
+    exporter_->write_space();
+    exporter_->write_word(stmt.name_);
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
+    }
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
+    if (!stmt.vars_.empty() && config_->show_class_body()) {
+        exporter_->write_word("private:");
+        exporter_->write_new_line();
+        exporter_->increase_indentation();
         for (size_t i = 0; i < stmt.vars_.size(); ++i) {
             if (stmt.vars_.at(i)) {
                 stmt.vars_.at(i)->accept(*this);
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
             }
         }
-        exp_->decrease_indentation();
+        exporter_->decrease_indentation();
     }
-    if (!stmt.methods_.empty()) {
-        exp_->write_word("public:\n", true);
-        exp_->increase_indentation();
+    if (!stmt.methods_.empty() && config_->show_class_body()) {
+        exporter_->write_word("public:");
+        exporter_->write_new_line();
+        exporter_->increase_indentation();
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
             if (stmt.methods_.at(i)) {
                 if (stmt.methods_.at(i)->owner_->name_ != stmt.methods_.at(i)->func_->name_ && stmt.methods_.at(i)->func_->name_.at(0) != '~') {
                     stmt.methods_.at(i)->func_->retType_->accept(*this);
-                    exp_->write_word(" ");
+                    exporter_->write_space();
                 }
-                exp_->write_word(stmt.methods_.at(i)->func_->name_ + "(");
+                exporter_->write_word(stmt.methods_.at(i)->func_->name_);
+                exporter_->write_round_bracket("(");
                 if (!stmt.methods_.at(i)->func_->params_.empty()) {
                     for (size_t j = 0; j < stmt.methods_.at(i)->func_->params_.size(); ++j) {
                         if (stmt.methods_.at(i)->func_->params_.at(j)) {
                             stmt.methods_.at(i)->func_->params_.at(j)->accept(*this);
                             if (j < stmt.methods_.at(i)->func_->params_.size() - 1) {
-                                exp_->write_word(", ");
+                                exporter_->write_word(", ");
                             }
                         }
                     }
                 }
-                exp_->write_word(")\n", true);
+                exporter_->write_round_bracket(")");
+                exporter_->write_new_line();
             }
         }
-        exp_->decrease_indentation();
+        exporter_->decrease_indentation();
     }
-    exp_->write_word("}\n", true);
-    if (!stmt.methods_.empty()) {
+    exporter_->write_curl_bracket("}");
+    exporter_->write_new_line();
+    if (!stmt.methods_.empty() && config_->show_method_body()) {
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
             if (stmt.methods_.at(i)) {
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
                 stmt.methods_.at(i)->accept(*this);
-                exp_->write_word("\n", true);
+                exporter_->write_new_line();
             }
         }
     }

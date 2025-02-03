@@ -1,8 +1,26 @@
 {
-    "basic_formatting":{
-        "indentation":"   "
+    "general_output":{
+        "file_name":"suborik",
+        "type":"text",
+        "view":"vnutorny",
+        "data_types":{
+            "int":"CELECISLO",
+            "char":"ZNAK"
+        }
     },
-    "data_types":{
-        "int":"CELECISLO"
+    "basic_format":{
+        "format":"txt",
+        "indentation":"   ",
+        "show_class_body":true,
+        "show_method_body":false,
+        "show_function_body":true,
+        "open_bracket_new_line":true
+    },
+    "system_names":{
+        "class":"TRIEDA",
+        "if":"AK",
+        "else":"INAK",
+        "for":"PRE",
+        "while":"POKIAL"
     }
 }

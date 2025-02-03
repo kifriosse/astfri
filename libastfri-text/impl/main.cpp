@@ -12,7 +12,7 @@ int main() {
 
     my_ast_trees::load_ast_tree_2(*visitor);
     visitor->write_file();
-    std::cout << output->str();
+    //std::cout << output->str();
 
     delete visitor;
     delete config;
