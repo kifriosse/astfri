@@ -18,9 +18,9 @@ ParamVarDefStmt* StmtFactory::mk_param_var_def(std::string name, Type* type, Exp
     return details::emplace_get<ParamVarDefStmt>(stmts_, std::move(name), type, initializer);
 }
 
-MemberVarDefStmt* StmtFactory::mk_member_var_def(std::string name, Type* type, Expr* initializer)
+MemberVarDefStmt* StmtFactory::mk_member_var_def(std::string name, Type* type, Expr* initializer, AccessModifier access)
 {
-    return details::emplace_get<MemberVarDefStmt>(stmts_, std::move(name), type, initializer);
+    return details::emplace_get<MemberVarDefStmt>(stmts_, std::move(name), type, initializer, access);
 }
 
 GlobalVarDefStmt* StmtFactory::mk_global_var_def(std::string name, Type* type, Expr* initializer)
@@ -33,9 +33,9 @@ FunctionDefStmt* StmtFactory::mk_function_def(std::string name, std::vector<Para
     return details::emplace_get<FunctionDefStmt>(stmts_, std::move(name), std::move(params), retType, body);
 }
 
-MethodDefStmt* StmtFactory::mk_method_def(ClassDefStmt* owner, FunctionDefStmt* func)
+MethodDefStmt* StmtFactory::mk_method_def(ClassDefStmt* owner, FunctionDefStmt* func, AccessModifier access)
 {
-    return details::emplace_get<MethodDefStmt>(stmts_, owner, func);
+    return details::emplace_get<MethodDefStmt>(stmts_, owner, func, access);
 }
 
 ClassDefStmt* StmtFactory::mk_class_def(std::string name, std::vector<MemberVarDefStmt*> vars, std::vector<MethodDefStmt*> methods, std::vector<GenericParam*> tparams)

@@ -30,9 +30,11 @@ ParamVarDefStmt::ParamVarDefStmt(
 MemberVarDefStmt::MemberVarDefStmt(
     std::string name,
     Type* type,
-    Expr* initializer
+    Expr* initializer,
+    AccessModifier access
 ) :
-    VarDefStmt(name, type, initializer)
+    VarDefStmt(name, type, initializer),
+    access_(access)
 {
 }
 
@@ -58,9 +60,10 @@ FunctionDefStmt::FunctionDefStmt(
 {
 }
 
-MethodDefStmt::MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func) :
+MethodDefStmt::MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func, AccessModifier access) :
     owner_(owner),
-    func_(func)
+    func_(func),
+    access_(access)
 {
 }
 

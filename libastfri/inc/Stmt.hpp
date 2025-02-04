@@ -17,6 +17,32 @@ struct Stmt : virtual IVisitable
 };
 
 /**
+ * @brief Defines access modifier of class member
+ */
+enum class AccessModifier
+{
+    /**
+     * Public
+     */
+    Public,
+
+    /**
+     * Private
+     */
+    Private,
+
+    /**
+     * Protected
+     */
+    Protected,
+
+    /**
+     * Internal -- package private | assembly private and similar
+     */
+    Internal
+};
+
+/**
  * @brief TODO
  */
 struct VarDefStmt : Stmt
@@ -49,7 +75,9 @@ struct ParamVarDefStmt : VarDefStmt, details::MkVisitable<ParamVarDefStmt>
  */
 struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt>
 {
-    MemberVarDefStmt(std::string name, Type* type, Expr* initializer);
+    AccessModifier access_;
+
+    MemberVarDefStmt(std::string name, Type* type, Expr* initializer, AccessModifier access);
 };
 
 /**
@@ -85,8 +113,9 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
     ClassDefStmt* owner_;
     FunctionDefStmt* func_;
+    AccessModifier access_;
 
-    MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func);
+    MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func, AccessModifier access);
 };
 
 /**

@@ -30,7 +30,8 @@ public:
     MemberVarDefStmt* mk_member_var_def (
         std::string name,
         Type* type,
-        Expr* initializer
+        Expr* initializer,
+        AccessModifier access
     );
     GlobalVarDefStmt* mk_global_var_def (
         std::string name,
@@ -43,7 +44,7 @@ public:
         Type* retType,
         CompoundStmt* body
     );
-    MethodDefStmt* mk_method_def (ClassDefStmt* owner, FunctionDefStmt* func);
+    MethodDefStmt* mk_method_def (ClassDefStmt* owner, FunctionDefStmt* func, AccessModifier access);
     ClassDefStmt* mk_class_def (
         std::string name,
         std::vector<MemberVarDefStmt*> vars,
