@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# TODO add proper exit and failure message
+
 # Choose a compiler
 COMPILER=g++
 
