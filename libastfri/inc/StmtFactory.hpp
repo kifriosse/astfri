@@ -44,7 +44,11 @@ public:
         Type* retType,
         CompoundStmt* body
     );
-    MethodDefStmt* mk_method_def (ClassDefStmt* owner, FunctionDefStmt* func, AccessModifier access);
+    MethodDefStmt* mk_method_def (
+        ClassDefStmt* owner,
+        FunctionDefStmt* func,
+        AccessModifier access
+    );
     ClassDefStmt* mk_class_def (
         std::string name,
         std::vector<MemberVarDefStmt*> vars,

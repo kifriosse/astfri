@@ -3,63 +3,63 @@
 
 namespace astfri
 {
-ExprFactory& ExprFactory::get_instance()
+ExprFactory& ExprFactory::get_instance ()
 {
     static ExprFactory instance;
     return instance;
 }
 
-IntLiteralExpr* ExprFactory::mk_int_literal(int const val)
+IntLiteralExpr* ExprFactory::mk_int_literal (int const val)
 {
     return details::emplace_get<IntLiteralExpr>(val, ints_, val);
 }
 
-FloatLiteralExpr* ExprFactory::mk_float_literal(float val)
+FloatLiteralExpr* ExprFactory::mk_float_literal (float val)
 {
     return details::emplace_get<FloatLiteralExpr>(exprs_, val);
 }
 
-CharLiteralExpr* ExprFactory::mk_char_literal(char const val)
+CharLiteralExpr* ExprFactory::mk_char_literal (char const val)
 {
     return details::emplace_get<CharLiteralExpr>(val, chars_, val);
 }
 
-StringLiteralExpr* ExprFactory::mk_string_literal(std::string const& val)
+StringLiteralExpr* ExprFactory::mk_string_literal (std::string const& val)
 {
     return details::emplace_get<StringLiteralExpr>(val, strings_, val);
 }
 
-BoolLiteralExpr* ExprFactory::mk_bool_literal(bool const val)
+BoolLiteralExpr* ExprFactory::mk_bool_literal (bool const val)
 {
     return val ? &true_ : &false_;
 }
 
-NullLiteralExpr* ExprFactory::mk_null_literal()
+NullLiteralExpr* ExprFactory::mk_null_literal ()
 {
     return &null_;
 }
 
-IfExpr* ExprFactory::mk_if(Expr* cond, Expr* iftrue, Expr* iffalse)
+IfExpr* ExprFactory::mk_if (Expr* cond, Expr* iftrue, Expr* iffalse)
 {
     return details::emplace_get<IfExpr>(exprs_, cond, iftrue, iffalse);
 }
 
-BinOpExpr* ExprFactory::mk_bin_on(Expr* left, BinOpType op, Expr* right)
+BinOpExpr* ExprFactory::mk_bin_on (Expr* left, BinOpType op, Expr* right)
 {
     return details::emplace_get<BinOpExpr>(exprs_, left, op, right);
 }
 
-UnaryOpExpr* ExprFactory::mk_unary_op(UnaryOpType op, Expr* arg)
+UnaryOpExpr* ExprFactory::mk_unary_op (UnaryOpType op, Expr* arg)
 {
     return details::emplace_get<UnaryOpExpr>(exprs_, op, arg);
 }
 
-AssignExpr* ExprFactory::mk_assign(Expr* lhs, Expr* rhs)
+AssignExpr* ExprFactory::mk_assign (Expr* lhs, Expr* rhs)
 {
     return details::emplace_get<AssignExpr>(exprs_, lhs, rhs);
 }
 
-CompoundAssignExpr* ExprFactory::mk_compound_assign(
+CompoundAssignExpr* ExprFactory::mk_compound_assign (
     Expr* lhs,
     BinOpType op,
     Expr* rhs
@@ -68,27 +68,27 @@ CompoundAssignExpr* ExprFactory::mk_compound_assign(
     return details::emplace_get<CompoundAssignExpr>(exprs_, lhs, op, rhs);
 }
 
-ParamVarRefExpr* ExprFactory::mk_param_var_ref(std::string param)
+ParamVarRefExpr* ExprFactory::mk_param_var_ref (std::string param)
 {
     return details::emplace_get<ParamVarRefExpr>(exprs_, std::move(param));
 }
 
-LocalVarRefExpr* ExprFactory::mk_local_var_ref(std::string var)
+LocalVarRefExpr* ExprFactory::mk_local_var_ref (std::string var)
 {
     return details::emplace_get<LocalVarRefExpr>(exprs_, std::move(var));
 }
 
-MemberVarRefExpr* ExprFactory::mk_member_var_ref(std::string member)
+MemberVarRefExpr* ExprFactory::mk_member_var_ref (std::string member)
 {
     return details::emplace_get<MemberVarRefExpr>(exprs_, std::move(member));
 }
 
-GlobalVarRefExpr* ExprFactory::mk_global_var_ref(std::string global)
+GlobalVarRefExpr* ExprFactory::mk_global_var_ref (std::string global)
 {
     return details::emplace_get<GlobalVarRefExpr>(exprs_, std::move(global));
 }
 
-FunctionCallExpr* ExprFactory::mk_function_call(
+FunctionCallExpr* ExprFactory::mk_function_call (
     std::string name,
     std::vector<Expr*> args
 )
@@ -100,7 +100,7 @@ FunctionCallExpr* ExprFactory::mk_function_call(
     );
 }
 
-MethodCallExpr* ExprFactory::mk_method_call(
+MethodCallExpr* ExprFactory::mk_method_call (
     Expr* owner,
     std::string name,
     std::vector<Expr*> args
@@ -114,7 +114,7 @@ MethodCallExpr* ExprFactory::mk_method_call(
     );
 }
 
-LambdaExpr* ExprFactory::mk_lambda_expr(
+LambdaExpr* ExprFactory::mk_lambda_expr (
     std::vector<ParamVarDefStmt*> params,
     Stmt* body
 )
@@ -122,12 +122,12 @@ LambdaExpr* ExprFactory::mk_lambda_expr(
     return details::emplace_get<LambdaExpr>(exprs_, std::move(params), body);
 }
 
-ThisExpr* ExprFactory::mk_this()
+ThisExpr* ExprFactory::mk_this ()
 {
     return &this_;
 }
 
-UnknownExpr* ExprFactory::mk_unknown()
+UnknownExpr* ExprFactory::mk_unknown ()
 {
     return &unknown_;
 }
