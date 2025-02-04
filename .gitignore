@@ -1,7 +1,5 @@
-.vscode/settings.json
-
-build
-.cache
+.cache/
+.vscode/
+build/
+.clangd
 compile_commands.json
-*.exe
-.vscode/launch.json
