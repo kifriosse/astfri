@@ -5,14 +5,25 @@
         "view":"vnutorny",
         "data_types":{
             "int":"CELECISLO",
-            "char":"ZNAK"
+            "float":"DESATINA",
+            "char":"ZNAK",
+            "bool":"BOOLEAN",
+            "void":"VOID"
+        },
+        "bin_ops":{
+            "assign":"<-"
+        },
+        "access_mods":{
+            "private":"súkromné",
+            "public":"verejné"
         }
     },
     "basic_format":{
         "format":"txt",
         "indentation":"   ",
         "show_class_body":true,
-        "show_method_body":false,
+        "show_method_body":true,
+        "show_method_definition":true,
         "show_function_body":true,
         "open_bracket_new_line":true
     },
@@ -21,6 +32,12 @@
         "if":"AK",
         "else":"INAK",
         "for":"PRE",
-        "while":"POKIAL"
+        "while":"POKIAL",
+        "do":"ROB",
+        "return":"VRÁŤ",
+        "throw":"VYHOĎ",
+        "switch":"VYBER",
+        "case":"PRÍPAD",
+        "this":"THIS"
     }
 }

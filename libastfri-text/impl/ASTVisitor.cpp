@@ -58,7 +58,11 @@ void ASTVisitor::visit(astfri::BinOpExpr const& expr) {
         expr.left_->accept(*this);
         switch (expr.op_) {
             case astfri::BinOpType::Add: exporter_->write_word(" + "); break;
-            case astfri::BinOpType::Assign: exporter_->write_word(" = "); break;
+            case astfri::BinOpType::Assign:
+                exporter_->write_space();
+                exporter_->write_assign_word();
+                exporter_->write_space();
+                break;
             case astfri::BinOpType::Divide: exporter_->write_word(" / "); break;
             case astfri::BinOpType::Equal: exporter_->write_word(" == "); break;
             case astfri::BinOpType::GreaterEqual: exporter_->write_word(" >= "); break;
@@ -91,7 +95,9 @@ void ASTVisitor::visit(astfri::UnaryOpExpr const& expr) {
 void ASTVisitor::visit(astfri::AssignExpr const& expr) {
     if (expr.lhs_ && expr.rhs_) {
         expr.lhs_->accept(*this);
-        exporter_->write_word(" = ");
+        exporter_->write_space();
+        exporter_->write_assign_word();
+        exporter_->write_space();
         expr.rhs_->accept(*this);
     }
 }
@@ -210,7 +216,8 @@ void ASTVisitor::visit(astfri::CompoundStmt const& stmt) {
 
 void ASTVisitor::visit(astfri::ReturnStmt const& stmt) {
     if (stmt.val_) {
-        exporter_->write_word("return ");
+        exporter_->write_return_word();
+        exporter_->write_space();
         stmt.val_->accept(*this);
     }
 }
@@ -252,7 +259,8 @@ void ASTVisitor::visit(astfri::IfStmt const& stmt) {
 }
 
 void ASTVisitor::visit(astfri::CaseStmt const& stmt) {
-    exporter_->write_word("case ");
+    exporter_->write_case_word();
+    exporter_->write_space();
     if (stmt.expr_) {
         stmt.expr_->accept(*this);
     }
@@ -266,7 +274,7 @@ void ASTVisitor::visit(astfri::CaseStmt const& stmt) {
 }
 
 void ASTVisitor::visit(astfri::SwitchStmt const& stmt) {
-    exporter_->write_word("switch");
+    exporter_->write_switch_word();
     exporter_->write_space();
     exporter_->write_round_bracket("(");
     stmt.expr_ ? stmt.expr_->accept(*this) : void();
@@ -315,7 +323,7 @@ void ASTVisitor::visit(astfri::WhileStmt const& stmt) {
 }
 
 void ASTVisitor::visit(astfri::DoWhileStmt const& stmt) {
-    exporter_->write_word("do");
+    exporter_->write_do_word();
     if (config_->open_bracket_new_line()) {
         exporter_->write_new_line();
     } else {
@@ -367,7 +375,8 @@ void ASTVisitor::visit(astfri::ForStmt const& stmt) {
 
 void ASTVisitor::visit(astfri::ThrowStmt const& stmt) {
     if (stmt.val_) {
-        exporter_->write_word("throw ");
+        exporter_->write_throw_word();
+        exporter_->write_space();
         stmt.val_->accept(*this);
     }
 }
@@ -378,7 +387,9 @@ void ASTVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
         exporter_->write_space();
         exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exporter_->write_word(" = ");
+            exporter_->write_space();
+            exporter_->write_assign_word();
+            exporter_->write_space();
             stmt.initializer_->accept(*this);
         }
     }
@@ -390,7 +401,9 @@ void ASTVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
         exporter_->write_space();
         exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exporter_->write_word(" = ");
+            exporter_->write_space();
+            exporter_->write_assign_word();
+            exporter_->write_space();
             stmt.initializer_->accept(*this);
         }
     }
@@ -402,7 +415,9 @@ void ASTVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
         exporter_->write_space();
         exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exporter_->write_word(" = ");
+            exporter_->write_space();
+            exporter_->write_assign_word();
+            exporter_->write_space();
             stmt.initializer_->accept(*this);
         }
     }
@@ -414,7 +429,9 @@ void ASTVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
         exporter_->write_space();
         exporter_->write_word(stmt.name_);
         if (stmt.initializer_) {
-            exporter_->write_word(" = ");
+            exporter_->write_space();
+            exporter_->write_assign_word();
+            exporter_->write_space();
             stmt.initializer_->accept(*this);
         }
     }
@@ -457,8 +474,10 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
     if (!stmt.func_ || !stmt.owner_ || !stmt.func_->retType_) {
         return;
     }
-    stmt.func_->retType_->accept(*this);
-    exporter_->write_space();
+    if (stmt.owner_->name_ != stmt.func_->name_ && stmt.func_->name_.at(0) != '~') {
+        stmt.func_->retType_->accept(*this);
+        exporter_->write_space();
+    }
     exporter_->write_word(stmt.owner_->name_ + "::" + stmt.func_->name_);
     exporter_->write_round_bracket("(");
     for (size_t i = 0; i < stmt.func_->params_.size(); ++i) {
@@ -487,7 +506,7 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
 }
 
 void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
-    if (!stmt.tparams_.empty()) {
+    if (!stmt.tparams_.empty()) {//gen_params
         exporter_->write_word("<");
         for (size_t i = 0; i < stmt.tparams_.size(); ++i) {
             if (stmt.tparams_.at(i)) {
@@ -510,8 +529,9 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     }
     exporter_->write_curl_bracket("{");
     exporter_->write_new_line();
-    if (!stmt.vars_.empty() && config_->show_class_body()) {
-        exporter_->write_word("private:");
+    if (!stmt.vars_.empty() && config_->show_class_body()) {//atribs
+        exporter_->write_private_word();
+        exporter_->write_word(":");
         exporter_->write_new_line();
         exporter_->increase_indentation();
         for (size_t i = 0; i < stmt.vars_.size(); ++i) {
@@ -522,8 +542,9 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
         }
         exporter_->decrease_indentation();
     }
-    if (!stmt.methods_.empty() && config_->show_class_body()) {
-        exporter_->write_word("public:");
+    if (!stmt.methods_.empty() && config_->show_class_body()) {//methods
+        exporter_->write_public_word();
+        exporter_->write_word(":");
         exporter_->write_new_line();
         exporter_->increase_indentation();
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
@@ -552,7 +573,7 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     }
     exporter_->write_curl_bracket("}");
     exporter_->write_new_line();
-    if (!stmt.methods_.empty() && config_->show_method_body()) {
+    if (!stmt.methods_.empty() && config_->show_method_definition()) {
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
             if (stmt.methods_.at(i)) {
                 exporter_->write_new_line();

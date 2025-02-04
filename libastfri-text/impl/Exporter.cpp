@@ -49,8 +49,32 @@ void Exporter::write_int_type() {
     write_word(config_->get_int_word()->str());
 }
 
+void Exporter::write_float_type() {
+    write_word(config_->get_float_word()->str());
+}
+
 void Exporter::write_char_type() {
     write_word(config_->get_char_word()->str());
+}
+
+void Exporter::write_bool_type() {
+    write_word(config_->get_bool_word()->str());
+}
+
+void Exporter::write_void_type() {
+    write_word(config_->get_void_word()->str());
+}
+
+void Exporter::write_assign_word() {
+    write_word(config_->get_assign_word()->str());
+}
+
+void Exporter::write_private_word() {
+    write_word(config_->get_private_word()->str());
+}
+
+void Exporter::write_public_word() {
+    write_word(config_->get_public_word()->str());
 }
 
 void Exporter::write_class_word() {
@@ -71,4 +95,28 @@ void Exporter::write_for_word() {
 
 void Exporter::write_while_word() {
     write_word(config_->get_while_word()->str());
+}
+
+void Exporter::write_do_word() {
+    write_word(config_->get_do_word()->str());
+}
+
+void Exporter::write_return_word() {
+    write_word(config_->get_return_word()->str());
+}
+
+void Exporter::write_throw_word() {
+    write_word(config_->get_throw_word()->str());
+}
+
+void Exporter::write_switch_word() {
+    write_word(config_->get_switch_word()->str());
+}
+
+void Exporter::write_case_word() {
+    write_word(config_->get_case_word()->str());
+}
+
+void Exporter::write_this_word() {
+    write_word(config_->get_this_word()->str());
 }

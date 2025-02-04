@@ -23,12 +23,24 @@ public:
     virtual void write_curl_bracket(const std::string& s);
     virtual void write_round_bracket(const std::string& s);
     virtual void write_int_type();
+    virtual void write_float_type();
     virtual void write_char_type();
+    virtual void write_bool_type();
+    virtual void write_void_type();
+    virtual void write_assign_word();
+    virtual void write_private_word();
+    virtual void write_public_word();
     virtual void write_class_word();
     virtual void write_if_word();
     virtual void write_else_word();
     virtual void write_for_word();
     virtual void write_while_word();
+    virtual void write_do_word();
+    virtual void write_return_word();
+    virtual void write_throw_word();
+    virtual void write_switch_word();
+    virtual void write_case_word();
+    virtual void write_this_word();
 private:
     void write_indentation();
 };

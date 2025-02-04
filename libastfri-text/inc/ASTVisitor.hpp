@@ -14,10 +14,10 @@ public:
     void write_file() { exporter_->make_export(); };
     void visit(astfri::DynamicType const& /*type*/) override { exporter_->write_word("dynamic"); };
     void visit(astfri::IntType const& /*type*/) override { exporter_->write_int_type(); };
-    void visit(astfri::FloatType const& /*type*/) override { exporter_->write_word("float"); };
+    void visit(astfri::FloatType const& /*type*/) override { exporter_->write_float_type(); };
     void visit(astfri::CharType const& /*type*/) override { exporter_->write_char_type(); };
-    void visit(astfri::BoolType const& /*type*/) override { exporter_->write_word("bool"); };
-    void visit(astfri::VoidType const& /*type*/) override { exporter_->write_word("void"); };
+    void visit(astfri::BoolType const& /*type*/) override { exporter_->write_bool_type(); };
+    void visit(astfri::VoidType const& /*type*/) override { exporter_->write_void_type(); };
     void visit(astfri::UserType const& type) override { exporter_->write_word(type.name_); };
     void visit(astfri::IndirectionType const& type) override { type.indirect_->accept(*this); };
     void visit(astfri::UnknownType const& /*type*/) override { exporter_->write_word("UNKNOWN_TYPE"); };
@@ -39,7 +39,7 @@ public:
     void visit(astfri::FunctionCallExpr const& expr) override;
     void visit(astfri::MethodCallExpr const& expr) override;
     void visit(astfri::LambdaExpr const& expr) override;
-    void visit(astfri::ThisExpr const& /*expr*/) override { exporter_->write_word("this"); };
+    void visit(astfri::ThisExpr const& /*expr*/) override { exporter_->write_this_word(); };
     void visit(astfri::UnknownExpr const& /*expr*/) override { exporter_->write_word("UNKNOWN_EXPRESSION"); };
     void visit(astfri::TranslationUnit const& stmt) override;
     void visit(astfri::CompoundStmt const& stmt) override;
