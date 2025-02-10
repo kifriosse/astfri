@@ -1,13 +1,24 @@
 #include <libastfri-cpp/inc/CppASTVisitor.hpp>
+#include "libastfri/inc/Stmt.hpp"
 namespace astfri::cpp
 {
+CppASTVisitor::CppASTVisitor() {
+    // konstruktor
+}
 // visit deklaracie
 bool CppASTVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
     llvm::outs() << "Function: " << FD->getNameAsString() << "\n";
+    // this->methods.push_back(this->stmt_factory.mk_function_def(
+    //     FD->getNameAsString(),
+    //     std::vector<ParamVarDefStmt*>(),
+    //     this->type_factory.mk_user(FD->getReturnType().getAsString()),
+    //     nullptr
+    // ));
     return true;
 }
 bool CppASTVisitor::VisitCXXRecordDecl(clang::CXXRecordDecl *RD) {
     llvm::outs() << "Class: " << RD->getNameAsString() << "\n";
+    this->name = RD->getNameAsString();
     return true;
 }
 bool CppASTVisitor::VisitVarDecl(clang::VarDecl *VD) {
@@ -16,6 +27,11 @@ bool CppASTVisitor::VisitVarDecl(clang::VarDecl *VD) {
 }
 bool CppASTVisitor::VisitFieldDecl(clang::FieldDecl *FD) {
     llvm::outs() << "Field:" << FD->getNameAsString() << "\n";
+    this->vars.push_back(this->stmt_factory.mk_member_var_def(
+        FD->getNameAsString(),
+        this->type_factory.mk_user(FD->getType().getAsString()),
+        nullptr
+    ));
     return true;
 }
 bool CppASTVisitor::VisitNamespaceDecl(clang::NamespaceDecl *ND) {
@@ -67,5 +83,8 @@ bool CppASTVisitor::VisitBinaryOperator(clang::BinaryOperator *BO) {
 bool CppASTVisitor::VisitUnaryOperator(clang::UnaryOperator *UO) {
     llvm::outs() << "Unary operator\n";
     return true;
+}
+CppASTVisitor::~CppASTVisitor() {
+    // awd
 }
 } // namespace libastfri::cpp
