@@ -15,6 +15,7 @@
 #include <clang/Tooling/Tooling.h>
 #include <llvm/Support/raw_ostream.h>
 #include <vector>
+#include <iostream>
 
 
 // AST Consumer
@@ -58,17 +59,23 @@ class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 static llvm::cl::OptionCategory MyToolCategory("my-tool options");
 
 int main(int argc, const char **argv) {
-    
-    std::vector<astfri::ClassDefStmt*> classes;
-    std::vector<astfri::FunctionDefStmt*> functions;
-    std::vector<astfri::GlobalVarDefStmt*> globals;
-    astfri::TranslationUnit tu(classes, functions, globals);
-
+    astfri::TranslationUnit tu(
+        std::vector<astfri::ClassDefStmt*> {},
+        std::vector<astfri::FunctionDefStmt*> {},
+        std::vector<astfri::GlobalVarDefStmt*> {}
+    );
     auto OptionsParser = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory);
     if (!OptionsParser) {
         llvm::errs() << OptionsParser.takeError();
         return 1;
     }
     clang::tooling::ClangTool Tool(OptionsParser->getCompilations(), OptionsParser->getSourcePathList());
-    return Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+    Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+
+    std::cout << "\n\n\n" << tu.classes_.at(0)->name_ << std::endl;
+    for(auto field : tu.classes_[0]->vars_) {
+        std::cout << field->type_ << " " <<  field->name_ << " = " << field->initializer_ << std::endl;
+    }
+
+    return 0;
 }

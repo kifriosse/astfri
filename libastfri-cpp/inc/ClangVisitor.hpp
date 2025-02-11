@@ -50,11 +50,5 @@ private:
     StmtFactory& stmt_factory = StmtFactory::get_instance();
     ExprFactory& expr_factory = ExprFactory::get_instance();
     TypeFactory& type_factory = TypeFactory::get_instance();
-
-    // zatial len pre jednu triedu
-    std::string name;
-    std::vector<MemberVarDefStmt*> vars;
-    std::vector<MethodDefStmt*> methods;
-    std::vector<GenericParam*> tparams;
 };
 } // namespace libastfri::cpp

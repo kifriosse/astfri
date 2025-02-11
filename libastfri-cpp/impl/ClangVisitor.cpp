@@ -1,4 +1,5 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::cpp
 {
@@ -9,17 +10,26 @@ ClangVisitor::ClangVisitor(TranslationUnit& visitedTranslationUnit) :
 // visit deklaracie
 bool ClangVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
     llvm::outs() << "Function: " << FD->getNameAsString() << "\n";
-    // this->methods.push_back(this->stmt_factory.mk_function_def(
-    //     FD->getNameAsString(),
-    //     std::vector<ParamVarDefStmt*>(),
-    //     this->type_factory.mk_user(FD->getReturnType().getAsString()),
-    //     nullptr
-    // ));
     return true;
 }
 bool ClangVisitor::VisitCXXRecordDecl(clang::CXXRecordDecl *RD) {
     llvm::outs() << "Class: " << RD->getNameAsString() << "\n";
-    this->name = RD->getNameAsString();
+    this->tu_->classes_.push_back(this->stmt_factory.mk_class_def(
+        RD->getNameAsString(),
+        std::vector<MemberVarDefStmt*> {},
+        std::vector<MethodDefStmt*> {},
+        std::vector<GenericParam*> {}
+    ));
+
+    for(auto field : RD->fields()) {
+        // visit member variables
+        this->tu_->classes_.back()->vars_.push_back(this->stmt_factory.mk_member_var_def(
+            field->getNameAsString(),
+            this->type_factory.mk_user(field->getType().getAsString()),
+            this->expr_factory.mk_int_literal(100))
+        );
+    }
+
     return true;
 }
 bool ClangVisitor::VisitVarDecl(clang::VarDecl *VD) {
@@ -28,11 +38,6 @@ bool ClangVisitor::VisitVarDecl(clang::VarDecl *VD) {
 }
 bool ClangVisitor::VisitFieldDecl(clang::FieldDecl *FD) {
     llvm::outs() << "Field:" << FD->getNameAsString() << "\n";
-    this->vars.push_back(this->stmt_factory.mk_member_var_def(
-        FD->getNameAsString(),
-        this->type_factory.mk_user(FD->getType().getAsString()),
-        nullptr
-    ));
     return true;
 }
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl *ND) {
@@ -62,6 +67,7 @@ bool ClangVisitor::VisitIfStmt(clang::IfStmt *IS) {
 }
 bool ClangVisitor::VisitForStmt(clang::ForStmt *FS) {
     llvm::outs() << "For statement: " << FS->getConditionVariableDeclStmt() << "\n";
+    //FS->getBody()->dump();
     return true;
 }
 bool ClangVisitor::VisitWhileStmt(clang::WhileStmt *WS) {
