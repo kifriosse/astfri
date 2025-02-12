@@ -5,7 +5,7 @@
 #include <iostream>
 
 void printChar(char ch){
-    for(int i = 0; i < 0; ++i)
+    for(int i = 0; i < 10; ++i)
     {
         std::cout << ch << " ";
     }

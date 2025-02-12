@@ -1,7 +1,7 @@
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
-
+#include <libastfri-serialize/JSonDeserialiser.cpp>
 
 // int compare(int a,int b=10)
 // {
@@ -35,7 +35,8 @@ astfri::IfStmt* condition = statements.mk_if(expressions.mk_bin_on(
 astfri::CompoundStmt* body = statements.mk_compound({condition});
 astfri::FunctionDefStmt* function = statements.mk_function_def("compare",std::move(params),types.mk_int(),body);
  
-
+  JsonDeSerialiser jsonOutput(std::cout);
+  jsonOutput.visit(*function); 
 
  return 0;
   }
