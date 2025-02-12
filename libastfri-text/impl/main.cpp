@@ -1,6 +1,7 @@
-#include <libastfri-text/impl/TxtFileExporter.cpp>
-#include <libastfri-text/impl/RtfFileExporter.cpp>
 #include <libastfri-text/impl/HtmlFileExporter.cpp>
+#include <libastfri-text/impl/PdfFileExporter.cpp>
+#include <libastfri-text/impl/RtfFileExporter.cpp>
+#include <libastfri-text/impl/TxtFileExporter.cpp>
 #include <libastfri-text/impl/Configurator.cpp>
 #include <libastfri-text/impl/ASTVisitor.cpp>
 #include <libastfri-text/impl/Exporter.cpp>
@@ -13,7 +14,6 @@ int main() {
 
     my_ast_trees::load_ast_tree_2(*visitor);
     visitor->write_file();
-    //std::cout << output->str();
 
     delete visitor;
     delete config;

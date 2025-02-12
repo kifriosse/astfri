@@ -108,6 +108,9 @@ Configurator::Configurator(const std::string& configFileName) {
         if (basForm.HasMember("open_bracket_new_line") && basForm["open_bracket_new_line"].IsBool()) {
             openBracketOnNewLine_ = basForm["open_bracket_new_line"].GetBool();
         }
+        if (basForm.HasMember("show_row_number") && basForm["show_row_number"].IsBool()) {
+            showRowNumber_ = basForm["show_row_number"].GetBool();
+        }
     }
     if (doc.HasMember("system_names") && doc["system_names"].IsObject() && !doc["system_names"].IsNull()) {//----------system_names----------
         rj::Value& sysNam = doc["system_names"];
@@ -207,6 +210,7 @@ void Configurator::set_defaults() {
     showMethodDefinition_ = true;
     showFunctionBody_ = true;
     openBracketOnNewLine_ = false;
+    showRowNumber_ = true;
     classWord_ = new std::stringstream("class");
     ifWord_ = new std::stringstream("if");
     elseWord_ = new std::stringstream("else");

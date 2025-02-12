@@ -27,13 +27,7 @@ void ASTVisitor::visit(astfri::IfExpr const& expr) {
         expr.cond_->accept(*this);
     }
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (expr.iftrue_) {
         exporter_->increase_indentation();
         expr.iftrue_->accept(*this);
@@ -43,9 +37,7 @@ void ASTVisitor::visit(astfri::IfExpr const& expr) {
     exporter_->write_curl_bracket("}");
     exporter_->write_space();
     exporter_->write_else_word();
-    exporter_->write_space();
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (expr.iffalse_) {
         exporter_->increase_indentation();
         expr.iffalse_->accept(*this);
@@ -121,7 +113,7 @@ void ASTVisitor::visit(astfri::CompoundAssignExpr const& expr) {
 }
 
 void ASTVisitor::visit(astfri::FunctionCallExpr const& expr) {
-    exporter_->write_word(expr.name_);
+    exporter_->write_function_name(expr.name_);
     exporter_->write_round_bracket("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
@@ -135,7 +127,7 @@ void ASTVisitor::visit(astfri::FunctionCallExpr const& expr) {
 }
 
 void ASTVisitor::visit(astfri::MethodCallExpr const& expr) {
-    exporter_->write_word(expr.name_);
+    exporter_->write_method_name(expr.name_);
     exporter_->write_round_bracket("(");
     for (size_t i = 0; i < expr.args_.size(); ++i) {
         if (expr.args_.at(i)) {
@@ -159,13 +151,7 @@ void ASTVisitor::visit(astfri::LambdaExpr const& expr) {
         }
     }
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (expr.body_) {
         exporter_->increase_indentation();
         expr.body_->accept(*this);
@@ -232,13 +218,7 @@ void ASTVisitor::visit(astfri::IfStmt const& stmt) {
         stmt.cond_->accept(*this);
     }
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.iftrue_) {
         exporter_->increase_indentation();
         stmt.iftrue_->accept(*this);
@@ -248,9 +228,7 @@ void ASTVisitor::visit(astfri::IfStmt const& stmt) {
     exporter_->write_curl_bracket("}");
     exporter_->write_space();
     exporter_->write_else_word();
-    exporter_->write_space();
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.iffalse_) {
         exporter_->increase_indentation();
         stmt.iffalse_->accept(*this);
@@ -281,13 +259,7 @@ void ASTVisitor::visit(astfri::SwitchStmt const& stmt) {
     exporter_->write_round_bracket("(");
     stmt.expr_ ? stmt.expr_->accept(*this) : void();
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     exporter_->increase_indentation();
     for (size_t i = 0; i < stmt.cases_.size(); ++i) {
         if (stmt.cases_.at(i)) {
@@ -308,13 +280,7 @@ void ASTVisitor::visit(astfri::WhileStmt const& stmt) {
     exporter_->write_round_bracket("(");
     stmt.cond_ ? stmt.cond_->accept(*this) : void();
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.body_) {
         exporter_->increase_indentation();
         stmt.body_->accept(*this);
@@ -326,13 +292,7 @@ void ASTVisitor::visit(astfri::WhileStmt const& stmt) {
 
 void ASTVisitor::visit(astfri::DoWhileStmt const& stmt) {
     exporter_->write_do_word();
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.body_) {
         exporter_->increase_indentation();
         stmt.body_->accept(*this);
@@ -358,14 +318,7 @@ void ASTVisitor::visit(astfri::ForStmt const& stmt) {
     exporter_->write_word("; ");
     stmt.step_ ? stmt.step_->accept(*this) : void();
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_space();
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.body_) {
         exporter_->increase_indentation();
         stmt.body_->accept(*this);
@@ -387,7 +340,7 @@ void ASTVisitor::visit(astfri::LocalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exporter_->write_space();
-        exporter_->write_word(stmt.name_);
+        exporter_->write_local_var_name(stmt.name_);
         if (stmt.initializer_) {
             exporter_->write_space();
             exporter_->write_assign_word();
@@ -401,7 +354,7 @@ void ASTVisitor::visit(astfri::ParamVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exporter_->write_space();
-        exporter_->write_word(stmt.name_);
+        exporter_->write_param_var_name(stmt.name_);
         if (stmt.initializer_) {
             exporter_->write_space();
             exporter_->write_assign_word();
@@ -415,7 +368,7 @@ void ASTVisitor::visit(astfri::MemberVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exporter_->write_space();
-        exporter_->write_word(stmt.name_);
+        exporter_->write_member_var_name(stmt.name_);
         if (stmt.initializer_) {
             exporter_->write_space();
             exporter_->write_assign_word();
@@ -429,7 +382,7 @@ void ASTVisitor::visit(astfri::GlobalVarDefStmt const& stmt) {
     if (stmt.type_) {
         stmt.type_->accept(*this);
         exporter_->write_space();
-        exporter_->write_word(stmt.name_);
+        exporter_->write_global_var_name(stmt.name_);
         if (stmt.initializer_) {
             exporter_->write_space();
             exporter_->write_assign_word();
@@ -445,7 +398,7 @@ void ASTVisitor::visit(astfri::FunctionDefStmt const& stmt) {
     }
     stmt.retType_->accept(*this);
     exporter_->write_space();
-    exporter_->write_word(stmt.name_);
+    exporter_->write_function_name(stmt.name_);
     exporter_->write_round_bracket("(");
     for (size_t i = 0; i < stmt.params_.size(); ++i) {
         if (stmt.params_.at(i)) {
@@ -456,13 +409,7 @@ void ASTVisitor::visit(astfri::FunctionDefStmt const& stmt) {
         }
     }
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.body_ && config_->show_function_body()) {
         exporter_->increase_indentation();
         stmt.body_->accept(*this);
@@ -481,7 +428,8 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
         exporter_->write_space();
     }
     exporter_->write_class_name(stmt.owner_->name_);
-    exporter_->write_word("::" + stmt.func_->name_);
+    exporter_->write_word("::");
+    exporter_->write_method_name(stmt.func_->name_);
     exporter_->write_round_bracket("(");
     for (size_t i = 0; i < stmt.func_->params_.size(); ++i) {
         if (stmt.func_->params_.at(i)) {
@@ -492,13 +440,7 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
         }
     }
     exporter_->write_round_bracket(")");
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (stmt.func_->body_ && config_->show_method_body()) {
         exporter_->increase_indentation();
         stmt.func_->body_->accept(*this);
@@ -525,13 +467,7 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     exporter_->write_class_word();
     exporter_->write_space();
     exporter_->write_class_name(stmt.name_);
-    if (config_->open_bracket_new_line()) {
-        exporter_->write_new_line();
-    } else {
-        exporter_->write_space();
-    }
-    exporter_->write_curl_bracket("{");
-    exporter_->write_new_line();
+    write_open_bracket();
     if (!stmt.vars_.empty() && config_->show_class_body()) {//atribs
         exporter_->write_private_word();
         exporter_->write_word(":");
@@ -556,7 +492,7 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
                     stmt.methods_.at(i)->func_->retType_->accept(*this);
                     exporter_->write_space();
                 }
-                exporter_->write_word(stmt.methods_.at(i)->func_->name_);
+                exporter_->write_method_name(stmt.methods_.at(i)->func_->name_);
                 exporter_->write_round_bracket("(");
                 if (!stmt.methods_.at(i)->func_->params_.empty()) {
                     for (size_t j = 0; j < stmt.methods_.at(i)->func_->params_.size(); ++j) {
@@ -585,4 +521,14 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
             }
         }
     }
+}
+
+void ASTVisitor::write_open_bracket() {
+    if (config_->open_bracket_new_line()) {
+        exporter_->write_new_line();
+    } else {
+        exporter_->write_space();
+    }
+    exporter_->write_curl_bracket("{");
+    exporter_->write_new_line();
 }

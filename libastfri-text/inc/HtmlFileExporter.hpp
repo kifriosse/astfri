@@ -8,4 +8,6 @@ struct HtmlFileExporter : Exporter {
     void write_new_line() override;
     void write_class_word() override;
     void write_class_name(const std::string& name) override;
+private:
+    void write_row_number() override;
 };

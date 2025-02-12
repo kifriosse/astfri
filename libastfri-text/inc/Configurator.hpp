@@ -22,6 +22,7 @@ private:
     bool showMethodDefinition_;
     bool showFunctionBody_;
     bool openBracketOnNewLine_;//true=new_line false=same_line
+    bool showRowNumber_;
     //-------------------------------------------
     const std::stringstream* classWord_;
     const std::stringstream* ifWord_;
@@ -57,6 +58,7 @@ public:
     bool show_method_definition() const { return showMethodDefinition_; };
     bool show_function_body() const { return showFunctionBody_; };
     bool open_bracket_new_line() const { return openBracketOnNewLine_; };
+    bool show_row_number() const { return showRowNumber_; };
     const std::stringstream* get_tab_word() const { return tabWord_; };
     const std::stringstream* get_class_word() const { return classWord_; };
     const std::stringstream* get_if_word() const { return ifWord_; };

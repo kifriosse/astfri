@@ -7,12 +7,12 @@ TxtFileExporter::TxtFileExporter(const Configurator* conf, std::stringstream* ou
 
 void TxtFileExporter::make_export() {
     namespace fs = std::filesystem;
-    std::string userInput = get_config()->get_output_file_name()->str();
+    std::string userInput = config_->get_output_file_name()->str();
     userInput.append(".txt");
     fs::path filePath = fs::current_path().parent_path().parent_path() / userInput;
     std::ofstream file(filePath);
     if (file) {
-        file << get_output()->str();
+        file << output_->str();
         std::cout << "Zápis prebehol úspešne!\n";
     } else {
         std::cout << "Nastala chyba pri zápise do súboru!\n";

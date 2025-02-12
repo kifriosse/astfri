@@ -1,10 +1,12 @@
 #include <libastfri-text/inc/Exporter.hpp>
+#include <iomanip>
 
 Exporter::Exporter(const Configurator* conf, std::stringstream* output) {
     config_ = conf;
     output_ = output;
     currentIndentation_ = 0;
     startedLine_ = false;
+    row_ = 1;
 }
 
 Exporter::~Exporter() {
@@ -14,10 +16,9 @@ Exporter::~Exporter() {
 
 //---------------GENERAL----------------------------------------------------
 
-void Exporter::write_word(const std::string& ss, bool newLine) {
+void Exporter::write_word(const std::string& ss) {
     !startedLine_ ? write_indentation() : void();
     *output_ << ss;
-    newLine ? startedLine_ = false : true;
 }
 
 void Exporter::write_space() {
@@ -27,14 +28,18 @@ void Exporter::write_space() {
 //---------------SPECIFIC---------------------------------------------------
 
 void Exporter::write_indentation() {
+    config_->show_row_number() ? write_row_number() : void();
+    *output_ << "  ";
     for (int i = 0; i < currentIndentation_; ++i) {
         *output_ << config_->get_tab_word()->str();
-        startedLine_ = true;
     }
+    startedLine_ = true;
 }
 
 void Exporter::write_new_line() {
-    write_word("\n", true);
+    write_word("\n");
+    startedLine_ = false;
+    ++row_;
 }
 
 void Exporter::write_curl_bracket(const std::string& s) {
@@ -43,6 +48,10 @@ void Exporter::write_curl_bracket(const std::string& s) {
 
 void Exporter::write_round_bracket(const std::string& s) {
     write_word(s);
+}
+
+void Exporter::write_dynamic_type() {
+    write_word("dynamic");
 }
 
 void Exporter::write_int_type() {
@@ -63,6 +72,58 @@ void Exporter::write_bool_type() {
 
 void Exporter::write_void_type() {
     write_word(config_->get_void_word()->str());
+}
+
+void Exporter::write_user_type(const std::string& usertype) {
+    write_word(usertype);
+}
+
+void Exporter::write_int_val(const int val) {
+    write_word(std::to_string(val));
+}
+
+void Exporter::write_float_val(const float val) {
+    write_word(std::to_string(val));
+}
+
+void Exporter::write_char_val(const char val) {
+    write_word(std::to_string(val));
+}
+
+void Exporter::write_string_val(const std::string& val) {
+    write_word(val);
+}
+
+void Exporter::write_bool_val(const bool val) {
+    val ? write_word("true") : write_word("false");
+}
+
+void Exporter::write_null_val() {
+    write_word("NULL");
+}
+
+void Exporter::write_param_var_name(const std::string& name) {
+    write_word(name);
+}
+
+void Exporter::write_local_var_name(const std::string& name) {
+    write_word(name);
+}
+
+void Exporter::write_member_var_name(const std::string& name) {
+    write_word(name);
+}
+
+void Exporter::write_global_var_name(const std::string& name) {
+    write_word(name);
+}
+
+void Exporter::write_function_name(const std::string& name) {
+    write_word(name);
+}
+
+void Exporter::write_method_name(const std::string& name) {
+    write_word(name);
 }
 
 void Exporter::write_assign_word() {
@@ -123,4 +184,20 @@ void Exporter::write_case_word() {
 
 void Exporter::write_this_word() {
     write_word(config_->get_this_word()->str());
+}
+
+void Exporter::write_unknown_type() {
+    write_word("unk-type");
+}
+
+void Exporter::write_unknown_expr() {
+    write_word("unk-expr");
+}
+
+void Exporter::write_unknown_stat() {
+    write_word("unk-stat");
+}
+
+void Exporter::write_row_number() {
+    *output_ << std::setw(3) << row_ << ".";
 }

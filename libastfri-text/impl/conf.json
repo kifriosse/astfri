@@ -29,7 +29,8 @@
         "show_method_body":true,
         "show_method_definition":true,
         "show_function_body":true,
-        "open_bracket_new_line":true
+        "open_bracket_new_line":true,
+        "show_row_number":true
     },
     "system_names":{
         "class":"TRIEDA",
