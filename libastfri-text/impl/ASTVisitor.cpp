@@ -7,6 +7,8 @@ ASTVisitor::ASTVisitor(const Configurator* conf, std::stringstream* output) {
         exporter_ = new TxtFileExporter(config_, output);
     } else if (format == "rtf") {
         exporter_ = new RtfFileExporter(config_, output);
+    } else if (format == "html") {
+        exporter_ = new HtmlFileExporter(config_, output);
     } else {
         exporter_ = new TxtFileExporter(config_, output);
     }
@@ -478,7 +480,8 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
         stmt.func_->retType_->accept(*this);
         exporter_->write_space();
     }
-    exporter_->write_word(stmt.owner_->name_ + "::" + stmt.func_->name_);
+    exporter_->write_class_name(stmt.owner_->name_);
+    exporter_->write_word("::" + stmt.func_->name_);
     exporter_->write_round_bracket("(");
     for (size_t i = 0; i < stmt.func_->params_.size(); ++i) {
         if (stmt.func_->params_.at(i)) {
@@ -521,7 +524,7 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     }
     exporter_->write_class_word();
     exporter_->write_space();
-    exporter_->write_word(stmt.name_);
+    exporter_->write_class_name(stmt.name_);
     if (config_->open_bracket_new_line()) {
         exporter_->write_new_line();
     } else {

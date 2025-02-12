@@ -14,12 +14,15 @@ public:
     //---------------GENERAL----------------------------------------------------
     std::stringstream* get_output() { return output_; };
     const Configurator* get_config() { return config_; };
+    int get_indentation() { return currentIndentation_; };
+    void set_started_line(bool b) { startedLine_ = b; };
     void increase_indentation() { ++currentIndentation_; };
     void decrease_indentation() { --currentIndentation_; };
     void write_word(const std::string& ss, bool newLine = false);
     void write_space();
-    void write_new_line();
     //---------------SPECIFIC---------------------------------------------------
+    virtual void write_indentation();
+    virtual void write_new_line();
     virtual void write_curl_bracket(const std::string& s);
     virtual void write_round_bracket(const std::string& s);
     virtual void write_int_type();
@@ -31,6 +34,7 @@ public:
     virtual void write_private_word();
     virtual void write_public_word();
     virtual void write_class_word();
+    virtual void write_class_name(const std::string& name);
     virtual void write_if_word();
     virtual void write_else_word();
     virtual void write_for_word();
@@ -41,6 +45,4 @@ public:
     virtual void write_switch_word();
     virtual void write_case_word();
     virtual void write_this_word();
-private:
-    void write_indentation();
 };

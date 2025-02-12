@@ -71,6 +71,17 @@ Configurator::Configurator(const std::string& configFileName) {
                 publicWord_ = new std::stringstream(accMod["public"].GetString());
             }
         }
+        if (genOut.HasMember("formatting") && genOut["formatting"].IsObject() && !genOut["formatting"].IsNull()) {//-----formatting-----
+            rj::Value& formm = genOut["formatting"];
+            if (formm.HasMember("class_word_color") && formm["class_word_color"].IsString()) {
+                delete classWordColor_;
+                classWordColor_ = new std::stringstream(formm["class_word_color"].GetString());
+            }
+            if (formm.HasMember("class_name_color") && formm["class_name_color"].IsString()) {
+                delete classNameColor_;
+                classNameColor_ = new std::stringstream(formm["class_name_color"].GetString());
+            }
+        }
     }
     if (doc.HasMember("basic_format") && doc["basic_format"].IsObject() && !doc["basic_format"].IsNull()) {//----------basic_format----------
         rj::Value& basForm = doc["basic_format"];
@@ -78,7 +89,7 @@ Configurator::Configurator(const std::string& configFileName) {
             delete outputFormat_;
             outputFormat_ = new std::stringstream(basForm["format"].GetString());
         }
-        if (basForm.HasMember("indentation") && basForm["indentation"].IsString() && basForm["indentation"].GetStringLength() > 0) {
+        if (basForm.HasMember("indentation") && basForm["indentation"].IsString() && basForm["indentation"].GetStringLength() < 9) {
             delete tabWord_;
             tabWord_ = new std::stringstream(basForm["indentation"].GetString());
         }
@@ -173,6 +184,8 @@ Configurator::~Configurator() {
     delete switchWord_;
     delete caseWord_;
     delete thisWord_;
+    delete classWordColor_;
+    delete classNameColor_;
 }
 
 void Configurator::set_defaults() {
@@ -205,4 +218,6 @@ void Configurator::set_defaults() {
     switchWord_ = new std::stringstream("switch");
     caseWord_ = new std::stringstream("case");
     thisWord_ = new std::stringstream("this");
+    classWordColor_ = new std::stringstream("black");
+    classNameColor_ = new std::stringstream("black");
 }

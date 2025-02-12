@@ -24,9 +24,7 @@ void Exporter::write_space() {
     write_word(" ");
 }
 
-void Exporter::write_new_line() {
-    write_word("\n", true);
-}
+//---------------SPECIFIC---------------------------------------------------
 
 void Exporter::write_indentation() {
     for (int i = 0; i < currentIndentation_; ++i) {
@@ -35,7 +33,9 @@ void Exporter::write_indentation() {
     }
 }
 
-//---------------SPECIFIC---------------------------------------------------
+void Exporter::write_new_line() {
+    write_word("\n", true);
+}
 
 void Exporter::write_curl_bracket(const std::string& s) {
     write_word(s);
@@ -79,6 +79,10 @@ void Exporter::write_public_word() {
 
 void Exporter::write_class_word() {
     write_word(config_->get_class_word()->str());
+}
+
+void Exporter::write_class_name(const std::string& name) {
+    write_word(name);
 }
 
 void Exporter::write_if_word() {

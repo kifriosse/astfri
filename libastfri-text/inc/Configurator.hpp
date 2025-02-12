@@ -34,6 +34,9 @@ private:
     const std::stringstream* switchWord_;
     const std::stringstream* caseWord_;
     const std::stringstream* thisWord_;
+    //-------------------------------------------
+    const std::stringstream* classWordColor_;
+    const std::stringstream* classNameColor_;
 public:
     Configurator(const std::string& configFileName);
     ~Configurator();
@@ -66,6 +69,8 @@ public:
     const std::stringstream* get_switch_word() const { return switchWord_; };
     const std::stringstream* get_case_word() const { return caseWord_; };
     const std::stringstream* get_this_word() const { return thisWord_; };
+    const std::stringstream* get_class_word_color() const { return classWordColor_; };
+    const std::stringstream* get_class_name_color() const { return classNameColor_; };
 private:
     void set_defaults();
 };

@@ -1,5 +1,6 @@
 #include <libastfri-text/impl/TxtFileExporter.cpp>
 #include <libastfri-text/impl/RtfFileExporter.cpp>
+#include <libastfri-text/impl/HtmlFileExporter.cpp>
 #include <libastfri-text/impl/Configurator.cpp>
 #include <libastfri-text/impl/ASTVisitor.cpp>
 #include <libastfri-text/impl/Exporter.cpp>

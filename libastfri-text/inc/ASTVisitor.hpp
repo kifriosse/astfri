@@ -1,5 +1,6 @@
 #include <libastfri-text/inc/TxtFileExporter.hpp>
 #include <libastfri-text/inc/RtfFileExporter.hpp>
+#include <libastfri-text/inc/HtmlFileExporter.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
