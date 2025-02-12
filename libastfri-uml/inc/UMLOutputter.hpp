@@ -23,6 +23,7 @@ namespace uml {
         virtual void close_class() = 0;
 
         virtual void add_data_member(VarStruct v) = 0;
+        virtual void add_function_member(MethodStruct m) = 0;
     
     };
 

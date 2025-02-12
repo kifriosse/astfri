@@ -25,6 +25,10 @@ namespace uml {
         void set_outputter(UMLOutputter* outputter);
 
         void visit (astfri::IntType const& type) override;
+        void visit (astfri::FloatType const& type) override;
+        void visit (astfri::CharType const& type) override;
+        void visit (astfri::BoolType const& type) override;
+        void visit (astfri::VoidType const& type) override;
         
         void visit (astfri::ParamVarDefStmt const& stmt) override;
 

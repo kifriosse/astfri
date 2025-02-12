@@ -1,12 +1,8 @@
-add_library(uml-class-visitor)
-target_sources(uml-class-visitor PRIVATE
-    ClassVisitor.cpp
-)
-target_link_libraries(uml-class-visitor PRIVATE astfri-core)
-
-add_library(uml-outputter)
-target_sources(uml-outputter PRIVATE
+add_library(astfri-uml)
+target_sources(astfri-uml PRIVATE
     UMLOutputter.cpp
     PlantUMLOutputter.cpp
+    ClassVisitor.cpp
+    TypeConvention.cpp
 )
-target_link_libraries(uml-outputter PRIVATE astfri-core)
+target_link_libraries(astfri-uml PRIVATE astfri-core)

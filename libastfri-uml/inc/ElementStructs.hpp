@@ -8,17 +8,17 @@ namespace uml {
         std::string name_;
         std::string genericParam_;
     };
+    
+    struct VarStruct {
+        std::string name_;
+        std::string type_;
+        std::string init_;
+    };
 
     // w.i.p. with just a single param, TODO
     struct MethodStruct {
         std::string name_;
         std::string retType_;
-        std::string param_;
-    };
-
-    struct VarStruct {
-        std::string name_;
-        std::string type_;
-        std::string init_;
+        VarStruct param_;
     };
 } // namespace uml

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libastfri-uml/inc/UMLOutputter.hpp>
+#include "libastfri-uml/inc/ElementStructs.hpp"
 
 namespace uml {
     class PlantUMLOutputter : public UMLOutputter {
@@ -11,6 +12,7 @@ namespace uml {
         virtual void close_class() override;
 
         virtual void add_data_member(VarStruct v) override;
+        virtual void add_function_member(MethodStruct m) override;
     };
 
 } // namespace uml

@@ -18,6 +18,5 @@ target_sources(uml-external-example PRIVATE
 )
 target_link_libraries(uml-external-example PRIVATE
 	astfri-core
-	uml-outputter
-	uml-class-visitor
+	astfri-uml
 )

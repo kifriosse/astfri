@@ -1,16 +1,12 @@
 #pragma once
 
-#include <string>
+#include <libastfri-uml/inc/TypeConvention.hpp>
 
 namespace uml {
-    enum class TypeConvention {
-        TYPE_BEFORE_NAME = 0,
-        TYPE_AFTER_NAME
-    };
-
     struct Config {
         // type var, var : type
-        TypeConvention typeConvention_;
+        TypeConvention* typeConvention_;
+        char separator_ = ' ';
         std::string intTypeName_ = "int";
         std::string floatTypeName_ = "float";
         std::string charTypeName_ = "char";
