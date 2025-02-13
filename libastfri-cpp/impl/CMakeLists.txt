@@ -40,7 +40,6 @@ add_library(
   astfri-cpp SHARED
     ClangManagement.cpp
     ClangVisitor.cpp
-    CppASTVisitor.cpp #pridane pre Visitora
 )
 
 # Public compile options
