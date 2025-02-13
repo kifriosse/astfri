@@ -12,4 +12,11 @@ target_sources(uml-class-example PRIVATE
 target_compile_options(uml-class-example PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(uml-class-example PRIVATE astfri-core)
 
-#extracting target_compile_options into ../CMakeLists.txt with PUBLIC modifier?
+add_executable(uml-external-example)
+target_sources(uml-external-example PRIVATE
+	example_external.cpp
+)
+target_link_libraries(uml-external-example PRIVATE
+	astfri-core
+	astfri-uml
+)
