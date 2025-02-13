@@ -27,11 +27,11 @@ public:
     UserType* mk_user (std::string const& name);
 
 public:
-    TypeFactory(TypeFactory const&)     = delete;
+    TypeFactory (TypeFactory const&)    = delete;
     void operator= (TypeFactory const&) = delete;
 
 private:
-    TypeFactory() = default;
+    TypeFactory () = default;
 
 private:
     IntType int_;

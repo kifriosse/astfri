@@ -19,7 +19,7 @@ public:
     static ExprFactory& get_instance ();
 
 public:
-    ~ExprFactory() = default;
+    ~ExprFactory () = default;
 
     IntLiteralExpr* mk_int_literal (int val);
     FloatLiteralExpr* mk_float_literal (float val);
@@ -53,8 +53,8 @@ public:
     UnknownExpr* mk_unknown ();
 
 private:
-    ExprFactory()                       = default;
-    ExprFactory(ExprFactory const&)     = delete;
+    ExprFactory ()                      = default;
+    ExprFactory (ExprFactory const&)    = delete;
     void operator= (ExprFactory const&) = delete;
 
 private:

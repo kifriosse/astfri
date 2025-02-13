@@ -25,8 +25,7 @@ struct MkVisitable : virtual IVisitable
  * @brief TODO
  */
 template<typename Map>
-concept map_like = requires(Map m, typename Map::key_type k)
-{
+concept map_like = requires(Map m, typename Map::key_type k) {
     m.find(k);
     m.begin();
     m.end();
@@ -37,10 +36,8 @@ concept map_like = requires(Map m, typename Map::key_type k)
  * @brief TODO
  */
 template<typename Vector>
-concept vector_like = requires(Vector v, typename Vector::value_type x)
-{
-    v.push_back(x);
-};
+concept vector_like
+    = requires(Vector v, typename Vector::value_type x) { v.push_back(x); };
 
 /**
  * @brief Gets pointer to value from @p map if exists or constructs a new value

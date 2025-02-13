@@ -2,14 +2,14 @@
 
 namespace astfri
 {
-VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
+VarDefStmt::VarDefStmt (std::string name, Type* type, Expr* initializer) :
     name_(std::move(name)),
     type_(type),
     initializer_(initializer)
 {
 }
 
-LocalVarDefStmt::LocalVarDefStmt(
+LocalVarDefStmt::LocalVarDefStmt (
     std::string name,
     Type* type,
     Expr* initializer
@@ -18,7 +18,7 @@ LocalVarDefStmt::LocalVarDefStmt(
 {
 }
 
-ParamVarDefStmt::ParamVarDefStmt(
+ParamVarDefStmt::ParamVarDefStmt (
     std::string name,
     Type* type,
     Expr* initializer
@@ -27,7 +27,18 @@ ParamVarDefStmt::ParamVarDefStmt(
 {
 }
 
-MemberVarDefStmt::MemberVarDefStmt(
+MemberVarDefStmt::MemberVarDefStmt (
+    std::string name,
+    Type* type,
+    Expr* initializer,
+    AccessModifier access
+) :
+    VarDefStmt(name, type, initializer),
+    access_(access)
+{
+}
+
+GlobalVarDefStmt::GlobalVarDefStmt (
     std::string name,
     Type* type,
     Expr* initializer
@@ -36,16 +47,7 @@ MemberVarDefStmt::MemberVarDefStmt(
 {
 }
 
-GlobalVarDefStmt::GlobalVarDefStmt(
-    std::string name,
-    Type* type,
-    Expr* initializer
-) :
-    VarDefStmt(name, type, initializer)
-{
-}
-
-FunctionDefStmt::FunctionDefStmt(
+FunctionDefStmt::FunctionDefStmt (
     std::string name,
     std::vector<ParamVarDefStmt*> params,
     Type* retType,
@@ -58,13 +60,18 @@ FunctionDefStmt::FunctionDefStmt(
 {
 }
 
-MethodDefStmt::MethodDefStmt(ClassDefStmt* owner, FunctionDefStmt* func) :
+MethodDefStmt::MethodDefStmt (
+    ClassDefStmt* owner,
+    FunctionDefStmt* func,
+    AccessModifier access
+) :
     owner_(owner),
-    func_(func)
+    func_(func),
+    access_(access)
 {
 }
 
-ClassDefStmt::ClassDefStmt(
+ClassDefStmt::ClassDefStmt (
     std::string name,
     std::vector<MemberVarDefStmt*> vars,
     std::vector<MethodDefStmt*> methods,
@@ -77,55 +84,75 @@ ClassDefStmt::ClassDefStmt(
 {
 }
 
-GenericParam::GenericParam(std::string constraint, std::string name) :
+GenericParam::GenericParam (std::string constraint, std::string name) :
     constraint_(std::move(constraint)),
     name_(std::move(name))
 {
 }
 
-CompoundStmt::CompoundStmt(std::vector<Stmt*> stmts) : stmts_(std::move(stmts))
+CompoundStmt::CompoundStmt (std::vector<Stmt*> stmts) :
+    stmts_(std::move(stmts))
 {
 }
 
-ReturnStmt::ReturnStmt(Expr* val) : val_(val) { }
+ReturnStmt::ReturnStmt (Expr* val) :
+    val_(val)
+{
+}
 
-ExprStmt::ExprStmt(Expr* expr) : expr_(expr) { }
+ExprStmt::ExprStmt (Expr* expr) :
+    expr_(expr)
+{
+}
 
-IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
+IfStmt::IfStmt (Expr* cond, Stmt* iftrue, Stmt* iffalse) :
     cond_(cond),
     iftrue_(iftrue),
     iffalse_(iffalse)
 {
 }
 
-CaseStmt::CaseStmt(Expr* expr, Stmt* body) : expr_(expr), body_(body) { }
+CaseStmt::CaseStmt (Expr* expr, Stmt* body) :
+    expr_(expr),
+    body_(body)
+{
+}
 
-SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases) :
+SwitchStmt::SwitchStmt (Expr* expr, std::vector<CaseStmt*> cases) :
     expr_(expr),
     cases_(std::move(cases))
 {
 }
 
-LoopStmt::LoopStmt(Expr* cond, CompoundStmt* body) :
+LoopStmt::LoopStmt (Expr* cond, CompoundStmt* body) :
     cond_(cond),
-    body_(body) { }
-
-WhileStmt::WhileStmt(Expr* cond, CompoundStmt* body) : LoopStmt(cond, body) { }
-
-DoWhileStmt::DoWhileStmt(Expr* cond, CompoundStmt* body) : LoopStmt(cond, body)
+    body_(body)
 {
 }
 
-ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body) :
+WhileStmt::WhileStmt (Expr* cond, CompoundStmt* body) :
+    LoopStmt(cond, body)
+{
+}
+
+DoWhileStmt::DoWhileStmt (Expr* cond, CompoundStmt* body) :
+    LoopStmt(cond, body)
+{
+}
+
+ForStmt::ForStmt (Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body) :
     LoopStmt(cond, body),
     init_(init),
     step_(step)
 {
 }
 
-ThrowStmt::ThrowStmt(Expr* val) : val_(val) { }
+ThrowStmt::ThrowStmt (Expr* val) :
+    val_(val)
+{
+}
 
-TranslationUnit::TranslationUnit(
+TranslationUnit::TranslationUnit (
     std::vector<ClassDefStmt*> classes,
     std::vector<FunctionDefStmt*> functions,
     std::vector<GlobalVarDefStmt*> globals

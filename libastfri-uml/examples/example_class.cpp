@@ -61,7 +61,8 @@ int main()
     auto varNumber = statements.mk_member_var_def(
         "number",
         types.mk_int(),
-        nullptr
+        nullptr,
+        astfri::AccessModifier::Public
     );
 
     std::vector<astfri::MemberVarDefStmt*> memberVariables;
