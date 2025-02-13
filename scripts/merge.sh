@@ -54,7 +54,7 @@ possibly_die "Failed to prepare build"
 
 # Try to build the project
 cd build/release
-make
+make -j10
 possibly_die "Failed to build the project"
 cd ../..
 

@@ -1,10 +1,10 @@
-#include <libastfri-text/impl/HtmlFileExporter.cpp>
-#include <libastfri-text/impl/PdfFileExporter.cpp>
-#include <libastfri-text/impl/RtfFileExporter.cpp>
-#include <libastfri-text/impl/TxtFileExporter.cpp>
-#include <libastfri-text/impl/Configurator.cpp>
-#include <libastfri-text/impl/ASTVisitor.cpp>
-#include <libastfri-text/impl/Exporter.cpp>
+#include <libastfri-text/inc/HtmlFileExporter.hpp>
+#include <libastfri-text/inc/PdfFileExporter.hpp>
+#include <libastfri-text/inc/RtfFileExporter.hpp>
+#include <libastfri-text/inc/TxtFileExporter.hpp>
+#include <libastfri-text/inc/Configurator.hpp>
+#include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-text/inc/Exporter.hpp>
 #include <libastfri-text/inl/ASTLoader.inl>
 
 int main() {
