@@ -1,51 +1,19 @@
-#include "CodeVisitor.cpp"
-#include <filesystem>
-#include <iostream>
-#include <fstream>
-
-void vypis(std::string*& output) {
-    std::string userInput;
-    std::cout << "Pre výpis do súboru zadaj \"yes\" , inak sa vypíše do konzoly: ";
-    std::getline(std::cin, userInput);
-    if (userInput == "yes") {
-        namespace fs = std::filesystem;
-        std::cout << "Zadaj názov súboru bez prípony: ";
-        std::getline(std::cin, userInput);
-        userInput.append(".txt");
-        fs::path cestaKAstfri_text = fs::current_path().parent_path().parent_path().parent_path() / "libastfri-text" / "impl" / userInput;
-        std::ofstream file(cestaKAstfri_text);
-        if (file) {
-            file << *output;
-            std::cout << "Zápis prebehol úspešne!\n";
-        }
-        file.close();
-    } else {
-        std::cout << *output;
-    }
-}
+#include <libastfri-text/impl/HtmlFileExporter.cpp>
+#include <libastfri-text/impl/PdfFileExporter.cpp>
+#include <libastfri-text/impl/RtfFileExporter.cpp>
+#include <libastfri-text/impl/TxtFileExporter.cpp>
+#include <libastfri-text/impl/Configurator.cpp>
+#include <libastfri-text/impl/ASTVisitor.cpp>
+#include <libastfri-text/impl/Exporter.cpp>
+#include <libastfri-text/inl/ASTLoader.inl>
 
 int main() {
-    std::string* basicOutput = new std::string();
-    CodeVisitor cv(basicOutput);
+    std::stringstream* output = new std::stringstream();
+    const Configurator* config = new Configurator("conf.json");
+    ASTVisitor* visitor = new ASTVisitor(config, output);
 
-    /*{ // priestor pre testovanie
-        astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
-        astfri::StmtFactory& statements = astfri::StmtFactory::get_instance();
-        astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
-        statements.mk_switch(
-            expressions.mk_local_var_ref("moznost"),
-            {
-                statements.mk_case(expressions.mk_string_literal("a"), statements.mk_compound({ statements.mk_uknown(), statements.mk_return(expressions.mk_char_literal('A')) })),
-                statements.mk_case(expressions.mk_string_literal("b"), statements.mk_compound({ statements.mk_uknown(), statements.mk_return(expressions.mk_char_literal('B')) })),
-                statements.mk_case(expressions.mk_string_literal("c"), statements.mk_compound({ statements.mk_uknown(), statements.mk_return(expressions.mk_char_literal('C')) }))
-            }
-        )->accept(cv);
-        expressions.mk_int_literal({})->accept(cv);
-        types.mk_user({})->accept(cv);
-        statements.mk_local_var_def("localka", types.mk_bool(), {})->accept(cv);
-        std::cout << "\n";
-        statements.mk_class_def("krj", {}, {}, {{}, {}})->accept(cv);
-    }*/
+    my_ast_trees::load_ast_tree_2(*visitor);
+    visitor->write_file();
 
     { // priklad s jednoduchou triedou
         //class TestClass {
@@ -92,4 +60,7 @@ int main() {
     }*/
 
     vypis(basicOutput);
+    delete visitor;
+    delete config;
+    delete output;
 }
