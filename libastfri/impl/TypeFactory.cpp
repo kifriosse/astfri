@@ -2,43 +2,43 @@
 
 namespace astfri
 {
-TypeFactory& TypeFactory::get_instance()
+TypeFactory& TypeFactory::get_instance ()
 {
     static TypeFactory instance;
     return instance;
 }
 
-IntType* TypeFactory::mk_int()
+IntType* TypeFactory::mk_int ()
 {
     return &int_;
 }
 
-FloatType* TypeFactory::mk_float()
+FloatType* TypeFactory::mk_float ()
 {
     return &float_;
 }
 
-CharType* TypeFactory::mk_char()
+CharType* TypeFactory::mk_char ()
 {
     return &char_;
 }
 
-BoolType* TypeFactory::mk_bool()
+BoolType* TypeFactory::mk_bool ()
 {
     return &bool_;
 }
 
-VoidType* TypeFactory::mk_void()
+VoidType* TypeFactory::mk_void ()
 {
     return &void_;
 }
 
-UnknownType* TypeFactory::mk_unknown()
+UnknownType* TypeFactory::mk_unknown ()
 {
     return &unknown_;
 }
 
-IndirectionType* TypeFactory::mk_indirect(Type* type)
+IndirectionType* TypeFactory::mk_indirect (Type* type)
 {
     auto const it = indirect_.find(type);
     if (it != indirect_.end())
@@ -48,7 +48,7 @@ IndirectionType* TypeFactory::mk_indirect(Type* type)
     return &indirect_.try_emplace(type, type).first->second;
 }
 
-UserType* TypeFactory::mk_user(std::string const& name)
+UserType* TypeFactory::mk_user (std::string const& name)
 {
     auto const it = user_.find(name);
     if (it != user_.end())

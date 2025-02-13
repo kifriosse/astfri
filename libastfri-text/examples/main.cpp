@@ -34,11 +34,11 @@ int main() {
     statements.mk_method_def(cds, statements.mk_function_def(cds->name_, constructorParams, types.mk_user(cds->name_), statements.mk_compound({
         statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("a"), expressions.mk_param_var_ref("cislo1"))),
         statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("b"), expressions.mk_param_var_ref("cislo2")))
-    }))),
-    statements.mk_method_def(cds, statements.mk_function_def("~TestClass", {}, types.mk_unknown(), {})),
+    })), astfri::AccessModifier::Public),
+    statements.mk_method_def(cds, statements.mk_function_def("~TestClass", {}, types.mk_unknown(), {}), astfri::AccessModifier::Public),
     statements.mk_method_def(cds, statements.mk_function_def("getCislo", {}, types.mk_int(), statements.mk_compound({
       statements.mk_return(expressions.mk_bin_on(expressions.mk_member_var_ref("a"), astfri::BinOpType::Multiply, expressions.mk_member_var_ref("b")))
-    })))
+    })), astfri::AccessModifier::Public)
   };
   cds = statements.mk_class_def(cds->name_, atributes, methods, {});
   ClassVisitor cv;
