@@ -1,11 +1,6 @@
-#include <libastfri-text/inc/HtmlFileExporter.hpp>
-#include <libastfri-text/inc/PdfFileExporter.hpp>
-#include <libastfri-text/inc/RtfFileExporter.hpp>
-#include <libastfri-text/inc/TxtFileExporter.hpp>
-#include <libastfri-text/inc/Configurator.hpp>
 #include <libastfri-text/inc/ASTVisitor.hpp>
-#include <libastfri-text/inc/Exporter.hpp>
-#include <libastfri-text/inl/ASTLoader.inl>
+#include <libastfri-text/inc/Configurator.hpp>
+#include <libastfri-text/examples/ASTLoader.cpp>
 
 int main() {
     std::stringstream* output = new std::stringstream();

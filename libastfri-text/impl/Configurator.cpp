@@ -1,6 +1,6 @@
 #include <libastfri-text/inc/Configurator.hpp>
-#include <rapidjson/filereadstream.h>
-#include <rapidjson/document.h>
+#include <lib/rapidjson/filereadstream.h>
+#include <lib/rapidjson/document.h>
 #include <filesystem>
 
 Configurator::Configurator(const std::string& configFileName) {
