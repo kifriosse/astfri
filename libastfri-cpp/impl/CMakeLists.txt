@@ -61,7 +61,7 @@ target_include_directories(
 # Link the core module and clang libraries
 target_link_libraries(
   astfri-cpp PUBLIC
-    astfri-core
+    as
     clang
     clangAST
     clangASTMatchers

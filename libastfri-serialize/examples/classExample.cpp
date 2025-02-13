@@ -31,7 +31,7 @@ int main(){
   auto& expressions = astfri::ExprFactory::get_instance();
   auto& types = astfri::TypeFactory::get_instance();
 
-
+  
 std::vector<astfri::MemberVarDefStmt*> attributes{ 
         statements.mk_member_var_def("symbol",types.mk_char(),
                                         expressions.mk_char_literal('*')),
