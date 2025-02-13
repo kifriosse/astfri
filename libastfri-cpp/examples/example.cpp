@@ -31,5 +31,18 @@ namespace jojoNamespace {
             delete name;
         }
     };
+    
+    void metodaOdVeci2(void* lol) {
+        lol = lol;
+    }
+    int metodaOdVeci() {
+        char easterEgg[] = "Toto nieje easter egg, len troll";
+        long java = 3405691581; // Toto uz je easter egg
+        java++;
+        metodaOdVeci2(easterEgg);
+        metodaOdVeci2(&java);
+        return 'J'; // Ako Jojo
+    }
+
 
 }
