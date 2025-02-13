@@ -79,14 +79,15 @@ int main()
     auto varNumber = statements.mk_member_var_def(
         "number",
         types.mk_int(),
-        nullptr
+        nullptr,
+        astfri::AccessModifier::Public
     );
 
     std::vector<astfri::MemberVarDefStmt*> memberVariables;
     memberVariables.push_back(varNumber);
 
     std::vector<astfri::MethodDefStmt*> methods;
-    astfri::MethodDefStmt* method = statements.mk_method_def(nullptr, func);
+    astfri::MethodDefStmt* method = statements.mk_method_def(nullptr, func, astfri::AccessModifier::Public);
     methods.push_back(method);
     std::vector<astfri::GenericParam*> genericParams;
     //Statement factory has no mk_generic_param

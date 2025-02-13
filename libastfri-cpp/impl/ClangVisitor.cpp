@@ -26,7 +26,8 @@ bool ClangVisitor::VisitCXXRecordDecl(clang::CXXRecordDecl *RD) {
         this->tu_->classes_.back()->vars_.push_back(this->stmt_factory.mk_member_var_def(
             field->getNameAsString(),
             this->type_factory.mk_user(field->getType().getAsString()),
-            this->expr_factory.mk_int_literal(100))
+            this->expr_factory.mk_int_literal(100),
+            astfri::AccessModifier::Public)
         );
     }
 
