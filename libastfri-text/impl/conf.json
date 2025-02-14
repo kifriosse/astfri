@@ -5,7 +5,7 @@
         "view":"vnutorny",
         "data_types":{
             "int":"CELECISLO",
-            "float":"DESATINA",
+            "float":"FLOAT",
             "char":"ZNAK",
             "bool":"BOOLEAN",
             "void":"VOID"
@@ -14,8 +14,8 @@
             "assign":"<-"
         },
         "access_mods":{
-            "private":"súkromné",
-            "public":"verejné"
+            "private":"PRIVATE",
+            "public":"PUBLIC"
         },
         "formatting":{
             "class_word_color":"red",
@@ -24,7 +24,7 @@
     },
     "basic_format":{
         "format":"html",
-        "indentation":"     ",
+        "indentation":"    ",
         "show_class_body":true,
         "show_method_body":true,
         "show_method_definition":true,
@@ -34,11 +34,11 @@
     },
     "system_names":{
         "class":"TRIEDA",
-        "if":"AK",
-        "else":"INAK",
+        "if":"AK PLATÍ",
+        "else":"INAK VYKONAJ",
         "for":"PRE",
-        "while":"POKIAL",
-        "do":"ROB",
+        "while":"KÝM PLATÍ",
+        "do":"VYKONAJ",
         "return":"VRÁŤ",
         "throw":"VYHOĎ",
         "switch":"VYBER",

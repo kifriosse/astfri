@@ -2,7 +2,7 @@
 #include <libastfri-text/inc/Exporter.hpp>
 
 struct HtmlFileExporter : Exporter {
-    HtmlFileExporter(const Configurator* conf, std::stringstream* output);
+    HtmlFileExporter(Configurator& conf);
     void make_export() override;
     void write_indentation() override;
     void write_new_line() override;
