@@ -1,22 +1,22 @@
 #include <libastfri-text/inc/ASTVisitor.hpp>
 
-ASTVisitor::ASTVisitor(const Configurator* conf, std::stringstream* output) {
-    config_ = conf;
+ASTVisitor::ASTVisitor() {
+    config_ = new Configurator();
     std::string format = config_->get_output_format()->str();
     if (format == "txt") {
-        exporter_ = new TxtFileExporter(config_, output);
+        exporter_ = new TxtFileExporter(*config_);
     } else if (format == "rtf") {
-        exporter_ = new RtfFileExporter(config_, output);
+        exporter_ = new RtfFileExporter(*config_);
     } else if (format == "html") {
-        exporter_ = new HtmlFileExporter(config_, output);
+        exporter_ = new HtmlFileExporter(*config_);
     } else {
-        exporter_ = new TxtFileExporter(config_, output);
+        exporter_ = new TxtFileExporter(*config_);
     }
 }
 
 ASTVisitor::~ASTVisitor() {
     delete exporter_;
-    config_ = nullptr;
+    delete config_;
 }
 
 void ASTVisitor::visit(astfri::IfExpr const& expr) {
@@ -27,24 +27,18 @@ void ASTVisitor::visit(astfri::IfExpr const& expr) {
         expr.cond_->accept(*this);
     }
     exporter_->write_round_bracket(")");
-    write_open_bracket();
+    exporter_->write_space();
+    exporter_->write_do_word();
     if (expr.iftrue_) {
-        exporter_->increase_indentation();
+        exporter_->write_space();
         expr.iftrue_->accept(*this);
-        exporter_->decrease_indentation();
-        exporter_->write_new_line();
     }
-    exporter_->write_curl_bracket("}");
     exporter_->write_space();
     exporter_->write_else_word();
-    write_open_bracket();
     if (expr.iffalse_) {
-        exporter_->increase_indentation();
+        exporter_->write_space();
         expr.iffalse_->accept(*this);
-        exporter_->decrease_indentation();
-        exporter_->write_new_line();
     }
-    exporter_->write_curl_bracket("}");
 }
 
 void ASTVisitor::visit(astfri::BinOpExpr const& expr) {
@@ -469,12 +463,25 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
     exporter_->write_class_name(stmt.name_);
     write_open_bracket();
     if (!stmt.vars_.empty() && config_->show_class_body()) {//atribs
-        exporter_->write_private_word();
+        if (config_->get_view()->str() == "vnutorny") {
+            exporter_->write_private_word();
+            exporter_->write_word(":");
+            exporter_->write_new_line();
+            exporter_->increase_indentation();
+            for (size_t i = 0; i < stmt.vars_.size(); ++i) {
+                if (stmt.vars_.at(i) && stmt.vars_.at(i)->access_ != astfri::AccessModifier::Public) {
+                    stmt.vars_.at(i)->accept(*this);
+                    exporter_->write_new_line();
+                }
+            }
+            exporter_->decrease_indentation();
+        }
+        exporter_->write_public_word();
         exporter_->write_word(":");
         exporter_->write_new_line();
         exporter_->increase_indentation();
         for (size_t i = 0; i < stmt.vars_.size(); ++i) {
-            if (stmt.vars_.at(i)) {
+            if (stmt.vars_.at(i) && stmt.vars_.at(i)->access_ == astfri::AccessModifier::Public) {
                 stmt.vars_.at(i)->accept(*this);
                 exporter_->write_new_line();
             }
@@ -487,7 +494,7 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
         exporter_->write_new_line();
         exporter_->increase_indentation();
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
-            if (stmt.methods_.at(i)) {
+            if (stmt.methods_.at(i) && stmt.methods_.at(i)->access_ == astfri::AccessModifier::Public) {
                 if (stmt.methods_.at(i)->owner_->name_ != stmt.methods_.at(i)->func_->name_ && stmt.methods_.at(i)->func_->name_.at(0) != '~') {
                     stmt.methods_.at(i)->func_->retType_->accept(*this);
                     exporter_->write_space();
@@ -509,6 +516,35 @@ void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
             }
         }
         exporter_->decrease_indentation();
+        if (config_->get_view()->str() == "vnutorny") {
+            exporter_->write_private_word();
+            exporter_->write_word(":");
+            exporter_->write_new_line();
+            exporter_->increase_indentation();
+            for (size_t i = 0; i < stmt.methods_.size(); ++i) {
+                if (stmt.methods_.at(i) && stmt.methods_.at(i)->access_ != astfri::AccessModifier::Public) {
+                    if (stmt.methods_.at(i)->owner_->name_ != stmt.methods_.at(i)->func_->name_ && stmt.methods_.at(i)->func_->name_.at(0) != '~') {
+                        stmt.methods_.at(i)->func_->retType_->accept(*this);
+                        exporter_->write_space();
+                    }
+                    exporter_->write_method_name(stmt.methods_.at(i)->func_->name_);
+                    exporter_->write_round_bracket("(");
+                    if (!stmt.methods_.at(i)->func_->params_.empty()) {
+                        for (size_t j = 0; j < stmt.methods_.at(i)->func_->params_.size(); ++j) {
+                            if (stmt.methods_.at(i)->func_->params_.at(j)) {
+                                stmt.methods_.at(i)->func_->params_.at(j)->accept(*this);
+                                if (j < stmt.methods_.at(i)->func_->params_.size() - 1) {
+                                    exporter_->write_word(", ");
+                                }
+                            }
+                        }
+                    }
+                    exporter_->write_round_bracket(")");
+                    exporter_->write_new_line();
+                }
+            }
+            exporter_->decrease_indentation();
+        }
     }
     exporter_->write_curl_bracket("}");
     exporter_->write_new_line();

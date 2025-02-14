@@ -39,7 +39,7 @@ private:
     const std::stringstream* classWordColor_;
     const std::stringstream* classNameColor_;
 public:
-    Configurator(const std::string& configFileName);
+    Configurator();
     ~Configurator();
     const std::stringstream* get_output_file_name() const { return outputFileName_; };
     const std::stringstream* get_output_type() const { return outputType_; };
