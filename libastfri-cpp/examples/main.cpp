@@ -17,6 +17,8 @@
 #include <vector>
 #include <iostream>
 
+#include <libastfri-text/inc/ASTVisitor.hpp>
+
 
 // AST Consumer
 class CppASTConsumer : public clang::ASTConsumer {
@@ -59,6 +61,9 @@ class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 static llvm::cl::OptionCategory MyToolCategory("my-tool options");
 
 int main(int argc, const char **argv) {
+
+    
+    
     astfri::TranslationUnit tu(
         std::vector<astfri::ClassDefStmt*> {},
         std::vector<astfri::FunctionDefStmt*> {},
@@ -71,11 +76,11 @@ int main(int argc, const char **argv) {
     }
     clang::tooling::ClangTool Tool(OptionsParser->getCompilations(), OptionsParser->getSourcePathList());
     Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
-
-    std::cout << "\n\n\n" << tu.classes_.at(0)->name_ << std::endl;
-    for(auto field : tu.classes_[0]->vars_) {
-        std::cout << field->type_ << " " <<  field->name_ << " = " << field->initializer_ << std::endl;
-    }
+    
+    // AST Visitor - nice
+    ASTVisitor* visitor = new ASTVisitor();
+    visitor->visit(tu);
+    visitor->write_file();
 
     return 0;
 }

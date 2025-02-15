@@ -1,5 +1,9 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 #include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
+#include <clang/AST/APValue.h>
+#include <clang/AST/Decl.h>
+#include <clang/Basic/Specifiers.h>
 #include <iostream>
 #include <vector>
 
@@ -65,15 +69,9 @@ bool ClangVisitor::VisitCXXRecordDecl(clang::CXXRecordDecl *RD) {
         TraverseFunctionDecl(func);
     }
 
-    // prejdenie vsetkych atributov, mozno cez traverse metody by nebolo odveci
+    // prejdenie vsetkych atributov
     for(auto field : RD->fields()) {
-        this->tu_->classes_.back()->vars_.push_back(this->stmt_factory_->mk_member_var_def(
-            field->getNameAsString(),
-            //TODO: fixnut typy
-            this->type_factory_->mk_user(field->getType().getAsString()),
-            this->expr_factory_->mk_int_literal(100),
-            astfri::AccessModifier::Public)
-        );
+        TraverseFieldDecl(field);
     }
 
     delete this->class_index_;
@@ -99,8 +97,78 @@ bool ClangVisitor::VisitParmVarDecl(clang::ParmVarDecl *PVD) {
     return false;
 }
 bool ClangVisitor::VisitFieldDecl(clang::FieldDecl *FD) {
-    llvm::outs() << "Field:" << FD->getNameAsString() << "\n";
-    return false;
+    astfri::AccessModifier access;
+    switch (FD->getAccess()) {
+        case clang::AccessSpecifier::AS_public:
+            access = astfri::AccessModifier::Public;
+            break;
+        case clang::AccessSpecifier::AS_protected:
+            access = astfri::AccessModifier::Protected;
+            break;
+        case clang::AccessSpecifier::AS_private:
+            access = astfri::AccessModifier::Private;
+            break;
+        default:
+            access = astfri::AccessModifier::Public;
+            break;
+    }
+
+    astfri::Type* type;
+    astfri::Expr* init_value = nullptr;
+    auto clang_type = FD->getType();
+
+    if (clang_type->isIntegerType()) {
+        type = this->type_factory_->mk_int();
+    } else if (clang_type->isFloatingType()) {
+        type = this->type_factory_->mk_float();
+    } else if (clang_type->isCharType()) {
+        type = this->type_factory_->mk_char();
+    } else if (clang_type->isBooleanType()) {
+        type = this->type_factory_->mk_bool();
+    } else if (clang_type->isVoidType()) {
+        type = this->type_factory_->mk_void();
+    } else if (clang_type->isPointerType()) {
+        //TODO: pridat ako typ a nie user type
+        type = this->type_factory_->mk_indirect(this->type_factory_->mk_user(clang_type->getPointeeType().getAsString()));
+    } else {
+        type = this->type_factory_->mk_user(clang_type->getTypeClassName());
+    }
+
+    if (FD->hasInClassInitializer()) {
+        const clang::Expr* initExpr = FD->getInClassInitializer();
+        clang::Expr::EvalResult result;
+        
+        //TODO: pre ostatné prípady
+
+        if (initExpr->EvaluateAsRValue(result, FD->getASTContext())) {
+            // pre integer
+            if (result.Val.isInt()) {
+                init_value = this->expr_factory_->mk_int_literal(result.Val.getInt().getSExtValue());
+            }
+            // pre float
+            if (result.Val.isFloat()) {
+                init_value = this->expr_factory_->mk_float_literal(result.Val.getFloat().convertToFloat());
+            }
+            // pre char
+            // if (result.Val) {
+            //     init_value = this->expr_factory_->mk_int_literal(result.Val.getInt().getSExtValue());
+            // }
+            // pre boolean
+            // if (result.Val()) {
+            //     init_value = this->expr_factory_->mk_int_literal(result.Val.getInt().getSExtValue());
+            // }
+        }
+    }
+
+    this->tu_->classes_.back()->vars_.push_back(this->stmt_factory_->mk_member_var_def(
+        FD->getNameAsString(),
+        type,
+        init_value,
+        //TODO: kuknut na internal
+        access
+        )
+    );
+    return true;
 }
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl *ND) {
     llvm::outs() << "Namespace:" << ND->getNameAsString() << "\n";
