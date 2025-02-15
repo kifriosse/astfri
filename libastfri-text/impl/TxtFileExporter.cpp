@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 
-TxtFileExporter::TxtFileExporter(const Configurator* conf, std::stringstream* output) : Exporter(conf, output) {}
+TxtFileExporter::TxtFileExporter(Configurator& conf) : Exporter(conf) {}
 
 void TxtFileExporter::make_export() {
     namespace fs = std::filesystem;

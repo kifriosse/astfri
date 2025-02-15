@@ -1,20 +1,28 @@
 #include <libastfri-text/inc/Exporter.hpp>
 #include <iomanip>
 
-Exporter::Exporter(const Configurator* conf, std::stringstream* output) {
-    config_ = conf;
-    output_ = output;
+Exporter::Exporter(Configurator& conf) {
+    config_ = &conf;
+    output_ = new std::stringstream();
     currentIndentation_ = 0;
     startedLine_ = false;
     row_ = 1;
 }
 
 Exporter::~Exporter() {
+    delete output_;
     config_ = nullptr;
-    output_ = nullptr;
 }
 
 //---------------GENERAL----------------------------------------------------
+
+void Exporter::increase_indentation() {
+    ++currentIndentation_;
+}
+
+void Exporter::decrease_indentation() {
+    --currentIndentation_;
+}
 
 void Exporter::write_word(const std::string& ss) {
     !startedLine_ ? write_indentation() : void();

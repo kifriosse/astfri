@@ -2,6 +2,6 @@
 #include <libastfri-text/inc/Exporter.hpp>
 
 struct RtfFileExporter : Exporter {
-    RtfFileExporter(const Configurator* conf, std::stringstream* output);
+    RtfFileExporter(Configurator& conf);
     void make_export() override;
 };

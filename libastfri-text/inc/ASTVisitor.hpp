@@ -1,5 +1,4 @@
 #include <libastfri-text/inc/HtmlFileExporter.hpp>
-#include <libastfri-text/inc/PdfFileExporter.hpp>
 #include <libastfri-text/inc/RtfFileExporter.hpp>
 #include <libastfri-text/inc/TxtFileExporter.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
@@ -8,10 +7,10 @@
 
 struct ASTVisitor : astfri::IVisitor {
 private:
-    const Configurator* config_;
+    Configurator* config_;
     Exporter* exporter_;
 public:
-    ASTVisitor(const Configurator* conf, std::stringstream* output);
+    ASTVisitor();
     ~ASTVisitor();
     void write_file() { exporter_->make_export(); };
     void visit(astfri::DynamicType const& /*type*/) override { exporter_->write_dynamic_type(); };

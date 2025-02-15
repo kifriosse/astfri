@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 
-HtmlFileExporter::HtmlFileExporter(const Configurator* conf, std::stringstream* output) : Exporter(conf, output) {}
+HtmlFileExporter::HtmlFileExporter(Configurator& conf) : Exporter(conf) {}
 
 void HtmlFileExporter::make_export() {
     std::string userInput = config_->get_output_file_name()->str() + ".html";
@@ -16,8 +16,8 @@ void HtmlFileExporter::make_export() {
         file << "<title>" << userInput << "</title>\n";
         //formatovanie
         file << "<style>\n";
-        file << ".output { font-size: 20px; font-family: Calibri }\n";
-        file << ".class-word { font-weight: bold; color: " << config_->get_class_word_color()->str() << "; font-size: 21px; }\n";
+        file << ".output { font-size: 20px; font-family: Bell MT }\n";
+        file << ".class-word { font-weight: bold; color: " << config_->get_class_word_color()->str() << "; font-size: 20px; }\n";
         file << ".class-name { color: " << config_->get_class_name_color()->str() << " }\n";
         file << "</style>\n";
         file << "</head>\n";

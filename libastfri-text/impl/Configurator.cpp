@@ -1,13 +1,13 @@
 #include <libastfri-text/inc/Configurator.hpp>
-#include <rapidjson/filereadstream.h>
-#include <rapidjson/document.h>
+#include <lib/rapidjson/filereadstream.h>
+#include <lib/rapidjson/document.h>
 #include <filesystem>
 
-Configurator::Configurator(const std::string& configFileName) {
+Configurator::Configurator() {
     set_defaults();
     namespace fs = std::filesystem;
     namespace rj = rapidjson;
-    fs::path configFilePath = fs::current_path().parent_path().parent_path().parent_path() / "libastfri-text" / "impl" / configFileName;
+    fs::path configFilePath = fs::current_path().parent_path().parent_path().parent_path() / "libastfri-text" / "impl" / "conf.json";
     FILE* configFile = fopen(configFilePath.c_str(), "r");
     if (!configFile) {
         return;

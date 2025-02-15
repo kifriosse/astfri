@@ -28,6 +28,7 @@ public:
     bool VisitFunctionDecl(clang::FunctionDecl *FD);
     bool VisitCXXRecordDecl(clang::CXXRecordDecl *RD);
     bool VisitVarDecl(clang::VarDecl *VD);
+    bool VisitParmVarDecl(clang::ParmVarDecl *PVD);
     bool VisitFieldDecl(clang::FieldDecl *FD);
     bool VisitNamespaceDecl(clang::NamespaceDecl *ND);
     bool VisitTypedefDecl(clang::TypedefDecl *TD);
@@ -47,8 +48,12 @@ public:
 private:
     TranslationUnit* tu_;
 
-    StmtFactory& stmt_factory = StmtFactory::get_instance();
-    ExprFactory& expr_factory = ExprFactory::get_instance();
-    TypeFactory& type_factory = TypeFactory::get_instance();
+    StmtFactory* stmt_factory_;
+    ExprFactory* expr_factory_;
+    TypeFactory* type_factory_;
+
+    // context variables
+    int* class_index_ = nullptr;
+    int* method_index_ = nullptr;
 };
 } // namespace libastfri::cpp

@@ -1,14 +1,12 @@
-add_executable(app_mp
-  main.cpp
+add_library(astfri-text SHARED
   ASTVisitor.cpp
   Configurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
-  PdfFileExporter.cpp
   RtfFileExporter.cpp
   TxtFileExporter.cpp
 )
 
-target_compile_options(app_mp PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries(app_mp PRIVATE astfri-core)
-target_include_directories(app_mp PUBLIC ${PROJECT_SOURCE_DIR}/lib)
+target_compile_options(astfri-text PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(astfri-text PRIVATE astfri-core)
+target_include_directories(astfri-text PUBLIC ${PROJECT_SOURCE_DIR}/lib)
