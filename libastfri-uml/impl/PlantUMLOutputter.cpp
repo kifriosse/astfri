@@ -15,18 +15,20 @@ namespace uml {
     }
 
     void PlantUMLOutputter::add_data_member(VarStruct v) {
-        // TODO - access modifier (also in visitor)
-        this->outputString_ += this->config_->typeConvention_->get_string(v.type_, v.name_, this->config_->separator_) + "\n";
+        this->outputString_ += 
+            this->config_->accessPrefix_[(int)v.accessMod_] + 
+            this->config_->typeConvention_->get_string(v.type_, v.name_, this->config_->separator_) + "\n";
     }
 
     void PlantUMLOutputter::add_function_member(MethodStruct m) {
-        // TODO - access modifier (also in visitor)
         std::string header = 
             m.name_ +
             "(" +
             this->config_->typeConvention_->get_string(m.param_.type_, m.param_.name_, this->config_->separator_) +
             ")"
         ;
-        this->outputString_ += this->config_->typeConvention_->get_string(m.retType_, header, this->config_->separator_) + "\n";
+        this->outputString_ += 
+            this->config_->accessPrefix_[(int)m.accessMod_] + 
+            this->config_->typeConvention_->get_string(m.retType_, header, this->config_->separator_) + "\n";
     }
 } // namespace uml

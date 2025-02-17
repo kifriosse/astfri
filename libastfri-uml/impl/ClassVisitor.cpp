@@ -1,6 +1,5 @@
 #include <libastfri-uml/inc/ClassVisitor.hpp>
 #include <string>
-#include "libastfri/inc/Type.hpp"
 
 namespace uml {
     void ClassVisitor::set_config(Config* config) {
@@ -41,6 +40,7 @@ namespace uml {
     void ClassVisitor::visit (astfri::MemberVarDefStmt const& stmt) {
         stmt.type_->accept(*this);
         this->currentVariable_.name_ = stmt.name_;
+        this->currentVariable_.accessMod_ = stmt.access_;
         //if (stmt.initializer_) stmt.initializer_->accept(*this);
         this->outputter_->add_data_member(this->currentVariable_);
     }
@@ -57,6 +57,7 @@ namespace uml {
         stmt.func_->retType_->accept(*this);
         this->currentMethod_.retType_ = this->currentVariable_.type_;
         this->currentMethod_.name_ = stmt.func_->name_;
+        this->currentMethod_.accessMod_ = stmt.access_;
         if (stmt.func_->params_.size() > 0) {
             stmt.func_->params_[0]->accept(*this);
         }

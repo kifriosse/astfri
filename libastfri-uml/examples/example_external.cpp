@@ -80,7 +80,7 @@ int main()
         "number",
         types.mk_int(),
         nullptr,
-        astfri::AccessModifier::Public
+        astfri::AccessModifier::Private
     );
 
     std::vector<astfri::MemberVarDefStmt*> memberVariables;
