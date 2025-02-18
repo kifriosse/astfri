@@ -1,16 +1,39 @@
 public class Dummy {
 
+    private int d;
+
     public int add(int a, int b) {
+        double c = -5.2;
+        if (a >= 2) {
+            a += 5;
+            c = 1 + 2;
+        }
         return a + b;
     }
 
     public boolean printout(boolean s) {
-        s = true;
+        switch(s) {
+            case true:
+                s = false;
+                break;
+            case false:
+                s = true;
+                break;
+        }
         return s;
     }
 
-    public String printString(String s) {
+    public static String printString(String s) {
+        boolean finish = false;
         return s;
     }
 
+    public int sub(int a) {
+        int b = 100;
+
+        for(int i = 0; i < b; i++) {
+            a++;
+        }
+        return b - a;
+    }
 }
