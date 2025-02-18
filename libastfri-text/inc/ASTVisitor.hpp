@@ -1,3 +1,6 @@
+#ifndef LIBASTFRI_TEXT_INC_AST_VISITOR
+#define LIBASTFRI_TEXT_INC_AST_VISITOR
+
 #include <libastfri-text/inc/HtmlFileExporter.hpp>
 #include <libastfri-text/inc/RtfFileExporter.hpp>
 #include <libastfri-text/inc/TxtFileExporter.hpp>
@@ -7,11 +10,10 @@
 
 struct ASTVisitor : astfri::IVisitor {
 private:
-    Configurator* config_;
-    Exporter* exporter_;
+    std::shared_ptr<TextConfigurator> config_;
+    std::unique_ptr<Exporter> exporter_;
 public:
     ASTVisitor();
-    ~ASTVisitor();
     void write_file() { exporter_->make_export(); };
     void visit(astfri::DynamicType const& /*type*/) override { exporter_->write_dynamic_type(); };
     void visit(astfri::IntType const& /*type*/) override { exporter_->write_int_type(); };
@@ -64,3 +66,5 @@ public:
 private:
     void write_open_bracket();
 };
+
+#endif

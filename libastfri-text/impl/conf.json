@@ -1,7 +1,6 @@
 {
     "general_output":{
-        "file_name":"suborik",
-        "type":"text",
+        "file_path":"/mnt/c/users/marek/desktop/suborik",
         "view":"vnutorny",
         "data_types":{
             "int":"CELECISLO",
@@ -14,8 +13,9 @@
             "assign":"<-"
         },
         "access_mods":{
+            "public":"PUBLIC",
             "private":"PRIVATE",
-            "public":"PUBLIC"
+            "protected":"PROTECTED"
         },
         "formatting":{
             "class_word_color":"red",
@@ -24,25 +24,32 @@
     },
     "basic_format":{
         "format":"html",
-        "indentation":"    ",
+        "show_row_num":true,
+        "show_op_br_new_line":true,
+        "show_class_decl":true,
         "show_class_body":true,
+        "show_attribute":true,
         "show_method_body":true,
-        "show_method_definition":true,
+        "show_method_decl":true,
+        "show_method_defin":true,
+        "show_method_defin_inline":false,
+        "show_function_decl":true,
         "show_function_body":true,
-        "open_bracket_new_line":true,
-        "show_row_number":true
+        "tab_word_length":8,
+        "margin_left":6,
+        "row_num_size":15
     },
     "system_names":{
         "class":"TRIEDA",
+        "this":"THIS",
+        "return":"VRÁŤ",
+        "throw":"VYHOĎ",
         "if":"AK PLATÍ",
         "else":"INAK VYKONAJ",
         "for":"PRE",
         "while":"KÝM PLATÍ",
         "do":"VYKONAJ",
-        "return":"VRÁŤ",
-        "throw":"VYHOĎ",
         "switch":"VYBER",
-        "case":"PRÍPAD",
-        "this":"THIS"
+        "case":"PRÍPAD"
     }
 }

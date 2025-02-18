@@ -1,21 +1,26 @@
 #include <libastfri-text/inc/TxtFileExporter.hpp>
-#include <filesystem>
 #include <iostream>
 #include <fstream>
 
-TxtFileExporter::TxtFileExporter(Configurator& conf) : Exporter(conf) {}
+TxtFileExporter::TxtFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(conf) {}
 
 void TxtFileExporter::make_export() {
-    namespace fs = std::filesystem;
-    std::string userInput = config_->get_output_file_name()->str();
-    userInput.append(".txt");
-    fs::path filePath = fs::current_path().parent_path().parent_path() / userInput;
-    std::ofstream file(filePath);
+    std::string filePath = config_->get_output_file_path()->str() + ".txt";
+    std::ofstream file(std::move(filePath));
     if (file) {
-        file << output_->str();
+        file << std::move(output_->str());
+        file.close();
+        std::cout << "Zápis prebehol úspešne!\n";
+        return;
+    }
+    std::cout << "Nastala chyba. Použijem predvolenú cestu!\n";
+    filePath = config_->get_default_output_path()->str() + ".txt";
+    std::ofstream defFile(std::move(filePath));
+    if (defFile) {
+        defFile << std::move(output_->str());
+        defFile.close();
         std::cout << "Zápis prebehol úspešne!\n";
     } else {
-        std::cout << "Nastala chyba pri zápise do súboru!\n";
+        std::cout << "Nastala chyba pri zápise!\n";
     }
-    file.close();
 }

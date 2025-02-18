@@ -1,6 +1,7 @@
 add_library(astfri-text SHARED
   ASTVisitor.cpp
   Configurator.cpp
+  TextConfigurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
   RtfFileExporter.cpp

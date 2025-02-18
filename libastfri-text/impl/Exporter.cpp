@@ -1,20 +1,13 @@
 #include <libastfri-text/inc/Exporter.hpp>
 #include <iomanip>
 
-Exporter::Exporter(Configurator& conf) {
-    config_ = &conf;
-    output_ = new std::stringstream();
+Exporter::Exporter(std::shared_ptr<TextConfigurator> conf) {
+    config_ = conf;
+    output_ = std::make_unique<std::stringstream>();
     currentIndentation_ = 0;
     startedLine_ = false;
     row_ = 1;
 }
-
-Exporter::~Exporter() {
-    delete output_;
-    config_ = nullptr;
-}
-
-//---------------GENERAL----------------------------------------------------
 
 void Exporter::increase_indentation() {
     ++currentIndentation_;
@@ -24,42 +17,52 @@ void Exporter::decrease_indentation() {
     --currentIndentation_;
 }
 
-void Exporter::write_word(const std::string& ss) {
+void Exporter::write_word(std::string word) {
     !startedLine_ ? write_indentation() : void();
-    *output_ << ss;
+    *output_ << std::move(word);
 }
 
 void Exporter::write_space() {
-    write_word(" ");
+    write_word(std::move(" "));
 }
 
-//---------------SPECIFIC---------------------------------------------------
-
 void Exporter::write_indentation() {
-    config_->show_row_number() ? write_row_number() : void();
-    *output_ << "  ";
+    config_->sh_row_number() ? write_row_number() : void();
+    for (int i = 0; i < config_->get_len_left_margin(); ++i) {
+        *output_ << std::move(" ");
+    }
     for (int i = 0; i < currentIndentation_; ++i) {
-        *output_ << config_->get_tab_word()->str();
+        for (int j = 0; j < config_->get_len_tab_word(); ++j) {
+            *output_ << std::move(" ");
+        }
     }
     startedLine_ = true;
 }
 
 void Exporter::write_new_line() {
-    write_word("\n");
+    write_word(std::move("\n"));
     startedLine_ = false;
     ++row_;
 }
 
-void Exporter::write_curl_bracket(const std::string& s) {
-    write_word(s);
+void Exporter::write_curl_bracket(std::string s) {
+    write_word(std::move(s));
 }
 
-void Exporter::write_round_bracket(const std::string& s) {
-    write_word(s);
+void Exporter::write_round_bracket(std::string s) {
+    write_word(std::move(s));
+}
+
+void Exporter::write_operator_sign(std::string s) {
+    write_word(std::move(s));
+}
+
+void Exporter::write_separator_sign(std::string s) {
+    write_word(std::move(s));
 }
 
 void Exporter::write_dynamic_type() {
-    write_word("dynamic");
+    write_word(std::move("dynamic"));
 }
 
 void Exporter::write_int_type() {
@@ -82,56 +85,64 @@ void Exporter::write_void_type() {
     write_word(config_->get_void_word()->str());
 }
 
-void Exporter::write_user_type(const std::string& usertype) {
-    write_word(usertype);
+void Exporter::write_user_type(std::string usertype) {
+    write_word(std::move(usertype));
 }
 
-void Exporter::write_int_val(const int val) {
+void Exporter::write_int_val(int val) {
     write_word(std::to_string(val));
 }
 
-void Exporter::write_float_val(const float val) {
+void Exporter::write_float_val(float val) {
     write_word(std::to_string(val));
 }
 
-void Exporter::write_char_val(const char val) {
+void Exporter::write_char_val(char val) {
     write_word(std::to_string(val));
 }
 
-void Exporter::write_string_val(const std::string& val) {
-    write_word(val);
+void Exporter::write_string_val(std::string val) {
+    write_word(std::move(val));
 }
 
-void Exporter::write_bool_val(const bool val) {
-    val ? write_word("true") : write_word("false");
+void Exporter::write_bool_val(bool val) {
+    val ? write_word(std::move("true")) : write_word(std::move("false"));
 }
 
 void Exporter::write_null_val() {
-    write_word("NULL");
+    write_word(std::move("NULL"));
 }
 
-void Exporter::write_param_var_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_param_var_name(std::string name) {
+    write_word(std::move(name));
 }
 
-void Exporter::write_local_var_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_local_var_name(std::string name) {
+    write_word(std::move(name));
 }
 
-void Exporter::write_member_var_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_member_var_name(std::string name) {
+    write_word(std::move(name));
 }
 
-void Exporter::write_global_var_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_global_var_name(std::string name) {
+    write_word(std::move(name));
 }
 
-void Exporter::write_function_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_gen_param_name(std::string name) {
+    write_word(std::move(name));
 }
 
-void Exporter::write_method_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_gen_param_constr(std::string constr) {
+    write_word(std::move(constr));
+}
+
+void Exporter::write_function_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_method_name(std::string name) {
+    write_word(std::move(name));
 }
 
 void Exporter::write_assign_word() {
@@ -150,8 +161,8 @@ void Exporter::write_class_word() {
     write_word(config_->get_class_word()->str());
 }
 
-void Exporter::write_class_name(const std::string& name) {
-    write_word(name);
+void Exporter::write_class_name(std::string name) {
+    write_word(std::move(name));
 }
 
 void Exporter::write_if_word() {
@@ -195,17 +206,17 @@ void Exporter::write_this_word() {
 }
 
 void Exporter::write_unknown_type() {
-    write_word("unk-type");
+    write_word(std::move("unk-type"));
 }
 
 void Exporter::write_unknown_expr() {
-    write_word("unk-expr");
+    write_word(std::move("unk-expr"));
 }
 
 void Exporter::write_unknown_stat() {
-    write_word("unk-stat");
+    write_word(std::move("unk-stat"));
 }
 
 void Exporter::write_row_number() {
-    *output_ << std::setw(3) << row_ << ".";
+    *output_ << std::setw(3) << row_ << std::move(".");
 }

@@ -1,21 +1,28 @@
-Vytvoril som plne funkčnú prehliadku AST s výpisom kódu do konzoly alebo do súboru. Pri výpise sa použije jednoduchý .json konfiguračný súbor. Používaj main.cpp v adresári impl. V tomto istom adresári musí byť vstupný .json súbor. Výstupný súbor bude umiestnený v priečinku build.
+Ak chceš použiť knižnicu na textový výstup, sprav nasledovné.
 
-Pre spustenie si najprv zostav ľubovoľný strom v podadresári inl/ASTLoader, a vo funkcií main pošli ASTVisitora ľubovoľnej funkcií.
+1) Musíš spraviť správny build. Knižnica sa volá "astfri-text".
+2) Použi takýto include: "#include <libastfri-text/inc/ASTVisitor.hpp>"
+3) Vytvor si inštanciu ASTVisitor-a: "std::unique_ptr<ASTVisitor> visitor = std::make_unique<ASTVisitor>();"
+4) Inštancií pošli správu visit s ľubovoľným vrcholom: "visitor.visit(astfri::VoidType);"
+5) Zavolaj metódu: "visitor->write_file();"
 
+Program funguje aj bez konfiguračného súboru, vtedy sa použije predvolená konfigurácia.
 Konfigurácia(formátovanie výstupu) je plne ošetrená voči chybám v konfiguračnom súbore. Konfiguráciu je možné nastaviť pre ľubovoľné parametre, podmienka je zachovanie "hierarchie" tohto súboru. Na samotnom poradí nezáleží.
 
-Zatiaľ je plne funkčný iba výpis do txt súborov.
+Vstupný konfiguračný súbor je buď možné použiť predvolený v priečinku impl, alebo si môžeš vytvoriť svoj(program sa ťa opýta na cestu ku .json súboru).
+Keď nastane hocijaká chyba pri vytváraní súboru, tak sa súbor vytvorí v priečinku build.
+
+Zatiaľ je plne funkčný iba výpis do .txt súborov, súbory .html fungujú taktiež, ale iba s primitívnym formátovaním.
 
 
 Príklad s kompletným konfiguračným súborom(toto všetko sa dá modifikovať).
 {
     "general_output":{
-        "file_name":"suborik",
-        "type":"text",
+        "file_path":"/mnt/c/users/marek/desktop/suborik",
         "view":"vnutorny",
         "data_types":{
             "int":"CELECISLO",
-            "float":"DESATINA",
+            "float":"FLOAT",
             "char":"ZNAK",
             "bool":"BOOLEAN",
             "void":"VOID"
@@ -24,35 +31,46 @@ Príklad s kompletným konfiguračným súborom(toto všetko sa dá modifikovať
             "assign":"<-"
         },
         "access_mods":{
-            "private":"súkromné",
-            "public":"verejné"
+            "public":"PUBLIC",
+            "private":"PRIVATE",
+            "protected":"PROTECTED"
+        },
+        "formatting":{
+            "class_word_color":"red",
+            "class_name_color":"forestgreen"
         }
     },
     "basic_format":{
-        "format":"txt",
-        "indentation":"   ",
+        "format":"html",
+        "show_row_num":true,
+        "show_op_br_new_line":true,
+        "show_class_decl":true,
         "show_class_body":true,
+        "show_attribute":true,
         "show_method_body":true,
-        "show_method_definition":true,
+        "show_method_decl":true,
+        "show_method_defin":true,
+        "show_method_defin_inline":false,
+        "show_function_decl":true,
         "show_function_body":true,
-        "open_bracket_new_line":true
+        "tab_word_length":8,
+        "margin_left":6,
+        "row_num_size":15
     },
     "system_names":{
         "class":"TRIEDA",
-        "if":"AK",
-        "else":"INAK",
-        "for":"PRE",
-        "while":"POKIAL",
-        "do":"ROB",
+        "this":"THIS",
         "return":"VRÁŤ",
         "throw":"VYHOĎ",
+        "if":"AK PLATÍ",
+        "else":"INAK VYKONAJ",
+        "for":"PRE",
+        "while":"KÝM PLATÍ",
+        "do":"VYKONAJ",
         "switch":"VYBER",
-        "case":"PRÍPAD",
-        "this":"THIS"
+        "case":"PRÍPAD"
     }
 }
-
-
 
 
 mkdir build
