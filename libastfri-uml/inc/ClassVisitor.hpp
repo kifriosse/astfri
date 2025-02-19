@@ -21,8 +21,8 @@ namespace uml {
         VarStruct currentVariable_;
 
     public:
-        void set_config(Config* config);
-        void set_outputter(UMLOutputter* outputter);
+        void set_config(Config const& config);
+        void set_outputter(UMLOutputter const& outputter);
 
         void visit (astfri::IntType const& type) override;
         void visit (astfri::FloatType const& type) override;

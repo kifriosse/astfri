@@ -2,12 +2,12 @@
 #include <string>
 
 namespace uml {
-    void ClassVisitor::set_config(Config* config) {
-        this->config_ = config;
+    void ClassVisitor::set_config(Config const& config) {
+        this->config_ = (Config*)&config;
     }
 
-    void ClassVisitor::set_outputter(UMLOutputter* outputter) {
-        this->outputter_ = outputter;
+    void ClassVisitor::set_outputter(UMLOutputter const& outputter) {
+        this->outputter_ = (UMLOutputter*)&outputter;
     }
 
     void ClassVisitor::visit (astfri::IntType const& /*type*/) {

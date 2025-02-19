@@ -113,8 +113,8 @@ int main()
     conf.separator_ = ' ';
 
     op.set_config(&conf);
-    cv.set_config(&conf);
-    cv.set_outputter(&op);
+    cv.set_config(conf);
+    cv.set_outputter(op);
 
     classDS->accept(cv);
     op.write_to_console();
