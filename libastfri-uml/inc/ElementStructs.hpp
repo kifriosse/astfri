@@ -1,15 +1,15 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "libastfri/inc/Stmt.hpp"
 
 namespace uml {
-    // w.i.p. with just a single generic param, TODO
     struct ClassStruct {
         std::string name_;
-        std::string genericParam_;
+        std::vector<std::string> genericParams_;
     };
-    
+
     struct VarStruct {
         std::string name_;
         std::string type_;
@@ -17,11 +17,10 @@ namespace uml {
         astfri::AccessModifier accessMod_;
     };
 
-    // w.i.p. with just a single param, TODO
     struct MethodStruct {
         std::string name_;
         std::string retType_;
-        VarStruct param_;
+        std::vector<VarStruct> params_;
         astfri::AccessModifier accessMod_;
     };
 } // namespace uml

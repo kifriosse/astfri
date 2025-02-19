@@ -1,5 +1,6 @@
 #include <libastfri-uml/inc/ClassVisitor.hpp>
 #include <string>
+#include "libastfri/inc/Stmt.hpp"
 
 namespace uml {
     void ClassVisitor::set_config(Config const& config) {
@@ -34,7 +35,6 @@ namespace uml {
         stmt.type_->accept(*this);
         this->currentVariable_.name_ = stmt.name_;
         //if (stmt.initializer_) stmt.initializer_->accept(*this);
-        this->currentMethod_.param_ = this->currentVariable_;
     }
 
     void ClassVisitor::visit (astfri::MemberVarDefStmt const& stmt) {
@@ -45,11 +45,11 @@ namespace uml {
         this->outputter_->add_data_member(this->currentVariable_);
     }
 
-    void ClassVisitor::visit (astfri::GlobalVarDefStmt const& stmt) {
+    void ClassVisitor::visit (astfri::GlobalVarDefStmt const& /*stmt*/) {
 
     }
 
-    void ClassVisitor::visit (astfri::FunctionDefStmt const& stmt) {
+    void ClassVisitor::visit (astfri::FunctionDefStmt const& /*stmt*/) {
 
     }
 
@@ -58,22 +58,23 @@ namespace uml {
         this->currentMethod_.retType_ = this->currentVariable_.type_;
         this->currentMethod_.name_ = stmt.func_->name_;
         this->currentMethod_.accessMod_ = stmt.access_;
-        if (stmt.func_->params_.size() > 0) {
-            stmt.func_->params_[0]->accept(*this);
+        for (astfri::ParamVarDefStmt* p : stmt.func_->params_) {
+            p->type_->accept(*this);
+            this->currentVariable_.name_ = p->name_;
+            //if (stmt.initializer_) stmt.initializer_->accept(*this);
+            this->currentMethod_.params_.push_back(this->currentVariable_);
         }
-        else {
-            this->currentVariable_.name_ = "";
-            this->currentVariable_.type_ = "";
-            this->currentVariable_.init_ = "";
-        }
-        this->currentMethod_.param_ = this->currentVariable_;
         this->outputter_->add_function_member(this->currentMethod_);
+        this->currentMethod_.params_.clear();
     }
 
     void ClassVisitor::visit (astfri::ClassDefStmt const& stmt) {
         this->currentClass_.name_ = stmt.name_;
-        this->currentClass_.genericParam_ = stmt.tparams_[0] ? stmt.tparams_[0]->name_ : "";
+        for (astfri::GenericParam* gp : stmt.tparams_) {
+            this->currentClass_.genericParams_.push_back(gp->name_);
+        }
         this->outputter_->open_class(this->currentClass_);
+        this->currentClass_.genericParams_.clear();
 
         for (astfri::MemberVarDefStmt* var : stmt.vars_)
         {
