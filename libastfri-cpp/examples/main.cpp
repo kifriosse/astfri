@@ -76,6 +76,9 @@ int main(int argc, const char **argv) {
     }
     clang::tooling::ClangTool Tool(OptionsParser->getCompilations(), OptionsParser->getSourcePathList());
     Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+
+    //koniec mojho
+    std::cout << "Ill be back!" << std::endl;
     
     // AST Visitor - nice
     ASTVisitor* visitor = new ASTVisitor();
