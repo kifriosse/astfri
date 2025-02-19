@@ -88,22 +88,69 @@ struct IfExpr : Expr, details::MkVisitable<IfExpr>
 };
 
 /**
- * @brief TODO
+ * @brief List of binary operators
  */
 enum class BinOpType
 {
+    // arg = arg, arg := arg, arg <- arg
     Assign,
+
+    // arg + arg
     Add,
+
+    // arg - arg
     Subtract,
+
+    // arg * arg
     Multiply,
+
+    // arg / arg
     Divide,
+
+    // arg % arg
     Modulo,
+
+    // arg == arg
     Equal,
+
+    // arg != arg, arg <> arg
     NotEqual,
+
+    // arg < arg
     Less,
+
+    // arg <= arg
     LessEqual,
+
+    // arg > arg
     Greater,
-    GreaterEqual
+
+    // arg >= arg
+    GreaterEqual,
+
+    // arg && arg
+    LogicalAnd,
+
+    // arg || arg
+    LogicalOr,
+
+    // arg >> arg
+    BitShiftRight,
+
+    // arg << arg
+    BitShiftLeft,
+
+    // arg & arg
+    BitAnd,
+
+    // arg | arg
+    BitOr,
+
+    // arg ^ arg
+    BitXor,
+
+    // arg , arg
+    Comma
 };
 
 /**
@@ -119,15 +166,33 @@ struct BinOpExpr : Expr, details::MkVisitable<BinOpExpr>
 };
 
 /**
- * @brief TODO
+ * @brief List of unary operators
  */
 enum class UnaryOpType
 {
+    // !arg, not arg
     LogicalNot,
+
+    // -arg
     Minus,
+
+    // +arg
     Plus,
+
+    // *arg
     Dereference,
-    AddressOf
+
+    // &arg
+    AddressOf,
+
+    // ++arg
+    PreIncrement,
+
+    // arg++
+    PostIncrement,
+
+    // ~arg
+    BitFlip
 };
 
 /**
