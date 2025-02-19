@@ -3,9 +3,7 @@
 #include <libastfri/inc/TypeFactory.hpp>
 #include <vector>
 
-#include <libastfri-uml/inc/ClassVisitor.hpp>
-#include <libastfri-uml/inc/PlantUMLOutputter.hpp>
-#include "libastfri-uml/inc/TypeConvention.hpp"
+#include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include "libastfri/inc/Stmt.hpp"
 
 
@@ -119,18 +117,11 @@ int main()
     //astfri::MethodDefStmt* method = statements.mk_method_def(classDS, func);
     //methods.push_back(method);
 
-    uml::ClassVisitor cv;
     uml::Config conf;
     uml::PlantUMLOutputter op;
-
     uml::TypeBeforeConvention tc;
-    conf.typeConvention_ = &tc;
-    conf.separator_ = ' ';
 
-    op.set_config(conf);
-    cv.set_config(conf);
-    cv.set_outputter(op);
-
-    tu->accept(cv);
-    op.write_to_console();
+    uml::UMLLibWrapper uml;
+    uml.init(conf, op, tc);
+    uml.run(*tu);
 }

@@ -115,4 +115,12 @@ namespace uml {
         }
     }
 
+    void ClassVisitor::finish() {
+        if (this->config_->writeToFile_) {
+            this->outputter_->write_to_file();
+        } else {
+            this->outputter_->write_to_console();
+        }
+    }
+
 } // namespace uml

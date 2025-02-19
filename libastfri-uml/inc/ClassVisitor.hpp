@@ -47,5 +47,7 @@ namespace uml {
         void visit (astfri::ClassDefStmt const& stmt) override;
 
         void visit (astfri::TranslationUnit const& stmt) override;
+
+        void finish();
     };
 } // namespace uml
