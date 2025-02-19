@@ -13,6 +13,8 @@ namespace uml {
 
         virtual void add_data_member(VarStruct v) override;
         virtual void add_function_member(MethodStruct m) override;
+
+        virtual void add_relation(RelationStruct r) override;
     };
 
 } // namespace uml

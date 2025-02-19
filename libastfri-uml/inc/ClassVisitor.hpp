@@ -20,6 +20,8 @@ namespace uml {
         MethodStruct currentMethod_;
         VarStruct currentVariable_;
 
+        std::vector<RelationStruct> relations_;
+
     public:
         void set_config(Config const& config);
         void set_outputter(UMLOutputter const& outputter);
@@ -29,6 +31,8 @@ namespace uml {
         void visit (astfri::CharType const& type) override;
         void visit (astfri::BoolType const& type) override;
         void visit (astfri::VoidType const& type) override;
+        void visit (astfri::UserType const& type) override;
+        void visit (astfri::IndirectionType const& type) override;
         
         void visit (astfri::ParamVarDefStmt const& stmt) override;
 
@@ -41,5 +45,7 @@ namespace uml {
         void visit (astfri::MethodDefStmt const& stmt) override;
 
         void visit (astfri::ClassDefStmt const& stmt) override;
+
+        void visit (astfri::TranslationUnit const& stmt) override;
     };
 } // namespace uml

@@ -47,4 +47,8 @@ namespace uml {
             this->config_->accessPrefix_[(int)m.accessMod_] + 
             this->config_->typeConvention_->get_string(m.retType_, header, this->config_->separator_) + "\n";
     }
+
+    void PlantUMLOutputter::add_relation(RelationStruct r) {
+        this->outputString_ += r.to_ + this->config_->relationArrows_[(int)r.type_] + r.from_ + "\n";
+    }
 } // namespace uml

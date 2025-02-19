@@ -1,6 +1,8 @@
 #include <libastfri-uml/inc/ClassVisitor.hpp>
 #include <string>
+#include "libastfri-uml/inc/ElementStructs.hpp"
 #include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
 
 namespace uml {
     void ClassVisitor::set_config(Config const& config) {
@@ -29,6 +31,20 @@ namespace uml {
 
     void ClassVisitor::visit (astfri::VoidType const& /*type*/) {
         this->currentVariable_.type_ = this->config_->voidTypeName_;
+    }
+
+    void ClassVisitor::visit (astfri::UserType const& type) {
+        if (type.name_.compare(this->currentClass_.name_) != 0) {
+            RelationStruct r;
+            r.from_ = this->currentClass_.name_;
+            r.to_ = type.name_;
+            r.type_ = RelationType::ASSOCIATION;
+            this->relations_.push_back(r);
+        }
+        this->currentVariable_.type_ = type.name_;
+    }
+
+    void ClassVisitor::visit (astfri::IndirectionType const& /*type*/) {
     }
         
     void ClassVisitor::visit (astfri::ParamVarDefStmt const& stmt) {
@@ -87,6 +103,16 @@ namespace uml {
         }
 
         this->outputter_->close_class();
+    }
+
+    void ClassVisitor::visit(astfri::TranslationUnit const& stmt) {
+        for (astfri::ClassDefStmt* c : stmt.classes_) {
+            c->accept(*this);
+        }
+
+        for (RelationStruct r : this->relations_) {
+            this->outputter_->add_relation(r);
+        }
     }
 
 } // namespace uml
