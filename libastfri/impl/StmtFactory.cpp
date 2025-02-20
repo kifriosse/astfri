@@ -66,6 +66,11 @@ GlobalVarDefStmt* StmtFactory::mk_global_var_def(
     );
 }
 
+FunctionDefStmt* StmtFactory::mk_function_def()
+{
+    return details::emplace_get<FunctionDefStmt>(stmts_);
+}
+
 FunctionDefStmt* StmtFactory::mk_function_def(
     std::string name,
     std::vector<ParamVarDefStmt*> params,
@@ -91,6 +96,11 @@ MethodDefStmt* StmtFactory::mk_method_def(
     return details::emplace_get<MethodDefStmt>(stmts_, owner, func, access);
 }
 
+ClassDefStmt* StmtFactory::mk_class_def()
+{
+    return details::emplace_get<ClassDefStmt>(stmts_);
+}
+
 ClassDefStmt* StmtFactory::mk_class_def(
     std::string name,
     std::vector<MemberVarDefStmt*> vars,
@@ -105,6 +115,11 @@ ClassDefStmt* StmtFactory::mk_class_def(
         std::move(methods),
         std::move(tparams)
     );
+}
+
+ConstructorDefStmt* StmtFactory::mk_constructor_def()
+{
+    return details::emplace_get<ConstructorDefStmt>(stmts_);
 }
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def(
@@ -215,6 +230,11 @@ ThrowStmt* StmtFactory::mk_throw(Expr* val)
 UnknownStmt* StmtFactory::mk_uknown()
 {
     return &unknown_;
+}
+
+TranslationUnit* StmtFactory::mk_translation_unit()
+{
+    return details::emplace_get<TranslationUnit>(stmts_);
 }
 
 TranslationUnit* StmtFactory::mk_translation_unit(

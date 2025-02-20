@@ -98,10 +98,12 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
  */
 struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
 {
-    std::string name_;
-    std::vector<ParamVarDefStmt*> params_;
-    Type* retType_;
-    CompoundStmt* body_;
+    std::string name_ {};
+    std::vector<ParamVarDefStmt*> params_ {};
+    Type* retType_ {nullptr};
+    CompoundStmt* body_ {nullptr};
+
+    FunctionDefStmt() = default;
 
     FunctionDefStmt(
         std::string name,
@@ -143,11 +145,13 @@ struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
  */
 struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
 {
-    ClassDefStmt* owner_;
-    std::vector<ParamVarDefStmt*> params_;
-    std::vector<BaseInitializerStmt*> baseInit_;
-    CompoundStmt* body_;
-    AccessModifier access_;
+    ClassDefStmt* owner_ {nullptr};
+    std::vector<ParamVarDefStmt*> params_ {};
+    std::vector<BaseInitializerStmt*> baseInit_ {};
+    CompoundStmt* body_ {nullptr};
+    AccessModifier access_ {AccessModifier::Public};
+
+    ConstructorDefStmt() = default;
 
     ConstructorDefStmt(
         ClassDefStmt* owner,
@@ -186,10 +190,12 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
  */
 struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
 {
-    std::string name_;
-    std::vector<MemberVarDefStmt*> vars_;
-    std::vector<MethodDefStmt*> methods_;
-    std::vector<GenericParam*> tparams_;
+    std::string name_ {};
+    std::vector<MemberVarDefStmt*> vars_ {};
+    std::vector<MethodDefStmt*> methods_ {};
+    std::vector<GenericParam*> tparams_ {};
+
+    ClassDefStmt() = default;
 
     ClassDefStmt(
         std::string name,
@@ -323,9 +329,11 @@ struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>
  */
 struct TranslationUnit : Stmt, details::MkVisitable<TranslationUnit>
 {
-    std::vector<ClassDefStmt*> classes_;
-    std::vector<FunctionDefStmt*> functions_;
-    std::vector<GlobalVarDefStmt*> globals_;
+    std::vector<ClassDefStmt*> classes_ {};
+    std::vector<FunctionDefStmt*> functions_ {};
+    std::vector<GlobalVarDefStmt*> globals_ {};
+
+    TranslationUnit() = default;
 
     TranslationUnit(
         std::vector<ClassDefStmt*> classes,
