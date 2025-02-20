@@ -19,7 +19,7 @@ public:
     static ExprFactory& get_instance ();
 
 public:
-    ~ExprFactory () = default;
+    ~ExprFactory() = default;
 
     IntLiteralExpr* mk_int_literal (int val);
     FloatLiteralExpr* mk_float_literal (float val);
@@ -50,11 +50,17 @@ public:
         Stmt* body
     );
     ThisExpr* mk_this ();
+    ConstructorCallExpr* mk_constructor_call (
+        Type* type,
+        std::vector<Expr*> args
+    );
+    NewExpr* mk_new (ConstructorCallExpr* init);
+    DeleteExpr* mk_delete (Expr* arg);
     UnknownExpr* mk_unknown ();
 
 private:
-    ExprFactory ()                      = default;
-    ExprFactory (ExprFactory const&)    = delete;
+    ExprFactory()                       = default;
+    ExprFactory(ExprFactory const&)     = delete;
     void operator= (ExprFactory const&) = delete;
 
 private:

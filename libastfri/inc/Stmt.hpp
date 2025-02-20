@@ -13,7 +13,7 @@ namespace astfri
  */
 struct Stmt : virtual IVisitable
 {
-    virtual ~Stmt () = default;
+    virtual ~Stmt() = default;
 };
 
 /**
@@ -51,7 +51,7 @@ struct VarDefStmt : Stmt
     Type* type_;
     Expr* initializer_;
 
-    VarDefStmt (std::string name, Type* type, Expr* initializer);
+    VarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
@@ -59,7 +59,7 @@ struct VarDefStmt : Stmt
  */
 struct LocalVarDefStmt : VarDefStmt, details::MkVisitable<LocalVarDefStmt>
 {
-    LocalVarDefStmt (std::string name, Type* type, Expr* initializer);
+    LocalVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
@@ -67,7 +67,7 @@ struct LocalVarDefStmt : VarDefStmt, details::MkVisitable<LocalVarDefStmt>
  */
 struct ParamVarDefStmt : VarDefStmt, details::MkVisitable<ParamVarDefStmt>
 {
-    ParamVarDefStmt (std::string name, Type* type, Expr* initializer);
+    ParamVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
@@ -77,7 +77,7 @@ struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt>
 {
     AccessModifier access_;
 
-    MemberVarDefStmt (
+    MemberVarDefStmt(
         std::string name,
         Type* type,
         Expr* initializer,
@@ -90,7 +90,7 @@ struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt>
  */
 struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
 {
-    GlobalVarDefStmt (std::string name, Type* type, Expr* initializer);
+    GlobalVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
@@ -103,7 +103,7 @@ struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
     Type* retType_;
     CompoundStmt* body_;
 
-    FunctionDefStmt (
+    FunctionDefStmt(
         std::string name,
         std::vector<ParamVarDefStmt*> params,
         Type* retType,
@@ -120,7 +120,7 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
     FunctionDefStmt* func_;
     AccessModifier access_;
 
-    MethodDefStmt (
+    MethodDefStmt(
         ClassDefStmt* owner,
         FunctionDefStmt* func,
         AccessModifier access
@@ -128,15 +128,57 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 };
 
 /**
+ * @brief Initializer of a base class called at the begining of a constructor
+ */
+struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
+{
+    std::string base_;
+    std::vector<Expr*> args_;
+
+    BaseInitializerStmt(std::string base, std::vector<Expr*> args);
+};
+
+/**
  * @brief TODO
  */
-struct GenericParam
+struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
+{
+    ClassDefStmt* owner_;
+    std::vector<ParamVarDefStmt*> params_;
+    std::vector<BaseInitializerStmt*> baseInit_;
+    CompoundStmt* body_;
+    AccessModifier access_;
+
+    ConstructorDefStmt(
+        ClassDefStmt* owner,
+        std::vector<ParamVarDefStmt*> params,
+        std::vector<BaseInitializerStmt*> baseInit,
+        CompoundStmt* body,
+        AccessModifier access
+    );
+};
+
+/**
+ * @brief Definition of a descructor
+ */
+struct DestructorDefStmt : Stmt, details::MkVisitable<DestructorDefStmt>
+{
+    ClassDefStmt* owner_;
+    CompoundStmt* body_;
+
+    DestructorDefStmt(ClassDefStmt* owner, CompoundStmt* body);
+};
+
+/**
+ * @brief TODO
+ */
+struct GenericParam : Stmt, details::MkVisitable<GenericParam>
 {
     // TODO later, this could be pointer to a concept
     std::string constraint_;
     std::string name_;
 
-    GenericParam (std::string constraint, std::string name);
+    GenericParam(std::string constraint, std::string name);
 };
 
 /**
@@ -149,7 +191,7 @@ struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
 
-    ClassDefStmt (
+    ClassDefStmt(
         std::string name,
         std::vector<MemberVarDefStmt*> vars,
         std::vector<MethodDefStmt*> methods,
@@ -164,7 +206,7 @@ struct CompoundStmt : Stmt, details::MkVisitable<CompoundStmt>
 {
     std::vector<Stmt*> stmts_;
 
-    explicit CompoundStmt (std::vector<Stmt*> stmts);
+    explicit CompoundStmt(std::vector<Stmt*> stmts);
 };
 
 /**
@@ -174,7 +216,7 @@ struct ReturnStmt : Stmt, details::MkVisitable<ReturnStmt>
 {
     Expr* val_;
 
-    explicit ReturnStmt (Expr* val);
+    explicit ReturnStmt(Expr* val);
 };
 
 /**
@@ -184,7 +226,7 @@ struct ExprStmt : Stmt, details::MkVisitable<ExprStmt>
 {
     Expr* expr_;
 
-    explicit ExprStmt (Expr* expr);
+    explicit ExprStmt(Expr* expr);
 };
 
 /**
@@ -196,7 +238,7 @@ struct IfStmt : Stmt, details::MkVisitable<IfStmt>
     Stmt* iftrue_;
     Stmt* iffalse_;
 
-    IfStmt (Expr* cond, Stmt* iftrue, Stmt* iffalse);
+    IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse);
 };
 
 /**
@@ -207,7 +249,7 @@ struct CaseStmt : Stmt, details::MkVisitable<CaseStmt>
     Expr* expr_;
     Stmt* body_;
 
-    CaseStmt (Expr* expr, Stmt* body);
+    CaseStmt(Expr* expr, Stmt* body);
 };
 
 /**
@@ -218,7 +260,7 @@ struct SwitchStmt : Stmt, details::MkVisitable<SwitchStmt>
     Expr* expr_;
     std::vector<CaseStmt*> cases_;
 
-    SwitchStmt (Expr* expr, std::vector<CaseStmt*> cases);
+    SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases);
 };
 
 /**
@@ -229,7 +271,7 @@ struct LoopStmt : Stmt
     Expr* cond_;
     CompoundStmt* body_;
 
-    LoopStmt (Expr* cond, CompoundStmt* body);
+    LoopStmt(Expr* cond, CompoundStmt* body);
 };
 
 /**
@@ -237,7 +279,7 @@ struct LoopStmt : Stmt
  */
 struct WhileStmt : LoopStmt, details::MkVisitable<WhileStmt>
 {
-    WhileStmt (Expr* cond, CompoundStmt* body);
+    WhileStmt(Expr* cond, CompoundStmt* body);
 };
 
 /**
@@ -245,7 +287,7 @@ struct WhileStmt : LoopStmt, details::MkVisitable<WhileStmt>
  */
 struct DoWhileStmt : LoopStmt, details::MkVisitable<DoWhileStmt>
 {
-    DoWhileStmt (Expr* cond, CompoundStmt* body);
+    DoWhileStmt(Expr* cond, CompoundStmt* body);
 };
 
 /**
@@ -256,7 +298,7 @@ struct ForStmt : LoopStmt, details::MkVisitable<ForStmt>
     Stmt* init_;
     Stmt* step_;
 
-    ForStmt (Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
+    ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
 };
 
 /**
@@ -266,7 +308,7 @@ struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
 {
     Expr* val_;
 
-    explicit ThrowStmt (Expr* val);
+    explicit ThrowStmt(Expr* val);
 };
 
 /**
@@ -285,7 +327,7 @@ struct TranslationUnit : Stmt, details::MkVisitable<TranslationUnit>
     std::vector<FunctionDefStmt*> functions_;
     std::vector<GlobalVarDefStmt*> globals_;
 
-    TranslationUnit (
+    TranslationUnit(
         std::vector<ClassDefStmt*> classes,
         std::vector<FunctionDefStmt*> functions,
         std::vector<GlobalVarDefStmt*> globals

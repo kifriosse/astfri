@@ -49,6 +49,22 @@ public:
         FunctionDefStmt* func,
         AccessModifier access
     );
+    ConstructorDefStmt* mk_constructor_def (
+        ClassDefStmt* owner,
+        std::vector<ParamVarDefStmt*> params,
+        std::vector<BaseInitializerStmt*> baseInit,
+        CompoundStmt* body,
+        AccessModifier access
+    );
+    BaseInitializerStmt* mak_base_initializer (
+        std::string base,
+        std::vector<Expr*> args
+    );
+    DestructorDefStmt* mk_destructor_def (
+        ClassDefStmt* owner,
+        CompoundStmt* body
+    );
+    GenericParam* mk_generic_param (std::string constraint, std::string name);
     ClassDefStmt* mk_class_def (
         std::string name,
         std::vector<MemberVarDefStmt*> vars,

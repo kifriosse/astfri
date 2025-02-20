@@ -13,7 +13,7 @@ namespace astfri
  */
 struct Expr : virtual IVisitable
 {
-    virtual ~Expr () = default;
+    virtual ~Expr() = default;
 };
 
 /**
@@ -23,7 +23,7 @@ template<typename T>
 struct Literal : Expr
 {
     T val_;
-    Literal (T val);
+    Literal(T val);
 };
 
 /**
@@ -31,7 +31,7 @@ struct Literal : Expr
  */
 struct IntLiteralExpr : Literal<int>, details::MkVisitable<IntLiteralExpr>
 {
-    explicit IntLiteralExpr (int val);
+    explicit IntLiteralExpr(int val);
 };
 
 /**
@@ -39,7 +39,7 @@ struct IntLiteralExpr : Literal<int>, details::MkVisitable<IntLiteralExpr>
  */
 struct FloatLiteralExpr : Literal<float>, details::MkVisitable<FloatLiteralExpr>
 {
-    explicit FloatLiteralExpr (float val);
+    explicit FloatLiteralExpr(float val);
 };
 
 /**
@@ -47,7 +47,7 @@ struct FloatLiteralExpr : Literal<float>, details::MkVisitable<FloatLiteralExpr>
  */
 struct CharLiteralExpr : Literal<char>, details::MkVisitable<CharLiteralExpr>
 {
-    explicit CharLiteralExpr (char val);
+    explicit CharLiteralExpr(char val);
 };
 
 /**
@@ -57,7 +57,7 @@ struct StringLiteralExpr :
     Literal<std::string>,
     details::MkVisitable<StringLiteralExpr>
 {
-    explicit StringLiteralExpr (std::string val);
+    explicit StringLiteralExpr(std::string val);
 };
 
 /**
@@ -65,7 +65,7 @@ struct StringLiteralExpr :
  */
 struct BoolLiteralExpr : Literal<bool>, details::MkVisitable<BoolLiteralExpr>
 {
-    explicit BoolLiteralExpr (bool val);
+    explicit BoolLiteralExpr(bool val);
 };
 
 /**
@@ -84,7 +84,7 @@ struct IfExpr : Expr, details::MkVisitable<IfExpr>
     Expr* iftrue_;
     Expr* iffalse_;
 
-    IfExpr (Expr* cond, Expr* iftrue, Expr* iffalse);
+    IfExpr(Expr* cond, Expr* iftrue, Expr* iffalse);
 };
 
 /**
@@ -162,7 +162,7 @@ struct BinOpExpr : Expr, details::MkVisitable<BinOpExpr>
     BinOpType op_;
     Expr* right_;
 
-    BinOpExpr (Expr* left, BinOpType op, Expr* right);
+    BinOpExpr(Expr* left, BinOpType op, Expr* right);
 };
 
 /**
@@ -203,7 +203,7 @@ struct UnaryOpExpr : Expr, details::MkVisitable<UnaryOpExpr>
     UnaryOpType op_;
     Expr* arg_;
 
-    UnaryOpExpr (UnaryOpType op, Expr* arg);
+    UnaryOpExpr(UnaryOpType op, Expr* arg);
 };
 
 /**
@@ -214,7 +214,7 @@ struct AssignExpr : Expr, details::MkVisitable<AssignExpr>
     Expr* lhs_;
     Expr* rhs_;
 
-    AssignExpr (Expr* lhs, Expr* rhs);
+    AssignExpr(Expr* lhs, Expr* rhs);
 };
 
 /**
@@ -226,83 +226,76 @@ struct CompoundAssignExpr : Expr, details::MkVisitable<CompoundAssignExpr>
     BinOpType op_;
     Expr* rhs_;
 
-    CompoundAssignExpr (Expr* lhs, BinOpType op, Expr* rhs);
+    CompoundAssignExpr(Expr* lhs, BinOpType op, Expr* rhs);
 };
 
 /**
  * @brief TODO
  */
-struct RefExpr : Expr
-{
-};
-
-/**
- * @brief TODO
- */
-struct ParamVarRefExpr : RefExpr, details::MkVisitable<ParamVarRefExpr>
+struct ParamVarRefExpr : Expr, details::MkVisitable<ParamVarRefExpr>
 {
     // TODO later this should be a pointer to ParamVarDef
     std::string param_;
 
-    explicit ParamVarRefExpr (std::string param);
+    explicit ParamVarRefExpr(std::string param);
 };
 
 /**
  * @brief TODO
  */
-struct LocalVarRefExpr : RefExpr, details::MkVisitable<LocalVarRefExpr>
+struct LocalVarRefExpr : Expr, details::MkVisitable<LocalVarRefExpr>
 {
     // TODO later this should be a pointer to LocalVarDef
     std::string var_;
 
-    explicit LocalVarRefExpr (std::string var);
+    explicit LocalVarRefExpr(std::string var);
 };
 
 /**
  * @brief TODO
  */
-struct MemberVarRefExpr : RefExpr, details::MkVisitable<MemberVarRefExpr>
+struct MemberVarRefExpr : Expr, details::MkVisitable<MemberVarRefExpr>
 {
     // TODO later this should be a pointer to MemberVarDef
     std::string member_;
 
-    explicit MemberVarRefExpr (std::string member);
+    explicit MemberVarRefExpr(std::string member);
 };
 
 /**
  * @brief TODO
  */
-struct GlobalVarRefExpr : RefExpr, details::MkVisitable<GlobalVarRefExpr>
+struct GlobalVarRefExpr : Expr, details::MkVisitable<GlobalVarRefExpr>
 {
     // TODO later this should be a pointer to GlobalVarDef
     std::string global_;
 
-    explicit GlobalVarRefExpr (std::string global);
+    explicit GlobalVarRefExpr(std::string global);
 };
 
 /**
  * @brief TODO
  */
-struct FunctionCallExpr : RefExpr, details::MkVisitable<FunctionCallExpr>
+struct FunctionCallExpr : Expr, details::MkVisitable<FunctionCallExpr>
 {
     // TODO later this sould be a pointer to FunctionDecl
     std::string name_;
     std::vector<Expr*> args_;
 
-    FunctionCallExpr (std::string name, std::vector<Expr*> args);
+    FunctionCallExpr(std::string name, std::vector<Expr*> args);
 };
 
 /**
  * @brief TODO
  */
-struct MethodCallExpr : RefExpr, details::MkVisitable<MethodCallExpr>
+struct MethodCallExpr : Expr, details::MkVisitable<MethodCallExpr>
 {
     Expr* owner_;
     // TODO later this sould be a pointer to MethodDecl
     std::string name_;
     std::vector<Expr*> args_;
 
-    MethodCallExpr (Expr* owner, std::string name, std::vector<Expr*> args);
+    MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args);
 };
 
 /**
@@ -313,7 +306,7 @@ struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
     std::vector<ParamVarDefStmt*> params_;
     Stmt* body_;
 
-    LambdaExpr (std::vector<ParamVarDefStmt*> params, Stmt* body);
+    LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body);
 };
 
 /**
@@ -321,6 +314,36 @@ struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
  */
 struct ThisExpr : Expr, details::MkVisitable<ThisExpr>
 {
+};
+
+/**
+ * @brief Constructor call
+ */
+struct ConstructorCallExpr : Expr, details::MkVisitable<ConstructorCallExpr>
+{
+    Type* type_;
+    std::vector<Expr*> args_;
+    ConstructorCallExpr(Type* type, std::vector<Expr*> args);
+};
+
+/**
+ * @brief Operator new that allocates and possibly initializes memory
+ * If @c init is null, then the memory is just allocated for the type
+ * and it is not initialized.
+ */
+struct NewExpr : Expr, details::MkVisitable<NewExpr>
+{
+    ConstructorCallExpr* init_;
+    NewExpr(ConstructorCallExpr* init);
+};
+
+/**
+ * @brief Operator delete that frees allocated memory
+ */
+struct DeleteExpr : Expr, details::MkVisitable<DeleteExpr>
+{
+    Expr* arg_;
+    DeleteExpr(Expr* arg);
 };
 
 /**

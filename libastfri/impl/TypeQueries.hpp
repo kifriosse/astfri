@@ -7,7 +7,7 @@ namespace astfri::details
 {
 struct ITypeQueries
 {
-    virtual ~ITypeQueries ()                            = default;
+    virtual ~ITypeQueries()                             = default;
 
     virtual DynamicType* as_dynamic () noexcept         = 0;
     virtual IntType* as_int () noexcept                 = 0;
