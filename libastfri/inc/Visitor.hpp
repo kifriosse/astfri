@@ -37,6 +37,7 @@ struct IVisitor
     virtual void visit (LocalVarRefExpr const& expr)     = 0;
     virtual void visit (MemberVarRefExpr const& expr)    = 0;
     virtual void visit (GlobalVarRefExpr const& expr)    = 0;
+    virtual void visit (ClassRefExpr const& expr)        = 0;
     virtual void visit (FunctionCallExpr const& expr)    = 0;
     virtual void visit (MethodCallExpr const& expr)      = 0;
     virtual void visit (LambdaExpr const& expr)          = 0;
@@ -180,6 +181,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit (GlobalVarRefExpr const& /*expr*/) override
+    {
+    }
+
+    void visit (ClassRefExpr const& /*expr*/) override
     {
     }
 

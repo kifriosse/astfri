@@ -274,6 +274,18 @@ struct GlobalVarRefExpr : Expr, details::MkVisitable<GlobalVarRefExpr>
 };
 
 /**
+ * @brief Reference to a class object
+ * This type is mainly used as @c owner for static method calls
+ */
+struct ClassRefExpr : Expr, details::MkVisitable<ClassRefExpr>
+{
+    // TODO later this could point to ClassDefStmt
+    std::string name_;
+
+    ClassRefExpr(std::string name);
+};
+
+/**
  * @brief TODO
  */
 struct FunctionCallExpr : Expr, details::MkVisitable<FunctionCallExpr>

@@ -89,6 +89,11 @@ GlobalVarRefExpr* ExprFactory::mk_global_var_ref(std::string global)
     return details::emplace_get<GlobalVarRefExpr>(exprs_, std::move(global));
 }
 
+ClassRefExpr* ExprFactory::mk_class_ref(std::string name)
+{
+    return details::emplace_get<ClassRefExpr>(exprs_, std::move(name));
+}
+
 FunctionCallExpr* ExprFactory::mk_function_call(
     std::string name,
     std::vector<Expr*> args

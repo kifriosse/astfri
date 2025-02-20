@@ -80,6 +80,11 @@ GlobalVarRefExpr::GlobalVarRefExpr(std::string global) :
 {
 }
 
+ClassRefExpr::ClassRefExpr(std::string name) :
+  name_(std::move(name))
+{
+}
+
 FunctionCallExpr::FunctionCallExpr(std::string name, std::vector<Expr*> args) :
     name_(std::move(name)),
     args_(std::move(args))
