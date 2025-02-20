@@ -78,7 +78,7 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl *FD) {
     auto new_function = this->stmt_factory_->mk_function_def(
         FD->getNameAsString(),
         std::vector<ParamVarDefStmt*> {},
-        this->type_factory_->mk_void(), //TODO: fixnut typ
+        this->type_factory_->mk_user(FD->getReturnType().getAsString()), //TODO: fixnut typ
         this->stmt_factory_->mk_compound(std::vector<Stmt *> {})
     );
     this->tu_->functions_.push_back(new_function);
@@ -110,7 +110,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
         this->stmt_factory_->mk_function_def(
             MD->getNameAsString(),
             std::vector<ParamVarDefStmt*> {},
-            this->type_factory_->mk_void(), //TODO: fixnut typ
+            this->type_factory_->mk_user(MD->getReturnType().getAsString()), //TODO: fixnut typ
             this->stmt_factory_->mk_compound(std::vector<Stmt *> {})),
         astfri::AccessModifier::Public
     );
@@ -175,10 +175,18 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl *VD) {
         // globalna premenna
         new_var = this->stmt_factory_->mk_global_var_def(
             VD->getNameAsString(),
-            this->type_factory_->mk_int(), //TODO: fixnut
-            this->expr_factory_->mk_int_literal(0)
+            this->type_factory_->mk_user(VD->getType().getAsString()), //TODO: fixnut
+            nullptr
         );
         this->tu_->globals_.push_back((GlobalVarDefStmt*)new_var);
+    } else {
+        // premenna v compounde
+        new_var = this->stmt_factory_->mk_local_var_def(
+            VD->getNameAsString(),
+            this->type_factory_->mk_user(VD->getType().getAsString()), //TODO: fixnut
+            nullptr
+        );
+        ((CompoundStmt*)this->astfri_locationStack.back()->stmt_)->stmts_.push_back(new_var);
     }
 
     // vytvorenie AST location
@@ -190,6 +198,15 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl *VD) {
     this->clang_locationStack.push_back(clang_location);
 
     Base::TraverseVarDecl(VD);
+
+    if (VD->hasInit()) {
+        new_var->initializer_ = this->astfri_locationStack.back()->expr_;
+        // vymazanie AST location inicializatora
+        delete this->astfri_locationStack.back(); 
+        this->astfri_locationStack.pop_back();
+        delete this->clang_locationStack.back();
+        this->clang_locationStack.pop_back();
+    }
 
     // vymazanie AST location
     delete this->astfri_locationStack.back(); 
@@ -259,7 +276,7 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
     auto new_member = this->stmt_factory_->mk_member_var_def(
         FD->getNameAsString(),
         this->type_factory_->mk_int(), //TODO: fixnut typ a inicializator
-        this->expr_factory_->mk_int_literal(0),
+        nullptr,
         access
     );
     ((ClassDefStmt*)this->astfri_locationStack.back()->stmt_)->vars_.push_back(new_member);
@@ -273,6 +290,16 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
     this->clang_locationStack.push_back(clang_location);
 
     Base::TraverseFieldDecl(FD);
+
+    // ak ma inicializator
+    if (FD->hasInClassInitializer()) {
+        new_member->initializer_ = this->astfri_locationStack.back()->expr_;
+        // vymazanie AST location inicializatora
+        delete this->astfri_locationStack.back(); 
+        this->astfri_locationStack.pop_back();
+        delete this->clang_locationStack.back();
+        this->clang_locationStack.pop_back();
+    }
 
     // vymazanie AST location
     delete this->astfri_locationStack.back(); 
@@ -301,19 +328,49 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
 //     llvm::outs() << "Statement:" << S->getStmtClassName() << "\n";
 //     return true;
 // }
+bool ClangVisitor::TraverseCompoundStmt(clang::CompoundStmt *CS) {
+    llvm::outs() << "Compound Statement zaciatok:" << "\n";
+
+    // akcia na tomto vrchole
+    CompoundStmt* new_compound;
+    if (this->astfri_locationStack.size() == 1) {
+        new_compound = ((FunctionDefStmt*)this->astfri_locationStack.back()->stmt_)->body_;
+    } else {
+        new_compound = ((MethodDefStmt*)this->astfri_locationStack.back()->stmt_)->func_->body_;
+    }
+
+    // vytvorenie AST location
+    AstfriASTLocation* astfri_location = new AstfriASTLocation();
+    astfri_location->stmt_ = new_compound;
+    this->astfri_locationStack.push_back(astfri_location);
+    ClangASTLocation* clang_location = new ClangASTLocation();
+    clang_location->stmt_ = CS;
+    this->clang_locationStack.push_back(clang_location);
+
+    Base::TraverseCompoundStmt(CS);
+
+    // vymazanie AST location
+    delete this->astfri_locationStack.back(); 
+    this->astfri_locationStack.pop_back();
+    delete this->clang_locationStack.back();
+    this->clang_locationStack.pop_back();
+    llvm::outs() << "Compound Statement koniec:" << "\n";
+    return true;
+}
 bool ClangVisitor::TraverseReturnStmt(clang::ReturnStmt *RS) {
     llvm::outs() << "Return Statement (value): " << RS->getRetValue() << "\n";
 
     // akcia na tomto vrchole
-    auto new_return = this->stmt_factory_->mk_return(
+    ReturnStmt* new_return = this->stmt_factory_->mk_return(
         nullptr //TODO: fixnut
     );
-    if(this->astfri_locationStack.size() == 1) {
-        // globalna funkcia
-        ((FunctionDefStmt*)this->astfri_locationStack.back()->stmt_)->body_->stmts_.push_back(new_return);
-    } else {
-        // metoda triedy
-    }
+    std::cout << "Sem som sa dostal" << std::endl;
+    ((CompoundStmt*)this->astfri_locationStack.back()->stmt_)->stmts_.push_back(new_return);
+    // if(this->astfri_locationStack.size() == 1) {
+    //     // globalna funkcia
+    // } else {
+    //     // metoda triedy
+    // }
 
     // vytvorenie AST location
     AstfriASTLocation* astfri_location = new AstfriASTLocation();
@@ -324,6 +381,15 @@ bool ClangVisitor::TraverseReturnStmt(clang::ReturnStmt *RS) {
     this->clang_locationStack.push_back(clang_location);
 
     Base::TraverseReturnStmt(RS);
+
+    // naplnenie return stmt
+    new_return->val_ = this->astfri_locationStack.back()->expr_;
+    //vymazanie AST location navratovej hodnoty
+    delete this->astfri_locationStack.back();
+    this->astfri_locationStack.pop_back();
+    delete this->clang_locationStack.back();
+    this->clang_locationStack.pop_back();
+
 
     // vymazanie AST location
     delete this->astfri_locationStack.back(); 
@@ -345,6 +411,30 @@ bool ClangVisitor::TraverseReturnStmt(clang::ReturnStmt *RS) {
 //     return true;
 // }
 // // visit expression
+bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor) {
+    llvm::outs() << "CXXConstructExpr: " << Ctor->getConstructor()->getNameAsString() << "\n";
+
+    // akcia na tomto vrchole
+    auto new_ctor = this->expr_factory_->mk_method_call(
+        //TODO: zatial dam len ako string, neviem ci netreba nejaky pointer alebo nieco
+        this->expr_factory_->mk_string_literal(Ctor->getConstructor()->getParent()->getNameAsString()),
+        Ctor->getConstructor()->getNameAsString(),
+        std::vector<Expr *> {}
+    );
+
+    // vytvorenie AST location
+    AstfriASTLocation* astfri_location = new AstfriASTLocation();
+    astfri_location->expr_ = new_ctor;
+    this->astfri_locationStack.push_back(astfri_location);
+    ClangASTLocation* clang_location = new ClangASTLocation();
+    clang_location->expr_ = Ctor;
+    this->clang_locationStack.push_back(clang_location);
+
+    Base::TraverseCXXConstructExpr(Ctor);
+
+    // vymazanie AST location netreba
+    return true;
+}
 bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr *DRE) {
     llvm::outs() << "DeclRefExpr: " << DRE->getDecl()->getNameAsString() << "\n";
 
@@ -392,39 +482,112 @@ bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr *DRE) {
 // literaly
  bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral *IL) {
     llvm::outs() << "Integer literal: " << IL->getValue().getSExtValue() << "\n";
-    // TODO: Dorobit new a potom toto bude fungovat
-    // ((VarDefStmt*)this->astfri_locationStack.back()->stmt_)->initializer_ = this->expr_factory_->mk_int_literal(IL->getValue().getSExtValue());
+
+    // akcia na tomto vrchole
+    auto int_literal = this->expr_factory_->mk_int_literal(IL->getValue().getSExtValue());
+
+    // vytvorenie AST location
+    AstfriASTLocation* astfri_location = new AstfriASTLocation();
+    astfri_location->expr_ = int_literal;
+    this->astfri_locationStack.push_back(astfri_location);
+    ClangASTLocation* clang_location = new ClangASTLocation();
+    clang_location->int_lit_ = IL;
+    this->clang_locationStack.push_back(clang_location);
+
+    Base::TraverseIntegerLiteral(IL); // ja viem ze to je asi zbytocne ale pre istotu XD
+
+    // vymazanie AST location netreba 
     return true;
  }
  bool ClangVisitor::TraverseFloatingLiteral(clang::FloatingLiteral *FL) {
     llvm::outs() << "Floating literal: " << FL->getValue().convertToFloat() << "\n";
+    
+    auto float_literal = this->expr_factory_->mk_float_literal(FL->getValue().convertToFloat());
+
+    // vytvorenie AST location
+    AstfriASTLocation* astfri_location = new AstfriASTLocation();
+    astfri_location->expr_ = float_literal;
+    this->astfri_locationStack.push_back(astfri_location);
+    ClangASTLocation* clang_location = new ClangASTLocation();
+    clang_location->float_lit_ = FL;
+    this->clang_locationStack.push_back(clang_location);
+
+    Base::TraverseFloatingLiteral(FL);
+    // vymazanie AST location netreba
     return true;
  }
  bool ClangVisitor::TraverseStringLiteral(clang::StringLiteral *SL) {
     llvm::outs() << "String literal: " << SL->getString() << "\n";
+
+    auto string_literal = this->expr_factory_->mk_string_literal(SL->getString().str());
+
+    // vytvorenie AST location
+    AstfriASTLocation* astfri_location = new AstfriASTLocation();
+    astfri_location->expr_ = string_literal;
+    this->astfri_locationStack.push_back(astfri_location);
+    ClangASTLocation* clang_location = new ClangASTLocation();
+    clang_location->string_lit_ = SL;
+    this->clang_locationStack.push_back(clang_location);
+
+    Base::TraverseStringLiteral(SL);
+    // vymazanie AST location netreba
+    return true;
+ }
+ bool ClangVisitor::TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL) {
+    llvm::outs() << "Bool literal: " << BL->getValue() << "\n";
+
+    auto bool_literal = this->expr_factory_->mk_bool_literal(BL->getValue());
+
+    // vytvorenie AST location
+    AstfriASTLocation* astfri_location = new AstfriASTLocation();
+    astfri_location->expr_ = bool_literal;
+    this->astfri_locationStack.push_back(astfri_location);
+    ClangASTLocation* clang_location = new ClangASTLocation();
+    clang_location->bool_lit_ = BL;
+    this->clang_locationStack.push_back(clang_location);
+
+    Base::TraverseCXXBoolLiteralExpr(BL);
+    // vymazanie AST location netreba
     return true;
  }
  // operatory
  bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator *BO) {
-     BinOpExpr* bin_op = nullptr;
-     llvm::outs() << "Binary operator: " << BO->getOpcodeStr() << "\n";
-     // =
-     if (BO->getOpcodeStr().equals("=")) { //TODO
-         llvm::outs() << "Priradenie: " << BO->getLHS()->getStmtClassName()
-                      << " = " << BO->getRHS()->getStmtClassName() << "\n";
-         auto assign_op = this->expr_factory_->mk_assign(
-                    nullptr,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("+")) {
+    BinOpExpr* bin_op = nullptr;
+    llvm::outs() << "Binary operator: " << BO->getOpcodeStr() << "\n";
+    // =
+    //  if (BO->getOpcodeStr().equals("=")) { //TODO
+    //      llvm::outs() << "Priradenie: " << BO->getLHS()->getStmtClassName()
+    //                   << " = " << BO->getRHS()->getStmtClassName() << "\n";
+    //      auto assign_op = this->expr_factory_->mk_assign(
+    //                 nullptr,
+    //         nullptr
+    //     );
+    // } else 
+    if (BO->getOpcodeStr().equals("+")) {
         // operator +
         bin_op = this->expr_factory_->mk_bin_on(
             nullptr,
             BinOpType::Add,
             nullptr
         );
+    } else if (BO->getOpcodeStr().equals("-")) {
+        // operator -
+        bin_op = this->expr_factory_->mk_bin_on(
+            nullptr,
+            BinOpType::Subtract,
+            nullptr
+        );
     }
-    ((ReturnStmt*)this->astfri_locationStack.back()->stmt_)->val_ = bin_op;
+    // ak je nad return statement
+    if (this->clang_locationStack.back()->stmt_ && llvm::dyn_cast<clang::ReturnStmt>(this->clang_locationStack.back()->stmt_)) {
+        // vytvorenie return statementu
+        ((ReturnStmt*)this->astfri_locationStack.back()->stmt_)->val_ = bin_op;    
+    }
+    // ak je nad vardecl
+    if (this->clang_locationStack.back()->decl_ && llvm::dyn_cast<clang::VarDecl>(this->clang_locationStack.back()->decl_)) {
+        // vytvorenie inicializacie
+        ((VarDefStmt*)this->astfri_locationStack.back()->stmt_)->initializer_ = bin_op;
+    }
 
     // vytvorenie AST location
     AstfriASTLocation* astfri_location = new AstfriASTLocation();
@@ -452,10 +615,10 @@ bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr *DRE) {
     this->astfri_locationStack.pop_back();
 
     // vymazanie AST location
-    delete this->astfri_locationStack.back(); 
-    this->astfri_locationStack.pop_back();
-    delete this->clang_locationStack.back();
-    this->clang_locationStack.pop_back();
+    // delete this->astfri_locationStack.back(); 
+    // this->astfri_locationStack.pop_back();
+    // delete this->clang_locationStack.back();
+    // this->clang_locationStack.pop_back();
     return true;
 }
 } // namespace libastfri::cpp

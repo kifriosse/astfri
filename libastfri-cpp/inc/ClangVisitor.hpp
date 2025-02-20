@@ -15,7 +15,9 @@
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Decl.h>
 #include <clang/AST/DeclBase.h>
+#include <clang/AST/DeclCXX.h>
 #include <clang/AST/Expr.h>
+#include <clang/AST/ExprCXX.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Stmt.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -30,6 +32,10 @@ namespace astfri::cpp
         const clang::Stmt* stmt_ = nullptr;
         const clang::Expr* expr_ = nullptr;
         const clang::BinaryOperator* bin_op_ = nullptr;
+        const clang::IntegerLiteral* int_lit_ = nullptr;
+        const clang::FloatingLiteral *float_lit_ = nullptr;
+        const clang::CXXBoolLiteralExpr *bool_lit_ = nullptr;
+        const clang::StringLiteral *string_lit_ = nullptr;
         const ClangASTLocation* parent_ = nullptr;
     };
 
@@ -60,11 +66,13 @@ public:
     // bool TraverseEnumDecl(clang::EnumDecl *ED);
     // // Traverse statementy
     // bool TraverseStmt(clang::Stmt *S);
+    bool TraverseCompoundStmt(clang::CompoundStmt *CS);
     bool TraverseReturnStmt(clang::ReturnStmt *RS);
     // bool TraverseIfStmt(clang::IfStmt *IS);
     // bool TraverseForStmt(clang::ForStmt *FS);
     // bool TraverseWhileStmt(clang::WhileStmt *WS);
     // // Traverse expression
+    bool TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor);
     bool TraverseDeclRefExpr(clang::DeclRefExpr *DRE);
     // bool TraverseExpr(clang::Expr *E);
     // bool TraverseCallExpr(clang::CallExpr *CE);
@@ -74,6 +82,7 @@ public:
     bool TraverseIntegerLiteral(clang::IntegerLiteral *IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral *FL);
     bool TraverseStringLiteral(clang::StringLiteral *SL);
+    bool TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL);
     // Traverse operators
     bool TraverseBinaryOperator(clang::BinaryOperator *BO);
 
