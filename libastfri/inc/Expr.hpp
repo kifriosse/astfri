@@ -191,6 +191,12 @@ enum class UnaryOpType
     // arg++
     PostIncrement,
 
+    // --arg
+    PreDecrement,
+
+    // arg--
+    PostDecrement,
+
     // ~arg
     BitFlip
 };
