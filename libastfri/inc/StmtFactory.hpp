@@ -38,6 +38,8 @@ public:
         Type* type,
         Expr* initializer
     );
+    DefStmt* mk_def();
+    DefStmt* mk_def(std::vector<VarDefStmt*> defs);
     FunctionDefStmt* mk_function_def ();
     FunctionDefStmt* mk_function_def (
         std::string name,

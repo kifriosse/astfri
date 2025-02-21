@@ -64,6 +64,7 @@ struct IVisitor
     virtual void visit (MemberVarDefStmt const& stmt)    = 0;
     virtual void visit (GlobalVarDefStmt const& stmt)    = 0;
     virtual void visit (FunctionDefStmt const& stmt)     = 0;
+    virtual void visit (DefStmt const& stmt)             = 0;
     virtual void visit (MethodDefStmt const& stmt)       = 0;
     virtual void visit (BaseInitializerStmt const& stmt) = 0;
     virtual void visit (ConstructorDefStmt const& stmt)  = 0;
@@ -285,6 +286,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit (FunctionDefStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit (DefStmt const& /*stmt*/) override
     {
     }
 

@@ -94,6 +94,29 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
 };
 
 /**
+ * @brief Definition statement that may contain multiple variable definitions
+ * Covers the following situations:
+ * @code
+   int x = 10, y = 20;
+ * @endcode
+ * In this case, you would use:
+ * @code
+   DefStmt
+   |-VarDefStmt
+   | `-IntLiteralExpr(10)
+   `-VarDefStmt
+     `-IntLiteralExpr(10)
+ * @endcode
+ */
+struct DefStmt : Stmt, details::MkVisitable<DefStmt>
+{
+    std::vector<VarDefStmt*> defs_ {};
+
+    DefStmt() = default;
+    explicit DefStmt(std::vector<VarDefStmt*> defs);
+};
+
+/**
  * @brief TODO
  */
 struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>

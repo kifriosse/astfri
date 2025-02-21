@@ -7,6 +7,7 @@ struct LocalVarDefStmt;
 struct ParamVarDefStmt;
 struct MemberVarDefStmt;
 struct GlobalVarDefStmt;
+struct DefStmt;
 struct FunctionDefStmt;
 struct MethodDefStmt;
 struct BaseInitializerStmt;

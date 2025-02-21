@@ -66,6 +66,16 @@ GlobalVarDefStmt* StmtFactory::mk_global_var_def(
     );
 }
 
+DefStmt* StmtFactory::mk_def()
+{
+    return details::emplace_get<DefStmt>(stmts_);
+}
+
+DefStmt* StmtFactory::mk_def(std::vector<VarDefStmt*> defs)
+{
+    return details::emplace_get<DefStmt>(stmts_, std::move(defs));
+}
+
 FunctionDefStmt* StmtFactory::mk_function_def()
 {
     return details::emplace_get<FunctionDefStmt>(stmts_);

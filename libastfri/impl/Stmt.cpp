@@ -47,6 +47,11 @@ GlobalVarDefStmt::GlobalVarDefStmt(
 {
 }
 
+DefStmt::DefStmt(std::vector<VarDefStmt*> defs) :
+    defs_(std::move(defs))
+{
+}
+
 FunctionDefStmt::FunctionDefStmt(
     std::string name,
     std::vector<ParamVarDefStmt*> params,
