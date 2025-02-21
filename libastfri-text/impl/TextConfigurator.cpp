@@ -11,29 +11,29 @@ TextConfigurator::TextConfigurator() : Configurator() {
 void TextConfigurator::load_new_config_file() {
     set_defaults();
     std::string input;
-    std::cout << "Chceš použiť konfiguračný súbor? [\"yes\"/...]: ";
+    std::cout << std::move("Chceš použiť konfiguračný súbor? [\"yes\"/...]: ");
     std::getline(std::cin, input);
     if (input != "yes") {
-        std::cout << "Použijem predvolenú konfiguráciu.\n";
+        std::cout << std::move("Použijem predvolený formát.\n");
         Configurator::set_defaults();
         return;
     }
-    std::cout << "Chceš použiť vlastný konfiguračný súbor? [\"yes\"/...]: ";
+    std::cout << std::move("Chceš použiť vlastný konfiguračný súbor? [\"yes\"/...]: ");
     std::getline(std::cin, input);
     if (input == "yes") {
-        std::cout << "Zadaj celú cestu ku .json súboru : ";
+        std::cout << std::move("Zadaj celú cestu ku .json súboru: ");
         std::getline(std::cin, input);
-        if (!input.ends_with(".json")) {
-            std::cout << "Zlý typ súboru! Použijem predvolenú konfiguráciu.\n";
+        if (!input.ends_with(std::move(".json"))) {
+            std::cout << std::move("Zlý typ súboru! Použijem predvolený formát.\n");
             Configurator::set_defaults();
             return;
         }
     } else {
         input = std::filesystem::current_path().parent_path().parent_path().parent_path() / "libastfri-text" / "impl" / "conf.json";
     }
-    FILE* configFile = fopen(input.c_str(), "r");
+    FILE* configFile = fopen(input.c_str(), std::move("r"));
     if (!configFile) {
-        std::cout << "Zlá cesta! Použijem predvolenú konfiguráciu.\n";
+        std::cout << std::move("Zlá cesta! Použijem predvolený formát.\n");
         Configurator::set_defaults();
         return;
     }
@@ -43,7 +43,7 @@ void TextConfigurator::load_new_config_file() {
     rj::Document doc;
     doc.ParseStream(inputStream);
     if (doc.HasParseError()) {
-        std::cout << "Chyba v súbore! Použijem predvolenú konfiguráciu.\n";
+        std::cout << std::move("Chyba pri čítaní súboru! Použijem predvolený formát.\n");
         Configurator::set_defaults();
         return;
     }
@@ -141,12 +141,12 @@ void TextConfigurator::load_new_config_file() {
         }
     }
     fclose(std::move(configFile));
-    Configurator::set_input_path(input);
+    Configurator::set_input_path(std::move(input));
     Configurator::load_new_config_file();
 }
 
 void TextConfigurator::set_defaults() {
-    outputFileFormat_ = std::make_unique<std::stringstream>("txt");
+    outputFileFormat_ = std::make_unique<std::stringstream>(std::move("txt"));
     showRowNumber_ = true;
     showOpeningBracketOnNewLine_ = true;
     showClassDecl_ = true;
@@ -160,16 +160,16 @@ void TextConfigurator::set_defaults() {
     showFunctionBody_ = true;
     lengthOfTabWord_ = 4;
     lengthOfLeftMargin_ = 2;
-    sizeOfRowNumber_ = 15;
-    classWord_ = std::make_unique<std::stringstream>("class");
-    thisWord_ = std::make_unique<std::stringstream>("this");
-    returnWord_ = std::make_unique<std::stringstream>("return");
-    throwWord_ = std::make_unique<std::stringstream>("throw");
-    ifWord_ = std::make_unique<std::stringstream>("if");
-    elseWord_ = std::make_unique<std::stringstream>("else");
-    forWord_ = std::make_unique<std::stringstream>("for");
-    whileWord_ = std::make_unique<std::stringstream>("while");
-    doWord_ = std::make_unique<std::stringstream>("do");
-    switchWord_ = std::make_unique<std::stringstream>("switch");
-    caseWord_ = std::make_unique<std::stringstream>("case");
+    sizeOfRowNumber_ = 20;
+    classWord_ = std::make_unique<std::stringstream>(std::move("class"));
+    thisWord_ = std::make_unique<std::stringstream>(std::move("this"));
+    returnWord_ = std::make_unique<std::stringstream>(std::move("return"));
+    throwWord_ = std::make_unique<std::stringstream>(std::move("throw"));
+    ifWord_ = std::make_unique<std::stringstream>(std::move("if"));
+    elseWord_ = std::make_unique<std::stringstream>(std::move("else"));
+    forWord_ = std::make_unique<std::stringstream>(std::move("for"));
+    whileWord_ = std::make_unique<std::stringstream>(std::move("while"));
+    doWord_ = std::make_unique<std::stringstream>(std::move("do"));
+    switchWord_ = std::make_unique<std::stringstream>(std::move("switch"));
+    caseWord_ = std::make_unique<std::stringstream>(std::move("case"));
 }

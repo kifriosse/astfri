@@ -6,19 +6,17 @@ Ak chceš použiť knižnicu na textový výstup, sprav nasledovné.
 4) Inštancií pošli správu visit s ľubovoľným vrcholom: "visitor.visit(astfri::VoidType);"
 5) Zavolaj metódu: "visitor->write_file();"
 
-Program funguje aj bez konfiguračného súboru, vtedy sa použije predvolená konfigurácia.
+Program funguje aj bez konfiguračného súboru, vtedy sa použije predvolený formát.
 Konfigurácia(formátovanie výstupu) je plne ošetrená voči chybám v konfiguračnom súbore. Konfiguráciu je možné nastaviť pre ľubovoľné parametre, podmienka je zachovanie "hierarchie" tohto súboru. Na samotnom poradí nezáleží.
 
 Vstupný konfiguračný súbor je buď možné použiť predvolený v priečinku impl, alebo si môžeš vytvoriť svoj(program sa ťa opýta na cestu ku .json súboru).
-Keď nastane hocijaká chyba pri vytváraní súboru, tak sa súbor vytvorí v priečinku build.
-
-Zatiaľ je plne funkčný iba výpis do .txt súborov, súbory .html fungujú taktiež, ale iba s primitívnym formátovaním.
-
+Cestu k výstupu si buď zadáš cez konfigurák, alebo sa použije predvolená cesta. Tá ukazuje buď priamo do priečinka "build", ak taký v ceste ku programu máš, a ak nie, tak sa použije adresár "/home/USER/", kde USER je aktuálne prihlásený používateľ. Pri hocijakej chybe sa taktiež použije predvolená cesta.
 
 Príklad s kompletným konfiguračným súborom(toto všetko sa dá modifikovať).
 {
     "general_output":{
-        "file_path":"/mnt/c/users/marek/desktop/suborik",
+        "file_name":"suborik",
+        "file_path":"/mnt/c/users/marek/desktop/",
         "view":"vnutorny",
         "data_types":{
             "int":"CELECISLO",
@@ -55,7 +53,7 @@ Príklad s kompletným konfiguračným súborom(toto všetko sa dá modifikovať
         "show_function_body":true,
         "tab_word_length":8,
         "margin_left":6,
-        "row_num_size":15
+        "row_num_size":17
     },
     "system_names":{
         "class":"TRIEDA",
@@ -71,7 +69,6 @@ Príklad s kompletným konfiguračným súborom(toto všetko sa dá modifikovať
         "case":"PRÍPAD"
     }
 }
-
 
 mkdir build
 cd build

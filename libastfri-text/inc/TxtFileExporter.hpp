@@ -6,6 +6,8 @@
 struct TxtFileExporter : Exporter {
     TxtFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
+private:
+    void write_file(std::string path) override;
 };
 
 #endif

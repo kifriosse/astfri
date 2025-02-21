@@ -6,9 +6,12 @@
 
 struct Configurator {
 private:
-    std::unique_ptr<std::stringstream> inputFilePath_;
-    std::unique_ptr<std::stringstream> defaultOutputFilePath_;
+    std::unique_ptr<std::stringstream> configFilePath_;
+    std::unique_ptr<std::stringstream> outputFileName_;
+    std::unique_ptr<std::stringstream> defFolderPath_;
+    std::unique_ptr<std::stringstream> outFolderPath_;
 private:
+    std::unique_ptr<std::stringstream> defaultOutputFilePath_;
     std::unique_ptr<std::stringstream> outputFilePath_;
     std::unique_ptr<std::stringstream> view_;
     std::unique_ptr<std::stringstream> intWord_;
@@ -22,6 +25,13 @@ private:
     std::unique_ptr<std::stringstream> protectedWord_;
     std::unique_ptr<std::stringstream> classWordColor_;
     std::unique_ptr<std::stringstream> classNameColor_;
+protected:
+    Configurator();
+    void set_input_path(std::string path);
+    void reset_def_path();
+    void reset_out_path();
+    virtual void load_new_config_file();
+    virtual void set_defaults();
 public:
     const std::stringstream* get_default_output_path()  { return defaultOutputFilePath_.get(); };
     const std::stringstream* get_output_file_path()     { return outputFilePath_.get(); };
@@ -37,10 +47,6 @@ public:
     const std::stringstream* get_protected_word()       { return protectedWord_.get(); };
     const std::stringstream* get_class_word_color()     { return classWordColor_.get(); };
     const std::stringstream* get_class_name_color()     { return classNameColor_.get(); };
-protected:
-    void set_input_path(std::string& path);
-    virtual void load_new_config_file();
-    virtual void set_defaults();
 };
 
 #endif

@@ -1,6 +1,7 @@
 {
     "general_output":{
-        "file_path":"/mnt/c/users/marek/desktop/suborik",
+        "file_name":"suborik",
+        "file_path":"/mnt/c/users/marek/desktop/",
         "view":"vnutorny",
         "data_types":{
             "int":"CELECISLO",
@@ -37,7 +38,7 @@
         "show_function_body":true,
         "tab_word_length":8,
         "margin_left":6,
-        "row_num_size":15
+        "row_num_size":17
     },
     "system_names":{
         "class":"TRIEDA",

@@ -34,6 +34,9 @@ private:
 public:
     TextConfigurator();
     void load_new_config_file() override;
+private:
+    void set_defaults() override;
+public:
     const std::stringstream* get_output_file_format() { return outputFileFormat_.get(); };
     const bool& sh_row_number()         { return showRowNumber_; };
     const bool& sh_open_br_new_line()   { return showOpeningBracketOnNewLine_; };
@@ -60,8 +63,6 @@ public:
     const std::stringstream* get_do_word()      { return doWord_.get(); };
     const std::stringstream* get_switch_word()  { return switchWord_.get(); };
     const std::stringstream* get_case_word()    { return caseWord_.get(); };
-private:
-    void set_defaults() override;
 };
 
 #endif

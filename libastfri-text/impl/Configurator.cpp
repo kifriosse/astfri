@@ -3,21 +3,64 @@
 #include <lib/rapidjson/document.h>
 #include <filesystem>
 
-void Configurator::set_input_path(std::string& path) {
-    inputFilePath_ = std::make_unique<std::stringstream>(std::move(path));
+Configurator::Configurator() {
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    bool foundBuildFolder = false;
+    while (currentPath.has_filename() || currentPath.parent_path().has_filename()) {
+        if (currentPath.filename() == "build") {
+            foundBuildFolder = true;
+            break;
+        }
+        currentPath = currentPath.parent_path();
+    }
+    if (!foundBuildFolder) {
+        currentPath.clear();
+        std::string user = getenv(std::move("USER"));
+        currentPath = std::move("/home/") + std::move(user);
+    }
+    currentPath.concat(std::move("/"));
+    defFolderPath_ = std::make_unique<std::stringstream>(std::move(currentPath));
+    set_defaults();
+}
+
+void Configurator::set_input_path(std::string path) {
+    configFilePath_ = std::make_unique<std::stringstream>(std::move(path));
+}
+
+void Configurator::reset_def_path() {
+    defaultOutputFilePath_ = std::make_unique<std::stringstream>(defFolderPath_->str() + outputFileName_->str());
+}
+
+void Configurator::reset_out_path() {
+    outputFilePath_ = std::make_unique<std::stringstream>(outFolderPath_->str() + outputFileName_->str());
 }
 
 void Configurator::load_new_config_file() {
-    FILE* configFile = fopen(std::move(inputFilePath_->str().c_str()), "r");
+    FILE* configFile = fopen(std::move(configFilePath_->str().c_str()), std::move("r"));
     char readBuffer[65536];
     namespace rj = rapidjson;
     rj::FileReadStream inputStream(configFile, readBuffer, sizeof(std::move(readBuffer)));
     rj::Document doc;
     doc.ParseStream(inputStream);
+    bool resetPath = false;
     if (doc.HasMember("general_output") && doc["general_output"].IsObject() && !doc["general_output"].IsNull()) {
         const rj::Value& genOut = std::move(doc["general_output"]);
+        if (genOut.HasMember("file_name") && genOut["file_name"].IsString() && genOut["file_name"].GetStringLength() > 0) {
+            std::string name = std::move(genOut["file_name"].GetString());
+            if (!name.starts_with(std::move(" ")) && !name.ends_with(std::move(" "))) {
+                outputFileName_ = std::make_unique<std::stringstream>(std::move(name));
+                resetPath = true;
+            }
+        }
         if (genOut.HasMember("file_path") && genOut["file_path"].IsString() && genOut["file_path"].GetStringLength() > 0) {
-            outputFilePath_ = std::make_unique<std::stringstream>(std::move(genOut["file_path"].GetString()));
+            std::string path = std::move(genOut["file_path"].GetString());
+            if (!path.starts_with(std::move(" ")) && !path.ends_with(std::move(" "))) {
+                if (path.at(std::move(path.length() - 1)) != '/') {
+                    path.append(std::move("/"));
+                }
+                outFolderPath_ = std::make_unique<std::stringstream>(std::move(path));
+                resetPath = true;
+            }
         }
         if (genOut.HasMember("view") && genOut["view"].IsString() && genOut["view"].GetStringLength() > 0) {
             view_ = std::make_unique<std::stringstream>(std::move(genOut["view"].GetString()));
@@ -69,12 +112,17 @@ void Configurator::load_new_config_file() {
         }
     }
     fclose(std::move(configFile));
+    if (resetPath) {
+        reset_def_path();
+        reset_out_path();
+    }
 }
 
 void Configurator::set_defaults() {
-    namespace fs = std::filesystem;
-    defaultOutputFilePath_ = std::make_unique<std::stringstream>(fs::current_path().parent_path().parent_path() / "output");
-    outputFilePath_ = std::make_unique<std::stringstream>(std::move("/"));
+    outputFileName_ = std::make_unique<std::stringstream>(std::move("output"));
+    outFolderPath_ = std::make_unique<std::stringstream>(defFolderPath_->str());
+    defaultOutputFilePath_ = std::make_unique<std::stringstream>(defFolderPath_->str() + outputFileName_->str());
+    outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
     view_ = std::make_unique<std::stringstream>(std::move("vnutorny"));
     intWord_ = std::make_unique<std::stringstream>(std::move("int"));
     floatWord_ = std::make_unique<std::stringstream>(std::move("float"));
