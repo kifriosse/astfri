@@ -34,8 +34,12 @@ Príklad s kompletným konfiguračným súborom(toto všetko sa dá modifikovať
             "protected":"PROTECTED"
         },
         "formatting":{
+            "font":"Consolas",
             "class_word_color":"red",
-            "class_name_color":"forestgreen"
+            "class_name_color":"forestgreen",
+            "method_name_color":"orange",
+            "data_type_color":"blue",
+            "acc_mods_color":"#53fc18"
         }
     },
     "basic_format":{

@@ -103,11 +103,23 @@ void Configurator::load_new_config_file() {
         }
         if (genOut.HasMember("formatting") && genOut["formatting"].IsObject() && !genOut["formatting"].IsNull()) {
             const rj::Value& formm = std::move(genOut["formatting"]);
+            if (formm.HasMember("font") && formm["font"].IsString()) {
+                font_ = std::make_unique<std::stringstream>(std::move(formm["font"].GetString()));
+            }
             if (formm.HasMember("class_word_color") && formm["class_word_color"].IsString()) {
                 classWordColor_ = std::make_unique<std::stringstream>(std::move(formm["class_word_color"].GetString()));
             }
+            if (formm.HasMember("method_name_color") && formm["method_name_color"].IsString()) {
+                methodNameColor_ = std::make_unique<std::stringstream>(std::move(formm["method_name_color"].GetString()));
+            }
             if (formm.HasMember("class_name_color") && formm["class_name_color"].IsString()) {
                 classNameColor_ = std::make_unique<std::stringstream>(std::move(formm["class_name_color"].GetString()));
+            }
+            if (formm.HasMember("data_type_color") && formm["data_type_color"].IsString()) {
+                dataTypeColor_ = std::make_unique<std::stringstream>(std::move(formm["data_type_color"].GetString()));
+            }
+            if (formm.HasMember("acc_mods_color") && formm["acc_mods_color"].IsString()) {
+                accessModColor_ = std::make_unique<std::stringstream>(std::move(formm["acc_mods_color"].GetString()));
             }
         }
     }
@@ -133,6 +145,10 @@ void Configurator::set_defaults() {
     publicWord_ = std::make_unique<std::stringstream>(std::move("public"));
     privateWord_ = std::make_unique<std::stringstream>(std::move("private"));
     protectedWord_ = std::make_unique<std::stringstream>(std::move("protected"));
+    font_ = std::make_unique<std::stringstream>(std::move("Consolas"));
     classWordColor_ = std::make_unique<std::stringstream>(std::move("black"));
+    methodNameColor_ = std::make_unique<std::stringstream>(std::move("black"));
     classNameColor_ = std::make_unique<std::stringstream>(std::move("black"));
+    dataTypeColor_ = std::make_unique<std::stringstream>(std::move("black"));
+    accessModColor_ = std::make_unique<std::stringstream>(std::move("black"));
 }

@@ -23,8 +23,12 @@ private:
     std::unique_ptr<std::stringstream> publicWord_;
     std::unique_ptr<std::stringstream> privateWord_;
     std::unique_ptr<std::stringstream> protectedWord_;
+    std::unique_ptr<std::stringstream> font_;
     std::unique_ptr<std::stringstream> classWordColor_;
+    std::unique_ptr<std::stringstream> methodNameColor_;
     std::unique_ptr<std::stringstream> classNameColor_;
+    std::unique_ptr<std::stringstream> dataTypeColor_;
+    std::unique_ptr<std::stringstream> accessModColor_;
 protected:
     Configurator();
     void set_input_path(std::string path);
@@ -45,8 +49,12 @@ public:
     const std::stringstream* get_public_word()          { return publicWord_.get(); };
     const std::stringstream* get_private_word()         { return privateWord_.get(); };
     const std::stringstream* get_protected_word()       { return protectedWord_.get(); };
+    const std::stringstream* get_font()                 { return font_.get(); };
     const std::stringstream* get_class_word_color()     { return classWordColor_.get(); };
+    const std::stringstream* get_method_name_color()    { return methodNameColor_.get(); };
     const std::stringstream* get_class_name_color()     { return classNameColor_.get(); };
+    const std::stringstream* get_data_type_color()      { return dataTypeColor_.get(); };
+    const std::stringstream* get_access_mod_color()     { return accessModColor_.get(); };
 };
 
 #endif
