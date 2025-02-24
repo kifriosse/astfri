@@ -9,12 +9,25 @@ private:
     int b;
 public:
     int add_funkcia(int a, int b) {
-    return a + b;
-}
+        if (a > b) {
+            int cislo = 5 + 23 + 4;
+            return a + b + cislo;
+        }
+        return a;
+    }
 };
 
 int main(int argc, char* argv[]) {
     Cisla cisla;
-    int a = 3 - 2;
+    int a = 3;
+    if (a < 0) {
+        a = 0;
+    } else {
+        if (a > 0) {
+            a = 1;
+        } else {
+            a = 2;
+        }
+    }
     return 0;
 }

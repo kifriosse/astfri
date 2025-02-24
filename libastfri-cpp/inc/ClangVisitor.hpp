@@ -68,7 +68,7 @@ public:
     // bool TraverseStmt(clang::Stmt *S);
     bool TraverseCompoundStmt(clang::CompoundStmt *CS);
     bool TraverseReturnStmt(clang::ReturnStmt *RS);
-    // bool TraverseIfStmt(clang::IfStmt *IS);
+    bool TraverseIfStmt(clang::IfStmt *IS);
     // bool TraverseForStmt(clang::ForStmt *FS);
     // bool TraverseWhileStmt(clang::WhileStmt *WS);
     // // Traverse expression
