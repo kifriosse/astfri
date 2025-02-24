@@ -39,7 +39,15 @@ namespace uml {
             r.from_ = this->currentClass_.name_;
             r.to_ = type.name_;
             r.type_ = RelationType::ASSOCIATION;
-            this->relations_.push_back(r);
+
+            bool duplicate = false;
+            for (RelationStruct rs : this->relations_) {
+                if ((rs.from_.compare(r.from_) == 0 ) && rs.to_.compare(r.to_) == 0) {
+                    duplicate = true;
+                }
+            }
+
+            if (!duplicate) this->relations_.push_back(r);
         }
         this->currentVariable_.type_ = type.name_;
     }
