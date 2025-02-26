@@ -11,18 +11,23 @@ Exporter::Exporter(std::shared_ptr<TextConfigurator> conf) {
     row_ = 1;
 }
 
-void Exporter::check_file(std::string suffix) {
+void Exporter::check_output_file_path(std::string suffix) {
     const std::string& path = config_->get_output_file_path()->str() + suffix;
     std::ofstream file(path);
     if (file) {
         file.close();
-        write_file(path);
+        write_output_into_file(path);
     } else {
         file.close();
         const std::string& defaultPath = config_->get_default_output_path()->str() + std::move(suffix);
         std::cout << std::move("Zadaná cesta neexistuje! ");
-        write_file(defaultPath);
+        check_output_file_path(defaultPath);
     }
+}
+
+void Exporter::write_word(std::string word) {
+    !startedLine_ ? write_indentation() : void();
+    *output_ << std::move(word);
 }
 
 void Exporter::increase_indentation() {
@@ -33,26 +38,21 @@ void Exporter::decrease_indentation() {
     --currentIndentation_;
 }
 
-void Exporter::write_word(std::string word) {
-    !startedLine_ ? write_indentation() : void();
-    *output_ << std::move(word);
-}
-
 void Exporter::write_indentation() {
+    startedLine_ = true;
     config_->sh_row_number() ? write_row_number() : void();
     for (int i = 0; i < config_->get_len_left_margin(); ++i) {
-        *output_ << std::move(" ");
+        write_space();
     }
     for (int i = 0; i < currentIndentation_; ++i) {
         for (int j = 0; j < config_->get_len_tab_word(); ++j) {
-            *output_ << std::move(" ");
+            write_space();
         }
     }
-    startedLine_ = true;
 }
 
 void Exporter::write_row_number() {
-    *output_ << std::setw(3) << row_ << std::move(".");
+    *output_ << std::setw(4) << row_ << std::move(".");
 }
 
 void Exporter::write_new_line() {
@@ -77,16 +77,24 @@ void Exporter::write_curl_bracket(std::string br) {
     write_word(std::move(br));
 }
 
-void Exporter::write_operator_sign(std::string sign) {
-    write_word(std::move(sign));
+void Exporter::write_unknown_word() {
+    write_word(config_->get_unknown_word()->str());
 }
 
-void Exporter::write_separator_sign(std::string sign) {
-    write_word(std::move(sign));
+void Exporter::write_public_word() {
+    write_word(config_->get_public_word()->str());
+}
+
+void Exporter::write_private_word() {
+    write_word(config_->get_private_word()->str());
+}
+
+void Exporter::write_protected_word() {
+    write_word(config_->get_protected_word()->str());
 }
 
 void Exporter::write_dynamic_type() {
-    write_word(std::move("dynamic"));
+    write_word(config_->get_dynamic_word()->str());
 }
 
 void Exporter::write_int_type() {
@@ -113,8 +121,52 @@ void Exporter::write_user_type(std::string usertype) {
     write_word(std::move(usertype));
 }
 
-void Exporter::write_unknown_type() {
-    write_word(std::move("unk-type"));
+void Exporter::write_gen_param_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_gen_param_constr(std::string constraint) {
+    write_word(std::move(constraint));
+}
+
+void Exporter::write_class_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_method_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_function_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_global_var_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_member_var_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_local_var_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_param_var_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_operator_sign(std::string sign) {
+    write_word(std::move(sign));
+}
+
+void Exporter::write_assign_op_word() {
+    write_word(config_->get_assign_op_word()->str());
+}
+
+void Exporter::write_separator_sign(std::string sign) {
+    write_word(std::move(sign));
 }
 
 void Exporter::write_int_val(int val) {
@@ -134,67 +186,11 @@ void Exporter::write_string_val(std::string val) {
 }
 
 void Exporter::write_bool_val(bool val) {
-    val ? write_word(std::move("true")) : write_word(std::move("false"));
+    val ? write_word(config_->get_true_val()->str()) : write_word(config_->get_false_val()->str());
 }
 
 void Exporter::write_null_val() {
-    write_word(std::move("NULL"));
-}
-
-void Exporter::write_unknown_expr() {
-    write_word(std::move("unk-expr"));
-}
-
-void Exporter::write_param_var_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_local_var_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_member_var_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_global_var_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_function_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_method_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_class_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_gen_param_name(std::string name) {
-    write_word(std::move(name));
-}
-
-void Exporter::write_gen_param_constr(std::string constraint) {
-    write_word(std::move(constraint));
-}
-
-void Exporter::write_unknown_stat() {
-    write_word(std::move("unk-stat"));
-}
-
-void Exporter::write_private_word() {
-    write_word(config_->get_private_word()->str());
-}
-
-void Exporter::write_protected_word() {
-    write_word(config_->get_protected_word()->str());
-}
-
-void Exporter::write_public_word() {
-    write_word(config_->get_public_word()->str());
+    write_word(config_->get_null_val()->str());
 }
 
 void Exporter::write_class_word() {
@@ -221,16 +217,20 @@ void Exporter::write_else_word() {
     write_word(config_->get_else_word()->str());
 }
 
-void Exporter::write_for_word() {
-    write_word(config_->get_for_word()->str());
+void Exporter::write_do_word() {
+    write_word(config_->get_do_word()->str());
 }
 
 void Exporter::write_while_word() {
     write_word(config_->get_while_word()->str());
 }
 
-void Exporter::write_do_word() {
-    write_word(config_->get_do_word()->str());
+void Exporter::write_for_word() {
+    write_word(config_->get_for_word()->str());
+}
+
+void Exporter::write_repeat_word() {
+    write_word(config_->get_repeat_word()->str());
 }
 
 void Exporter::write_switch_word() {
@@ -241,6 +241,26 @@ void Exporter::write_case_word() {
     write_word(config_->get_case_word()->str());
 }
 
-void Exporter::write_assign_word() {
-    write_word(config_->get_assign_word()->str());
+void Exporter::write_method_word() {
+    write_word(config_->get_method_word()->str());
+}
+
+void Exporter::write_function_word() {
+    write_word(config_->get_function_word()->str());
+}
+
+void Exporter::write_lambda_word() {
+    write_word(config_->get_lambda_word()->str());
+}
+
+void Exporter::write_call_word() {
+    write_word(config_->get_call_word()->str());
+}
+
+void Exporter::write_define_word() {
+    write_word(config_->get_define_word()->str());
+}
+
+void Exporter::write_returns_word() {
+    write_word(config_->get_returns_word()->str());
 }

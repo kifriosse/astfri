@@ -5,12 +5,12 @@
 TxtFileExporter::TxtFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {}
 
 void TxtFileExporter::make_export() {
-    check_file(std::move(".txt"));
+    check_output_file_path(std::move(".txt"));
 }
 
-void TxtFileExporter::write_file(std::string path) {
-    std::cout << std::move("Súbor nájdeš na ceste: ") << path << std::move("\n");
-    std::ofstream file(std::move(path));
+void TxtFileExporter::write_output_into_file(std::string filepath) {
+    std::cout << std::move("Súbor nájdeš na ceste: ") << filepath << std::move("\n");
+    std::ofstream file(std::move(filepath));
     file << std::move(output_->str());
     file.close();
     std::cout << std::move("Zápis prebehol úspešne!\n");

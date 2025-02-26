@@ -7,7 +7,7 @@ struct RtfFileExporter : Exporter {
     RtfFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
 private:
-    void write_file(std::string path) override;
+    void write_output_into_file(std::string filepath) override;
 };
 
 #endif
