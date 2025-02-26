@@ -1,19 +1,7 @@
 #include "NodeGetter.hpp"
 
-#include <cstdint>
-#include <cstring>
-#include <string>
-#include <tree_sitter/api.h>
-#include <vector>
-
-TSTree* NodeGetter::get_syntax_tree(char const* sourceCode)
-{
-    TSParser* parser = ts_parser_new();
-    ts_parser_set_language(parser, tree_sitter_java());
-    TSTree* tree
-        = ts_parser_parse_string(parser, NULL, sourceCode, strlen(sourceCode));
-
-    return tree;
+NodeGetter::NodeGetter(TSTree* tree, const std::string& sourceCode) {
+    classes = get_classes(tree, sourceCode);
 }
 
 TSQuery* NodeGetter::make_query (char const* queryString)
@@ -32,7 +20,13 @@ TSQuery* NodeGetter::make_query (char const* queryString)
     return tsQuery;
 }
 
-std::vector<Parameter_node> NodeGetter::get_params (TSNode paramsNode)
+std::string NodeGetter::get_node_text(const TSNode& node, const std::string& sourceCode) {
+    uint32_t start = ts_node_start_byte(node);
+    uint32_t end = ts_node_end_byte(node);
+    return sourceCode.substr(start, end - start);
+}
+
+std::vector<Parameter_node> NodeGetter::get_params (TSNode paramsNode, const std::string& sourceCode)
 {
     std::vector<Parameter_node> params;
 
@@ -57,7 +51,7 @@ std::vector<Parameter_node> NodeGetter::get_params (TSNode paramsNode)
                 tsCapture.index,
                 &length
             );
-            std::string nodeText(ts_node_string(tsCapture.node));
+            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
             if (captureName == "param_type")
             {
@@ -78,7 +72,7 @@ std::vector<Parameter_node> NodeGetter::get_params (TSNode paramsNode)
     return params;
 }
 
-std::vector<Local_variable_node> NodeGetter::get_local_vars (TSNode methodNode)
+std::vector<Local_variable_node> NodeGetter::get_local_vars (TSNode methodNode, const std::string& sourceCode)
 {
     std::vector<Local_variable_node> localVars;
 
@@ -105,7 +99,8 @@ std::vector<Local_variable_node> NodeGetter::get_local_vars (TSNode methodNode)
                 tsCapture.index,
                 &length
             );
-            std::string nodeText(ts_node_string(tsCapture.node));
+            std::string nodeName(ts_node_string(tsCapture.node));
+            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
             if (captureName == "local_var_type")
             {
@@ -117,6 +112,7 @@ std::vector<Local_variable_node> NodeGetter::get_local_vars (TSNode methodNode)
             }
             else if (captureName == "local_var_value")
             {
+                localVar.literal = nodeName;
                 localVar.value = nodeText;
             }
         }
@@ -130,7 +126,7 @@ std::vector<Local_variable_node> NodeGetter::get_local_vars (TSNode methodNode)
     return localVars;
 }
 
-std::vector<Method_node> NodeGetter::get_methods (TSNode classNode)
+std::vector<Method_node> NodeGetter::get_methods (TSNode classNode, const std::string& sourceCode)
 {
     std::vector<Method_node> methods;
 
@@ -159,7 +155,8 @@ std::vector<Method_node> NodeGetter::get_methods (TSNode classNode)
                 tsCapture.index,
                 &length
             );
-            std::string nodeText(ts_node_string(tsCapture.node));
+            std::string nodeName(ts_node_string(tsCapture.node));
+            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
             if (captureName == "method_modifiers")
             {
@@ -185,11 +182,11 @@ std::vector<Method_node> NodeGetter::get_methods (TSNode classNode)
 
         if (! ts_node_is_null(paramsNode))
         {
-            method.params = get_params(paramsNode);
+            method.params = get_params(paramsNode, sourceCode);
         }
         if (! ts_node_is_null(methodNode))
         {
-            method.vars = get_local_vars(methodNode);
+            method.vars = get_local_vars(methodNode, sourceCode);
         }
 
         methods.push_back(method);
@@ -198,7 +195,7 @@ std::vector<Method_node> NodeGetter::get_methods (TSNode classNode)
     return methods;
 }
 
-std::vector<Member_variable_node> NodeGetter::get_member_vars (TSNode classNode)
+std::vector<Member_variable_node> NodeGetter::get_member_vars (TSNode classNode, const std::string& sourceCode)
 {
     std::vector<Member_variable_node> vars;
 
@@ -229,7 +226,8 @@ std::vector<Member_variable_node> NodeGetter::get_member_vars (TSNode classNode)
                 tsCapture.index,
                 &length
             );
-            std::string nodeText(ts_node_string(tsCapture.node));
+            std::string nodeName(ts_node_string(tsCapture.node));
+            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
             if (captureName == "memeber_modifier")
             {
@@ -245,6 +243,7 @@ std::vector<Member_variable_node> NodeGetter::get_member_vars (TSNode classNode)
             }
             else if (captureName == "member_value")
             {
+                var.literal = nodeName;
                 var.value = nodeText;
             }
         }
@@ -258,7 +257,7 @@ std::vector<Member_variable_node> NodeGetter::get_member_vars (TSNode classNode)
     return vars;
 }
 
-std::vector<Class_node> NodeGetter::get_classes (TSTree* tree)
+std::vector<Class_node> NodeGetter::get_classes (TSTree* tree, const std::string& sourceCode)
 {
     std::vector<Class_node> classes;
     TSNode rootNode = ts_tree_root_node(tree);
@@ -288,7 +287,7 @@ std::vector<Class_node> NodeGetter::get_classes (TSTree* tree)
                 tsCapture.index,
                 &length
             );
-            std::string nodeText(ts_node_string(tsCapture.node));
+            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
             if (captureName == "class_modifier")
             {
@@ -306,12 +305,16 @@ std::vector<Class_node> NodeGetter::get_classes (TSTree* tree)
 
         if (! ts_node_is_null(tsNode))
         {
-            classNode.vars = get_member_vars(tsNode);
-            classNode.methods = get_methods(tsNode);
+            classNode.vars = get_member_vars(tsNode, sourceCode);
+            classNode.methods = get_methods(tsNode, sourceCode);
         }
 
         classes.push_back(classNode);
     }
 
     return classes;
+}
+
+std::vector<Class_node> NodeGetter::get_classes() {
+    return this->classes;
 }
