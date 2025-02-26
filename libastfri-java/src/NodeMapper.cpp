@@ -3,7 +3,7 @@
 NodeMapper::NodeMapper() : stmtFactory(astfri::StmtFactory::get_instance()), exprFactory(astfri::ExprFactory::get_instance()) {
     astfri::TypeFactory& typeFactory = astfri::TypeFactory::get_instance();
     
-    const std::map<std::string, astfri::Type*> type_map = {
+    const std::map<std::string, astfri::Type*> typeMap = {
         {"int", typeFactory.mk_int()},
         {"float", typeFactory.mk_float()},
         {"char", typeFactory.mk_char()},
@@ -11,7 +11,7 @@ NodeMapper::NodeMapper() : stmtFactory(astfri::StmtFactory::get_instance()), exp
         {"void", typeFactory.mk_void()},
    };
 
-   const std::map<std::string, std::function<astfri::Stmt*(StmtArguments)>> stmt_map = {
+   const std::map<std::string, std::function<astfri::Stmt*(StmtArguments)>> stmtMap = {
        {"local_variable_declaration", map_local_variable()},
        {"field_declaration", map_member_variable()},
        {"formal_parameter", map_formal_parameter()},
@@ -28,7 +28,7 @@ NodeMapper::NodeMapper() : stmtFactory(astfri::StmtFactory::get_instance()), exp
        {"for_statement", map_for_node()},
    };
 
-   const std::map<std::string, std::function<astfri::Expr*(ExprArguments)>> expr_map = {
+   const std::map<std::string, std::function<astfri::Expr*(ExprArguments)>> exprMap = {
        {"decimal_integer_literal", map_integer_literal()},
        {"decimal_floating_point_literal", map_float_literal()},
        {"character_literal", map_char_literal()},
@@ -45,6 +45,14 @@ NodeMapper::NodeMapper() : stmtFactory(astfri::StmtFactory::get_instance()), exp
        {"%=", map_compound_assignment()},
        {"identifier", map_parameter_variable_reference()},
    };
+}
+
+std::map<std::string, astfri::Type*> NodeMapper::get_typeMap() {
+    return this->typeMap;
+}
+
+std::map<std::string, std::function<astfri::Expr*(NodeMapper::ExprArguments)>> NodeMapper::get_exprMap() {
+    return this->exprMap;
 }
 
 std::function<astfri::Stmt*(NodeMapper::StmtArguments)> NodeMapper::map_local_variable() {
