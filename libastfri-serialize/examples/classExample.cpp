@@ -31,13 +31,12 @@ int main(){
   auto& expressions = astfri::ExprFactory::get_instance();
   auto& types = astfri::TypeFactory::get_instance();
 
-  
 std::vector<astfri::MemberVarDefStmt*> attributes{ 
         statements.mk_member_var_def("symbol",types.mk_char(),
-                                        expressions.mk_char_literal('*')),
-                                        statements.mk_member_var_def("numbers",types.mk_user("std::vector"),expressions.mk_function_call("std:vector",std::vector<astfri::Expr *>{
-                                            expressions.mk_int_literal(1),expressions.mk_int_literal(2),expressions.mk_int_literal(3),expressions.mk_int_literal(4)
-                                        }))};
+                expressions.mk_char_literal('*'),astfri::AccessModifier::Private),
+        statements.mk_member_var_def("numbers",types.mk_user("std::vector"),expressions.mk_function_call("std:vector",std::vector<astfri::Expr *>{
+            expressions.mk_int_literal(1),expressions.mk_int_literal(2),expressions.mk_int_literal(3),expressions.mk_int_literal(4)
+                                        }),astfri::AccessModifier::Private)};
 
     
     
@@ -48,14 +47,16 @@ std::vector<astfri::MemberVarDefStmt*> attributes{
                 std::vector<astfri::ParamVarDefStmt*>{},types.mk_void(),statements.mk_compound(
                     std::vector<astfri::Stmt*>{statements.mk_expr(expressions.mk_function_call("printChar",std::vector<astfri::Expr *>{
                         expressions.mk_local_var_ref("symbol")
-                    }))}))),statements.mk_method_def(classDefinition,
+                    }))})),astfri::AccessModifier::Public),statements.mk_method_def(classDefinition,
                         statements.mk_function_def("printNumbers",
                             std::vector<astfri::ParamVarDefStmt*>{},
                         types.mk_void(),
-                        statements.mk_compound(std::vector<astfri::Stmt*>{statements.mk_for(statements.mk_local_var_def("i",types.mk_int(),expressions.mk_int_literal(0)),
-                        expressions.mk_bin_on(expressions.mk_local_var_ref("i"),astfri::BinOpType::Less,expressions.mk_method_call(expressions.mk_member_var_ref("numbers"),"size",std::vector<astfri::Expr*>{})),
+                        statements.mk_compound(std::vector<astfri::Stmt*>{statements.mk_for(statements.mk_local_var_def("i",types.mk_int(),
+                            expressions.mk_int_literal(0)),
+                        expressions.mk_bin_on(expressions.mk_local_var_ref("i"),astfri::BinOpType::Less,
+                        expressions.mk_method_call(expressions.mk_member_var_ref("numbers"),"size",std::vector<astfri::Expr*>{})),
                         statements.mk_expr(expressions.mk_unary_op(astfri::UnaryOpType::Plus,expressions.mk_local_var_ref("i"))),
-                    statements.mk_compound(std::vector<astfri::Stmt*>{}))})))},std::vector<astfri::GenericParam*>{});
+                    statements.mk_compound(std::vector<astfri::Stmt*>{}))})),astfri::AccessModifier::Public)},std::vector<astfri::GenericParam*>{});
 
                     std::cout << "Class Definition: " << std::endl;
                     

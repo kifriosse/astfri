@@ -1,0 +1,63 @@
+#ifndef DATA_HPP
+#define DATA_HPP
+#include <variant>
+#include <libastfri/inc/Expr.hpp>
+#include <libastfri/inc/Stmt.hpp>
+#include <libastfri/inc/Type.hpp>
+#include <unordered_map>
+#include <string>
+namespace astfri_serialize{
+
+
+enum  ExprNodeType{
+    IntLiteralExpr,FloatLiteralExpr,CharLiteralExpr,StringLiteralExpr,BoolLiteralExpr,NullLiteralExpr,IfExpr,
+    BinOpExpr,UnaryOpExpr,AssignExpr,CompoundAssignExpr,RefExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
+    GlobalVarRefExpr,FunctionCallExpr,MethodCallExpr,LambdaExpr,ThisExpr,UnknownExpr};
+    
+enum StmtNodeType{    
+    LocalVarDefStmt,ParamVarDefStmt,
+    MemberVarDefStmt,GlobalVarDefStmt,FunctionDefStmt,MethodDefStmt,GenericParam,ClassDefStmt,CompoundStmt,ReturnStmt,
+    ExprStmt,IfStmt,CaseStmt,SwitchStmt,WhileStmt,DoWhileStmt,ForStmt,ThrowStmt,UnknownStmt,TranslationUnit};
+    
+    
+
+
+
+
+    //where should be GenericParameter ?
+inline    std::unordered_map<std::string,ExprNodeType> strToExprMapping={
+    {"IntLitExpr",IntLiteralExpr},{"FloatLitExpr",FloatLiteralExpr},{"CharLitExpr",CharLiteralExpr},
+    {"StringLitExpr",StringLiteralExpr},{"BoolLitExpr",BoolLiteralExpr},{"NullLitExpr",NullLiteralExpr},
+    {"IfExpr",IfExpr},{"BinOpExpr",BinOpExpr},{"UnaryOpExpr",UnaryOpExpr},{"AssignExpr",AssignExpr},
+    {"CompoundAssignExpr",CompoundAssignExpr},{"ParamVarRefExpr",ParamVarRefExpr},
+    {"LocalVarRefExpr",LocalVarRefExpr},{"MemberVarRefExpr",MemberVarRefExpr},{"GlobalVarRefExpr",GlobalVarRefExpr},
+    {"FunctionCallExpr",FunctionCallExpr},{"MethodCallExpr",MethodCallExpr},{"LambdaExpr",LambdaExpr},
+    {"ThisExpr",ThisExpr},{"UnknownExpr",UnknownExpr}};
+    
+inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVarDefStmt",LocalVarDefStmt},
+    {"ParamVarDefStmt",ParamVarDefStmt},{"MemberVarDefStmt",MemberVarDefStmt},{"GlobalVarDefStmt",GlobalVarDefStmt},
+    {"FunctionDefStmt",FunctionDefStmt},{"MethodDefStmt",MethodDefStmt},
+    {"ClassDefStmt",ClassDefStmt},{"CompoundStmt",CompoundStmt},{"ReturnStmt",ReturnStmt},{"ExprStmt",ExprStmt},
+    {"IfStmt",IfStmt},{"CaseStmt",CaseStmt},{"SwitchStmt",SwitchStmt},{"WhileStmt",WhileStmt},{"DoWhileStmt",DoWhileStmt},
+    {"ForStmt",ForStmt},{"ThrowStmt",ThrowStmt},{"UnknownStmt",UnknownStmt},{"TranslationUnit",TranslationUnit}}; 
+
+
+inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},
+{"-",astfri::BinOpType::Subtract},{"*",astfri::BinOpType::Multiply},{"/",astfri::BinOpType::Divide},{"%",astfri::BinOpType::Modulo},
+{"==",astfri::BinOpType::Equal},{"!=",astfri::BinOpType::NotEqual},{"<",astfri::BinOpType::Less},{"<=",astfri::BinOpType::LessEqual},
+{">",astfri::BinOpType::Greater},{">=",astfri::BinOpType::GreaterEqual}};
+
+
+
+inline std::unordered_map<std::string,astfri::UnaryOpType> unaryOpTypeMapping={{"-",astfri::UnaryOpType::Minus},{"+",astfri::UnaryOpType::Plus},
+{"*",astfri::UnaryOpType::Dereference},{"&",astfri::UnaryOpType::AddressOf},{"!",astfri::UnaryOpType::LogicalNot}};
+
+enum Types{IntType,FloatType,CharType,BoolType,VoidType,UserType,IndirectionType,UnknownType,DynamicType};
+
+inline std::unordered_map<std::string,Types> strToTypeMapping={{"Int",IntType},{"Float",FloatType},
+    {"Char",CharType},{"Bool",BoolType},{"Void",VoidType},{"User",UserType},
+    {"Indirection",IndirectionType},{"Unknown",UnknownType},{"Dynamic",DynamicType}};
+
+}
+
+#endif
