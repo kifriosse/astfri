@@ -3,9 +3,7 @@
 #include <libastfri/inc/TypeFactory.hpp>
 #include <vector>
 
-#include <libastfri-uml/inc/ClassVisitor.hpp>
-#include <libastfri-uml/inc/PlantUMLOutputter.hpp>
-#include "libastfri-uml/inc/TypeConvention.hpp"
+#include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include "libastfri/inc/Stmt.hpp"
 
 
@@ -80,11 +78,14 @@ int main()
         "number",
         types.mk_int(),
         nullptr,
-        astfri::AccessModifier::Public
+        astfri::AccessModifier::Private
     );
+
+    auto varReference = statements.mk_member_var_def("ref_", types.mk_user("ClassName"), nullptr, astfri::AccessModifier::Private);
 
     std::vector<astfri::MemberVarDefStmt*> memberVariables;
     memberVariables.push_back(varNumber);
+    memberVariables.push_back(varReference);
 
     std::vector<astfri::MethodDefStmt*> methods;
     astfri::MethodDefStmt* method = statements.mk_method_def(nullptr, func, astfri::AccessModifier::Public);
@@ -100,22 +101,27 @@ int main()
         methods,
         genericParams //GenericParam is TODO
     );
+    std::vector<astfri::MemberVarDefStmt *> vars;
+    std::vector<astfri::MethodDefStmt *> funcmems;
+    std::vector<astfri::GenericParam *> tparams;
+    auto classDSTwo = statements.mk_class_def("ClassName", vars, funcmems, tparams);
+
+    std::vector<astfri::ClassDefStmt *> classes;
+    classes.push_back(classDS);
+    classes.push_back(classDSTwo);
+    std::vector<astfri::FunctionDefStmt *> functions;
+    std::vector<astfri::GlobalVarDefStmt *> globals;
+
+    auto tu = statements.mk_translation_unit(classes, functions, globals);
 
     //astfri::MethodDefStmt* method = statements.mk_method_def(classDS, func);
     //methods.push_back(method);
 
-    uml::ClassVisitor cv;
     uml::Config conf;
     uml::PlantUMLOutputter op;
-
     uml::TypeBeforeConvention tc;
-    conf.typeConvention_ = &tc;
-    conf.separator_ = ' ';
 
-    op.set_config(&conf);
-    cv.set_config(&conf);
-    cv.set_outputter(&op);
-
-    classDS->accept(cv);
-    op.write_to_console();
+    uml::UMLLibWrapper uml;
+    uml.init(conf, op, tc);
+    uml.run(*tu);
 }

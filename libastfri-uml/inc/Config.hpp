@@ -6,7 +6,10 @@ namespace uml {
     struct Config {
         // type var, var : type
         TypeConvention* typeConvention_;
+        bool writeToFile_ = false;
         char separator_ = ' ';
+        char accessPrefix_[4] = {'+', '-', '#', '~'};
+        std::string relationArrows_[3] = {"<--", "*--", "<|--"};
         std::string intTypeName_ = "int";
         std::string floatTypeName_ = "float";
         std::string charTypeName_ = "char";

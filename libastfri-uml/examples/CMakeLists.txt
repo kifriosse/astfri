@@ -17,6 +17,5 @@ target_sources(uml-external-example PRIVATE
 	example_external.cpp
 )
 target_link_libraries(uml-external-example PRIVATE
-	astfri-core
 	astfri-uml
 )

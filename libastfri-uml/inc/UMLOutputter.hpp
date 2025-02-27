@@ -14,7 +14,7 @@ namespace uml {
         std::string outputString_;
 
     public:
-        void set_config(Config* config);
+        void set_config(Config const& config);
 
         void write_to_file();
         void write_to_console();
@@ -24,6 +24,8 @@ namespace uml {
 
         virtual void add_data_member(VarStruct v) = 0;
         virtual void add_function_member(MethodStruct m) = 0;
+
+        virtual void add_relation(RelationStruct r) = 0;
     
     };
 

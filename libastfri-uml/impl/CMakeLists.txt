@@ -1,8 +1,9 @@
 add_library(astfri-uml)
 target_sources(astfri-uml PRIVATE
+    UMLLibWrapper.cpp
     UMLOutputter.cpp
     PlantUMLOutputter.cpp
     ClassVisitor.cpp
     TypeConvention.cpp
 )
-target_link_libraries(astfri-uml PRIVATE astfri-core)
+target_link_libraries(astfri-uml PUBLIC astfri-core)

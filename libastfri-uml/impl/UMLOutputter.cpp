@@ -1,8 +1,8 @@
 #include <libastfri-uml/inc/UMLOutputter.hpp>
 
 namespace uml {
-    void UMLOutputter::set_config(Config* config) {
-        this->config_ = config;
+    void UMLOutputter::set_config(Config const& config) {
+        this->config_ = (Config*)&config;
     }
 
     void UMLOutputter::write_to_console() {
