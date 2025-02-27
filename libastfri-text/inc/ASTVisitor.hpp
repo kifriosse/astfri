@@ -39,10 +39,14 @@ public:
     void visit(astfri::LocalVarRefExpr const& expr) override { exporter_->write_local_var_name(expr.var_); };
     void visit(astfri::MemberVarRefExpr const& expr) override { exporter_->write_member_var_name(expr.member_); };
     void visit(astfri::GlobalVarRefExpr const& expr) override { exporter_->write_global_var_name(expr.global_); };
+    void visit(astfri::ClassRefExpr const& expr) override;
     void visit(astfri::FunctionCallExpr const& expr) override;
     void visit(astfri::MethodCallExpr const& expr) override;
     void visit(astfri::LambdaExpr const& expr) override;
     void visit(astfri::ThisExpr const& /*expr*/) override { exporter_->write_this_word(); };
+    void visit(astfri::ConstructorCallExpr const& expr) override;
+    void visit(astfri::NewExpr const& expr) override;
+    void visit(astfri::DeleteExpr const& expr) override;
     void visit(astfri::UnknownExpr const& /*expr*/) override { exporter_->write_unknown_word(); };
     void visit(astfri::TranslationUnit const& stmt) override;
     void visit(astfri::CompoundStmt const& stmt) override;
@@ -61,37 +65,13 @@ public:
     void visit(astfri::MemberVarDefStmt const& stmt) override;
     void visit(astfri::GlobalVarDefStmt const& stmt) override;
     void visit(astfri::FunctionDefStmt const& stmt) override;
+    void visit(astfri::DefStmt const& stmt) override;
     void visit(astfri::MethodDefStmt const& stmt) override;
+    void visit(astfri::BaseInitializerStmt const& stmt) override;
+    void visit(astfri::ConstructorDefStmt const& stmt) override;
+    void visit(astfri::DestructorDefStmt const& stmt) override;
+    void visit(astfri::GenericParam const& stmt) override;
     void visit(astfri::ClassDefStmt const& stmt) override;
-    void visit(astfri::DefStmt const& stmt) override {};
-    void visit (astfri::ClassRefExpr const& /*expr*/) override
-    {
-    }
-    void visit (astfri::ConstructorCallExpr const& /*expr*/) override
-    {
-    }
-
-    void visit (astfri::NewExpr const& /*expr*/) override
-    {
-    }
-
-    void visit (astfri::DeleteExpr const& /*expr*/) override
-    {
-    }
-    void visit (astfri::BaseInitializerStmt const& /*stmt*/) override
-    {
-    }
-
-    void visit (astfri::ConstructorDefStmt const& /*stmt*/) override
-    {
-    }
-
-    void visit (astfri::DestructorDefStmt const& /*stmt*/) override
-    {
-    }
-    void visit (astfri::GenericParam const& /*stmt*/) override
-    {
-    }
 private:
     void write_open_bracket();
 };

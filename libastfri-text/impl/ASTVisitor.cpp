@@ -53,6 +53,7 @@ void ASTVisitor::visit(astfri::BinOpExpr const& expr) {
             case astfri::BinOpType::Modulo: exporter_->write_operator_sign(std::move("%")); break;
             case astfri::BinOpType::Subtract: exporter_->write_operator_sign(std::move("-")); break;
             case astfri::BinOpType::Multiply: exporter_->write_operator_sign(std::move("*")); break;
+            default: return;
         }
         exporter_->write_space();
         expr.right_->accept(*this);
@@ -69,6 +70,7 @@ void ASTVisitor::visit(astfri::UnaryOpExpr const& expr) {
         case astfri::UnaryOpType::LogicalNot: exporter_->write_operator_sign(std::move("!")); break;
         case astfri::UnaryOpType::Minus: exporter_->write_operator_sign(std::move("-")); break;
         case astfri::UnaryOpType::Plus: exporter_->write_operator_sign(std::move("+")); break;
+        default: return;
     }
     expr.arg_->accept(*this);
 }
@@ -97,6 +99,10 @@ void ASTVisitor::visit(astfri::CompoundAssignExpr const& expr) {
         default: exporter_->write_space(); break;
     }
     expr.rhs_->accept(*this);
+}
+
+void ASTVisitor::visit(astfri::ClassRefExpr const& expr) {
+    exporter_->write_class_name(expr.name_);
 }
 
 void ASTVisitor::visit(astfri::FunctionCallExpr const& expr) {
@@ -161,6 +167,18 @@ void ASTVisitor::visit(astfri::LambdaExpr const& expr) {
         exporter_->write_new_line();
     }
     exporter_->write_curl_bracket(std::move("}"));
+}
+
+void ASTVisitor::visit(astfri::ConstructorCallExpr const& expr) {
+    expr.type_->accept(*this);
+}
+
+void ASTVisitor::visit(astfri::NewExpr const& expr) {
+    expr.init_->accept(*this);
+}
+
+void ASTVisitor::visit(astfri::DeleteExpr const& expr) {
+    expr.arg_->accept(*this);
 }
 
 void ASTVisitor::visit(astfri::TranslationUnit const& stmt) {
@@ -454,6 +472,10 @@ void ASTVisitor::visit(astfri::FunctionDefStmt const& stmt) {
     }
 }
 
+void ASTVisitor::visit(astfri::DefStmt const& stmt) {
+    std::string s = stmt.defs_.at(0)->name_;
+}
+
 void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
     if (!stmt.func_ || !stmt.owner_ || !stmt.func_->retType_ || !config_->sh_method_defin()) {
         return;
@@ -484,6 +506,22 @@ void ASTVisitor::visit(astfri::MethodDefStmt const& stmt) {
         exporter_->write_new_line();
         exporter_->write_curl_bracket(std::move("}"));
     }
+}
+
+void ASTVisitor::visit(astfri::BaseInitializerStmt const& stmt) {
+    std::string s = stmt.base_;
+}
+
+void ASTVisitor::visit(astfri::ConstructorDefStmt const& stmt) {
+    stmt.body_->accept(*this);
+}
+
+void ASTVisitor::visit(astfri::DestructorDefStmt const& stmt) {
+    stmt.owner_->accept(*this);
+}
+
+void ASTVisitor::visit(astfri::GenericParam const& stmt) {
+    std::string s = stmt.name_;
 }
 
 void ASTVisitor::visit(astfri::ClassDefStmt const& stmt) {
