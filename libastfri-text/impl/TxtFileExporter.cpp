@@ -1,21 +1,17 @@
 #include <libastfri-text/inc/TxtFileExporter.hpp>
-#include <filesystem>
 #include <iostream>
 #include <fstream>
 
-TxtFileExporter::TxtFileExporter(Configurator& conf) : Exporter(conf) {}
+TxtFileExporter::TxtFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {}
 
 void TxtFileExporter::make_export() {
-    namespace fs = std::filesystem;
-    std::string userInput = config_->get_output_file_name()->str();
-    userInput.append(".txt");
-    fs::path filePath = fs::current_path().parent_path().parent_path() / userInput;
-    std::ofstream file(filePath);
-    if (file) {
-        file << output_->str();
-        std::cout << "Zápis prebehol úspešne!\n";
-    } else {
-        std::cout << "Nastala chyba pri zápise do súboru!\n";
-    }
+    check_output_file_path(std::move(".txt"));
+}
+
+void TxtFileExporter::write_output_into_file(std::string filepath) {
+    std::cout << std::move("Súbor nájdeš na ceste: ") << filepath << std::move("\n");
+    std::ofstream file(std::move(filepath));
+    file << std::move(output_->str());
     file.close();
+    std::cout << std::move("Zápis prebehol úspešne!\n");
 }

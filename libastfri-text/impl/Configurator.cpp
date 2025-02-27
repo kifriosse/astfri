@@ -4,224 +4,286 @@
 #include <filesystem>
 
 Configurator::Configurator() {
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    bool foundBuildFolder = false;
+    while (currentPath.has_filename() || currentPath.parent_path().has_filename()) {
+        if (currentPath.filename() == "build") {
+            foundBuildFolder = true;
+            break;
+        }
+        currentPath = currentPath.parent_path();
+    }
+    if (!foundBuildFolder) {
+        currentPath.clear();
+        std::string user = getenv(std::move("USER"));
+        currentPath = std::move("/home/") + std::move(user);
+    }
+    currentPath.concat(std::move("/"));
+    defFolderPath_ = std::make_unique<std::stringstream>(std::move(currentPath));
     set_defaults();
-    namespace fs = std::filesystem;
-    namespace rj = rapidjson;
-    fs::path configFilePath = fs::current_path().parent_path().parent_path().parent_path() / "libastfri-text" / "impl" / "conf.json";
-    FILE* configFile = fopen(configFilePath.c_str(), "r");
-    if (!configFile) {
-        return;
-    }
-    char readBuffer[65536];
-    rj::FileReadStream inputStream(configFile, readBuffer, sizeof(readBuffer));
-    rj::Document doc;
-    doc.ParseStream(inputStream);
-    if (doc.HasMember("general_output") && doc["general_output"].IsObject() && !doc["general_output"].IsNull()) {//----------general_output----------
-        rj::Value& genOut = doc["general_output"];
-        if (genOut.HasMember("file_name") && genOut["file_name"].IsString() && genOut["file_name"].GetStringLength() > 0) {
-            delete outputFileName_;
-            outputFileName_ = new std::stringstream(genOut["file_name"].GetString());
-        }
-        if (genOut.HasMember("type") && genOut["type"].IsString() && genOut["type"].GetStringLength() > 0) {
-            delete outputType_;
-            outputType_ = new std::stringstream(genOut["type"].GetString());
-        }
-        if (genOut.HasMember("view") && genOut["view"].IsString() && genOut["view"].GetStringLength() > 0) {
-            delete view_;
-            view_ = new std::stringstream(genOut["view"].GetString());
-        }
-        if (genOut.HasMember("data_types") && genOut["data_types"].IsObject() && !genOut["data_types"].IsNull()) {//-----data_types-----
-            rj::Value& datTyp = genOut["data_types"];
-            if (datTyp.HasMember("int") && datTyp["int"].IsString() && datTyp["int"].GetStringLength() > 0) {
-                delete intWord_;
-                intWord_ = new std::stringstream(datTyp["int"].GetString());
-            }
-            if (datTyp.HasMember("float") && datTyp["float"].IsString() && datTyp["float"].GetStringLength() > 0) {
-                delete floatWord_;
-                floatWord_ = new std::stringstream(datTyp["float"].GetString());
-            }
-            if (datTyp.HasMember("char") && datTyp["char"].IsString() && datTyp["char"].GetStringLength() > 0) {
-                delete charWord_;
-                charWord_ = new std::stringstream(datTyp["char"].GetString());
-            }
-            if (datTyp.HasMember("bool") && datTyp["bool"].IsString() && datTyp["bool"].GetStringLength() > 0) {
-                delete boolWord_;
-                boolWord_ = new std::stringstream(datTyp["bool"].GetString());
-            }
-            if (datTyp.HasMember("void") && datTyp["void"].IsString() && datTyp["void"].GetStringLength() > 0) {
-                delete voidWord_;
-                voidWord_ = new std::stringstream(datTyp["void"].GetString());
-            }
-        }
-        if (genOut.HasMember("bin_ops") && genOut["bin_ops"].IsObject() && !genOut["bin_ops"].IsNull()) {//-----bin_ops-----
-            rj::Value& binOp = genOut["bin_ops"];
-            if (binOp.HasMember("assign") && binOp["assign"].IsString() && binOp["assign"].GetStringLength() > 0) {
-                delete assignWord_;
-                assignWord_ = new std::stringstream(binOp["assign"].GetString());
-            }
-        }
-        if (genOut.HasMember("access_mods") && genOut["access_mods"].IsObject() && !genOut["access_mods"].IsNull()) {//-----access_mods-----
-            rj::Value& accMod = genOut["access_mods"];
-            if (accMod.HasMember("private") && accMod["private"].IsString() && accMod["private"].GetStringLength() > 0) {
-                delete privateWord_;
-                privateWord_ = new std::stringstream(accMod["private"].GetString());
-            }
-            if (accMod.HasMember("public") && accMod["public"].IsString() && accMod["public"].GetStringLength() > 0) {
-                delete publicWord_;
-                publicWord_ = new std::stringstream(accMod["public"].GetString());
-            }
-        }
-        if (genOut.HasMember("formatting") && genOut["formatting"].IsObject() && !genOut["formatting"].IsNull()) {//-----formatting-----
-            rj::Value& formm = genOut["formatting"];
-            if (formm.HasMember("class_word_color") && formm["class_word_color"].IsString()) {
-                delete classWordColor_;
-                classWordColor_ = new std::stringstream(formm["class_word_color"].GetString());
-            }
-            if (formm.HasMember("class_name_color") && formm["class_name_color"].IsString()) {
-                delete classNameColor_;
-                classNameColor_ = new std::stringstream(formm["class_name_color"].GetString());
-            }
-        }
-    }
-    if (doc.HasMember("basic_format") && doc["basic_format"].IsObject() && !doc["basic_format"].IsNull()) {//----------basic_format----------
-        rj::Value& basForm = doc["basic_format"];
-        if (basForm.HasMember("format") && basForm["format"].IsString() && basForm["format"].GetStringLength() > 0) {
-            delete outputFormat_;
-            outputFormat_ = new std::stringstream(basForm["format"].GetString());
-        }
-        if (basForm.HasMember("indentation") && basForm["indentation"].IsString() && basForm["indentation"].GetStringLength() < 9) {
-            delete tabWord_;
-            tabWord_ = new std::stringstream(basForm["indentation"].GetString());
-        }
-        if (basForm.HasMember("show_class_body") && basForm["show_class_body"].IsBool()) {
-            showClassBody_ = basForm["show_class_body"].GetBool();
-        }
-        if (basForm.HasMember("show_method_body") && basForm["show_method_body"].IsBool()) {
-            showMethodBody_ = basForm["show_method_body"].GetBool();
-        }
-        if (basForm.HasMember("show_method_definition") && basForm["show_method_definition"].IsBool()) {
-            showMethodDefinition_ = basForm["show_method_definition"].GetBool();
-        }
-        if (basForm.HasMember("show_function_body") && basForm["show_function_body"].IsBool()) {
-            showFunctionBody_ = basForm["show_function_body"].GetBool();
-        }
-        if (basForm.HasMember("open_bracket_new_line") && basForm["open_bracket_new_line"].IsBool()) {
-            openBracketOnNewLine_ = basForm["open_bracket_new_line"].GetBool();
-        }
-        if (basForm.HasMember("show_row_number") && basForm["show_row_number"].IsBool()) {
-            showRowNumber_ = basForm["show_row_number"].GetBool();
-        }
-    }
-    if (doc.HasMember("system_names") && doc["system_names"].IsObject() && !doc["system_names"].IsNull()) {//----------system_names----------
-        rj::Value& sysNam = doc["system_names"];
-        if (sysNam.HasMember("class") && sysNam["class"].IsString() && sysNam["class"].GetStringLength() > 0) {
-            delete classWord_;
-            classWord_ = new std::stringstream(sysNam["class"].GetString());
-        }
-        if (sysNam.HasMember("if") && sysNam["if"].IsString() && sysNam["if"].GetStringLength() > 0) {
-            delete ifWord_;
-            ifWord_ = new std::stringstream(sysNam["if"].GetString());
-        }
-        if (sysNam.HasMember("else") && sysNam["else"].IsString() && sysNam["else"].GetStringLength() > 0) {
-            delete elseWord_;
-            elseWord_ = new std::stringstream(sysNam["else"].GetString());
-        }
-        if (sysNam.HasMember("for") && sysNam["for"].IsString() && sysNam["for"].GetStringLength() > 0) {
-            delete forWord_;
-            forWord_ = new std::stringstream(sysNam["for"].GetString());
-        }
-        if (sysNam.HasMember("while") && sysNam["while"].IsString() && sysNam["while"].GetStringLength() > 0) {
-            delete whileWord_;
-            whileWord_ = new std::stringstream(sysNam["while"].GetString());
-        }
-        if (sysNam.HasMember("do") && sysNam["do"].IsString() && sysNam["do"].GetStringLength() > 0) {
-            delete doWord_;
-            doWord_ = new std::stringstream(sysNam["do"].GetString());
-        }
-        if (sysNam.HasMember("return") && sysNam["return"].IsString() && sysNam["return"].GetStringLength() > 0) {
-            delete returnWord_;
-            returnWord_ = new std::stringstream(sysNam["return"].GetString());
-        }
-        if (sysNam.HasMember("throw") && sysNam["throw"].IsString() && sysNam["throw"].GetStringLength() > 0) {
-            delete throwWord_;
-            throwWord_ = new std::stringstream(sysNam["throw"].GetString());
-        }
-        if (sysNam.HasMember("switch") && sysNam["switch"].IsString() && sysNam["switch"].GetStringLength() > 0) {
-            delete switchWord_;
-            switchWord_ = new std::stringstream(sysNam["switch"].GetString());
-        }
-        if (sysNam.HasMember("case") && sysNam["case"].IsString() && sysNam["case"].GetStringLength() > 0) {
-            delete caseWord_;
-            caseWord_ = new std::stringstream(sysNam["case"].GetString());
-        }
-        if (sysNam.HasMember("this") && sysNam["this"].IsString() && sysNam["this"].GetStringLength() > 0) {
-            delete thisWord_;
-            thisWord_ = new std::stringstream(sysNam["this"].GetString());
-        }
-    }
-    fclose(configFile);
 }
 
-Configurator::~Configurator() {
-    delete outputFileName_;
-    delete outputType_;
-    delete view_;
-    delete intWord_;
-    delete floatWord_;
-    delete charWord_;
-    delete boolWord_;
-    delete voidWord_;
-    delete assignWord_;
-    delete privateWord_;
-    delete publicWord_;
-    delete outputFormat_;
-    delete tabWord_;
-    delete classWord_;
-    delete ifWord_;
-    delete elseWord_;
-    delete forWord_;
-    delete whileWord_;
-    delete doWord_;
-    delete returnWord_;
-    delete throwWord_;
-    delete switchWord_;
-    delete caseWord_;
-    delete thisWord_;
-    delete classWordColor_;
-    delete classNameColor_;
+void Configurator::set_input_path(std::string path) {
+    configFilePath_ = std::make_unique<std::stringstream>(std::move(path));
+}
+
+void Configurator::reset_def_path() {
+    defaultOutputFilePath_ = std::make_unique<std::stringstream>(defFolderPath_->str() + outputFileName_->str());
+}
+
+void Configurator::reset_out_path() {
+    outputFilePath_ = std::make_unique<std::stringstream>(outFolderPath_->str() + outputFileName_->str());
+}
+
+void Configurator::load_new_config_file() {
+    FILE* configFile = fopen(std::move(configFilePath_->str().c_str()), std::move("r"));
+    char readBuffer[65536];
+    namespace rj = rapidjson;
+    rj::FileReadStream inputStream(configFile, readBuffer, sizeof(std::move(readBuffer)));
+    rj::Document doc;
+    doc.ParseStream(inputStream);
+    bool resetPath = false;
+    if (doc.HasMember(std::move("CONFIGURATOR")) && doc[std::move("CONFIGURATOR")].IsObject()) {
+        const rj::Value& conf = std::move(doc[std::move("CONFIGURATOR")]);
+        if (conf.HasMember(std::move("FILE")) && conf[std::move("FILE")].IsObject()) {
+            const rj::Value& file = std::move(conf[std::move("FILE")]);
+            if (file.HasMember(std::move("name")) && file[std::move("name")].IsString() && file[std::move("name")].GetStringLength() > 0) {
+                std::string name = std::move(file[std::move("name")].GetString());
+                if (!name.starts_with(std::move(" ")) && !name.ends_with(std::move(" "))) {
+                    outputFileName_ = std::make_unique<std::stringstream>(std::move(name));
+                    resetPath = true;
+                }
+            }
+            if (file.HasMember(std::move("path")) && file[std::move("path")].IsString() && file[std::move("path")].GetStringLength() > 0) {
+                std::string path = std::move(file[std::move("path")].GetString());
+                if (!path.starts_with(std::move(" ")) && !path.ends_with(std::move(" "))) {
+                    if (path.at(std::move(path.length() - 1)) != '/') {
+                        path.append(std::move("/"));
+                    }
+                    outFolderPath_ = std::make_unique<std::stringstream>(std::move(path));
+                    resetPath = true;
+                }
+            }
+            if (file.HasMember(std::move("format")) && file[std::move("format")].IsString()) {
+                outputFileFormat_ = std::make_unique<std::stringstream>(std::move(file[std::move("format")].GetString()));
+            }
+        }
+        if (conf.HasMember(std::move("DEFAULT_STYLE")) && conf[std::move("DEFAULT_STYLE")].IsString()) {
+            defaultStyle_ = std::make_unique<std::stringstream>(std::move(conf[std::move("DEFAULT_STYLE")].GetString()));
+        }
+        if (conf.HasMember(std::move("UNKNOWN_WORD")) && conf[std::move("UNKNOWN_WORD")].IsString() && conf[std::move("UNKNOWN_WORD")].GetStringLength() > 0) {
+            unknownWord_ = std::make_unique<std::stringstream>(std::move(conf[std::move("UNKNOWN_WORD")].GetString()));
+        }
+        if (conf.HasMember(std::move("UNKNOWN_WORD_STYLE")) && conf[std::move("UNKNOWN_WORD_STYLE")].IsString()) {
+            unknownWordStyle_ = std::make_unique<std::stringstream>(std::move(conf[std::move("UNKNOWN_WORD_STYLE")].GetString()));
+        }
+        if (conf.HasMember(std::move("ACCESS_MOD")) && conf[std::move("ACCESS_MOD")].IsObject()) {
+            const rj::Value& acc = std::move(conf[std::move("ACCESS_MOD")]);
+            if (acc.HasMember(std::move("view")) && acc[std::move("view")].IsString()) {
+                view_ = std::make_unique<std::stringstream>(std::move(acc[std::move("view")].GetString()));
+            }
+            if (acc.HasMember(std::move("public")) && acc[std::move("public")].IsString() && acc[std::move("public")].GetStringLength() > 0) {
+                publicWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("public")].GetString()));
+            }
+            if (acc.HasMember(std::move("private")) && acc[std::move("private")].IsString() && acc[std::move("private")].GetStringLength() > 0) {
+                privateWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("private")].GetString()));
+            }
+            if (acc.HasMember(std::move("protected")) && acc[std::move("protected")].IsString() && acc[std::move("protected")].GetStringLength() > 0) {
+                protectedWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("protected")].GetString()));
+            }
+            if (acc.HasMember(std::move("style")) && acc[std::move("style")].IsString()) {
+                accessModStyle_ = std::make_unique<std::stringstream>(std::move(acc[std::move("style")].GetString()));
+            }
+        }
+        if (conf.HasMember(std::move("DATA_TYPE")) && conf[std::move("DATA_TYPE")].IsObject()) {
+            const rj::Value& dt = std::move(conf[std::move("DATA_TYPE")]);
+            if (dt.HasMember(std::move("dynamic")) && dt[std::move("dynamic")].IsString() && dt[std::move("dynamic")].GetStringLength() > 0) {
+                dynamicWord_ = std::make_unique<std::stringstream>(std::move(dt[std::move("dynamic")].GetString()));
+            }
+            if (dt.HasMember(std::move("int")) && dt[std::move("int")].IsString() && dt[std::move("int")].GetStringLength() > 0) {
+                intWord_ = std::make_unique<std::stringstream>(std::move(dt[std::move("int")].GetString()));
+            }
+            if (dt.HasMember(std::move("float")) && dt[std::move("float")].IsString() && dt[std::move("float")].GetStringLength() > 0) {
+                floatWord_ = std::make_unique<std::stringstream>(std::move(dt[std::move("float")].GetString()));
+            }
+            if (dt.HasMember(std::move("char")) && dt[std::move("char")].IsString() && dt[std::move("char")].GetStringLength() > 0) {
+                charWord_ = std::make_unique<std::stringstream>(std::move(dt[std::move("char")].GetString()));
+            }
+            if (dt.HasMember(std::move("bool")) && dt[std::move("bool")].IsString() && dt[std::move("bool")].GetStringLength() > 0) {
+                boolWord_ = std::make_unique<std::stringstream>(std::move(dt[std::move("bool")].GetString()));
+            }
+            if (dt.HasMember(std::move("void")) && dt[std::move("void")].IsString() && dt[std::move("void")].GetStringLength() > 0) {
+                voidWord_ = std::make_unique<std::stringstream>(std::move(dt[std::move("void")].GetString()));
+            }
+            if (dt.HasMember(std::move("STYLE")) && dt[std::move("STYLE")].IsObject()) {
+                const rj::Value& st = std::move(dt[std::move("STYLE")]);
+                if (st.HasMember(std::move("general_style")) && st[std::move("general_style")].IsString()) {
+                    typeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("general_style")].GetString()));
+                }
+                if (st.HasMember(std::move("dynamic_type_style")) && st[std::move("dynamic_type_style")].IsString()) {
+                    dynamicTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("dynamic_type_style")].GetString()));
+                }
+                if (st.HasMember(std::move("int_type_style")) && st[std::move("int_type_style")].IsString()) {
+                    intTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("int_type_style")].GetString()));
+                }
+                if (st.HasMember(std::move("float_type_style")) && st[std::move("float_type_style")].IsString()) {
+                    floatTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("float_type_style")].GetString()));
+                }
+                if (st.HasMember(std::move("char_type_style")) && st[std::move("char_type_style")].IsString()) {
+                    charTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("char_type_style")].GetString()));
+                }
+                if (st.HasMember(std::move("bool_type_style")) && st[std::move("bool_type_style")].IsString()) {
+                    boolTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("bool_type_style")].GetString()));
+                }
+                if (st.HasMember(std::move("void_type_style")) && st[std::move("void_type_style")].IsString()) {
+                    voidTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("void_type_style")].GetString()));
+                }
+                if (st.HasMember(std::move("user_type_style")) && st[std::move("user_type_style")].IsString()) {
+                    userTypeStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("user_type_style")].GetString()));
+                }
+            }
+        }
+        if (conf.HasMember(std::move("REF_NAME_STYLE")) && conf[std::move("REF_NAME_STYLE")].IsObject()) {
+            const rj::Value& ref = std::move(conf[std::move("REF_NAME_STYLE")]);
+            if (ref.HasMember(std::move("def_ref_name_style")) && ref[std::move("def_ref_name_style")].IsString()) {
+                defRefNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("def_ref_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("gen_param_name_style")) && ref[std::move("gen_param_name_style")].IsString()) {
+                generParamNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("gen_param_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("gen_param_constr_style")) && ref[std::move("gen_param_constr_style")].IsString()) {
+                generParamConstrStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("gen_param_constr_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("class_name_style")) && ref[std::move("class_name_style")].IsString()) {
+                classNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("class_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("method_name_style")) && ref[std::move("method_name_style")].IsString()) {
+                methodNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("method_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("function_name_style")) && ref[std::move("function_name_style")].IsString()) {
+                functionNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("function_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("global_var_name_style")) && ref[std::move("global_var_name_style")].IsString()) {
+                globalVarNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("global_var_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("member_var_name_style")) && ref[std::move("member_var_name_style")].IsString()) {
+                memberVarNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("member_var_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("local_var_name_style")) && ref[std::move("local_var_name_style")].IsString()) {
+                localVarNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("local_var_name_style")].GetString()));
+            }
+            if (ref.HasMember(std::move("param_var_name_style")) && ref[std::move("param_var_name_style")].IsString()) {
+                paramVarNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("param_var_name_style")].GetString()));
+            }
+        }
+        if (conf.HasMember(std::move("OPERATOR")) && conf[std::move("OPERATOR")].IsObject()) {
+            const rj::Value& op = std::move(conf[std::move("OPERATOR")]);
+            if (op.HasMember(std::move("assign")) && op[std::move("assign")].IsString() && op[std::move("assign")].GetStringLength() > 0) {
+                assignOpWord_ = std::make_unique<std::stringstream>(std::move(op[std::move("assign")].GetString()));
+            }
+            if (op.HasMember(std::move("style")) && op[std::move("style")].IsString()) {
+                operatorStyle_ = std::make_unique<std::stringstream>(std::move(op[std::move("style")].GetString()));
+            }
+        }
+        if (conf.HasMember(std::move("SEPARATOR")) && conf[std::move("SEPARATOR")].IsObject()) {
+            const rj::Value& sep = std::move(conf[std::move("SEPARATOR")]);
+            if (sep.HasMember(std::move("style")) && sep[std::move("style")].IsString()) {
+                separatorStyle_ = std::make_unique<std::stringstream>(std::move(sep[std::move("style")].GetString()));
+            }
+        }
+        if (conf.HasMember(std::move("VALUE")) && conf[std::move("VALUE")].IsObject()) {
+            const rj::Value& val = std::move(conf[std::move("VALUE")]);
+            if (val.HasMember(std::move("true_val")) && val[std::move("true_val")].IsString() && val[std::move("true_val")].GetStringLength() > 0) {
+                trueVal_ = std::make_unique<std::stringstream>(std::move(val[std::move("true_val")].GetString()));
+            }
+            if (val.HasMember(std::move("false_val")) && val[std::move("false_val")].IsString() && val[std::move("false_val")].GetStringLength() > 0) {
+                falseVal_ = std::make_unique<std::stringstream>(std::move(val[std::move("false_val")].GetString()));
+            }
+            if (val.HasMember(std::move("null_val")) && val[std::move("null_val")].IsString() && val[std::move("null_val")].GetStringLength() > 0) {
+                nullVal_ = std::make_unique<std::stringstream>(std::move(val[std::move("null_val")].GetString()));
+            }
+            if (val.HasMember(std::move("STYLE")) && val[std::move("STYLE")].IsObject()) {
+                const rj::Value& st = std::move(val[std::move("STYLE")]);
+                if (st.HasMember(std::move("general_val_style")) && st[std::move("general_val_style")].IsString()) {
+                    valStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("general_val_style")].GetString()));
+                }
+                if (st.HasMember(std::move("int_val_style")) && st[std::move("int_val_style")].IsString()) {
+                    intValStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("int_val_style")].GetString()));
+                }
+                if (st.HasMember(std::move("float_val_style")) && st[std::move("float_val_style")].IsString()) {
+                    floatValStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("float_val_style")].GetString()));
+                }
+                if (st.HasMember(std::move("char_val_style")) && st[std::move("char_val_style")].IsString()) {
+                    charValStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("char_val_style")].GetString()));
+                }
+                if (st.HasMember(std::move("string_val_style")) && st[std::move("string_val_style")].IsString()) {
+                    stringValStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("string_val_style")].GetString()));
+                }
+                if (st.HasMember(std::move("bool_val_style")) && st[std::move("bool_val_style")].IsString()) {
+                    boolValStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("bool_val_style")].GetString()));
+                }
+                if (st.HasMember(std::move("null_val_style")) && st[std::move("null_val_style")].IsString()) {
+                    nullValStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("null_val_style")].GetString()));
+                }
+            }
+        }
+    }
+    fclose(std::move(configFile));
+    if (resetPath) {
+        reset_def_path();
+        reset_out_path();
+    }
 }
 
 void Configurator::set_defaults() {
-    outputFileName_ = new std::stringstream("output");
-    outputType_ = new std::stringstream("text");
-    view_ = new std::stringstream("vnutorny");
-    intWord_ = new std::stringstream("int");
-    floatWord_ = new std::stringstream("float");
-    charWord_ = new std::stringstream("char");
-    boolWord_ = new std::stringstream("bool");
-    voidWord_ = new std::stringstream("void");
-    assignWord_ = new std::stringstream("=");
-    privateWord_ = new std::stringstream("private");
-    publicWord_ = new std::stringstream("public");
-    outputFormat_ = new std::stringstream("txt");
-    tabWord_ = new std::stringstream("   ");
-    showClassBody_ = true;
-    showMethodBody_ = true;
-    showMethodDefinition_ = true;
-    showFunctionBody_ = true;
-    openBracketOnNewLine_ = false;
-    showRowNumber_ = true;
-    classWord_ = new std::stringstream("class");
-    ifWord_ = new std::stringstream("if");
-    elseWord_ = new std::stringstream("else");
-    forWord_ = new std::stringstream("for");
-    whileWord_ = new std::stringstream("while");
-    doWord_ = new std::stringstream("do");
-    returnWord_ = new std::stringstream("return");
-    throwWord_ = new std::stringstream("throw");
-    switchWord_ = new std::stringstream("switch");
-    caseWord_ = new std::stringstream("case");
-    thisWord_ = new std::stringstream("this");
-    classWordColor_ = new std::stringstream("black");
-    classNameColor_ = new std::stringstream("black");
+    outputFileName_ = std::make_unique<std::stringstream>(std::move("output"));
+    outFolderPath_ = std::make_unique<std::stringstream>(defFolderPath_->str());
+    defaultOutputFilePath_ = std::make_unique<std::stringstream>(defFolderPath_->str() + outputFileName_->str());
+    outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
+    outputFileFormat_ = std::make_unique<std::stringstream>(std::move("txt"));
+    defaultStyle_ = std::make_unique<std::stringstream>(std::move("font-family:Consolas;font-size:18px"));
+    unknownWord_ = std::make_unique<std::stringstream>(std::move("UNKNOWN EXPRESSION"));
+    unknownWordStyle_ = std::make_unique<std::stringstream>();
+    view_ = std::make_unique<std::stringstream>(std::move("inner"));
+    publicWord_ = std::make_unique<std::stringstream>(std::move("public"));
+    privateWord_ = std::make_unique<std::stringstream>(std::move("private"));
+    protectedWord_ = std::make_unique<std::stringstream>(std::move("protected"));
+    accessModStyle_ = std::make_unique<std::stringstream>();
+    dynamicWord_ = std::make_unique<std::stringstream>(std::move("dynamic"));
+    intWord_ = std::make_unique<std::stringstream>(std::move("int"));
+    floatWord_ = std::make_unique<std::stringstream>(std::move("float"));
+    charWord_ = std::make_unique<std::stringstream>(std::move("char"));
+    boolWord_ = std::make_unique<std::stringstream>(std::move("bool"));
+    voidWord_ = std::make_unique<std::stringstream>(std::move("void"));
+    typeStyle_ = std::make_unique<std::stringstream>();
+    dynamicTypeStyle_ = std::make_unique<std::stringstream>();
+    intTypeStyle_ = std::make_unique<std::stringstream>();
+    floatTypeStyle_ = std::make_unique<std::stringstream>();
+    charTypeStyle_ = std::make_unique<std::stringstream>();
+    boolTypeStyle_ = std::make_unique<std::stringstream>();
+    voidTypeStyle_ = std::make_unique<std::stringstream>();
+    userTypeStyle_ = std::make_unique<std::stringstream>();
+    defRefNameStyle_ = std::make_unique<std::stringstream>();
+    generParamNameStyle_ = std::make_unique<std::stringstream>();
+    generParamConstrStyle_ = std::make_unique<std::stringstream>();
+    classNameStyle_ = std::make_unique<std::stringstream>();
+    methodNameStyle_ = std::make_unique<std::stringstream>();
+    functionNameStyle_ = std::make_unique<std::stringstream>();
+    globalVarNameStyle_ = std::make_unique<std::stringstream>();
+    memberVarNameStyle_ = std::make_unique<std::stringstream>();
+    localVarNameStyle_ = std::make_unique<std::stringstream>();
+    paramVarNameStyle_ = std::make_unique<std::stringstream>();
+    assignOpWord_ = std::make_unique<std::stringstream>(std::move("="));
+    operatorStyle_ = std::make_unique<std::stringstream>();
+    separatorStyle_ = std::make_unique<std::stringstream>();
+    trueVal_ = std::make_unique<std::stringstream>(std::move("true"));
+    falseVal_ = std::make_unique<std::stringstream>(std::move("false"));
+    nullVal_ = std::make_unique<std::stringstream>(std::move("NULL"));
+    valStyle_ = std::make_unique<std::stringstream>();
+    intValStyle_ = std::make_unique<std::stringstream>();
+    floatValStyle_ = std::make_unique<std::stringstream>();
+    charValStyle_ = std::make_unique<std::stringstream>();
+    stringValStyle_ = std::make_unique<std::stringstream>();
+    boolValStyle_ = std::make_unique<std::stringstream>();
+    nullValStyle_ = std::make_unique<std::stringstream>();
 }

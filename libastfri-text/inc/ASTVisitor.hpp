@@ -1,3 +1,6 @@
+#ifndef LIBASTFRI_TEXT_INC_AST_VISITOR
+#define LIBASTFRI_TEXT_INC_AST_VISITOR
+
 #include <libastfri-text/inc/HtmlFileExporter.hpp>
 #include <libastfri-text/inc/RtfFileExporter.hpp>
 #include <libastfri-text/inc/TxtFileExporter.hpp>
@@ -7,11 +10,10 @@
 
 struct ASTVisitor : astfri::IVisitor {
 private:
-    Configurator* config_;
-    Exporter* exporter_;
+    std::shared_ptr<TextConfigurator> config_;
+    std::unique_ptr<Exporter> exporter_;
 public:
     ASTVisitor();
-    ~ASTVisitor();
     void write_file() { exporter_->make_export(); };
     void visit(astfri::DynamicType const& /*type*/) override { exporter_->write_dynamic_type(); };
     void visit(astfri::IntType const& /*type*/) override { exporter_->write_int_type(); };
@@ -21,7 +23,7 @@ public:
     void visit(astfri::VoidType const& /*type*/) override { exporter_->write_void_type(); };
     void visit(astfri::UserType const& type) override { exporter_->write_user_type(type.name_); };
     void visit(astfri::IndirectionType const& type) override { type.indirect_->accept(*this); };
-    void visit(astfri::UnknownType const& /*type*/) override { exporter_->write_unknown_type(); };
+    void visit(astfri::UnknownType const& /*type*/) override { exporter_->write_unknown_word(); };
     void visit(astfri::IntLiteralExpr const& expr) override { exporter_->write_int_val(expr.val_); };
     void visit(astfri::FloatLiteralExpr const& expr) override { exporter_->write_float_val(expr.val_); };
     void visit(astfri::CharLiteralExpr const& expr) override { exporter_->write_char_val(expr.val_); };
@@ -41,7 +43,7 @@ public:
     void visit(astfri::MethodCallExpr const& expr) override;
     void visit(astfri::LambdaExpr const& expr) override;
     void visit(astfri::ThisExpr const& /*expr*/) override { exporter_->write_this_word(); };
-    void visit(astfri::UnknownExpr const& /*expr*/) override { exporter_->write_unknown_expr(); };
+    void visit(astfri::UnknownExpr const& /*expr*/) override { exporter_->write_unknown_word(); };
     void visit(astfri::TranslationUnit const& stmt) override;
     void visit(astfri::CompoundStmt const& stmt) override;
     void visit(astfri::ReturnStmt const& stmt) override;
@@ -53,7 +55,7 @@ public:
     void visit(astfri::DoWhileStmt const& stmt) override;
     void visit(astfri::ForStmt const& stmt) override;
     void visit(astfri::ThrowStmt const& stmt) override;
-    void visit(astfri::UnknownStmt const& /*stmt*/) override { exporter_->write_unknown_stat(); };
+    void visit(astfri::UnknownStmt const& /*stmt*/) override { exporter_->write_unknown_word(); };
     void visit(astfri::LocalVarDefStmt const& stmt) override;
     void visit(astfri::ParamVarDefStmt const& stmt) override;
     void visit(astfri::MemberVarDefStmt const& stmt) override;
@@ -64,3 +66,5 @@ public:
 private:
     void write_open_bracket();
 };
+
+#endif
