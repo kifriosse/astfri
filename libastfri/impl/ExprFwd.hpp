@@ -19,10 +19,14 @@ struct ParamVarRefExpr;
 struct LocalVarRefExpr;
 struct MemberVarRefExpr;
 struct GlobalVarRefExpr;
+struct ClassRefExpr;
 struct FunctionCallExpr;
 struct MethodCallExpr;
 struct LambdaExpr;
 struct ThisExpr;
+struct ConstructorCallExpr;
+struct NewExpr;
+struct DeleteExpr;
 struct UnknownExpr;
 } // namespace astfri
 

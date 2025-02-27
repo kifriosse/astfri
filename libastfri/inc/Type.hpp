@@ -13,7 +13,7 @@ namespace astfri
  */
 struct Type : virtual IVisitable
 {
-    virtual ~Type () = default;
+    virtual ~Type() = default;
 };
 
 /**
@@ -99,7 +99,7 @@ struct UserType :
 {
     std::string name_;
 
-    explicit UserType (std::string name);
+    explicit UserType(std::string name);
 
     UserType* as_user () noexcept override;
 };
@@ -114,7 +114,7 @@ struct IndirectionType :
 {
     Type* indirect_;
 
-    explicit IndirectionType (Type* indirect);
+    explicit IndirectionType(Type* indirect);
 
     IndirectionType* as_indirection () noexcept override;
 };

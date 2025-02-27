@@ -38,6 +38,9 @@ public:
         Type* type,
         Expr* initializer
     );
+    DefStmt* mk_def();
+    DefStmt* mk_def(std::vector<VarDefStmt*> defs);
+    FunctionDefStmt* mk_function_def ();
     FunctionDefStmt* mk_function_def (
         std::string name,
         std::vector<ParamVarDefStmt*> params,
@@ -49,6 +52,24 @@ public:
         FunctionDefStmt* func,
         AccessModifier access
     );
+    ConstructorDefStmt* mk_constructor_def ();
+    ConstructorDefStmt* mk_constructor_def (
+        ClassDefStmt* owner,
+        std::vector<ParamVarDefStmt*> params,
+        std::vector<BaseInitializerStmt*> baseInit,
+        CompoundStmt* body,
+        AccessModifier access
+    );
+    BaseInitializerStmt* mak_base_initializer (
+        std::string base,
+        std::vector<Expr*> args
+    );
+    DestructorDefStmt* mk_destructor_def (
+        ClassDefStmt* owner,
+        CompoundStmt* body
+    );
+    GenericParam* mk_generic_param (std::string constraint, std::string name);
+    ClassDefStmt* mk_class_def ();
     ClassDefStmt* mk_class_def (
         std::string name,
         std::vector<MemberVarDefStmt*> vars,
@@ -66,6 +87,7 @@ public:
     ForStmt* mk_for (Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
     ThrowStmt* mk_throw (Expr* val);
     UnknownStmt* mk_uknown ();
+    TranslationUnit* mk_translation_unit ();
     TranslationUnit* mk_translation_unit (
         std::vector<ClassDefStmt*> classes,
         std::vector<FunctionDefStmt*> functions,
