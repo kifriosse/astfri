@@ -14,7 +14,7 @@
 
 class AstFriSerializer {
 public:
-    static AstFriSerializer& getInstance();
+    static AstFriSerializer& get_instance();
     astfri::IVisitable* serialize(std::string filePath);
 
 private:
@@ -27,53 +27,62 @@ JsonFormatChecker& jsonChecker_;
 
 
 
-astfri::IntLiteralExpr* serializeIntLiteralExpr(rapidjson::Value& value);
-astfri::FloatLiteralExpr* serializeFloatLiteralExpr(rapidjson::Value& value);
-astfri::CharLiteralExpr* serializeCharLiteralExpr(rapidjson::Value& value);
-astfri::StringLiteralExpr* serializeStringLiteralExpr(rapidjson::Value& value);
-astfri::BoolLiteralExpr* serializeBoolLiteralExpr(rapidjson::Value& value);
-astfri::NullLiteralExpr* serializeNullLiteralExpr(rapidjson::Value& value);
-astfri::IfExpr* serializeIfExpr(rapidjson::Value& value);
-astfri::BinOpExpr* serializeBinOpExpr(rapidjson::Value& value);
-astfri::UnaryOpExpr* serializeUnaryOpExpr(rapidjson::Value& value);
-astfri::AssignExpr* serializeAssignExpr(rapidjson::Value& value);
-astfri::CompoundAssignExpr* serializeCompoundAssignExpr(rapidjson::Value& value);
-astfri::ParamVarRefExpr* serializeParamVarRefExpr(rapidjson::Value& value);
-astfri::LocalVarRefExpr* serializeLocalVarRefExpr(rapidjson::Value& value);
-astfri::MemberVarRefExpr* serializeMemberVarRefExpr(rapidjson::Value& value);
-astfri::GlobalVarRefExpr* serializeGlobalVarRefExpr(rapidjson::Value& value);
-astfri::FunctionCallExpr* serializeFunctionCallExpr(rapidjson::Value& value);
-astfri::MethodCallExpr* serializeMethodCallExpr(rapidjson::Value& value);
-astfri::LambdaExpr* serializeLambdaExpr(rapidjson::Value& value);
-astfri::ThisExpr* serializeThisExpr();
-astfri::UnknownExpr* serializeUnknownExpr();
-astfri::LocalVarDefStmt* serializeLocalVarDefStmt(rapidjson::Value& value);
-astfri::ParamVarDefStmt* serializeParamVarDefStmt(rapidjson::Value& value);
-astfri::MemberVarDefStmt* serializeMemberVarDefStmt(rapidjson::Value& value);
-astfri::GlobalVarDefStmt* serializeGlobalVarDefStmt(rapidjson::Value& value);
-astfri::FunctionDefStmt* serializeFunctionDefStmt(rapidjson::Value& value);
-astfri::MethodDefStmt* serializeMethodDefStmt(rapidjson::Value& value);
-astfri::GenericParam* serializeGenericParam(rapidjson::Value& value);
-astfri::ClassDefStmt* serializeClassDefStmt(rapidjson::Value& value);
-astfri::CompoundStmt* serializeCompoundStmt(rapidjson::Value& value);
-astfri::ReturnStmt* serializeReturnStmt(rapidjson::Value& value);
-astfri::ExprStmt* serializeExprStmt(rapidjson::Value& value);
-astfri::IfStmt* serializeIfStmt(rapidjson::Value& value);
-astfri::CaseStmt* serializeCaseStmt(rapidjson::Value& value);
-astfri::SwitchStmt* serializeSwitchStmt(rapidjson::Value& value);
-astfri::WhileStmt* serializeWhileStmt(rapidjson::Value& value);
-astfri::DoWhileStmt* serializeDoWhileStmt(rapidjson::Value& value);
-astfri::ForStmt* serializeForStmt(rapidjson::Value& value);
-astfri::ThrowStmt* serializeThrowStmt(rapidjson::Value& value);
-astfri::UnknownStmt* serializeUnknownStmt(rapidjson::Value& value);
-astfri::TranslationUnit* serializeTranslationUnit(rapidjson::Value& value);
-astfri::Type* serializeType(rapidjson::Value& value);
+astfri::IntLiteralExpr* serialize_int_lit_expr(rapidjson::Value& value);
+astfri::FloatLiteralExpr* serialize_float_lit_expr(rapidjson::Value& value);
+astfri::CharLiteralExpr* serialize_char_lit_expr(rapidjson::Value& value);
+astfri::StringLiteralExpr* serialize_string_lit_expr(rapidjson::Value& value);
+astfri::BoolLiteralExpr* serialize_bool_lit_expr(rapidjson::Value& value);
+astfri::NullLiteralExpr* serialize_null_lit_expr(rapidjson::Value& value);
+astfri::IfExpr* serialize_if_expr(rapidjson::Value& value);
+astfri::BinOpExpr* serialize_bin_op_expr(rapidjson::Value& value);
+astfri::UnaryOpExpr* serialize_unary_op_expr(rapidjson::Value& value);
+astfri::AssignExpr* serialize_assign_expr(rapidjson::Value& value);
+astfri::CompoundAssignExpr* serialize_compound_assign_expr(rapidjson::Value& value);
+astfri::ParamVarRefExpr* serialize_param_var_ref_expr(rapidjson::Value& value);
+astfri::LocalVarRefExpr* serialize_local_var_ref_expr(rapidjson::Value& value);
+astfri::MemberVarRefExpr* serialize_member_var_ref_expr(rapidjson::Value& value);
+astfri::GlobalVarRefExpr* serialize_global_var_ref_expr(rapidjson::Value& value);
+astfri::FunctionCallExpr* serialize_function_call_expr(rapidjson::Value& value);
+astfri::MethodCallExpr* serialize_method_call_expr(rapidjson::Value& value);
+astfri::LambdaExpr* serialize_lambda_expr(rapidjson::Value& value);
+astfri::ThisExpr* serialize_this_expr();
+astfri::ConstructorCallExpr* serialize_constructor_call_expr(rapidjson::Value& value);
+astfri::NewExpr* serialize_new_expr(rapidjson::Value& value);
+astfri::DeleteExpr* serialize_delete_expr(rapidjson::Value& value);
+astfri::UnknownExpr* serialize_unknown_expr();
+astfri::LocalVarDefStmt* serialize_local_var_def_stmt(rapidjson::Value& value);
+astfri::ParamVarDefStmt* serialize_param_var_def_stmt(rapidjson::Value& value);
+astfri::MemberVarDefStmt* serialize_member_var_def_stmt(rapidjson::Value& value);
+astfri::GlobalVarDefStmt* serialize_global_var_def_stmt(rapidjson::Value& value);
+astfri::FunctionDefStmt* serialize_function_def_stmt(rapidjson::Value& value);
+astfri::MethodDefStmt* serialize_method_def_stmt(rapidjson::Value& value);
+astfri::GenericParam* serialize_generic_param(rapidjson::Value& value);
+astfri::ClassDefStmt* serialize_class_def_stmt(rapidjson::Value& value);
+astfri::CompoundStmt* serialize_compound_stmt(rapidjson::Value& value);
+astfri::ReturnStmt* serialize_return_stmt(rapidjson::Value& value);
+astfri::ExprStmt* serialize_expr_stmt(rapidjson::Value& value);
+astfri::IfStmt* serialize_if_stmt(rapidjson::Value& value);
+astfri::CaseStmt* serialize_case_stmt(rapidjson::Value& value);
+astfri::SwitchStmt* serialize_switch_stmt(rapidjson::Value& value);
+astfri::WhileStmt* serialize_while_stmt(rapidjson::Value& value);
+astfri::DoWhileStmt* serialize_dowhile_stmt(rapidjson::Value& value);
+astfri::ForStmt* serialize_for_stmt(rapidjson::Value& value);
+astfri::ThrowStmt* serialize_throw_stmt(rapidjson::Value& value);
+astfri::UnknownStmt* serialize_unknown_stmt(rapidjson::Value& value);
+astfri::ConstructorDefStmt* serialize_constructor_def_stmt(rapidjson::Value& value);
+astfri::BaseInitializerStmt* serialize_base_initializer_stmt(rapidjson::Value& value);
+astfri::DestructorDefStmt* serialize_destructor_def_stmt(rapidjson::Value& value);
 
-void checkJsonFormatLitExpressions(rapidjson::Value& jsonVal);
+astfri::DefStmt* serialize_def_stmt(rapidjson::Value& value);
+
+astfri::TranslationUnit* serialize_translation_unit(rapidjson::Value& value);
+astfri::Type* serialize_type(rapidjson::Value& value);
 
 
-astfri::Expr* resolveExpr(rapidjson::Value& value);
-astfri::Stmt* resolveStmt(rapidjson::Value& value);
-astfri::Type* resolveType(rapidjson::Value& value);
+
+
+astfri::Expr* resolve_expr(rapidjson::Value& value);
+astfri::Stmt* resolve_stmt(rapidjson::Value& value);
+astfri::Type* resolve_type(rapidjson::Value& value);
 };
 #endif

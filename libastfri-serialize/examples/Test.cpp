@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv){
 
-AstFriSerializer& serializer = AstFriSerializer::getInstance();    
+AstFriSerializer& serializer = AstFriSerializer::get_instance();    
     
 astfri::IVisitable* node = serializer.serialize(argv[1]);
 
