@@ -100,6 +100,12 @@ ConstructorDefStmt::ConstructorDefStmt(
 {
 }
 
+DestructorDefStmt::DestructorDefStmt(ClassDefStmt* owner, CompoundStmt* body) :
+    owner_(owner),
+    body_(body)
+{
+}
+
 ClassDefStmt::ClassDefStmt(
     std::string name,
     std::vector<MemberVarDefStmt*> vars,

@@ -28,35 +28,35 @@ possibly_die() {
 # Branches
 BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp"
 
-# Pull newest changes in each branch
-heading "# Pulling changes"
-for branch in ${BRANCHES}; do
-  git switch ${branch}
-  possibly_die "Failed to switch to ${branch}"
+# # Pull newest changes in each branch
+# heading "# Pulling changes"
+# for branch in ${BRANCHES}; do
+#   git switch ${branch}
+#   possibly_die "Failed to switch to ${branch}"
 
-  git pull
-  possibly_die "Failed to pull ${branch}"
-done
-ok
+#   git pull
+#   possibly_die "Failed to pull ${branch}"
+# done
+# ok
 
-# Merge each branch to main
-heading "# Merging to main"
-git switch main
-for branch in ${BRANCHES}; do
-  git merge ${branch}
-  possibly_die "Failed to merge ${branch}"
-done
-ok
+# # Merge each branch to main
+# heading "# Merging to main"
+# git switch main
+# for branch in ${BRANCHES}; do
+#   git merge ${branch}
+#   possibly_die "Failed to merge ${branch}"
+# done
+# ok
 
-# Try to prepare build
-./scipts/prepare-build.sh
-possibly_die "Failed to prepare build"
+# # Try to prepare build
+# ./scipts/prepare-build.sh
+# possibly_die "Failed to prepare build"
 
-# Try to build the project
-cd build/release
-make
-possibly_die "Failed to build the project"
-cd ../..
+# # Try to build the project
+# cd build/release
+# make
+# possibly_die "Failed to build the project"
+# cd ../..
 
 # Rebase each branch on main
 heading "# Rebasing on main"

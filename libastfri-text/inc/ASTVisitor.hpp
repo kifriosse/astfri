@@ -63,6 +63,35 @@ public:
     void visit(astfri::FunctionDefStmt const& stmt) override;
     void visit(astfri::MethodDefStmt const& stmt) override;
     void visit(astfri::ClassDefStmt const& stmt) override;
+    void visit(astfri::DefStmt const& stmt) override {};
+    void visit (astfri::ClassRefExpr const& /*expr*/) override
+    {
+    }
+    void visit (astfri::ConstructorCallExpr const& /*expr*/) override
+    {
+    }
+
+    void visit (astfri::NewExpr const& /*expr*/) override
+    {
+    }
+
+    void visit (astfri::DeleteExpr const& /*expr*/) override
+    {
+    }
+    void visit (astfri::BaseInitializerStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit (astfri::ConstructorDefStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit (astfri::DestructorDefStmt const& /*stmt*/) override
+    {
+    }
+    void visit (astfri::GenericParam const& /*stmt*/) override
+    {
+    }
 private:
     void write_open_bracket();
 };
