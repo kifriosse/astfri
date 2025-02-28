@@ -8,13 +8,13 @@ private:
     int a = 3;
     int b;
 public:
-    int add_funkcia(int a, int b) {
-        if (a > b) {
-            int cislo = 5 + 23 + 4;
-            return a + b + cislo;
-        }
-        return a;
-    }
+    // int add_funkcia(int a, int b) {
+    //     if (a > b) {
+    //         int cislo = 5 + 23 + 4;
+    //         return a + b + cislo;
+    //     }
+    //     return a;
+    // }
 };
 
 int main(int argc, char* argv[]) {
@@ -30,4 +30,20 @@ int main(int argc, char* argv[]) {
         }
     }
     return 0;
+}
+
+void switch_skuska() {
+    char pismenko = 'j';
+    // switch (pismenko) {
+    // case 0: {
+        
+    //     }
+    //     break;
+    // case 'j': {
+        
+    //     }
+    //     break;
+    // default:
+    // break;
+    // }
 }

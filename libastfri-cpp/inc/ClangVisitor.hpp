@@ -94,16 +94,7 @@ private:
     TypeFactory* type_factory_;
 
     // context variables
-    ClassDefStmt* class_ = nullptr;
-    MethodDefStmt* method_ = nullptr;
-    ParamVarDefStmt* param_ = nullptr;
-    MemberVarDefStmt* field_ = nullptr;
-    VarDefStmt* var_ = nullptr;
-    FunctionDefStmt* function_ = nullptr;
-    CompoundStmt* compound_ = nullptr;
-
-    std::vector<ClangASTLocation*> clang_locationStack;
-    std::vector<AstfriASTLocation*> astfri_locationStack;
-
+    ClangASTLocation clang_location;
+    AstfriASTLocation astfri_location;
 };
 } // namespace libastfri::cpp
