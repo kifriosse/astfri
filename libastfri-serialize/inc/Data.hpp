@@ -54,9 +54,11 @@ inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",
 {",",astfri::BinOpType::Comma},{"&&",astfri::BinOpType::LogicalAnd},{"||",astfri::BinOpType::LogicalOr}};
 
 
-
+//if it s post increment/decrement operator is solved in serialize_unary_expr-there is property to recognise,which says if its
+//post or pre increment/decrement type 
 inline std::unordered_map<std::string,astfri::UnaryOpType> unaryOpTypeMapping={{"-",astfri::UnaryOpType::Minus},{"+",astfri::UnaryOpType::Plus},
-{"*",astfri::UnaryOpType::Dereference},{"&",astfri::UnaryOpType::AddressOf},{"!",astfri::UnaryOpType::LogicalNot}};
+{"*",astfri::UnaryOpType::Dereference},{"&",astfri::UnaryOpType::AddressOf},{"!",astfri::UnaryOpType::LogicalNot},{"~",astfri::UnaryOpType::BitFlip},
+{"++",astfri::UnaryOpType::PreIncrement},{"--",astfri::UnaryOpType::PreDecrement}};
 
 enum Types{IntType,FloatType,CharType,BoolType,VoidType,UserType,IndirectionType,UnknownType,DynamicType};
 
