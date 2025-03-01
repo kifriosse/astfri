@@ -207,12 +207,7 @@ astfri::UnknownExpr* AstFriSerializer::serialize_unknown_expr(){
 
 astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
 {
-    if (!value.HasMember("node")) {
-        throw std::runtime_error("Missing node field in expression");
-    }
-    if (!value["node"].IsString()) {
-        throw std::runtime_error("Invalid node field in expression");
-    }
+
     auto it = astfri_serialize::strToExprMapping.find(value["node"].GetString());
     if (it == astfri_serialize::strToExprMapping.end()) {
         throw std::runtime_error("Invalid node type in expression");
@@ -258,6 +253,12 @@ astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
             return this->serialize_this_expr();
         case astfri_serialize::UnknownExpr:
             return this->serialize_unknown_expr();
+        case astfri_serialize::NewExpr:
+            return this->serialize_new_expr(value);
+        case astfri_serialize::DeleteExpr:
+            return this->serialize_delete_expr(value);
+        case astfri_serialize::ConstructorCallExpr:
+            return this->serialize_constructor_call_expr(value);
 
     }
 

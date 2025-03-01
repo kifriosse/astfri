@@ -12,19 +12,21 @@ namespace astfri_serialize{
 enum  ExprNodeType{
     IntLiteralExpr,FloatLiteralExpr,CharLiteralExpr,StringLiteralExpr,BoolLiteralExpr,NullLiteralExpr,IfExpr,
     BinOpExpr,UnaryOpExpr,AssignExpr,CompoundAssignExpr,RefExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
-    GlobalVarRefExpr,FunctionCallExpr,MethodCallExpr,LambdaExpr,ThisExpr,UnknownExpr};
+    GlobalVarRefExpr,FunctionCallExpr,MethodCallExpr,LambdaExpr,ThisExpr,UnknownExpr,ConstructorCallExpr,NewExpr,
+    DeleteExpr};
     
 enum StmtNodeType{    
     LocalVarDefStmt,ParamVarDefStmt,
     MemberVarDefStmt,GlobalVarDefStmt,FunctionDefStmt,MethodDefStmt,GenericParam,ClassDefStmt,CompoundStmt,ReturnStmt,
-    ExprStmt,IfStmt,CaseStmt,SwitchStmt,WhileStmt,DoWhileStmt,ForStmt,ThrowStmt,UnknownStmt,TranslationUnit};
+    ExprStmt,IfStmt,CaseStmt,SwitchStmt,WhileStmt,DoWhileStmt,ForStmt,ThrowStmt,UnknownStmt,TranslationUnit,
+    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt};
     
     
 
 
 
 
-    //where should be GenericParameter ?
+    
 inline    std::unordered_map<std::string,ExprNodeType> strToExprMapping={
     {"IntLitExpr",IntLiteralExpr},{"FloatLitExpr",FloatLiteralExpr},{"CharLitExpr",CharLiteralExpr},
     {"StringLitExpr",StringLiteralExpr},{"BoolLitExpr",BoolLiteralExpr},{"NullLitExpr",NullLiteralExpr},
@@ -32,14 +34,16 @@ inline    std::unordered_map<std::string,ExprNodeType> strToExprMapping={
     {"CompoundAssignExpr",CompoundAssignExpr},{"ParamVarRefExpr",ParamVarRefExpr},
     {"LocalVarRefExpr",LocalVarRefExpr},{"MemberVarRefExpr",MemberVarRefExpr},{"GlobalVarRefExpr",GlobalVarRefExpr},
     {"FunctionCallExpr",FunctionCallExpr},{"MethodCallExpr",MethodCallExpr},{"LambdaExpr",LambdaExpr},
-    {"ThisExpr",ThisExpr},{"UnknownExpr",UnknownExpr}};
+    {"ThisExpr",ThisExpr},{"UnknownExpr",UnknownExpr},{"ConstructorCallExpr",ConstructorCallExpr},{"NewExpr",NewExpr},
+    {"DeleteExpr",DeleteExpr}};
     
 inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVarDefStmt",LocalVarDefStmt},
     {"ParamVarDefStmt",ParamVarDefStmt},{"MemberVarDefStmt",MemberVarDefStmt},{"GlobalVarDefStmt",GlobalVarDefStmt},
     {"FunctionDefStmt",FunctionDefStmt},{"MethodDefStmt",MethodDefStmt},
     {"ClassDefStmt",ClassDefStmt},{"CompoundStmt",CompoundStmt},{"ReturnStmt",ReturnStmt},{"ExprStmt",ExprStmt},
     {"IfStmt",IfStmt},{"CaseStmt",CaseStmt},{"SwitchStmt",SwitchStmt},{"WhileStmt",WhileStmt},{"DoWhileStmt",DoWhileStmt},
-    {"ForStmt",ForStmt},{"ThrowStmt",ThrowStmt},{"UnknownStmt",UnknownStmt},{"TranslationUnit",TranslationUnit}}; 
+    {"ForStmt",ForStmt},{"ThrowStmt",ThrowStmt},{"UnknownStmt",UnknownStmt},{"TranslationUnit",TranslationUnit},{"GenericParam",GenericParam},
+    {"DefStmt",DefStmt},{"ConstructorDefStmt",ConstructorDefStmt},{"DestructorDefStmt",DestructorDefStmt},{"BaseInitializerStmt",BaseInitializerStmt}}; 
 
 
 inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},
@@ -59,5 +63,7 @@ inline std::unordered_map<std::string,Types> strToTypeMapping={{"Int",IntType},{
     {"Indirection",IndirectionType},{"Unknown",UnknownType},{"Dynamic",DynamicType}};
 
 }
+
+
 
 #endif

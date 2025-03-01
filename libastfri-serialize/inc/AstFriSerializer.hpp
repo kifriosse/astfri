@@ -84,5 +84,7 @@ astfri::Type* serialize_type(rapidjson::Value& value);
 astfri::Expr* resolve_expr(rapidjson::Value& value);
 astfri::Stmt* resolve_stmt(rapidjson::Value& value);
 astfri::Type* resolve_type(rapidjson::Value& value);
+
+
 };
 #endif
