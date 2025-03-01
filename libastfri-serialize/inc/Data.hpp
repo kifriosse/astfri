@@ -49,7 +49,9 @@ inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVar
 inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},
 {"-",astfri::BinOpType::Subtract},{"*",astfri::BinOpType::Multiply},{"/",astfri::BinOpType::Divide},{"%",astfri::BinOpType::Modulo},
 {"==",astfri::BinOpType::Equal},{"!=",astfri::BinOpType::NotEqual},{"<",astfri::BinOpType::Less},{"<=",astfri::BinOpType::LessEqual},
-{">",astfri::BinOpType::Greater},{">=",astfri::BinOpType::GreaterEqual}};
+{">",astfri::BinOpType::Greater},{">=",astfri::BinOpType::GreaterEqual},{">>",astfri::BinOpType::BitShiftRight},
+{"<<",astfri::BinOpType::BitShiftLeft},{"&",astfri::BinOpType::BitAnd},{"|",astfri::BinOpType::BitOr},{"^",astfri::BinOpType::BitXor},
+{",",astfri::BinOpType::Comma},{"&&",astfri::BinOpType::LogicalAnd},{"||",astfri::BinOpType::LogicalOr}};
 
 
 
