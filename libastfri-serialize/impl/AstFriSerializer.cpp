@@ -96,9 +96,6 @@ astfri::NullLiteralExpr* AstFriSerializer::serialize_null_lit_expr(rapidjson::Va
 astfri::IfExpr* AstFriSerializer::serialize_if_expr(rapidjson::Value& value)
 {
 
-    if (!value.HasMember("condition") || !value.HasMember("ifTrue") || !value.HasMember("ifFalse")) {
-        throw std::runtime_error("Missing fields in IfExpr");
-    }
     astfri::Expr* cond = this->resolve_expr(value["condition"]);
     astfri::Expr* iftrue = this->resolve_expr(value["ifTrue"]);
     astfri::Expr* iffalse = this->resolve_expr(value["ifFalse"]);
@@ -120,12 +117,25 @@ astfri::BinOpExpr* AstFriSerializer::serialize_bin_op_expr(rapidjson::Value& val
     astfri::BinOpType op = it->second;
     return this->expressionMaker_.mk_bin_on(left,op,right);
 }
-astfri::UnaryOpExpr* AstFriSerializer::serialize_unary_op_expr(rapidjson::Value& val){
+astfri::UnaryOpExpr* AstFriSerializer::serialize_unary_op_expr(rapidjson::Value& value){
 
-    astfri::Expr* arg = this->resolve_expr(val["argument"]);
+    astfri::Expr* arg = this->resolve_expr(value["argument"]);
     auto it = astfri_serialize::unaryOpTypeMapping.find(val["operator"].GetString());
     if (it == astfri_serialize::unaryOpTypeMapping.end()) {
         throw std::runtime_error("Invalid operator in UnaryOpExpr");
+    }
+    astfri::BinOpType op = it->second;
+    
+    //if it s pre increment/decrement ,check property isPostfix to determine which operator it really is,because in mapping
+    //there or only pre variants
+    if(op == astfri::UnaryOpType::PreIncrement || op == astfri::UnaryOpType::PreDecrement){
+        std::string opString = value["operator"].GetString();    
+       //if operator is postfix change op to proper operator type
+       if (value["isPostfix"].GetBool()){
+            op = opString == "++" ? astfri::UnaryOpType::PostIncrement : astfri::UnaryOpType::PostDecrement;
+
+       }
+
     }
 
     return this->expressionMaker_.mk_unary_op(it->second,arg);
