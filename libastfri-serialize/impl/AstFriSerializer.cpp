@@ -316,8 +316,7 @@ astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
         case astfri_serialize::VoidType:
             return this->typeMaker_.mk_void();
         case astfri_serialize::UserType:
-             
-            return this->typeMaker_.mk_user(value["name"].GetString());
+             return this->typeMaker_.mk_user(value["name"].GetString());
         case astfri_serialize::IndirectionType:
             return this->typeMaker_.mk_indirect(this->resolve_type(value["indirect"]));
         case astfri_serialize::UnknownType:
@@ -327,6 +326,68 @@ astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
             return nullptr;
     }
     
+}
+
+astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
+    auto it = astfri_serialize::strToStmtMapping.find(value["node"].GetString());
+    
+    if (it == astfri_serialize::strToStmtMapping.end()) {
+        throw std::runtime_error("Invalid node type in expression");
+    }
+
+    switch(it->second){
+        case astfri_serialize::LocalVarDefStmt:
+            return this->serialize_local_var_def_stmt(value);
+        case astfri_serialize::ParamVarDefStmt:
+            return this->serialize_param_var_def_stmt(value);
+        case astfri_serialize::MemberVarDefStmt:
+            return this->serialize_member_var_def_stmt(value);
+        case astfri_serialize::GlobalVarDefStmt:
+            return this->serialize_global_var_def_stmt(value);
+        case astfri_serialize::FunctionDefStmt:
+            return this->serialize_function_def_stmt(value);
+        case astfri_serialize::MethodDefStmt:
+            return this->serialize_method_def_stmt(value);
+        case astfri_serialize::GenericParam:
+            return this->serialize_generic_param(value);
+        case astfri_serialize::ClassDefStmt:
+            return this->serialize_class_def_stmt(value);
+        case astfri_serialize::CompoundStmt:
+            return this->serialize_compound_stmt(value);
+        case astfri_serialize::ReturnStmt:
+            return this->serialize_return_stmt(value);
+        case astfri_serialize::ExprStmt:
+            return this->serialize_expr_stmt(value);
+        case astfri_serialize::IfStmt:
+            return this->serialize_if_stmt(value);
+        case astfri_serialize::SwitchStmt:
+            return this->serialize_switch_stmt(value);
+        case astfri_serialize::CaseStmt:
+            return this->serialize_case_stmt(value);
+        case astfri_serialize::WhileStmt:
+            return this->serialize_while_stmt(value);
+        case astfri_serialize::DoWhileStmt:
+            return this->serialize_do_while_stmt(value);
+        case astfri_serialize::ForStmt:
+            return this->serialize_for_stmt(value);
+        case astfri_serialize::ThrowStmt:
+            return this->serialize_throw_stmt(value);
+        case astfri_serialize::UnknownStmt:
+            return this->serialize_unknown_stmt(value);
+        case astfri_serialize::TranslationUnit:
+            return this->serialize_translation_unit(value);
+        case astfri_serialize::DefStmt:
+            return this->serialize_def_stmt(value);
+        case astfri_serialize::ConstructorDefStmt:
+            return this->serialize_constructor_def_stmt(value);
+        case astfri_serialize::DestructorDefStmt:
+            return this->serialize_destructor_def_stmt(value);
+        case astfri_serialize::BaseInitializerStmt:
+            return this->serialize_base_initializer_stmt(value);
+
+    }
+
+
 }
 
 astfri::LocalVarDefStmt* AstFriSerializer::serialize_local_var_def_stmt(rapidjson::Value& value){
