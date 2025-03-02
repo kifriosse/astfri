@@ -73,9 +73,9 @@ astfri::DoWhileStmt* serialize_do_while_stmt(rapidjson::Value& value);
 astfri::ForStmt* serialize_for_stmt(rapidjson::Value& value);
 astfri::ThrowStmt* serialize_throw_stmt(rapidjson::Value& value);
 astfri::UnknownStmt* serialize_unknown_stmt(rapidjson::Value& value);
-astfri::ConstructorDefStmt* serialize_constructor_def_stmt(rapidjson::Value& value);
+astfri::ConstructorDefStmt* serialize_constructor_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner=nullptr);
 astfri::BaseInitializerStmt* serialize_base_initializer_stmt(rapidjson::Value& value);
-astfri::DestructorDefStmt* serialize_destructor_def_stmt(rapidjson::Value& value);
+astfri::DestructorDefStmt* serialize_destructor_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner=nullptr);
 astfri::DefStmt* serialize_def_stmt(rapidjson::Value& value);
 astfri::TranslationUnit* serialize_translation_unit(rapidjson::Value& value);
 

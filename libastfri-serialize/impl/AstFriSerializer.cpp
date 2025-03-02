@@ -445,7 +445,37 @@ astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value
 }
 
 astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Value& value){
+    
+    std::vector<astfri::MemberVarDefStmt*> attributes;
+    std::vector<astfri::GenericParam*> genericParams;
+    std::vector<astfri::ConstructorDefStmt*> constructors;
+    std::vector<astfri::MethodDefStmt*> methods;
 
-    return this->statementMaker_.mk_class_def();
+    //Create naked ClassDefStmt*only with name,values will be added later to particular ClassDefStmt's attributes 
+    astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()),std::move(attributes),
+                                                                            std::move(methods),std::move(genericParams));
+
+
+    for (auto& attribute : value["attributes"].GetArray()){
+        classDefStmt->vars_.push_back(this->serialize_member_var_def_stmt(attribute));
+    }
+
+    for (auto& genericParam : value["generic_parameters"].GetArray()){
+        classDefStmt->tparams_.push_back(this->serialize_generic_param(genericParam));
+    }
+
+    for (auto& method : value["methods"].GetArray()){
+        classDefStmt->methods_.push_back(this->serialize_method_def_stmt(method,classDefStmt));
+    }
+    /*
+    for (auto& constructor : value["constructors"].GetArray()){
+        classDefStmt->constructors_.push_back(this->serialize_constructor_def_stmt(constructor,classDefStmt));
+    }
+
+    classDefStmt->destructor_ = value["destructor"].IsNull() ? nullptr : 
+                                            this->serialize_destructor_def_stmt(value["destructor"],classDefStmt);*/
+
+    return classDefStmt;
+    
 }
 
