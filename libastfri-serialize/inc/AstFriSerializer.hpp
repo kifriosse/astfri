@@ -50,6 +50,7 @@ astfri::ConstructorCallExpr* serialize_constructor_call_expr(rapidjson::Value& v
 astfri::NewExpr* serialize_new_expr(rapidjson::Value& value);
 astfri::DeleteExpr* serialize_delete_expr(rapidjson::Value& value);
 astfri::UnknownExpr* serialize_unknown_expr();
+astfri::ClassRefExpr* serialize_class_ref_expr(rapidjson::Value& value);
 astfri::LocalVarDefStmt* serialize_local_var_def_stmt(rapidjson::Value& value);
 astfri::ParamVarDefStmt* serialize_param_var_def_stmt(rapidjson::Value& value);
 astfri::MemberVarDefStmt* serialize_member_var_def_stmt(rapidjson::Value& value);
