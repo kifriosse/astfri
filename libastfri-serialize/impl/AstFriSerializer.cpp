@@ -392,11 +392,60 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
 
 astfri::LocalVarDefStmt* AstFriSerializer::serialize_local_var_def_stmt(rapidjson::Value& value){
     
-    if (!value.HasMember("name") || !value.HasMember("type") ) {
-        throw std::runtime_error("Missing fields in LocalVarDefStmt");
-    }
     astfri::Type* type = this->resolve_type(value["type"]);
-    astfri::Expr* initializer = value.HasMember("initializer") ? this->resolve_expr(value["initializer"]) : nullptr;
-    return this->statementMaker_.mk_local_var_def(value["name"].GetString(),type,initializer);
+    astfri::Expr* initializer = value["initializer"].IsNull() ?  nullptr : this->resolve_expr(value["initializer"]);
+    return this->statementMaker_.mk_local_var_def(std::move(value["name"].GetString()),type,initializer);
+}
+
+astfri::ParamVarDefStmt* AstFriSerializer::serialize_param_var_def_stmt(rapidjson::Value& value){
+    astfri::Type* type = this->resolve_type(value["type"]);
+    astfri::Expr* initializer = value["initializer"].IsNull() ?  nullptr : this->resolve_expr(value["initializer"]);
+    return this->statementMaker_.mk_param_var_def(std::move(value["name"].GetString()),type,initializer);    
+
+}
+
+astfri::GlobalVarDefStmt* AstFriSerializer::serialize_global_var_def_stmt(rapidjson::Value& value){
+    astfri::Type* type = this->resolve_type(value["type"]);
+    astfri::Expr* initializer = value["initializer"].IsNull() ?  nullptr : this->resolve_expr(value["initializer"]);
+    return this->statementMaker_.mk_global_var_def(std::move(value["name"].GetString()),type,initializer);
+}
+
+astfri::MemberVarDefStmt* AstFriSerializer::serialize_member_var_def_stmt(rapidjson::Value& value){
+    astfri::Type* type = this->resolve_type(value["type"]);
+    astfri::Expr* initializer = value["initializer"].IsNull() ?  nullptr : this->resolve_expr(value["initializer"]);
+    astfri::AccessModifier modifier = accessModMapping.find(value["acces"].GetString())->second; 
+
+    return this->statementMaker_.mk_member_var_def(std::move(value["name"].GetString()),type,initializer,modifier);
+}
+
+astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson::Value& value){
+    std::vector<astfri::ParamVarDefStmt*> params ;
+
+    for (auto& param : value["parameters"].GetArray()){
+        params.push_back(this->serialize_param_var_def_stmt(param));
+    }
+
+    astfri::Type* returnType = this->resolve_type(value["return_type"]); 
+    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+
+    return this->statementMaker_.mk_function_def(std::move(value["name"].GetString()),std::move(params),returnType,body);
+}
+
+astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner=nullptr){
+    astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
+    astfri::AccessModifier accessMod = accessModMapping.find(value["acces"].GetString())->second;
+    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod);
+}
+
+astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value& value){
+
+    return this->statementMaker_.mk_generic_param(value["constraint"].IsNull() ? std::move("") : 
+                                                    std::move(value["constraint"].GetString()),
+                                                    std::move(value["name"].GetString()));
+}
+
+astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Value& value){
+
+    return this->statementMaker_.mk_class_def();
 }
 

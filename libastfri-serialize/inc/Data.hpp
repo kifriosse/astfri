@@ -68,6 +68,9 @@ inline std::unordered_map<std::string,Types> strToTypeMapping={{"Int",IntType},{
 
 }
 
+inline std::unordered_map<std::string,astfri::AccessModifier> accessModMapping = {{"private",astfri::AccessModifier::Private},
+{"public",astfri::AccessModifier::Public},{"protected",astfri::AccessModifier::Protected},{"internal",astfri::AccessModifier::Internal}};
+
 
 
 #endif
