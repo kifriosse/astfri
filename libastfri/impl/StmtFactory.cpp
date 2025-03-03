@@ -1,4 +1,5 @@
 #include <libastfri/inc/StmtFactory.hpp>
+#include <libastfri/inc/TypeFactory.hpp>
 
 namespace astfri
 {
@@ -68,7 +69,7 @@ GlobalVarDefStmt* StmtFactory::mk_global_var_def(
 
 DefStmt* StmtFactory::mk_def()
 {
-    return details::emplace_get<DefStmt>(stmts_);
+    return details::emplace_get<DefStmt>(stmts_, std::vector<VarDefStmt*>{});
 }
 
 DefStmt* StmtFactory::mk_def(std::vector<VarDefStmt*> defs)
@@ -78,7 +79,13 @@ DefStmt* StmtFactory::mk_def(std::vector<VarDefStmt*> defs)
 
 FunctionDefStmt* StmtFactory::mk_function_def()
 {
-    return details::emplace_get<FunctionDefStmt>(stmts_);
+    return details::emplace_get<FunctionDefStmt>(
+        stmts_,
+        "",
+        std::vector<ParamVarDefStmt*>{},
+        TypeFactory::get_instance().mk_unknown(),
+        nullptr
+    );
 }
 
 FunctionDefStmt* StmtFactory::mk_function_def(
@@ -108,7 +115,13 @@ MethodDefStmt* StmtFactory::mk_method_def(
 
 ClassDefStmt* StmtFactory::mk_class_def()
 {
-    return details::emplace_get<ClassDefStmt>(stmts_);
+    return details::emplace_get<ClassDefStmt>(
+        stmts_,
+        "",
+        std::vector<MemberVarDefStmt*>{},
+        std::vector<MethodDefStmt*>{},
+        std::vector<GenericParam*>{}
+    );
 }
 
 ClassDefStmt* StmtFactory::mk_class_def(
@@ -129,7 +142,14 @@ ClassDefStmt* StmtFactory::mk_class_def(
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def()
 {
-    return details::emplace_get<ConstructorDefStmt>(stmts_);
+    return details::emplace_get<ConstructorDefStmt>(
+        stmts_,
+        nullptr,
+        std::vector<ParamVarDefStmt*>{},
+        std::vector<BaseInitializerStmt*>{},
+        nullptr,
+        AccessModifier::Public
+    );
 }
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def(
@@ -167,6 +187,7 @@ DestructorDefStmt* StmtFactory::mk_destructor_def(
     CompoundStmt* body
 )
 {
+
     return details::emplace_get<DestructorDefStmt>(stmts_, owner, body);
 }
 
@@ -244,7 +265,12 @@ UnknownStmt* StmtFactory::mk_uknown()
 
 TranslationUnit* StmtFactory::mk_translation_unit()
 {
-    return details::emplace_get<TranslationUnit>(stmts_);
+    return details::emplace_get<TranslationUnit>(
+        stmts_,
+        std::vector<ClassDefStmt*>{},
+        std::vector<FunctionDefStmt*>{},
+        std::vector<GlobalVarDefStmt*>{}
+    );
 }
 
 TranslationUnit* StmtFactory::mk_translation_unit(

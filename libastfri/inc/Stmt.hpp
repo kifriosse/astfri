@@ -110,9 +110,8 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
  */
 struct DefStmt : Stmt, details::MkVisitable<DefStmt>
 {
-    std::vector<VarDefStmt*> defs_ {};
+    std::vector<VarDefStmt*> defs_;
 
-    DefStmt() = default;
     explicit DefStmt(std::vector<VarDefStmt*> defs);
 };
 
@@ -121,12 +120,10 @@ struct DefStmt : Stmt, details::MkVisitable<DefStmt>
  */
 struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
 {
-    std::string name_ {};
-    std::vector<ParamVarDefStmt*> params_ {};
-    Type* retType_ {nullptr};
-    CompoundStmt* body_ {nullptr};
-
-    FunctionDefStmt() = default;
+    std::string name_;
+    std::vector<ParamVarDefStmt*> params_;
+    Type* retType_;
+    CompoundStmt* body_;
 
     FunctionDefStmt(
         std::string name,
@@ -168,13 +165,11 @@ struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
  */
 struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
 {
-    ClassDefStmt* owner_ {nullptr};
-    std::vector<ParamVarDefStmt*> params_ {};
-    std::vector<BaseInitializerStmt*> baseInit_ {};
-    CompoundStmt* body_ {nullptr};
-    AccessModifier access_ {AccessModifier::Public};
-
-    ConstructorDefStmt() = default;
+    ClassDefStmt* owner_;
+    std::vector<ParamVarDefStmt*> params_;
+    std::vector<BaseInitializerStmt*> baseInit_;
+    CompoundStmt* body_;
+    AccessModifier access_;
 
     ConstructorDefStmt(
         ClassDefStmt* owner,
@@ -213,12 +208,10 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
  */
 struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
 {
-    std::string name_ {};
-    std::vector<MemberVarDefStmt*> vars_ {};
-    std::vector<MethodDefStmt*> methods_ {};
-    std::vector<GenericParam*> tparams_ {};
-
-    ClassDefStmt() = default;
+    std::string name_;
+    std::vector<MemberVarDefStmt*> vars_;
+    std::vector<MethodDefStmt*> methods_;
+    std::vector<GenericParam*> tparams_;
 
     ClassDefStmt(
         std::string name,
@@ -352,11 +345,9 @@ struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>
  */
 struct TranslationUnit : Stmt, details::MkVisitable<TranslationUnit>
 {
-    std::vector<ClassDefStmt*> classes_ {};
-    std::vector<FunctionDefStmt*> functions_ {};
-    std::vector<GlobalVarDefStmt*> globals_ {};
-
-    TranslationUnit() = default;
+    std::vector<ClassDefStmt*> classes_;
+    std::vector<FunctionDefStmt*> functions_;
+    std::vector<GlobalVarDefStmt*> globals_;
 
     TranslationUnit(
         std::vector<ClassDefStmt*> classes,
