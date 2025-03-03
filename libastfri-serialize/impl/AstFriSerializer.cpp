@@ -34,17 +34,23 @@ astfri::IVisitable* AstFriSerializer::serialize(std::string filePath)
     }
 
     
-
-    auto itExpr = astfri_serialize::strToExprMapping.find(document_["node"].GetString());
+    //first try to find node type between statements
+    auto itStmt = astfri_serialize::strToStmtMapping.find(document_["node"].GetString());
     
-    if (itExpr == astfri_serialize::strToExprMapping.end()) {
-        auto itStmt = astfri_serialize::strToStmtMapping.find(document_["node"].GetString());
+    //if node wasnt found among statements,try to resolve type among expressions and lastly among types
+    if (itStmt == astfri_serialize::strToStmtMapping.end()) {
+        auto itExpr = astfri_serialize::strToExprMapping.find(document_["node"].GetString());
 
-        if (itStmt == astfri_serialize::strToStmtMapping.end()) throw std::runtime_error("Invalid node type");
-        //return this->resolveStmt(this->document_);
+        if (itExpr == astfri_serialize::strToExprMapping.end()) {
+            auto itType = astfri_serialize::strToTypeMapping.find(document_["node"].GetString());
+            // if node name isnt either between expression and types throw exception
+            if(itType == astfri_serialize::strToTypeMapping.end()) {throw std::runtime_error("Invalide node type");}
+            return this->resolve_type(document_);
+        }
+        return this->resolve_expr(document_);
     }
 
-    return this->resolve_expr(document_);
+    return this->resolve_stmt(document_);
 
     
 
@@ -329,10 +335,11 @@ astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
 }
 
 astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
+    std::string name = value["node"].GetString();
     auto it = astfri_serialize::strToStmtMapping.find(value["node"].GetString());
     
     if (it == astfri_serialize::strToStmtMapping.end()) {
-        throw std::runtime_error("Invalid node type in expression");
+        throw std::runtime_error("Invalid node type");
     }
 
     switch(it->second){
@@ -433,7 +440,7 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
 
 astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
-    astfri::AccessModifier accessMod = accessModMapping.find(value["acces"].GetString())->second;
+    astfri::AccessModifier accessMod = accessModMapping.find(value["access"].GetString())->second;
     return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod);
 }
 

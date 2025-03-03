@@ -40,7 +40,7 @@ inline    std::unordered_map<std::string,ExprNodeType> strToExprMapping={
 inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVarDefStmt",LocalVarDefStmt},
     {"ParamVarDefStmt",ParamVarDefStmt},{"MemberVarDefStmt",MemberVarDefStmt},{"GlobalVarDefStmt",GlobalVarDefStmt},
     {"FunctionDefStmt",FunctionDefStmt},{"MethodDefStmt",MethodDefStmt},
-    {"ClassDefStmt",ClassDefStmt},{"CompoundStmt",CompoundStmt},{"ReturnStmt",ReturnStmt},{"ExprStmt",ExprStmt},
+    {"ClassDefStmt",ClassDefStmt},{"CompoundStmt",CompoundStmt},{"ReturnStmt",ReturnStmt},{"ExpressionStmt",ExprStmt},
     {"IfStmt",IfStmt},{"CaseStmt",CaseStmt},{"SwitchStmt",SwitchStmt},{"WhileStmt",WhileStmt},{"DoWhileStmt",DoWhileStmt},
     {"ForStmt",ForStmt},{"ThrowStmt",ThrowStmt},{"UnknownStmt",UnknownStmt},{"TranslationUnit",TranslationUnit},{"GenericParam",GenericParam},
     {"DefStmt",DefStmt},{"ConstructorDefStmt",ConstructorDefStmt},{"DestructorDefStmt",DestructorDefStmt},{"BaseInitializerStmt",BaseInitializerStmt}}; 
