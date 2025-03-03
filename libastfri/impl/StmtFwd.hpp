@@ -20,6 +20,7 @@ struct ReturnStmt;
 struct ExprStmt;
 struct IfStmt;
 struct CaseStmt;
+struct DefaultCaseStmt;
 struct SwitchStmt;
 struct LoopStmt;
 struct WhileStmt;

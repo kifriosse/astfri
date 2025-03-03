@@ -264,14 +264,31 @@ struct IfStmt : Stmt, details::MkVisitable<IfStmt>
 };
 
 /**
- * @brief TODO
+ * @brief Base for case options in switch statement
  */
-struct CaseStmt : Stmt, details::MkVisitable<CaseStmt>
+struct CaseBaseStmt : Stmt
 {
-    std::vector<Expr*> exprs_;
     Stmt* body_;
 
+    explicit CaseBaseStmt(Stmt* body);
+};
+
+/**
+ * @brief Case option in switch statement
+ */
+struct CaseStmt : CaseBaseStmt, details::MkVisitable<CaseStmt>
+{
+    std::vector<Expr*> exprs_;
+
     CaseStmt(std::vector<Expr*> exprs, Stmt* body);
+};
+
+/**
+ * @brief Default option in switch statement
+ */
+struct DefaultCaseStmt : CaseBaseStmt, details::MkVisitable<DefaultCaseStmt>
+{
+    explicit DefaultCaseStmt(Stmt* body);
 };
 
 /**
@@ -280,9 +297,9 @@ struct CaseStmt : Stmt, details::MkVisitable<CaseStmt>
 struct SwitchStmt : Stmt, details::MkVisitable<SwitchStmt>
 {
     Expr* expr_;
-    std::vector<CaseStmt*> cases_;
+    std::vector<CaseBaseStmt*> cases_;
 
-    SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases);
+    SwitchStmt(Expr* expr, std::vector<CaseBaseStmt*> cases);
 };
 
 /**

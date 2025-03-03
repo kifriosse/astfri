@@ -241,7 +241,12 @@ CaseStmt* StmtFactory::mk_case(std::vector<Expr*> exprs, Stmt* body)
     );
 }
 
-SwitchStmt* StmtFactory::mk_switch(Expr* expr, std::vector<CaseStmt*> cases)
+DefaultCaseStmt* StmtFactory::mk_default_case(Stmt* body)
+{
+    return details::emplace_get<DefaultCaseStmt>(stmts_, body);
+}
+
+SwitchStmt* StmtFactory::mk_switch(Expr* expr, std::vector<CaseBaseStmt*> cases)
 {
     return details::emplace_get<SwitchStmt>(stmts_, expr, std::move(cases));
 }

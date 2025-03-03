@@ -148,12 +148,17 @@ IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
 }
 
 CaseStmt::CaseStmt(std::vector<Expr*> exprs, Stmt* body) :
-    exprs_(std::move(exprs)),
-    body_(body)
+    CaseBaseStmt(body),
+    exprs_(std::move(exprs))
 {
 }
 
-SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases) :
+DefaultCaseStmt::DefaultCaseStmt(Stmt* body) :
+    CaseBaseStmt(body)
+{
+}
+
+SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseBaseStmt*> cases) :
     expr_(expr),
     cases_(std::move(cases))
 {

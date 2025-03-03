@@ -53,6 +53,7 @@ struct IVisitor
     virtual void visit (ExprStmt const& stmt)            = 0;
     virtual void visit (IfStmt const& stmt)              = 0;
     virtual void visit (CaseStmt const& stmt)            = 0;
+    virtual void visit (DefaultCaseStmt const& stmt)     = 0;
     virtual void visit (SwitchStmt const& stmt)          = 0;
     virtual void visit (WhileStmt const& stmt)           = 0;
     virtual void visit (DoWhileStmt const& stmt)         = 0;
@@ -242,6 +243,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit (CaseStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit (DefaultCaseStmt const& /*stmt*/) override
     {
     }
 
