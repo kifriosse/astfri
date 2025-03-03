@@ -4,8 +4,7 @@ find_package(TreeSitterJava REQUIRED)
 add_library(astfri-java SHARED dummy.cpp
                                 NodeMapper.cpp
                                 NodeGetter.cpp
-                                TreeMaker.cpp
-                                Transformer.cpp)
+                                TreeMaker.cpp)
 
 target_compile_options(astfri-java PRIVATE -Wall -Wextra -Wpedantic)
 
