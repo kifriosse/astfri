@@ -147,8 +147,8 @@ IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
 {
 }
 
-CaseStmt::CaseStmt(Expr* expr, Stmt* body) :
-    expr_(expr),
+CaseStmt::CaseStmt(std::vector<Expr*> exprs, Stmt* body) :
+    exprs_(std::move(exprs)),
     body_(body)
 {
 }

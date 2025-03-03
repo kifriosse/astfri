@@ -81,6 +81,7 @@ public:
     ExprStmt* mk_expr (Expr* expr);
     IfStmt* mk_if (Expr* cond, Stmt* iftrue, Stmt* iffalse);
     CaseStmt* mk_case (Expr* expr, Stmt* body);
+    CaseStmt* mk_case (std::vector<Expr*> exprs, Stmt* body);
     SwitchStmt* mk_switch (Expr* expr, std::vector<CaseStmt*> cases);
     WhileStmt* mk_while (Expr* cond, CompoundStmt* body);
     DoWhileStmt* mk_do_while (Expr* cond, CompoundStmt* body);

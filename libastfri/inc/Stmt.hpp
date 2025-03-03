@@ -268,10 +268,10 @@ struct IfStmt : Stmt, details::MkVisitable<IfStmt>
  */
 struct CaseStmt : Stmt, details::MkVisitable<CaseStmt>
 {
-    Expr* expr_;
+    std::vector<Expr*> exprs_;
     Stmt* body_;
 
-    CaseStmt(Expr* expr, Stmt* body);
+    CaseStmt(std::vector<Expr*> exprs, Stmt* body);
 };
 
 /**

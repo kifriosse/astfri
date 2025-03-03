@@ -225,7 +225,20 @@ IfStmt* StmtFactory::mk_if(Expr* cond, Stmt* iftrue, Stmt* iffalse)
 
 CaseStmt* StmtFactory::mk_case(Expr* expr, Stmt* body)
 {
-    return details::emplace_get<CaseStmt>(stmts_, expr, body);
+    return details::emplace_get<CaseStmt>(
+        stmts_,
+        std::vector<Expr*>{expr},
+        body
+    );
+}
+
+CaseStmt* StmtFactory::mk_case(std::vector<Expr*> exprs, Stmt* body)
+{
+    return details::emplace_get<CaseStmt>(
+        stmts_,
+        std::move(exprs),
+        body
+    );
 }
 
 SwitchStmt* StmtFactory::mk_switch(Expr* expr, std::vector<CaseStmt*> cases)
