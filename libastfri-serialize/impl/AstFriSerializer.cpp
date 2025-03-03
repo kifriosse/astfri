@@ -88,7 +88,7 @@ astfri::BoolLiteralExpr* AstFriSerializer::serialize_bool_lit_expr(rapidjson::Va
     
     return expressionMaker_.mk_bool_literal(value["value"].GetBool());
 }
-astfri::NullLiteralExpr* AstFriSerializer::serialize_null_lit_expr(rapidjson::Value& value)
+astfri::NullLiteralExpr* AstFriSerializer::serialize_null_lit_expr()
 {
    
     return expressionMaker_.mk_null_literal();
@@ -202,14 +202,14 @@ astfri::MethodCallExpr* AstFriSerializer::serialize_method_call_expr(rapidjson::
 //TODO
 astfri::LambdaExpr* AstFriSerializer::serialize_lambda_expr(rapidjson::Value& value){
     std::vector<astfri::ParamVarDefStmt*> params;
-    /*
-    for (auto& param : val["params"].GetArray()){
-        params.push_back(this->serializeParamVarDefStmt(param));
+    
+    for (auto& param : value["params"].GetArray()){
+        params.push_back(this->serialize_param_var_def_stmt(param));
     }
-    astfri::Stmt* body = this->resolveStmt(val["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
-   return this->expressionMaker_.mk_lambda_expr(std::move(params),body);*/
-   return this->expressionMaker_.mk_lambda_expr(params,nullptr);
+   return this->expressionMaker_.mk_lambda_expr(std::move(params),body);
+   
 }
 
 astfri::ThisExpr* AstFriSerializer::serialize_this_expr(){
@@ -234,7 +234,7 @@ astfri::NewExpr* AstFriSerializer::serialize_new_expr(rapidjson::Value& value){
 }
 
 astfri::DeleteExpr* AstFriSerializer::serialize_delete_expr(rapidjson::Value& value){
-    this->expressionMaker_.mk_delete(this->resolve_expr(value["expression"]));
+    return this->expressionMaker_.mk_delete(this->resolve_expr(value["expression"]));
 }
 
 
@@ -259,7 +259,7 @@ astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
         case astfri_serialize::BoolLiteralExpr:
             return this->serialize_bool_lit_expr(value);
         case astfri_serialize::NullLiteralExpr:
-            return this->serialize_null_lit_expr(value);
+            return this->serialize_null_lit_expr();
         case astfri_serialize::IfExpr:
             return this->serialize_if_expr(value);
         case astfri_serialize::BinOpExpr:
@@ -296,7 +296,7 @@ astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
             return this->serialize_constructor_call_expr(value);
 
     }
-
+    return expressionMaker_.mk_unknown();
 }
 astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
 {
@@ -325,7 +325,7 @@ astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
             //return this->typeMaker_.mk_dynamic();
             return nullptr;
     }
-    
+    return this->typeMaker_.mk_unknown();
 }
 
 astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
@@ -373,7 +373,7 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
         case astfri_serialize::ThrowStmt:
             return this->serialize_throw_stmt(value);
         case astfri_serialize::UnknownStmt:
-            return this->serialize_unknown_stmt(value);
+            return this->serialize_unknown_stmt();
         case astfri_serialize::TranslationUnit:
             return this->serialize_translation_unit(value);
         case astfri_serialize::DefStmt:
@@ -387,7 +387,7 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
 
     }
 
-
+    return this->statementMaker_.mk_uknown();
 }
 
 astfri::LocalVarDefStmt* AstFriSerializer::serialize_local_var_def_stmt(rapidjson::Value& value){
@@ -431,7 +431,7 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
     return this->statementMaker_.mk_function_def(std::move(value["name"].GetString()),std::move(params),returnType,body);
 }
 
-astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner=nullptr){
+astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
     astfri::AccessModifier accessMod = accessModMapping.find(value["acces"].GetString())->second;
     return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod);
@@ -479,3 +479,145 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
     
 }
 
+astfri::CompoundStmt* AstFriSerializer::serialize_compound_stmt(rapidjson::Value& value){
+    std::vector<astfri::Stmt*> statements;
+
+    for(auto& stmt : value["statements"].GetArray()){
+        statements.push_back(this->resolve_stmt(stmt));
+    }
+    return this->statementMaker_.mk_compound(std::move(statements)); 
+}
+
+astfri::ReturnStmt* AstFriSerializer::serialize_return_stmt(rapidjson::Value& value){
+    
+   return  this->statementMaker_.mk_return(value["value"].IsNull() ? nullptr : this->resolve_expr(value["value"]));
+}
+
+astfri::ExprStmt* AstFriSerializer::serialize_expr_stmt(rapidjson::Value& value){
+   return  this->statementMaker_.mk_expr(this->resolve_expr(value["expression"]));
+
+}
+
+astfri::IfStmt* AstFriSerializer::serialize_if_stmt(rapidjson::Value& value){
+    astfri::Expr* cond = this->resolve_expr(value["condition"]);
+    astfri::Stmt* ifTrue = this->resolve_stmt(value["ifTrue"]);
+    astfri::Stmt* ifFalse = value["ifFalse"].IsNull() ? nullptr : this->resolve_stmt(value["ifFalse"]);
+    
+    return this->statementMaker_.mk_if(cond,ifTrue,ifFalse);
+}
+
+astfri::SwitchStmt* AstFriSerializer::serialize_switch_stmt(rapidjson::Value& value){
+    astfri::Expr* swichEntry = this->resolve_expr(value["entry"]);
+    std::vector<astfri::CaseStmt*> cases;
+
+    for (auto& caze : value["cases"].GetArray()){
+        cases.push_back(this->serialize_case_stmt(caze));
+    }
+
+    
+    return this->statementMaker_.mk_switch(swichEntry,std::move(cases));
+}
+
+astfri::CaseStmt* AstFriSerializer::serialize_case_stmt(rapidjson::Value& value){
+    
+    std::vector<astfri::Expr*> expressions;
+    for(auto& expr : value["expressions"].GetArray()){
+        expressions.push_back(this->resolve_expr(expr));
+    }
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
+
+    //whole vector will be sent to mk_case method after update
+    return this->statementMaker_.mk_case(expressions[0],body);
+}
+
+astfri::WhileStmt* AstFriSerializer::serialize_while_stmt(rapidjson::Value& value){
+    astfri::Expr* condition = this->resolve_expr(value["condition"]);
+    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+
+    return this->statementMaker_.mk_while(condition,body);
+}
+
+astfri::DoWhileStmt* AstFriSerializer::serialize_do_while_stmt(rapidjson::Value& value){
+    astfri::Expr* condition = this->resolve_expr(value["condition"]);
+    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+
+    return this->statementMaker_.mk_do_while(condition,body);    
+}
+
+astfri::ForStmt* AstFriSerializer::serialize_for_stmt(rapidjson::Value& value){
+    astfri::Stmt* init = value["init"].IsNull() ? nullptr : this->resolve_stmt(value["init"]);
+    astfri::Expr* condition = value["condition"].IsNull() ? nullptr : this->resolve_expr(value["condition"]);
+    astfri::Stmt* step = value["step"].IsNull() ? nullptr : this->resolve_stmt(value["step"]);
+    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+
+    return this->statementMaker_.mk_for(init,condition,step,body);
+}
+
+astfri::ThrowStmt* AstFriSerializer::serialize_throw_stmt(rapidjson::Value& value){
+    return this->statementMaker_.mk_throw(this->resolve_expr(value["expression"]));
+}
+
+astfri::UnknownStmt* AstFriSerializer::serialize_unknown_stmt(){
+    return this->statementMaker_.mk_uknown();
+}
+
+astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson::Value& value){
+    std::vector<astfri::ClassDefStmt*> classes;
+    for (auto& classDef : value["classes"].GetArray()){
+        classes.push_back(this->serialize_class_def_stmt(classDef));
+    }
+
+    std::vector<astfri::FunctionDefStmt*> functions;
+    for (auto& function : value["functions"].GetArray()){
+        functions.push_back(this->serialize_function_def_stmt(function));
+    }
+
+    std::vector<astfri::GlobalVarDefStmt*> globals;
+    for (auto& global : value["globals"].GetArray()){
+        globals.push_back(this->serialize_global_var_def_stmt(global));
+    }
+
+    return this->statementMaker_.mk_translation_unit(std::move(classes),std::move(functions),std::move(globals));
+}
+
+
+
+astfri::ConstructorDefStmt* AstFriSerializer::serialize_constructor_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
+    std::vector<astfri::ParamVarDefStmt*> params;
+    for (auto& param : value["parameters"].GetArray()){
+        params.push_back(this->serialize_param_var_def_stmt(param));
+    }
+
+    std::vector<astfri::BaseInitializerStmt*> initStmts;
+    for(auto& baseInitStmt : value["base_initializers"].GetArray()){
+        initStmts.push_back(this->serialize_base_initializer_stmt(baseInitStmt));
+    }
+    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::AccessModifier accessModifier = accessModMapping.find(value["access"].GetString())->second;
+
+    return this->statementMaker_.mk_constructor_def(owner,std::move(params),std::move(initStmts),body,accessModifier);
+}
+
+astfri::DestructorDefStmt* AstFriSerializer::serialize_destructor_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
+
+    return this->statementMaker_.mk_destructor_def(owner,this->serialize_compound_stmt(value["body"]));
+}
+
+astfri::DefStmt* AstFriSerializer::serialize_def_stmt(rapidjson::Value& value){
+    std::vector<astfri::VarDefStmt*> definitions;
+    for(auto& def : value["definitions"].GetArray()){
+        //?
+        definitions.push_back(dynamic_cast<astfri::VarDefStmt*>(this->resolve_stmt(def)));  
+    }
+
+    return this->statementMaker_.mk_def(std::move(definitions));
+}
+
+astfri::BaseInitializerStmt* AstFriSerializer::serialize_base_initializer_stmt(rapidjson::Value& value){
+    std::vector<astfri::Expr*> arguments;
+    for(auto& arg : value["arguments"].GetArray()){
+        arguments.push_back(this->resolve_expr(arg));
+    }
+    
+    return this->statementMaker_.mak_base_initializer(value["base"].GetString(),std::move(arguments));
+}

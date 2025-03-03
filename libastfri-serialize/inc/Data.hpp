@@ -11,7 +11,7 @@ namespace astfri_serialize{
 
 enum  ExprNodeType{
     IntLiteralExpr,FloatLiteralExpr,CharLiteralExpr,StringLiteralExpr,BoolLiteralExpr,NullLiteralExpr,IfExpr,
-    BinOpExpr,UnaryOpExpr,AssignExpr,CompoundAssignExpr,RefExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
+    BinOpExpr,UnaryOpExpr,AssignExpr,CompoundAssignExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
     GlobalVarRefExpr,FunctionCallExpr,MethodCallExpr,LambdaExpr,ThisExpr,UnknownExpr,ConstructorCallExpr,NewExpr,
     DeleteExpr};
     
