@@ -12,6 +12,8 @@ in following example argument passed to serialise method is second argument of p
 ```cpp
 astfri::IVisitable* node = serializer.serialize(argv[1]);
 ```
+Look at whole example [here](https://github.com/kifriosse/astfri/blob/dev-jm/libastfri-serialize/examples/TestWithTextOutput.cpp)
+
 ### JSON representation of ASTFRI nodes
 [see](https://github.com/kifriosse/astfri/blob/dev-jm/libastfri-serialize/docs/Template-JSON-representation-of-ASTFRI-nodes.txt)
 
