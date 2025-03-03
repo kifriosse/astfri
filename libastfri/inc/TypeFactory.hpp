@@ -23,6 +23,7 @@ public:
     BoolType* mk_bool ();
     VoidType* mk_void ();
     UnknownType* mk_unknown ();
+    DynamicType* mk_dynamic ();
     IndirectionType* mk_indirect (Type* type);
     UserType* mk_user (std::string const& name);
 

@@ -40,6 +40,11 @@ UnknownType* TypeFactory::mk_unknown()
     return &unknown_;
 }
 
+DynamicType* TypeFactory::mk_dynamic()
+{
+    return &dynamic_;
+}
+
 IndirectionType* TypeFactory::mk_indirect(Type* type)
 {
     return details::emplace_get<IndirectionType>(type, indirect_, type);
