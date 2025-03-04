@@ -351,6 +351,20 @@ struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
 };
 
 /**
+ * @brief Break statement used to terminate a loop
+ */
+struct BreakStmt : Stmt, details::MkVisitable<BreakStmt>
+{
+};
+
+/**
+ * @brief Continue statement used to skip rest of a loop
+ */
+struct ContinueStmt : Stmt, details::MkVisitable<ContinueStmt>
+{
+};
+
+/**
  * @brief TODO
  */
 struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>

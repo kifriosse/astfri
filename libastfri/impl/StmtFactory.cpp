@@ -276,6 +276,16 @@ ThrowStmt* StmtFactory::mk_throw(Expr* val)
     return details::emplace_get<ThrowStmt>(stmts_, val);
 }
 
+ContinueStmt* StmtFactory::mk_continue()
+{
+    return &continue_;
+}
+
+BreakStmt* StmtFactory::mk_break()
+{
+    return &break_;
+}
+
 UnknownStmt* StmtFactory::mk_uknown()
 {
     return &unknown_;

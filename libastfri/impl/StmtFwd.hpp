@@ -27,6 +27,8 @@ struct WhileStmt;
 struct DoWhileStmt;
 struct ForStmt;
 struct ThrowStmt;
+struct ContinueStmt;
+struct BreakStmt;
 struct UnknownStmt;
 struct TranslationUnit;
 

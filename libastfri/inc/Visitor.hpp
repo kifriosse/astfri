@@ -7,6 +7,7 @@
 
 namespace astfri
 {
+
 /**
  * @brief TODO
  */
@@ -72,8 +73,10 @@ struct IVisitor
     virtual void visit (DestructorDefStmt const& stmt)   = 0;
     virtual void visit (GenericParam const& stmt)        = 0;
     virtual void visit (ClassDefStmt const& stmt)        = 0;
+    virtual void visit (ContinueStmt const& stmt)        = 0;
+    virtual void visit (BreakStmt const& stmt)           = 0;
 
-    virtual ~IVisitor()                                  = default;
+    virtual ~IVisitor() = default;
 };
 
 /**
@@ -321,7 +324,16 @@ struct VisitorAdapter : IVisitor
     void visit (ClassDefStmt const& /*stmt*/) override
     {
     }
+
+    void visit (ContinueStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit (BreakStmt const& /*stmt*/) override
+    {
+    }
 };
+
 } // namespace astfri
 
 #endif

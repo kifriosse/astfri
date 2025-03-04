@@ -8,6 +8,7 @@
 
 namespace astfri
 {
+
 /**
  * @brief TODO
  */
@@ -88,6 +89,8 @@ public:
     DoWhileStmt* mk_do_while (Expr* cond, CompoundStmt* body);
     ForStmt* mk_for (Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
     ThrowStmt* mk_throw (Expr* val);
+    ContinueStmt* mk_continue ();
+    BreakStmt* mk_break();
     UnknownStmt* mk_uknown ();
     TranslationUnit* mk_translation_unit ();
     TranslationUnit* mk_translation_unit (
@@ -98,9 +101,11 @@ public:
 
 private:
     std::vector<std::unique_ptr<Stmt>> stmts_;
-
+    ContinueStmt continue_;
+    BreakStmt break_;
     UnknownStmt unknown_;
 };
+
 } // namespace astfri
 
 #endif
