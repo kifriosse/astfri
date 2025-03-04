@@ -79,6 +79,12 @@ NodeMapper::NodeMapper() : typeFactory(astfri::TypeFactory::get_instance()),
                                 {"--", astfri::UnaryOpType::PreDecrement},
                                 {"--", astfri::UnaryOpType::PostDecrement},
                                 {"~", astfri::UnaryOpType::BitFlip},
+                            }),
+                            modMap({
+                                {"public", astfri::AccessModifier::Public},
+                                {"private", astfri::AccessModifier::Private},
+                                {"protected", astfri::AccessModifier::Protected},
+                                {"internal", astfri::AccessModifier::Internal},
                             })
 {    
 }
@@ -97,6 +103,10 @@ std::map<std::string, astfri::BinOpType> NodeMapper::get_binOpMap() {
 
 std::map<std::string, astfri::UnaryOpType> NodeMapper::get_unaryOpMap() {
     return this->unaryOpMap;
+}
+
+std::map<std::string, astfri::AccessModifier> NodeMapper::get_modMap() {
+    return this->modMap;
 }
 
 std::function<astfri::Stmt*(StmtArguments)> NodeMapper::map_local_variable() {

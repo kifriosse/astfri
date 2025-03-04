@@ -95,6 +95,7 @@ private:
 
     const std::map<std::string, astfri::BinOpType> binOpMap;
     const std::map<std::string, astfri::UnaryOpType> unaryOpMap;
+    const std::map<std::string, astfri::AccessModifier> modMap;
 
 public:
     NodeMapper();
@@ -103,5 +104,6 @@ public:
     std::map<std::string, std::function<astfri::Stmt*(StmtArguments)>> get_stmtMap ();
     std::map<std::string, astfri::BinOpType> get_binOpMap ();
     std::map<std::string, astfri::UnaryOpType> get_unaryOpMap ();
+    std::map<std::string, astfri::AccessModifier> get_modMap ();
 };
 #endif // NODE_MAPPER_CLASS_HPP
