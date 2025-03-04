@@ -3,7 +3,8 @@
 
 #include <libastfri-text/inc/Exporter.hpp>
 
-struct TxtFileExporter : Exporter {
+class TxtFileExporter : public Exporter {
+public:
     TxtFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
 private:

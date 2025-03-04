@@ -4,7 +4,6 @@ add_library(astfri-text SHARED
   TextConfigurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
-  RtfFileExporter.cpp
   TxtFileExporter.cpp
 )
 

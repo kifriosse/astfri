@@ -10,13 +10,17 @@
         "UNKNOWN_WORD_STYLE":"color:",
         "ACCESS_MOD":{
             "view":"inner",
-            "public":"public",
-            "private":"private",
-            "protected":"protected",
+            "public":"verejné",
+            "private":"súkromné",
+            "protected":"chránené",
+            "attribs":"atribúty",
+            "constructors":"konštruktory",
+            "destructors":"deštruktory",
+            "methods":"operácie",
             "style":"color:#1d8348"
         },
         "DATA_TYPE":{
-            "dynamic":"dynamický typ",
+            "dynamic":"auto",
             "int":"celé číslo",
             "float":"desatinné číslo",
             "char":"znak",
@@ -36,7 +40,6 @@
         "REF_NAME_STYLE":{
             "def_ref_name_style":"color:",
             "gen_param_name_style":"color:",
-            "gen_param_constr_style":"color:",
             "class_name_style":"color:forestgreen",
             "method_name_style":"color:orange",
             "function_name_style":"color:",
@@ -69,21 +72,22 @@
     },
     "TEXT_CONFIGURATOR":{
         "STRUCT_SETTING":{
-            "show_row_num":true,
-            "show_op_br_new_line":false,
-            "show_other_exprs":true,
-            "show_class_decl":true,
-            "show_class_body":true,
+            "use_cpp_bracket":true,
+            "show_row":true,
+            "show_other_expr":true,
+            "show_class_dec":true,
+            "show_class_def":true,
+            "show_gener_par":true,
             "show_attribute":true,
-            "show_method_body":true,
-            "show_method_decl":true,
-            "show_method_defin":true,
-            "show_method_defin_inline":false,
-            "show_function_decl":true,
-            "show_function_body":true,
-            "tab_word_length":8,
-            "margin_left":6,
-            "row_num_style":"color:grey"
+            "show_meth_dec":true,
+            "show_meth_def":true,
+            "show_meth_owner":true,
+            "show_func_dec":true,
+            "show_func_def":true,
+            "show_global_par":true,
+            "tab_length":8,
+            "margin_length":6,
+            "row_style":"color:grey"
         },
         "SYSTEM_EXPR":{
             "class_word":"trieda",
@@ -98,6 +102,9 @@
             "repeat_word":"opakuj",
             "switch_word":"ak má",
             "case_word":"hodnotu",
+            "new_word":"vytvor nový",
+            "delete_word":"vymaž",
+            "pointer_word":"*",
             "STYLE":{
                 "general_style":"color:",
                 "class_word_style":"color:red",
@@ -111,10 +118,15 @@
                 "for_word_style":"color:",
                 "repeat_word_style":"color:",
                 "switch_word_style":"color:",
-                "case_word_style":"color:"
+                "case_word_style":"color:",
+                "new_word_style":"color:",
+                "delete_word_style":"color:",
+                "pointer_word_style":"color:"
             }
         },
         "OTHER_EXPR":{
+            "constructor_word":"konštruktor",
+            "destructor_word":"deštruktor",
             "method_word":"metóda",
             "function_word":"funkcia",
             "lambda_word":"lambda",
@@ -123,6 +135,8 @@
             "returns_word":"navracia",
             "STYLE":{
                 "general_style":"color:",
+                "constructor_style":"color:",
+                "destructor_style":"color:",
                 "method_word_style":"color:",
                 "function_word_style":"color:",
                 "lambda_word_style":"color:",

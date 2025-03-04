@@ -3,7 +3,7 @@
 
 #include <libastfri-text/inc/TextConfigurator.hpp>
 
-struct Exporter {
+class Exporter {
 protected:
     std::shared_ptr<TextConfigurator> config_;
     std::unique_ptr<std::stringstream> output_;
@@ -24,12 +24,15 @@ public:
     virtual void write_new_line();
     virtual void write_space();
     virtual void write_round_bracket(std::string br);
-    virtual void write_square_bracket(std::string br);
     virtual void write_curl_bracket(std::string br);
     virtual void write_unknown_word();
     virtual void write_public_word();
     virtual void write_private_word();
     virtual void write_protected_word();
+    virtual void write_attribs_word();
+    virtual void write_constrs_word();
+    virtual void write_destrs_word();
+    virtual void write_meths_word();
     virtual void write_dynamic_type();
     virtual void write_int_type();
     virtual void write_float_type();
@@ -38,7 +41,6 @@ public:
     virtual void write_void_type();
     virtual void write_user_type(std::string usertype);
     virtual void write_gen_param_name(std::string name);
-    virtual void write_gen_param_constr(std::string constraint);
     virtual void write_class_name(std::string name);
     virtual void write_method_name(std::string name);
     virtual void write_function_name(std::string name);
@@ -67,6 +69,11 @@ public:
     virtual void write_repeat_word();
     virtual void write_switch_word();
     virtual void write_case_word();
+    virtual void write_new_word();
+    virtual void write_delete_word();
+    virtual void write_pointer_word();
+    virtual void write_constr_word();
+    virtual void write_destr_word();
     virtual void write_method_word();
     virtual void write_function_word();
     virtual void write_lambda_word();

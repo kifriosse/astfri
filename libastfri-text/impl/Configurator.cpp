@@ -91,8 +91,20 @@ void Configurator::load_new_config_file() {
             if (acc.HasMember(std::move("protected")) && acc[std::move("protected")].IsString() && acc[std::move("protected")].GetStringLength() > 0) {
                 protectedWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("protected")].GetString()));
             }
+            if (acc.HasMember(std::move("attribs")) && acc[std::move("attribs")].IsString() && acc[std::move("attribs")].GetStringLength() > 0) {
+                accAtribWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("attribs")].GetString()));
+            }
+            if (acc.HasMember(std::move("constructors")) && acc[std::move("constructors")].IsString() && acc[std::move("constructors")].GetStringLength() > 0) {
+                accConstrWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("constructors")].GetString()));
+            }
+            if (acc.HasMember(std::move("destructors")) && acc[std::move("destructors")].IsString() && acc[std::move("destructors")].GetStringLength() > 0) {
+                accDestrWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("destructors")].GetString()));
+            }
+            if (acc.HasMember(std::move("methods")) && acc[std::move("methods")].IsString() && acc[std::move("methods")].GetStringLength() > 0) {
+                accMethWord_ = std::make_unique<std::stringstream>(std::move(acc[std::move("methods")].GetString()));
+            }
             if (acc.HasMember(std::move("style")) && acc[std::move("style")].IsString()) {
-                accessModStyle_ = std::make_unique<std::stringstream>(std::move(acc[std::move("style")].GetString()));
+                accStyle_ = std::make_unique<std::stringstream>(std::move(acc[std::move("style")].GetString()));
             }
         }
         if (conf.HasMember(std::move("DATA_TYPE")) && conf[std::move("DATA_TYPE")].IsObject()) {
@@ -150,9 +162,6 @@ void Configurator::load_new_config_file() {
             }
             if (ref.HasMember(std::move("gen_param_name_style")) && ref[std::move("gen_param_name_style")].IsString()) {
                 generParamNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("gen_param_name_style")].GetString()));
-            }
-            if (ref.HasMember(std::move("gen_param_constr_style")) && ref[std::move("gen_param_constr_style")].IsString()) {
-                generParamConstrStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("gen_param_constr_style")].GetString()));
             }
             if (ref.HasMember(std::move("class_name_style")) && ref[std::move("class_name_style")].IsString()) {
                 classNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("class_name_style")].GetString()));
@@ -248,8 +257,12 @@ void Configurator::set_defaults() {
     publicWord_ = std::make_unique<std::stringstream>(std::move("public"));
     privateWord_ = std::make_unique<std::stringstream>(std::move("private"));
     protectedWord_ = std::make_unique<std::stringstream>(std::move("protected"));
-    accessModStyle_ = std::make_unique<std::stringstream>();
-    dynamicWord_ = std::make_unique<std::stringstream>(std::move("dynamic"));
+    accAtribWord_ = std::make_unique<std::stringstream>(std::move("attributes"));
+    accConstrWord_ = std::make_unique<std::stringstream>(std::move("constructors"));
+    accDestrWord_ = std::make_unique<std::stringstream>(std::move("destructors"));
+    accMethWord_ = std::make_unique<std::stringstream>(std::move("methods"));
+    accStyle_ = std::make_unique<std::stringstream>();
+    dynamicWord_ = std::make_unique<std::stringstream>(std::move("auto"));
     intWord_ = std::make_unique<std::stringstream>(std::move("int"));
     floatWord_ = std::make_unique<std::stringstream>(std::move("float"));
     charWord_ = std::make_unique<std::stringstream>(std::move("char"));
@@ -265,7 +278,6 @@ void Configurator::set_defaults() {
     userTypeStyle_ = std::make_unique<std::stringstream>();
     defRefNameStyle_ = std::make_unique<std::stringstream>();
     generParamNameStyle_ = std::make_unique<std::stringstream>();
-    generParamConstrStyle_ = std::make_unique<std::stringstream>();
     classNameStyle_ = std::make_unique<std::stringstream>();
     methodNameStyle_ = std::make_unique<std::stringstream>();
     functionNameStyle_ = std::make_unique<std::stringstream>();

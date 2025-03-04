@@ -40,12 +40,12 @@ void Exporter::decrease_indentation() {
 
 void Exporter::write_indentation() {
     startedLine_ = true;
-    config_->sh_row_number() ? write_row_number() : void();
-    for (int i = 0; i < config_->get_len_left_margin(); ++i) {
+    config_->sh_row() ? write_row_number() : void();
+    for (int i = 0; i < config_->get_marg_len(); ++i) {
         write_space();
     }
     for (int i = 0; i < currentIndentation_; ++i) {
-        for (int j = 0; j < config_->get_len_tab_word(); ++j) {
+        for (int j = 0; j < config_->get_tab_len(); ++j) {
             write_space();
         }
     }
@@ -69,10 +69,6 @@ void Exporter::write_round_bracket(std::string br) {
     write_word(std::move(br));
 }
 
-void Exporter::write_square_bracket(std::string br) {
-    write_word(std::move(br));
-}
-
 void Exporter::write_curl_bracket(std::string br) {
     write_word(std::move(br));
 }
@@ -91,6 +87,22 @@ void Exporter::write_private_word() {
 
 void Exporter::write_protected_word() {
     write_word(config_->get_protected_word()->str());
+}
+
+void Exporter::write_attribs_word() {
+    write_word(config_->get_acc_atrib_word()->str());
+}
+
+void Exporter::write_constrs_word() {
+    write_word(config_->get_acc_constr_word()->str());
+}
+
+void Exporter::write_destrs_word() {
+    write_word(config_->get_acc_destr_word()->str());
+}
+
+void Exporter::write_meths_word() {
+    write_word(config_->get_acc_meth_word()->str());
 }
 
 void Exporter::write_dynamic_type() {
@@ -123,10 +135,6 @@ void Exporter::write_user_type(std::string usertype) {
 
 void Exporter::write_gen_param_name(std::string name) {
     write_word(std::move(name));
-}
-
-void Exporter::write_gen_param_constr(std::string constraint) {
-    write_word(std::move(constraint));
 }
 
 void Exporter::write_class_name(std::string name) {
@@ -239,6 +247,26 @@ void Exporter::write_switch_word() {
 
 void Exporter::write_case_word() {
     write_word(config_->get_case_word()->str());
+}
+
+void Exporter::write_new_word() {
+    write_word(config_->get_new_word()->str());
+}
+
+void Exporter::write_delete_word() {
+    write_word(config_->get_delete_word()->str());
+}
+
+void Exporter::write_pointer_word() {
+    write_word(config_->get_pointer_word()->str());
+}
+
+void Exporter::write_constr_word() {
+    write_word(config_->get_constr_word()->str());
+}
+
+void Exporter::write_destr_word() {
+    write_word(config_->get_destr_word()->str());
 }
 
 void Exporter::write_method_word() {

@@ -13,14 +13,14 @@ void TextConfigurator::load_new_config_file() {
     std::string input;
     std::cout << std::move("Chceš použiť konfiguračný súbor? [\"yes\"/...]: ");
     std::getline(std::cin, input);
-    if (input != "yes") {
+    if (input != std::move("yes")) {
         std::cout << std::move("Použijem predvolený formát.\n");
         Configurator::set_defaults();
         return;
     }
     std::cout << std::move("Chceš použiť vlastný konfiguračný súbor? [\"yes\"/...]: ");
     std::getline(std::cin, input);
-    if (input == "yes") {
+    if (input == std::move("yes")) {
         std::cout << std::move("Zadaj celú cestu ku .json súboru: ");
         std::getline(std::cin, input);
         if (!input.ends_with(std::move(".json"))) {
@@ -51,56 +51,59 @@ void TextConfigurator::load_new_config_file() {
         const rj::Value& tconf = std::move(doc[std::move("TEXT_CONFIGURATOR")]);
         if (tconf.HasMember(std::move("STRUCT_SETTING")) && tconf[std::move("STRUCT_SETTING")].IsObject()) {
             const rj::Value& sett = std::move(tconf[std::move("STRUCT_SETTING")]);
-            if (sett.HasMember(std::move("show_row_num")) && sett[std::move("show_row_num")].IsBool()) {
-                showRowNumber_ = std::move(sett[std::move("show_row_num")].GetBool());
+            if (sett.HasMember(std::move("use_cpp_bracket")) && sett[std::move("use_cpp_bracket")].IsBool()) {
+                useCppBr_ = std::move(sett[std::move("use_cpp_bracket")].GetBool());
             }
-            if (sett.HasMember(std::move("show_op_br_new_line")) && sett[std::move("show_op_br_new_line")].IsBool()) {
-                showOpeningBracketOnNewLine_ = std::move(sett[std::move("show_op_br_new_line")].GetBool());
+            if (sett.HasMember(std::move("show_row")) && sett[std::move("show_row")].IsBool()) {
+                shRow_ = std::move(sett[std::move("show_row")].GetBool());
             }
-            if (sett.HasMember(std::move("show_other_exprs")) && sett[std::move("show_other_exprs")].IsBool()) {
-                showOtherExprs_ = std::move(sett[std::move("show_other_exprs")].GetBool());
+            if (sett.HasMember(std::move("show_other_expr")) && sett[std::move("show_other_expr")].IsBool()) {
+                shOtherExpr_ = std::move(sett[std::move("show_other_expr")].GetBool());
             }
-            if (sett.HasMember(std::move("show_class_decl")) && sett[std::move("show_class_decl")].IsBool()) {
-                showClassDecl_ = std::move(sett[std::move("show_class_decl")].GetBool());
+            if (sett.HasMember(std::move("show_class_dec")) && sett[std::move("show_class_dec")].IsBool()) {
+                shClassDec_ = std::move(sett[std::move("show_class_dec")].GetBool());
             }
-            if (sett.HasMember(std::move("show_class_body")) && sett[std::move("show_class_body")].IsBool()) {
-                showClassBody_ = std::move(sett[std::move("show_class_body")].GetBool());
+            if (sett.HasMember(std::move("show_class_def")) && sett[std::move("show_class_def")].IsBool()) {
+                shClassDef_ = std::move(sett[std::move("show_class_def")].GetBool());
+            }
+            if (sett.HasMember(std::move("show_gener_par")) && sett[std::move("show_gener_par")].IsBool()) {
+                shGenerPar_ = std::move(sett[std::move("show_gener_par")].GetBool());
             }
             if (sett.HasMember(std::move("show_attribute")) && sett[std::move("show_attribute")].IsBool()) {
-                showAttribute_ = std::move(sett[std::move("show_attribute")].GetBool());
+                shAttrib_ = std::move(sett[std::move("show_attribute")].GetBool());
             }
-            if (sett.HasMember(std::move("show_method_body")) && sett[std::move("show_method_body")].IsBool()) {
-                showMethodBody_ = std::move(sett[std::move("show_method_body")].GetBool());
+            if (sett.HasMember(std::move("show_meth_dec")) && sett[std::move("show_meth_dec")].IsBool()) {
+                shMethDec_ = std::move(sett[std::move("show_meth_dec")].GetBool());
             }
-            if (sett.HasMember(std::move("show_method_decl")) && sett[std::move("show_method_decl")].IsBool()) {
-                showMethodDecl_ = std::move(sett[std::move("show_method_decl")].GetBool());
+            if (sett.HasMember(std::move("show_meth_def")) && sett[std::move("show_meth_def")].IsBool()) {
+                shMethDef_ = std::move(sett[std::move("show_meth_def")].GetBool());
             }
-            if (sett.HasMember(std::move("show_method_defin")) && sett[std::move("show_method_defin")].IsBool()) {
-                showMethodDefin_ = std::move(sett[std::move("show_method_defin")].GetBool());
+            if (sett.HasMember(std::move("show_meth_owner")) && sett[std::move("show_meth_owner")].IsBool()) {
+                shMethOwner_ = std::move(sett[std::move("show_meth_owner")].GetBool());
             }
-            if (sett.HasMember(std::move("show_method_defin_inline")) && sett[std::move("show_method_defin_inline")].IsBool()) {
-                showMethodDefinInline_ = std::move(sett[std::move("show_method_defin_inline")].GetBool());
+            if (sett.HasMember(std::move("show_func_dec")) && sett[std::move("show_func_dec")].IsBool()) {
+                shFuncDec_ = std::move(sett[std::move("show_func_dec")].GetBool());
             }
-            if (sett.HasMember(std::move("show_function_decl")) && sett[std::move("show_function_decl")].IsBool()) {
-                showFunctionDecl_ = std::move(sett[std::move("show_function_decl")].GetBool());
+            if (sett.HasMember(std::move("show_func_def")) && sett[std::move("show_func_def")].IsBool()) {
+                shFuncDef_ = std::move(sett[std::move("show_func_def")].GetBool());
             }
-            if (sett.HasMember(std::move("show_function_body")) && sett[std::move("show_function_body")].IsBool()) {
-                showFunctionBody_ = std::move(sett[std::move("show_function_body")].GetBool());
+            if (sett.HasMember(std::move("show_global_par")) && sett[std::move("show_global_par")].IsBool()) {
+                shGlobPar_ = std::move(sett[std::move("show_global_par")].GetBool());
             }
-            if (sett.HasMember(std::move("tab_word_length")) && sett[std::move("tab_word_length")].IsInt()) {
-                int val = std::move(sett[std::move("tab_word_length")].GetInt());
+            if (sett.HasMember(std::move("tab_length")) && sett[std::move("tab_length")].IsInt()) {
+                int val = std::move(sett[std::move("tab_length")].GetInt());
                 if (val >= 0 && val <= 10) {
-                    lengthOfTabWord_ = std::move(val);
+                    tabLen_ = std::move(val);
                 }
             }
-            if (sett.HasMember(std::move("margin_left")) && sett[std::move("margin_left")].IsInt()) {
-                int val = std::move(sett[std::move("margin_left")].GetInt());
+            if (sett.HasMember(std::move("margin_length")) && sett[std::move("margin_length")].IsInt()) {
+                int val = std::move(sett[std::move("margin_length")].GetInt());
                 if (val >= 0 && val <= 10) {
-                    lengthOfLeftMargin_ = std::move(val);
+                    margLen_ = std::move(val);
                 }
             }
-            if (sett.HasMember(std::move("row_num_style")) && sett[std::move("row_num_style")].IsString()) {
-                rowNumberStyle_ = std::make_unique<std::stringstream>(std::move(sett[std::move("row_num_style")].GetString()));
+            if (sett.HasMember(std::move("row_style")) && sett[std::move("row_style")].IsString()) {
+                rowStyle_ = std::make_unique<std::stringstream>(std::move(sett[std::move("row_style")].GetString()));
             }
         }
         if (tconf.HasMember(std::move("SYSTEM_EXPR")) && tconf[std::move("SYSTEM_EXPR")].IsObject()) {
@@ -140,6 +143,15 @@ void TextConfigurator::load_new_config_file() {
             }
             if (ex.HasMember(std::move("case_word")) && ex[std::move("case_word")].IsString() && ex[std::move("case_word")].GetStringLength() > 0) {
                 caseWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("case_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("new_word")) && ex[std::move("new_word")].IsString() && ex[std::move("new_word")].GetStringLength() > 0) {
+                newWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("new_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("delete_word")) && ex[std::move("delete_word")].IsString() && ex[std::move("delete_word")].GetStringLength() > 0) {
+                deleteWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("delete_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("pointer_word")) && ex[std::move("pointer_word")].IsString() && ex[std::move("pointer_word")].GetStringLength() > 0) {
+                pointerWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("pointer_word")].GetString()));
             }
             if (ex.HasMember(std::move("STYLE")) && ex[std::move("STYLE")].IsObject()) {
                 const rj::Value& st = std::move(ex[std::move("STYLE")]);
@@ -182,10 +194,25 @@ void TextConfigurator::load_new_config_file() {
                 if (st.HasMember(std::move("case_word_style")) && st[std::move("case_word_style")].IsString()) {
                     caseWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("case_word_style")].GetString()));
                 }
+                if (st.HasMember(std::move("new_word_style")) && st[std::move("new_word_style")].IsString()) {
+                    newWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("new_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("delete_word_style")) && st[std::move("delete_word_style")].IsString()) {
+                    deleteWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("delete_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("pointer_word_style")) && st[std::move("pointer_word_style")].IsString()) {
+                    pointerWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("pointer_word_style")].GetString()));
+                }
             }
         }
         if (tconf.HasMember(std::move("OTHER_EXPR")) && tconf[std::move("OTHER_EXPR")].IsObject()) {
             const rj::Value& ex = std::move(tconf[std::move("OTHER_EXPR")]);
+            if (ex.HasMember(std::move("constructor_word")) && ex[std::move("constructor_word")].IsString() && ex[std::move("constructor_word")].GetStringLength() > 0) {
+                constrWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("constructor_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("destructor_word")) && ex[std::move("destructor_word")].IsString() && ex[std::move("destructor_word")].GetStringLength() > 0) {
+                destrWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("destructor_word")].GetString()));
+            }
             if (ex.HasMember(std::move("method_word")) && ex[std::move("method_word")].IsString() && ex[std::move("method_word")].GetStringLength() > 0) {
                 methodWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("method_word")].GetString()));
             }
@@ -208,6 +235,12 @@ void TextConfigurator::load_new_config_file() {
                 const rj::Value& st = std::move(ex[std::move("STYLE")]);
                 if (st.HasMember(std::move("general_style")) && st[std::move("general_style")].IsString()) {
                     otherExprStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("general_style")].GetString()));
+                }
+                if (st.HasMember(std::move("constructor_style")) && st[std::move("constructor_style")].IsString()) {
+                    constrStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("constructor_style")].GetString()));
+                }
+                if (st.HasMember(std::move("destructor_style")) && st[std::move("destructor_style")].IsString()) {
+                    destrStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("destructor_style")].GetString()));
                 }
                 if (st.HasMember(std::move("method_word_style")) && st[std::move("method_word_style")].IsString()) {
                     methodWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("method_word_style")].GetString()));
@@ -236,21 +269,22 @@ void TextConfigurator::load_new_config_file() {
 }
 
 void TextConfigurator::set_defaults() {
-    showRowNumber_ = true;
-    showOpeningBracketOnNewLine_ = false;
-    showOtherExprs_ = true;
-    showClassDecl_ = true;
-    showClassBody_ = true;
-    showAttribute_ = true;
-    showMethodBody_ = true;
-    showMethodDecl_ = true;
-    showMethodDefin_ = true;
-    showMethodDefinInline_ = false;
-    showFunctionDecl_ = true;
-    showFunctionBody_ = true;
-    lengthOfTabWord_ = 4;
-    lengthOfLeftMargin_ = 3;
-    rowNumberStyle_ = std::make_unique<std::stringstream>();
+    useCppBr_ = true;
+    shRow_ = true;
+    shOtherExpr_ = true;
+    shClassDec_ = true;
+    shClassDef_ = true;
+    shGenerPar_ = true;
+    shAttrib_ = true;
+    shMethDec_ = true;
+    shMethDef_ = true;
+    shMethOwner_ = true;
+    shFuncDec_ = true;
+    shFuncDef_ = true;
+    shGlobPar_ = true;
+    tabLen_ = 4;
+    margLen_ = 3;
+    rowStyle_ = std::make_unique<std::stringstream>();
     classWord_ = std::make_unique<std::stringstream>(std::move("class"));
     thisWord_ = std::make_unique<std::stringstream>(std::move("this"));
     returnWord_ = std::make_unique<std::stringstream>(std::move("return"));
@@ -263,6 +297,9 @@ void TextConfigurator::set_defaults() {
     repeatWord_ = std::make_unique<std::stringstream>(std::move("repeat"));
     switchWord_ = std::make_unique<std::stringstream>(std::move("switch"));
     caseWord_ = std::make_unique<std::stringstream>(std::move("case"));
+    newWord_ = std::make_unique<std::stringstream>(std::move("new"));
+    deleteWord_ = std::make_unique<std::stringstream>(std::move("delete"));
+    pointerWord_ = std::make_unique<std::stringstream>(std::move("*"));
     systExprStyle_ = std::make_unique<std::stringstream>();
     classWordStyle_ = std::make_unique<std::stringstream>();
     thisWordStyle_ = std::make_unique<std::stringstream>();
@@ -276,6 +313,11 @@ void TextConfigurator::set_defaults() {
     repeatWordStyle_ = std::make_unique<std::stringstream>();
     switchWordStyle_ = std::make_unique<std::stringstream>();
     caseWordStyle_ = std::make_unique<std::stringstream>();
+    newWordStyle_ = std::make_unique<std::stringstream>();
+    deleteWordStyle_ = std::make_unique<std::stringstream>();
+    pointerWordStyle_ = std::make_unique<std::stringstream>();
+    constrWord_ = std::make_unique<std::stringstream>(std::move("constructor"));
+    destrWord_ = std::make_unique<std::stringstream>(std::move("destructor"));
     methodWord_ = std::make_unique<std::stringstream>(std::move("method"));
     functionWord_ = std::make_unique<std::stringstream>(std::move("function"));
     lambdaWord_ = std::make_unique<std::stringstream>(std::move("lambda"));
@@ -283,6 +325,8 @@ void TextConfigurator::set_defaults() {
     defineWord_ = std::make_unique<std::stringstream>(std::move("define"));
     returnsWord_ = std::make_unique<std::stringstream>(std::move("returns"));
     otherExprStyle_ = std::make_unique<std::stringstream>();
+    constrStyle_ = std::make_unique<std::stringstream>();
+    destrStyle_ = std::make_unique<std::stringstream>();
     methodWordStyle_ = std::make_unique<std::stringstream>();
     functionWordStyle_ = std::make_unique<std::stringstream>();
     lambdaWordStyle_ = std::make_unique<std::stringstream>();

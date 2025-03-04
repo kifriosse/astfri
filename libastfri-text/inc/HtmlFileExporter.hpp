@@ -3,7 +3,8 @@
 
 #include <libastfri-text/inc/Exporter.hpp>
 
-struct HtmlFileExporter : Exporter {
+class HtmlFileExporter : public Exporter {
+public:
     HtmlFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
 private:
@@ -14,12 +15,15 @@ public:
     void write_new_line() override;
     void write_space() override;
     void write_round_bracket(std::string br) override;
-    void write_square_bracket(std::string br) override;
     void write_curl_bracket(std::string br) override;
     void write_unknown_word() override;
     void write_public_word() override;
     void write_private_word() override;
     void write_protected_word() override;
+    void write_attribs_word() override;
+    void write_constrs_word() override;
+    void write_destrs_word() override;
+    void write_meths_word() override;
     void write_dynamic_type() override;
     void write_int_type() override;
     void write_float_type() override;
@@ -28,7 +32,6 @@ public:
     void write_void_type() override;
     void write_user_type(std::string usertype) override;
     void write_gen_param_name(std::string name) override;
-    void write_gen_param_constr(std::string constraint) override;
     void write_class_name(std::string name) override;
     void write_method_name(std::string name) override;
     void write_function_name(std::string name) override;
@@ -57,6 +60,11 @@ public:
     void write_repeat_word() override;
     void write_switch_word() override;
     void write_case_word() override;
+    void write_new_word() override;
+    void write_delete_word() override;
+    void write_pointer_word() override;
+    void write_constr_word() override;
+    void write_destr_word() override;
     void write_method_word() override;
     void write_function_word() override;
     void write_lambda_word() override;
