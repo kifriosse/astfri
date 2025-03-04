@@ -47,19 +47,6 @@ UnaryOpExpr::UnaryOpExpr(UnaryOpType op, Expr* arg) :
 {
 }
 
-AssignExpr::AssignExpr(Expr* lhs, Expr* rhs) :
-    lhs_(lhs),
-    rhs_(rhs)
-{
-}
-
-CompoundAssignExpr::CompoundAssignExpr(Expr* lhs, BinOpType op, Expr* rhs) :
-    lhs_(lhs),
-    op_(op),
-    rhs_(rhs)
-{
-}
-
 ParamVarRefExpr::ParamVarRefExpr(std::string param) :
     param_(std::move(param))
 {

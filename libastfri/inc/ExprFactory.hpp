@@ -30,8 +30,6 @@ public:
     IfExpr* mk_if (Expr* cond, Expr* iftrue, Expr* iffalse);
     BinOpExpr* mk_bin_on (Expr* left, BinOpType op, Expr* right);
     UnaryOpExpr* mk_unary_op (UnaryOpType op, Expr* arg);
-    AssignExpr* mk_assign (Expr* lhs, Expr* rhs);
-    CompoundAssignExpr* mk_compound_assign (Expr* lhs, BinOpType op, Expr* rhs);
     ParamVarRefExpr* mk_param_var_ref (std::string param);
     LocalVarRefExpr* mk_local_var_ref (std::string var);
     MemberVarRefExpr* mk_member_var_ref (std::string member);

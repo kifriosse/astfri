@@ -13,8 +13,6 @@ struct NullLiteralExpr;
 struct IfExpr;
 struct BinOpExpr;
 struct UnaryOpExpr;
-struct AssignExpr;
-struct CompoundAssignExpr;
 struct ParamVarRefExpr;
 struct LocalVarRefExpr;
 struct MemberVarRefExpr;

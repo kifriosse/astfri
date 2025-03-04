@@ -32,8 +32,6 @@ struct IVisitor
     virtual void visit (IfExpr const& expr)              = 0;
     virtual void visit (BinOpExpr const& expr)           = 0;
     virtual void visit (UnaryOpExpr const& expr)         = 0;
-    virtual void visit (AssignExpr const& expr)          = 0;
-    virtual void visit (CompoundAssignExpr const& expr)  = 0;
     virtual void visit (ParamVarRefExpr const& expr)     = 0;
     virtual void visit (LocalVarRefExpr const& expr)     = 0;
     virtual void visit (MemberVarRefExpr const& expr)    = 0;
@@ -162,14 +160,6 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit (UnaryOpExpr const& /*expr*/) override
-    {
-    }
-
-    void visit (AssignExpr const& /*expr*/) override
-    {
-    }
-
-    void visit (CompoundAssignExpr const& /*expr*/) override
     {
     }
 

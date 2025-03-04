@@ -55,20 +55,6 @@ UnaryOpExpr* ExprFactory::mk_unary_op(UnaryOpType op, Expr* arg)
     return details::emplace_get<UnaryOpExpr>(exprs_, op, arg);
 }
 
-AssignExpr* ExprFactory::mk_assign(Expr* lhs, Expr* rhs)
-{
-    return details::emplace_get<AssignExpr>(exprs_, lhs, rhs);
-}
-
-CompoundAssignExpr* ExprFactory::mk_compound_assign(
-    Expr* lhs,
-    BinOpType op,
-    Expr* rhs
-)
-{
-    return details::emplace_get<CompoundAssignExpr>(exprs_, lhs, op, rhs);
-}
-
 ParamVarRefExpr* ExprFactory::mk_param_var_ref(std::string param)
 {
     return details::emplace_get<ParamVarRefExpr>(exprs_, std::move(param));
