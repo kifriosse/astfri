@@ -5,42 +5,29 @@
 #include <libastfri/impl/ExprFwd.hpp>
 #include <libastfri/impl/StmtFwd.hpp>
 
-#include <type_traits>
-
 namespace astfri
 {
-    template<class This>
-    struct MkTypeQueryable
-    {
-        template<class T>
-        bool is_a()
-        {
-            return std::is_base_of<T, This>::value;
-        }
-    };
 
-    template<class T>
-    bool is_a(Type* e)
-    {
-        static_assert(
-          std::is_base_of<T, MkTypeQueryable<T>>::value,
-          "Unsafe type query!"
-        );
-        return // TODO static cast to mktypequeryable
-    }
+/**
+  * @brief Checks if @p e is exactly of type @tparam T
+  */
+template<class T>
+bool is_type(Type* e);
 
-    template<class T>
-    bool is_a(Expr* e)
-    {
+/**
+  * @brief Checks if @p e is exactly of type @tparam T
+  */
+template<class T>
+bool is_type(Expr* e);
 
-    }
+/**
+  * @brief Checks if @p e is exactly of type @tparam T
+  */
+template<class T>
+bool is_type(Stmt* e);
 
-    template<class T>
-    bool is_a(Stmt* e)
-    {
+}  // namespace astfri
 
-    }
-
-}
+#include <libastfri/impl/TypeQuery.inl>
 
 #endif
