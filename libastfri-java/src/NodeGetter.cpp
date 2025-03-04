@@ -92,6 +92,14 @@ astfri::Expr* NodeGetter::get_expr(std::string const& nodeName, std::string cons
         auto assignExprVariant = this->get_assign_expr(tsNode, sourceCode);
         std::visit([&expr](auto&& arg) { expr = arg; }, assignExprVariant);
     }
+    else if (nodeName == "(this)")
+    {
+        expr = exprFactory.mk_this();
+    }
+    else if (nodeName.find("(object_creation_expression") != std::string::npos)
+    {
+        expr = this->get_new_expr(tsNode, sourceCode);
+    }
     else 
     {
         expr = exprFactory.mk_unknown();
@@ -392,7 +400,14 @@ astfri::MethodCallExpr* NodeGetter::get_method_call(TSNode tsNode, std::string c
 
             if (captureName == "object")
             {
-                owner = exprFactory.mk_class_ref(nodeText);
+                if (nodeName == "(identifier)")
+                {
+                    owner = exprFactory.mk_class_ref(nodeText);
+                }
+                else
+                {
+                    owner = this->get_expr(nodeName, nodeText, tsCapture.node, sourceCode);
+                }
             }
             else if (captureName == "name")
             {
@@ -400,7 +415,7 @@ astfri::MethodCallExpr* NodeGetter::get_method_call(TSNode tsNode, std::string c
             }
             else if (captureName == "args") 
             {
-                for (uint32_t j = 0; j < ts_node_child_count(tsCapture.node); j++) 
+                for (uint32_t j = 0; j < ts_node_child_count(tsCapture.node); ++j) 
                 {
                     arguments.push_back(get_expr(nodeName, nodeText, ts_node_child(tsCapture.node, j), sourceCode));
                 }
@@ -412,6 +427,60 @@ astfri::MethodCallExpr* NodeGetter::get_method_call(TSNode tsNode, std::string c
     }
 
     return methodCallExpr;
+}
+
+astfri::NewExpr* NodeGetter::get_new_expr(TSNode paramsNode, std::string const& sourceCode)
+{
+    astfri::NewExpr* newExpr = nullptr;
+
+    char const* queryString = "(object_creation_expression type: (_) @type arguments: (argument_list) @args)";
+
+    TSQuery* tsQuery        = make_query(queryString);
+    TSQueryCursor* tsCursor = ts_query_cursor_new();
+    ts_query_cursor_exec(tsCursor, tsQuery, paramsNode);
+    TSQueryMatch tsMatch;
+
+    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    {
+        astfri::Type* type;
+        std::vector<astfri::Expr*> arguments;
+
+        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        {
+            TSQueryCapture tsCapture = tsMatch.captures[i];
+            uint32_t length;
+            std::string captureName = ts_query_capture_name_for_id(
+                tsQuery,
+                tsCapture.index,
+                &length
+            );
+            std::string nodeName(ts_node_string(tsCapture.node));
+            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
+
+            if (captureName == "type")
+            {
+                if (nodeName == "(identifier)")
+                {
+                    type = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                }
+                else
+                {
+                    type = typeFactory.mk_user(nodeText);
+                }
+            }
+            else if (captureName == "args") 
+            {
+                for (uint32_t j = 0; j < ts_node_child_count(tsCapture.node); ++j) 
+                {
+                    arguments.push_back(get_expr(nodeName, nodeText, ts_node_child(tsCapture.node, j), sourceCode));
+                }
+            }
+        }
+
+        newExpr = exprFactory.mk_new(exprFactory.mk_constructor_call(type, arguments));
+    }
+
+    return newExpr;
 }
 
 std::vector<astfri::ParamVarDefStmt*> NodeGetter::get_params(TSNode paramsNode, std::string const& sourceCode)
@@ -440,12 +509,19 @@ std::vector<astfri::ParamVarDefStmt*> NodeGetter::get_params(TSNode paramsNode, 
                 tsCapture.index,
                 &length
             );
+            std::string nodeName(ts_node_string(tsCapture.node));
             std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
             if (captureName == "param_type")
             {
-                paramType
-                    = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                if (nodeName == "(identifier)")
+                {
+                    paramType = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                }
+                else
+                {
+                    paramType = typeFactory.mk_user(nodeText);
+                }
             }
             else if (captureName == "param_name")
             {
@@ -498,8 +574,14 @@ std::vector<astfri::LocalVarDefStmt*> NodeGetter::get_local_vars(TSNode methodNo
 
             if (captureName == "local_var_type")
             {
-                localVarType
-                    = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                if (nodeName == "(identifier)")
+                {
+                    localVarType = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                }
+                else
+                {
+                    localVarType = typeFactory.mk_user(nodeText);
+                }
             }
             else if (captureName == "local_var_name")
             {
@@ -656,8 +738,14 @@ std::vector<astfri::MethodDefStmt*> NodeGetter::get_methods(TSNode classNode, st
             }
             else if (captureName == "method_return_type")
             {
-                methodReturnType
-                    = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                if (nodeName == "(identifier)")
+                {
+                    methodReturnType = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                }
+                else
+                {
+                    methodReturnType = typeFactory.mk_user(nodeText);
+                }
             }
             else if (captureName == "method_name")
             {
@@ -765,8 +853,14 @@ std::vector<astfri::MemberVarDefStmt*> NodeGetter::get_member_vars(TSNode classN
             }
             else if (captureName == "member_type")
             {
-                memberVarType
-                    = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                if (nodeName == "(identifier)")
+                {
+                    memberVarType = this->nodeMapper->get_typeMap().find(nodeText)->second;
+                }
+                else 
+                {
+                    memberVarType = typeFactory.mk_user(nodeText);
+                }
             }
             else if (captureName == "member_name")
             {

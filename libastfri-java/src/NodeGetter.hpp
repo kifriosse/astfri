@@ -72,6 +72,7 @@ private:
     astfri::ParamVarRefExpr* get_param_ref(TSNode tsNode, std::string const& sourceCode);
     std::variant<astfri::ParamVarRefExpr*, astfri::LocalVarRefExpr*, astfri::MemberVarRefExpr*> get_ref_expr(TSNode tsNode, std::string const& sourceCode);
     astfri::MethodCallExpr* get_method_call(TSNode tsNode, std::string const& sourceCode);
+    astfri::NewExpr* get_new_expr(TSNode paramsNode, std::string const& sourceCode);
     std::vector<astfri::ParamVarDefStmt*> get_params (TSNode paramsNode, const std::string& sourceCode);
     std::vector<astfri::LocalVarDefStmt*> get_local_vars (TSNode methodNode, const std::string& sourceCode);
     astfri::ConstructorDefStmt* get_constructor (TSNode classNode, const std::string& sourceCode);
