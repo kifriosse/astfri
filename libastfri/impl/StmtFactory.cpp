@@ -251,12 +251,12 @@ SwitchStmt* StmtFactory::mk_switch(Expr* expr, std::vector<CaseBaseStmt*> cases)
     return details::emplace_get<SwitchStmt>(stmts_, expr, std::move(cases));
 }
 
-WhileStmt* StmtFactory::mk_while(Expr* cond, CompoundStmt* body)
+WhileStmt* StmtFactory::mk_while(Expr* cond, Stmt* body)
 {
     return details::emplace_get<WhileStmt>(stmts_, cond, body);
 }
 
-DoWhileStmt* StmtFactory::mk_do_while(Expr* cond, CompoundStmt* body)
+DoWhileStmt* StmtFactory::mk_do_while(Expr* cond, Stmt* body)
 {
     return details::emplace_get<DoWhileStmt>(stmts_, cond, body);
 }
@@ -265,7 +265,7 @@ ForStmt* StmtFactory::mk_for(
     Stmt* init,
     Expr* cond,
     Stmt* step,
-    CompoundStmt* body
+    Stmt* body
 )
 {
     return details::emplace_get<ForStmt>(stmts_, init, cond, step, body);

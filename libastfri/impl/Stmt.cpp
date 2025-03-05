@@ -164,23 +164,23 @@ SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseBaseStmt*> cases) :
 {
 }
 
-LoopStmt::LoopStmt(Expr* cond, CompoundStmt* body) :
+LoopStmt::LoopStmt(Expr* cond, Stmt* body) :
     cond_(cond),
     body_(body)
 {
 }
 
-WhileStmt::WhileStmt(Expr* cond, CompoundStmt* body) :
+WhileStmt::WhileStmt(Expr* cond, Stmt* body) :
     LoopStmt(cond, body)
 {
 }
 
-DoWhileStmt::DoWhileStmt(Expr* cond, CompoundStmt* body) :
+DoWhileStmt::DoWhileStmt(Expr* cond, Stmt* body) :
     LoopStmt(cond, body)
 {
 }
 
-ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body) :
+ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body) :
     LoopStmt(cond, body),
     init_(init),
     step_(step)

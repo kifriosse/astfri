@@ -308,9 +308,9 @@ struct SwitchStmt : Stmt, details::MkVisitable<SwitchStmt>
 struct LoopStmt : Stmt
 {
     Expr* cond_;
-    CompoundStmt* body_;
+    Stmt* body_;
 
-    LoopStmt(Expr* cond, CompoundStmt* body);
+    LoopStmt(Expr* cond, Stmt* body);
 };
 
 /**
@@ -318,7 +318,7 @@ struct LoopStmt : Stmt
  */
 struct WhileStmt : LoopStmt, details::MkVisitable<WhileStmt>
 {
-    WhileStmt(Expr* cond, CompoundStmt* body);
+    WhileStmt(Expr* cond, Stmt* body);
 };
 
 /**
@@ -326,7 +326,7 @@ struct WhileStmt : LoopStmt, details::MkVisitable<WhileStmt>
  */
 struct DoWhileStmt : LoopStmt, details::MkVisitable<DoWhileStmt>
 {
-    DoWhileStmt(Expr* cond, CompoundStmt* body);
+    DoWhileStmt(Expr* cond, Stmt* body);
 };
 
 /**
@@ -337,7 +337,7 @@ struct ForStmt : LoopStmt, details::MkVisitable<ForStmt>
     Stmt* init_;
     Stmt* step_;
 
-    ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body);
+    ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
 };
 
 /**
