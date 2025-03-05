@@ -119,6 +119,8 @@ ClassDefStmt* StmtFactory::mk_class_def()
         stmts_,
         "",
         std::vector<MemberVarDefStmt*>{},
+        std::vector<ConstructorDefStmt*>{},
+        std::vector<DestructorDefStmt*>{},
         std::vector<MethodDefStmt*>{},
         std::vector<GenericParam*>{}
     );
@@ -127,6 +129,8 @@ ClassDefStmt* StmtFactory::mk_class_def()
 ClassDefStmt* StmtFactory::mk_class_def(
     std::string name,
     std::vector<MemberVarDefStmt*> vars,
+    std::vector<ConstructorDefStmt*> constructors,
+    std::vector<DestructorDefStmt*> destructors,
     std::vector<MethodDefStmt*> methods,
     std::vector<GenericParam*> tparams
 )
@@ -135,6 +139,8 @@ ClassDefStmt* StmtFactory::mk_class_def(
         stmts_,
         std::move(name),
         std::move(vars),
+        std::move(constructors),
+        std::move(destructors),
         std::move(methods),
         std::move(tparams)
     );

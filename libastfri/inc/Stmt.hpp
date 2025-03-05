@@ -210,12 +210,16 @@ struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
 {
     std::string name_;
     std::vector<MemberVarDefStmt*> vars_;
+    std::vector<ConstructorDefStmt*> constructors_;
+    std::vector<DestructorDefStmt*> destructors_;
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
 
     ClassDefStmt(
         std::string name,
         std::vector<MemberVarDefStmt*> vars,
+        std::vector<ConstructorDefStmt*> constructors,
+        std::vector<DestructorDefStmt*> destructors,
         std::vector<MethodDefStmt*> methods,
         std::vector<GenericParam*> tparams
     );

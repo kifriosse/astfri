@@ -74,6 +74,8 @@ public:
     ClassDefStmt* mk_class_def (
         std::string name,
         std::vector<MemberVarDefStmt*> vars,
+        std::vector<ConstructorDefStmt*> constructors,
+        std::vector<DestructorDefStmt*> destructors,
         std::vector<MethodDefStmt*> methods,
         std::vector<GenericParam*> tparams
     );
