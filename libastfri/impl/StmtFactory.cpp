@@ -113,37 +113,28 @@ MethodDefStmt* StmtFactory::mk_method_def(
     return details::emplace_get<MethodDefStmt>(stmts_, owner, func, access);
 }
 
-ClassDefStmt* StmtFactory::mk_class_def()
+InterfaceDefStmt* StmtFactory::mk_interface_def()
 {
-    return details::emplace_get<ClassDefStmt>(
-        stmts_,
-        "",
-        std::vector<MemberVarDefStmt*>{},
-        std::vector<ConstructorDefStmt*>{},
-        std::vector<DestructorDefStmt*>{},
-        std::vector<MethodDefStmt*>{},
-        std::vector<GenericParam*>{}
-    );
+    return details::emplace_get<InterfaceDefStmt>(stmts_);
 }
 
-ClassDefStmt* StmtFactory::mk_class_def(
-    std::string name,
-    std::vector<MemberVarDefStmt*> vars,
-    std::vector<ConstructorDefStmt*> constructors,
-    std::vector<DestructorDefStmt*> destructors,
-    std::vector<MethodDefStmt*> methods,
-    std::vector<GenericParam*> tparams
-)
+InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name)
 {
-    return details::emplace_get<ClassDefStmt>(
-        stmts_,
-        std::move(name),
-        std::move(vars),
-        std::move(constructors),
-        std::move(destructors),
-        std::move(methods),
-        std::move(tparams)
-    );
+    InterfaceDefStmt* i = details::emplace_get<InterfaceDefStmt>(stmts_);
+    i->name_ = std::move(name);
+    return i;
+}
+
+ClassDefStmt* StmtFactory::mk_class_def()
+{
+    return details::emplace_get<ClassDefStmt>(stmts_);
+}
+
+ClassDefStmt* StmtFactory::mk_class_def(std::string name)
+{
+    ClassDefStmt* c = details::emplace_get<ClassDefStmt>(stmts_);
+    c->name_ = std::move(name);
+    return c;
 }
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def()

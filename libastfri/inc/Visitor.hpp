@@ -70,6 +70,7 @@ struct IVisitor
     virtual void visit (ConstructorDefStmt const& stmt)  = 0;
     virtual void visit (DestructorDefStmt const& stmt)   = 0;
     virtual void visit (GenericParam const& stmt)        = 0;
+    virtual void visit (InterfaceDefStmt const& stmt)    = 0;
     virtual void visit (ClassDefStmt const& stmt)        = 0;
     virtual void visit (ContinueStmt const& stmt)        = 0;
     virtual void visit (BreakStmt const& stmt)           = 0;
@@ -308,6 +309,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit (GenericParam const& /*stmt*/) override
+    {
+    }
+
+    void visit (InterfaceDefStmt const& /*stmt*/) override
     {
     }
 

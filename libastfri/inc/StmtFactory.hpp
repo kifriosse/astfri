@@ -70,15 +70,10 @@ public:
         CompoundStmt* body
     );
     GenericParam* mk_generic_param (std::string constraint, std::string name);
+    InterfaceDefStmt* mk_interface_def ();
+    InterfaceDefStmt* mk_interface_def (std::string name);
     ClassDefStmt* mk_class_def ();
-    ClassDefStmt* mk_class_def (
-        std::string name,
-        std::vector<MemberVarDefStmt*> vars,
-        std::vector<ConstructorDefStmt*> constructors,
-        std::vector<DestructorDefStmt*> destructors,
-        std::vector<MethodDefStmt*> methods,
-        std::vector<GenericParam*> tparams
-    );
+    ClassDefStmt* mk_class_def (std::string name);
     CompoundStmt* mk_compound (std::vector<Stmt*> stmts);
     ReturnStmt* mk_return (Expr* val);
     ExprStmt* mk_expr (Expr* expr);

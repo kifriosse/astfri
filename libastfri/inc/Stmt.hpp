@@ -206,6 +206,17 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
 /**
  * @brief TODO
  */
+struct InterfaceDefStmt : Stmt, details::MkVisitable<InterfaceDefStmt>
+{
+    std::string name_;
+    std::vector<MethodDefStmt*> methods_;
+    std::vector<GenericParam*> tparams_;
+    std::vector<InterfaceDefStmt*> bases_;
+};
+
+/**
+ * @brief TODO
+ */
 struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
 {
     std::string name_;
@@ -214,15 +225,8 @@ struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
     std::vector<DestructorDefStmt*> destructors_;
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
-
-    ClassDefStmt(
-        std::string name,
-        std::vector<MemberVarDefStmt*> vars,
-        std::vector<ConstructorDefStmt*> constructors,
-        std::vector<DestructorDefStmt*> destructors,
-        std::vector<MethodDefStmt*> methods,
-        std::vector<GenericParam*> tparams
-    );
+    std::vector<InterfaceDefStmt*> interfaces_;
+    std::vector<ClassDefStmt*> bases_;
 };
 
 /**

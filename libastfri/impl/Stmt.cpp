@@ -106,23 +106,6 @@ DestructorDefStmt::DestructorDefStmt(ClassDefStmt* owner, CompoundStmt* body) :
 {
 }
 
-ClassDefStmt::ClassDefStmt(
-    std::string name,
-    std::vector<MemberVarDefStmt*> vars,
-    std::vector<ConstructorDefStmt*> constructors,
-    std::vector<DestructorDefStmt*> destructors,
-    std::vector<MethodDefStmt*> methods,
-    std::vector<GenericParam*> tparams
-) :
-    name_(std::move(name)),
-    vars_(std::move(vars)),
-    constructors_(std::move(constructors)),
-    destructors_(std::move(destructors)),
-    methods_(std::move(methods)),
-    tparams_(std::move(tparams))
-{
-}
-
 GenericParam::GenericParam(std::string constraint, std::string name) :
     constraint_(std::move(constraint)),
     name_(std::move(name))
