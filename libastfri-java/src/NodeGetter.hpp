@@ -5,55 +5,15 @@
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include "NodeMapper.hpp"
-#include "libastfri/inc/Stmt.hpp"
 
 #include <cstring>
 #include <string>
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
+#include <variant>
 
-typedef struct Member_variable_node
-{
-    std::vector<std::string> modifiers;
-    std::string type;
-    std::string name;
-    std::string literal;
-    std::string value;
-} Member_variable_node;
-
-typedef struct Local_variable_node
-{
-    std::string type;
-    std::string name;
-    std::string literal;
-    std::string value;
-} Variable_node;
-
-typedef struct Parameter_node
-{
-    std::string type;
-    std::string name;
-    std::string literal;
-    std::string value;
-} Parameter_node;
-
-typedef struct Method_node
-{
-    std::vector<std::string> modifiers;
-    std::string returnType;
-    std::string name;
-    std::vector<Parameter_node> params;
-    std::vector<Local_variable_node> vars;
-} Function_node;
-
-typedef struct Class_node
-{
-    std::vector<std::string> modifiers;
-    std::string name;
-    std::vector<Member_variable_node> vars;
-    std::vector<Method_node> methods;
-} Class_node;
+using StatementReturnType = std::variant<std::vector<astfri::LocalVarDefStmt*>, astfri::ReturnStmt*, astfri::ExprStmt*>;
 
 class NodeGetter
 {
@@ -74,7 +34,7 @@ private:
     astfri::MethodCallExpr* get_method_call(TSNode tsNode, std::string const& sourceCode);
     astfri::NewExpr* get_new_expr(TSNode paramsNode, std::string const& sourceCode);
     std::vector<astfri::ParamVarDefStmt*> get_params (TSNode paramsNode, const std::string& sourceCode);
-    std::vector<astfri::LocalVarDefStmt*> get_local_vars (TSNode methodNode, const std::string& sourceCode);
+    StatementReturnType search_sub_tree (TSNode tsNode, std::string const& nodeName, const std::string& sourceCode);
     astfri::ConstructorDefStmt* get_constructor (TSNode classNode, const std::string& sourceCode);
     std::vector<astfri::MethodDefStmt*> get_methods (TSNode classNode, const std::string& sourceCode);
     std::vector<astfri::MemberVarDefStmt*> get_member_vars (TSNode classNode, const std::string& sourceCode);
