@@ -37,7 +37,6 @@ namespace uml {
         if (type.name_.compare(this->currentClass_.name_) != 0) {
             RelationStruct r;
             r.from_ = this->currentClass_.name_;
-            r.from_.assign(this->currentClass_.name_);
             r.to_ = type.name_;
             r.type_ = RelationType::ASSOCIATION;
 
