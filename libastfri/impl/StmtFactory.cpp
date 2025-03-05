@@ -121,7 +121,7 @@ InterfaceDefStmt* StmtFactory::mk_interface_def()
 InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name)
 {
     InterfaceDefStmt* i = details::emplace_get<InterfaceDefStmt>(stmts_);
-    i->name_ = std::move(name);
+    i->name_            = std::move(name);
     return i;
 }
 
@@ -133,7 +133,7 @@ ClassDefStmt* StmtFactory::mk_class_def()
 ClassDefStmt* StmtFactory::mk_class_def(std::string name)
 {
     ClassDefStmt* c = details::emplace_get<ClassDefStmt>(stmts_);
-    c->name_ = std::move(name);
+    c->name_        = std::move(name);
     return c;
 }
 
@@ -231,11 +231,7 @@ CaseStmt* StmtFactory::mk_case(Expr* expr, Stmt* body)
 
 CaseStmt* StmtFactory::mk_case(std::vector<Expr*> exprs, Stmt* body)
 {
-    return details::emplace_get<CaseStmt>(
-        stmts_,
-        std::move(exprs),
-        body
-    );
+    return details::emplace_get<CaseStmt>(stmts_, std::move(exprs), body);
 }
 
 DefaultCaseStmt* StmtFactory::mk_default_case(Stmt* body)
@@ -258,12 +254,7 @@ DoWhileStmt* StmtFactory::mk_do_while(Expr* cond, Stmt* body)
     return details::emplace_get<DoWhileStmt>(stmts_, cond, body);
 }
 
-ForStmt* StmtFactory::mk_for(
-    Stmt* init,
-    Expr* cond,
-    Stmt* step,
-    Stmt* body
-)
+ForStmt* StmtFactory::mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body)
 {
     return details::emplace_get<ForStmt>(stmts_, init, cond, step, body);
 }

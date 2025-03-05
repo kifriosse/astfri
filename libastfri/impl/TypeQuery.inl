@@ -1,5 +1,5 @@
-#include <libastfri/inc/TypeQuery.hpp>
 #include <libastfri/impl/TypeId.hpp>
+#include <libastfri/inc/TypeQuery.hpp>
 
 namespace astfri
 {

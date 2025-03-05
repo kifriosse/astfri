@@ -14,22 +14,22 @@ namespace astfri
 class TypeFactory
 {
 public:
-    static TypeFactory& get_instance ();
+    static TypeFactory& get_instance();
 
 public:
-    IntType* mk_int ();
-    FloatType* mk_float ();
-    CharType* mk_char ();
-    BoolType* mk_bool ();
-    VoidType* mk_void ();
-    UnknownType* mk_unknown ();
-    DynamicType* mk_dynamic ();
-    IndirectionType* mk_indirect (Type* type);
-    UserType* mk_user (std::string const& name);
+    IntType* mk_int();
+    FloatType* mk_float();
+    CharType* mk_char();
+    BoolType* mk_bool();
+    VoidType* mk_void();
+    UnknownType* mk_unknown();
+    DynamicType* mk_dynamic();
+    IndirectionType* mk_indirect(Type* type);
+    UserType* mk_user(std::string const& name);
 
 public:
-    TypeFactory(TypeFactory const&)     = delete;
-    void operator= (TypeFactory const&) = delete;
+    TypeFactory(TypeFactory const&)    = delete;
+    void operator=(TypeFactory const&) = delete;
 
 private:
     TypeFactory() = default;

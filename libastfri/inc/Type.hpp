@@ -24,7 +24,7 @@ struct DynamicType :
     details::MkVisitable<DynamicType>,
     details::TypeQueriesAdapter
 {
-    DynamicType* as_dynamic () noexcept override;
+    DynamicType* as_dynamic() noexcept override;
 };
 
 /**
@@ -42,7 +42,7 @@ struct IntType :
     details::MkVisitable<IntType>,
     details::TypeQueriesAdapter
 {
-    IntType* as_int () noexcept override;
+    IntType* as_int() noexcept override;
 };
 
 /**
@@ -53,7 +53,7 @@ struct FloatType :
     details::MkVisitable<FloatType>,
     details::TypeQueriesAdapter
 {
-    FloatType* as_float () noexcept override;
+    FloatType* as_float() noexcept override;
 };
 
 /**
@@ -64,7 +64,7 @@ struct CharType :
     details::MkVisitable<CharType>,
     details::TypeQueriesAdapter
 {
-    CharType* as_char () noexcept override;
+    CharType* as_char() noexcept override;
 };
 
 /**
@@ -75,7 +75,7 @@ struct BoolType :
     details::MkVisitable<BoolType>,
     details::TypeQueriesAdapter
 {
-    BoolType* as_bool () noexcept override;
+    BoolType* as_bool() noexcept override;
 };
 
 /**
@@ -86,7 +86,7 @@ struct VoidType :
     details::MkVisitable<VoidType>,
     details::TypeQueriesAdapter
 {
-    VoidType* as_void () noexcept override;
+    VoidType* as_void() noexcept override;
 };
 
 /**
@@ -101,7 +101,7 @@ struct UserType :
 
     explicit UserType(std::string name);
 
-    UserType* as_user () noexcept override;
+    UserType* as_user() noexcept override;
 };
 
 /**
@@ -116,7 +116,7 @@ struct IndirectionType :
 
     explicit IndirectionType(Type* indirect);
 
-    IndirectionType* as_indirection () noexcept override;
+    IndirectionType* as_indirection() noexcept override;
 };
 
 /**

@@ -15,7 +15,7 @@ namespace astfri::details
 template<typename This>
 struct MkVisitable : virtual IVisitable
 {
-    void accept (IVisitor& visitor) override
+    void accept(IVisitor& visitor) override
     {
         visitor.visit(static_cast<This const&>(*this));
     }
@@ -46,7 +46,7 @@ concept vector_like
  * constructed from @p args
  */
 template<typename Val, map_like Map, typename Key, typename... Args>
-Val* emplace_get (Key&& key, Map& map, Args&&... args)
+Val* emplace_get(Key&& key, Map& map, Args&&... args)
 {
     auto const it = map.find(key);
     if (it != map.end())
@@ -62,7 +62,7 @@ Val* emplace_get (Key&& key, Map& map, Args&&... args)
  * created object
  */
 template<typename T, vector_like Vector, typename... Args>
-T* emplace_get (Vector& store, Args&&... args)
+T* emplace_get(Vector& store, Args&&... args)
 {
     auto e = std::make_unique<T>(std::forward<Args>(args)...);
     store.push_back(std::move(e));

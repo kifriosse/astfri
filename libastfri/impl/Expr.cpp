@@ -68,7 +68,7 @@ GlobalVarRefExpr::GlobalVarRefExpr(std::string global) :
 }
 
 ClassRefExpr::ClassRefExpr(std::string name) :
-  name_(std::move(name))
+    name_(std::move(name))
 {
 }
 

@@ -72,22 +72,12 @@ BasedOnStyle:    ''
 FixNamespaceComments: true
 IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^<(libastfri/factories)/'
+  - Regex:           '^<libastfri/*'
     Priority:        1
-  - Regex:           '^<(libastfri)/structures/'
-    Priority:        2
-  - Regex:           '^<(libastfri)/'
-    Priority:        3
-  - Regex:           '^<(libastfri-cpp)/'
-    Priority:        4
-  - Regex:           '^<(libastfri-output)/'
-    Priority:        5
   - Regex:           '<.+>'
-    Priority:        6
+    Priority:        2
   - Regex:           '".+"'
-    Priority:        7
-  - Regex:           '.*'
-    Priority:        8
+    Priority:        3
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
@@ -117,9 +107,6 @@ PointerAlignment: Left
 PPIndentWidth: -1
 ReferenceAlignment: Pointer
 ReflowComments:  true
-# RemoveSemicolon: true
-# RequiresClausePosition: OwnLine
-# RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Always
 ShortNamespaceLines: 1
 SortIncludes: CaseInsensitive
@@ -127,19 +114,18 @@ SpaceAfterLogicalNot: true
 SpaceAfterTemplateKeyword: false
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCaseColon: false
-SpaceBeforeCpp11BracedList: true
+SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: Custom
 SpaceBeforeParensOptions:
   AfterControlStatements: true
   AfterForeachMacros: false
-  AfterFunctionDeclarationName: true
-  AfterFunctionDefinitionName: true
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
   AfterIfMacros: true
-  AfterOverloadedOperator: true
-  # AfterRequiresInClause: false
-  # AfterRequiresInExpression: false
+  AfterOverloadedOperator: false
+  AfterPlacementOperator: true
   BeforeNonEmptyParentheses: false
 SpaceAroundPointerQualifiers: Default
 SpaceBeforeRangeBasedForLoopColon: true
@@ -148,9 +134,7 @@ SpaceInEmptyBlock: true
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles:  Never
-SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
-SpacesInCStyleCastParentheses: false
 SpacesInLineCommentPrefix:
   Minimum:         1
   Maximum:         -1
