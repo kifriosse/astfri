@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <libastfri-uml/inc/UMLOutputter.hpp>
 
 namespace uml {
