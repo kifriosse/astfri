@@ -14,6 +14,13 @@ astfri::IVisitable* node = serializer.serialize(argv[1]);
 ```
 Look at whole example [here](https://github.com/kifriosse/astfri/blob/dev-jm/libastfri-serialize/examples/TestWithTextOutput.cpp)
 
+4.This library submodule target is called astfri-serialize 
+
+ To link it with your target use 
+ ```text
+target_link_libraries(YourTarget PRIVATE astfri-serialize)
+ ```
+
 ### JSON representation of ASTFRI nodes
 [see](https://github.com/kifriosse/astfri/blob/dev-jm/libastfri-serialize/docs/Template-JSON-representation-of-ASTFRI-nodes.txt)
 
