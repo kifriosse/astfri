@@ -19,6 +19,8 @@ namespace uml {
         void write_to_file();
         void write_to_console();
 
+        virtual std::string getFileExtension() = 0;
+
         virtual void open_class(ClassStruct c) = 0;
         virtual void close_class() = 0;
 

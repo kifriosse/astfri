@@ -11,4 +11,4 @@ Your CMake target must link library "astfri-uml".
 - Call the init method on your uml::UMLLibWrapper instance
 - Call the run method on your uml::UMLLibWrapper instance
 
-Note: see [this example (line 120)](examples/example_external.cpp)
+Note: see [this example (line 124)](examples/example_external.cpp)

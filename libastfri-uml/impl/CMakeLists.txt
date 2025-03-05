@@ -5,5 +5,6 @@ target_sources(astfri-uml PRIVATE
     PlantUMLOutputter.cpp
     ClassVisitor.cpp
     TypeConvention.cpp
+    ElementStructs.cpp
 )
 target_link_libraries(astfri-uml PUBLIC astfri-core)
