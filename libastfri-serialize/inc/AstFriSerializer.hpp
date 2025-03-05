@@ -78,7 +78,8 @@ astfri::DefStmt* serialize_def_stmt(rapidjson::Value& value);
 astfri::TranslationUnit* serialize_translation_unit(rapidjson::Value& value);
 //astfri::BreakStmt* serialize_break_stmt();
 //astfri::ContinueStmt* serialize_continue_stmt(); 
-//astfri::DefaultCaseStmt* serialize_default_case_stmt();
+//astfri::DefaultCaseStmt* serialize_default_case_stmt(rapidjson::Value& value);
+//astfri::InterfaceDefStmt* serialize_interface_def_stmt(rapidjson::Value& value);
 
 astfri::Type* serialize_type(rapidjson::Value& value);
 astfri::Type* resolve_type(rapidjson::Value& value);

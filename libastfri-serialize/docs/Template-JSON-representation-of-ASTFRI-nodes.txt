@@ -33,19 +33,6 @@ ParamVarRefExpr|LocalVarRefExpr,MemberVarRefExpr|ThisExpr|ClassRefExpr|GlobalVar
 ”name”: ”SomeName”
 }
 
-AssignExpression:
-{
-”node” : ”AssignExpr”,
-”left” : {SomeExpression},
-”right” : {SomeExpression}
-}
-CompoundAssignExpression:
-{
-”node” : ”CompoundAssignExpr”,
-”left” : {SomeExpression},
-”right” : {SomeExpression},
-”operator”: e.g. ”+=,/=”
-}
 BinOpExpression:
 {
 ”node” : ”BinOpExpr”,
@@ -118,8 +105,13 @@ IfStmt
 CaseStmt
 {
 ”node” : ”CaseStmt”,
-”expressions”: [{SomeExpression},...], ? default not solved yet 
+”expressions”: [{SomeExpression},...],
 ”body” : {SomeStatement}
+}
+DefaultCaseStmt:
+{
+”node” : ”DefaultCaseStmt”,
+”body”  : {SomeStatement}
 }
 SwitchStmt
 {
@@ -162,9 +154,9 @@ FunctionDefStmt
 ”node” : ”FunctionDefStmt”,
 ”name” : ”SomeName”,
 ”parameters” : [{ParamVarDefStmt},...],
-”return_type” : {Type},
+”return_type” : {SometType},
 ”body” : {CompoundStmt}
-}
+{
 
 
 MethodDefStmt
@@ -181,7 +173,7 @@ GenericParam
 {
 ”node” : ”GenericParam”,
 ”name” : ”SomeName”,
-”constraint” : ”SomeConstraint” | null
+”constraint” : ”SomeConstraint”  ! or null
 }
 ClassDefStmt
 {
@@ -189,9 +181,19 @@ ClassDefStmt
 ”name” : ”SomeName”,
 ”attributes” : [{MemberVarDefStmt},..],
 ”constructors” : [{ConstructorDefStmt},...],
-”destructor” : {DestructorDefStmt}, !! or null if there is no destructor defined
+”destructors” : [{DestructorDefStmt},...], 
 ”methods” : [{MethodDefStmt},...],
-”generic_parameters” : [{GenericParam},..]
+”generic_parameters” : [{GenericParam},..],
+”interfaces” : [{InterfaceDefStmt},...],
+”bases” : [{ClassDefStmt},...],
+}
+InterfaceDefStmt
+{
+”node” : ”InterfaceDefStmt”,
+”name” : ”SomeName”,
+”methods” : [{MethodDefStmt},...],
+”generic_parameters” : [{GenericParam},...],
+”bases” : [{IntefaceDefStmt},....]
 }
 TranslationUnit
 {
@@ -247,44 +249,44 @@ ContinueStmt:
 Types:
 DynamicType:
 {
-”node” : ”DynamicType”
+”node” : ”Dynamic”
 }
 IntType:
 {
-”node” : ”IntType”
+”node” : ”Int”
 }
 
 FloatType:
 {
-”node” : FloatType
+”node” : ” Float”
 }
 CharType:
 {
-”node” : CharType
+”node” : ” Char”
 }
 BoolType:
 {
-”node” : BoolType
+”node” : ” Bool”
 }
 VoidType:
 {
-”node” : VoidType
+”node” : ” Void”
 }
 UserType:
 {
-”node” :  ”UserType”,
+”node” :  ”User”,
 ”name” : ”SomeName”
 }
 InDirectionType:
 {
-”node” :  ”InderictionType”,
+”node” :  ”Indirection”,
 ”indirect” : {SomeType}
 }
 
 
 UnknownType:
 {
-”node” :  ”UnknownType”
+”node” :  ”Unknown”
 }
 
 
