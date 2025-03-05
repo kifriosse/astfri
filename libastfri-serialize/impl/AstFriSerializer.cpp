@@ -341,7 +341,8 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
         case astfri_serialize::GenericParam:
             return this->serialize_generic_param(value);
         case astfri_serialize::ClassDefStmt:
-            return this->serialize_class_def_stmt(value);
+            return this->statementMaker_.mk_uknown();
+            // return this->serialize_class_def_stmt(value);
         case astfri_serialize::CompoundStmt:
             return this->serialize_compound_stmt(value);
         case astfri_serialize::ReturnStmt:
@@ -442,7 +443,7 @@ astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value
                                                     std::move(value["constraint"].GetString()),
                                                     std::move(value["name"].GetString()));
 }
-
+/*
 astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Value& value){
     
     std::vector<astfri::MemberVarDefStmt*> attributes;
@@ -472,12 +473,12 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
     }
 
     classDefStmt->destructor_ = value["destructor"].IsNull() ? nullptr : 
-                                            this->serialize_destructor_def_stmt(value["destructor"],classDefStmt);*/
+                                            this->serialize_destructor_def_stmt(value["destructor"],classDefStmt);
 
     return classDefStmt;
     
 }
-
+*/
 astfri::CompoundStmt* AstFriSerializer::serialize_compound_stmt(rapidjson::Value& value){
     std::vector<astfri::Stmt*> statements;
 
@@ -563,7 +564,7 @@ astfri::UnknownStmt* AstFriSerializer::serialize_unknown_stmt(){
 astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson::Value& value){
     std::vector<astfri::ClassDefStmt*> classes;
     for (auto& classDef : value["classes"].GetArray()){
-        classes.push_back(this->serialize_class_def_stmt(classDef));
+      //  classes.push_back(this->serialize_class_def_stmt(classDef));
     }
 
     std::vector<astfri::FunctionDefStmt*> functions;
