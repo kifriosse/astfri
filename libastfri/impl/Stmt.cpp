@@ -65,17 +65,6 @@ FunctionDefStmt::FunctionDefStmt(
 {
 }
 
-MethodDefStmt::MethodDefStmt(
-    ClassDefStmt* owner,
-    FunctionDefStmt* func,
-    AccessModifier access
-) :
-    owner_(owner),
-    func_(func),
-    access_(access)
-{
-}
-
 BaseInitializerStmt::BaseInitializerStmt(
     std::string base,
     std::vector<Expr*> args

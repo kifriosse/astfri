@@ -17,7 +17,7 @@ struct Stmt : virtual IVisitable
 };
 
 /**
- * @brief Defines access modifier of class member
+ * @brief Defines access modifier of a class member
  */
 enum class AccessModifier
 {
@@ -40,6 +40,15 @@ enum class AccessModifier
      * Internal -- package private | assembly private and similar
      */
     Internal
+};
+
+/**
+ * @brief Marks method as virtual or not virtual
+ */
+enum class Virtuality
+{
+    NotVirtual,
+    Virtual
 };
 
 /**
@@ -138,15 +147,10 @@ struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
  */
 struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
-    ClassDefStmt* owner_;
-    FunctionDefStmt* func_;
-    AccessModifier access_;
-
-    MethodDefStmt(
-        ClassDefStmt* owner,
-        FunctionDefStmt* func,
-        AccessModifier access
-    );
+    ClassDefStmt* owner_{nullptr};
+    FunctionDefStmt* func_{nullptr};
+    AccessModifier access_{AccessModifier::Public};
+    Virtuality virtuality_{Virtuality::NotVirtual};
 };
 
 /**

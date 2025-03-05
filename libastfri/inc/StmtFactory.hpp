@@ -48,10 +48,12 @@ public:
         Type* retType,
         CompoundStmt* body
     );
+    MethodDefStmt* mk_method_def();
     MethodDefStmt* mk_method_def(
         ClassDefStmt* owner,
         FunctionDefStmt* func,
-        AccessModifier access
+        AccessModifier access,
+        Virtuality virtuality
     );
     ConstructorDefStmt* mk_constructor_def();
     ConstructorDefStmt* mk_constructor_def(

@@ -104,13 +104,24 @@ FunctionDefStmt* StmtFactory::mk_function_def(
     );
 }
 
+MethodDefStmt* StmtFactory::mk_method_def()
+{
+    return details::emplace_get<MethodDefStmt>(stmts_);
+}
+
 MethodDefStmt* StmtFactory::mk_method_def(
     ClassDefStmt* owner,
     FunctionDefStmt* func,
-    AccessModifier access
+    AccessModifier access,
+    Virtuality virtuality
 )
 {
-    return details::emplace_get<MethodDefStmt>(stmts_, owner, func, access);
+    MethodDefStmt* m = this->mk_method_def();
+    m->owner_        = owner;
+    m->func_         = func;
+    m->access_       = access;
+    m->virtuality_   = virtuality;
+    return m;
 }
 
 InterfaceDefStmt* StmtFactory::mk_interface_def()
