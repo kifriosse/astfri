@@ -11,15 +11,15 @@ namespace astfri_serialize{
 
 enum  ExprNodeType{
     IntLiteralExpr,FloatLiteralExpr,CharLiteralExpr,StringLiteralExpr,BoolLiteralExpr,NullLiteralExpr,IfExpr,
-    BinOpExpr,UnaryOpExpr,AssignExpr,CompoundAssignExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
+    BinOpExpr,UnaryOpExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
     GlobalVarRefExpr,FunctionCallExpr,MethodCallExpr,LambdaExpr,ThisExpr,UnknownExpr,ConstructorCallExpr,NewExpr,
-    DeleteExpr};
+    DeleteExpr,ClassRefExpr};
     
 enum StmtNodeType{    
     LocalVarDefStmt,ParamVarDefStmt,
     MemberVarDefStmt,GlobalVarDefStmt,FunctionDefStmt,MethodDefStmt,GenericParam,ClassDefStmt,CompoundStmt,ReturnStmt,
     ExprStmt,IfStmt,CaseStmt,SwitchStmt,WhileStmt,DoWhileStmt,ForStmt,ThrowStmt,UnknownStmt,TranslationUnit,
-    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt};
+    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt,BreakStmt,ContinueStmt,DefaultCaseStmt};
     
     
 
@@ -30,20 +30,22 @@ enum StmtNodeType{
 inline    std::unordered_map<std::string,ExprNodeType> strToExprMapping={
     {"IntLitExpr",IntLiteralExpr},{"FloatLitExpr",FloatLiteralExpr},{"CharLitExpr",CharLiteralExpr},
     {"StringLitExpr",StringLiteralExpr},{"BoolLitExpr",BoolLiteralExpr},{"NullLitExpr",NullLiteralExpr},
-    {"IfExpr",IfExpr},{"BinOpExpr",BinOpExpr},{"UnaryOpExpr",UnaryOpExpr},{"AssignExpr",AssignExpr},
-    {"CompoundAssignExpr",CompoundAssignExpr},{"ParamVarRefExpr",ParamVarRefExpr},
+    {"IfExpr",IfExpr},{"BinOpExpr",BinOpExpr},{"UnaryOpExpr",UnaryOpExpr},{"ParamVarRefExpr",ParamVarRefExpr},
     {"LocalVarRefExpr",LocalVarRefExpr},{"MemberVarRefExpr",MemberVarRefExpr},{"GlobalVarRefExpr",GlobalVarRefExpr},
     {"FunctionCallExpr",FunctionCallExpr},{"MethodCallExpr",MethodCallExpr},{"LambdaExpr",LambdaExpr},
     {"ThisExpr",ThisExpr},{"UnknownExpr",UnknownExpr},{"ConstructorCallExpr",ConstructorCallExpr},{"NewExpr",NewExpr},
-    {"DeleteExpr",DeleteExpr}};
+    {"DeleteExpr",DeleteExpr},{"ClassRefExpr",ClassRefExpr}};
     
 inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVarDefStmt",LocalVarDefStmt},
     {"ParamVarDefStmt",ParamVarDefStmt},{"MemberVarDefStmt",MemberVarDefStmt},{"GlobalVarDefStmt",GlobalVarDefStmt},
     {"FunctionDefStmt",FunctionDefStmt},{"MethodDefStmt",MethodDefStmt},
     {"ClassDefStmt",ClassDefStmt},{"CompoundStmt",CompoundStmt},{"ReturnStmt",ReturnStmt},{"ExpressionStmt",ExprStmt},
-    {"IfStmt",IfStmt},{"CaseStmt",CaseStmt},{"SwitchStmt",SwitchStmt},{"WhileStmt",WhileStmt},{"DoWhileStmt",DoWhileStmt},
-    {"ForStmt",ForStmt},{"ThrowStmt",ThrowStmt},{"UnknownStmt",UnknownStmt},{"TranslationUnit",TranslationUnit},{"GenericParam",GenericParam},
-    {"DefStmt",DefStmt},{"ConstructorDefStmt",ConstructorDefStmt},{"DestructorDefStmt",DestructorDefStmt},{"BaseInitializerStmt",BaseInitializerStmt}}; 
+    {"IfStmt",IfStmt},{"CaseStmt",CaseStmt},{"SwitchStmt",SwitchStmt},{"WhileStmt",WhileStmt},
+    {"DoWhileStmt",DoWhileStmt},{"ForStmt",ForStmt},{"ThrowStmt",ThrowStmt},{"UnknownStmt",UnknownStmt},
+    {"TranslationUnit",TranslationUnit},{"GenericParam",GenericParam},{"DefStmt",DefStmt},
+    {"ConstructorDefStmt",ConstructorDefStmt},{"DestructorDefStmt",DestructorDefStmt},
+    {"BaseInitializerStmt",BaseInitializerStmt},{"BreakStmt",BreakStmt},{"ContinueStmt",ContinueStmt},
+    {"DefaultCaseStmt",DefaultCaseStmt}};
 
 
 inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},

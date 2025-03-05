@@ -36,8 +36,6 @@ astfri::NullLiteralExpr* serialize_null_lit_expr();
 astfri::IfExpr* serialize_if_expr(rapidjson::Value& value);
 astfri::BinOpExpr* serialize_bin_op_expr(rapidjson::Value& value);
 astfri::UnaryOpExpr* serialize_unary_op_expr(rapidjson::Value& value);
-astfri::AssignExpr* serialize_assign_expr(rapidjson::Value& value);
-astfri::CompoundAssignExpr* serialize_compound_assign_expr(rapidjson::Value& value);
 astfri::ParamVarRefExpr* serialize_param_var_ref_expr(rapidjson::Value& value);
 astfri::LocalVarRefExpr* serialize_local_var_ref_expr(rapidjson::Value& value);
 astfri::MemberVarRefExpr* serialize_member_var_ref_expr(rapidjson::Value& value);
@@ -78,14 +76,11 @@ astfri::BaseInitializerStmt* serialize_base_initializer_stmt(rapidjson::Value& v
 astfri::DestructorDefStmt* serialize_destructor_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner=nullptr);
 astfri::DefStmt* serialize_def_stmt(rapidjson::Value& value);
 astfri::TranslationUnit* serialize_translation_unit(rapidjson::Value& value);
+//astfri::BreakStmt* serialize_break_stmt();
+//astfri::ContinueStmt* serialize_continue_stmt(); 
+//astfri::DefaultCaseStmt* serialize_default_case_stmt();
 
 astfri::Type* serialize_type(rapidjson::Value& value);
-
-
-
-
-
-
 astfri::Type* resolve_type(rapidjson::Value& value);
 
 

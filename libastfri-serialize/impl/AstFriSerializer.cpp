@@ -146,22 +146,6 @@ astfri::UnaryOpExpr* AstFriSerializer::serialize_unary_op_expr(rapidjson::Value&
 
     return this->expressionMaker_.mk_unary_op(it->second,arg);
 }
-astfri::AssignExpr* AstFriSerializer::serialize_assign_expr(rapidjson::Value& value){
-
-    return this->expressionMaker_.mk_assign(this->resolve_expr(value["left"]),this->resolve_expr(value["right"]));
-}
-
-astfri::CompoundAssignExpr* AstFriSerializer::serialize_compound_assign_expr(rapidjson::Value& value){
-    astfri::Expr* left = this->resolve_expr(value["left"]);
-    astfri::Expr* right= this->resolve_expr(value["right"]);
-
-    auto it = astfri_serialize::binOpTypeMapping.find(value["operator"].GetString());
-    if (it == astfri_serialize::binOpTypeMapping.end()) {
-        throw std::runtime_error("Invalid operator in BinOpExpr");
-    }
-
-    return this->expressionMaker_.mk_compound_assign(left,it->second,right);
-}
 
 
 astfri::ParamVarRefExpr* AstFriSerializer::serialize_param_var_ref_expr(rapidjson::Value& value){
@@ -272,10 +256,6 @@ astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
             return this->serialize_bin_op_expr(value);
         case astfri_serialize::UnaryOpExpr:
             return this->serialize_unary_op_expr(value);
-        case astfri_serialize::AssignExpr:
-            return this->serialize_assign_expr(value);
-        case astfri_serialize::CompoundAssignExpr:
-            return this->serialize_compound_assign_expr(value);
         case astfri_serialize::ParamVarRefExpr:
             return this->serialize_param_var_ref_expr(value);
         case astfri_serialize::LocalVarRefExpr:
@@ -300,6 +280,9 @@ astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
             return this->serialize_delete_expr(value);
         case astfri_serialize::ConstructorCallExpr:
             return this->serialize_constructor_call_expr(value);
+        case astfri_serialize::ClassRefExpr:
+            return this->serialize_class_ref_expr(value);
+
 
     }
     return expressionMaker_.mk_unknown();
@@ -391,6 +374,15 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
             return this->serialize_destructor_def_stmt(value);
         case astfri_serialize::BaseInitializerStmt:
             return this->serialize_base_initializer_stmt(value);
+        case astfri_serialize::BreakStmt:
+        return this->statementMaker_.mk_uknown();
+            //return this->serialize_break_stmt();
+        case astfri_serialize::ContinueStmt:
+        return this->statementMaker_.mk_uknown();
+            //return this->serialize_continue_stmt();
+        case astfri_serialize::DefaultCaseStmt:
+            return this->statementMaker_.mk_uknown();
+            //return this->serialize_default_case_stmt(value);   
 
     }
 
@@ -534,7 +526,7 @@ astfri::CaseStmt* AstFriSerializer::serialize_case_stmt(rapidjson::Value& value)
     astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     //whole vector will be sent to mk_case method after update
-    return this->statementMaker_.mk_case(expressions[0],body);
+    return this->statementMaker_.mk_case(expressions.size()== 0 ? nullptr : expressions[0],body);
 }
 
 astfri::WhileStmt* AstFriSerializer::serialize_while_stmt(rapidjson::Value& value){
@@ -628,3 +620,17 @@ astfri::BaseInitializerStmt* AstFriSerializer::serialize_base_initializer_stmt(r
     
     return this->statementMaker_.mak_base_initializer(value["base"].GetString(),std::move(arguments));
 }
+
+/*astfri::BreakStmt* AstFriSerializer::serialize_break_stmt(){
+    return this->statementMaker_.mk_break();
+}
+*/
+
+/*astfri::ContinueStmt* AstFriSerializer::serialize_continue_stmt(){
+    return this->statementMaker_.mk_continue();
+}
+
+astfri::DefaultCaseStmt* AstFriSerializer::serialize_default_case_stmt(rapidjson::Value& value){
+    return this->statementMaker_.mk_default_case(this->resolve_stmt(value["body"]));
+}
+*/
