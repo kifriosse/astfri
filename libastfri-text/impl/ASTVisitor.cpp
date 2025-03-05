@@ -292,8 +292,7 @@ void ASTVisitor::visit(CompoundStmt const& stmt) {
 
 void ASTVisitor::visit(ReturnStmt const& stmt) {
     exporter_->write_return_word();
-    exporter_->write_space();
-    stmt.val_ ? stmt.val_->accept(*this) : exporter_->write_unknown_word();
+    stmt.val_ ? (exporter_->write_space(), stmt.val_->accept(*this)) : void();
 }
 
 void ASTVisitor::visit(ExprStmt const& stmt) {
