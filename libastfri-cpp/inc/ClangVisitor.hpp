@@ -55,6 +55,7 @@ public:
     TranslationUnit* visitedTranslationUnit;
     // traverse deklaracie
     bool TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor);
+    bool TraverseCXXDestructorDecl(clang::CXXDestructorDecl *Dtor);
     bool TraverseFunctionDecl(clang::FunctionDecl *FD);
     bool TraverseCXXMethodDecl(clang::CXXMethodDecl *Decl);
     bool TraverseCXXRecordDecl(clang::CXXRecordDecl *RD);
@@ -89,6 +90,7 @@ public:
     bool TraverseUnaryOperator(clang::UnaryOperator *UO);
 
 private:
+    astfri::AccessModifier getAccessModifier(clang::Decl* decl);
     TranslationUnit* tu_;
 
     StmtFactory* stmt_factory_;

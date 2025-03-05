@@ -20,6 +20,7 @@ public:
         }
         return a;
     }
+    ~Cisla(){}
 };
 
 int main(int argc, char* argv[]) {

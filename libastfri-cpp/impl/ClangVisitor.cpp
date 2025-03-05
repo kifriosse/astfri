@@ -27,6 +27,23 @@ ClangVisitor::ClangVisitor(TranslationUnit& visitedTranslationUnit) :
     this->expr_as_stmt = false;
 }
 
+astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl) {
+    switch (decl->getAccess()) {
+        case clang::AccessSpecifier::AS_public:
+            return astfri::AccessModifier::Public;
+            break;
+        case clang::AccessSpecifier::AS_protected:
+            return astfri::AccessModifier::Protected;
+            break;
+        case clang::AccessSpecifier::AS_private:
+            return astfri::AccessModifier::Private;
+            break;
+        default:
+            return astfri::AccessModifier::Public;
+            break;
+    }
+}
+
 // traverse deklaracie
 bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     llvm::outs() << "Konstruktor zaciatok: " << Ctor->getNameAsString() << "\n";
@@ -39,34 +56,22 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     //MethodDefStmt* new_ctor = nullptr;
     if (Ctor->hasBody()) {
         // vytvorenie konstruktora
-        // auto new_ctor = this->stmt_factory_->mk_constructor_def(
-        //     (ClassDefStmt*)this->astfri_location.stmt_,
-        //     std::vector<ParamVarDefStmt*>{},
-        //     std::vector<BaseInitializerStmt*>{},
-        //     nullptr,
-        //     AccessModifier::Public
-        // );
-        auto new_ctor = this->stmt_factory_->mk_method_def(
-                (ClassDefStmt*)this->astfri_location.stmt_,
-                nullptr,
-                AccessModifier::Public
-            );
-        ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_ctor);
-        
-        // naplnenie func_
-        auto func = this->stmt_factory_->mk_function_def(
-            Ctor->getNameAsString(),
-            std::vector<ParamVarDefStmt*> {},
-            this->type_factory_->mk_user(Ctor->getNameAsString()),
-            nullptr
+        auto new_ctor = this->stmt_factory_->mk_constructor_def(
+            (ClassDefStmt*)this->astfri_location.stmt_,
+            std::vector<ParamVarDefStmt*>{},
+            std::vector<BaseInitializerStmt*>{},
+            nullptr,
+            this->getAccessModifier(Ctor)
         );
+        // TODO: ked pride podpora treba odkomentovat
+        // ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_ctor);
+        
         TraverseStmt(Ctor->getBody());
-        func->body_ = (CompoundStmt*)this->astfri_location.stmt_;
+        new_ctor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
         for (auto parm : Ctor->parameters()) {
             TraverseDecl(parm);
-            func->params_.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
+            new_ctor->params_.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
         }
-        new_ctor->func_ = func;
     }
 
     // vratenie naspat AST location
@@ -74,6 +79,30 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     this->clang_location = clang_temp;
 
     llvm::outs() << "Konstruktor koniec: " << Ctor->getNameAsString() << "\n";
+    return true;
+}
+bool ClangVisitor::TraverseCXXDestructorDecl(clang::CXXDestructorDecl *Dtor) {
+    llvm::outs() << "Destruktor\n";
+
+    // zapamatanie si AST location
+    AstfriASTLocation astfri_temp = this->astfri_location;
+    ClangASTLocation clang_temp = this->clang_location;
+
+    // akcia na tomto vrchole
+    auto new_dtor = this->stmt_factory_->mk_destructor_def(
+        (ClassDefStmt*)this->astfri_location.stmt_,
+        nullptr
+    );
+    // TODO: ked bude podpora pre destruktory,
+    // ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_dtor);
+    TraverseStmt(Dtor->getBody());
+    new_dtor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
+
+    // vratenie AST location
+    this->astfri_location = astfri_temp;
+    this->clang_location = clang_temp;
+
+    llvm::outs() << "Destruktor koniec\n";
     return true;
 }
 bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl *FD) {
@@ -127,7 +156,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
             std::vector<ParamVarDefStmt*> {},
             this->type_factory_->mk_user(MD->getReturnType().getAsString()), //TODO: fixnut typ
             nullptr),
-        astfri::AccessModifier::Public
+            this->getAccessModifier(MD)
     );
     ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_method);
 
@@ -262,21 +291,7 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
     llvm::outs() << "Field zaciatok: " << FD->getNameAsString() << "\n";
 
     // vytvorenie premennej triedy
-    astfri::AccessModifier access;
-    switch (FD->getAccess()) {
-    case clang::AccessSpecifier::AS_public:
-        access = astfri::AccessModifier::Public;
-        break;
-    case clang::AccessSpecifier::AS_protected:
-        access = astfri::AccessModifier::Protected;
-        break;
-    case clang::AccessSpecifier::AS_private:
-        access = astfri::AccessModifier::Private;
-        break;
-    default:
-        access = astfri::AccessModifier::Public;
-        break;
-    }
+    astfri::AccessModifier access = this->getAccessModifier(FD);
     auto new_member = this->stmt_factory_->mk_member_var_def(
         FD->getNameAsString(),
         this->type_factory_->mk_user(FD->getType().getAsString()), //TODO: fixnut typ
@@ -627,27 +642,28 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
 }
 // visit expression
 bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor) {
-    // llvm::outs() << "CXXConstructExpr: " << Ctor->getConstructor()->getNameAsString() << "\n";
+    llvm::outs() << "CXXConstructExpr: " << Ctor->getConstructor()->getNameAsString() << "\n";
 
-    // // akcia na tomto vrchole
-    // auto new_ctor = this->expr_factory_->mk_method_call(
-    //     //TODO: zatial dam len ako string, neviem ci netreba nejaky pointer alebo nieco
-    //     this->expr_factory_->mk_string_literal(Ctor->getConstructor()->getParent()->getNameAsString()),
-    //     Ctor->getConstructor()->getNameAsString(),
-    //     std::vector<Expr *> {}
-    // );
+    // akcia na tomto vrchole
+    auto new_ctor_expr = this->expr_factory_->mk_constructor_call(
+        nullptr,
+        std::vector<Expr *> {}
+    );
 
-    // // vytvorenie AST location
-    // AstfriASTLocation* astfri_location = new AstfriASTLocation();
-    // astfri_location->expr_ = new_ctor;
-    // this->astfri_locationStack.push_back(astfri_location);
-    // ClangASTLocation* clang_location = new ClangASTLocation();
-    // clang_location->expr_ = Ctor;
-    // this->clang_locationStack.push_back(clang_location);
+    auto type = this->type_factory_->mk_user(
+        Ctor->getType().getAsString().c_str()
+    );
+    new_ctor_expr->type_ = type;
 
-    // Base::TraverseCXXConstructExpr(Ctor);
+    for (auto arg : Ctor->arguments()) {
+        TraverseStmt(arg);
+        new_ctor_expr->args_.push_back(this->astfri_location.expr_);
+    }
 
-    // vymazanie AST location netreba
+    this->astfri_location.expr_ = new_ctor_expr;
+    this->clang_location.expr_ = Ctor;
+
+    llvm::outs() << "CXXConstructExpr koniec\n";
     return true;
 }
 bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr *DRE) {
@@ -709,6 +725,7 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
         MCE->getMethodDecl()->getNameAsString().c_str(),
         args
     );
+
     this->astfri_location.expr_ = new_mem_call;
     this->clang_location.expr_ = MCE;
 
