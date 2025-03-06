@@ -1,4 +1,5 @@
 #include <libastfri/inc/StmtFactory.hpp>
+#include <libastfri/inc/TypeFactory.hpp>
 
 namespace astfri
 {
@@ -68,7 +69,7 @@ GlobalVarDefStmt* StmtFactory::mk_global_var_def(
 
 DefStmt* StmtFactory::mk_def()
 {
-    return details::emplace_get<DefStmt>(stmts_);
+    return details::emplace_get<DefStmt>(stmts_, std::vector<VarDefStmt*>{});
 }
 
 DefStmt* StmtFactory::mk_def(std::vector<VarDefStmt*> defs)
@@ -78,7 +79,13 @@ DefStmt* StmtFactory::mk_def(std::vector<VarDefStmt*> defs)
 
 FunctionDefStmt* StmtFactory::mk_function_def()
 {
-    return details::emplace_get<FunctionDefStmt>(stmts_);
+    return details::emplace_get<FunctionDefStmt>(
+        stmts_,
+        "",
+        std::vector<ParamVarDefStmt*>{},
+        TypeFactory::get_instance().mk_unknown(),
+        nullptr
+    );
 }
 
 FunctionDefStmt* StmtFactory::mk_function_def(
@@ -97,13 +104,36 @@ FunctionDefStmt* StmtFactory::mk_function_def(
     );
 }
 
+MethodDefStmt* StmtFactory::mk_method_def()
+{
+    return details::emplace_get<MethodDefStmt>(stmts_);
+}
+
 MethodDefStmt* StmtFactory::mk_method_def(
     ClassDefStmt* owner,
     FunctionDefStmt* func,
-    AccessModifier access
+    AccessModifier access,
+    Virtuality virtuality
 )
 {
-    return details::emplace_get<MethodDefStmt>(stmts_, owner, func, access);
+    MethodDefStmt* m = this->mk_method_def();
+    m->owner_        = owner;
+    m->func_         = func;
+    m->access_       = access;
+    m->virtuality_   = virtuality;
+    return m;
+}
+
+InterfaceDefStmt* StmtFactory::mk_interface_def()
+{
+    return details::emplace_get<InterfaceDefStmt>(stmts_);
+}
+
+InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name)
+{
+    InterfaceDefStmt* i = details::emplace_get<InterfaceDefStmt>(stmts_);
+    i->name_            = std::move(name);
+    return i;
 }
 
 ClassDefStmt* StmtFactory::mk_class_def()
@@ -111,25 +141,23 @@ ClassDefStmt* StmtFactory::mk_class_def()
     return details::emplace_get<ClassDefStmt>(stmts_);
 }
 
-ClassDefStmt* StmtFactory::mk_class_def(
-    std::string name,
-    std::vector<MemberVarDefStmt*> vars,
-    std::vector<MethodDefStmt*> methods,
-    std::vector<GenericParam*> tparams
-)
+ClassDefStmt* StmtFactory::mk_class_def(std::string name)
 {
-    return details::emplace_get<ClassDefStmt>(
-        stmts_,
-        std::move(name),
-        std::move(vars),
-        std::move(methods),
-        std::move(tparams)
-    );
+    ClassDefStmt* c = details::emplace_get<ClassDefStmt>(stmts_);
+    c->name_        = std::move(name);
+    return c;
 }
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def()
 {
-    return details::emplace_get<ConstructorDefStmt>(stmts_);
+    return details::emplace_get<ConstructorDefStmt>(
+        stmts_,
+        nullptr,
+        std::vector<ParamVarDefStmt*>{},
+        std::vector<BaseInitializerStmt*>{},
+        nullptr,
+        AccessModifier::Public
+    );
 }
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def(
@@ -167,6 +195,7 @@ DestructorDefStmt* StmtFactory::mk_destructor_def(
     CompoundStmt* body
 )
 {
+
     return details::emplace_get<DestructorDefStmt>(stmts_, owner, body);
 }
 
@@ -204,30 +233,39 @@ IfStmt* StmtFactory::mk_if(Expr* cond, Stmt* iftrue, Stmt* iffalse)
 
 CaseStmt* StmtFactory::mk_case(Expr* expr, Stmt* body)
 {
-    return details::emplace_get<CaseStmt>(stmts_, expr, body);
+    return details::emplace_get<CaseStmt>(
+        stmts_,
+        std::vector<Expr*>{expr},
+        body
+    );
 }
 
-SwitchStmt* StmtFactory::mk_switch(Expr* expr, std::vector<CaseStmt*> cases)
+CaseStmt* StmtFactory::mk_case(std::vector<Expr*> exprs, Stmt* body)
+{
+    return details::emplace_get<CaseStmt>(stmts_, std::move(exprs), body);
+}
+
+DefaultCaseStmt* StmtFactory::mk_default_case(Stmt* body)
+{
+    return details::emplace_get<DefaultCaseStmt>(stmts_, body);
+}
+
+SwitchStmt* StmtFactory::mk_switch(Expr* expr, std::vector<CaseBaseStmt*> cases)
 {
     return details::emplace_get<SwitchStmt>(stmts_, expr, std::move(cases));
 }
 
-WhileStmt* StmtFactory::mk_while(Expr* cond, CompoundStmt* body)
+WhileStmt* StmtFactory::mk_while(Expr* cond, Stmt* body)
 {
     return details::emplace_get<WhileStmt>(stmts_, cond, body);
 }
 
-DoWhileStmt* StmtFactory::mk_do_while(Expr* cond, CompoundStmt* body)
+DoWhileStmt* StmtFactory::mk_do_while(Expr* cond, Stmt* body)
 {
     return details::emplace_get<DoWhileStmt>(stmts_, cond, body);
 }
 
-ForStmt* StmtFactory::mk_for(
-    Stmt* init,
-    Expr* cond,
-    Stmt* step,
-    CompoundStmt* body
-)
+ForStmt* StmtFactory::mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body)
 {
     return details::emplace_get<ForStmt>(stmts_, init, cond, step, body);
 }
@@ -235,6 +273,16 @@ ForStmt* StmtFactory::mk_for(
 ThrowStmt* StmtFactory::mk_throw(Expr* val)
 {
     return details::emplace_get<ThrowStmt>(stmts_, val);
+}
+
+ContinueStmt* StmtFactory::mk_continue()
+{
+    return &continue_;
+}
+
+BreakStmt* StmtFactory::mk_break()
+{
+    return &break_;
 }
 
 UnknownStmt* StmtFactory::mk_uknown()
@@ -249,16 +297,17 @@ TranslationUnit* StmtFactory::mk_translation_unit()
 
 TranslationUnit* StmtFactory::mk_translation_unit(
     std::vector<ClassDefStmt*> classes,
+    std::vector<InterfaceDefStmt*> interfaces,
     std::vector<FunctionDefStmt*> functions,
     std::vector<GlobalVarDefStmt*> globals
 )
 {
-    return details::emplace_get<TranslationUnit>(
-        stmts_,
-        std::move(classes),
-        std::move(functions),
-        std::move(globals)
-    );
+    TranslationUnit* u = this->mk_translation_unit();
+    u->classes_        = std::move(classes);
+    u->interfaces_     = std::move(interfaces);
+    u->functions_      = std::move(functions);
+    u->globals_        = std::move(globals);
+    return u;
 }
 
 } // namespace astfri

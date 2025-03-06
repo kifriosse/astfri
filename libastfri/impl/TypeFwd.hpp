@@ -1,6 +1,7 @@
 
 namespace astfri
 {
+
 struct Type;
 struct DynamicType;
 struct IntType;
@@ -11,4 +12,5 @@ struct VoidType;
 struct UserType;
 struct IndirectionType;
 struct UnknownType;
+
 } // namespace astfri

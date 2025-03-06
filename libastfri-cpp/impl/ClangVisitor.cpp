@@ -12,8 +12,8 @@
 #include <cstddef>
 #include <exception>
 #include <iostream>
-#include <llvm-18/llvm/Support/Casting.h>
-#include <llvm-18/llvm/Support/raw_ostream.h>
+#include <llvm/Support/Casting.h>
+#include <llvm/Support/raw_ostream.h>
 #include <vector>
 
 namespace astfri::cpp

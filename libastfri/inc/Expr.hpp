@@ -92,65 +92,107 @@ struct IfExpr : Expr, details::MkVisitable<IfExpr>
  */
 enum class BinOpType
 {
-    // arg = arg, arg := arg, arg <- arg
+    // {lhs} = {rhs}, {lhs} := {rhs}, {lhs} <- {rhs}
     Assign,
 
-    // arg + arg
+    // {lhs} + {rhs}
     Add,
 
-    // arg - arg
+    // {lhs} - {rhs}
     Subtract,
 
-    // arg * arg
+    // {lhs} * {rhs}
     Multiply,
 
-    // arg / arg
+    // {lhs} / {rhs}
     Divide,
 
-    // arg % arg
+    // {lhs} // {rhs}, {lhs} div {rhs}
+    FloorDivide,
+
+    // {lhs} % {rhs}, {lhs} mod {rhs}
     Modulo,
 
-    // arg == arg
+    // {lhs} ** {rhs}
+    Exponentiation,
+
+    // {lhs} == {rhs}
     Equal,
 
-    // arg != arg, arg <> arg
+    // {lhs} != {rhs}, {lhs} <> {rhs}
     NotEqual,
 
-    // arg < arg
+    // {lhs} < {rhs}
     Less,
 
-    // arg <= arg
+    // {lhs} <= {rhs}
     LessEqual,
 
-    // arg > arg
+    // {lhs} > {rhs}
     Greater,
 
-    // arg >= arg
+    // {lhs} >= {rhs}
     GreaterEqual,
 
-    // arg && arg
+    // {lhs} && {rhs}
     LogicalAnd,
 
-    // arg || arg
+    // {lhs} || {rhs}
     LogicalOr,
 
-    // arg >> arg
+    // {lhs} >> {rhs}
     BitShiftRight,
 
-    // arg << arg
+    // {lhs} << {rhs}
     BitShiftLeft,
 
-    // arg & arg
+    // {lhs} & {rhs}
     BitAnd,
 
-    // arg | arg
+    // {lhs} | {rhs}
     BitOr,
 
-    // arg ^ arg
+    // {lhs} ^ {rhs}
     BitXor,
 
-    // arg , arg
-    Comma
+    // {lhs} , {rhs}
+    Comma,
+
+    // {lhs} += {rhs}
+    AddAssign,
+
+    // {lhs} -= {rhs}
+    SubtractAssign,
+
+    // {lhs} *= {rhs}
+    MultiplyAssign,
+
+    // {lhs} /= {rhs}
+    DivideAssign,
+
+    // {lhs} //= {rhs}
+    FloorDivideAssign,
+
+    // {lhs} %= {rhs}
+    ModuloAssign,
+
+    // {lhs} **= {rhs}
+    ExponentiationAssign,
+
+    // {lhs} >>= {rhs}
+    BitShiftRightAssign,
+
+    // {lhs} <<= {rhs}
+    BitShiftLeftAssign,
+
+    // {lhs} &= {rhs}
+    BitAndAssign,
+
+    // {lhs} |= {rhs}
+    BitOrAssign,
+
+    // {lhs} ^= {rhs}
+    BitXorAssign
 };
 
 /**
@@ -215,29 +257,6 @@ struct UnaryOpExpr : Expr, details::MkVisitable<UnaryOpExpr>
 /**
  * @brief TODO
  */
-struct AssignExpr : Expr, details::MkVisitable<AssignExpr>
-{
-    Expr* lhs_;
-    Expr* rhs_;
-
-    AssignExpr(Expr* lhs, Expr* rhs);
-};
-
-/**
- * @brief TODO
- */
-struct CompoundAssignExpr : Expr, details::MkVisitable<CompoundAssignExpr>
-{
-    Expr* lhs_;
-    BinOpType op_;
-    Expr* rhs_;
-
-    CompoundAssignExpr(Expr* lhs, BinOpType op, Expr* rhs);
-};
-
-/**
- * @brief TODO
- */
 struct ParamVarRefExpr : Expr, details::MkVisitable<ParamVarRefExpr>
 {
     // TODO later this should be a pointer to ParamVarDef
@@ -262,10 +281,11 @@ struct LocalVarRefExpr : Expr, details::MkVisitable<LocalVarRefExpr>
  */
 struct MemberVarRefExpr : Expr, details::MkVisitable<MemberVarRefExpr>
 {
+    Expr* owner_;
     // TODO later this should be a pointer to MemberVarDef
     std::string member_;
 
-    explicit MemberVarRefExpr(std::string member);
+    MemberVarRefExpr(Expr* expr, std::string member);
 };
 
 /**

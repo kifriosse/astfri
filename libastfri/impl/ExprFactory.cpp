@@ -55,20 +55,6 @@ UnaryOpExpr* ExprFactory::mk_unary_op(UnaryOpType op, Expr* arg)
     return details::emplace_get<UnaryOpExpr>(exprs_, op, arg);
 }
 
-AssignExpr* ExprFactory::mk_assign(Expr* lhs, Expr* rhs)
-{
-    return details::emplace_get<AssignExpr>(exprs_, lhs, rhs);
-}
-
-CompoundAssignExpr* ExprFactory::mk_compound_assign(
-    Expr* lhs,
-    BinOpType op,
-    Expr* rhs
-)
-{
-    return details::emplace_get<CompoundAssignExpr>(exprs_, lhs, op, rhs);
-}
-
 ParamVarRefExpr* ExprFactory::mk_param_var_ref(std::string param)
 {
     return details::emplace_get<ParamVarRefExpr>(exprs_, std::move(param));
@@ -79,9 +65,16 @@ LocalVarRefExpr* ExprFactory::mk_local_var_ref(std::string var)
     return details::emplace_get<LocalVarRefExpr>(exprs_, std::move(var));
 }
 
-MemberVarRefExpr* ExprFactory::mk_member_var_ref(std::string member)
+MemberVarRefExpr* ExprFactory::mk_member_var_ref(
+    Expr* owner,
+    std::string member
+)
 {
-    return details::emplace_get<MemberVarRefExpr>(exprs_, std::move(member));
+    return details::emplace_get<MemberVarRefExpr>(
+        exprs_,
+        owner,
+        std::move(member)
+    );
 }
 
 GlobalVarRefExpr* ExprFactory::mk_global_var_ref(std::string global)

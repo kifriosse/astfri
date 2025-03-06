@@ -47,19 +47,6 @@ UnaryOpExpr::UnaryOpExpr(UnaryOpType op, Expr* arg) :
 {
 }
 
-AssignExpr::AssignExpr(Expr* lhs, Expr* rhs) :
-    lhs_(lhs),
-    rhs_(rhs)
-{
-}
-
-CompoundAssignExpr::CompoundAssignExpr(Expr* lhs, BinOpType op, Expr* rhs) :
-    lhs_(lhs),
-    op_(op),
-    rhs_(rhs)
-{
-}
-
 ParamVarRefExpr::ParamVarRefExpr(std::string param) :
     param_(std::move(param))
 {
@@ -70,7 +57,8 @@ LocalVarRefExpr::LocalVarRefExpr(std::string var) :
 {
 }
 
-MemberVarRefExpr::MemberVarRefExpr(std::string member) :
+MemberVarRefExpr::MemberVarRefExpr(Expr* owner, std::string member) :
+    owner_(owner),
     member_(std::move(member))
 {
 }
@@ -81,7 +69,7 @@ GlobalVarRefExpr::GlobalVarRefExpr(std::string global) :
 }
 
 ClassRefExpr::ClassRefExpr(std::string name) :
-  name_(std::move(name))
+    name_(std::move(name))
 {
 }
 

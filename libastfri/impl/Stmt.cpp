@@ -2,6 +2,7 @@
 
 namespace astfri
 {
+
 VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
     name_(std::move(name)),
     type_(type),
@@ -65,17 +66,6 @@ FunctionDefStmt::FunctionDefStmt(
 {
 }
 
-MethodDefStmt::MethodDefStmt(
-    ClassDefStmt* owner,
-    FunctionDefStmt* func,
-    AccessModifier access
-) :
-    owner_(owner),
-    func_(func),
-    access_(access)
-{
-}
-
 BaseInitializerStmt::BaseInitializerStmt(
     std::string base,
     std::vector<Expr*> args
@@ -103,19 +93,6 @@ ConstructorDefStmt::ConstructorDefStmt(
 DestructorDefStmt::DestructorDefStmt(ClassDefStmt* owner, CompoundStmt* body) :
     owner_(owner),
     body_(body)
-{
-}
-
-ClassDefStmt::ClassDefStmt(
-    std::string name,
-    std::vector<MemberVarDefStmt*> vars,
-    std::vector<MethodDefStmt*> methods,
-    std::vector<GenericParam*> tparams
-) :
-    name_(std::move(name)),
-    vars_(std::move(vars)),
-    methods_(std::move(methods)),
-    tparams_(std::move(tparams))
 {
 }
 
@@ -147,35 +124,40 @@ IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
 {
 }
 
-CaseStmt::CaseStmt(Expr* expr, Stmt* body) :
-    expr_(expr),
-    body_(body)
+CaseStmt::CaseStmt(std::vector<Expr*> exprs, Stmt* body) :
+    CaseBaseStmt(body),
+    exprs_(std::move(exprs))
 {
 }
 
-SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseStmt*> cases) :
+DefaultCaseStmt::DefaultCaseStmt(Stmt* body) :
+    CaseBaseStmt(body)
+{
+}
+
+SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseBaseStmt*> cases) :
     expr_(expr),
     cases_(std::move(cases))
 {
 }
 
-LoopStmt::LoopStmt(Expr* cond, CompoundStmt* body) :
+LoopStmt::LoopStmt(Expr* cond, Stmt* body) :
     cond_(cond),
     body_(body)
 {
 }
 
-WhileStmt::WhileStmt(Expr* cond, CompoundStmt* body) :
+WhileStmt::WhileStmt(Expr* cond, Stmt* body) :
     LoopStmt(cond, body)
 {
 }
 
-DoWhileStmt::DoWhileStmt(Expr* cond, CompoundStmt* body) :
+DoWhileStmt::DoWhileStmt(Expr* cond, Stmt* body) :
     LoopStmt(cond, body)
 {
 }
 
-ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, CompoundStmt* body) :
+ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body) :
     LoopStmt(cond, body),
     init_(init),
     step_(step)
@@ -187,14 +169,4 @@ ThrowStmt::ThrowStmt(Expr* val) :
 {
 }
 
-TranslationUnit::TranslationUnit(
-    std::vector<ClassDefStmt*> classes,
-    std::vector<FunctionDefStmt*> functions,
-    std::vector<GlobalVarDefStmt*> globals
-) :
-    classes_(std::move(classes)),
-    functions_(std::move(functions)),
-    globals_(std::move(globals))
-{
-}
 } // namespace astfri
