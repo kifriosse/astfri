@@ -52,7 +52,9 @@ namespace uml {
         this->currentVariable_.type_ = type.name_;
     }
 
-    void ClassVisitor::visit (astfri::IndirectionType const& /*type*/) {
+    void ClassVisitor::visit (astfri::IndirectionType const& type) {
+        this->currentVariable_.isIndirect_ = true;
+        type.indirect_->accept(*this);
     }
         
     void ClassVisitor::visit (astfri::ParamVarDefStmt const& stmt) {
@@ -67,6 +69,7 @@ namespace uml {
         this->currentVariable_.accessMod_ = stmt.access_;
         //if (stmt.initializer_) stmt.initializer_->accept(*this);
         this->outputter_->add_data_member(this->currentVariable_);
+        this->currentVariable_.reset();
     }
 
     void ClassVisitor::visit (astfri::GlobalVarDefStmt const& /*stmt*/) {
@@ -87,9 +90,10 @@ namespace uml {
             this->currentVariable_.name_ = p->name_;
             //if (stmt.initializer_) stmt.initializer_->accept(*this);
             this->currentMethod_.params_.push_back(this->currentVariable_);
+            this->currentVariable_.reset();
         }
         this->outputter_->add_function_member(this->currentMethod_);
-        this->currentMethod_.params_.clear();
+        this->currentMethod_.reset();
     }
 
     void ClassVisitor::visit (astfri::ClassDefStmt const& stmt) {
@@ -98,7 +102,6 @@ namespace uml {
             this->currentClass_.genericParams_.push_back(gp->name_);
         }
         this->outputter_->open_class(this->currentClass_);
-        this->currentClass_.genericParams_.clear();
 
         for (astfri::MemberVarDefStmt* var : stmt.vars_)
         {
@@ -110,6 +113,7 @@ namespace uml {
             method->accept(*this);
         }
 
+        this->currentClass_.reset();
         this->outputter_->close_class();
     }
 

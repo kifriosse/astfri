@@ -8,6 +8,8 @@ namespace uml {
     private:
 
     public:
+        virtual std::string getFileExtension() override;
+
         virtual void open_class(ClassStruct c) override;
         virtual void close_class() override;
 

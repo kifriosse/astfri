@@ -4,6 +4,10 @@
 #include "libastfri-uml/inc/ElementStructs.hpp"
 
 namespace uml {
+    std::string PlantUMLOutputter::getFileExtension() {
+        return ".puml";
+    }
+
     void PlantUMLOutputter::open_class(ClassStruct c) {
         this->outputString_ += "class " + c.name_;
         if (c.genericParams_.size() > 0) {
@@ -26,16 +30,24 @@ namespace uml {
     }
 
     void PlantUMLOutputter::add_data_member(VarStruct v) {
+        if (v.isIndirect_) v.type_ += this->config_->indirectIndicator_;
         this->outputString_ += 
             this->config_->accessPrefix_[(int)v.accessMod_] + 
-            this->config_->typeConvention_->get_string(v.type_, v.name_, this->config_->separator_) + "\n";
+            this->config_->typeConvention_->get_string(
+                v.type_,
+                v.name_,
+                this->config_->separator_) + "\n";
     }
 
     void PlantUMLOutputter::add_function_member(MethodStruct m) {
         std::string header = m.name_ + "(";
         size_t index = 0;
         for (VarStruct p : m.params_) {
-            header += this->config_->typeConvention_->get_string(p.type_, p.name_, this->config_->separator_);
+            if (p.isIndirect_) p.type_ += this->config_->indirectIndicator_;
+            header += this->config_->typeConvention_->get_string(
+                p.type_,
+                p.name_,
+                this->config_->separator_);
             if (index != m.params_.size() - 1) {
                 header += ", ";
             }
