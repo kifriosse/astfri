@@ -281,10 +281,11 @@ struct LocalVarRefExpr : Expr, details::MkVisitable<LocalVarRefExpr>
  */
 struct MemberVarRefExpr : Expr, details::MkVisitable<MemberVarRefExpr>
 {
+    Expr* owner_;
     // TODO later this should be a pointer to MemberVarDef
     std::string member_;
 
-    explicit MemberVarRefExpr(std::string member);
+    MemberVarRefExpr(Expr* expr, std::string member);
 };
 
 /**

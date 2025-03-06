@@ -32,7 +32,7 @@ public:
     UnaryOpExpr* mk_unary_op(UnaryOpType op, Expr* arg);
     ParamVarRefExpr* mk_param_var_ref(std::string param);
     LocalVarRefExpr* mk_local_var_ref(std::string var);
-    MemberVarRefExpr* mk_member_var_ref(std::string member);
+    MemberVarRefExpr* mk_member_var_ref(Expr* owner, std::string member);
     GlobalVarRefExpr* mk_global_var_ref(std::string global);
     ClassRefExpr* mk_class_ref(std::string name);
     FunctionCallExpr* mk_function_call(

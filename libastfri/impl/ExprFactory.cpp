@@ -65,9 +65,16 @@ LocalVarRefExpr* ExprFactory::mk_local_var_ref(std::string var)
     return details::emplace_get<LocalVarRefExpr>(exprs_, std::move(var));
 }
 
-MemberVarRefExpr* ExprFactory::mk_member_var_ref(std::string member)
+MemberVarRefExpr* ExprFactory::mk_member_var_ref(
+    Expr* owner,
+    std::string member
+)
 {
-    return details::emplace_get<MemberVarRefExpr>(exprs_, std::move(member));
+    return details::emplace_get<MemberVarRefExpr>(
+        exprs_,
+        owner,
+        std::move(member)
+    );
 }
 
 GlobalVarRefExpr* ExprFactory::mk_global_var_ref(std::string global)

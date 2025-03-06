@@ -57,7 +57,8 @@ LocalVarRefExpr::LocalVarRefExpr(std::string var) :
 {
 }
 
-MemberVarRefExpr::MemberVarRefExpr(std::string member) :
+MemberVarRefExpr::MemberVarRefExpr(Expr* owner, std::string member) :
+    owner_(owner),
     member_(std::move(member))
 {
 }
