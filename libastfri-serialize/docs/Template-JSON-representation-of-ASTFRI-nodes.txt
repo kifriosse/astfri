@@ -1,0 +1,297 @@
+Template for JSON representation of ASTFRI nodes
+Expressions 
+LiteralExpressions: 
+{”node” : ”*LiteralExpr”, !!* must be replaced by concrete type like: Int,Bool,String,.. 
+”value” :  e.g. (500, ”text”,true,...)
+}
+UnknownExpression:
+{”node”: ”UnknownExpr”}
+Návrh pre ThisExpression:
+{”node” : ”ThisExpr”}
+LambdaExpression:
+{”node” :”LambdaExpr”,
+”params” : [{ParamDefStmt},...],
+”body” : {SomeStatement}
+}
+FunctionCallExpression:
+{
+”node” : ”FunctionCallExpr”,
+”name” : ”SomeName”,
+” arguments”: [{SomeExpression},...]
+}
+ MethodCallExpression:
+{
+”node” : ”MethodCallExpr”
+”owner” : {SomeRefExpr},!! or null,if not resolved
+”name” :  ”SomeName”,
+”arguments” : [{SomeExpression},...]
+}
+ Referencies:
+{
+”node” : ” TypeOfReference”(
+ParamVarRefExpr|LocalVarRefExpr,MemberVarRefExpr|ThisExpr|ClassRefExpr|GlobalVarRefExpr),
+”name”: ”SomeName”
+}
+
+BinOpExpression:
+{
+”node” : ”BinOpExpr”,
+”left” : {SomeExpression},
+”right”: {SomeExpression},
+”operator” : e.g.  ” / , &&, +”
+}
+UnaryOpExpression:
+{
+”node”: ”UnaryOpExpr”,
+”operator” : ”operator”;
+”isPostfix” : true/false,
+”argument” : {SomeExpression}
+}
+IfExpression -ternary operator:
+{
+”node” : ”IfExpr”,
+”condition” : {SomeExpression},
+”ifTrue” : {SomeExpression},
+”ifFalse”:{SomeExpression}
+}
+ConstructorCallExpression:
+{
+”node” : ”ConstructorCallExpr”,
+”type” : {SomeType},
+”arguments” : [{SomeExpression},...]
+}
+NewExpression:
+{
+”node” : ”NewExpr”,
+”init” : {ConstructorCallExpr}
+}
+DeleteExpr:
+{
+”node” : ”DeleteExpr”,
+”expression” : {SomeExpression}
+}
+
+Statements:
+MemberVarDefStmt :
+{
+”node” : ”MemberVarDefStmt”
+”acces”  : ”private/public/protected/internal”,
+”name” : ”SomeName”,
+”type”: {SomeType},
+”initializer” : {SomeExpresion} !! or null if there is no initializer
+}
+
+
+GlobalVarDefStmt | LocalVarDefStmt | ParamVarDefStmt
+{
+”node” : GlobalVarDefStmt | LocalVarDefStmt | ParamVarDefStmt,
+”name” : ”SomeName”,
+”type”: {SomeType},
+”initializer” : {SomeExpresion}, !! or null if there is no initilazer
+}
+ReturnStmt
+{
+”node” : ”ReturnStmt”,
+”value” : {SomeExpression} !! or null if there is no return value
+}
+
+IfStmt
+{
+”node” : ”IfStmt”,
+”condition” : {SomeExpression},
+”ifTrue” : {SomeStatement},
+”ifFalse”:{SomeStatement} !! or null 
+}
+CaseStmt
+{
+”node” : ”CaseStmt”,
+”expressions”: [{SomeExpression},...],
+”body” : {SomeStatement}
+}
+DefaultCaseStmt:
+{
+”node” : ”DefaultCaseStmt”,
+”body”  : {SomeStatement}
+}
+SwitchStmt
+{
+”node”:“SwitchStmt”,
+”entry” : {SomeExpression},
+”cases”: [{CaseStmt},...]
+}
+WhileStmt
+{
+”node” : ”WhileStmt”,
+”condition” : {SomeExpression},
+”body” : {CompoundStmt}
+}
+
+DoWhileStmt
+{
+”node” : ”DoWhileStmt”,
+”condition” : {SomeExpression},
+”body” : {CompoundStmt}
+}
+ForStmt
+{
+”node” : ”ForStmt”,
+”init” : {SomeStatement} !! or null if this part is empty
+”condition” : {SomeExpression} !! or null if this part is empty 
+”step” : {SomeStatement} !! or null if this part is empty
+”body” : {CompoundStmt}
+}
+ThrowStmt
+{
+”node”: ”ThrowStmt”,
+”expression” : {SomeExpression}
+}
+UnknownStmt
+{
+”node” : ”UnknownStmt”
+}
+FunctionDefStmt
+{
+”node” : ”FunctionDefStmt”,
+”name” : ”SomeName”,
+”parameters” : [{ParamVarDefStmt},...],
+”return_type” : {SometType},
+”body” : {CompoundStmt}
+{
+
+
+MethodDefStmt
+{
+”node” : ”MethodDefStmt”,
+”owner” : ”NameOfTheOwner”, 
+”name” : ”SomeName”,
+”access” : ”private/public/protected/internal”,
+”parameters” : [{ParamVarDefStmt},...];
+”return_type” : {SomeType},
+”body” : {CompoundStmt},
+}
+GenericParam
+{
+”node” : ”GenericParam”,
+”name” : ”SomeName”,
+”constraint” : ”SomeConstraint”  ! or null
+}
+ClassDefStmt
+{
+”node” : ”ClassDefStmt”
+”name” : ”SomeName”,
+”attributes” : [{MemberVarDefStmt},..],
+”constructors” : [{ConstructorDefStmt},...],
+”destructors” : [{DestructorDefStmt},...], 
+”methods” : [{MethodDefStmt},...],
+”generic_parameters” : [{GenericParam},..],
+”interfaces” : [{InterfaceDefStmt},...],
+”bases” : [{ClassDefStmt},...],
+}
+InterfaceDefStmt
+{
+”node” : ”InterfaceDefStmt”,
+”name” : ”SomeName”,
+”methods” : [{MethodDefStmt},...],
+”generic_parameters” : [{GenericParam},...],
+”bases” : [{IntefaceDefStmt},....]
+}
+TranslationUnit
+{
+”node” : ”TranslationUnit”,
+”classes” : [{ClassDefStmt},..],
+”functions” : [{FunctionDefStmt},...],
+”globals” : [{GlobalVarDefStmt},...]
+}
+ConstructorDefStmt:
+{
+”node” : ”ConstructorDefStmt”,
+”owner” : ”NameOfTheOwner”,
+”parameters” : [{ParamVarDefStmt},...],
+”base_initializers” : [{BaseInitialiserStmt},..],
+”body” : {CompoundStmt},
+”access” : ”private/public/protected/internal”
+}
+BaseInitializerStmt:
+{
+”node” : ”BaseInitializerStmt”,
+”base” : ”SomeName”,
+”arguments” : [{SomeExpression},...]
+} 
+DestructorDefStmt:
+{
+”node” : ”DestructorDefStmt”,
+”owner” : ”NameOfTheOwner”,
+”body” : {CompoundStmt}
+}
+DefStmt:
+{
+”node” : ”DefStmt”,
+”definitions” : [{VarDefStmt},...]
+}
+ExpressionStmt:
+{
+”node” : ”ExpressionStmt”,
+”expression” : {SomeExpression}
+}
+CompoundStmt:
+{
+”node” : ”CompoundStmt”,
+”statements” : [{SomeStatement},..]
+}
+BreakStmt:
+{
+”node” : ”BreakStmt”
+}
+ContinueStmt:
+{
+”node” : ”ContinueStmt”
+}
+Types:
+DynamicType:
+{
+”node” : ”Dynamic”
+}
+IntType:
+{
+”node” : ”Int”
+}
+
+FloatType:
+{
+”node” : ” Float”
+}
+CharType:
+{
+”node” : ” Char”
+}
+BoolType:
+{
+”node” : ” Bool”
+}
+VoidType:
+{
+”node” : ” Void”
+}
+UserType:
+{
+”node” :  ”User”,
+”name” : ”SomeName”
+}
+InDirectionType:
+{
+”node” :  ”Indirection”,
+”indirect” : {SomeType}
+}
+
+
+UnknownType:
+{
+”node” :  ”Unknown”
+}
+
+
+
+
+
+
+

@@ -14,7 +14,7 @@
 class JsonFormatChecker
 {
     public:
-    static JsonFormatChecker& getInstance();
+    static JsonFormatChecker& get_instance();
 
     public:
     void check_int_lit_expr(const rapidjson::Value& value);
