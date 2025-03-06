@@ -432,7 +432,8 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
 astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
     astfri::AccessModifier accessMod = accessModMapping.find(value["access"].GetString())->second;
-    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, astfri::Virtuality::Virtual);
+    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, value["virtuality"].GetString() == "yes" ? 
+                                                                            astfri::Virtuality::Virtual : astfri::Virtuality::NotVirtual);
 }
 
 astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value& value){
@@ -578,10 +579,16 @@ astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson:
         globals.push_back(this->serialize_global_var_def_stmt(global));
     }
 
+    std::vector<astfri::InterfaceDefStmt*> interfaces;
+    for (auto& interface : value["interfaces"].GetArray()){
+        interfaces.push_back(this->serialize_interface_def_stmt(interface));
+    }
+
     astfri::TranslationUnit* tu = this->statementMaker_.mk_translation_unit();
     tu->classes_ = std::move(classes);
     tu->functions_ = std::move(functions);
     tu->globals_ = std::move(globals);
+    tu->interfaces_=std::move(interfaces);
     return tu;
 }
 
