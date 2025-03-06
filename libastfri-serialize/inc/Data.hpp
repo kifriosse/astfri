@@ -19,7 +19,7 @@ enum StmtNodeType{
     LocalVarDefStmt,ParamVarDefStmt,
     MemberVarDefStmt,GlobalVarDefStmt,FunctionDefStmt,MethodDefStmt,GenericParam,ClassDefStmt,CompoundStmt,ReturnStmt,
     ExprStmt,IfStmt,CaseStmt,SwitchStmt,WhileStmt,DoWhileStmt,ForStmt,ThrowStmt,UnknownStmt,TranslationUnit,
-    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt,BreakStmt,ContinueStmt,DefaultCaseStmt};
+    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt,BreakStmt,ContinueStmt,DefaultCaseStmt,InterfaceDefStmt};
     
     
 
@@ -45,7 +45,7 @@ inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVar
     {"TranslationUnit",TranslationUnit},{"GenericParam",GenericParam},{"DefStmt",DefStmt},
     {"ConstructorDefStmt",ConstructorDefStmt},{"DestructorDefStmt",DestructorDefStmt},
     {"BaseInitializerStmt",BaseInitializerStmt},{"BreakStmt",BreakStmt},{"ContinueStmt",ContinueStmt},
-    {"DefaultCaseStmt",DefaultCaseStmt}};
+    {"DefaultCaseStmt",DefaultCaseStmt},{"InterfaceDefStmt",InterfaceDefStmt}};
 
 
 inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},

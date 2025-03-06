@@ -341,8 +341,7 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
         case astfri_serialize::GenericParam:
             return this->serialize_generic_param(value);
         case astfri_serialize::ClassDefStmt:
-            return this->statementMaker_.mk_uknown();
-            // return this->serialize_class_def_stmt(value);
+             return this->serialize_class_def_stmt(value);
         case astfri_serialize::CompoundStmt:
             return this->serialize_compound_stmt(value);
         case astfri_serialize::ReturnStmt:
@@ -376,14 +375,13 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
         case astfri_serialize::BaseInitializerStmt:
             return this->serialize_base_initializer_stmt(value);
         case astfri_serialize::BreakStmt:
-        return this->statementMaker_.mk_uknown();
-            //return this->serialize_break_stmt();
+            return this->serialize_break_stmt();
         case astfri_serialize::ContinueStmt:
-        return this->statementMaker_.mk_uknown();
-            //return this->serialize_continue_stmt();
+            return this->serialize_continue_stmt();
         case astfri_serialize::DefaultCaseStmt:
-            return this->statementMaker_.mk_uknown();
-            //return this->serialize_default_case_stmt(value);   
+            return this->serialize_default_case_stmt(value);   
+        case astfri_serialize::InterfaceDefStmt:
+            return this->serialize_interface_def_stmt(value); 
 
     }
 
@@ -467,7 +465,7 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
     }
 
     for (auto& destructor : value["destructors"].GetArray()){
-        classDefStmt->destructors_.push_back(this->serialize_destructor_def_stmt(destructor,classDefStmt);)
+        classDefStmt->destructors_.push_back(this->serialize_destructor_def_stmt(destructor,classDefStmt));
     }
 
     for (auto& interface : value["interfaces"].GetArray() ){
@@ -475,7 +473,7 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
     }
 
     for (auto& base : value["bases"].GetArray() ){
-        classDefStmt->interfaces_.push_back(this->serialize_class_def_stmt(base));
+        classDefStmt->bases_.push_back(this->serialize_class_def_stmt(base));
     }
 
     return classDefStmt;
@@ -514,7 +512,7 @@ astfri::SwitchStmt* AstFriSerializer::serialize_switch_stmt(rapidjson::Value& va
     std::vector<astfri::CaseBaseStmt*> cases;
 
     for (auto& caze : value["cases"].GetArray()){
-        cases.push_back(this->serialize_case_stmt(caze));
+        cases.push_back(dynamic_cast<astfri::CaseBaseStmt*>(this->resolve_stmt(caze)));
     }
 
     
@@ -529,7 +527,7 @@ astfri::CaseStmt* AstFriSerializer::serialize_case_stmt(rapidjson::Value& value)
     }
     astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
-    //whole vector will be sent to mk_case method after update
+    
     return this->statementMaker_.mk_case(std::move(expressions),body);
 }
 
