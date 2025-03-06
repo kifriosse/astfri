@@ -8,6 +8,7 @@
 
 namespace astfri
 {
+
 /**
  * @brief TODO
  */
@@ -389,15 +390,11 @@ struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt>
 struct TranslationUnit : Stmt, details::MkVisitable<TranslationUnit>
 {
     std::vector<ClassDefStmt*> classes_;
+    std::vector<InterfaceDefStmt*> interfaces_;
     std::vector<FunctionDefStmt*> functions_;
     std::vector<GlobalVarDefStmt*> globals_;
-
-    TranslationUnit(
-        std::vector<ClassDefStmt*> classes,
-        std::vector<FunctionDefStmt*> functions,
-        std::vector<GlobalVarDefStmt*> globals
-    );
 };
+
 } // namespace astfri
 
 #endif

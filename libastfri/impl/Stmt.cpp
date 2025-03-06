@@ -2,6 +2,7 @@
 
 namespace astfri
 {
+
 VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
     name_(std::move(name)),
     type_(type),
@@ -168,14 +169,4 @@ ThrowStmt::ThrowStmt(Expr* val) :
 {
 }
 
-TranslationUnit::TranslationUnit(
-    std::vector<ClassDefStmt*> classes,
-    std::vector<FunctionDefStmt*> functions,
-    std::vector<GlobalVarDefStmt*> globals
-) :
-    classes_(std::move(classes)),
-    functions_(std::move(functions)),
-    globals_(std::move(globals))
-{
-}
 } // namespace astfri

@@ -292,26 +292,22 @@ UnknownStmt* StmtFactory::mk_uknown()
 
 TranslationUnit* StmtFactory::mk_translation_unit()
 {
-    return details::emplace_get<TranslationUnit>(
-        stmts_,
-        std::vector<ClassDefStmt*>{},
-        std::vector<FunctionDefStmt*>{},
-        std::vector<GlobalVarDefStmt*>{}
-    );
+    return details::emplace_get<TranslationUnit>(stmts_);
 }
 
 TranslationUnit* StmtFactory::mk_translation_unit(
     std::vector<ClassDefStmt*> classes,
+    std::vector<InterfaceDefStmt*> interfaces,
     std::vector<FunctionDefStmt*> functions,
     std::vector<GlobalVarDefStmt*> globals
 )
 {
-    return details::emplace_get<TranslationUnit>(
-        stmts_,
-        std::move(classes),
-        std::move(functions),
-        std::move(globals)
-    );
+    TranslationUnit* u = this->mk_translation_unit();
+    u->classes_        = std::move(classes);
+    u->interfaces_     = std::move(interfaces);
+    u->functions_      = std::move(functions);
+    u->globals_        = std::move(globals);
+    return u;
 }
 
 } // namespace astfri

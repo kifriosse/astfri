@@ -121,6 +121,7 @@ public:
     TranslationUnit* mk_translation_unit();
     TranslationUnit* mk_translation_unit(
         std::vector<ClassDefStmt*> classes,
+        std::vector<InterfaceDefStmt*> interfaces,
         std::vector<FunctionDefStmt*> functions,
         std::vector<GlobalVarDefStmt*> globals
     );
