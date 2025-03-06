@@ -443,19 +443,13 @@ astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value
                                                     std::move(value["constraint"].GetString()),
                                                     std::move(value["name"].GetString()));
 }
-/*
+
 astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Value& value){
     
-    std::vector<astfri::MemberVarDefStmt*> attributes;
-    std::vector<astfri::GenericParam*> genericParams;
-    std::vector<astfri::ConstructorDefStmt*> constructors;
-    std::vector<astfri::MethodDefStmt*> methods;
+    
 
-    //Create naked ClassDefStmt*only with name,values will be added later to particular ClassDefStmt's attributes 
-    astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()),std::move(attributes),
-                                                                            std::move(methods),std::move(genericParams));
-
-
+    astfri::ClassDefStmt*  classDefStmt = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()));
+    
     for (auto& attribute : value["attributes"].GetArray()){
         classDefStmt->vars_.push_back(this->serialize_member_var_def_stmt(attribute));
     }
@@ -467,18 +461,23 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
     for (auto& method : value["methods"].GetArray()){
         classDefStmt->methods_.push_back(this->serialize_method_def_stmt(method,classDefStmt));
     }
-    /*
+    
     for (auto& constructor : value["constructors"].GetArray()){
         classDefStmt->constructors_.push_back(this->serialize_constructor_def_stmt(constructor,classDefStmt));
     }
 
-    classDefStmt->destructor_ = value["destructor"].IsNull() ? nullptr : 
-                                            this->serialize_destructor_def_stmt(value["destructor"],classDefStmt);
+    for (auto& destructor : value["destructors"].GetArray()){
+        classDefStmt->destructors_.push_back(this->serialize_destructor_def_stmt(destructor,classDefStmt);)
+    }
+
+    for (auto& baseClass : value["interfaces"].GetArray() ){
+        classDefStmt->interfaces_.push_back(this->serialize_in)
+    }
 
     return classDefStmt;
     
 }
-*/
+
 astfri::CompoundStmt* AstFriSerializer::serialize_compound_stmt(rapidjson::Value& value){
     std::vector<astfri::Stmt*> statements;
 
@@ -626,16 +625,35 @@ astfri::BaseInitializerStmt* AstFriSerializer::serialize_base_initializer_stmt(r
     return this->statementMaker_.mak_base_initializer(value["base"].GetString(),std::move(arguments));
 }
 
-/*astfri::BreakStmt* AstFriSerializer::serialize_break_stmt(){
+astfri::BreakStmt* AstFriSerializer::serialize_break_stmt(){
     return this->statementMaker_.mk_break();
 }
-*/
 
-/*astfri::ContinueStmt* AstFriSerializer::serialize_continue_stmt(){
+
+astfri::ContinueStmt* AstFriSerializer::serialize_continue_stmt(){
     return this->statementMaker_.mk_continue();
 }
 
 astfri::DefaultCaseStmt* AstFriSerializer::serialize_default_case_stmt(rapidjson::Value& value){
     return this->statementMaker_.mk_default_case(this->resolve_stmt(value["body"]));
 }
-*/
+
+astfri::InterfaceDefStmt* AstFriSerializer::serialize_interface_def_stmt(rapidjson::Value& value){
+
+    astfri::InterfaceDefStmt* interfDefStmt =  this->statementMaker_.mk_interface_def(std::move(value["name"].GetString()));
+    
+    for(auto& base : value["bases"].GetArray()){
+        interfDefStmt->bases_.push_back(this->serialize_interface_def_stmt(base));
+    }
+
+    for(auto& method : value["methods"].GetArray()){
+        interfDefStmt->methods_.push_back(this->serialize_method_def_stmt(method));
+    }
+
+    for(auto& genericParam : value["generic_parameters"].GetArray()){
+        interfDefStmt->tparams_.push_back(this->serialize_generic_param(genericParam));
+    }
+
+    return interfDefStmt;
+
+}
