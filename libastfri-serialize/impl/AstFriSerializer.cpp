@@ -158,7 +158,7 @@ astfri::LocalVarRefExpr* AstFriSerializer::serialize_local_var_ref_expr(rapidjso
     
 }
 astfri::MemberVarRefExpr* AstFriSerializer::serialize_member_var_ref_expr(rapidjson::Value& value){
-   return  this->expressionMaker_.mk_member_var_ref(std::move(value["name"].GetString()));
+   return  this->expressionMaker_.mk_member_var_ref(nullptr, std::move(value["name"].GetString()));
 }
 
 astfri::GlobalVarRefExpr* AstFriSerializer::serialize_global_var_ref_expr(rapidjson::Value& value){
@@ -434,7 +434,7 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
 astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
     astfri::AccessModifier accessMod = accessModMapping.find(value["access"].GetString())->second;
-    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod);
+    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, astfri::Virtuality::Virtual);
 }
 
 astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value& value){
@@ -508,7 +508,7 @@ astfri::IfStmt* AstFriSerializer::serialize_if_stmt(rapidjson::Value& value){
 
 astfri::SwitchStmt* AstFriSerializer::serialize_switch_stmt(rapidjson::Value& value){
     astfri::Expr* swichEntry = this->resolve_expr(value["entry"]);
-    std::vector<astfri::CaseStmt*> cases;
+    std::vector<astfri::CaseBaseStmt*> cases;
 
     for (auto& caze : value["cases"].GetArray()){
         cases.push_back(this->serialize_case_stmt(caze));
@@ -577,7 +577,11 @@ astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson:
         globals.push_back(this->serialize_global_var_def_stmt(global));
     }
 
-    return this->statementMaker_.mk_translation_unit(std::move(classes),std::move(functions),std::move(globals));
+    astfri::TranslationUnit* tu = this->statementMaker_.mk_translation_unit();
+    tu->classes_ = std::move(classes);
+    tu->functions_ = std::move(functions);
+    tu->globals_ = std::move(globals);
+    return tu;
 }
 
 

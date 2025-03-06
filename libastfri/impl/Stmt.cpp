@@ -124,6 +124,11 @@ IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
 {
 }
 
+CaseBaseStmt::CaseBaseStmt(Stmt* body) :
+    body_(body)
+{
+}
+
 CaseStmt::CaseStmt(std::vector<Expr*> exprs, Stmt* body) :
     CaseBaseStmt(body),
     exprs_(std::move(exprs))

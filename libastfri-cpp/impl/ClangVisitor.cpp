@@ -156,7 +156,8 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
             std::vector<ParamVarDefStmt*> {},
             this->type_factory_->mk_user(MD->getReturnType().getAsString()), //TODO: fixnut typ
             nullptr),
-            this->getAccessModifier(MD)
+            this->getAccessModifier(MD),
+            Virtuality::NotVirtual
     );
     ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_method);
 
@@ -191,10 +192,7 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl *RD) {
 
     // akcia na vrchole
     auto new_class = this->stmt_factory_->mk_class_def(
-        RD->getNameAsString(),
-        std::vector<MemberVarDefStmt*> {},
-        std::vector<MethodDefStmt*> {},
-        std::vector<GenericParam*> {}
+        RD->getNameAsString()
     );
     this->tu_->classes_.push_back(new_class);
 
@@ -565,7 +563,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
     // akcia na tomto vrchole
     auto new_switch = this->stmt_factory_->mk_switch(
         nullptr,
-        std::vector<CaseStmt*> {}
+        std::vector<CaseBaseStmt*> {}
     );
     ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_switch);
 
@@ -590,7 +588,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
             // naplnenie case-u
             auto case_cond = case_stmt->getLHS();
             TraverseStmt(case_cond);
-            new_case->expr_ = this->astfri_location.expr_;
+            new_case->exprs_.push_back(this->astfri_location.expr_);
 
             auto case_body = case_stmt->getSubStmt();
             // ak je v compounde
@@ -621,7 +619,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
             } else {
                 // TODO: potom dorobit ked bude default case
                 auto len_zatial = this->expr_factory_->mk_string_literal("Default");
-                new_default->expr_ = len_zatial;
+                new_default->exprs_.push_back(len_zatial);
                 // nieje compound, iba jeden prikaz (dam do compoundu a potom vyberiem)
                 auto temp_compund = this->stmt_factory_->mk_compound(std::vector<Stmt *> {});
                 this->astfri_location.stmt_ = temp_compund;
@@ -693,6 +691,7 @@ bool ClangVisitor::TraverseMemberExpr(clang::MemberExpr* ME) {
     
     // akcia na tomto vrchole
     auto new_mem_expr = this->expr_factory_->mk_member_var_ref(
+        nullptr,
         ME->getMemberNameInfo().getAsString().c_str()
     );
     this->astfri_location.expr_ = new_mem_expr;

@@ -40,12 +40,12 @@ NodeMapper::NodeMapper() : typeFactory(astfri::TypeFactory::get_instance()),
                                {"false", map_boolean_literal()},
                                {"binary_expression", map_binary_operation()},
                                {"unary_expression", map_unary_operation()},
-                               {"=", map_assignment()},
-                               {"+=", map_compound_assignment()},
-                               {"-=", map_compound_assignment()},
-                               {"*=", map_compound_assignment()},
-                               {"/=", map_compound_assignment()},
-                               {"%=", map_compound_assignment()},
+                            //    {"=", map_assignment()},
+                            //    {"+=", map_compound_assignment()},
+                            //    {"-=", map_compound_assignment()},
+                            //    {"*=", map_compound_assignment()},
+                            //    {"/=", map_compound_assignment()},
+                            //    {"%=", map_compound_assignment()},
                                {"identifier", map_parameter_variable_reference()},
                            }),
                            binOpMap({
@@ -135,8 +135,13 @@ std::function<astfri::Stmt*(StmtArguments)> NodeMapper::map_formal_parameter() {
 
 std::function<astfri::Stmt*(StmtArguments)> NodeMapper::map_class_node() {
     return [this](StmtArguments arg) {
-        return std::apply([this](std::string name, std::vector<astfri::MemberVarDefStmt*> vars, std::vector<astfri::MethodDefStmt*> methods, std::vector<astfri::GenericParam*> tparams) {
-            return stmtFactory.mk_class_def(name, vars, methods, tparams);
+        
+        return std::apply([&](std::string name, std::vector<astfri::MemberVarDefStmt*> vars, std::vector<astfri::MethodDefStmt*> methods, std::vector<astfri::GenericParam*> tparams) {
+            astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(name);
+            classDef->vars_ = std::move(vars);
+            classDef->methods_ = std::move(methods);
+            classDef->tparams_ = std::move(tparams);
+            return classDef;
         }, std::get<std::tuple<std::string, std::vector<astfri::MemberVarDefStmt*>, std::vector<astfri::MethodDefStmt*>, std::vector<astfri::GenericParam*>>>(arg));
     };
 }
@@ -191,9 +196,9 @@ std::function<astfri::Stmt*(StmtArguments)> NodeMapper::map_case_node() {
 
 std::function<astfri::Stmt*(StmtArguments)> NodeMapper::map_switch_node() {
     return [this](StmtArguments arg) {
-        return std::apply([this](astfri::Expr* expr, std::vector<astfri::CaseStmt*> cases) {
+        return std::apply([this](astfri::Expr* expr, std::vector<astfri::CaseBaseStmt*> cases) {
             return stmtFactory.mk_switch(expr, cases);
-        }, std::get<std::tuple<astfri::Expr*, std::vector<astfri::CaseStmt*>>>(arg));
+        }, std::get<std::tuple<astfri::Expr*, std::vector<astfri::CaseBaseStmt*>>>(arg));
     };
 }
 
@@ -277,22 +282,6 @@ std::function<astfri::Expr*(ExprArguments)> NodeMapper::map_unary_operation() {
     };
 }
 
-std::function<astfri::Expr*(ExprArguments)> NodeMapper::map_assignment() {
-    return [this](ExprArguments arg) {
-        return std::apply([this](astfri::Expr* lhs, astfri::Expr* rhs) {
-            return exprFactory.mk_assign(lhs, rhs);
-        }, std::get<std::tuple<astfri::Expr*, astfri::Expr*>>(arg));
-    };
-}
-
-std::function<astfri::Expr*(ExprArguments)> NodeMapper::map_compound_assignment() {
-    return [this](ExprArguments arg) {
-        return std::apply([this](astfri::Expr* lhs, astfri::BinOpType op, astfri::Expr* rhs) {
-            return exprFactory.mk_compound_assign(lhs, op, rhs);
-        }, std::get<std::tuple<astfri::Expr*, astfri::BinOpType, astfri::Expr*>>(arg));
-    };
-}
-
 std::function<astfri::Expr*(ExprArguments)> NodeMapper::map_parameter_variable_reference() {
     return [this](ExprArguments arg) {
         return std::apply([this](std::string param) {
@@ -312,7 +301,7 @@ std::function<astfri::Expr*(ExprArguments)> NodeMapper::map_local_variable_refer
 std::function<astfri::Expr*(ExprArguments)> NodeMapper::map_member_variable_reference() {
     return [this](ExprArguments arg) {
         return std::apply([this](std::string member) {
-            return exprFactory.mk_member_var_ref(member);
+            return exprFactory.mk_member_var_ref(nullptr, member);
         }, std::get<std::tuple<std::string>>(arg));
     };
 }

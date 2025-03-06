@@ -88,11 +88,11 @@ astfri::Expr* NodeGetter::get_expr(
     {
         expr = this->get_un_op_expr(tsNode, sourceCode);
     }
-    else if (nodeName.find("(assignment_expression") != std::string::npos)
-    {
-        auto assignExprVariant = this->get_assign_expr(tsNode, sourceCode);
-        std::visit([&expr] (auto&& arg) { expr = arg; }, assignExprVariant);
-    }
+    // else if (nodeName.find("(assignment_expression") != std::string::npos)
+    // {
+    //     auto assignExprVariant = this->get_assign_expr(tsNode, sourceCode);
+    //     std::visit([&expr] (auto&& arg) { expr = arg; }, assignExprVariant);
+    // }
     else if (nodeName == "(this)")
     {
         expr = exprFactory.mk_this();
@@ -226,86 +226,86 @@ astfri::UnaryOpExpr* NodeGetter::get_un_op_expr(
     return unOpExpr;
 }
 
-std::variant<astfri::AssignExpr*, astfri::CompoundAssignExpr*> NodeGetter::
-    get_assign_expr(TSNode tsNode, std::string const& sourceCode)
-{
-    astfri::AssignExpr* assignExpr                 = nullptr;
-    astfri::CompoundAssignExpr* compoundAssignExpr = nullptr;
+// std::variant<astfri::AssignExpr*, astfri::CompoundAssignExpr*> NodeGetter::
+//     get_assign_expr(TSNode tsNode, std::string const& sourceCode)
+// {
+    // astfri::AssignExpr* assignExpr                 = nullptr;
+    // astfri::CompoundAssignExpr* compoundAssignExpr = nullptr;
 
-    char const* queryString = "(assignment_expression left: (_) @left"
-                              "operator: _ @operator right: (_) @right)";
+    // char const* queryString = "(assignment_expression left: (_) @left"
+    //                           "operator: _ @operator right: (_) @right)";
 
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, tsNode);
-    TSQueryMatch tsMatch;
+    // TSQuery* tsQuery        = make_query(queryString);
+    // TSQueryCursor* tsCursor = ts_query_cursor_new();
+    // ts_query_cursor_exec(tsCursor, tsQuery, tsNode);
+    // TSQueryMatch tsMatch;
 
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
-    {
-        astfri::Expr* leftExpr  = nullptr;
-        astfri::Expr* rightExpr = nullptr;
-        astfri::BinOpType binOpType;
+    // while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    // {
+    //     astfri::Expr* leftExpr  = nullptr;
+    //     astfri::Expr* rightExpr = nullptr;
+    //     astfri::BinOpType binOpType;
 
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
-        {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeName(ts_node_string(tsCapture.node));
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
+    //     for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+    //     {
+    //         TSQueryCapture tsCapture = tsMatch.captures[i];
+    //         uint32_t length;
+    //         std::string captureName = ts_query_capture_name_for_id(
+    //             tsQuery,
+    //             tsCapture.index,
+    //             &length
+    //         );
+    //         std::string nodeName(ts_node_string(tsCapture.node));
+    //         std::string nodeText(get_node_text(tsCapture.node, sourceCode));
 
-            if (captureName == "left")
-            {
-                leftExpr = this->get_expr(
-                    nodeName,
-                    nodeText,
-                    tsCapture.node,
-                    sourceCode
-                );
-            }
-            else if (captureName == "right")
-            {
-                rightExpr = this->get_expr(
-                    nodeName,
-                    nodeText,
-                    tsCapture.node,
-                    sourceCode
-                );
-            }
-            else if (captureName == "operator")
-            {
-                binOpType
-                    = this->nodeMapper->get_binOpMap().find(nodeText)->second;
-            }
-        }
+    //         if (captureName == "left")
+    //         {
+    //             leftExpr = this->get_expr(
+    //                 nodeName,
+    //                 nodeText,
+    //                 tsCapture.node,
+    //                 sourceCode
+    //             );
+    //         }
+    //         else if (captureName == "right")
+    //         {
+    //             rightExpr = this->get_expr(
+    //                 nodeName,
+    //                 nodeText,
+    //                 tsCapture.node,
+    //                 sourceCode
+    //             );
+    //         }
+    //         else if (captureName == "operator")
+    //         {
+    //             binOpType
+    //                 = this->nodeMapper->get_binOpMap().find(nodeText)->second;
+    //         }
+    //     }
 
-        if (astfri::BinOpType::Assign == binOpType)
-        {
-            assignExpr = exprFactory.mk_assign(leftExpr, rightExpr);
-        }
-        else
-        {
-            compoundAssignExpr = exprFactory.mk_compound_assign(
-                leftExpr,
-                binOpType,
-                rightExpr
-            );
-        }
-    }
+    //     if (astfri::BinOpType::Assign == binOpType)
+    //     {
+    //         assignExpr = exprFactory.mk_assign(leftExpr, rightExpr);
+    //     }
+    //     else
+    //     {
+    //         compoundAssignExpr = exprFactory.mk_compound_assign(
+    //             leftExpr,
+    //             binOpType,
+    //             rightExpr
+    //         );
+    //     }
+    // }
 
-    if (assignExpr != nullptr)
-    {
-        return assignExpr;
-    }
-    else
-    {
-        return compoundAssignExpr;
-    }
-}
+    // if (assignExpr != nullptr)
+    // {
+    //     return assignExpr;
+    // }
+    // else
+    // {
+    //     return compoundAssignExpr;
+    // }
+// }
 
 std::variant<
     astfri::ParamVarRefExpr*,
@@ -444,6 +444,7 @@ std::variant<
                                         == referenceName)
                                     {
                                         return exprFactory.mk_member_var_ref(
+                                            nullptr,
                                             referenceName
                                         );
                                     }
@@ -1004,7 +1005,7 @@ std::vector<astfri::MethodDefStmt*> NodeGetter::get_methods(
         }
 
         astfri::MethodDefStmt* method
-            = stmtFactory.mk_method_def(nullptr, func, access);
+            = stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::Virtual);
         methods.push_back(method);
         std::cout << "method added" << std::endl;
         methodModifiers.clear();
@@ -1176,9 +1177,9 @@ std::vector<astfri::ClassDefStmt*> NodeGetter::get_classes(
             classMethods = this->get_methods(tsNode, sourceCode);
         }
 
-        astfri::ClassDefStmt* classDef
-            = stmtFactory
-                  .mk_class_def(className, classMemberVars, classMethods, {});
+        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className);
+        classDef->vars_ = classMemberVars;
+        classDef->methods_ = classMethods;
         classes.push_back(classDef);
         std::cout << "class added" << std::endl;
 

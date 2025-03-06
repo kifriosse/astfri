@@ -32,8 +32,8 @@ public:
     void visit(IfExpr              const& expr) override;
     void visit(BinOpExpr           const& expr) override;
     void visit(UnaryOpExpr         const& expr) override;
-    void visit(AssignExpr          const& expr) override;
-    void visit(CompoundAssignExpr  const& expr) override;
+    // void visit(AssignExpr          const& expr) override;
+    // void visit(CompoundAssignExpr  const& expr) override;
     void visit(ParamVarRefExpr     const& expr) override;
     void visit(LocalVarRefExpr     const& expr) override;
     void visit(MemberVarRefExpr    const& expr) override;
@@ -52,6 +52,7 @@ public:
     void visit(ReturnStmt          const& stmt) override;
     void visit(ExprStmt            const& stmt) override;
     void visit(IfStmt              const& stmt) override;
+    void visit(DefaultCaseStmt     const& stmt) override;
     void visit(CaseStmt            const& stmt) override;
     void visit(SwitchStmt          const& stmt) override;
     void visit(WhileStmt           const& stmt) override;
@@ -71,6 +72,9 @@ public:
     void visit(DestructorDefStmt   const& stmt) override;
     void visit(GenericParam        const& stmt) override;
     void visit(ClassDefStmt        const& stmt) override;
+    void visit(InterfaceDefStmt    const& stmt) override;
+    void visit(BreakStmt           const& stmt) override;
+    void visit(ContinueStmt        const& stmt) override;
 private:
     void write_open_curl_bracket();
     void write_initialization(const VarDefStmt* init);

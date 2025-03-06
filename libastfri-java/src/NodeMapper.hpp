@@ -30,7 +30,7 @@ using StmtArguments = std::variant<
     std::tuple<astfri::Expr*>,
     std::tuple<astfri::Expr*, astfri::Stmt*, astfri::Stmt*>,
     std::tuple<astfri::Expr*, astfri::Stmt*>,
-    std::tuple<astfri::Expr*, std::vector<astfri::CaseStmt*>>,
+    std::tuple<astfri::Expr*, std::vector<astfri::CaseBaseStmt*>>,
     std::tuple<astfri::Expr*, astfri::CompoundStmt*>,
     std::tuple<
         astfri::Stmt*,
@@ -86,8 +86,6 @@ private:
     std::function<astfri::Expr*(ExprArguments)> map_boolean_literal ();
     std::function<astfri::Expr*(ExprArguments)> map_binary_operation ();
     std::function<astfri::Expr*(ExprArguments)> map_unary_operation ();
-    std::function<astfri::Expr*(ExprArguments)> map_assignment ();
-    std::function<astfri::Expr*(ExprArguments)> map_compound_assignment ();
     std::function<astfri::Expr*(ExprArguments)> map_parameter_variable_reference ();
     std::function<astfri::Expr*(ExprArguments)> map_local_variable_reference ();
     std::function<astfri::Expr*(ExprArguments)> map_member_variable_reference (

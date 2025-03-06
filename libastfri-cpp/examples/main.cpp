@@ -64,11 +64,7 @@ int main(int argc, const char **argv) {
 
     
     
-    astfri::TranslationUnit tu(
-        std::vector<astfri::ClassDefStmt*> {},
-        std::vector<astfri::FunctionDefStmt*> {},
-        std::vector<astfri::GlobalVarDefStmt*> {}
-    );
+    astfri::TranslationUnit tu;
     auto OptionsParser = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory);
     if (!OptionsParser) {
         llvm::errs() << OptionsParser.takeError();

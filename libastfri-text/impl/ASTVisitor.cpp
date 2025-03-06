@@ -166,28 +166,28 @@ void ASTVisitor::visit(UnaryOpExpr const& expr) {
     }
 }
 
-void ASTVisitor::visit(AssignExpr const& expr) {
-    expr.lhs_ ? expr.lhs_->accept(*this) : exporter_->write_unknown_word();
-    exporter_->write_space();
-    exporter_->write_assign_op_word();
-    exporter_->write_space();
-    expr.rhs_ ? expr.rhs_->accept(*this) : exporter_->write_unknown_word();
-}
+// void ASTVisitor::visit(AssignExpr const& expr) {
+//     expr.lhs_ ? expr.lhs_->accept(*this) : exporter_->write_unknown_word();
+//     exporter_->write_space();
+//     exporter_->write_assign_op_word();
+//     exporter_->write_space();
+//     expr.rhs_ ? expr.rhs_->accept(*this) : exporter_->write_unknown_word();
+// }
 
-void ASTVisitor::visit(CompoundAssignExpr const& expr) {
-    expr.lhs_ ? expr.lhs_->accept(*this) : exporter_->write_unknown_word();
-    exporter_->write_space();
-    switch (expr.op_) {
-        case BinOpType::Add: exporter_->write_operator_sign(std::move("+=")); break;
-        case BinOpType::Divide: exporter_->write_operator_sign(std::move("/=")); break;
-        case BinOpType::Modulo: exporter_->write_operator_sign(std::move("%=")); break;
-        case BinOpType::Subtract: exporter_->write_operator_sign(std::move("-=")); break;
-        case BinOpType::Multiply: exporter_->write_operator_sign(std::move("*=")); break;
-        default: break;
-    }
-    exporter_->write_space();
-    expr.rhs_ ? expr.rhs_->accept(*this) : exporter_->write_unknown_word();
-}
+// void ASTVisitor::visit(CompoundAssignExpr const& expr) {
+//     expr.lhs_ ? expr.lhs_->accept(*this) : exporter_->write_unknown_word();
+//     exporter_->write_space();
+//     switch (expr.op_) {
+//         case BinOpType::Add: exporter_->write_operator_sign(std::move("+=")); break;
+//         case BinOpType::Divide: exporter_->write_operator_sign(std::move("/=")); break;
+//         case BinOpType::Modulo: exporter_->write_operator_sign(std::move("%=")); break;
+//         case BinOpType::Subtract: exporter_->write_operator_sign(std::move("-=")); break;
+//         case BinOpType::Multiply: exporter_->write_operator_sign(std::move("*=")); break;
+//         default: break;
+//     }
+//     exporter_->write_space();
+//     expr.rhs_ ? expr.rhs_->accept(*this) : exporter_->write_unknown_word();
+// }
 
 void ASTVisitor::visit(ParamVarRefExpr const& expr) {
     exporter_->write_param_var_name(expr.param_);
@@ -314,10 +314,14 @@ void ASTVisitor::visit(IfStmt const& stmt) {
     exporter_->write_curl_bracket(std::move("}"));
 }
 
+void ASTVisitor::visit(DefaultCaseStmt const& stmt) {
+
+}
+
 void ASTVisitor::visit(CaseStmt const& stmt) {
     exporter_->write_case_word();
     exporter_->write_space();
-    stmt.expr_ ? stmt.expr_->accept(*this) : exporter_->write_unknown_word();
+    !stmt.exprs_.empty() ? stmt.exprs_.front()->accept(*this) : exporter_->write_unknown_word();
     exporter_->write_space();
     exporter_->write_do_word();
     write_open_curl_bracket();
@@ -514,6 +518,10 @@ void ASTVisitor::visit(GenericParam const& stmt) {
     exporter_->write_gen_param_name(stmt.name_);
 }
 
+void ASTVisitor::visit(InterfaceDefStmt const& stmt) {
+
+}
+
 void ASTVisitor::visit(ClassDefStmt const& stmt) {
     if (configurator_->sh_class_dec()) {
         if (configurator_->sh_gener_par() && !stmt.tparams_.empty()) {
@@ -589,6 +597,14 @@ void ASTVisitor::visit(ClassDefStmt const& stmt) {
             }
         }
     }
+}
+
+void ASTVisitor::visit(const ContinueStmt& stmt) {
+    
+}
+
+void ASTVisitor::visit(const BreakStmt& stmt) {
+
 }
 
 void ASTVisitor::write_open_curl_bracket() {

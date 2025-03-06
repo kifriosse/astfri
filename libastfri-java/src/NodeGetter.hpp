@@ -28,7 +28,7 @@ private:
     astfri::Expr* get_expr(std::string const& nodeName, std::string const& nodeText, TSNode tsNode, const std::string& sourceCode);
     astfri::BinOpExpr* get_bin_op_expr (TSNode tsNode, const std::string& sourceCode);
     astfri::UnaryOpExpr* get_un_op_expr(TSNode tsNode, const std::string& sourceCode);
-    std::variant<astfri::AssignExpr*, astfri::CompoundAssignExpr*> get_assign_expr(TSNode tsNode, std::string const& sourceCode);
+    // std::variant<astfri::AssignExpr*, astfri::CompoundAssignExpr*> get_assign_expr(TSNode tsNode, std::string const& sourceCode);
     astfri::ParamVarRefExpr* get_param_ref(TSNode tsNode, std::string const& sourceCode);
     std::variant<astfri::ParamVarRefExpr*, astfri::LocalVarRefExpr*, astfri::MemberVarRefExpr*> get_ref_expr(TSNode tsNode, std::string const& sourceCode);
     astfri::MethodCallExpr* get_method_call(TSNode tsNode, std::string const& sourceCode);
