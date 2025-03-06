@@ -4,9 +4,7 @@
 
 HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {}
 
-void HtmlFileExporter::make_export() {
-    check_output_file_path(std::move(".html"));
-}
+void HtmlFileExporter::make_export() { check_output_file_path(std::move(".html")); }
 
 void HtmlFileExporter::write_output_into_file(std::string filepath) {
     std::cout << std::move("Súbor nájdeš na ceste: ") << filepath << std::move("\n");
@@ -17,7 +15,7 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
     file << std::move("<meta charset=\"UTF-8\">\n");
     file << std::move("<style>\n");
     file << std::move(".unknown-word{") << config_->get_unknown_word_style()->str() << std::move("}\n");
-    file << std::move(".access-mod{") << config_->get_access_mod_style()->str() << std::move("}\n");
+    file << std::move(".access-mod{") << config_->get_acc_style()->str() << std::move("}\n");
     file << std::move(".data-type{") << config_->get_type_style()->str() << std::move("}\n");
     file << std::move(".dynamic-type{") << config_->get_dynamic_type_style()->str() << std::move("}\n");
     file << std::move(".int-type{") << config_->get_int_type_style()->str() << std::move("}\n");
@@ -28,7 +26,6 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
     file << std::move(".user-type{") << config_->get_user_type_style()->str() << std::move("}\n");
     file << std::move(".ref-name{") << config_->get_def_ref_name_style()->str() << std::move("}\n");
     file << std::move(".gen-par-name{") << config_->get_gener_param_name_style()->str() << std::move("}\n");
-    file << std::move(".gen-par-cons{") << config_->get_gener_param_constr_style()->str() << std::move("}\n");
     file << std::move(".class-name{") << config_->get_class_name_style()->str() << std::move("}\n");
     file << std::move(".method-name{") << config_->get_method_name_style()->str() << std::move("}\n");
     file << std::move(".function-name{") << config_->get_function_name_style()->str() << std::move("}\n");
@@ -45,7 +42,7 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
     file << std::move(".string-value{") << config_->get_string_val_style()->str() << std::move("}\n");
     file << std::move(".bool-value{") << config_->get_bool_val_style()->str() << std::move("}\n");
     file << std::move(".null-value{") << config_->get_null_val_style()->str() << std::move("}\n");
-    file << std::move(".row-num{") << config_->get_row_num_style()->str() << std::move("}\n");
+    file << std::move(".row-num{") << config_->get_row_style()->str() << std::move("}\n");
     file << std::move(".system-expr{") << config_->get_sys_ex_style()->str() << std::move("}\n");
     file << std::move(".class-word{") << config_->get_class_word_style()->str() << std::move("}\n");
     file << std::move(".this-word{") << config_->get_this_word_style()->str() << std::move("}\n");
@@ -59,7 +56,12 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
     file << std::move(".repeat-word{") << config_->get_repeat_word_style()->str() << std::move("}\n");
     file << std::move(".switch-word{") << config_->get_switch_word_style()->str() << std::move("}\n");
     file << std::move(".case-word{") << config_->get_case_word_style()->str() << std::move("}\n");
+    file << std::move(".new-word{") << config_->get_new_word_style()->str() << std::move("}\n");
+    file << std::move(".delete-word{") << config_->get_delete_word_style()->str() << std::move("}\n");
+    file << std::move(".pointer-word{") << config_->get_pointer_word_style()->str() << std::move("}\n");
     file << std::move(".other-expr{") << config_->get_other_expr_style()->str() << std::move("}\n");
+    file << std::move(".constr-word{") << config_->get_constr_style()->str() << std::move("}\n");
+    file << std::move(".destr-word{") << config_->get_destr_style()->str() << std::move("}\n");
     file << std::move(".method-word{") << config_->get_method_word_style()->str() << std::move("}\n");
     file << std::move(".function-word{") << config_->get_function_word_style()->str() << std::move("}\n");
     file << std::move(".lambda-word{") << config_->get_lambda_word_style()->str() << std::move("}\n");
@@ -78,12 +80,12 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
 
 void HtmlFileExporter::write_indentation() {
     startedLine_ = true;
-    config_->sh_row_number() ? write_row_number() : void();
-    for (int i = 0; i < config_->get_len_left_margin(); ++i) {
+    config_->sh_row() ? write_row_number() : void();
+    for (int i = 0; i < config_->get_marg_len(); ++i) {
         write_space();
     }
     for (int i = 0; i < currentIndentation_; ++i) {
-        for (int j = 0; j < config_->get_len_tab_word(); ++j) {
+        for (int j = 0; j < config_->get_tab_len(); ++j) {
             write_space();
         }
     }
@@ -116,10 +118,6 @@ void HtmlFileExporter::write_round_bracket(std::string br) {
     write_word(std::move(br));
 }
 
-void HtmlFileExporter::write_square_bracket(std::string br) {
-    write_word(std::move(br));
-}
-
 void HtmlFileExporter::write_curl_bracket(std::string br) {
     write_word(std::move(br));
 }
@@ -139,6 +137,22 @@ void HtmlFileExporter::write_private_word() {
 
 void HtmlFileExporter::write_protected_word() {
     write_acc_mod_style(config_->get_protected_word()->str());
+}
+
+void HtmlFileExporter::write_attribs_word() {
+    write_acc_mod_style(config_->get_acc_atrib_word()->str());
+}
+
+void HtmlFileExporter::write_constrs_word() {
+    write_acc_mod_style(config_->get_acc_constr_word()->str());
+}
+
+void HtmlFileExporter::write_destrs_word() {
+    write_acc_mod_style(config_->get_acc_destr_word()->str());
+}
+
+void HtmlFileExporter::write_meths_word() {
+    write_acc_mod_style(config_->get_acc_meth_word()->str());
 }
 
 void HtmlFileExporter::write_dynamic_type() {
@@ -178,11 +192,6 @@ void HtmlFileExporter::write_user_type(std::string usertype) {
 
 void HtmlFileExporter::write_gen_param_name(std::string name) {
     std::string s = std::move("<span class=\"gen-par-name\">") + std::move(name) + std::move("</span>");
-    write_ref_name_style(std::move(s));
-}
-
-void HtmlFileExporter::write_gen_param_constr(std::string constraint) {
-    std::string s = std::move("<span class=\"gen-par-cons\">") + std::move(constraint) + std::move("</span>");
     write_ref_name_style(std::move(s));
 }
 
@@ -323,6 +332,31 @@ void HtmlFileExporter::write_switch_word() {
 void HtmlFileExporter::write_case_word() {
     std::string s = std::move("<span class=\"case-word\">") + config_->get_case_word()->str() + std::move("</span>");
     write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_new_word() {
+    std::string s = std::move("<span class=\"new-word\">") + config_->get_new_word()->str() + std::move("</span>");
+    write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_delete_word() {
+    std::string s = std::move("<span class=\"delete-word\">") + config_->get_delete_word()->str() + std::move("</span>");
+    write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_pointer_word() {
+    std::string s = std::move("<span class=\"pointer-word\">") + config_->get_pointer_word()->str() + std::move("</span>");
+    write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_constr_word() {
+    std::string s = std::move("<span class=\"constr-word\">") + config_->get_constr_word()->str() + std::move("</span>");
+    write_other_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_destr_word() {
+    std::string s = std::move("<span class=\"destr-word\">") + config_->get_destr_word()->str() + std::move("</span>");
+    write_other_expr_style(std::move(s));
 }
 
 void HtmlFileExporter::write_method_word() {

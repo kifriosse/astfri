@@ -1,99 +1,111 @@
 #ifndef LIBASTFRI_TEXT_INC_AST_VISITOR
 #define LIBASTFRI_TEXT_INC_AST_VISITOR
 
-#include <libastfri-text/inc/HtmlFileExporter.hpp>
-#include <libastfri-text/inc/RtfFileExporter.hpp>
+#include <libastfri/inc/Stmt.hpp>
 #include <libastfri-text/inc/TxtFileExporter.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include <libastfri-text/inc/HtmlFileExporter.hpp>
 
-struct ASTVisitor : astfri::IVisitor {
-private:
-    std::shared_ptr<TextConfigurator> config_;
+using namespace astfri;
+
+class ASTVisitor : public IVisitor {
+    std::shared_ptr<TextConfigurator> configurator_;
     std::unique_ptr<Exporter> exporter_;
 public:
     ASTVisitor();
-    void write_file() { exporter_->make_export(); };
-    void visit(astfri::DynamicType const& /*type*/) override { exporter_->write_dynamic_type(); };
-    void visit(astfri::IntType const& /*type*/) override { exporter_->write_int_type(); };
-    void visit(astfri::FloatType const& /*type*/) override { exporter_->write_float_type(); };
-    void visit(astfri::CharType const& /*type*/) override { exporter_->write_char_type(); };
-    void visit(astfri::BoolType const& /*type*/) override { exporter_->write_bool_type(); };
-    void visit(astfri::VoidType const& /*type*/) override { exporter_->write_void_type(); };
-    void visit(astfri::UserType const& type) override { exporter_->write_user_type(type.name_); };
-    void visit(astfri::IndirectionType const& type) override { type.indirect_->accept(*this); };
-    void visit(astfri::UnknownType const& /*type*/) override { exporter_->write_unknown_word(); };
-    void visit(astfri::IntLiteralExpr const& expr) override { exporter_->write_int_val(expr.val_); };
-    void visit(astfri::FloatLiteralExpr const& expr) override { exporter_->write_float_val(expr.val_); };
-    void visit(astfri::CharLiteralExpr const& expr) override { exporter_->write_char_val(expr.val_); };
-    void visit(astfri::StringLiteralExpr const& expr) override { exporter_->write_string_val(expr.val_); };
-    void visit(astfri::BoolLiteralExpr const& expr) override { exporter_->write_bool_val(expr.val_); };
-    void visit(astfri::NullLiteralExpr const& /*expr*/) override { exporter_->write_null_val(); };
-    void visit(astfri::IfExpr const& expr) override;
-    void visit(astfri::BinOpExpr const& expr) override;
-    void visit(astfri::UnaryOpExpr const& expr) override;
-    void visit(astfri::AssignExpr const& expr) override;
-    void visit(astfri::CompoundAssignExpr const& expr) override;
-    void visit(astfri::ParamVarRefExpr const& expr) override { exporter_->write_param_var_name(expr.param_); };
-    void visit(astfri::LocalVarRefExpr const& expr) override { exporter_->write_local_var_name(expr.var_); };
-    void visit(astfri::MemberVarRefExpr const& expr) override { exporter_->write_member_var_name(expr.member_); };
-    void visit(astfri::GlobalVarRefExpr const& expr) override { exporter_->write_global_var_name(expr.global_); };
-    void visit(astfri::FunctionCallExpr const& expr) override;
-    void visit(astfri::MethodCallExpr const& expr) override;
-    void visit(astfri::LambdaExpr const& expr) override;
-    void visit(astfri::ThisExpr const& /*expr*/) override { exporter_->write_this_word(); };
-    void visit(astfri::UnknownExpr const& /*expr*/) override { exporter_->write_unknown_word(); };
-    void visit(astfri::TranslationUnit const& stmt) override;
-    void visit(astfri::CompoundStmt const& stmt) override;
-    void visit(astfri::ReturnStmt const& stmt) override;
-    void visit(astfri::ExprStmt const& stmt) override { stmt.expr_->accept(*this); };
-    void visit(astfri::IfStmt const& stmt) override;
-    void visit(astfri::CaseStmt const& stmt) override;
-    void visit(astfri::SwitchStmt const& stmt) override;
-    void visit(astfri::WhileStmt const& stmt) override;
-    void visit(astfri::DoWhileStmt const& stmt) override;
-    void visit(astfri::ForStmt const& stmt) override;
-    void visit(astfri::ThrowStmt const& stmt) override;
-    void visit(astfri::UnknownStmt const& /*stmt*/) override { exporter_->write_unknown_word(); };
-    void visit(astfri::LocalVarDefStmt const& stmt) override;
-    void visit(astfri::ParamVarDefStmt const& stmt) override;
-    void visit(astfri::MemberVarDefStmt const& stmt) override;
-    void visit(astfri::GlobalVarDefStmt const& stmt) override;
-    void visit(astfri::FunctionDefStmt const& stmt) override;
-    void visit(astfri::MethodDefStmt const& stmt) override;
-    void visit(astfri::ClassDefStmt const& stmt) override;
-    void visit(astfri::DefStmt const& stmt) override {};
-    void visit (astfri::ClassRefExpr const& /*expr*/) override
-    {
-    }
-    void visit (astfri::ConstructorCallExpr const& /*expr*/) override
-    {
-    }
-
-    void visit (astfri::NewExpr const& /*expr*/) override
-    {
-    }
-
-    void visit (astfri::DeleteExpr const& /*expr*/) override
-    {
-    }
-    void visit (astfri::BaseInitializerStmt const& /*stmt*/) override
-    {
-    }
-
-    void visit (astfri::ConstructorDefStmt const& /*stmt*/) override
-    {
-    }
-
-    void visit (astfri::DestructorDefStmt const& /*stmt*/) override
-    {
-    }
-    void visit (astfri::GenericParam const& /*stmt*/) override
-    {
-    }
+    void write_file();
+public:
+    void visit(DynamicType         const& type) override;
+    void visit(IntType             const& type) override;
+    void visit(FloatType           const& type) override;
+    void visit(CharType            const& type) override;
+    void visit(BoolType            const& type) override;
+    void visit(VoidType            const& type) override;
+    void visit(UserType            const& type) override;
+    void visit(IndirectionType     const& type) override;
+    void visit(UnknownType         const& type) override;
+    void visit(IntLiteralExpr      const& expr) override;
+    void visit(FloatLiteralExpr    const& expr) override;
+    void visit(CharLiteralExpr     const& expr) override;
+    void visit(StringLiteralExpr   const& expr) override;
+    void visit(BoolLiteralExpr     const& expr) override;
+    void visit(NullLiteralExpr     const& expr) override;
+    void visit(IfExpr              const& expr) override;
+    void visit(BinOpExpr           const& expr) override;
+    void visit(UnaryOpExpr         const& expr) override;
+    void visit(AssignExpr          const& expr) override;
+    void visit(CompoundAssignExpr  const& expr) override;
+    void visit(ParamVarRefExpr     const& expr) override;
+    void visit(LocalVarRefExpr     const& expr) override;
+    void visit(MemberVarRefExpr    const& expr) override;
+    void visit(GlobalVarRefExpr    const& expr) override;
+    void visit(ClassRefExpr        const& expr) override;
+    void visit(FunctionCallExpr    const& expr) override;
+    void visit(MethodCallExpr      const& expr) override;
+    void visit(LambdaExpr          const& expr) override;
+    void visit(ThisExpr            const& expr) override;
+    void visit(ConstructorCallExpr const& expr) override;
+    void visit(NewExpr             const& expr) override;
+    void visit(DeleteExpr          const& expr) override;
+    void visit(UnknownExpr         const& expr) override;
+    void visit(TranslationUnit     const& stmt) override;
+    void visit(CompoundStmt        const& stmt) override;
+    void visit(ReturnStmt          const& stmt) override;
+    void visit(ExprStmt            const& stmt) override;
+    void visit(IfStmt              const& stmt) override;
+    void visit(CaseStmt            const& stmt) override;
+    void visit(SwitchStmt          const& stmt) override;
+    void visit(WhileStmt           const& stmt) override;
+    void visit(DoWhileStmt         const& stmt) override;
+    void visit(ForStmt             const& stmt) override;
+    void visit(ThrowStmt           const& stmt) override;
+    void visit(UnknownStmt         const& stmt) override;
+    void visit(LocalVarDefStmt     const& stmt) override;
+    void visit(ParamVarDefStmt     const& stmt) override;
+    void visit(MemberVarDefStmt    const& stmt) override;
+    void visit(GlobalVarDefStmt    const& stmt) override;
+    void visit(FunctionDefStmt     const& stmt) override;
+    void visit(DefStmt             const& stmt) override;
+    void visit(MethodDefStmt       const& stmt) override;
+    void visit(BaseInitializerStmt const& stmt) override;
+    void visit(ConstructorDefStmt  const& stmt) override;
+    void visit(DestructorDefStmt   const& stmt) override;
+    void visit(GenericParam        const& stmt) override;
+    void visit(ClassDefStmt        const& stmt) override;
 private:
-    void write_open_bracket();
+    void write_open_curl_bracket();
+    void write_initialization(const VarDefStmt* init);
+    void write_member_vars(std::vector<MemberVarDefStmt*>& vars);
+    void write_methods(std::vector<MethodDefStmt*>& meth);
+    void write_return_type(Type* t);
+    void write_body(Stmt* s);
+    void write_body(CompoundStmt* s);
+    void write_cond(Expr* e);
+    template<typename Parameter>
+    void write_parameters(const std::vector<Parameter*>& params);
+    template<typename Member>
+    bool has_acc_mod(const std::vector<Member*>& stmts, std::vector<Member*>& found, AccessModifier acc);
 };
+
+template<typename Parameter>
+void ASTVisitor::write_parameters(const std::vector<Parameter*>& params) {
+    exporter_->write_round_bracket(std::move("("));
+    for (size_t i = 0; i < params.size(); ++i) {
+        params.at(i) ? params.at(i)->accept(*this) : exporter_->write_unknown_word();
+        (i < params.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
+    }
+    exporter_->write_round_bracket(std::move(")"));
+}
+
+template<typename Member>
+bool ASTVisitor::has_acc_mod(const std::vector<Member*>& stmts, std::vector<Member*>& found, AccessModifier acc) {
+    bool hasMod = false;
+    for (size_t i = 0; i < stmts.size(); ++i) {
+        if (stmts.at(i)->access_ == acc) {
+            found.push_back(stmts.at(i));
+            hasMod = true;
+        }
+    }
+    return hasMod;
+}
 
 #endif

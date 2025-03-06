@@ -5,22 +5,8 @@
 namespace my_ast_trees
 {
     template <typename TreeVisitor>
-    void load_ast_tree_1(TreeVisitor& tv) {
-        astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
-        astfri::StmtFactory& statements = astfri::StmtFactory::get_instance();
-        astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
-        statements.mk_switch(
-            expressions.mk_local_var_ref("moznost"),
-            {
-                statements.mk_case(expressions.mk_string_literal("a"), statements.mk_compound({ statements.mk_uknown(), statements.mk_return(expressions.mk_char_literal('A')) })),
-                statements.mk_case(expressions.mk_string_literal("b"), statements.mk_compound({ statements.mk_uknown(), statements.mk_return(expressions.mk_char_literal('B')) })),
-                statements.mk_case(expressions.mk_string_literal("c"), statements.mk_compound({ statements.mk_uknown(), statements.mk_return(expressions.mk_char_literal('C')) }))
-            }
-        )->accept(tv);
-        expressions.mk_int_literal({})->accept(tv);
-        types.mk_user({})->accept(tv);
-        statements.mk_local_var_def("localka", types.mk_bool(), {})->accept(tv);
-        statements.mk_class_def("krj", {}, {}, {{}, {}})->accept(tv);
+    void load_ast_tree_1(TreeVisitor& /*tv*/) {
+        // AST
     }
 
     template <typename TreeVisitor>
@@ -40,7 +26,7 @@ namespace my_ast_trees
         astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
         astfri::ClassDefStmt* cds = statements.mk_class_def("TestClass", {}, {}, {});
         std::vector<astfri::MemberVarDefStmt*> atributes{
-            statements.mk_member_var_def("a", types.mk_int(), nullptr, astfri::AccessModifier::Private),
+            statements.mk_member_var_def("a", types.mk_int(), nullptr, astfri::AccessModifier::Protected),
             statements.mk_member_var_def("b", types.mk_int(), expressions.mk_int_literal(1), astfri::AccessModifier::Private),
             statements.mk_member_var_def("s", types.mk_user("string"), expressions.mk_string_literal("textik"), astfri::AccessModifier::Public)
         };
@@ -63,10 +49,7 @@ namespace my_ast_trees
     }
 
     template <typename TreeVisitor>
-    void load_ast_tree_3(TreeVisitor& tv) {
-        // priklad s komplexnejsiou triedou s pouzitim TU
-        // treba navrhnut zlozitejsi vstupny kod
-        astfri::TranslationUnit inputCode{{}, {}, {}};
-        tv.visit(inputCode);
+    void load_ast_tree_3(TreeVisitor& /*tv*/) {
+        // AST
     }
 }

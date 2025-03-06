@@ -6,144 +6,161 @@ Ak chceš použiť knižnicu na textový výstup, sprav nasledovné.
 4) Inštancií pošli správu visit s ľubovoľným vrcholom: "visitor.visit(astfri::VoidType);"
 5) Zavolaj metódu: "visitor->write_file();"
 
-Program funguje aj bez konfiguračného súboru, vtedy sa použije predvolený formát.
+Program funguje aj bez konfiguračného súboru, vtedy sa použije predvolený formát(txt súbor).
+Program vypíše cestu, kde vytvorí exportovaný súbor.
 Konfigurácia(formátovanie výstupu) je plne ošetrená voči chybám v konfiguračnom súbore. Konfiguráciu je možné nastaviť pre ľubovoľné parametre, podmienka je zachovanie "hierarchie" tohto súboru. Na samotnom poradí nezáleží.
 
 Vstupný konfiguračný súbor je buď možné použiť predvolený v priečinku impl, alebo si môžeš vytvoriť svoj(program sa ťa opýta na cestu ku .json súboru).
 Cestu k výstupu si buď zadáš cez konfigurák, alebo sa použije predvolená cesta. Tá ukazuje buď priamo do priečinka "build", ak taký v ceste ku programu máš, a ak nie, tak sa použije adresár "/home/USER/", kde USER je aktuálne prihlásený používateľ. Pri hocijakej chybe sa taktiež použije predvolená cesta.
 
-Takto vyzerá kompletný konfiguračný súbor. Všetko toto sa dá modifikovať.
+
+"format": txt/html
+Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
 {
     "CONFIGURATOR":{
         "FILE":{
-            "name":"suborik",
-            "path":"/mnt/c/users/marek/desktop/",
-            "format":"html"
+            "name":"output",
+            "path":"/tu/si/vloz/cestu/ku/vystupnemu/suboru/",
+            "format":"txt"
         },
-        "DEFAULT_STYLE":"line-height:1.1;font-family:Consolas;font-size:23px;background-color:#f7f9f9",
-        "UNKNOWN_WORD":"NEZNÁMY VÝRAZ",
-        "UNKNOWN_WORD_STYLE":"color:",
+        "DEFAULT_STYLE":"font-family:Consolas;font-size:18px",
+        "UNKNOWN_WORD":"UNKNOWN EXPRESSION",
+        "UNKNOWN_WORD_STYLE":"",
         "ACCESS_MOD":{
             "view":"inner",
             "public":"public",
             "private":"private",
             "protected":"protected",
-            "style":"color:#1d8348"
+            "attribs":"attributes",
+            "constructors":"constructors",
+            "destructors":"destructors",
+            "methods":"methods",
+            "style":""
         },
         "DATA_TYPE":{
-            "dynamic":"dynamický typ",
-            "int":"celé číslo",
-            "float":"desatinné číslo",
-            "char":"znak",
-            "bool":"logická hodnota",
-            "void":"prázdny typ",
+            "dynamic":"auto",
+            "int":"int",
+            "float":"float",
+            "char":"char",
+            "bool":"bool",
+            "void":"void",
             "STYLE":{
-                "general_style":"color:blue",
-                "dynamic_type_style":"color:",
-                "int_type_style":"color:",
-                "float_type_style":"color:",
-                "char_type_style":"color:",
-                "bool_type_style":"color:",
-                "void_type_style":"color:",
-                "user_type_style":"color:brown"
+                "general_style":"",
+                "dynamic_type_style":"",
+                "int_type_style":"",
+                "float_type_style":"",
+                "char_type_style":"",
+                "bool_type_style":"",
+                "void_type_style":"",
+                "user_type_style":""
             }
         },
         "REF_NAME_STYLE":{
-            "def_ref_name_style":"color:",
-            "gen_param_name_style":"color:",
-            "gen_param_constr_style":"color:",
-            "class_name_style":"color:forestgreen",
-            "method_name_style":"color:orange",
-            "function_name_style":"color:",
-            "global_var_name_style":"color:",
-            "member_var_name_style":"color:#a04000",
-            "local_var_name_style":"color:",
-            "param_var_name_style":"color:#9c640c"
+            "def_ref_name_style":"",
+            "gen_param_name_style":"",
+            "class_name_style":"",
+            "method_name_style":"",
+            "function_name_style":"",
+            "global_var_name_style":"",
+            "member_var_name_style":"",
+            "local_var_name_style":"",
+            "param_var_name_style":""
         },
         "OPERATOR":{
-            "assign":"<-",
-            "style":"font-weight:bold"
+            "assign":"=",
+            "style":""
         },
         "SEPARATOR":{
-            "style":"color:"
+            "style":""
         },
         "VALUE":{
-            "true_val":"pravda",
-            "false_val":"nepravda",
+            "true_val":"true",
+            "false_val":"false",
             "null_val":"NULL",
             "STYLE":{
-                "general_val_style":"color:#d2b4de",
-                "int_val_style":"color:#7d3c98",
-                "float_val_style":"color:",
-                "char_val_style":"color:",
-                "string_val_style":"color:",
-                "bool_val_style":"color:",
-                "null_val_style":"color:"
+                "general_val_style":"",
+                "int_val_style":"",
+                "float_val_style":"",
+                "char_val_style":"",
+                "string_val_style":"",
+                "bool_val_style":"",
+                "null_val_style":""
             }
         }
     },
     "TEXT_CONFIGURATOR":{
         "STRUCT_SETTING":{
-            "show_row_num":true,
-            "show_op_br_new_line":false,
-            "show_other_exprs":true,
-            "show_class_decl":true,
-            "show_class_body":true,
+            "use_cpp_bracket":true,
+            "show_row":true,
+            "show_other_expr":true,
+            "show_class_dec":true,
+            "show_class_def":true,
+            "show_gener_par":true,
             "show_attribute":true,
-            "show_method_body":true,
-            "show_method_decl":true,
-            "show_method_defin":true,
-            "show_method_defin_inline":false,
-            "show_function_decl":true,
-            "show_function_body":true,
-            "tab_word_length":8,
-            "margin_left":6,
-            "row_num_style":"color:grey"
+            "show_meth_dec":true,
+            "show_meth_def":true,
+            "show_meth_owner":true,
+            "show_func_dec":true,
+            "show_func_def":true,
+            "show_global_par":true,
+            "tab_length":4,
+            "margin_length":3,
+            "row_style":""
         },
         "SYSTEM_EXPR":{
-            "class_word":"trieda",
-            "this_word":"tento objekt",
-            "return_word":"vráť",
-            "throw_word":"vyhoď výnimku",
-            "if_word":"ak platí",
-            "else_word":"inak vykonaj",
-            "do_word":"vykonaj",
-            "while_word":"kým platí",
-            "for_word":"pre",
-            "repeat_word":"opakuj",
-            "switch_word":"ak má",
-            "case_word":"hodnotu",
+            "class_word":"class",
+            "this_word":"this",
+            "return_word":"return",
+            "throw_word":"throw",
+            "if_word":"if",
+            "else_word":"else",
+            "do_word":"do",
+            "while_word":"while",
+            "for_word":"for",
+            "repeat_word":"repeat",
+            "switch_word":"switch",
+            "case_word":"case",
+            "new_word":"new",
+            "delete_word":"delete",
+            "pointer_word":"*",
             "STYLE":{
-                "general_style":"color:",
-                "class_word_style":"color:red",
-                "this_word_style":"color:",
-                "return_word_style":"color:#943126;font-weight:bold",
-                "throw_word_style":"color:",
-                "if_word_style":"color:",
-                "else_word_style":"color:",
-                "do_word_style":"color:",
-                "while_word_style":"color:",
-                "for_word_style":"color:",
-                "repeat_word_style":"color:",
-                "switch_word_style":"color:",
-                "case_word_style":"color:"
+                "general_style":"",
+                "class_word_style":"",
+                "this_word_style":"",
+                "return_word_style":"",
+                "throw_word_style":"",
+                "if_word_style":"",
+                "else_word_style":"",
+                "do_word_style":"",
+                "while_word_style":"",
+                "for_word_style":"",
+                "repeat_word_style":"",
+                "switch_word_style":"",
+                "case_word_style":"",
+                "new_word_style":"",
+                "delete_word_style":"",
+                "pointer_word_style":""
             }
         },
         "OTHER_EXPR":{
-            "method_word":"metóda",
-            "function_word":"funkcia",
+            "constructor_word":"constructor",
+            "destructor_word":"destructor",
+            "method_word":"method",
+            "function_word":"function",
             "lambda_word":"lambda",
-            "call_word":"zavolaj operáciu",
-            "define_word":"definuj",
-            "returns_word":"navracia",
+            "call_word":"call",
+            "define_word":"define",
+            "returns_word":"returns",
             "STYLE":{
-                "general_style":"color:",
-                "method_word_style":"color:",
-                "function_word_style":"color:",
-                "lambda_word_style":"color:",
-                "call_word_style":"color:",
-                "define_word_style":"color:",
-                "returns_word_style":"color:"
+                "general_style":"",
+                "constructor_style":"",
+                "destructor_style":"",
+                "method_word_style":"",
+                "function_word_style":"",
+                "lambda_word_style":"",
+                "call_word_style":"",
+                "define_word_style":"",
+                "returns_word_style":""
             }
         }
     }

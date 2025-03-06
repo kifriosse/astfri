@@ -4,8 +4,7 @@
 #include <sstream>
 #include <memory>
 
-struct Configurator {
-private:
+class Configurator {
     std::unique_ptr<std::stringstream> configFilePath_;
     std::unique_ptr<std::stringstream> defFolderPath_;
     std::unique_ptr<std::stringstream> outFolderPath_;
@@ -21,7 +20,11 @@ private:
     std::unique_ptr<std::stringstream> publicWord_;
     std::unique_ptr<std::stringstream> privateWord_;
     std::unique_ptr<std::stringstream> protectedWord_;
-    std::unique_ptr<std::stringstream> accessModStyle_;
+    std::unique_ptr<std::stringstream> accAtribWord_;
+    std::unique_ptr<std::stringstream> accConstrWord_;
+    std::unique_ptr<std::stringstream> accDestrWord_;
+    std::unique_ptr<std::stringstream> accMethWord_;
+    std::unique_ptr<std::stringstream> accStyle_;
     std::unique_ptr<std::stringstream> dynamicWord_;
     std::unique_ptr<std::stringstream> intWord_;
     std::unique_ptr<std::stringstream> floatWord_;
@@ -38,7 +41,6 @@ private:
     std::unique_ptr<std::stringstream> userTypeStyle_;
     std::unique_ptr<std::stringstream> defRefNameStyle_;
     std::unique_ptr<std::stringstream> generParamNameStyle_;
-    std::unique_ptr<std::stringstream> generParamConstrStyle_;
     std::unique_ptr<std::stringstream> classNameStyle_;
     std::unique_ptr<std::stringstream> methodNameStyle_;
     std::unique_ptr<std::stringstream> functionNameStyle_;
@@ -67,55 +69,58 @@ protected:
     virtual void load_new_config_file();
     virtual void set_defaults();
 public:
-    const std::stringstream* get_output_file_name()     { return outputFileName_.get(); };
-    const std::stringstream* get_default_output_path()  { return defaultOutputFilePath_.get(); };
-    const std::stringstream* get_output_file_path()     { return outputFilePath_.get(); };
-    const std::stringstream* get_output_file_format()   { return outputFileFormat_.get(); };
-    const std::stringstream* get_default_style()        { return defaultStyle_.get(); };
-    const std::stringstream* get_unknown_word()         { return unknownWord_.get(); };
-    const std::stringstream* get_unknown_word_style()   { return unknownWordStyle_.get(); };
-    const std::stringstream* get_view()                 { return view_.get(); };
-    const std::stringstream* get_public_word()          { return publicWord_.get(); };
-    const std::stringstream* get_private_word()         { return privateWord_.get(); };
-    const std::stringstream* get_protected_word()       { return protectedWord_.get(); };
-    const std::stringstream* get_access_mod_style()     { return accessModStyle_.get(); };
-    const std::stringstream* get_dynamic_word()  { return dynamicWord_.get(); };
-    const std::stringstream* get_int_word()      { return intWord_.get(); };
-    const std::stringstream* get_float_word()    { return floatWord_.get(); };
-    const std::stringstream* get_char_word()     { return charWord_.get(); };
-    const std::stringstream* get_bool_word()     { return boolWord_.get(); };
-    const std::stringstream* get_void_word()     { return voidWord_.get(); };
-    const std::stringstream* get_type_style()    { return typeStyle_.get(); };
-    const std::stringstream* get_dynamic_type_style()  { return dynamicTypeStyle_.get(); };
-    const std::stringstream* get_int_type_style()      { return intTypeStyle_.get(); };
-    const std::stringstream* get_float_type_style()    { return floatTypeStyle_.get(); };
-    const std::stringstream* get_char_type_style()     { return charTypeStyle_.get(); };
-    const std::stringstream* get_bool_type_style()     { return boolTypeStyle_.get(); };
-    const std::stringstream* get_void_type_style()     { return voidTypeStyle_.get(); };
-    const std::stringstream* get_user_type_style()     { return userTypeStyle_.get(); };
-    const std::stringstream* get_def_ref_name_style()  { return defRefNameStyle_.get(); };
-    const std::stringstream* get_gener_param_name_style()    { return generParamNameStyle_.get(); };
-    const std::stringstream* get_gener_param_constr_style()  { return generParamConstrStyle_.get(); };
-    const std::stringstream* get_class_name_style()          { return classNameStyle_.get(); };
-    const std::stringstream* get_method_name_style()         { return methodNameStyle_.get(); };
-    const std::stringstream* get_function_name_style()       { return functionNameStyle_.get(); };
-    const std::stringstream* get_global_var_name_style()     { return globalVarNameStyle_.get(); };
-    const std::stringstream* get_member_var_name_style()     { return memberVarNameStyle_.get(); };
-    const std::stringstream* get_local_var_name_style()      { return localVarNameStyle_.get(); };
-    const std::stringstream* get_param_var_name_style()      { return paramVarNameStyle_.get(); };
-    const std::stringstream* get_assign_op_word()    { return assignOpWord_.get(); };
-    const std::stringstream* get_operator_style()    { return operatorStyle_.get(); };
-    const std::stringstream* get_separator_style()   { return separatorStyle_.get(); };
-    const std::stringstream* get_true_val()          { return trueVal_.get(); };
-    const std::stringstream* get_false_val()         { return falseVal_.get(); };
-    const std::stringstream* get_null_val()          { return nullVal_.get(); };
-    const std::stringstream* get_val_style()         { return valStyle_.get(); };
-    const std::stringstream* get_int_val_style()     { return intValStyle_.get(); };
-    const std::stringstream* get_float_val_style()   { return floatValStyle_.get(); };
-    const std::stringstream* get_char_val_style()    { return charValStyle_.get(); };
-    const std::stringstream* get_string_val_style()  { return stringValStyle_.get(); };
-    const std::stringstream* get_bool_val_style()    { return boolValStyle_.get(); };
-    const std::stringstream* get_null_val_style()    { return nullValStyle_.get(); };
+    const std::stringstream* get_output_file_name()    { return outputFileName_.get(); };
+    const std::stringstream* get_default_output_path() { return defaultOutputFilePath_.get(); };
+    const std::stringstream* get_output_file_path()    { return outputFilePath_.get(); };
+    const std::stringstream* get_output_file_format()  { return outputFileFormat_.get(); };
+    const std::stringstream* get_default_style()       { return defaultStyle_.get(); };
+    const std::stringstream* get_unknown_word()        { return unknownWord_.get(); };
+    const std::stringstream* get_unknown_word_style()  { return unknownWordStyle_.get(); };
+    const std::stringstream* get_view()            { return view_.get(); };
+    const std::stringstream* get_public_word()     { return publicWord_.get(); };
+    const std::stringstream* get_private_word()    { return privateWord_.get(); };
+    const std::stringstream* get_protected_word()  { return protectedWord_.get(); };
+    const std::stringstream* get_acc_atrib_word()  { return accAtribWord_.get(); };
+    const std::stringstream* get_acc_constr_word() { return accConstrWord_.get(); };
+    const std::stringstream* get_acc_destr_word()  { return accDestrWord_.get(); };
+    const std::stringstream* get_acc_meth_word()   { return accMethWord_.get(); };
+    const std::stringstream* get_acc_style()    { return accStyle_.get(); };
+    const std::stringstream* get_dynamic_word() { return dynamicWord_.get(); };
+    const std::stringstream* get_int_word()     { return intWord_.get(); };
+    const std::stringstream* get_float_word()   { return floatWord_.get(); };
+    const std::stringstream* get_char_word()    { return charWord_.get(); };
+    const std::stringstream* get_bool_word()    { return boolWord_.get(); };
+    const std::stringstream* get_void_word()    { return voidWord_.get(); };
+    const std::stringstream* get_type_style()   { return typeStyle_.get(); };
+    const std::stringstream* get_dynamic_type_style() { return dynamicTypeStyle_.get(); };
+    const std::stringstream* get_int_type_style()     { return intTypeStyle_.get(); };
+    const std::stringstream* get_float_type_style()   { return floatTypeStyle_.get(); };
+    const std::stringstream* get_char_type_style()    { return charTypeStyle_.get(); };
+    const std::stringstream* get_bool_type_style()    { return boolTypeStyle_.get(); };
+    const std::stringstream* get_void_type_style()    { return voidTypeStyle_.get(); };
+    const std::stringstream* get_user_type_style()    { return userTypeStyle_.get(); };
+    const std::stringstream* get_def_ref_name_style() { return defRefNameStyle_.get(); };
+    const std::stringstream* get_gener_param_name_style() { return generParamNameStyle_.get(); };
+    const std::stringstream* get_class_name_style()       { return classNameStyle_.get(); };
+    const std::stringstream* get_method_name_style()      { return methodNameStyle_.get(); };
+    const std::stringstream* get_function_name_style()    { return functionNameStyle_.get(); };
+    const std::stringstream* get_global_var_name_style()  { return globalVarNameStyle_.get(); };
+    const std::stringstream* get_member_var_name_style()  { return memberVarNameStyle_.get(); };
+    const std::stringstream* get_local_var_name_style()   { return localVarNameStyle_.get(); };
+    const std::stringstream* get_param_var_name_style()   { return paramVarNameStyle_.get(); };
+    const std::stringstream* get_assign_op_word()   { return assignOpWord_.get(); };
+    const std::stringstream* get_operator_style()   { return operatorStyle_.get(); };
+    const std::stringstream* get_separator_style()  { return separatorStyle_.get(); };
+    const std::stringstream* get_true_val()         { return trueVal_.get(); };
+    const std::stringstream* get_false_val()        { return falseVal_.get(); };
+    const std::stringstream* get_null_val()         { return nullVal_.get(); };
+    const std::stringstream* get_val_style()        { return valStyle_.get(); };
+    const std::stringstream* get_int_val_style()    { return intValStyle_.get(); };
+    const std::stringstream* get_float_val_style()  { return floatValStyle_.get(); };
+    const std::stringstream* get_char_val_style()   { return charValStyle_.get(); };
+    const std::stringstream* get_string_val_style() { return stringValStyle_.get(); };
+    const std::stringstream* get_bool_val_style()   { return boolValStyle_.get(); };
+    const std::stringstream* get_null_val_style()   { return nullValStyle_.get(); };
 };
 
 #endif
