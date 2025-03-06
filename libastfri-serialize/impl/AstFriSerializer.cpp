@@ -470,8 +470,12 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
         classDefStmt->destructors_.push_back(this->serialize_destructor_def_stmt(destructor,classDefStmt);)
     }
 
-    for (auto& baseClass : value["interfaces"].GetArray() ){
-        classDefStmt->interfaces_.push_back(this->serialize_in)
+    for (auto& interface : value["interfaces"].GetArray() ){
+        classDefStmt->interfaces_.push_back(this->serialize_interface_def_stmt(interface));
+    }
+
+    for (auto& base : value["bases"].GetArray() ){
+        classDefStmt->interfaces_.push_back(this->serialize_class_def_stmt(base));
     }
 
     return classDefStmt;
