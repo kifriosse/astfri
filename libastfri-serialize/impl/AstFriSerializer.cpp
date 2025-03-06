@@ -530,19 +530,19 @@ astfri::CaseStmt* AstFriSerializer::serialize_case_stmt(rapidjson::Value& value)
     astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     //whole vector will be sent to mk_case method after update
-    return this->statementMaker_.mk_case(expressions.size()== 0 ? nullptr : expressions[0],body);
+    return this->statementMaker_.mk_case(std::move(expressions),body);
 }
 
 astfri::WhileStmt* AstFriSerializer::serialize_while_stmt(rapidjson::Value& value){
     astfri::Expr* condition = this->resolve_expr(value["condition"]);
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     return this->statementMaker_.mk_while(condition,body);
 }
 
 astfri::DoWhileStmt* AstFriSerializer::serialize_do_while_stmt(rapidjson::Value& value){
     astfri::Expr* condition = this->resolve_expr(value["condition"]);
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     return this->statementMaker_.mk_do_while(condition,body);    
 }
@@ -551,7 +551,7 @@ astfri::ForStmt* AstFriSerializer::serialize_for_stmt(rapidjson::Value& value){
     astfri::Stmt* init = value["init"].IsNull() ? nullptr : this->resolve_stmt(value["init"]);
     astfri::Expr* condition = value["condition"].IsNull() ? nullptr : this->resolve_expr(value["condition"]);
     astfri::Stmt* step = value["step"].IsNull() ? nullptr : this->resolve_stmt(value["step"]);
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     return this->statementMaker_.mk_for(init,condition,step,body);
 }
