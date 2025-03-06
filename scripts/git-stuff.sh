@@ -50,7 +50,7 @@ possibly_die() {
 # Branches
 BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp"
 
-if [ "$MODE" -eq "pull" ]; then    # pull
+if [ "$MODE" = "pull" ]; then    # pull
   heading "# Pulling changes"
   for branch in ${BRANCHES}; do
     git switch ${branch}
