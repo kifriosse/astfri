@@ -32,10 +32,12 @@ namespace astfri::cpp
         const clang::Stmt* stmt_ = nullptr;
         const clang::Expr* expr_ = nullptr;
         const clang::BinaryOperator* bin_op_ = nullptr;
+        const clang::UnaryOperator* un_op_ = nullptr;
         const clang::IntegerLiteral* int_lit_ = nullptr;
         const clang::FloatingLiteral *float_lit_ = nullptr;
         const clang::CXXBoolLiteralExpr *bool_lit_ = nullptr;
         const clang::StringLiteral *string_lit_ = nullptr;
+        const clang::CharacterLiteral *char_lit_ = nullptr;
         const ClangASTLocation* parent_ = nullptr;
     };
 
@@ -48,45 +50,47 @@ namespace astfri::cpp
         
 class ClangVisitor : public clang::RecursiveASTVisitor<ClangVisitor>
 {
-    using Base = RecursiveASTVisitor<ClangVisitor>; // Definujeme alias na base class
 public:
     ClangVisitor(TranslationUnit& visitedTranslationUnit);
     TranslationUnit* visitedTranslationUnit;
     // traverse deklaracie
-    // bool TraverseDecl(clang::Decl *D);
     bool TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor);
+    bool TraverseCXXDestructorDecl(clang::CXXDestructorDecl *Dtor);
     bool TraverseFunctionDecl(clang::FunctionDecl *FD);
     bool TraverseCXXMethodDecl(clang::CXXMethodDecl *Decl);
     bool TraverseCXXRecordDecl(clang::CXXRecordDecl *RD);
     bool TraverseVarDecl(clang::VarDecl *VD);
     bool TraverseParmVarDecl(clang::ParmVarDecl *PVD);
     bool TraverseFieldDecl(clang::FieldDecl *FD);
-    // bool TraverseNamespaceDecl(clang::NamespaceDecl *ND);
     // bool TraverseTypedefDecl(clang::TypedefDecl *TD);
     // bool TraverseEnumDecl(clang::EnumDecl *ED);
     // // Traverse statementy
-    // bool TraverseStmt(clang::Stmt *S);
     bool TraverseCompoundStmt(clang::CompoundStmt *CS);
     bool TraverseReturnStmt(clang::ReturnStmt *RS);
     bool TraverseIfStmt(clang::IfStmt *IS);
-    // bool TraverseForStmt(clang::ForStmt *FS);
-    // bool TraverseWhileStmt(clang::WhileStmt *WS);
+    bool TraverseForStmt(clang::ForStmt *FS);
+    bool TraverseWhileStmt(clang::WhileStmt *WS);
+    bool TraverseDoStmt(clang::DoStmt *DS);
+    bool TraverseSwitchStmt(clang::SwitchStmt *SS);
     // // Traverse expression
     bool TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor);
     bool TraverseDeclRefExpr(clang::DeclRefExpr *DRE);
-    // bool TraverseExpr(clang::Expr *E);
+    bool TraverseMemberExpr(clang::MemberExpr *ME);
+    bool TraverseCXXThisExpr(clang::CXXThisExpr *TE);
+    bool TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE);
     // bool TraverseCallExpr(clang::CallExpr *CE);
-    // bool TraverseBinaryOperator(clang::BinaryOperator *BO);
-    // bool TraverseUnaryOperator(clang::UnaryOperator *UO);
     // // Traverse literals
     bool TraverseIntegerLiteral(clang::IntegerLiteral *IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral *FL);
     bool TraverseStringLiteral(clang::StringLiteral *SL);
     bool TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL);
+    bool TraverseCharacterLiteralExpr(clang::CharacterLiteral *CL);
     // Traverse operators
     bool TraverseBinaryOperator(clang::BinaryOperator *BO);
+    bool TraverseUnaryOperator(clang::UnaryOperator *UO);
 
 private:
+    astfri::AccessModifier getAccessModifier(clang::Decl* decl);
     TranslationUnit* tu_;
 
     StmtFactory* stmt_factory_;
@@ -94,16 +98,8 @@ private:
     TypeFactory* type_factory_;
 
     // context variables
-    ClassDefStmt* class_ = nullptr;
-    MethodDefStmt* method_ = nullptr;
-    ParamVarDefStmt* param_ = nullptr;
-    MemberVarDefStmt* field_ = nullptr;
-    VarDefStmt* var_ = nullptr;
-    FunctionDefStmt* function_ = nullptr;
-    CompoundStmt* compound_ = nullptr;
-
-    std::vector<ClangASTLocation*> clang_locationStack;
-    std::vector<AstfriASTLocation*> astfri_locationStack;
-
+    ClangASTLocation clang_location;
+    AstfriASTLocation astfri_location;
+    bool expr_as_stmt;
 };
 } // namespace libastfri::cpp
