@@ -66,6 +66,12 @@ void TextConfigurator::load_new_config_file() {
             if (sett.HasMember(std::move("show_class_def")) && sett[std::move("show_class_def")].IsBool()) {
                 shClassDef_ = std::move(sett[std::move("show_class_def")].GetBool());
             }
+            if (sett.HasMember(std::move("show_interf_dec")) && sett[std::move("show_interf_dec")].IsBool()) {
+                shInterfDec_ = std::move(sett[std::move("show_interf_dec")].GetBool());
+            }
+            if (sett.HasMember(std::move("show_interf_def")) && sett[std::move("show_interf_def")].IsBool()) {
+                shInterfDef_ = std::move(sett[std::move("show_interf_def")].GetBool());
+            }
             if (sett.HasMember(std::move("show_gener_par")) && sett[std::move("show_gener_par")].IsBool()) {
                 shGenerPar_ = std::move(sett[std::move("show_gener_par")].GetBool());
             }
@@ -111,11 +117,23 @@ void TextConfigurator::load_new_config_file() {
             if (ex.HasMember(std::move("class_word")) && ex[std::move("class_word")].IsString() && ex[std::move("class_word")].GetStringLength() > 0) {
                 classWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("class_word")].GetString()));
             }
+            if (ex.HasMember(std::move("interface_word")) && ex[std::move("interface_word")].IsString() && ex[std::move("interface_word")].GetStringLength() > 0) {
+                interfaceWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("interface_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("implement_word")) && ex[std::move("implement_word")].IsString() && ex[std::move("implement_word")].GetStringLength() > 0) {
+                implementWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("implement_word")].GetString()));
+            }
             if (ex.HasMember(std::move("this_word")) && ex[std::move("this_word")].IsString() && ex[std::move("this_word")].GetStringLength() > 0) {
                 thisWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("this_word")].GetString()));
             }
             if (ex.HasMember(std::move("return_word")) && ex[std::move("return_word")].IsString() && ex[std::move("return_word")].GetStringLength() > 0) {
                 returnWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("return_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("continue_word")) && ex[std::move("continue_word")].IsString() && ex[std::move("continue_word")].GetStringLength() > 0) {
+                continueWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("continue_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("break_word")) && ex[std::move("break_word")].IsString() && ex[std::move("break_word")].GetStringLength() > 0) {
+                breakWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("break_word")].GetString()));
             }
             if (ex.HasMember(std::move("throw_word")) && ex[std::move("throw_word")].IsString() && ex[std::move("throw_word")].GetStringLength() > 0) {
                 throwWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("throw_word")].GetString()));
@@ -144,6 +162,9 @@ void TextConfigurator::load_new_config_file() {
             if (ex.HasMember(std::move("case_word")) && ex[std::move("case_word")].IsString() && ex[std::move("case_word")].GetStringLength() > 0) {
                 caseWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("case_word")].GetString()));
             }
+            if (ex.HasMember(std::move("default_word")) && ex[std::move("default_word")].IsString() && ex[std::move("default_word")].GetStringLength() > 0) {
+                defaultWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("default_word")].GetString()));
+            }
             if (ex.HasMember(std::move("new_word")) && ex[std::move("new_word")].IsString() && ex[std::move("new_word")].GetStringLength() > 0) {
                 newWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("new_word")].GetString()));
             }
@@ -153,6 +174,9 @@ void TextConfigurator::load_new_config_file() {
             if (ex.HasMember(std::move("pointer_word")) && ex[std::move("pointer_word")].IsString() && ex[std::move("pointer_word")].GetStringLength() > 0) {
                 pointerWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("pointer_word")].GetString()));
             }
+            if (ex.HasMember(std::move("virtual_word")) && ex[std::move("virtual_word")].IsString() && ex[std::move("virtual_word")].GetStringLength() > 0) {
+                virtualWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("virtual_word")].GetString()));
+            }
             if (ex.HasMember(std::move("STYLE")) && ex[std::move("STYLE")].IsObject()) {
                 const rj::Value& st = std::move(ex[std::move("STYLE")]);
                 if (st.HasMember(std::move("general_style")) && st[std::move("general_style")].IsString()) {
@@ -161,11 +185,23 @@ void TextConfigurator::load_new_config_file() {
                 if (st.HasMember(std::move("class_word_style")) && st[std::move("class_word_style")].IsString()) {
                     classWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("class_word_style")].GetString()));
                 }
+                if (st.HasMember(std::move("interface_word_style")) && st[std::move("interface_word_style")].IsString()) {
+                    interfaceWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("interface_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("implement_word_style")) && st[std::move("implement_word_style")].IsString()) {
+                    implementWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("implement_word_style")].GetString()));
+                }
                 if (st.HasMember(std::move("this_word_style")) && st[std::move("this_word_style")].IsString()) {
                     thisWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("this_word_style")].GetString()));
                 }
                 if (st.HasMember(std::move("return_word_style")) && st[std::move("return_word_style")].IsString()) {
                     returnWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("return_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("continue_word_style")) && st[std::move("continue_word_style")].IsString()) {
+                    continueWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("continue_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("break_word_style")) && st[std::move("break_word_style")].IsString()) {
+                    breakWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("break_word_style")].GetString()));
                 }
                 if (st.HasMember(std::move("throw_word_style")) && st[std::move("throw_word_style")].IsString()) {
                     throwWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("throw_word_style")].GetString()));
@@ -194,6 +230,9 @@ void TextConfigurator::load_new_config_file() {
                 if (st.HasMember(std::move("case_word_style")) && st[std::move("case_word_style")].IsString()) {
                     caseWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("case_word_style")].GetString()));
                 }
+                if (st.HasMember(std::move("default_word_style")) && st[std::move("default_word_style")].IsString()) {
+                    defaultWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("default_word_style")].GetString()));
+                }
                 if (st.HasMember(std::move("new_word_style")) && st[std::move("new_word_style")].IsString()) {
                     newWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("new_word_style")].GetString()));
                 }
@@ -202,6 +241,9 @@ void TextConfigurator::load_new_config_file() {
                 }
                 if (st.HasMember(std::move("pointer_word_style")) && st[std::move("pointer_word_style")].IsString()) {
                     pointerWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("pointer_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("virtual_word_style")) && st[std::move("virtual_word_style")].IsString()) {
+                    virtualWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("virtual_word_style")].GetString()));
                 }
             }
         }
@@ -274,6 +316,8 @@ void TextConfigurator::set_defaults() {
     shOtherExpr_ = true;
     shClassDec_ = true;
     shClassDef_ = true;
+    shInterfDec_ = true;
+    shInterfDef_ = true;
     shGenerPar_ = true;
     shAttrib_ = true;
     shMethDec_ = true;
@@ -286,8 +330,12 @@ void TextConfigurator::set_defaults() {
     margLen_ = 3;
     rowStyle_ = std::make_unique<std::stringstream>();
     classWord_ = std::make_unique<std::stringstream>(std::move("class"));
+    interfaceWord_ = std::make_unique<std::stringstream>(std::move("interface"));
+    implementWord_ = std::make_unique<std::stringstream>(std::move("implements"));
     thisWord_ = std::make_unique<std::stringstream>(std::move("this"));
     returnWord_ = std::make_unique<std::stringstream>(std::move("return"));
+    continueWord_ = std::make_unique<std::stringstream>(std::move("continue"));
+    breakWord_ = std::make_unique<std::stringstream>(std::move("break"));
     throwWord_ = std::make_unique<std::stringstream>(std::move("throw"));
     ifWord_ = std::make_unique<std::stringstream>(std::move("if"));
     elseWord_ = std::make_unique<std::stringstream>(std::move("else"));
@@ -297,13 +345,19 @@ void TextConfigurator::set_defaults() {
     repeatWord_ = std::make_unique<std::stringstream>(std::move("repeat"));
     switchWord_ = std::make_unique<std::stringstream>(std::move("switch"));
     caseWord_ = std::make_unique<std::stringstream>(std::move("case"));
+    defaultWord_ = std::make_unique<std::stringstream>(std::move("default"));
     newWord_ = std::make_unique<std::stringstream>(std::move("new"));
     deleteWord_ = std::make_unique<std::stringstream>(std::move("delete"));
     pointerWord_ = std::make_unique<std::stringstream>(std::move("*"));
+    virtualWord_ = std::make_unique<std::stringstream>(std::move("is virtual"));
     systExprStyle_ = std::make_unique<std::stringstream>();
     classWordStyle_ = std::make_unique<std::stringstream>();
+    interfaceWordStyle_ = std::make_unique<std::stringstream>();
+    implementWordStyle_ = std::make_unique<std::stringstream>();
     thisWordStyle_ = std::make_unique<std::stringstream>();
     returnWordStyle_ = std::make_unique<std::stringstream>();
+    continueWordStyle_ = std::make_unique<std::stringstream>();
+    breakWordStyle_ = std::make_unique<std::stringstream>();
     throwWordStyle_ = std::make_unique<std::stringstream>();
     ifWordStyle_ = std::make_unique<std::stringstream>();
     elseWordStyle_ = std::make_unique<std::stringstream>();
@@ -313,9 +367,11 @@ void TextConfigurator::set_defaults() {
     repeatWordStyle_ = std::make_unique<std::stringstream>();
     switchWordStyle_ = std::make_unique<std::stringstream>();
     caseWordStyle_ = std::make_unique<std::stringstream>();
+    defaultWordStyle_ = std::make_unique<std::stringstream>();
     newWordStyle_ = std::make_unique<std::stringstream>();
     deleteWordStyle_ = std::make_unique<std::stringstream>();
     pointerWordStyle_ = std::make_unique<std::stringstream>();
+    virtualWordStyle_ = std::make_unique<std::stringstream>();
     constrWord_ = std::make_unique<std::stringstream>(std::move("constructor"));
     destrWord_ = std::make_unique<std::stringstream>(std::move("destructor"));
     methodWord_ = std::make_unique<std::stringstream>(std::move("method"));

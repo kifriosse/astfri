@@ -77,6 +77,12 @@ void Configurator::load_new_config_file() {
         if (conf.HasMember(std::move("UNKNOWN_WORD_STYLE")) && conf[std::move("UNKNOWN_WORD_STYLE")].IsString()) {
             unknownWordStyle_ = std::make_unique<std::stringstream>(std::move(conf[std::move("UNKNOWN_WORD_STYLE")].GetString()));
         }
+        if (conf.HasMember(std::move("INVALID_WORD")) && conf[std::move("INVALID_WORD")].IsString() && conf[std::move("INVALID_WORD")].GetStringLength() > 0) {
+            invalidWord_ = std::make_unique<std::stringstream>(std::move(conf[std::move("INVALID_WORD")].GetString()));
+        }
+        if (conf.HasMember(std::move("INVALID_WORD_STYLE")) && conf[std::move("INVALID_WORD_STYLE")].IsString()) {
+            invalidWordStyle_ = std::make_unique<std::stringstream>(std::move(conf[std::move("INVALID_WORD_STYLE")].GetString()));
+        }
         if (conf.HasMember(std::move("ACCESS_MOD")) && conf[std::move("ACCESS_MOD")].IsObject()) {
             const rj::Value& acc = std::move(conf[std::move("ACCESS_MOD")]);
             if (acc.HasMember(std::move("view")) && acc[std::move("view")].IsString()) {
@@ -166,6 +172,9 @@ void Configurator::load_new_config_file() {
             if (ref.HasMember(std::move("class_name_style")) && ref[std::move("class_name_style")].IsString()) {
                 classNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("class_name_style")].GetString()));
             }
+            if (ref.HasMember(std::move("interface_name_style")) && ref[std::move("interface_name_style")].IsString()) {
+                interfaceNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("interface_name_style")].GetString()));
+            }
             if (ref.HasMember(std::move("method_name_style")) && ref[std::move("method_name_style")].IsString()) {
                 methodNameStyle_ = std::make_unique<std::stringstream>(std::move(ref[std::move("method_name_style")].GetString()));
             }
@@ -253,6 +262,8 @@ void Configurator::set_defaults() {
     defaultStyle_ = std::make_unique<std::stringstream>(std::move("font-family:Consolas;font-size:18px"));
     unknownWord_ = std::make_unique<std::stringstream>(std::move("UNKNOWN EXPRESSION"));
     unknownWordStyle_ = std::make_unique<std::stringstream>();
+    invalidWord_ = std::make_unique<std::stringstream>(std::move("INVALID EXPRESSION"));
+    invalidWordStyle_ = std::make_unique<std::stringstream>();
     view_ = std::make_unique<std::stringstream>(std::move("inner"));
     publicWord_ = std::make_unique<std::stringstream>(std::move("public"));
     privateWord_ = std::make_unique<std::stringstream>(std::move("private"));
@@ -279,6 +290,7 @@ void Configurator::set_defaults() {
     defRefNameStyle_ = std::make_unique<std::stringstream>();
     generParamNameStyle_ = std::make_unique<std::stringstream>();
     classNameStyle_ = std::make_unique<std::stringstream>();
+    interfaceNameStyle_ = std::make_unique<std::stringstream>();
     methodNameStyle_ = std::make_unique<std::stringstream>();
     functionNameStyle_ = std::make_unique<std::stringstream>();
     globalVarNameStyle_ = std::make_unique<std::stringstream>();

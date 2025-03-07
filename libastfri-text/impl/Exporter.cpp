@@ -77,6 +77,10 @@ void Exporter::write_unknown_word() {
     write_word(config_->get_unknown_word()->str());
 }
 
+void Exporter::write_invalid_word() {
+    write_word(config_->get_invalid_word()->str());
+}
+
 void Exporter::write_public_word() {
     write_word(config_->get_public_word()->str());
 }
@@ -138,6 +142,10 @@ void Exporter::write_gen_param_name(std::string name) {
 }
 
 void Exporter::write_class_name(std::string name) {
+    write_word(std::move(name));
+}
+
+void Exporter::write_interface_name(std::string name) {
     write_word(std::move(name));
 }
 
@@ -205,12 +213,28 @@ void Exporter::write_class_word() {
     write_word(config_->get_class_word()->str());
 }
 
+void Exporter::write_interface_word() {
+    write_word(config_->get_interface_word()->str());
+}
+
+void Exporter::write_implement_word() {
+    write_word(config_->get_implement_word()->str());
+}
+
 void Exporter::write_this_word() {
     write_word(config_->get_this_word()->str());
 }
 
 void Exporter::write_return_word() {
     write_word(config_->get_return_word()->str());
+}
+
+void Exporter::write_continue_word() {
+    write_word(config_->get_continue_word()->str());
+}
+
+void Exporter::write_break_word() {
+    write_word(config_->get_break_word()->str());
 }
 
 void Exporter::write_throw_word() {
@@ -249,6 +273,10 @@ void Exporter::write_case_word() {
     write_word(config_->get_case_word()->str());
 }
 
+void Exporter::write_default_word() {
+    write_word(config_->get_default_word()->str());
+}
+
 void Exporter::write_new_word() {
     write_word(config_->get_new_word()->str());
 }
@@ -259,6 +287,10 @@ void Exporter::write_delete_word() {
 
 void Exporter::write_pointer_word() {
     write_word(config_->get_pointer_word()->str());
+}
+
+void Exporter::write_virtual_word() {
+    write_word(config_->get_virtual_word()->str());
 }
 
 void Exporter::write_constr_word() {

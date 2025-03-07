@@ -34,23 +34,74 @@ namespace my_ast_trees
             statements.mk_param_var_def("cislo1", types.mk_int(), nullptr),
             statements.mk_param_var_def("cislo2", types.mk_int(), expressions.mk_int_literal(5))
         };
-        // std::vector<astfri::MethodDefStmt*> methods{
-        //     statements.mk_method_def(cds, statements.mk_function_def(cds->name_, constructorParams, types.mk_user(cds->name_), statements.mk_compound({
-        //         statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("a"), expressions.mk_param_var_ref("cislo1"))),
-        //         statements.mk_expr(expressions.mk_assign(expressions.mk_member_var_ref("b"), expressions.mk_param_var_ref("cislo2")))
-        //     })), astfri::AccessModifier::Public),
-        //     statements.mk_method_def(cds, statements.mk_function_def("~TestClass", {}, types.mk_unknown(), {}), astfri::AccessModifier::Public),
-        //     statements.mk_method_def(cds, statements.mk_function_def("getCislo", {}, types.mk_int(), statements.mk_compound({
-        //         statements.mk_return(expressions.mk_bin_on(expressions.mk_member_var_ref("a"), astfri::BinOpType::Multiply, expressions.mk_member_var_ref("b")))
-        //     })), astfri::AccessModifier::Private)
-        // };
+        std::vector<astfri::MethodDefStmt*> methods {
+            statements.mk_method_def(
+                cds,
+                statements.mk_function_def(
+                    cds->name_,
+                    constructorParams,
+                    types.mk_void(),
+                    statements.mk_compound(
+                        {
+                            statements.mk_expr(expressions.mk_bin_on(
+                                expressions.mk_member_var_ref(
+                                    expressions.mk_class_ref(cds->name_),
+                                    "a"
+                                ),
+                                astfri::BinOpType::Assign,
+                                expressions.mk_param_var_ref("cislo1")
+                                )
+                            ),
+                            statements.mk_expr(
+                                expressions.mk_bin_on(
+                                    expressions.mk_member_var_ref(
+                                        expressions.mk_class_ref(cds->name_),
+                                        "b"
+                                    ),
+                                    astfri::BinOpType::Assign,
+                                    expressions.mk_param_var_ref("cislo2")
+                                )
+                            )
+                        }
+                    )
+                ),
+                astfri::AccessModifier::Public,
+                astfri::Virtuality::NotVirtual
+            ),
+            statements.mk_method_def(
+                cds,
+                statements.mk_function_def(
+                    "~TestClass",
+                    {},
+                    types.mk_unknown(),
+                    {}
+                ),
+                astfri::AccessModifier::Public,
+                astfri::Virtuality::NotVirtual
+            ),
+            statements.mk_method_def(
+                cds,
+                statements.mk_function_def(
+                    "getCislo",
+                    {},
+                    types.mk_int(),
+                    statements.mk_compound({
+                        statements.mk_return(
+                            expressions.mk_bin_on(
+                                expressions.mk_member_var_ref(expressions.mk_class_ref(cds->name_), "a"),
+                                astfri::BinOpType::Multiply,
+                                expressions.mk_member_var_ref(expressions.mk_class_ref(cds->name_), "b")
+                            )
+                        )
+                    })
+                ),
+                astfri::AccessModifier::Private,
+                astfri::Virtuality::NotVirtual
+            )
+        };
         cds = statements.mk_class_def(cds->name_);
         cds->vars_ = atributes;
+        cds->methods_ = methods;
         cds->accept(tv);
-    }
-
-    template <typename TreeVisitor>
-    void load_ast_tree_3(TreeVisitor& /*tv*/) {
-        // AST
     }
 }

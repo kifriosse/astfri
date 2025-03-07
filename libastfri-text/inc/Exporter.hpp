@@ -26,6 +26,7 @@ public:
     virtual void write_round_bracket(std::string br);
     virtual void write_curl_bracket(std::string br);
     virtual void write_unknown_word();
+    virtual void write_invalid_word();
     virtual void write_public_word();
     virtual void write_private_word();
     virtual void write_protected_word();
@@ -42,6 +43,7 @@ public:
     virtual void write_user_type(std::string usertype);
     virtual void write_gen_param_name(std::string name);
     virtual void write_class_name(std::string name);
+    virtual void write_interface_name(std::string name);
     virtual void write_method_name(std::string name);
     virtual void write_function_name(std::string name);
     virtual void write_global_var_name(std::string name);
@@ -58,8 +60,12 @@ public:
     virtual void write_bool_val(bool val);
     virtual void write_null_val();
     virtual void write_class_word();
+    virtual void write_interface_word();
+    virtual void write_implement_word();
     virtual void write_this_word();
     virtual void write_return_word();
+    virtual void write_continue_word();
+    virtual void write_break_word();
     virtual void write_throw_word();
     virtual void write_if_word();
     virtual void write_else_word();
@@ -69,9 +75,11 @@ public:
     virtual void write_repeat_word();
     virtual void write_switch_word();
     virtual void write_case_word();
+    virtual void write_default_word();
     virtual void write_new_word();
     virtual void write_delete_word();
     virtual void write_pointer_word();
+    virtual void write_virtual_word();
     virtual void write_constr_word();
     virtual void write_destr_word();
     virtual void write_method_word();
