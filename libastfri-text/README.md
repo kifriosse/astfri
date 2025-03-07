@@ -19,13 +19,15 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
 {
     "CONFIGURATOR":{
         "FILE":{
-            "name":"output",
-            "path":"/tu/si/vloz/cestu/ku/vystupnemu/suboru/",
-            "format":"txt"
+            "name":"suborik",
+            "path":"/mnt/c/users/marek/desktop/",
+            "format":"html"
         },
         "DEFAULT_STYLE":"font-family:Consolas;font-size:18px",
         "UNKNOWN_WORD":"UNKNOWN EXPRESSION",
         "UNKNOWN_WORD_STYLE":"",
+        "INVALID_WORD":"INVALID EXPRESSION",
+        "INVALID_WORD_STYLE":"",
         "ACCESS_MOD":{
             "view":"inner",
             "public":"public",
@@ -59,15 +61,16 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "def_ref_name_style":"",
             "gen_param_name_style":"",
             "class_name_style":"",
+            "interface_name_style":"",
             "method_name_style":"",
             "function_name_style":"",
             "global_var_name_style":"",
-            "member_var_name_style":"",
+            "member_var_name_style":",
             "local_var_name_style":"",
             "param_var_name_style":""
         },
         "OPERATOR":{
-            "assign":"=",
+            "assign":"<-",
             "style":""
         },
         "SEPARATOR":{
@@ -95,6 +98,8 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "show_other_expr":true,
             "show_class_dec":true,
             "show_class_def":true,
+            "show_interf_dec":true,
+            "show_interf_def":true,
             "show_gener_par":true,
             "show_attribute":true,
             "show_meth_dec":true,
@@ -109,8 +114,12 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
         },
         "SYSTEM_EXPR":{
             "class_word":"class",
+            "interface_word":"interface",
+            "implement_word":"implements",
             "this_word":"this",
             "return_word":"return",
+            "continue_word":"continue",
+            "break_word":"break",
             "throw_word":"throw",
             "if_word":"if",
             "else_word":"else",
@@ -120,14 +129,20 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "repeat_word":"repeat",
             "switch_word":"switch",
             "case_word":"case",
+            "default_word":"default",
             "new_word":"new",
             "delete_word":"delete",
             "pointer_word":"*",
+            "virtual_word":"is virtual",
             "STYLE":{
                 "general_style":"",
                 "class_word_style":"",
+                "interface_word_style":"",
+                "implement_word_style":"",
                 "this_word_style":"",
                 "return_word_style":"",
+                "continue_word_style":"",
+                "break_word_style":"",
                 "throw_word_style":"",
                 "if_word_style":"",
                 "else_word_style":"",
@@ -137,9 +152,11 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
                 "repeat_word_style":"",
                 "switch_word_style":"",
                 "case_word_style":"",
+                "default_word_style":"",
                 "new_word_style":"",
                 "delete_word_style":"",
-                "pointer_word_style":""
+                "pointer_word_style":"",
+                "virtual_word_style":""
             }
         },
         "OTHER_EXPR":{
