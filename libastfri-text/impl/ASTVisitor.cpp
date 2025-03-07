@@ -189,7 +189,7 @@ void ASTVisitor::visit(LocalVarRefExpr const& expr) {
 }
 
 void ASTVisitor::visit(MemberVarRefExpr const& expr) {
-    expr.owner_ ? (expr.owner_->accept(*this), exporter_->write_separator_sign(std::move("->"))) : void();
+    expr.owner_ ? (expr.owner_->accept(*this), exporter_->write_separator_sign(std::move("."))) : void();
     exporter_->write_member_var_name(expr.member_);
 }
 
@@ -209,7 +209,7 @@ void ASTVisitor::visit(FunctionCallExpr const& expr) {
 
 void ASTVisitor::visit(MethodCallExpr const& expr) {
     configurator_->sh_other_expr() ? (exporter_->write_call_word(), exporter_->write_space()) : void();
-    expr.owner_ ? (expr.owner_->accept(*this), exporter_->write_separator_sign(std::move("->"))) : void();
+    expr.owner_ ? (expr.owner_->accept(*this), exporter_->write_separator_sign(std::move("."))) : void();
     exporter_->write_method_name(expr.name_);
     write_parameters(expr.args_);
 }
@@ -798,9 +798,8 @@ void ASTVisitor::write_return_type(Type* type) {
 void ASTVisitor::write_body(Stmt* body) {
     write_open_curl_bracket();
     exporter_->increase_indentation();
-    body ? body->accept(*this) : void();
+    body ? (body->accept(*this), exporter_->write_new_line()) : void();
     exporter_->decrease_indentation();
-    exporter_->write_new_line();
     exporter_->write_curl_bracket(std::move("}"));
 }
 
