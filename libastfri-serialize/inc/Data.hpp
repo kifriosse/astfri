@@ -53,7 +53,12 @@ inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",
 {"==",astfri::BinOpType::Equal},{"!=",astfri::BinOpType::NotEqual},{"<",astfri::BinOpType::Less},{"<=",astfri::BinOpType::LessEqual},
 {">",astfri::BinOpType::Greater},{">=",astfri::BinOpType::GreaterEqual},{">>",astfri::BinOpType::BitShiftRight},
 {"<<",astfri::BinOpType::BitShiftLeft},{"&",astfri::BinOpType::BitAnd},{"|",astfri::BinOpType::BitOr},{"^",astfri::BinOpType::BitXor},
-{",",astfri::BinOpType::Comma},{"&&",astfri::BinOpType::LogicalAnd},{"||",astfri::BinOpType::LogicalOr}};
+{",",astfri::BinOpType::Comma},{"&&",astfri::BinOpType::LogicalAnd},{"||",astfri::BinOpType::LogicalOr},{"+=",astfri::BinOpType::AddAssign},
+{"-=",astfri::BinOpType::SubtractAssign},{"*=",astfri::BinOpType::MultiplyAssign},{"/=",astfri::BinOpType::DivideAssign},
+{"//=",astfri::BinOpType::FloorDivideAssign},{"%=",astfri::BinOpType::ModuloAssign},{"**=",astfri::BinOpType::ExponentiationAssign},
+{">>=",astfri::BinOpType::BitShiftRightAssign},{"&=",astfri::BinOpType::BitAndAssign},{"|=",astfri::BinOpType::BitOrAssign},
+{"^=",astfri::BinOpType::BitXorAssign},{"//",astfri::BinOpType::FloorDivide},{"**",astfri::BinOpType::Exponentiation},
+{"<<=",astfri::BinOpType::BitShiftLeftAssign},};
 
 
 //if it s post increment/decrement operator is solved in serialize_unary_expr-there is property to recognise,which says if its

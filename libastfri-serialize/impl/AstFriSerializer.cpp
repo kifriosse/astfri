@@ -445,8 +445,6 @@ astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value
 
 astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Value& value){
     
-    
-
     astfri::ClassDefStmt*  classDefStmt = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()));
     
     for (auto& attribute : value["attributes"].GetArray()){
@@ -566,7 +564,7 @@ astfri::UnknownStmt* AstFriSerializer::serialize_unknown_stmt(){
 astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson::Value& value){
     std::vector<astfri::ClassDefStmt*> classes;
     for (auto& classDef : value["classes"].GetArray()){
-      //  classes.push_back(this->serialize_class_def_stmt(classDef));
+        classes.push_back(this->serialize_class_def_stmt(classDef));
     }
 
     std::vector<astfri::FunctionDefStmt*> functions;
