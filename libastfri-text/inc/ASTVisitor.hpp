@@ -10,6 +10,11 @@ using namespace astfri;
 class ASTVisitor : public IVisitor {
     std::shared_ptr<TextConfigurator> configurator_;
     std::unique_ptr<Exporter> exporter_;
+    std::unique_ptr<std::stringstream> currClassName_;
+    std::unique_ptr<std::stringstream> currInterfName_;
+    std::unique_ptr<std::vector<std::stringstream>> currGenParams_;
+    bool isMethodCall_;
+    bool isConstructorCall_;
 public:
     ASTVisitor();
     void write_file();
@@ -75,6 +80,7 @@ public:
     void visit(BreakStmt           const& stmt) override;
 private:
     void write_open_curl_bracket();
+    void write_arrow();
     void write_initialization(const VarDefStmt* init);
     void write_member_vars(std::vector<MemberVarDefStmt*>& vars);
     void write_constructors(std::vector<ConstructorDefStmt*>& constr);
@@ -82,6 +88,8 @@ private:
     void write_return_type(Type* type);
     void write_body(Stmt* body);
     void write_cond(Expr* cond);
+    void write_gen_params(const std::vector<GenericParam*>& params);
+    void write_implementations(const std::vector<InterfaceDefStmt*>& interfaces);
     template<typename Parameter>
     void write_parameters(const std::vector<Parameter*>& params);
     template<typename Member>

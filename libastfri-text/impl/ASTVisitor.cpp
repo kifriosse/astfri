@@ -9,6 +9,11 @@ ASTVisitor::ASTVisitor() {
     } else {
         exporter_ = std::make_unique<TxtFileExporter>(configurator_);
     }
+    currClassName_ = std::make_unique<std::stringstream>();
+    currInterfName_ = std::make_unique<std::stringstream>();
+    currGenParams_ = std::make_unique<std::vector<std::stringstream>>();
+    isMethodCall_ = false;
+    isConstructorCall_ = false;
 }
 
 void ASTVisitor::write_file() {
@@ -40,12 +45,39 @@ void ASTVisitor::visit(VoidType const& /*type*/) {
 }
 
 void ASTVisitor::visit(UserType const& type) {
-    exporter_->write_user_type(type.name_);
+    std::string name = type.name_;
+    size_t st = std::move(name.find(std::move('<')));
+    size_t en = std::move(name.find(std::move('>')));
+    if (st != std::move(std::string::npos) && en != std::move(std::string::npos) && st < en) {
+        std::string cl = name.substr(0, st);
+        std::string genPar = name.substr(st + 1, en - st - 1);
+        exporter_->write_class_name(std::move(cl));
+        exporter_->write_separator_sign(std::move("<"));
+        exporter_->write_gen_param_name(std::move(genPar));
+        exporter_->write_separator_sign(std::move(">"));
+    } else {
+        if (!currGenParams_->empty()) {
+            for (auto& a : *currGenParams_) {
+                if (std::move(a.str()) == name) {
+                    exporter_->write_gen_param_name(std::move(name));
+                    return;
+                }
+            }
+        }
+        if (name == std::move(currClassName_->str())) {
+            exporter_->write_class_name(std::move(name));
+        } else if (name == std::move(currInterfName_->str())) {
+            exporter_->write_interface_name(std::move(name));
+        } else if (name[0] >= std::move('A') && name[0] <= std::move('Z')) {
+            exporter_->write_class_name(std::move(name));
+        } else {
+            exporter_->write_user_type(std::move(name));
+        }
+    }
 }
 
 void ASTVisitor::visit(IndirectionType const& type) {
     type.indirect_ ? type.indirect_->accept(*this) : exporter_->write_invalid_word();
-    exporter_->write_space();
     exporter_->write_pointer_word();
 }
 
@@ -93,6 +125,7 @@ void ASTVisitor::visit(IfExpr const& expr) {
 }
 
 void ASTVisitor::visit(BinOpExpr const& expr) {
+    exporter_->write_round_bracket(std::move("("));
     expr.left_ ? expr.left_->accept(*this) : exporter_->write_invalid_word();
     exporter_->write_space();
     switch (expr.op_) {
@@ -133,9 +166,11 @@ void ASTVisitor::visit(BinOpExpr const& expr) {
     }
     exporter_->write_space();
     expr.right_ ? expr.right_->accept(*this) : exporter_->write_invalid_word();
+    exporter_->write_round_bracket(std::move(")"));
 }
 
 void ASTVisitor::visit(UnaryOpExpr const& expr) {
+    exporter_->write_round_bracket(std::move("("));
     switch (expr.op_) {
         case UnaryOpType::LogicalNot:
             exporter_->write_operator_sign(std::move("!"));
@@ -178,6 +213,7 @@ void ASTVisitor::visit(UnaryOpExpr const& expr) {
             expr.arg_ ? expr.arg_->accept(*this) : exporter_->write_invalid_word();
             break;
     }
+    exporter_->write_round_bracket(std::move(")"));
 }
 
 void ASTVisitor::visit(ParamVarRefExpr const& expr) {
@@ -208,8 +244,13 @@ void ASTVisitor::visit(FunctionCallExpr const& expr) {
 }
 
 void ASTVisitor::visit(MethodCallExpr const& expr) {
-    configurator_->sh_other_expr() ? (exporter_->write_call_word(), exporter_->write_space()) : void();
+    if (configurator_->sh_other_expr() && !isMethodCall_) {
+        exporter_->write_call_word();
+        exporter_->write_space();
+        isMethodCall_ = true;
+    }
     expr.owner_ ? (expr.owner_->accept(*this), exporter_->write_separator_sign(std::move("."))) : void();
+    isMethodCall_ = false;
     exporter_->write_method_name(expr.name_);
     write_parameters(expr.args_);
 }
@@ -234,15 +275,23 @@ void ASTVisitor::visit(ThisExpr const& /*expr*/) {
 }
 
 void ASTVisitor::visit(ConstructorCallExpr const& expr) {
-    configurator_->sh_other_expr() ? (exporter_->write_call_word(), exporter_->write_space()) : void();
+    if (configurator_->sh_other_expr() && !isConstructorCall_) {
+        exporter_->write_call_word();
+        exporter_->write_space();
+        exporter_->write_constr_word();
+        exporter_->write_space();
+    }
     expr.type_ ? expr.type_->accept(*this) : exporter_->write_invalid_word();
+    isConstructorCall_ = false;
     write_parameters(expr.args_);
 }
 
 void ASTVisitor::visit(NewExpr const& expr) {
     exporter_->write_new_word();
     exporter_->write_space();
+    isConstructorCall_ = true;
     expr.init_ ? expr.init_->accept(*this) : exporter_->write_invalid_word();
+    isConstructorCall_ = false;
 }
 
 void ASTVisitor::visit(DeleteExpr const& expr) {
@@ -318,9 +367,11 @@ void ASTVisitor::visit(IfStmt const& stmt) {
     exporter_->write_space();
     exporter_->write_do_word();
     write_body(stmt.iftrue_);
-    exporter_->write_space();
-    exporter_->write_else_word();
-    write_body(stmt.iffalse_);
+    if (stmt.iffalse_) {
+        exporter_->write_space();
+        exporter_->write_else_word();
+        write_body(stmt.iffalse_);
+    }
 }
 
 void ASTVisitor::visit(CaseStmt const& stmt) {
@@ -476,6 +527,9 @@ void ASTVisitor::visit(MethodDefStmt const& stmt) {
     configurator_->sh_other_expr() ? (exporter_->write_method_word(), exporter_->write_space()) : void();
     if (configurator_->sh_meth_owner() && stmt.owner_) {
         exporter_->write_class_name(stmt.owner_->name_);
+        if (configurator_->sh_gener_par() && !stmt.owner_->tparams_.empty()) {
+            write_gen_params(stmt.owner_->tparams_);
+        }
         exporter_->write_separator_sign(std::move("::"));
     }
     exporter_->write_method_name(stmt.func_->name_);
@@ -485,8 +539,25 @@ void ASTVisitor::visit(MethodDefStmt const& stmt) {
 }
 
 void ASTVisitor::visit(BaseInitializerStmt const& stmt) {
-    configurator_->sh_other_expr() ? (exporter_->write_call_word(), exporter_->write_space()) : void();
-    exporter_->write_class_name(stmt.base_);
+    if (configurator_->sh_other_expr()) {
+        exporter_->write_call_word();
+        exporter_->write_space();
+        exporter_->write_constr_word();
+        exporter_->write_space();
+    }
+    std::string name = stmt.base_;
+    size_t st = name.find(std::move('<'));
+    size_t en = name.find(std::move('>'));
+    if (st != std::string::npos && en != std::string::npos && st < en) {
+        std::string cl = name.substr(0, st);
+        std::string genPar = name.substr(st + 1, en - st - 1);
+        exporter_->write_class_name(std::move(cl));
+        exporter_->write_separator_sign(std::move("<"));
+        exporter_->write_gen_param_name(std::move(genPar));
+        exporter_->write_separator_sign(std::move(">"));
+    } else {
+        exporter_->write_class_name(std::move(name));
+    }
     write_parameters(stmt.args_);
 }
 
@@ -497,17 +568,18 @@ void ASTVisitor::visit(ConstructorDefStmt const& stmt) {
     configurator_->sh_other_expr() ? (exporter_->write_constr_word(), exporter_->write_space()) : void();
     if (configurator_->sh_meth_owner() && stmt.owner_) {
         exporter_->write_class_name(stmt.owner_->name_);
+        if (configurator_->sh_gener_par() && !stmt.owner_->tparams_.empty()) {
+            write_gen_params(stmt.owner_->tparams_);
+        }
         exporter_->write_separator_sign(std::move("::"));
     }
     stmt.owner_ ? exporter_->write_class_name(stmt.owner_->name_) : exporter_->write_invalid_word();
     write_parameters(stmt.params_);
     if (!stmt.baseInit_.empty()) {
-        exporter_->write_new_line();
-        exporter_->write_separator_sign(std::move("->"));
-        exporter_->write_space();
         for (size_t i = 0; i < stmt.baseInit_.size(); ++i) {
+            exporter_->write_new_line();
+            write_arrow();
             stmt.baseInit_.at(i) ? stmt.baseInit_.at(i)->accept(*this) : exporter_->write_invalid_word();
-            (i < stmt.baseInit_.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
         }
     }
     write_body(stmt.body_);
@@ -520,6 +592,9 @@ void ASTVisitor::visit(DestructorDefStmt const& stmt) {
     configurator_->sh_other_expr() ? (exporter_->write_destr_word(), exporter_->write_space()) : void();
     if (configurator_->sh_meth_owner() && stmt.owner_) {
         exporter_->write_class_name(stmt.owner_->name_);
+        if (configurator_->sh_gener_par() && !stmt.owner_->tparams_.empty()) {
+            write_gen_params(stmt.owner_->tparams_);
+        }
         exporter_->write_separator_sign(std::move("::"));
     }
     stmt.owner_ ? exporter_->write_class_name(std::move("~") + stmt.owner_->name_) : exporter_->write_invalid_word();
@@ -530,81 +605,55 @@ void ASTVisitor::visit(DestructorDefStmt const& stmt) {
 
 void ASTVisitor::visit(GenericParam const& stmt) {
     exporter_->write_gen_param_name(stmt.name_);
+    currGenParams_->push_back(std::stringstream(stmt.name_));
 }
 
 void ASTVisitor::visit(InterfaceDefStmt const& stmt) {
     if (!configurator_->sh_interf_dec()) {
         return;
     }
+    currInterfName_ = std::make_unique<std::stringstream>(stmt.name_);
     if (configurator_->sh_gener_par() && !stmt.tparams_.empty()) {
-        exporter_->write_separator_sign(std::move("<"));
-        for (size_t i = 0; i < stmt.tparams_.size(); ++i) {
-            stmt.tparams_.at(i) ? stmt.tparams_.at(i)->accept(*this) : exporter_->write_invalid_word();
-            (i < stmt.tparams_.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
-        }
-        exporter_->write_separator_sign(std::move(">"));
+        write_gen_params(stmt.tparams_);
         exporter_->write_new_line();
     }
     exporter_->write_interface_word();
     exporter_->write_space();
     exporter_->write_interface_name(stmt.name_);
     if (!stmt.bases_.empty()) {
-        exporter_->write_space();
-        exporter_->write_separator_sign(std::move("->"));
-        exporter_->write_space();
-        exporter_->write_implement_word();
-        exporter_->write_space();
-        exporter_->write_interface_word();
-        for (size_t i = 0; i < stmt.bases_.size(); ++i) {
-            stmt.bases_.at(i) ? exporter_->write_interface_name(stmt.bases_.at(i)->name_) : exporter_->write_invalid_word();
-            (i < stmt.bases_.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
-        }
+        write_implementations(stmt.bases_);
     }
     write_open_curl_bracket();
     if (configurator_->sh_interf_def() && configurator_->sh_meth_dec() && !stmt.methods_.empty()) {
-        for (size_t i = 0; i < stmt.methods_.size(); ++i) {
-            std::vector<MethodDefStmt*> meth {};
-            if (has_acc_mod(stmt.methods_, meth, AccessModifier::Public)) {
-                exporter_->write_public_word();
+        std::vector<MethodDefStmt*> meth {};
+        if (has_acc_mod(stmt.methods_, meth, AccessModifier::Public)) {
+            exporter_->write_public_word();
+            write_methods(meth);
+        }
+        if (configurator_->get_view()->view() == std::move("inner")) {
+            if (has_acc_mod(stmt.methods_, meth, AccessModifier::Protected)) {
+                exporter_->write_protected_word();
                 write_methods(meth);
-            }
-            if (configurator_->get_view()->view() == std::move("inner")) {
-                if (has_acc_mod(stmt.methods_, meth, AccessModifier::Protected)) {
-                    exporter_->write_protected_word();
-                    write_methods(meth);
-                }
             }
         }
     }
     exporter_->write_curl_bracket(std::move("}"));
     exporter_->write_new_line();
+    currInterfName_ = std::make_unique<std::stringstream>();
 }
 
 void ASTVisitor::visit(ClassDefStmt const& stmt) {
+    currClassName_ = std::make_unique<std::stringstream>(stmt.name_);
     if (configurator_->sh_class_dec()) {
         if (configurator_->sh_gener_par() && !stmt.tparams_.empty()) {
-            exporter_->write_separator_sign(std::move("<"));
-            for (size_t i = 0; i < stmt.tparams_.size(); ++i) {
-                stmt.tparams_.at(i) ? stmt.tparams_.at(i)->accept(*this) : exporter_->write_invalid_word();
-                (i < stmt.tparams_.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
-            }
-            exporter_->write_separator_sign(std::move(">"));
+            write_gen_params(stmt.tparams_);
             exporter_->write_new_line();
         }
         exporter_->write_class_word();
         exporter_->write_space();
         exporter_->write_class_name(stmt.name_);
         if (!stmt.interfaces_.empty()) {
-            exporter_->write_space();
-            exporter_->write_separator_sign(std::move("->"));
-            exporter_->write_space();
-            exporter_->write_implement_word();
-            exporter_->write_space();
-            exporter_->write_interface_word();
-            for (size_t i = 0; i < stmt.interfaces_.size(); ++i) {
-                stmt.interfaces_.at(i) ? exporter_->write_interface_name(stmt.interfaces_.at(i)->name_) : exporter_->write_invalid_word();
-                (i < stmt.interfaces_.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
-            }
+            write_implementations(stmt.interfaces_);
         }
         write_open_curl_bracket();
         if (configurator_->sh_class_def()) {
@@ -704,6 +753,7 @@ void ASTVisitor::visit(ClassDefStmt const& stmt) {
             }
         }
     }
+    currClassName_ = std::make_unique<std::stringstream>();
 }
 
 void ASTVisitor::visit(ContinueStmt const& /*stmt*/) {
@@ -714,10 +764,18 @@ void ASTVisitor::visit(BreakStmt const& /*stmt*/) {
     exporter_->write_break_word();
 }
 
+//---------------------------------------------------------------------------------------
+
 void ASTVisitor::write_open_curl_bracket() {
     configurator_->use_cpp_br() ? exporter_->write_new_line() : exporter_->write_space();
     exporter_->write_curl_bracket(std::move("{"));
     exporter_->write_new_line();
+}
+
+void ASTVisitor::write_arrow() {
+    exporter_->write_space();
+    exporter_->write_separator_sign(std::move("->"));
+    exporter_->write_space();
 }
 
 void ASTVisitor::write_initialization(const VarDefStmt* init) {
@@ -771,13 +829,13 @@ void ASTVisitor::write_methods(std::vector<MethodDefStmt*>& meth) {
     bool once = false;
     for (size_t i = 0; i < meth.size(); ++i) {
         if (meth.at(i) && meth.at(i)->func_) {
+            if (meth.at(i)->virtuality_ == Virtuality::Virtual) {
+                exporter_->write_virtual_word();
+                write_arrow();
+            }
             exporter_->write_method_name(meth.at(i)->func_->name_);
             write_parameters(meth.at(i)->func_->params_);
             write_return_type(meth.at(i)->func_->retType_);
-            if (meth.at(i)->virtuality_ == Virtuality::Virtual) {
-                exporter_->write_space();
-                exporter_->write_virtual_word();
-            }
             exporter_->write_new_line();
             once = true;
         }
@@ -788,9 +846,7 @@ void ASTVisitor::write_methods(std::vector<MethodDefStmt*>& meth) {
 }
 
 void ASTVisitor::write_return_type(Type* type) {
-    exporter_->write_space();
-    exporter_->write_separator_sign(std::move("->"));
-    exporter_->write_space();
+    write_arrow();
     configurator_->sh_other_expr() ? (exporter_->write_returns_word(), exporter_->write_space()) : void();
     type ? type->accept(*this) : exporter_->write_invalid_word();
 }
@@ -808,4 +864,30 @@ void ASTVisitor::write_cond(Expr* cond) {
     exporter_->write_round_bracket(std::move("("));
     cond ? cond->accept(*this) : void();
     exporter_->write_round_bracket(std::move(")"));
+}
+
+void ASTVisitor::write_gen_params(const std::vector<GenericParam*>& params) {
+    exporter_->write_separator_sign(std::move("<"));
+    for (size_t i = 0; i < params.size(); ++i) {
+        params.at(i) ? params.at(i)->accept(*this) : exporter_->write_invalid_word();
+        (i < params.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
+    }
+    exporter_->write_separator_sign(std::move(">"));
+}
+
+void ASTVisitor::write_implementations(const std::vector<InterfaceDefStmt*>& interfaces) {
+    for (size_t i = 0; i < interfaces.size(); ++i) {
+        exporter_->write_new_line();
+        write_arrow();
+        exporter_->write_implement_word();
+        exporter_->write_space();
+        exporter_->write_interface_word();
+        exporter_->write_space();
+        if (interfaces.at(i)) {
+            exporter_->write_interface_name(interfaces.at(i)->name_);
+            interfaces.at(i)->tparams_.empty() ? void() : write_gen_params(interfaces.at(i)->tparams_);
+        } else {
+            exporter_->write_invalid_word();
+        }
+    }
 }

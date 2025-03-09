@@ -41,7 +41,7 @@
         },
         "REF_NAME_STYLE":{
             "def_ref_name_style":"color:",
-            "gen_param_name_style":"color:",
+            "gen_param_name_style":"color:purple;font-weight:bold",
             "class_name_style":"color:forestgreen",
             "interface_name_style":"color:forestgreen",
             "method_name_style":"color:orange",
@@ -114,7 +114,7 @@
             "default_word":"žiadnu uvedenú hodnotu",
             "new_word":"vytvor nový",
             "delete_word":"vymaž",
-            "pointer_word":"*",
+            "pointer_word":"↑",
             "virtual_word":"je virtuálna",
             "STYLE":{
                 "general_style":"color:",

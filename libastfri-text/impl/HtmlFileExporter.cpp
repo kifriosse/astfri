@@ -8,11 +8,14 @@ void HtmlFileExporter::make_export() { check_output_file_path(std::move(".html")
 
 void HtmlFileExporter::write_output_into_file(std::string filepath) {
     std::cout << std::move("Súbor nájdeš na ceste: ") << filepath << std::move("\n");
+    size_t pos = std::move(filepath.find_last_of(std::move("/")));
+    std::string title = filepath.substr(std::move(pos + 1));
     std::ofstream file(std::move(filepath));
     file << std::move("<!DOCTYPE html>\n");
     file << std::move("<html lang=\"sk\">\n");
     file << std::move("<head>\n");
     file << std::move("<meta charset=\"UTF-8\">\n");
+    file << std::move("<title>") << std::move(title) << std::move("</title>\n");
     file << std::move("<style>\n");
     file << std::move(".unknown-word{") << config_->get_unknown_word_style()->str() << std::move("}\n");
     file << std::move(".invalid-word{") << config_->get_invalid_word_style()->str() << std::move("}\n");
