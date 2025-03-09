@@ -69,9 +69,9 @@ inline std::unordered_map<std::string,astfri::UnaryOpType> unaryOpTypeMapping={{
 
 enum Types{IntType,FloatType,CharType,BoolType,VoidType,UserType,IndirectionType,UnknownType,DynamicType};
 
-inline std::unordered_map<std::string,Types> strToTypeMapping={{"Int",IntType},{"Float",FloatType},
-    {"Char",CharType},{"Bool",BoolType},{"Void",VoidType},{"User",UserType},
-    {"Indirection",IndirectionType},{"Unknown",UnknownType},{"Dynamic",DynamicType}};
+inline std::unordered_map<std::string,Types> strToTypeMapping={{"IntType",IntType},{"FloatType",FloatType},
+    {"CharType",CharType},{"BoolType",BoolType},{"VoidType",VoidType},{"UserType",UserType},
+    {"IndirectionType",IndirectionType},{"UnknownType",UnknownType},{"DynamicType",DynamicType}};
 
 }
 

@@ -49,7 +49,9 @@ astfri::IVisitable* AstFriSerializer::serialize(std::string filePath)
         }
         return this->resolve_expr(document_);
     }
-
+    this->resolve_class_def_stmts(); 
+    this->resolve_interface_def_stmts();
+    this->clear_records();
     return this->resolve_stmt(document_);
 
     
@@ -411,7 +413,7 @@ astfri::GlobalVarDefStmt* AstFriSerializer::serialize_global_var_def_stmt(rapidj
 astfri::MemberVarDefStmt* AstFriSerializer::serialize_member_var_def_stmt(rapidjson::Value& value){
     astfri::Type* type = this->resolve_type(value["type"]);
     astfri::Expr* initializer = value["initializer"].IsNull() ?  nullptr : this->resolve_expr(value["initializer"]);
-    astfri::AccessModifier modifier = accessModMapping.find(value["acces"].GetString())->second; 
+    astfri::AccessModifier modifier = accessModMapping.find(value["access"].GetString())->second; 
 
     return this->statementMaker_.mk_member_var_def(std::move(value["name"].GetString()),type,initializer,modifier);
 }
@@ -430,9 +432,10 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
 }
 
 astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
+    std::string name = value["name"].GetString();
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
     astfri::AccessModifier accessMod = accessModMapping.find(value["access"].GetString())->second;
-    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, value["virtuality"].GetString() == "yes" ? 
+    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, strcmp(value["virtual"].GetString(),"yes") == 0 ? 
                                                                             astfri::Virtuality::Virtual : astfri::Virtuality::NotVirtual);
 }
 
@@ -467,14 +470,35 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
         classDefStmt->destructors_.push_back(this->serialize_destructor_def_stmt(destructor,classDefStmt));
     }
 
-    for (auto& interface : value["interfaces"].GetArray() ){
-        classDefStmt->interfaces_.push_back(this->serialize_interface_def_stmt(interface));
+    //if the root of JSON file was Translation unit ,all InterfaceDefStmts should already be resolved
+    for(auto& base : value["interfaces"].GetArray()){
+        std::string name = base.GetString();
+        auto it = nameWithInterfaceDefStmtMapping_.find(name);
+        //if interface isnt among resolved interfaces create naked interface only with name and add it among resolved interfaces
+        if (it==nameWithInterfaceDefStmtMapping_.end()){
+            astfri::InterfaceDefStmt* interface = this->statementMaker_.mk_interface_def(base.GetString());
+            nameWithInterfaceDefStmtMapping_[name]=interface;
+            classDefStmt->interfaces_.push_back(interface);
+        }else{
+            classDefStmt->interfaces_.push_back(it->second);
+        }
+        
     }
 
     for (auto& base : value["bases"].GetArray() ){
-        classDefStmt->bases_.push_back(this->serialize_class_def_stmt(base));
+        std::string name = base.GetString();
+        auto it = nameWithClassDefStmtMapping_.find(name);
+        //if class mentioned among base classes isnt resolved yet ,do nothing except for create record in unresolvedClassDefStmt map
+        //and add this classDefStmt among classDefStmts which references to unresolved ClassDefStmt
+        if (it==nameWithClassDefStmtMapping_.end()){
+            unResolvedClassDefStmts_[name].push_back(classDefStmt);
+            
+        }else{
+            classDefStmt->bases_.push_back(it->second);
+        }
     }
 
+    nameWithClassDefStmtMapping_[classDefStmt->name_]=classDefStmt;
     return classDefStmt;
     
 }
@@ -562,6 +586,12 @@ astfri::UnknownStmt* AstFriSerializer::serialize_unknown_stmt(){
 }
 
 astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson::Value& value){
+    
+    std::vector<astfri::InterfaceDefStmt*> interfaces;
+    for (auto& interface : value["interfaces"].GetArray()){
+        interfaces.push_back(this->serialize_interface_def_stmt(interface));
+    }
+    
     std::vector<astfri::ClassDefStmt*> classes;
     for (auto& classDef : value["classes"].GetArray()){
         classes.push_back(this->serialize_class_def_stmt(classDef));
@@ -577,10 +607,7 @@ astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson:
         globals.push_back(this->serialize_global_var_def_stmt(global));
     }
 
-    std::vector<astfri::InterfaceDefStmt*> interfaces;
-    for (auto& interface : value["interfaces"].GetArray()){
-        interfaces.push_back(this->serialize_interface_def_stmt(interface));
-    }
+    
 
     astfri::TranslationUnit* tu = this->statementMaker_.mk_translation_unit();
     tu->classes_ = std::move(classes);
@@ -650,7 +677,14 @@ astfri::InterfaceDefStmt* AstFriSerializer::serialize_interface_def_stmt(rapidjs
     astfri::InterfaceDefStmt* interfDefStmt =  this->statementMaker_.mk_interface_def(std::move(value["name"].GetString()));
     
     for(auto& base : value["bases"].GetArray()){
-        interfDefStmt->bases_.push_back(this->serialize_interface_def_stmt(base));
+        std::string name = base.GetString();
+        auto it = nameWithInterfaceDefStmtMapping_.find(name);
+        if (it == nameWithInterfaceDefStmtMapping_.end()){
+            unresolvedInterfaceDefStmts_[name].push_back(interfDefStmt);
+        }else{
+            interfDefStmt->bases_.push_back(it->second);
+        }
+        
     }
 
     for(auto& method : value["methods"].GetArray()){
@@ -661,6 +695,77 @@ astfri::InterfaceDefStmt* AstFriSerializer::serialize_interface_def_stmt(rapidjs
         interfDefStmt->tparams_.push_back(this->serialize_generic_param(genericParam));
     }
 
+    nameWithInterfaceDefStmtMapping_[interfDefStmt->name_]=interfDefStmt;
     return interfDefStmt;
 
+}
+
+void AstFriSerializer::resolve_class_def_stmts(){
+    //traverse throw all unresolved classDefStmts
+    for (auto& it : unResolvedClassDefStmts_){
+        std::string name = it.first;
+        //try to find name among already resolved classDefStmts
+        auto itResolvedClassStmt =  nameWithClassDefStmtMapping_.find(name);
+
+        //if name isnt among resolved statements ,create empty class def statement only with name,and add it to all child classes
+        if(itResolvedClassStmt == nameWithClassDefStmtMapping_.end()){
+            astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(name));
+            for(auto& clsDefStmt : it.second){
+                clsDefStmt->bases_.push_back(classDefStmt);
+            }
+
+        } else {
+            for(auto& clsDefStmt : it.second){
+                clsDefStmt->bases_.push_back(itResolvedClassStmt->second);
+            }
+        }
+
+
+    }
+
+
+}
+
+void AstFriSerializer::resolve_interface_def_stmts(){
+    //traverse throw all unresolved interfaceDefStmts
+    for (auto& it : unresolvedInterfaceDefStmts_){
+        std::string name = it.first;
+        
+        //try to find name among already resolved interfaceDefStmts
+        auto itResolvedInterfaceStmt = nameWithInterfaceDefStmtMapping_.find(name);
+        if (itResolvedInterfaceStmt == nameWithInterfaceDefStmtMapping_.end()){
+            astfri::InterfaceDefStmt* interfDefStmt = this->statementMaker_.mk_interface_def(std::move(name));
+            for (auto& defStmt : it.second){
+                if(is_class_def_stmt(defStmt)){
+                    dynamic_cast<astfri::ClassDefStmt*>(defStmt)->interfaces_.push_back(interfDefStmt);
+                }else{
+                    dynamic_cast<astfri::InterfaceDefStmt*>(defStmt)->bases_.push_back(interfDefStmt);
+                }
+
+            }
+        }else{
+            astfri::InterfaceDefStmt* interfDefStmt = itResolvedInterfaceStmt->second;
+            for (auto& defStmt : it.second){
+                if(is_class_def_stmt(defStmt)){
+                    dynamic_cast<astfri::ClassDefStmt*>(defStmt)->interfaces_.push_back(interfDefStmt);
+                }else{
+                    dynamic_cast<astfri::InterfaceDefStmt*>(defStmt)->bases_.push_back(interfDefStmt);
+                }
+
+            }
+
+        }
+
+    }
+}
+
+bool AstFriSerializer::is_class_def_stmt(astfri::Stmt* stmt){
+    return dynamic_cast<astfri::ClassDefStmt*>(stmt) != nullptr;
+}
+
+void AstFriSerializer::clear_records(){
+    nameWithClassDefStmtMapping_.clear();
+    nameWithInterfaceDefStmtMapping_.clear();
+    unResolvedClassDefStmts_.clear();
+    unresolvedInterfaceDefStmts_.clear();
 }
