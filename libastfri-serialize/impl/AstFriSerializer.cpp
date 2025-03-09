@@ -160,7 +160,8 @@ astfri::LocalVarRefExpr* AstFriSerializer::serialize_local_var_ref_expr(rapidjso
     
 }
 astfri::MemberVarRefExpr* AstFriSerializer::serialize_member_var_ref_expr(rapidjson::Value& value){
-   return  this->expressionMaker_.mk_member_var_ref(nullptr, std::move(value["name"].GetString()));
+    astfri::Expr* owner = this->resolveExpr(value["owner"]);
+    return  this->expressionMaker_.mk_member_var_ref(owner, std::move(value["name"].GetString()));
 }
 
 astfri::GlobalVarRefExpr* AstFriSerializer::serialize_global_var_ref_expr(rapidjson::Value& value){
@@ -313,8 +314,8 @@ astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
         case astfri_serialize::UnknownType:
             return this->typeMaker_.mk_unknown();
         case astfri_serialize::DynamicType:
-            //return this->typeMaker_.mk_dynamic();
-            return nullptr;
+            return this->typeMaker_.mk_dynamic();
+            
     }
     return this->typeMaker_.mk_unknown();
 }
