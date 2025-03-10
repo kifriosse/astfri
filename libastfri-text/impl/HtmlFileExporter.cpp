@@ -2,7 +2,12 @@
 #include <iostream>
 #include <fstream>
 
-HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {}
+HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {
+    maxRoundBrIndex_ = config_->get_round_br_col()->size();
+    maxCurlBrIndex_ = config_->get_curl_br_col()->size();
+    roundBrIndex_ = 0;
+    curlBrIndex_ = 0;
+}
 
 void HtmlFileExporter::make_export() { check_output_file_path(std::move(".html")); }
 
@@ -126,11 +131,53 @@ void HtmlFileExporter::write_space() {
 }
 
 void HtmlFileExporter::write_round_bracket(std::string br) {
-    write_word(std::move(br));
+    if (config_->use_br_col() && maxRoundBrIndex_ > 0) {
+        std::string out = std::move("<span style=\"color:");
+        if (std::move(br) == std::move("(")) {
+            out.append(std::move(config_->get_round_br_col()->at(roundBrIndex_).str()));
+            out.append(std::move("\">(</span>"));
+            ++roundBrIndex_;
+            if (roundBrIndex_ == maxRoundBrIndex_) {
+                roundBrIndex_ = 0;
+            }
+        } else {
+            if (roundBrIndex_ == 0) {
+                roundBrIndex_ = maxRoundBrIndex_ - 1;
+            } else {
+                --roundBrIndex_;
+            }
+            out.append(std::move(config_->get_round_br_col()->at(roundBrIndex_).str()));
+            out.append(std::move("\">)</span>"));
+        }
+        write_word(std::move(out));
+    } else {
+        write_word(std::move(br));
+    }
 }
 
 void HtmlFileExporter::write_curl_bracket(std::string br) {
-    write_word(std::move(br));
+    if (config_->use_br_col() && maxCurlBrIndex_ > 0) {
+        std::string out = std::move("<span style=\"color:");
+        if (std::move(br) == std::move("{")) {
+            out.append(std::move(config_->get_curl_br_col()->at(curlBrIndex_).str()));
+            out.append(std::move("\">{</span>"));
+            ++curlBrIndex_;
+            if (curlBrIndex_ == maxCurlBrIndex_) {
+                curlBrIndex_ = 0;
+            }
+        } else {
+            if (curlBrIndex_ == 0) {
+                curlBrIndex_ = maxCurlBrIndex_ - 1;
+            } else {
+                --curlBrIndex_;
+            }
+            out.append(std::move(config_->get_curl_br_col()->at(curlBrIndex_).str()));
+            out.append(std::move("\">}</span>"));
+        }
+        write_word(std::move(out));
+    } else {
+        write_word(std::move(br));
+    }
 }
 
 void HtmlFileExporter::write_unknown_word() {

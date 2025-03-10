@@ -76,6 +76,7 @@
     "TEXT_CONFIGURATOR":{
         "STRUCT_SETTING":{
             "use_cpp_bracket":true,
+            "use_br_color":true,
             "show_row":true,
             "show_other_expr":true,
             "show_class_dec":true,
@@ -92,6 +93,8 @@
             "show_global_par":true,
             "tab_length":8,
             "margin_length":6,
+            "round_br_colors":["red", "orange", true, "blue"],
+            "curl_br_colors":["red", "orange", true, "blue"],
             "row_style":"color:grey"
         },
         "SYSTEM_EXPR":{

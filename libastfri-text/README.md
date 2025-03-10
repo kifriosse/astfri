@@ -94,6 +94,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
     "TEXT_CONFIGURATOR":{
         "STRUCT_SETTING":{
             "use_cpp_bracket":true,
+            "use_br_color":true,
             "show_row":true,
             "show_other_expr":true,
             "show_class_dec":true,
@@ -110,6 +111,8 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "show_global_par":true,
             "tab_length":4,
             "margin_length":3,
+            "round_br_colors":[],
+            "curl_br_colors":[],
             "row_style":""
         },
         "SYSTEM_EXPR":{

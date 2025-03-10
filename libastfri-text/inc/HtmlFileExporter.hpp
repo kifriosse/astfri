@@ -4,6 +4,10 @@
 #include <libastfri-text/inc/Exporter.hpp>
 
 class HtmlFileExporter : public Exporter {
+    int maxRoundBrIndex_;
+    int maxCurlBrIndex_;
+    int roundBrIndex_;
+    int curlBrIndex_;
 public:
     HtmlFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;

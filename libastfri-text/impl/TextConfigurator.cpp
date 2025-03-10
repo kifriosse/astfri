@@ -54,6 +54,9 @@ void TextConfigurator::load_new_config_file() {
             if (sett.HasMember(std::move("use_cpp_bracket")) && sett[std::move("use_cpp_bracket")].IsBool()) {
                 useCppBr_ = std::move(sett[std::move("use_cpp_bracket")].GetBool());
             }
+            if (sett.HasMember(std::move("use_br_color")) && sett[std::move("use_br_color")].IsBool()) {
+                useBrCol_ = std::move(sett[std::move("use_br_color")].GetBool());
+            }
             if (sett.HasMember(std::move("show_row")) && sett[std::move("show_row")].IsBool()) {
                 shRow_ = std::move(sett[std::move("show_row")].GetBool());
             }
@@ -106,6 +109,22 @@ void TextConfigurator::load_new_config_file() {
                 int val = std::move(sett[std::move("margin_length")].GetInt());
                 if (val >= 0 && val <= 10) {
                     margLen_ = std::move(val);
+                }
+            }
+            if (sett.HasMember(std::move("round_br_colors")) && sett[std::move("round_br_colors")].IsArray()) {
+                const rj::Value& colors = std::move(sett[std::move("round_br_colors")]);
+                for (size_t i = 0; i < colors.Size() && i < 4; ++i) {
+                    if (colors[i].IsString()) {
+                        roundBrCol_->push_back(std::stringstream(std::move(colors[i].GetString())));
+                    }
+                }
+            }
+            if (sett.HasMember(std::move("curl_br_colors")) && sett[std::move("curl_br_colors")].IsArray()) {
+                const rj::Value& colors = std::move(sett[std::move("curl_br_colors")]);
+                for (size_t i = 0; i < colors.Size() && i < 4; ++i) {
+                    if (colors[i].IsString()) {
+                        curlBrCol_->push_back(std::stringstream(std::move(colors[i].GetString())));
+                    }
                 }
             }
             if (sett.HasMember(std::move("row_style")) && sett[std::move("row_style")].IsString()) {
@@ -312,6 +331,7 @@ void TextConfigurator::load_new_config_file() {
 
 void TextConfigurator::set_defaults() {
     useCppBr_ = true;
+    useBrCol_ = true;
     shRow_ = true;
     shOtherExpr_ = true;
     shClassDec_ = true;
@@ -328,6 +348,8 @@ void TextConfigurator::set_defaults() {
     shGlobPar_ = true;
     tabLen_ = 4;
     margLen_ = 3;
+    roundBrCol_ = std::make_unique<std::vector<std::stringstream>>();
+    curlBrCol_ = std::make_unique<std::vector<std::stringstream>>();
     rowStyle_ = std::make_unique<std::stringstream>();
     classWord_ = std::make_unique<std::stringstream>(std::move("class"));
     interfaceWord_ = std::make_unique<std::stringstream>(std::move("interface"));

@@ -2,9 +2,11 @@
 #define LIBASTFRI_TEXT_INC_TEXT_CONFIG
 
 #include <libastfri-text/inc/Configurator.hpp>
+#include <vector>
 
 class TextConfigurator : public Configurator {
     bool useCppBr_;
+    bool useBrCol_;
     bool shRow_;
     bool shOtherExpr_;
     bool shClassDec_;
@@ -21,6 +23,8 @@ class TextConfigurator : public Configurator {
     bool shGlobPar_;
     int tabLen_;
     int margLen_;
+    std::unique_ptr<std::vector<std::stringstream>> roundBrCol_;
+    std::unique_ptr<std::vector<std::stringstream>> curlBrCol_;
     std::unique_ptr<std::stringstream> rowStyle_;
     std::unique_ptr<std::stringstream> classWord_;
     std::unique_ptr<std::stringstream> interfaceWord_;
@@ -89,6 +93,7 @@ private:
     void set_defaults() override;
 public:
     const bool& use_cpp_br()    { return useCppBr_; };
+    const bool& use_br_col()    { return useBrCol_; };
     const bool& sh_row()        { return shRow_; };
     const bool& sh_other_expr() { return shOtherExpr_; };
     const bool& sh_class_dec()  { return shClassDec_; };
@@ -105,6 +110,8 @@ public:
     const bool& sh_glob_par()   { return shGlobPar_; };
     const int& get_tab_len()    { return tabLen_; };
     const int& get_marg_len()   { return margLen_; };
+    const std::vector<std::stringstream>* get_round_br_col() { return roundBrCol_.get(); };
+    const std::vector<std::stringstream>* get_curl_br_col()  { return curlBrCol_.get(); };
     const std::stringstream* get_row_style()      { return rowStyle_.get(); };
     const std::stringstream* get_class_word()     { return classWord_.get(); };
     const std::stringstream* get_interface_word() { return interfaceWord_.get(); };
