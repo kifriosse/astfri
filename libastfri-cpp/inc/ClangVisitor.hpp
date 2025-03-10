@@ -62,9 +62,11 @@ public:
     bool TraverseVarDecl(clang::VarDecl *VD);
     bool TraverseParmVarDecl(clang::ParmVarDecl *PVD);
     bool TraverseFieldDecl(clang::FieldDecl *FD);
+    // bool TraverseClassTemplateDecl(clang::ClassTemplateDecl *CTD);
     // bool TraverseTypedefDecl(clang::TypedefDecl *TD);
     // bool TraverseEnumDecl(clang::EnumDecl *ED);
     // // Traverse statementy
+    bool TraverseDeclStmt(clang::DeclStmt *DS);
     bool TraverseCompoundStmt(clang::CompoundStmt *CS);
     bool TraverseReturnStmt(clang::ReturnStmt *RS);
     bool TraverseIfStmt(clang::IfStmt *IS);
@@ -91,6 +93,7 @@ public:
 
 private:
     astfri::AccessModifier getAccessModifier(clang::Decl* decl);
+    astfri::ClassDefStmt* get_existing_class(std::string name);
     TranslationUnit* tu_;
 
     StmtFactory* stmt_factory_;

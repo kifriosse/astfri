@@ -4,6 +4,7 @@
 #include "libastfri/inc/Type.hpp"
 #include <clang/AST/APValue.h>
 #include <clang/AST/Decl.h>
+#include <clang/AST/DeclTemplate.h>
 #include <clang/AST/Expr.h>
 #include <clang/AST/OperationKinds.h>
 #include <clang/AST/RecursiveASTVisitor.h>
@@ -44,6 +45,15 @@ astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl) {
     }
 }
 
+astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name) {
+    for (auto cls : this->tu_->classes_) {
+        if (cls->name_.compare(name) == 0) {
+            return cls;
+        }
+    }
+    return nullptr;
+}
+
 // traverse deklaracie
 bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     llvm::outs() << "Konstruktor zaciatok: " << Ctor->getNameAsString() << "\n";
@@ -65,7 +75,7 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
         );
         // TODO: ked pride podpora treba odkomentovat
         // ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_ctor);
-        
+
         TraverseStmt(Ctor->getBody());
         new_ctor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
         for (auto parm : Ctor->parameters()) {
@@ -137,7 +147,7 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl *FD) {
 
     //priradenie comopund statementu funkcii
     new_function->body_ = (CompoundStmt*)this->astfri_location.stmt_;
-    
+
     // vratenie naspat location
     this->astfri_location = astfri_temp;
     this->clang_location = clang_temp;
@@ -179,7 +189,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
     TraverseStmt(body);
 
     new_method->func_->body_ = (CompoundStmt*)this->astfri_location.stmt_;
-    
+
     // vratenie naspat AST Location
     this->astfri_location = astfri_temp;
     this->clang_location = clang_temp;
@@ -189,12 +199,18 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
 }
 bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl *RD) {
     llvm::outs() << "Class zaciatok: " << RD->getNameAsString() << "\n";
-
+    
+    
     // akcia na vrchole
     auto new_class = this->stmt_factory_->mk_class_def(
         RD->getNameAsString()
     );
     this->tu_->classes_.push_back(new_class);
+
+    // nastavenie bases
+    for (auto base : RD->bases()) {
+        new_class->bases_.push_back(this->get_existing_class(base.getType().getAsString()));
+    }
 
     // zapamatanie si predoslich location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -212,10 +228,23 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl *RD) {
         TraverseDecl(method);
     }
 
+    if(auto tparams = RD->getDescribedTemplateParams()) {
+        std::cout << "Som v triede ktorá má template\n";
+        for (unsigned int i = 0; i < tparams->size(); i++) {
+            new_class->tparams_.push_back(
+                this->stmt_factory_->mk_generic_param(
+                    "",
+                    tparams->getParam(i)->getNameAsString()
+                )
+            );
+            std::cout << tparams->getParam(i)->getNameAsString() << "\n"; // Vratilo T konecne
+        }
+    }
+
     // vratenie naspat na predosly location
     this->astfri_location = astfri_temp;
     this->clang_location = clang_temp;
-    
+
     llvm::outs() << "Class koniec: " << RD->getNameAsString() << "\n";
     return true;
 }
@@ -231,7 +260,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl *VD) {
             this->type_factory_->mk_user(VD->getType().getAsString()), //TODO: fixnut
             nullptr
         );
-        ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_var);
+        ((DefStmt*)this->astfri_location.stmt_)->defs_.push_back(new_var);
     } else {
         // globalna premenna
         new_var = this->stmt_factory_->mk_global_var_def(
@@ -317,9 +346,31 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
     this->clang_location = clang_temp;
 
     llvm::outs() << "Field koniec: " << FD->getNameAsString() << "\n";
-    
+
     return true;
 }
+// bool ClangVisitor::TraverseClassTemplateDecl(clang::ClassTemplateDecl *CTD) {
+//     llvm::outs() << "Class template\n";
+
+//     //akcia na tomto vrchole
+//     auto new_tparams = std::vector<GenericParam*> {};
+//     auto params = CTD->getTemplateParameters();
+//     for (unsigned int i = 0; i < params->size(); i++) {
+//         new_tparams.push_back(
+//             this->stmt_factory_->mk_generic_param(
+//                 "",
+//                 params->getParam(i)->getNameAsString()
+//             )
+//         );
+//         std::cout << params->getParam(i)->getNameAsString() << "\n"; // Vratilo T konecne
+//     }
+
+//     // prejdenie samotnej triedy
+//     TraverseDecl(CTD->getTemplatedDecl());
+
+//     llvm::outs() << "Class template koniec\n";
+//     return true;
+// }
 // bool ClangVisitor::TraverseTypedefDecl(clang::TypedefDecl *TD) {
 //     llvm::outs() << "Typedef:" << TD->getNameAsString() << "\n";
 //     return true;
@@ -329,7 +380,33 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
 //     return true;
 // }
 // // traverse statementy
+bool ClangVisitor::TraverseDeclStmt(clang::DeclStmt *DS) {
+    llvm::outs() << "Decl stmt zaciatok\n";
 
+    // akcia na tomto vrchole
+    auto new_def_stmt = this->stmt_factory_->mk_def();
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_def_stmt);
+
+    // zapamatanie si AST Location
+    AstfriASTLocation astfri_temp = this->astfri_location;
+    ClangASTLocation clang_temp = this->clang_location;
+
+    // prepisanie AST location
+    this->astfri_location.stmt_ = new_def_stmt;
+    this->clang_location.stmt_ = DS;
+
+    // prejdenie deklaracii
+    for (auto decl : DS->decls()) {
+        TraverseDecl(decl);
+    }
+
+    // vratenie AST location
+    this->astfri_location = astfri_temp;
+    this->clang_location = clang_temp;
+
+    llvm::outs() << "Decl stmt koniec\n";
+    return true;
+}
 bool ClangVisitor::TraverseCompoundStmt(clang::CompoundStmt *CS) {
     llvm::outs() << "Compound Statement zaciatok:" << "\n";
 
@@ -347,6 +424,11 @@ bool ClangVisitor::TraverseCompoundStmt(clang::CompoundStmt *CS) {
             this->expr_as_stmt = true;
             TraverseStmt(stmt);
             this->expr_as_stmt = false;
+        } else if (llvm::dyn_cast<clang::Expr>(stmt)) {
+            TraverseStmt(stmt);
+            new_compound->stmts_.push_back(
+                this->stmt_factory_->mk_expr(this->astfri_location.expr_)
+            );
         } else {
             TraverseStmt(stmt);
         }
@@ -393,11 +475,11 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt *IS) {
         nullptr
     );
     // priradenie stmt tam kde patri
-    // if (this->clang_locationStack.back()->stmt_ && 
+    // if (this->clang_locationStack.back()->stmt_ &&
     // llvm::dyn_cast<clang::CompoundStmt>(this->clang_locationStack.back()->stmt_)) {
     //     // ak je v compounde
     //     ((CompoundStmt*)this->astfri_locationStack.back()->stmt_)->stmts_.push_back(new_if);
-    // } else if (this->clang_locationStack[this->clang_locationStack.size() - 3]->stmt_ && 
+    // } else if (this->clang_locationStack[this->clang_locationStack.size() - 3]->stmt_ &&
     // llvm::dyn_cast<clang::IfStmt>(this->clang_locationStack[this->clang_locationStack.size() - 3]->stmt_)) {
     //     // ak je v dalsom if-e
     //     ((IfStmt*)this->astfri_locationStack[this->astfri_locationStack.size() - 3]->stmt_)->iffalse_ = new_if;
@@ -413,20 +495,18 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt *IS) {
     // prepisanie AST Location
     this->astfri_location.stmt_ = new_if;
     this->clang_location.stmt_ = IS;
-    
+
     // priradenie podmienky
-    auto cond = IS->getCond();
-    TraverseStmt(cond);
+    TraverseStmt(IS->getCond());
     new_if->cond_ = this->astfri_location.expr_;
-    
+
     // priradenie true vetvy
-    auto true_stmt = IS->getThen();
-    TraverseStmt(true_stmt);
+    TraverseStmt(IS->getThen());
     new_if->iftrue_ = this->astfri_location.stmt_;
 
     // else vetva
     if (auto else_stmt = IS->getElse()) {
-        // TODO: ak ma compound ako else dorobit, zatial sa prepoklada ze je to compound vzdy
+        // TODO: ak ma else ako if dorobit, zatial sa prepoklada ze je to compound vzdy
         TraverseStmt(else_stmt);
         new_if->iffalse_ = this->astfri_location.stmt_;
     }
@@ -606,8 +686,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
             new_switch->cases_.push_back(new_case);
         } else if (auto default_stmt = llvm::dyn_cast<clang::DefaultStmt>(sw_case)){
             // ak je to default
-            auto new_default = this->stmt_factory_->mk_case(
-                nullptr,
+            auto new_default = this->stmt_factory_->mk_default_case(
                 nullptr
             );
             // naplnenie default-u
@@ -617,9 +696,6 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
                 TraverseStmt(CS_body);
                 new_default->body_ = this->astfri_location.stmt_;
             } else {
-                // TODO: potom dorobit ked bude default case
-                auto len_zatial = this->expr_factory_->mk_string_literal("Default");
-                new_default->exprs_.push_back(len_zatial);
                 // nieje compound, iba jeden prikaz (dam do compoundu a potom vyberiem)
                 auto temp_compund = this->stmt_factory_->mk_compound(std::vector<Stmt *> {});
                 this->astfri_location.stmt_ = temp_compund;
@@ -683,15 +759,15 @@ bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr *DRE) {
 
     this->astfri_location.expr_ = new_decl_ref_expr;
     this->clang_location.expr_ = DRE;
-    
+
     return true;
 }
 bool ClangVisitor::TraverseMemberExpr(clang::MemberExpr* ME) {
     llvm::outs() << "MemberExpr zaciatok\n";
-    
+
     // akcia na tomto vrchole
     auto new_mem_expr = this->expr_factory_->mk_member_var_ref(
-        nullptr,
+        this->expr_factory_->mk_this(),
         ME->getMemberNameInfo().getAsString().c_str()
     );
     this->astfri_location.expr_ = new_mem_expr;
@@ -705,7 +781,7 @@ bool ClangVisitor::TraverseCXXThisExpr(clang::CXXThisExpr *TE) {
 
     this->astfri_location.expr_ = this->expr_factory_->mk_this();
     this->clang_location.expr_ = TE;
-    
+
     llvm::outs() << "This expr koniec\n";
     return true;
 }
@@ -718,7 +794,30 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
         TraverseStmt(arg);
         args.push_back(this->astfri_location.expr_);
     }
-    auto owner = this->expr_factory_->mk_class_ref(MCE->getRecordDecl()->getNameAsString().c_str());
+
+    Expr* owner = nullptr;
+    auto clang_owner = MCE->getImplicitObjectArgument();
+    clang_owner = clang_owner->IgnoreParenImpCasts();
+
+    if (MCE->isImplicitCXXThis()) {
+        owner = this->expr_factory_->mk_this();
+        std::cout << "owner je: this\n"; 
+    } else if (auto DRE = llvm::dyn_cast<clang::DeclRefExpr>(clang_owner)) {
+        owner = this->expr_factory_->mk_local_var_ref(DRE->getNameInfo().getAsString());
+        std::cout << "owner je lokalna premenna " << DRE->getNameInfo().getAsString() << "\n";
+    } else if (auto MFE = llvm::dyn_cast<clang::MemberExpr>(clang_owner)) {
+        owner = this->expr_factory_->mk_member_var_ref(
+            this->expr_factory_->mk_this(),
+            MFE->getMemberNameInfo().getAsString()
+        );
+        std::cout << "owner je field " << MFE->getMemberNameInfo().getAsString() << "\n";
+    } else {
+        owner = this->expr_factory_->mk_this();
+        std::cout << "owner je: this\n"; 
+    }
+
+    std::cout << "Metoda je " << MCE->getMethodDecl()->getNameAsString().c_str() << std::endl;
+
     auto new_mem_call = this->expr_factory_->mk_method_call(
         owner,
         MCE->getMethodDecl()->getNameAsString().c_str(),
@@ -746,12 +845,12 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
     // vytvorenie AST location
     this->astfri_location.expr_ = int_literal;
     this->clang_location.int_lit_ = IL;
-    
+
     return true;
  }
  bool ClangVisitor::TraverseFloatingLiteral(clang::FloatingLiteral *FL) {
     llvm::outs() << "Floating literal: " << FL->getValue().convertToFloat() << "\n";
-    
+
     // akcia na tomto vrchole
     auto float_literal = this->expr_factory_->mk_float_literal(FL->getValue().convertToFloat());
 
@@ -763,14 +862,14 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
  }
  bool ClangVisitor::TraverseStringLiteral(clang::StringLiteral *SL) {
     llvm::outs() << "String literal: " << SL->getString() << "\n";
-    
+
     // akcia na tomto vrchole
     auto string_literal = this->expr_factory_->mk_string_literal(SL->getString().str());
 
     // vytvorenie AST location
     this->astfri_location.expr_ = string_literal;
     this->clang_location.string_lit_ = SL;
-    
+
     return true;
  }
  bool ClangVisitor::TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL) {
@@ -797,7 +896,7 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
  // operatory
  bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator *BO) {
     llvm::outs() << "Binary operator: " << BO->getOpcodeStr() << "\n";
-    
+
     BinOpExpr* bin_op = nullptr;
 
     if (BO->getOpcodeStr().equals("+")) {
@@ -814,7 +913,7 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
             BinOpType::Subtract,
             nullptr
         );
-        
+
     } else if (BO->getOpcodeStr().equals("*")) {
         // operator *
          bin_op = this->expr_factory_->mk_bin_on(
@@ -857,32 +956,19 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
             BinOpType::Equal,
             nullptr
         );
+    } else if (BO->getOpcodeStr().equals("!=")) {
+        // operator !=
+         bin_op = this->expr_factory_->mk_bin_on(
+            nullptr,
+            BinOpType::NotEqual,
+            nullptr
+        );
     }
-    // pridanie na svoje miesto
-    // ak je nad return statement
-    // if (this->clang_locationStack.back()->stmt_ && llvm::dyn_cast<clang::ReturnStmt>(this->clang_locationStack.back()->stmt_)) {
-    //     ((ReturnStmt*)this->astfri_locationStack.back()->stmt_)->val_ = bin_op;    
-    // }
-    // // ak je nad vardecl
-    // if (this->clang_locationStack.back()->decl_ && llvm::dyn_cast<clang::VarDecl>(this->clang_locationStack.back()->decl_)) {
-    //     ((VarDefStmt*)this->astfri_locationStack.back()->stmt_)->initializer_ = bin_op;
-    // }
-    // // ak je nad ifstmt
-    // if (this->clang_locationStack.back()->stmt_ && llvm::dyn_cast<clang::IfStmt>(this->clang_locationStack.back()->stmt_)) {
-    //     ((IfStmt*)this->astfri_locationStack.back()->stmt_)->cond_ = bin_op;
-    // }
-    // // ak je v compounde
-    // if (this->clang_locationStack.back()->stmt_ && llvm::dyn_cast<clang::CompoundStmt>(this->clang_locationStack.back()->stmt_)) {
-    //     ((CompoundStmt*)this->astfri_locationStack.back()->stmt_)->stmts_.push_back(
-    //         this->stmt_factory_->mk_expr(bin_op)
-    //     );
-    //     isStmt = true;
-    // }
-    
+
     // prepisanie AST location
     this->astfri_location.expr_ = bin_op;
     this->clang_location.bin_op_ = BO;
-    
+
     // zapamatanie AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp = this->clang_location;
@@ -919,7 +1005,7 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
     return true;
 }
 bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator *UO) {
-    llvm::outs() << "Unary operator " << UO->getOpcode() << "\n";
+    llvm::outs() << "Unary operator ";
 
     // dolezite operandy
     // UO_Plus     +
@@ -944,7 +1030,7 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator *UO) {
         case clang::UO_Not: op = UnaryOpType::LogicalNot;
             break;
         case clang::UO_LNot:op = UnaryOpType::LogicalNot; // TODO: spytat sa na rozdiel
-            break; 
+            break;
         case clang::UO_PreInc: op = UnaryOpType::PreIncrement;
             break;
         case clang::UO_PostInc: op = UnaryOpType::PostIncrement;
@@ -963,13 +1049,11 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator *UO) {
         }
             break;
     }
+    llvm::outs() << (int)op << "\n";
 
-    Expr* arg = nullptr;
-    // TODO: treba dorobit normalne
     // nastavenie operandu
-    arg = this->expr_factory_->mk_local_var_ref(
-        llvm::dyn_cast<clang::DeclRefExpr>(UO->getSubExpr())->getDecl()->getNameAsString()
-    );
+    TraverseStmt(UO->getSubExpr());
+    Expr* arg = this->astfri_location.expr_;
 
     // vytvorenie unary operator vrchol
     UnaryOpExpr* un_op = this->expr_factory_->mk_unary_op(
