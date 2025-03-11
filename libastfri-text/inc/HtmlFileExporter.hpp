@@ -57,6 +57,7 @@ public:
     void write_class_word() override;
     void write_interface_word() override;
     void write_implement_word() override;
+    void write_extend_word() override;
     void write_this_word() override;
     void write_return_word() override;
     void write_continue_word() override;

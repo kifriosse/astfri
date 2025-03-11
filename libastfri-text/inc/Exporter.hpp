@@ -62,6 +62,7 @@ public:
     virtual void write_class_word();
     virtual void write_interface_word();
     virtual void write_implement_word();
+    virtual void write_extend_word();
     virtual void write_this_word();
     virtual void write_return_word();
     virtual void write_continue_word();

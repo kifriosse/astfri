@@ -142,6 +142,9 @@ void TextConfigurator::load_new_config_file() {
             if (ex.HasMember(std::move("implement_word")) && ex[std::move("implement_word")].IsString() && ex[std::move("implement_word")].GetStringLength() > 0) {
                 implementWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("implement_word")].GetString()));
             }
+            if (ex.HasMember(std::move("extend_word")) && ex[std::move("extend_word")].IsString() && ex[std::move("extend_word")].GetStringLength() > 0) {
+                extendWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("extend_word")].GetString()));
+            }
             if (ex.HasMember(std::move("this_word")) && ex[std::move("this_word")].IsString() && ex[std::move("this_word")].GetStringLength() > 0) {
                 thisWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("this_word")].GetString()));
             }
@@ -209,6 +212,9 @@ void TextConfigurator::load_new_config_file() {
                 }
                 if (st.HasMember(std::move("implement_word_style")) && st[std::move("implement_word_style")].IsString()) {
                     implementWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("implement_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("extend_word_style")) && st[std::move("extend_word_style")].IsString()) {
+                    extendWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("extend_word_style")].GetString()));
                 }
                 if (st.HasMember(std::move("this_word_style")) && st[std::move("this_word_style")].IsString()) {
                     thisWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("this_word_style")].GetString()));
@@ -354,6 +360,7 @@ void TextConfigurator::set_defaults() {
     classWord_ = std::make_unique<std::stringstream>(std::move("class"));
     interfaceWord_ = std::make_unique<std::stringstream>(std::move("interface"));
     implementWord_ = std::make_unique<std::stringstream>(std::move("implements"));
+    extendWord_ = std::make_unique<std::stringstream>(std::move("extends"));
     thisWord_ = std::make_unique<std::stringstream>(std::move("this"));
     returnWord_ = std::make_unique<std::stringstream>(std::move("return"));
     continueWord_ = std::make_unique<std::stringstream>(std::move("continue"));
@@ -370,12 +377,13 @@ void TextConfigurator::set_defaults() {
     defaultWord_ = std::make_unique<std::stringstream>(std::move("default"));
     newWord_ = std::make_unique<std::stringstream>(std::move("new"));
     deleteWord_ = std::make_unique<std::stringstream>(std::move("delete"));
-    pointerWord_ = std::make_unique<std::stringstream>(std::move("*"));
+    pointerWord_ = std::make_unique<std::stringstream>(std::move("↑"));
     virtualWord_ = std::make_unique<std::stringstream>(std::move("is virtual"));
     systExprStyle_ = std::make_unique<std::stringstream>();
     classWordStyle_ = std::make_unique<std::stringstream>();
     interfaceWordStyle_ = std::make_unique<std::stringstream>();
     implementWordStyle_ = std::make_unique<std::stringstream>();
+    extendWordStyle_ = std::make_unique<std::stringstream>();
     thisWordStyle_ = std::make_unique<std::stringstream>();
     returnWordStyle_ = std::make_unique<std::stringstream>();
     continueWordStyle_ = std::make_unique<std::stringstream>();

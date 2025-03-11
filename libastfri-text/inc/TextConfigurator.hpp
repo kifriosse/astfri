@@ -29,6 +29,7 @@ class TextConfigurator : public Configurator {
     std::unique_ptr<std::stringstream> classWord_;
     std::unique_ptr<std::stringstream> interfaceWord_;
     std::unique_ptr<std::stringstream> implementWord_;
+    std::unique_ptr<std::stringstream> extendWord_;
     std::unique_ptr<std::stringstream> thisWord_;
     std::unique_ptr<std::stringstream> returnWord_;
     std::unique_ptr<std::stringstream> continueWord_;
@@ -51,6 +52,7 @@ class TextConfigurator : public Configurator {
     std::unique_ptr<std::stringstream> classWordStyle_;
     std::unique_ptr<std::stringstream> interfaceWordStyle_;
     std::unique_ptr<std::stringstream> implementWordStyle_;
+    std::unique_ptr<std::stringstream> extendWordStyle_;
     std::unique_ptr<std::stringstream> thisWordStyle_;
     std::unique_ptr<std::stringstream> returnWordStyle_;
     std::unique_ptr<std::stringstream> continueWordStyle_;
@@ -116,6 +118,7 @@ public:
     const std::stringstream* get_class_word()     { return classWord_.get(); };
     const std::stringstream* get_interface_word() { return interfaceWord_.get(); };
     const std::stringstream* get_implement_word() { return implementWord_.get(); };
+    const std::stringstream* get_extend_word()    { return extendWord_.get(); };
     const std::stringstream* get_this_word()      { return thisWord_.get(); };
     const std::stringstream* get_return_word()    { return returnWord_.get(); };
     const std::stringstream* get_continue_word()  { return continueWord_.get(); };
@@ -138,6 +141,7 @@ public:
     const std::stringstream* get_class_word_style()     { return classWordStyle_.get(); };
     const std::stringstream* get_interface_word_style() { return interfaceWordStyle_.get(); };
     const std::stringstream* get_implement_word_style() { return implementWordStyle_.get(); };
+    const std::stringstream* get_extend_word_style()    { return extendWordStyle_.get(); };
     const std::stringstream* get_this_word_style()      { return thisWordStyle_.get(); };
     const std::stringstream* get_return_word_style()    { return returnWordStyle_.get(); };
     const std::stringstream* get_continue_word_style()  { return continueWordStyle_.get(); };

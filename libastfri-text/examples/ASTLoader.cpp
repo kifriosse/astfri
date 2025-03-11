@@ -61,6 +61,11 @@ namespace my_ast_trees
         ClassDefStmt* cdsImplStack = std::move(sfc.mk_class_def(std::move("ImplicitStack")));
         cdsImplStack->tparams_ = {std::move(sfc.mk_generic_param(std::move(""), std::move("T")))};
         cdsImplStack->interfaces_.push_back(idsStack);
+        ClassDefStmt* ext = std::move(sfc.mk_class_def(std::move("ADS")));
+        ext->tparams_ = {
+            std::move(sfc.mk_generic_param(std::move(""), std::move("T")))
+        };
+        cdsImplStack->bases_.push_back(std::move(ext));
         cdsImplStack->constructors_ = {
             std::move(sfc.mk_constructor_def(
                 cdsImplStack,
@@ -247,6 +252,11 @@ namespace my_ast_trees
         ClassDefStmt* cdsExplStack = std::move(sfc.mk_class_def(std::move("ExplicitStack")));
         cdsExplStack->tparams_ = {std::move(sfc.mk_generic_param(std::move(""), std::move("T")))};
         cdsExplStack->interfaces_.push_back(idsStack);
+        ClassDefStmt* ext2 = std::move(sfc.mk_class_def(std::move("ADS")));
+        ext2->tparams_ = {
+            std::move(sfc.mk_generic_param(std::move(""), std::move("T")))
+        };
+        cdsExplStack->bases_.push_back(std::move(ext2));
         cdsExplStack->constructors_ = {
             std::move(sfc.mk_constructor_def(
                 cdsExplStack,

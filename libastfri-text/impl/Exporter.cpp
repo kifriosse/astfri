@@ -221,6 +221,10 @@ void Exporter::write_implement_word() {
     write_word(config_->get_implement_word()->str());
 }
 
+void Exporter::write_extend_word() {
+    write_word(config_->get_extend_word()->str());
+}
+
 void Exporter::write_this_word() {
     write_word(config_->get_this_word()->str());
 }

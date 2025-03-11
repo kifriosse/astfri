@@ -57,6 +57,7 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
     file << std::move(".class-word{") << config_->get_class_word_style()->str() << std::move("}\n");
     file << std::move(".interface-word{") << config_->get_interface_word_style()->str() << std::move("}\n");
     file << std::move(".implement-word{") << config_->get_implement_word_style()->str() << std::move("}\n");
+    file << std::move(".extend-word{") << config_->get_extend_word_style()->str() << std::move("}\n");
     file << std::move(".this-word{") << config_->get_this_word_style()->str() << std::move("}\n");
     file << std::move(".return-word{") << config_->get_return_word_style()->str() << std::move("}\n");
     file << std::move(".continue-word{") << config_->get_continue_word_style()->str() << std::move("}\n");
@@ -354,6 +355,11 @@ void HtmlFileExporter::write_interface_word() {
 
 void HtmlFileExporter::write_implement_word() {
     std::string s = std::move("<span class=\"implement-word\">") + config_->get_implement_word()->str() + std::move("</span>");
+    write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_extend_word() {
+    std::string s = std::move("<span class=\"extend-word\">") + config_->get_extend_word()->str() + std::move("</span>");
     write_system_expr_style(std::move(s));
 }
 

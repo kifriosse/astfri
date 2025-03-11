@@ -100,7 +100,8 @@
         "SYSTEM_EXPR":{
             "class_word":"trieda",
             "interface_word":"rozhranie",
-            "implement_word":"implementuje",
+            "implement_word":"implementuje rozhranie",
+            "extend_word":"rozširuje triedu",
             "this_word":"tento objekt",
             "return_word":"vráť",
             "continue_word":"pokračuj",
@@ -124,6 +125,7 @@
                 "class_word_style":"color:red",
                 "interface_word_style":"",
                 "implement_word_style":"",
+                "extend_word_style":"",
                 "this_word_style":"color:",
                 "return_word_style":"color:#943126;font-weight:bold",
                 "continue_word_style":"color:#943126;font-weight:bold",
