@@ -5,7 +5,17 @@
 #include "libastfri/inc/Type.hpp"
 
 namespace astfri::uml {
-    RelationStruct* ClassVisitor::findRelation(RelationStruct const& rel) {
+        void ClassVisitor::create_relation(std::string target, RelationType type) {
+            RelationStruct r;
+            r.from_ = this->currentClass_.name_;
+            r.to_ = target;
+            r.type_ = type;
+
+            RelationStruct* found = this->findRelation(r);
+            if (!found) this->relations_.push_back(r);
+        }
+
+        RelationStruct* ClassVisitor::findRelation(RelationStruct const& rel) {
         for (size_t i = 0; i < this->relations_.size(); ++i) {
             if ((this->relations_[i].from_.compare(rel.from_) == 0) &&
                 (this->relations_[i].to_.compare(rel.to_) == 0)) {
@@ -58,14 +68,8 @@ namespace astfri::uml {
     }
 
     void ClassVisitor::visit (astfri::UserType const& type) {
-        if (type.name_.compare(this->currentClass_.name_) != 0 &&
-            this->findClass(type.name_)) {
-                RelationStruct r;
-                r.from_ = this->currentClass_.name_;
-                r.to_ = type.name_;
-                r.type_ = RelationType::ASSOCIATION;
-                
-                if (!this->findRelation(r)) this->relations_.push_back(r);
+        if (type.name_.compare(this->currentClass_.name_) != 0) {
+            this->create_relation(type.name_, RelationType::ASSOCIATION);
         }
         this->currentVariable_.type_ = type.name_;
     }
@@ -122,9 +126,37 @@ namespace astfri::uml {
         }
         this->outputter_->open_class(this->currentClass_);
 
+        for (astfri::ClassDefStmt* base : stmt.bases_) {
+            this->create_relation(base->name_, RelationType::EXTENTION);
+        }
+
+        for (astfri::InterfaceDefStmt* interface : stmt.interfaces_) {
+            this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
+        }
+
         for (astfri::MemberVarDefStmt* var : stmt.vars_)
         {
             var->accept(*this);
+        }
+
+        for (astfri::MethodDefStmt* method : stmt.methods_)
+        {
+            method->accept(*this);
+        }
+
+        this->currentClass_.reset();
+        this->outputter_->close_class();
+    }
+
+    void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt) {
+        this->currentClass_.name_ = stmt.name_;
+        for (astfri::GenericParam* gp : stmt.tparams_) {
+            this->currentClass_.genericParams_.push_back(gp->name_);
+        }
+        this->outputter_->open_interface(this->currentClass_);
+
+        for (astfri::InterfaceDefStmt* base : stmt.bases_) {
+            this->create_relation(base->name_, RelationType::EXTENTION);
         }
 
         for (astfri::MethodDefStmt* method : stmt.methods_)

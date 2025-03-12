@@ -10,7 +10,7 @@ namespace astfri::uml {
         char indirectIndicator_ = '*';
         char separator_ = ' ';
         char accessPrefix_[4] = {'+', '-', '#', '~'};
-        std::string relationArrows_[3] = {"<--", "*--", "<|--"};
+        std::string relationArrows_[4] = {"<--", "*--", "<|--", "<|.."};
         std::string intTypeName_ = "int";
         std::string floatTypeName_ = "float";
         std::string charTypeName_ = "char";

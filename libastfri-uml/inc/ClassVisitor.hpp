@@ -24,6 +24,7 @@ namespace astfri::uml {
         std::vector<std::string> classes_;
         std::vector<std::string> interfaces_;
 
+        void create_relation(std::string target, RelationType type);
         RelationStruct* findRelation(RelationStruct const& rel);
         bool findClass(std::string name);
         bool findInterface(std::string name);
@@ -51,6 +52,8 @@ namespace astfri::uml {
         void visit (astfri::MethodDefStmt const& stmt) override;
 
         void visit (astfri::ClassDefStmt const& stmt) override;
+
+        void visit (astfri::InterfaceDefStmt const& stmt) override;
 
         void visit (astfri::TranslationUnit const& stmt) override;
 

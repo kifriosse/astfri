@@ -13,12 +13,21 @@ int main()
 
     astfri::ClassDefStmt* classFoo = statements.mk_class_def("Foo");
     astfri::ClassDefStmt* classBar = statements.mk_class_def("Bar");
+    astfri::ClassDefStmt* classParent = statements.mk_class_def("Parent");
     astfri::InterfaceDefStmt* interfaceIVisitable = statements.mk_interface_def("IVisitable");
 
     std::vector<astfri::GenericParam*> genericParamsFoo;
     genericParamsFoo.push_back(statements.mk_generic_param("", "T"));
     genericParamsFoo.push_back(statements.mk_generic_param("", "E"));
     classFoo->tparams_ = genericParamsFoo;
+
+    std::vector<astfri::ClassDefStmt*> basesBar;
+    basesBar.push_back(classParent);
+    classBar->bases_ = basesBar;
+
+    std::vector<astfri::InterfaceDefStmt*> interfacesFoo;
+    interfacesFoo.push_back(interfaceIVisitable);
+    classFoo->interfaces_ = interfacesFoo;
 
     std::vector<astfri::MemberVarDefStmt*> fieldsFoo;
     fieldsFoo.push_back(statements.mk_member_var_def(
@@ -55,6 +64,7 @@ int main()
     std::vector<astfri::ClassDefStmt*> classes;
     classes.push_back(classFoo);
     classes.push_back(classBar);
+    classes.push_back(classParent);
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     interfaces.push_back(interfaceIVisitable);
 

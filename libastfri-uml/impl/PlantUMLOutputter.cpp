@@ -4,18 +4,14 @@
 #include "libastfri-uml/inc/ElementStructs.hpp"
 
 namespace astfri::uml {
-    std::string PlantUMLOutputter::getFileExtension() {
-        return ".puml";
-    }
-
-    void PlantUMLOutputter::open_class(ClassStruct c) {
-        this->outputString_ += "class " + c.name_;
-        if (c.genericParams_.size() > 0) {
+    void PlantUMLOutputter::open(ClassStruct const& cs) {
+        this->outputString_ += cs.name_;
+        if (cs.genericParams_.size() > 0) {
             this->outputString_ += "<";
             size_t index = 0;
-            for (std::string gp : c.genericParams_) {
+            for (std::string gp : cs.genericParams_) {
                 this->outputString_ += gp;
-                if (index != c.genericParams_.size() - 1) {
+                if (index != cs.genericParams_.size() - 1) {
                     this->outputString_ += ", ";
                 }
                 ++index;
@@ -23,6 +19,20 @@ namespace astfri::uml {
             this->outputString_ += ">";
         }
         this->outputString_ += " {\n";
+    }
+
+    std::string PlantUMLOutputter::getFileExtension() {
+        return ".puml";
+    }
+
+    void PlantUMLOutputter::open_class(ClassStruct c) {
+        this->outputString_ += "class ";
+        this->open(c);
+    }
+
+    void PlantUMLOutputter::open_interface(ClassStruct i) {
+        this->outputString_ += "interface ";
+        this->open(i);
     }
 
     void PlantUMLOutputter::close_class() {
