@@ -2,7 +2,14 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
+#include <string>
+#include <sys/types.h>
+#include <tree_sitter/api.h>
+#include <vector>
+
+#include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
 
 NodeGetter::NodeGetter(TSTree* tree, std::string const& sourceCode) :
     typeFactory(astfri::TypeFactory::get_instance()),
@@ -39,15 +46,12 @@ std::string NodeGetter::get_node_text(
     return sourceCode.substr(start, end - start);
 }
 
-astfri::Expr* NodeGetter::get_expr(
-    std::string const& nodeName,
-    std::string const& nodeText,
-    TSNode tsNode,
-    std::string const& sourceCode
-)
+astfri::Expr* NodeGetter::get_expr(TSNode tsNode, std::string const& sourceCode)
 {
+    std::string nodeName = ts_node_string(tsNode);
+    std::string nodeText = get_node_text(tsNode, sourceCode);
     astfri::Expr* expr;
-    if (nodeName == "(decimal_integer_literal)")
+    if (nodeName == ("(decimal_integer_literal)"))
     {
         expr = exprFactory.mk_int_literal(atoi(nodeText.c_str()));
     }
@@ -59,7 +63,8 @@ astfri::Expr* NodeGetter::get_expr(
     {
         expr = exprFactory.mk_char_literal(nodeText[0]);
     }
-    else if (nodeName == "(string_literal)")
+    else if (nodeName.find("(string_literal ") == 0
+             || nodeName == "(string_literal)")
     {
         expr = exprFactory.mk_string_literal(nodeText);
     }
@@ -75,31 +80,60 @@ astfri::Expr* NodeGetter::get_expr(
     {
         expr = exprFactory.mk_null_literal();
     }
-    else if (nodeName == "(identifier)")
-    {
-        auto refExprVariant = this->get_ref_expr(tsNode, sourceCode);
-        std::visit([&expr] (auto&& arg) { expr = arg; }, refExprVariant);
-    }
-    else if (nodeName.find("(binary_expression") != std::string::npos)
-    {
-        expr = this->get_bin_op_expr(tsNode, sourceCode);
-    }
-    else if (nodeName.find("(unary_expression") != std::string::npos)
-    {
-        expr = this->get_un_op_expr(tsNode, sourceCode);
-    }
-    // else if (nodeName.find("(assignment_expression") != std::string::npos)
-    // {
-    //     auto assignExprVariant = this->get_assign_expr(tsNode, sourceCode);
-    //     std::visit([&expr] (auto&& arg) { expr = arg; }, assignExprVariant);
-    // }
     else if (nodeName == "(this)")
     {
         expr = exprFactory.mk_this();
     }
-    else if (nodeName.find("(object_creation_expression") != std::string::npos)
+    else if (nodeName.find("(field_access ") == 0)
+    {
+        TSNode object;
+        std::string objectName;
+        if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+        {
+            object     = ts_node_named_child(tsNode, 0);
+            objectName = ts_node_string(object);
+        }
+        if (objectName == "(this)")
+        {
+            expr = exprFactory.mk_this();
+        }
+        else
+        {
+            expr = exprFactory.mk_class_ref(get_node_text(object, sourceCode));
+        }
+    }
+    else if (nodeName == "(identifier)")
+    {
+        auto refExprVariant = this->get_ref_expr(tsNode, sourceCode);
+        std::visit([&expr](auto&& arg) { expr = arg; }, refExprVariant);
+    }
+    else if (nodeName.find("(binary_expression") == 0)
+    {
+        expr = this->get_bin_op_expr(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(assignment_expression") == 0)
+    {
+        expr = this->get_bin_op_expr(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(unary_expression") == 0)
+    {
+        expr = this->get_un_op_expr("unExpr", tsNode, sourceCode);
+    }
+    else if (nodeName.find("(update_expression") == 0)
+    {
+        expr = this->get_un_op_expr("updateExpr", tsNode, sourceCode);
+    }
+    else if (nodeName.find("(object_creation_expression") == 0)
     {
         expr = this->get_new_expr(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(method_invocation ") == 0)
+    {
+        expr = this->get_method_call(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(parenthesized_expression ") == 0)
+    {
+        expr = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
     }
     else
     {
@@ -113,76 +147,60 @@ astfri::BinOpExpr* NodeGetter::get_bin_op_expr(
     std::string const& sourceCode
 )
 {
-    astfri::BinOpExpr* binOpExpr;
+    astfri::Expr* leftExpr  = nullptr;
+    astfri::BinOpType binOp = astfri::BinOpType::Add;
+    astfri::Expr* rightExpr = nullptr;
 
-    char const* queryString = "(binary_expression left: (_) @left operator: _ "
-                              "@operator right: (_) @right)";
+    TSNode leftOperand;
+    TSNode binOperator;
+    TSNode rightOperand;
 
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, tsNode);
-    TSQueryMatch tsMatch;
-
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
     {
-        astfri::Expr* leftExpr;
-        astfri::Expr* rightExpr;
-        astfri::BinOpType binOpType;
-
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
-        {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeName(ts_node_string(tsCapture.node));
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-            if (captureName == "left")
-            {
-                leftExpr = this->get_expr(
-                    nodeName,
-                    nodeText,
-                    tsCapture.node,
-                    sourceCode
-                );
-            }
-            else if (captureName == "right")
-            {
-                rightExpr = this->get_expr(
-                    nodeName,
-                    nodeText,
-                    tsCapture.node,
-                    sourceCode
-                );
-            }
-            else if (captureName == "operator")
-            {
-                binOpType
-                    = this->nodeMapper->get_binOpMap().find(nodeText)->second;
-            }
-        }
-
-        binOpExpr = exprFactory.mk_bin_on(leftExpr, binOpType, rightExpr);
+        leftOperand                 = ts_node_named_child(tsNode, 0);
+        std::string leftOperandName = ts_node_string(leftOperand);
+        leftExpr                    = this->get_expr(leftOperand, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        rightOperand                 = ts_node_named_child(tsNode, 1);
+        std::string rightOperandName = ts_node_string(rightOperand);
+        rightExpr                    = this->get_expr(rightOperand, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_child(tsNode, 1)))
+    {
+        binOperator                 = ts_node_child(tsNode, 1);
+        std::string binOperatorName = get_node_text(binOperator, sourceCode);
+        binOp = this->nodeMapper->get_binOpMap().find(binOperatorName)->second;
     }
 
-    return binOpExpr;
+    return exprFactory.mk_bin_on(leftExpr, binOp, rightExpr);
 }
 
 astfri::UnaryOpExpr* NodeGetter::get_un_op_expr(
+    std::string qString,
     TSNode tsNode,
     std::string const& sourceCode
 )
 {
     astfri::UnaryOpExpr* unOpExpr;
 
-    char const* queryString
+    char const* queryStringUnExpr
         = "(unary_expression operator: _ @operator operand: (_) @operand)";
 
-    TSQuery* tsQuery        = make_query(queryString);
+    char const* queryStringUpdateExpr
+        = "(update_expression _? @operator (identifier) @operand _? @operator)";
+
+    TSQuery* tsQuery;
+    if (qString == "unExpr")
+    {
+        tsQuery = make_query(queryStringUnExpr);
+    }
+    else if (qString == "updateExpr")
+    {
+        tsQuery = make_query(queryStringUpdateExpr);
+    }
+
     TSQueryCursor* tsCursor = ts_query_cursor_new();
     ts_query_cursor_exec(tsCursor, tsQuery, tsNode);
     TSQueryMatch tsMatch;
@@ -206,12 +224,7 @@ astfri::UnaryOpExpr* NodeGetter::get_un_op_expr(
 
             if (captureName == "operand")
             {
-                operand = this->get_expr(
-                    nodeName,
-                    nodeText,
-                    tsCapture.node,
-                    sourceCode
-                );
+                operand = this->get_expr(tsCapture.node, sourceCode);
             }
             else if (captureName == "operator")
             {
@@ -225,87 +238,6 @@ astfri::UnaryOpExpr* NodeGetter::get_un_op_expr(
 
     return unOpExpr;
 }
-
-// std::variant<astfri::AssignExpr*, astfri::CompoundAssignExpr*> NodeGetter::
-//     get_assign_expr(TSNode tsNode, std::string const& sourceCode)
-// {
-    // astfri::AssignExpr* assignExpr                 = nullptr;
-    // astfri::CompoundAssignExpr* compoundAssignExpr = nullptr;
-
-    // char const* queryString = "(assignment_expression left: (_) @left"
-    //                           "operator: _ @operator right: (_) @right)";
-
-    // TSQuery* tsQuery        = make_query(queryString);
-    // TSQueryCursor* tsCursor = ts_query_cursor_new();
-    // ts_query_cursor_exec(tsCursor, tsQuery, tsNode);
-    // TSQueryMatch tsMatch;
-
-    // while (ts_query_cursor_next_match(tsCursor, &tsMatch))
-    // {
-    //     astfri::Expr* leftExpr  = nullptr;
-    //     astfri::Expr* rightExpr = nullptr;
-    //     astfri::BinOpType binOpType;
-
-    //     for (uint32_t i = 0; i < tsMatch.capture_count; i++)
-    //     {
-    //         TSQueryCapture tsCapture = tsMatch.captures[i];
-    //         uint32_t length;
-    //         std::string captureName = ts_query_capture_name_for_id(
-    //             tsQuery,
-    //             tsCapture.index,
-    //             &length
-    //         );
-    //         std::string nodeName(ts_node_string(tsCapture.node));
-    //         std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-    //         if (captureName == "left")
-    //         {
-    //             leftExpr = this->get_expr(
-    //                 nodeName,
-    //                 nodeText,
-    //                 tsCapture.node,
-    //                 sourceCode
-    //             );
-    //         }
-    //         else if (captureName == "right")
-    //         {
-    //             rightExpr = this->get_expr(
-    //                 nodeName,
-    //                 nodeText,
-    //                 tsCapture.node,
-    //                 sourceCode
-    //             );
-    //         }
-    //         else if (captureName == "operator")
-    //         {
-    //             binOpType
-    //                 = this->nodeMapper->get_binOpMap().find(nodeText)->second;
-    //         }
-    //     }
-
-    //     if (astfri::BinOpType::Assign == binOpType)
-    //     {
-    //         assignExpr = exprFactory.mk_assign(leftExpr, rightExpr);
-    //     }
-    //     else
-    //     {
-    //         compoundAssignExpr = exprFactory.mk_compound_assign(
-    //             leftExpr,
-    //             binOpType,
-    //             rightExpr
-    //         );
-    //     }
-    // }
-
-    // if (assignExpr != nullptr)
-    // {
-    //     return assignExpr;
-    // }
-    // else
-    // {
-    //     return compoundAssignExpr;
-    // }
-// }
 
 std::variant<
     astfri::ParamVarRefExpr*,
@@ -466,75 +398,37 @@ astfri::MethodCallExpr* NodeGetter::get_method_call(
     std::string const& sourceCode
 )
 {
-    astfri::MethodCallExpr* methodCallExpr = nullptr;
+    astfri::Expr* owner = nullptr;
+    std::string name;
+    std::vector<astfri::Expr*> arguments;
+    uint32_t childCount = ts_node_named_child_count(tsNode);
 
-    char const* queryString
-        = "(method_invocation object: (_) @object name: (identifier) @name "
-          "arguments: (argument_list) @args)";
-
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, tsNode);
-    TSQueryMatch tsMatch;
-
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    for (uint32_t i = 0; i < childCount; i++)
     {
-        astfri::Expr* owner;
-        std::string methodName;
-        std::vector<astfri::Expr*> arguments;
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childName = ts_node_string(child);
 
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        if (childName.find("(field_access ") == 0 || childName == "(this)")
         {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeName(ts_node_string(tsCapture.node));
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-            if (captureName == "object")
+            owner = this->get_expr(child, sourceCode);
+        }
+        else if (childName == ("(identifier)"))
+        {
+            name = get_node_text(child, sourceCode);
+        }
+        else if (childName.find("(argument_list ") == 0)
+        {
+            uint32_t argCount = ts_node_named_child_count(child);
+            for (uint32_t j = 0; j < argCount; j++)
             {
-                if (nodeName == "(identifier)")
-                {
-                    owner = exprFactory.mk_class_ref(nodeText);
-                }
-                else
-                {
-                    owner = this->get_expr(
-                        nodeName,
-                        nodeText,
-                        tsCapture.node,
-                        sourceCode
-                    );
-                }
-            }
-            else if (captureName == "name")
-            {
-                methodName = nodeText;
-            }
-            else if (captureName == "args")
-            {
-                for (uint32_t j = 0; j < ts_node_child_count(tsCapture.node);
-                     ++j)
-                {
-                    arguments.push_back(get_expr(
-                        nodeName,
-                        nodeText,
-                        ts_node_child(tsCapture.node, j),
-                        sourceCode
-                    ));
-                }
+                TSNode argNode          = ts_node_named_child(child, j);
+                std::string argNodeName = ts_node_string(argNode);
+                arguments.push_back(get_expr(argNode, sourceCode));
             }
         }
-
-        methodCallExpr
-            = exprFactory.mk_method_call(owner, methodName, arguments);
     }
 
-    return methodCallExpr;
+    return exprFactory.mk_method_call(owner, name, arguments);
 }
 
 astfri::NewExpr* NodeGetter::get_new_expr(
@@ -587,12 +481,9 @@ astfri::NewExpr* NodeGetter::get_new_expr(
                 for (uint32_t j = 0; j < ts_node_child_count(tsCapture.node);
                      ++j)
                 {
-                    arguments.push_back(get_expr(
-                        nodeName,
-                        nodeText,
-                        ts_node_child(tsCapture.node, j),
-                        sourceCode
-                    ));
+                    arguments.push_back(
+                        get_expr(ts_node_child(tsCapture.node, j), sourceCode)
+                    );
                 }
             }
         }
@@ -659,7 +550,6 @@ std::vector<astfri::ParamVarDefStmt*> NodeGetter::get_params(
         params.push_back(
             stmtFactory.mk_param_var_def(paramName, paramType, nullptr)
         );
-        std::cout << "param added" << std::endl;
     }
 
     ts_query_cursor_delete(tsCursor);
@@ -667,119 +557,295 @@ std::vector<astfri::ParamVarDefStmt*> NodeGetter::get_params(
     return params;
 }
 
-StatementReturnType NodeGetter::search_sub_tree(
+astfri::LocalVarDefStmt* NodeGetter::get_local_var(
     TSNode tsNode,
-    std::string const& nodeName,
     std::string const& sourceCode
 )
 {
-    std::vector<astfri::LocalVarDefStmt*> localVars;
-
-    uint32_t tsNodeChildeCount = ts_node_named_child_count(tsNode);
     astfri::Type* type = typeFactory.mk_unknown();
     std::string name;
-    astfri::Expr* value = exprFactory.mk_unknown();
+    astfri::Expr* init;
+
+    std::string tsNodeName = ts_node_string(tsNode);
+    uint32_t childCount    = ts_node_named_child_count(tsNode);
+    for (uint32_t j = 0; j < childCount; j++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, j);
+        std::string childName = ts_node_string(child);
+
+        if (childName == "(identifier)"
+            || childName.find("type") != std::string::npos)
+        {
+            if (childName == "(identifier)")
+            {
+                type = typeFactory.mk_user(get_node_text(child, sourceCode));
+            }
+            else
+            {
+                type = this->nodeMapper->get_typeMap()
+                           .find(get_node_text(child, sourceCode))
+                           ->second;
+            }
+        }
+        else if (childName.find("(variable_declarator") == 0)
+        {
+            uint32_t greatGrandChildCount = ts_node_named_child_count(child);
+            for (uint32_t k = 0; k < greatGrandChildCount; k++)
+            {
+                TSNode greatGrandChild = ts_node_named_child(child, k);
+                std::string greatGrandChildName
+                    = ts_node_string(greatGrandChild);
+
+                if (greatGrandChildName == "(identifier)" && k == 0)
+                {
+                    name = get_node_text(greatGrandChild, sourceCode);
+                }
+                else
+                {
+                    init = this->get_expr(greatGrandChild, sourceCode);
+                }
+            }
+        }
+    }
+    return stmtFactory.mk_local_var_def(name, type, init);
+}
+
+astfri::ExprStmt* NodeGetter::get_expr_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
     astfri::Expr* expr;
+
+    TSNode child          = ts_node_named_child(tsNode, 0);
+    std::string childName = ts_node_string(child);
+    expr                  = this->get_expr(child, sourceCode);
+
+    return stmtFactory.mk_expr(expr);
+}
+
+astfri::IfStmt* NodeGetter::get_if_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Expr* condition = nullptr;
+    astfri::Stmt* iftrue    = nullptr;
+    astfri::Stmt* iffalse   = nullptr;
+
+    uint32_t childCount     = ts_node_named_child_count(tsNode);
+    for (uint32_t j = 0; j < childCount; j++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, j);
+        std::string childName = ts_node_string(child);
+        TSNode conditionNode  = ts_node_named_child(child, 0);
+        TSNode iftrueNode;
+        TSNode iffalseNode;
+        if (childName.find("(parenthesized_expression ") == 0)
+        {
+            std::string conditionNodeName = ts_node_string(conditionNode);
+            condition = this->get_expr(conditionNode, sourceCode);
+        }
+        else if ((childName.find("(block ") == 0 && j == 1))
+        {
+            iftrueNode                 = child;
+            std::string iftrueNodeName = ts_node_string(iftrueNode);
+            iftrue = this->search_sub_tree(iftrueNode, sourceCode);
+        }
+        else if (childName.find("(block ") == 0 && j == 2)
+        {
+            iffalseNode                 = child;
+            std::string iffalseNodeName = ts_node_string(iffalseNode);
+            iffalse = this->search_sub_tree(iffalseNode, sourceCode);
+        }
+        else if (childName.find("(if_statement ") == 0)
+        {
+            if (j == 1)
+            {
+                iftrueNode                 = child;
+                std::string iftrueNodeName = ts_node_string(iftrueNode);
+                iftrue = this->get_if_stmt(iftrueNode, sourceCode);
+            }
+            else
+            {
+                iffalseNode                 = child;
+                std::string iffalseNodeName = ts_node_string(iffalseNode);
+                iffalse = this->get_if_stmt(iffalseNode, sourceCode);
+            }
+        }
+    }
+
+    return stmtFactory.mk_if(condition, iftrue, iffalse);
+}
+
+astfri::ForStmt* NodeGetter::get_for_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Stmt* init      = nullptr;
+    astfri::Expr* condition = nullptr;
+    astfri::Stmt* step      = nullptr;
+    astfri::Stmt* body      = nullptr;
+
+    TSNode initNode;
+    TSNode conditionNode;
+    TSNode stepNode;
+    TSNode bodyNode;
+
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        initNode                 = ts_node_named_child(tsNode, 0);
+        std::string initNodeName = ts_node_string(initNode);
+        init                     = this->get_local_var(initNode, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        conditionNode                 = ts_node_named_child(tsNode, 1);
+        std::string conditionNodeName = ts_node_string(conditionNode);
+        condition = this->get_expr(conditionNode, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 2)))
+    {
+        stepNode                 = ts_node_named_child(tsNode, 2);
+        std::string stepNodeName = ts_node_string(stepNode);
+        astfri::Expr* expr       = this->get_expr(stepNode, sourceCode);
+        step                     = stmtFactory.mk_expr(expr);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 3)))
+    {
+        bodyNode                 = ts_node_named_child(tsNode, 3);
+        std::string bodyNodeName = ts_node_string(bodyNode);
+        body                     = this->search_sub_tree(bodyNode, sourceCode);
+    }
+
+    return stmtFactory.mk_for(init, condition, step, body);
+}
+
+astfri::WhileStmt* NodeGetter::get_while_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Expr* condition    = nullptr;
+    astfri::CompoundStmt* body = nullptr;
+
+    TSNode helpNode;
+    TSNode conditionNode;
+    TSNode bodyNode;
+
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        helpNode = ts_node_named_child(tsNode, 0);
+        if (! ts_node_is_null(ts_node_named_child(helpNode, 0)))
+        {
+            conditionNode                 = ts_node_named_child(helpNode, 0);
+            std::string conditionNodeName = ts_node_string(conditionNode);
+            condition = this->get_expr(conditionNode, sourceCode);
+        }
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        bodyNode                 = ts_node_named_child(tsNode, 1);
+        std::string bodyNodeName = ts_node_string(bodyNode);
+        body                     = this->search_sub_tree(bodyNode, sourceCode);
+    }
+
+    return stmtFactory.mk_while(condition, body);
+}
+
+astfri::DoWhileStmt* NodeGetter::get_do_while_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Expr* condition    = nullptr;
+    astfri::CompoundStmt* body = nullptr;
+
+    TSNode helpNode;
+    TSNode conditionNode;
+    TSNode bodyNode;
+
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        bodyNode                 = ts_node_named_child(tsNode, 0);
+        std::string bodyNodeName = ts_node_string(bodyNode);
+        body                     = this->search_sub_tree(bodyNode, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        helpNode = ts_node_named_child(tsNode, 1);
+        if (! ts_node_is_null(ts_node_named_child(helpNode, 0)))
+        {
+            conditionNode                 = ts_node_named_child(helpNode, 0);
+            std::string conditionNodeName = ts_node_string(conditionNode);
+            condition = this->get_expr(conditionNode, sourceCode);
+        }
+    }
+
+    return stmtFactory.mk_do_while(condition, body);
+}
+
+astfri::ReturnStmt* NodeGetter::get_return_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Expr* expr;
+
+    TSNode child          = ts_node_named_child(tsNode, 0);
+    std::string childName = ts_node_string(child);
+    expr                  = this->get_expr(child, sourceCode);
+
+    return stmtFactory.mk_return(expr);
+}
+
+astfri::CompoundStmt* NodeGetter::search_sub_tree(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    std::vector<astfri::Stmt*> statements = {};
+    uint32_t tsNodeChildeCount            = ts_node_named_child_count(tsNode);
 
     for (uint32_t i = 0; i < tsNodeChildeCount; i++)
     {
         TSNode child          = ts_node_named_child(tsNode, i);
         std::string childName = ts_node_string(child);
-        if (childName.find(nodeName) != std::string::npos)
+        if (childName.find("(local_variable_declaration ") == 0)
         {
-            uint32_t grandChildCount = ts_node_named_child_count(child);
-            for (uint32_t j = 0; j < grandChildCount; j++)
-            {
-                TSNode grandChild          = ts_node_named_child(child, j);
-                std::string grandChildName = ts_node_string(grandChild);
-
-                if (grandChildName.find("type") != std::string::npos)
-                {
-                    if (grandChildName == "(type_identifier)")
-                    {
-                        type = typeFactory.mk_user(
-                            get_node_text(grandChild, sourceCode)
-                        );
-                    }
-                    else
-                    {
-                        type = this->nodeMapper->get_typeMap()
-                                   .find(get_node_text(grandChild, sourceCode))
-                                   ->second;
-                    }
-                }
-                else if (grandChildName.find("(variable_declarator")
-                         != std::string::npos)
-                {
-                    uint32_t greatGrandChildCount
-                        = ts_node_named_child_count(grandChild);
-                    for (uint32_t k = 0; k < greatGrandChildCount; k++)
-                    {
-                        TSNode greatGrandChild
-                            = ts_node_named_child(grandChild, k);
-                        std::string greatGrandChildName
-                            = ts_node_string(greatGrandChild);
-
-                        if (greatGrandChildName == "(identifier)")
-                        {
-                            name = get_node_text(greatGrandChild, sourceCode);
-                        }
-                        else if (greatGrandChildName.find("expression")
-                                     != std::string::npos
-                                 || greatGrandChildName.find("method_invocation"
-                                    ) != std::string::npos
-                                 || greatGrandChildName.find("_literal")
-                                        != std::string::npos)
-                        {
-                            value = this->get_expr(
-                                ts_node_string(greatGrandChild),
-                                get_node_text(greatGrandChild, sourceCode),
-                                greatGrandChild,
-                                sourceCode
-                            );
-                        }
-                    }
-                }
-                else if (grandChildName.find("_expression")
-                         != std::string::npos)
-                {
-                    uint32_t greatGrandChildrenCount
-                        = ts_node_named_child_count(grandChild);
-                    for (uint32_t k = 0; k < greatGrandChildrenCount; k++)
-                    {
-                        TSNode greatGrandChildNode
-                            = ts_node_child(grandChild, k);
-                        expr = this->get_expr(
-                            ts_node_string(greatGrandChildNode),
-                            get_node_text(greatGrandChildNode, sourceCode),
-                            greatGrandChildNode,
-                            sourceCode
-                        );
-                    }
-                }
-            }
-
-            if (nodeName.find("(local_variable_declaration ")
-                != std::string::npos)
-            {
-                localVars.push_back(
-                    stmtFactory.mk_local_var_def(name, type, value)
-                );
-            }
+            statements.push_back(this->get_local_var(child, sourceCode));
+        }
+        else if (childName.find("(expression_statement ") == 0)
+        {
+            statements.push_back(this->get_expr_stmt(child, sourceCode));
+        }
+        else if (childName.find("(if_statement ") == 0)
+        {
+            statements.push_back(this->get_if_stmt(child, sourceCode));
+        }
+        //else if (childName.find("(switch_expression ") == 0)
+        //{
+        //    statements.push_back(this->get_switch_stmt(child, sourceCode));
+        //}
+        else if (childName.find("(for_statement ") == 0)
+        {
+            statements.push_back(this->get_for_stmt(child, sourceCode));
+        }
+        else if (childName.find("(while_statement ") == 0)
+        {
+            statements.push_back(this->get_while_stmt(child, sourceCode));
+        }
+        else if (childName.find("(do_statement ") == 0)
+        {
+            statements.push_back(this->get_do_while_stmt(child, sourceCode));
+        }
+        else if (childName.find("(return_statement ") == 0)
+        {
+            statements.push_back(this->get_return_stmt(child, sourceCode));
         }
     }
-    if (nodeName.find("(local_variable_declaration ") != std::string::npos)
-    {
-        return localVars;
-    }
-    else if (nodeName.find("(expression_statement "))
-    {
-        return stmtFactory.mk_expr(expr);
-    }
-    else
-    {
-        return stmtFactory.mk_return(expr);
-    }
+    return stmtFactory.mk_compound(statements);
 }
 
 astfri::ConstructorDefStmt* NodeGetter::get_constructor(
@@ -878,245 +944,141 @@ astfri::ConstructorDefStmt* NodeGetter::get_constructor(
     return constructorDef;
 }
 
-std::vector<astfri::MethodDefStmt*> NodeGetter::get_methods(
-    TSNode classNode,
+astfri::MethodDefStmt* NodeGetter::get_method(
+    TSNode tsNode,
     std::string const& sourceCode
 )
 {
-    std::vector<astfri::MethodDefStmt*> methods;
+    TSNode modifierNode;
+    TSNode typeNode;
+    TSNode nameNode;
+    TSNode parameterNode;
+    TSNode bodyNode;
 
-    char const* queryString
-        = "(method_declaration (modifiers)? @method_modifiers type: (_) "
-          "@method_return_type name: (identifier) @method_name "
-          "(formal_parameters)? @params body: (block) @method_body)";
+    astfri::AccessModifier access = astfri::AccessModifier::Internal;
+    astfri::Type* type            = nullptr;
+    std::string name;
+    std::vector<astfri::ParamVarDefStmt*> params;
+    astfri::CompoundStmt* body = nullptr;
 
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, classNode);
-    TSQueryMatch tsMatch;
-
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
     {
-        astfri::Type* methodReturnType = typeFactory.mk_unknown();
-        std::string methodName;
-        std::vector<astfri::ParamVarDefStmt*> methodParams;
-        std::vector<astfri::LocalVarDefStmt*> methodVars;
-        std::vector<std::string> methodModifiers;
-        TSNode paramsNode;
-        TSNode methodNode;
-        astfri::FunctionDefStmt* func;
-        astfri::AccessModifier access;
-
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        modifierNode        = ts_node_named_child(tsNode, 0);
+        uint32_t childCount = ts_node_child_count(modifierNode);
+        for (uint32_t i = 0; i < childCount; i++)
         {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeName(ts_node_string(tsCapture.node));
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-            if (captureName == "method_modifiers")
+            TSNode child          = ts_node_child(modifierNode, i);
+            std::string childName = get_node_text(child, sourceCode);
+            if (childName == "private" || childName == "public"
+                || childName == "internal" || childName == "protected")
             {
-                methodModifiers.push_back(nodeText);
-            }
-            else if (captureName == "method_return_type")
-            {
-                if (nodeName == "(type_identifier)")
-                {
-                    methodReturnType = typeFactory.mk_user(nodeText);
-                }
-                else
-                {
-                    methodReturnType = this->nodeMapper->get_typeMap()
-                                           .find(nodeText)
-                                           ->second;
-                }
-            }
-            else if (captureName == "method_name")
-            {
-                methodName = nodeText;
-            }
-            else if (captureName == "params")
-            {
-                paramsNode = tsCapture.node;
-            }
-            else if (captureName == "method_body")
-            {
-                methodNode = tsCapture.node;
+                access = this->nodeMapper->get_modMap().find(childName)->second;
             }
         }
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        typeNode                 = ts_node_named_child(tsNode, 1);
+        std::string typeNodeName = ts_node_string(typeNode);
+        std::string typeNodeText = get_node_text(typeNode, sourceCode);
 
-        if (! ts_node_is_null(paramsNode))
+        if (typeNodeName == "(identifier)")
         {
-            methodParams = this->get_params(paramsNode, sourceCode);
+            type = typeFactory.mk_user(typeNodeText);
         }
-        if (! ts_node_is_null(methodNode))
+        else
         {
-            auto stmt = search_sub_tree(
-                methodNode,
-                "(local_variable_declaration ",
-                sourceCode
-            );
-
-            std::visit(
-                [&methodVars] (auto&& arg)
-                {
-                    if constexpr (std::is_same_v<
-                                      decltype(arg),
-                                      std::vector<astfri::LocalVarDefStmt*>>)
-                    {
-                        methodVars = arg;
-                    }
-                },
-                stmt
-            );
+            type = this->nodeMapper->get_typeMap().find(typeNodeText)->second;
         }
-
-        func = stmtFactory.mk_function_def(
-            methodName,
-            methodParams,
-            methodReturnType,
-            nullptr
-        );
-
-        access = astfri::AccessModifier::Internal;
-        for (std::string mod : methodModifiers)
-        {
-            if (mod == "public")
-            {
-                access = astfri::AccessModifier::Public;
-            }
-            else if (mod == "private")
-            {
-                access = astfri::AccessModifier::Private;
-            }
-            else if (mod == "internal")
-            {
-                access = astfri::AccessModifier::Internal;
-            }
-            else if (mod == "protected")
-            {
-                access = astfri::AccessModifier::Protected;
-            }
-        }
-
-        astfri::MethodDefStmt* method
-            = stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::Virtual);
-        methods.push_back(method);
-        std::cout << "method added" << std::endl;
-        methodModifiers.clear();
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 2)))
+    {
+        nameNode = ts_node_named_child(tsNode, 2);
+        name     = get_node_text(nameNode, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 3)))
+    {
+        parameterNode                 = ts_node_named_child(tsNode, 3);
+        std::string parameterNodeName = ts_node_string(parameterNode);
+        params = this->get_params(parameterNode, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 4)))
+    {
+        bodyNode                 = ts_node_named_child(tsNode, 4);
+        std::string bodyNodeName = ts_node_string(parameterNode);
+        body                     = this->search_sub_tree(bodyNode, sourceCode);
     }
 
-    ts_query_cursor_delete(tsCursor);
-    ts_query_delete(tsQuery);
-    return methods;
+    astfri::FunctionDefStmt* func
+        = stmtFactory.mk_function_def(name, params, type, body);
+
+    return stmtFactory
+        .mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual);
 }
 
-std::vector<astfri::MemberVarDefStmt*> NodeGetter::get_member_vars(
-    TSNode classNode,
+astfri::MemberVarDefStmt* NodeGetter::get_attribute(
+    TSNode tsNode,
     std::string const& sourceCode
 )
 {
-    std::vector<astfri::MemberVarDefStmt*> memberVars;
+    TSNode modifierNode;
+    TSNode typeNode;
+    TSNode declaratorNode;
 
-    char const* queryString = "(field_declaration"
-                              "  (modifiers)? @member_modifier"
-                              "  type: (_) @member_type"
-                              "  (variable_declarator"
-                              "    name: (identifier) @member_name"
-                              "    value: (_)? @member_value"
-                              "  )"
-                              ")";
+    astfri::AccessModifier access = astfri::AccessModifier::Internal;
+    astfri::Type* type            = nullptr;
+    std::string name;
+    astfri::Expr* init = nullptr;
 
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, classNode);
-    TSQueryMatch tsMatch;
-
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
     {
-        astfri::Type* memberVarType = typeFactory.mk_unknown();
-        std::string memberVarName;
-        astfri::Expr* memberVarValue;
-        std::vector<std::string> memberVarModifiers;
-
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        modifierNode        = ts_node_named_child(tsNode, 0);
+        uint32_t childCount = ts_node_child_count(modifierNode);
+        for (uint32_t i = 0; i < childCount; i++)
         {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeName(ts_node_string(tsCapture.node));
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-            if (captureName == "memeber_modifier")
+            TSNode child          = ts_node_child(modifierNode, i);
+            std::string childName = get_node_text(child, sourceCode);
+            if (childName == "private" || childName == "public"
+                || childName == "internal" || childName == "protected")
             {
-                memberVarModifiers.push_back(nodeText);
-            }
-            else if (captureName == "member_type")
-            {
-                if (nodeName == "(type_identifier)")
-                {
-                    memberVarType = typeFactory.mk_user(nodeText);
-                }
-                else
-                {
-                    memberVarType = this->nodeMapper->get_typeMap()
-                                        .find(nodeText)
-                                        ->second;
-                }
-            }
-            else if (captureName == "member_name")
-            {
-                memberVarName = nodeText;
-            }
-            else if (captureName == "member_value")
-            {
-                memberVarValue
-                    = get_expr(nodeName, nodeText, tsCapture.node, sourceCode);
+                access = this->nodeMapper->get_modMap().find(childName)->second;
             }
         }
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        typeNode                 = ts_node_named_child(tsNode, 1);
+        std::string typeNodeName = ts_node_string(typeNode);
+        std::string typeNodeText = get_node_text(typeNode, sourceCode);
 
-        astfri::AccessModifier access = astfri::AccessModifier::Internal;
-        for (std::string mod : memberVarModifiers)
+        if (typeNodeName == "(identifier)")
         {
-            if (mod == "public")
-            {
-                access = astfri::AccessModifier::Public;
-            }
-            else if (mod == "private")
-            {
-                access = astfri::AccessModifier::Private;
-            }
-            else if (mod == "internal")
-            {
-                access = astfri::AccessModifier::Internal;
-            }
-            else if (mod == "protected")
-            {
-                access = astfri::AccessModifier::Protected;
-            }
+            type = typeFactory.mk_user(typeNodeText);
         }
+        else
+        {
+            type = this->nodeMapper->get_typeMap().find(typeNodeText)->second;
+        }
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 2)))
+    {
+        declaratorNode = ts_node_named_child(tsNode, 2);
+        TSNode attributeNameNode;
+        TSNode attributeInitNode;
 
-        memberVars.push_back(stmtFactory.mk_member_var_def(
-            memberVarName,
-            memberVarType,
-            memberVarValue,
-            access
-        ));
-        std::cout << "member added" << std::endl;
+        if (! ts_node_is_null(ts_node_named_child(declaratorNode, 0)))
+        {
+            attributeNameNode = ts_node_named_child(declaratorNode, 0);
+            name              = get_node_text(attributeNameNode, sourceCode);
+        }
+        if (! ts_node_is_null(ts_node_named_child(declaratorNode, 1)))
+        {
+            attributeInitNode = ts_node_named_child(declaratorNode, 1);
+            init              = this->get_expr(attributeInitNode, sourceCode);
+        }
     }
 
-    ts_query_cursor_delete(tsCursor);
-    ts_query_delete(tsQuery);
-    return memberVars;
+    return stmtFactory.mk_member_var_def(name, type, init, access);
 }
 
 std::vector<astfri::ClassDefStmt*> NodeGetter::get_classes(
@@ -1124,74 +1086,64 @@ std::vector<astfri::ClassDefStmt*> NodeGetter::get_classes(
     std::string const& sourceCode
 )
 {
+    TSNode rootNode = ts_tree_root_node(tree);
+    TSNode classNode;
+    TSNode classNameNode;
+    TSNode classBodyNode;
+    std::string className;
+    std::vector<astfri::MemberVarDefStmt*> attributes;
+    std::vector<astfri::MethodDefStmt*> methods;
     std::vector<astfri::ClassDefStmt*> classes;
-    TSNode rootNode         = ts_tree_root_node(tree);
 
-    char const* queryString = "(class_declaration"
-                              "(modifiers)? @modifier"
-                              "(identifier) @class_name"
-                              "(class_body)? @class_body"
-                              ")";
-
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, rootNode);
-    TSQueryMatch tsMatch;
-
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    uint32_t childCount = ts_node_named_child_count(rootNode);
+    for (uint32_t i = 0; i < childCount; i++)
     {
-        std::vector<std::string> classModifiers;
-        std::string className;
-        std::vector<astfri::MemberVarDefStmt*> classMemberVars;
-        std::vector<astfri::MethodDefStmt*> classMethods;
-        TSNode tsNode;
-
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        if (! ts_node_is_null(ts_node_named_child(rootNode, i)))
         {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-            if (captureName == "class_modifier")
-            {
-                classModifiers.push_back(nodeText);
-            }
-            else if (captureName == "class_name")
-            {
-                className = nodeText;
-            }
-            else if (captureName == "class_body")
-            {
-                tsNode = tsCapture.node;
-            }
+            classNode = ts_node_named_child(rootNode, i);
         }
 
-        if (! ts_node_is_null(tsNode))
+        if (! ts_node_is_null(ts_node_named_child(classNode, 1)))
         {
-            classMemberVars = this->get_member_vars(tsNode, sourceCode);
-            classMethods = this->get_methods(tsNode, sourceCode);
+            classNameNode = ts_node_named_child(classNode, 1);
+            className     = get_node_text(classNameNode, sourceCode);
+        }
+
+        if (! ts_node_is_null(ts_node_named_child(classNode, 2)))
+        {
+            classBodyNode = ts_node_named_child(classNode, 2);
+        }
+
+        uint32_t grandChildCount = ts_node_named_child_count(classBodyNode);
+        for (uint32_t i = 0; i < grandChildCount; i++)
+        {
+            TSNode grandChild          = ts_node_named_child(classBodyNode, i);
+            std::string grandChildName = ts_node_string(grandChild);
+
+            if (grandChildName.find("(field_declaration ") == 0)
+            {
+                attributes.push_back(this->get_attribute(grandChild, sourceCode)
+                );
+            }
+            else if (grandChildName.find("(method_declaration ") == 0)
+            {
+                methods.push_back(this->get_method(grandChild, sourceCode));
+            }
         }
 
         astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className);
-        classDef->vars_ = classMemberVars;
-        classDef->methods_ = classMethods;
+        classDef->vars_                = attributes;
+        classDef->methods_             = methods;
         classes.push_back(classDef);
-        std::cout << "class added" << std::endl;
 
-        for (astfri::MethodDefStmt* method : classMethods)
+        for (astfri::MethodDefStmt* method : methods)
         {
             method->owner_ = classDef;
-            std::cout << "method owner set" << std::endl;
         }
+        attributes.clear();
+        methods.clear();
     }
 
-    ts_query_cursor_delete(tsCursor);
-    ts_query_delete(tsQuery);
     return classes;
 }
 
