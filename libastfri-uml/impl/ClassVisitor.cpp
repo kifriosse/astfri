@@ -1,8 +1,5 @@
 #include <libastfri-uml/inc/ClassVisitor.hpp>
 #include <string>
-#include "libastfri-uml/inc/ElementStructs.hpp"
-#include "libastfri/inc/Stmt.hpp"
-#include "libastfri/inc/Type.hpp"
 
 namespace astfri::uml {
         void ClassVisitor::create_relation(std::string target, RelationType type) {

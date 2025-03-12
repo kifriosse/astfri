@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "libastfri/inc/Stmt.hpp"
+#include <libastfri/inc/Stmt.hpp>
 
 namespace astfri::uml {
     enum class RelationType {

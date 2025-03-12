@@ -1,6 +1,4 @@
-
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
-#include "libastfri-uml/inc/TypeConvention.hpp"
 
 namespace astfri::uml {
     void UMLLibWrapper::init(Config& config, UMLOutputter& output, TypeConvention const& typeConvention) {

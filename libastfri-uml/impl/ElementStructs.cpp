@@ -1,5 +1,4 @@
 #include <libastfri-uml/inc/ElementStructs.hpp>
-#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::uml {
     void ClassStruct::reset() {

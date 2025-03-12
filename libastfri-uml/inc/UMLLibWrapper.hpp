@@ -2,7 +2,6 @@
 
 #include <libastfri-uml/inc/ClassVisitor.hpp>
 #include <libastfri-uml/inc/PlantUMLOutputter.hpp>
-#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::uml {
     class UMLLibWrapper {

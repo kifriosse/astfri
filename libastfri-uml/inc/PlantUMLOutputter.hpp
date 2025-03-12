@@ -1,7 +1,6 @@
 #pragma once
 
 #include <libastfri-uml/inc/UMLOutputter.hpp>
-#include "libastfri-uml/inc/ElementStructs.hpp"
 
 namespace astfri::uml {
     class PlantUMLOutputter : public UMLOutputter {

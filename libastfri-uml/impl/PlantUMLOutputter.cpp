@@ -1,8 +1,6 @@
 #include <cstddef>
 #include <cstring>
 #include <libastfri-uml/inc/PlantUMLOutputter.hpp>
-#include "libastfri-uml/inc/ElementStructs.hpp"
-#include "libastfri-uml/inc/UMLOutputter.hpp"
 
 namespace astfri::uml {
     void PlantUMLOutputter::open(ClassStruct const& cs) {
