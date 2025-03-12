@@ -16,8 +16,8 @@ namespace astfri::uml {
     public:
         void set_config(Config const& config);
 
-        void write_to_file();
-        void write_to_console();
+        virtual void write_to_file();
+        virtual void write_to_console();
 
         virtual std::string getFileExtension() = 0;
 

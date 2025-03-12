@@ -117,8 +117,7 @@ namespace astfri::uml {
         this->currentMethod_.name_ = stmt.func_->name_;
         this->currentMethod_.accessMod_ = stmt.access_;
         for (astfri::ParamVarDefStmt* p : stmt.func_->params_) {
-            p->type_->accept(*this);
-            this->currentVariable_.name_ = p->name_;
+            p->accept(*this);
             // TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
             this->currentMethod_.params_.push_back(this->currentVariable_);
             this->currentVariable_.reset();
@@ -140,6 +139,25 @@ namespace astfri::uml {
 
         for (astfri::InterfaceDefStmt* interface : stmt.interfaces_) {
             this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
+        }
+
+        for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
+            this->currentMethod_.accessMod_ = constructor->access_;
+            this->currentMethod_.name_ = constructor->owner_->name_;
+            for (astfri::ParamVarDefStmt* p : constructor->params_) {
+                p->accept(*this);
+                this->currentMethod_.params_.push_back(this->currentVariable_);
+                this->currentVariable_.reset();
+            }
+            this->outputter_->add_function_member(this->currentMethod_);
+            this->currentMethod_.reset();
+        }
+
+        for (astfri::DestructorDefStmt* descructor : stmt.destructors_) {
+            this->currentMethod_.accessMod_ = AccessModifier::Public;
+            this->currentMethod_.name_ = this->config_->destructorIndicator_ + descructor->owner_->name_;
+            this->outputter_->add_function_member(this->currentMethod_);
+            this->currentMethod_.reset();
         }
 
         for (astfri::MemberVarDefStmt* var : stmt.vars_)

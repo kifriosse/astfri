@@ -8,6 +8,7 @@ namespace astfri::uml {
         TypeConvention* typeConvention_;
         bool writeToFile_ = false;
         char indirectIndicator_ = '*';
+        char destructorIndicator_ = '~';
         char separator_ = ' ';
         char accessPrefix_[4] = {'+', '-', '#', '~'};
         std::string relationArrows_[4] = {"<--", "*--", "<|--", "<|.."};

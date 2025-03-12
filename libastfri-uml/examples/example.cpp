@@ -3,6 +3,7 @@
 #include <libastfri/inc/TypeFactory.hpp>
 
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <vector>
 #include "libastfri/inc/Stmt.hpp"
 
 int main()
@@ -24,6 +25,18 @@ int main()
     std::vector<astfri::ClassDefStmt*> basesBar;
     basesBar.push_back(classParent);
     classBar->bases_ = basesBar;
+
+    std::vector<astfri::ConstructorDefStmt*> constructorsBar;
+    auto cnstrBar = statements.mk_constructor_def();
+    cnstrBar->access_ = astfri::AccessModifier::Public;
+    cnstrBar->owner_ = classBar;
+    constructorsBar.push_back(cnstrBar);
+    classBar->constructors_ = constructorsBar;
+
+    std::vector<astfri::DestructorDefStmt*> descructorsBar;
+    auto dstrctrBar = statements.mk_destructor_def(classBar, nullptr);
+    descructorsBar.push_back(dstrctrBar);
+    classBar->destructors_ = descructorsBar;
 
     std::vector<astfri::InterfaceDefStmt*> interfacesFoo;
     interfacesFoo.push_back(interfaceIVisitable);

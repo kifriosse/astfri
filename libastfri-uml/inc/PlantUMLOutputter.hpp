@@ -9,6 +9,11 @@ namespace astfri::uml {
         void open(ClassStruct const& cs);
 
     public:
+        PlantUMLOutputter();
+
+        virtual void write_to_file() override;
+        virtual void write_to_console() override;
+        
         virtual std::string getFileExtension() override;
 
         virtual void open_class(ClassStruct c) override;

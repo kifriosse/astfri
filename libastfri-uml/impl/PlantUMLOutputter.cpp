@@ -2,6 +2,7 @@
 #include <cstring>
 #include <libastfri-uml/inc/PlantUMLOutputter.hpp>
 #include "libastfri-uml/inc/ElementStructs.hpp"
+#include "libastfri-uml/inc/UMLOutputter.hpp"
 
 namespace astfri::uml {
     void PlantUMLOutputter::open(ClassStruct const& cs) {
@@ -19,6 +20,20 @@ namespace astfri::uml {
             this->outputString_ += ">";
         }
         this->outputString_ += " {\n";
+    }
+
+    PlantUMLOutputter::PlantUMLOutputter() {
+        this->outputString_ += "@startuml\n";
+    }
+
+    void PlantUMLOutputter::write_to_file() {
+        this->outputString_ += "@enduml\n";
+        UMLOutputter::write_to_file();
+    }
+
+    void PlantUMLOutputter::write_to_console() {
+        this->outputString_ += "@enduml\n";
+        UMLOutputter::write_to_console();
     }
 
     std::string PlantUMLOutputter::getFileExtension() {
