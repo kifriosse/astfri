@@ -18,6 +18,7 @@
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/Expr.h>
 #include <clang/AST/ExprCXX.h>
+#include <clang/AST/OperationKinds.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Stmt.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -62,7 +63,6 @@ public:
     bool TraverseVarDecl(clang::VarDecl *VD);
     bool TraverseParmVarDecl(clang::ParmVarDecl *PVD);
     bool TraverseFieldDecl(clang::FieldDecl *FD);
-    // bool TraverseClassTemplateDecl(clang::ClassTemplateDecl *CTD);
     // bool TraverseTypedefDecl(clang::TypedefDecl *TD);
     // bool TraverseEnumDecl(clang::EnumDecl *ED);
     // // Traverse statementy
@@ -88,12 +88,15 @@ public:
     bool TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL);
     bool TraverseCharacterLiteralExpr(clang::CharacterLiteral *CL);
     // Traverse operators
+    bool TraverseCompoundAssignOperator(clang::CompoundAssignOperator *CAO);
     bool TraverseBinaryOperator(clang::BinaryOperator *BO);
     bool TraverseUnaryOperator(clang::UnaryOperator *UO);
 
 private:
     astfri::AccessModifier getAccessModifier(clang::Decl* decl);
     astfri::ClassDefStmt* get_existing_class(std::string name);
+    astfri::BinOpType get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type);
+    astfri::UnaryOpType get_astfri_un_op_type(clang::UnaryOperatorKind clang_type);
     TranslationUnit* tu_;
 
     StmtFactory* stmt_factory_;

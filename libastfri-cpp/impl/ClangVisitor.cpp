@@ -54,27 +54,109 @@ astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name) {
     return nullptr;
 }
 
+astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type) {
+    // TODO: 
+    // ඞ Fakt toto existuje?
+    // {lhs} // {rhs}, {lhs} div {rhs}
+    //FloorDivide,
+
+    // {lhs} ** {rhs}
+    // Exponentiation,
+
+    // {lhs} //= {rhs}
+    // FloorDivideAssign,
+
+    // {lhs} **= {rhs}
+    // ExponentiationAssign,
+    
+    // sú tam aj ďalšie srandy, ale to nepodporuje ASTFRI: .* ->* 
+
+    switch (clang_type) {
+        case clang::BinaryOperatorKind::BO_Assign: return astfri::BinOpType::Assign; break; // =
+        case clang::BinaryOperatorKind::BO_Add: return astfri::BinOpType::Add; break; // +
+        case clang::BinaryOperatorKind::BO_Sub: return astfri::BinOpType::Subtract; break; // -
+        case clang::BinaryOperatorKind::BO_Mul: return astfri::BinOpType::Multiply; break; // *
+        case clang::BinaryOperatorKind::BO_Div: return astfri::BinOpType::Divide; break; // /
+        case clang::BinaryOperatorKind::BO_AddAssign: return astfri::BinOpType::AddAssign; break; // +=
+        case clang::BinaryOperatorKind::BO_SubAssign: return astfri::BinOpType::SubtractAssign; break; // -=
+        case clang::BinaryOperatorKind::BO_MulAssign: return astfri::BinOpType::MultiplyAssign; break; // *=
+        case clang::BinaryOperatorKind::BO_DivAssign: return astfri::BinOpType::DivideAssign; break; // /=
+        case clang::BinaryOperatorKind::BO_GT: return astfri::BinOpType::Greater; break; // >
+        case clang::BinaryOperatorKind::BO_GE: return astfri::BinOpType::GreaterEqual; break; // >=
+        case clang::BinaryOperatorKind::BO_LT: return astfri::BinOpType::Less; break; // <
+        case clang::BinaryOperatorKind::BO_LE: return astfri::BinOpType::LessEqual; break; // <=
+        case clang::BinaryOperatorKind::BO_EQ: return astfri::BinOpType::Equal; break; // ==
+        case clang::BinaryOperatorKind::BO_NE: return astfri::BinOpType::NotEqual; break; // !=
+        case clang::BinaryOperatorKind::BO_LAnd: return astfri::BinOpType::LogicalAnd; break; // &&
+        case clang::BinaryOperatorKind::BO_LOr: return astfri::BinOpType::LogicalOr; break; // ||
+        case clang::BinaryOperatorKind::BO_Rem: return astfri::BinOpType::Modulo; break; // %
+        case clang::BinaryOperatorKind::BO_RemAssign: return astfri::BinOpType::ModuloAssign; break; // %=
+        case clang::BinaryOperatorKind::BO_Shr: return astfri::BinOpType::BitShiftRight; break; // >>
+        case clang::BinaryOperatorKind::BO_Shl: return astfri::BinOpType::BitShiftLeft; break; // <<
+        case clang::BinaryOperatorKind::BO_ShrAssign: return astfri::BinOpType::BitShiftRightAssign; break; // >>=
+        case clang::BinaryOperatorKind::BO_ShlAssign: return astfri::BinOpType::BitShiftLeftAssign; break; // <<=   
+        case clang::BinaryOperatorKind::BO_And: return astfri::BinOpType::BitAnd; break; // &
+        case clang::BinaryOperatorKind::BO_AndAssign: return astfri::BinOpType::BitAndAssign; break; // &=
+        case clang::BinaryOperatorKind::BO_Or: return astfri::BinOpType::BitOr; break; // |
+        case clang::BinaryOperatorKind::BO_OrAssign: return astfri::BinOpType::BitOrAssign; break; // |=
+        case clang::BinaryOperatorKind::BO_Xor: return astfri::BinOpType::BitXor; break; // ^
+        case clang::BinaryOperatorKind::BO_XorAssign: return astfri::BinOpType::BitXorAssign; break; // ^=
+        case clang::BinaryOperatorKind::BO_Comma: return astfri::BinOpType::Comma; break; // ,
+        default: {
+            std::cout << "\n\n\nChyba pri priradeni Binary operator\n\n\n";
+        } break;
+    }
+    return BinOpType::Assign;
+}
+
+astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind clang_type) {
+    switch (clang_type) {
+        case clang::UnaryOperatorKind::UO_Plus: return UnaryOpType::Plus; break;
+        case clang::UnaryOperatorKind::UO_Minus: return UnaryOpType::Minus; break;
+        case clang::UnaryOperatorKind::UO_LNot:return UnaryOpType::LogicalNot; break; 
+        case clang::UnaryOperatorKind::UO_PreInc: return UnaryOpType::PreIncrement; break;
+        case clang::UnaryOperatorKind::UO_PostInc: return UnaryOpType::PostIncrement; break;
+        case clang::UnaryOperatorKind::UO_PreDec: return UnaryOpType::PreDecrement; break;
+        case clang::UnaryOperatorKind::UO_PostDec: return UnaryOpType::PostDecrement; break;
+        case clang::UnaryOperatorKind::UO_AddrOf: return UnaryOpType::AddressOf; break;
+        case clang::UnaryOperatorKind::UO_Deref: return UnaryOpType::Dereference; break;
+        case clang::UnaryOperatorKind::UO_Not: return UnaryOpType::LogicalNot; break;
+        default: {
+            std::cout << "\n\n\nChyba pri priradeni Unary operator\n\n\n";
+        } break;
+    }
+    return UnaryOpType::Plus;
+}
+
 // traverse deklaracie
 bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     llvm::outs() << "Konstruktor zaciatok: " << Ctor->getNameAsString() << "\n";
 
+    // ak nema telo tak sa skipne ako pri metodach
+    if (!Ctor->hasBody()) {
+        return true;
+    }
+
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp = this->clang_location;
-
+    
     // akcia na tomto vrchole
+    // ziskanie ownera
+    auto owner = this->get_existing_class(
+        Ctor->getParent()->getNameAsString()
+    );
     //MethodDefStmt* new_ctor = nullptr;
     if (Ctor->hasBody()) {
         // vytvorenie konstruktora
         auto new_ctor = this->stmt_factory_->mk_constructor_def(
-            (ClassDefStmt*)this->astfri_location.stmt_,
+            owner,
             std::vector<ParamVarDefStmt*>{},
             std::vector<BaseInitializerStmt*>{},
             nullptr,
             this->getAccessModifier(Ctor)
         );
-        // TODO: ked pride podpora treba odkomentovat
-        // ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_ctor);
+        owner->constructors_.push_back(new_ctor);
 
         TraverseStmt(Ctor->getBody());
         new_ctor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
@@ -94,17 +176,26 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
 bool ClangVisitor::TraverseCXXDestructorDecl(clang::CXXDestructorDecl *Dtor) {
     llvm::outs() << "Destruktor\n";
 
+    // ak nema telo tak sa znova skipne
+    if (!Dtor->hasBody()) {
+        return true;
+    }
+
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp = this->clang_location;
 
     // akcia na tomto vrchole
+    // ziskanie ownera
+    auto owner = this->get_existing_class(
+        Dtor->getParent()->getNameAsString()
+    );
+
     auto new_dtor = this->stmt_factory_->mk_destructor_def(
-        (ClassDefStmt*)this->astfri_location.stmt_,
+        owner,
         nullptr
     );
-    // TODO: ked bude podpora pre destruktory,
-    // ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_dtor);
+    owner->destructors_.push_back(new_dtor);
     TraverseStmt(Dtor->getBody());
     new_dtor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
 
@@ -156,20 +247,33 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl *FD) {
     return true;
 }
 bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
+    // ak nema telo (je to len declaracia), tak sa skipne, vytvori sa az ked pride na jej definiciu
+    if (!MD->hasBody()) {
+        return true;
+    }
     llvm::outs() << "Metoda zaciatok: " << MD->getNameAsString() << "\n";
-
+    
     // akcia na tomto vrchole
+    auto owner = this->get_existing_class(
+        MD->getParent()->getNameAsString()
+    );
+
+    auto virtuality = Virtuality::NotVirtual;
+    if (MD->isVirtual()) {
+        virtuality = Virtuality::Virtual;
+    }
+
     auto new_method = this->stmt_factory_->mk_method_def(
-        (ClassDefStmt*)this->astfri_location.stmt_,
+        owner,
         this->stmt_factory_->mk_function_def(
             MD->getNameAsString(),
             std::vector<ParamVarDefStmt*> {},
             this->type_factory_->mk_user(MD->getReturnType().getAsString()), //TODO: fixnut typ
             nullptr),
             this->getAccessModifier(MD),
-            Virtuality::NotVirtual
+            virtuality
     );
-    ((ClassDefStmt*)this->astfri_location.stmt_)->methods_.push_back(new_method);
+    owner->methods_.push_back(new_method);
 
     // zapamatanie AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -185,9 +289,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
         new_method->func_->params_.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
     }
 
-    auto body = MD->getBody();
-    TraverseStmt(body);
-
+    TraverseStmt(MD->getBody());
     new_method->func_->body_ = (CompoundStmt*)this->astfri_location.stmt_;
 
     // vratenie naspat AST Location
@@ -349,28 +451,6 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
 
     return true;
 }
-// bool ClangVisitor::TraverseClassTemplateDecl(clang::ClassTemplateDecl *CTD) {
-//     llvm::outs() << "Class template\n";
-
-//     //akcia na tomto vrchole
-//     auto new_tparams = std::vector<GenericParam*> {};
-//     auto params = CTD->getTemplateParameters();
-//     for (unsigned int i = 0; i < params->size(); i++) {
-//         new_tparams.push_back(
-//             this->stmt_factory_->mk_generic_param(
-//                 "",
-//                 params->getParam(i)->getNameAsString()
-//             )
-//         );
-//         std::cout << params->getParam(i)->getNameAsString() << "\n"; // Vratilo T konecne
-//     }
-
-//     // prejdenie samotnej triedy
-//     TraverseDecl(CTD->getTemplatedDecl());
-
-//     llvm::outs() << "Class template koniec\n";
-//     return true;
-// }
 // bool ClangVisitor::TraverseTypedefDecl(clang::TypedefDecl *TD) {
 //     llvm::outs() << "Typedef:" << TD->getNameAsString() << "\n";
 //     return true;
@@ -474,16 +554,6 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt *IS) {
         nullptr,
         nullptr
     );
-    // priradenie stmt tam kde patri
-    // if (this->clang_locationStack.back()->stmt_ &&
-    // llvm::dyn_cast<clang::CompoundStmt>(this->clang_locationStack.back()->stmt_)) {
-    //     // ak je v compounde
-    //     ((CompoundStmt*)this->astfri_locationStack.back()->stmt_)->stmts_.push_back(new_if);
-    // } else if (this->clang_locationStack[this->clang_locationStack.size() - 3]->stmt_ &&
-    // llvm::dyn_cast<clang::IfStmt>(this->clang_locationStack[this->clang_locationStack.size() - 3]->stmt_)) {
-    //     // ak je v dalsom if-e
-    //     ((IfStmt*)this->astfri_locationStack[this->astfri_locationStack.size() - 3]->stmt_)->iffalse_ = new_if;
-    // }
 
     // TODO: prepoklada sa ze je v compounde a nie v else vetve
     ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_if);
@@ -509,6 +579,9 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt *IS) {
         // TODO: ak ma else ako if dorobit, zatial sa prepoklada ze je to compound vzdy
         TraverseStmt(else_stmt);
         new_if->iffalse_ = this->astfri_location.stmt_;
+    } else {
+        // naplnenie prazdnym else-om
+        new_if->iffalse_ = this->stmt_factory_->mk_compound(std::vector<Stmt *> {});
     }
 
     // vratenie AST location
@@ -894,76 +967,66 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
     return true;
  }
  // operatory
+ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator *CAO) {
+    llvm::outs() << "Compound Assign: " << CAO->getOpcodeStr() << "\n";
+
+    BinOpExpr* bin_op = nullptr;
+
+    bin_op = this->expr_factory_->mk_bin_on(
+        nullptr,
+        this->get_astfri_bin_op_type(CAO->getOpcode()),
+        nullptr
+    );
+
+    // prepisanie AST location
+    this->astfri_location.expr_ = bin_op;
+    this->clang_location.bin_op_ = CAO;
+
+    // zapamatanie AST location
+    AstfriASTLocation astfri_temp = this->astfri_location;
+    ClangASTLocation clang_temp = this->clang_location;
+
+    // ak je expr_as_stmt flag true, nech sa pre ostatne vypne
+    bool expr_as_stmt_changed = false;
+    if (this->expr_as_stmt) {
+        this->expr_as_stmt = false;
+        expr_as_stmt_changed = true;
+    }
+
+    // lavy operator
+    TraverseStmt(CAO->getLHS());
+    bin_op->left_ = this->astfri_location.expr_;
+    // pravy operator
+    TraverseStmt(CAO->getRHS());
+    bin_op->right_ = this->astfri_location.expr_;
+
+    // vratenie expr_as_stmt naspat ak je toto node ktory ho zmenil
+    if (expr_as_stmt_changed) {
+        this->expr_as_stmt = true;
+    }
+
+    // vratenie tohto bin op naspat
+    this->astfri_location = astfri_temp;
+    this->clang_location = clang_temp;
+
+    if (this->expr_as_stmt) {
+        ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(
+            this->stmt_factory_->mk_expr(bin_op)
+        );
+    }
+    
+    return true;
+ }
  bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator *BO) {
     llvm::outs() << "Binary operator: " << BO->getOpcodeStr() << "\n";
 
     BinOpExpr* bin_op = nullptr;
 
-    if (BO->getOpcodeStr().equals("+")) {
-        // operator +
-        bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Add,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("-")) {
-        // operator -
-        bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Subtract,
-            nullptr
-        );
-
-    } else if (BO->getOpcodeStr().equals("*")) {
-        // operator *
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Multiply,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("/")) {
-        // operator /
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Divide,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals(">")) {
-        // operator >
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Greater,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("<")) {
-        // operator <
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Less,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("=")) {
-        // operator <
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Assign,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("==")) {
-        // operator <
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::Equal,
-            nullptr
-        );
-    } else if (BO->getOpcodeStr().equals("!=")) {
-        // operator !=
-         bin_op = this->expr_factory_->mk_bin_on(
-            nullptr,
-            BinOpType::NotEqual,
-            nullptr
-        );
-    }
+    bin_op = this->expr_factory_->mk_bin_on(
+        nullptr,
+        this->get_astfri_bin_op_type(BO->getOpcode()),
+        nullptr
+    );
 
     // prepisanie AST location
     this->astfri_location.expr_ = bin_op;
@@ -1007,49 +1070,8 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
 bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator *UO) {
     llvm::outs() << "Unary operator ";
 
-    // dolezite operandy
-    // UO_Plus     +
-    // UO_Minus    -
-    // UO_Not      !
-    // UO_LNot     logicke !
-    // UO_PreInc   ++x
-    // UO_PostInc  x++
-    // UO_PreDec   --x
-    // UO_PostDec  x--
-    // UO_AddrOf   &x
-    // UO_Deref    *x
-
     // akcia na tomto vrchole
-    // nastavenie operatora
-    UnaryOpType op;
-    switch (UO->getOpcode()) {
-        case clang::UO_Plus: op = UnaryOpType::Plus;
-            break;
-        case clang::UO_Minus: op = UnaryOpType::Minus;
-            break;
-        case clang::UO_Not: op = UnaryOpType::LogicalNot;
-            break;
-        case clang::UO_LNot:op = UnaryOpType::LogicalNot; // TODO: spytat sa na rozdiel
-            break;
-        case clang::UO_PreInc: op = UnaryOpType::PreIncrement;
-            break;
-        case clang::UO_PostInc: op = UnaryOpType::PostIncrement;
-            break;
-        case clang::UO_PreDec: op = UnaryOpType::PreDecrement;
-            break;
-        case clang::UO_PostDec: op = UnaryOpType::PostDecrement;
-            break;
-        case clang::UO_AddrOf: op = UnaryOpType::AddressOf;
-            break;
-        case clang::UO_Deref: op = UnaryOpType::Dereference;
-            break;
-        default: {
-            std::cout << "Chyba pri nastavovani unary operatora!, koncim\n";
-            return 1;
-        }
-            break;
-    }
-    llvm::outs() << (int)op << "\n";
+    UnaryOpType op = this->get_astfri_un_op_type(UO->getOpcode());
 
     // nastavenie operandu
     TraverseStmt(UO->getSubExpr());
@@ -1061,8 +1083,8 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator *UO) {
         arg
     );
 
-    // ak je expression nad compound stmt, tak sa vytvori ako stmt a nie expr
-    if (llvm::dyn_cast<clang::CompoundStmt>(this->clang_location.stmt_)) {
+    // ak je expression nad compound stmt, tak sa vytvori ako stmt a nie expr a rovno sa tam vlozi
+    if (this->expr_as_stmt) {
         ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(
             this->stmt_factory_->mk_expr(un_op)
         );
