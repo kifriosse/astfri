@@ -6,7 +6,7 @@ namespace astfri::uml {
     struct Config {
         // type var, var : type
         TypeConvention* typeConvention_;
-        bool writeToFile_ = true;
+        bool writeToFile_ = false;
         char indirectIndicator_ = '*';
         char separator_ = ' ';
         char accessPrefix_[4] = {'+', '-', '#', '~'};

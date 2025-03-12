@@ -21,6 +21,12 @@ namespace astfri::uml {
         VarStruct currentVariable_;
 
         std::vector<RelationStruct> relations_;
+        std::vector<std::string> classes_;
+        std::vector<std::string> interfaces_;
+
+        RelationStruct* findRelation(RelationStruct const& rel);
+        bool findClass(std::string name);
+        bool findInterface(std::string name);
 
     public:
         void set_config(Config const& config);

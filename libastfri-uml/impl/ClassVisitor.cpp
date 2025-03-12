@@ -5,6 +5,30 @@
 #include "libastfri/inc/Type.hpp"
 
 namespace astfri::uml {
+    RelationStruct* ClassVisitor::findRelation(RelationStruct const& rel) {
+        for (size_t i = 0; i < this->relations_.size(); ++i) {
+            if ((this->relations_[i].from_.compare(rel.from_) == 0) &&
+                (this->relations_[i].to_.compare(rel.to_) == 0)) {
+                    return &this->relations_[i];
+            }
+        }
+        return nullptr;
+    }
+
+    bool ClassVisitor::findClass(std::string name) {
+        for (std::string c : this->classes_) {
+            if (c.compare(name) == 0) return true;
+        }
+        return false;
+    }
+    
+    bool ClassVisitor::findInterface(std::string name) {
+        for (std::string i : this->interfaces_) {
+            if (i.compare(name) == 0) return true;
+        }
+        return false;
+    }
+
     void ClassVisitor::set_config(Config const& config) {
         this->config_ = (Config*)&config;
     }
@@ -34,20 +58,14 @@ namespace astfri::uml {
     }
 
     void ClassVisitor::visit (astfri::UserType const& type) {
-        if (type.name_.compare(this->currentClass_.name_) != 0) {
-            RelationStruct r;
-            r.from_ = this->currentClass_.name_;
-            r.to_ = type.name_;
-            r.type_ = RelationType::ASSOCIATION;
-
-            bool duplicate = false;
-            for (RelationStruct rs : this->relations_) {
-                if ((rs.from_.compare(r.from_) == 0 ) && rs.to_.compare(r.to_) == 0) {
-                    duplicate = true;
-                }
-            }
-
-            if (!duplicate) this->relations_.push_back(r);
+        if (type.name_.compare(this->currentClass_.name_) != 0 &&
+            this->findClass(type.name_)) {
+                RelationStruct r;
+                r.from_ = this->currentClass_.name_;
+                r.to_ = type.name_;
+                r.type_ = RelationType::ASSOCIATION;
+                
+                if (!this->findRelation(r)) this->relations_.push_back(r);
         }
         this->currentVariable_.type_ = type.name_;
     }
@@ -119,7 +137,19 @@ namespace astfri::uml {
 
     void ClassVisitor::visit(astfri::TranslationUnit const& stmt) {
         for (astfri::ClassDefStmt* c : stmt.classes_) {
+            this->classes_.push_back(c->name_);
+        }
+
+        for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
+            this->interfaces_.push_back(i->name_);
+        }
+        
+        for (astfri::ClassDefStmt* c : stmt.classes_) {
             c->accept(*this);
+        }
+
+        for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
+            i->accept(*this);
         }
 
         for (RelationStruct r : this->relations_) {
