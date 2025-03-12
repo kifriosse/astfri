@@ -40,6 +40,7 @@ namespace astfri::uml {
     }
 
     void PlantUMLOutputter::add_function_member(MethodStruct m) {
+        if (m.returnIsIndirect_) m.retType_ += this->config_->indirectIndicator_;
         std::string header = m.name_ + "(";
         size_t index = 0;
         for (VarStruct p : m.params_) {

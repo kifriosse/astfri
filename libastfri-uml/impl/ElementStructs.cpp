@@ -18,6 +18,7 @@ namespace astfri::uml {
     void MethodStruct::reset() {
         this->name_ = "";
         this->retType_ = "";
+        this->returnIsIndirect_ = false;
         this->params_.clear();
         this->accessMod_ = astfri::AccessModifier::Internal;
     }

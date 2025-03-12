@@ -31,6 +31,7 @@ namespace astfri::uml {
     struct MethodStruct {
         std::string name_;
         std::string retType_;
+        bool returnIsIndirect_= false;
         std::vector<VarStruct> params_;
         astfri::AccessModifier accessMod_;
 

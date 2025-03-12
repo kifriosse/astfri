@@ -18,6 +18,7 @@ int main()
     std::vector<astfri::GenericParam*> genericParamsFoo;
     genericParamsFoo.push_back(statements.mk_generic_param("", "T"));
     genericParamsFoo.push_back(statements.mk_generic_param("", "E"));
+    classFoo->tparams_ = genericParamsFoo;
 
     std::vector<astfri::MemberVarDefStmt*> fieldsFoo;
     fieldsFoo.push_back(statements.mk_member_var_def(
@@ -36,7 +37,7 @@ int main()
 
     auto func = statements.mk_function_def();
     func->name_ = "foo";
-    func->retType_ = types.mk_indirect(types.mk_user("RetType"));
+    func->retType_ = types.mk_indirect(types.mk_user("Bar"));
     std::vector<astfri::ParamVarDefStmt*> params;
     params.push_back(statements.mk_param_var_def("number", types.mk_int(), nullptr));
     func->params_ = params;

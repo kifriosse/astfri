@@ -101,6 +101,7 @@ namespace astfri::uml {
     void ClassVisitor::visit (astfri::MethodDefStmt const& stmt) {
         stmt.func_->retType_->accept(*this);
         this->currentMethod_.retType_ = this->currentVariable_.type_;
+        this->currentMethod_.returnIsIndirect_ = this->currentVariable_.isIndirect_;
         this->currentMethod_.name_ = stmt.func_->name_;
         this->currentMethod_.accessMod_ = stmt.access_;
         for (astfri::ParamVarDefStmt* p : stmt.func_->params_) {
