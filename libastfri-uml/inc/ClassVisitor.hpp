@@ -25,9 +25,9 @@ namespace astfri::uml {
         std::vector<std::string> interfaces_;
 
         void create_relation(std::string target, RelationType type);
-        RelationStruct* findRelation(RelationStruct const& rel);
-        bool findClass(std::string name);
-        bool findInterface(std::string name);
+        RelationStruct* find_relation(RelationStruct const& rel);
+        bool find_class(std::string name);
+        bool find_interface(std::string name);
 
     public:
         void set_config(Config const& config);

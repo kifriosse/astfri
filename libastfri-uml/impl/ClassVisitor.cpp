@@ -11,11 +11,11 @@ namespace astfri::uml {
             r.to_ = target;
             r.type_ = type;
 
-            RelationStruct* found = this->findRelation(r);
+            RelationStruct* found = this->find_relation(r);
             if (!found) this->relations_.push_back(r);
         }
 
-        RelationStruct* ClassVisitor::findRelation(RelationStruct const& rel) {
+        RelationStruct* ClassVisitor::find_relation(RelationStruct const& rel) {
         for (size_t i = 0; i < this->relations_.size(); ++i) {
             if ((this->relations_[i].from_.compare(rel.from_) == 0) &&
                 (this->relations_[i].to_.compare(rel.to_) == 0)) {
@@ -25,14 +25,14 @@ namespace astfri::uml {
         return nullptr;
     }
 
-    bool ClassVisitor::findClass(std::string name) {
+    bool ClassVisitor::find_class(std::string name) {
         for (std::string c : this->classes_) {
             if (c.compare(name) == 0) return true;
         }
         return false;
     }
     
-    bool ClassVisitor::findInterface(std::string name) {
+    bool ClassVisitor::find_interface(std::string name) {
         for (std::string i : this->interfaces_) {
             if (i.compare(name) == 0) return true;
         }
