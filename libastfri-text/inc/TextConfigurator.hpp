@@ -176,7 +176,7 @@ public:
     const std::stringstream* get_lambda_word_style()    { return lambdaWordStyle_.get(); };
     const std::stringstream* get_call_word_style()      { return callWordStyle_.get(); };
     const std::stringstream* get_define_word_style()    { return defineWordStyle_.get(); };
-    const std::stringstream* get_returns_word_style()   { return returnsWord_.get(); };
+    const std::stringstream* get_returns_word_style()   { return returnsWordStyle_.get(); };
 };
 
 #endif

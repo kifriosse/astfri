@@ -327,12 +327,14 @@ void ASTVisitor::visit(TranslationUnit const& stmt) {
             }
         }
     }
-    for (InterfaceDefStmt* a : stmt.interfaces_) {
-        if (a) {
-            predch ? exporter_->write_new_line() : void();
-            a->accept(*this);
-            exporter_->write_new_line();
-            predch = true;
+    if (configurator_->sh_interf_dec()) {
+        for (InterfaceDefStmt* a : stmt.interfaces_) {
+            if (a) {
+                predch ? exporter_->write_new_line() : void();
+                a->accept(*this);
+                exporter_->write_new_line();
+                predch = true;
+            }
         }
     }
     for (ClassDefStmt* a : stmt.classes_) {
