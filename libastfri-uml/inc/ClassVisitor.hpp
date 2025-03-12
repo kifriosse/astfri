@@ -29,6 +29,7 @@ namespace astfri::uml {
         bool find_class(std::string name);
         bool find_interface(std::string name);
 
+        void finish();
     public:
         void set_config(Config const& config);
         void set_outputter(UMLOutputter const& outputter);
@@ -56,7 +57,5 @@ namespace astfri::uml {
         void visit (astfri::InterfaceDefStmt const& stmt) override;
 
         void visit (astfri::TranslationUnit const& stmt) override;
-
-        void finish();
     };
 } // namespace astfri::uml

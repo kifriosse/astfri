@@ -39,6 +39,14 @@ namespace astfri::uml {
         return false;
     }
 
+    void ClassVisitor::finish() {
+        if (this->config_->writeToFile_) {
+            this->outputter_->write_to_file();
+        } else {
+            this->outputter_->write_to_console();
+        }
+    }
+
     void ClassVisitor::set_config(Config const& config) {
         this->config_ = (Config*)&config;
     }
@@ -111,7 +119,7 @@ namespace astfri::uml {
         for (astfri::ParamVarDefStmt* p : stmt.func_->params_) {
             p->type_->accept(*this);
             this->currentVariable_.name_ = p->name_;
-            //if (stmt.initializer_) stmt.initializer_->accept(*this);
+            // TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
             this->currentMethod_.params_.push_back(this->currentVariable_);
             this->currentVariable_.reset();
         }
@@ -188,14 +196,7 @@ namespace astfri::uml {
         for (RelationStruct r : this->relations_) {
             this->outputter_->add_relation(r);
         }
-    }
 
-    void ClassVisitor::finish() {
-        if (this->config_->writeToFile_) {
-            this->outputter_->write_to_file();
-        } else {
-            this->outputter_->write_to_console();
-        }
+        this->finish();
     }
-
 } // namespace astfri::uml

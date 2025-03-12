@@ -11,6 +11,5 @@ namespace astfri::uml {
     }
     void UMLLibWrapper::run(astfri::TranslationUnit& translationUnit) {
         translationUnit.accept(this->classVisitor_);
-        this->classVisitor_.finish();
     }
 } // namespace astfri::uml

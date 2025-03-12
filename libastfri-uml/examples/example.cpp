@@ -72,6 +72,9 @@ int main()
     tu.interfaces_ = interfaces;
 
     astfri::uml::Config conf;
+    // config can be changed at any point before calling run
+    // either by directly accessing its member variables
+    // or using its parse_json method (TODO - NOT YET IMPLEMENTED)
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::TypeBeforeConvention tc;
     astfri::uml::UMLLibWrapper uml;
