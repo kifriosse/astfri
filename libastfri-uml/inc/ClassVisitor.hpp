@@ -9,7 +9,7 @@
 
 #include <libastfri-uml/inc/ElementStructs.hpp>
 
-namespace uml {
+namespace astfri::uml {
     class ClassVisitor : public astfri::VisitorAdapter
     {
     private:
@@ -50,4 +50,4 @@ namespace uml {
 
         void finish();
     };
-} // namespace uml
+} // namespace astfri::uml

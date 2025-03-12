@@ -4,7 +4,7 @@
 #include <vector>
 #include "libastfri/inc/Stmt.hpp"
 
-namespace uml {
+namespace astfri::uml {
     enum class RelationType {
         ASSOCIATION = 0,
         COMPOSITION,
@@ -42,4 +42,4 @@ namespace uml {
         std::string to_;
         RelationType type_;
     };
-} // namespace uml
+} // namespace astfri::uml

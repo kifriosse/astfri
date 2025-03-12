@@ -4,7 +4,7 @@
 #include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
 
-namespace uml {
+namespace astfri::uml {
     void ClassVisitor::set_config(Config const& config) {
         this->config_ = (Config*)&config;
     }
@@ -135,4 +135,4 @@ namespace uml {
         }
     }
 
-} // namespace uml
+} // namespace astfri::uml

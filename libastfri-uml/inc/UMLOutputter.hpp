@@ -5,7 +5,7 @@
 #include <libastfri-uml/inc/Config.hpp>
 #include <libastfri-uml/inc/ElementStructs.hpp>
 
-namespace uml {
+namespace astfri::uml {
     class UMLOutputter {
     private:
 
@@ -31,4 +31,4 @@ namespace uml {
     
     };
 
-} // namespace uml
+} // namespace astfri::uml

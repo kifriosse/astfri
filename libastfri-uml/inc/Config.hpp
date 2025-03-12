@@ -2,7 +2,7 @@
 
 #include <libastfri-uml/inc/TypeConvention.hpp>
 
-namespace uml {
+namespace astfri::uml {
     struct Config {
         // type var, var : type
         TypeConvention* typeConvention_;
@@ -24,4 +24,4 @@ namespace uml {
         void save_json(const char* path);
     };
 
-} // namespace uml
+} // namespace astfri::uml

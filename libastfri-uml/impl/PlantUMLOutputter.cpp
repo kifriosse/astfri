@@ -3,7 +3,7 @@
 #include <libastfri-uml/inc/PlantUMLOutputter.hpp>
 #include "libastfri-uml/inc/ElementStructs.hpp"
 
-namespace uml {
+namespace astfri::uml {
     std::string PlantUMLOutputter::getFileExtension() {
         return ".puml";
     }
@@ -63,4 +63,4 @@ namespace uml {
     void PlantUMLOutputter::add_relation(RelationStruct r) {
         this->outputString_ += r.to_ + this->config_->relationArrows_[(int)r.type_] + r.from_ + "\n";
     }
-} // namespace uml
+} // namespace astfri::uml

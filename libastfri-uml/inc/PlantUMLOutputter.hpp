@@ -3,7 +3,7 @@
 #include <libastfri-uml/inc/UMLOutputter.hpp>
 #include "libastfri-uml/inc/ElementStructs.hpp"
 
-namespace uml {
+namespace astfri::uml {
     class PlantUMLOutputter : public UMLOutputter {
     private:
 
@@ -19,4 +19,4 @@ namespace uml {
         virtual void add_relation(RelationStruct r) override;
     };
 
-} // namespace uml
+} // namespace astfri::uml

@@ -2,7 +2,7 @@
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include "libastfri-uml/inc/TypeConvention.hpp"
 
-namespace uml {
+namespace astfri::uml {
     void UMLLibWrapper::init(Config& config, UMLOutputter& output, TypeConvention const& typeConvention) {
         config.typeConvention_ = (TypeConvention*)&typeConvention;
         output.set_config(config);
@@ -13,4 +13,4 @@ namespace uml {
         translationUnit.accept(this->classVisitor_);
         this->classVisitor_.finish();
     }
-} // namespace uml
+} // namespace astfri::uml
