@@ -1,39 +1,39 @@
-public class Dummy {
+public class ExampleClass {
+    private int count;
+    private String name;
 
-    private int d;
-
-    public int add(int a, int b) {
-        double c = -5.2;
-        if (a >= 2) {
-            a += 5;
-            c = 1 + 2;
+    public void printMessages() {
+        for (int i = 0; i < count; i++) {
+            System.out.println("Hello, " + name + "! This is message number: " + (i + 1));
         }
+    }
+
+    public void nestedLoops() {
+        int outerCount = 3;
+        
+        for (int i = 1; i <= outerCount; i++) {
+            System.out.println("Outer loop iteration: " + i);
+
+            for (int j = 1; j <= count; j++) {
+                if (j % 2 == 0) {
+                    System.out.println("  Inner loop (even): " + j);
+                } else {
+                    System.out.println("  Inner loop (odd): " + j);
+                }
+            }
+        }
+
+        int k = 0;
+        while (k < count) {
+            System.out.println("While loop iteration: " + k);
+            k++;
+        }
+    }
+
+    public int add(int pa, int pb)
+    {
+        int a = pa;
+        int b = pb;
         return a + b;
-    }
-
-    public boolean printout(boolean s) {
-        switch(s) {
-            case true:
-                s = false;
-                break;
-            case false:
-                s = true;
-                break;
-        }
-        return s;
-    }
-
-    public static String printString(String s) {
-        boolean finish = false;
-        return s;
-    }
-
-    public int sub(int a) {
-        int b = 100;
-
-        for(int i = 0; i < b; i++) {
-            a++;
-        }
-        return b - a;
     }
 }
