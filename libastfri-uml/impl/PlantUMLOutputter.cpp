@@ -1,21 +1,16 @@
 #include <cstddef>
 #include <cstring>
 #include <libastfri-uml/inc/PlantUMLOutputter.hpp>
-#include "libastfri-uml/inc/ElementStructs.hpp"
 
-namespace uml {
-    std::string PlantUMLOutputter::getFileExtension() {
-        return ".puml";
-    }
-
-    void PlantUMLOutputter::open_class(ClassStruct c) {
-        this->outputString_ += "class " + c.name_;
-        if (c.genericParams_.size() > 0) {
+namespace astfri::uml {
+    void PlantUMLOutputter::open(ClassStruct const& cs) {
+        this->outputString_ += cs.name_;
+        if (cs.genericParams_.size() > 0) {
             this->outputString_ += "<";
             size_t index = 0;
-            for (std::string gp : c.genericParams_) {
+            for (std::string gp : cs.genericParams_) {
                 this->outputString_ += gp;
-                if (index != c.genericParams_.size() - 1) {
+                if (index != cs.genericParams_.size() - 1) {
                     this->outputString_ += ", ";
                 }
                 ++index;
@@ -23,6 +18,34 @@ namespace uml {
             this->outputString_ += ">";
         }
         this->outputString_ += " {\n";
+    }
+
+    PlantUMLOutputter::PlantUMLOutputter() {
+        this->outputString_ += "@startuml\n";
+    }
+
+    void PlantUMLOutputter::write_to_file() {
+        this->outputString_ += "@enduml\n";
+        UMLOutputter::write_to_file();
+    }
+
+    void PlantUMLOutputter::write_to_console() {
+        this->outputString_ += "@enduml\n";
+        UMLOutputter::write_to_console();
+    }
+
+    std::string PlantUMLOutputter::getFileExtension() {
+        return ".puml";
+    }
+
+    void PlantUMLOutputter::open_class(ClassStruct c) {
+        this->outputString_ += "class ";
+        this->open(c);
+    }
+
+    void PlantUMLOutputter::open_interface(ClassStruct i) {
+        this->outputString_ += "interface ";
+        this->open(i);
     }
 
     void PlantUMLOutputter::close_class() {
@@ -40,6 +63,7 @@ namespace uml {
     }
 
     void PlantUMLOutputter::add_function_member(MethodStruct m) {
+        if (m.returnIsIndirect_) m.retType_ += this->config_->indirectIndicator_;
         std::string header = m.name_ + "(";
         size_t index = 0;
         for (VarStruct p : m.params_) {
@@ -63,4 +87,4 @@ namespace uml {
     void PlantUMLOutputter::add_relation(RelationStruct r) {
         this->outputString_ += r.to_ + this->config_->relationArrows_[(int)r.type_] + r.from_ + "\n";
     }
-} // namespace uml
+} // namespace astfri::uml

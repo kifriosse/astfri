@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace uml {
+namespace astfri::uml {
     class TypeConvention {
     public:
         virtual std::string get_string(std::string type, std::string val, char separator) = 0;
@@ -17,4 +17,4 @@ namespace uml {
     public:
         std::string get_string(std::string type, std::string val, char separator) override;
     };
-} // namespace uml
+} // namespace astfri::uml

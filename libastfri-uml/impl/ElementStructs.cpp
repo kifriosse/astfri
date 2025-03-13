@@ -1,7 +1,6 @@
 #include <libastfri-uml/inc/ElementStructs.hpp>
-#include "libastfri/inc/Stmt.hpp"
 
-namespace uml {
+namespace astfri::uml {
     void ClassStruct::reset() {
         this->name_ = "";
         this->genericParams_.clear();
@@ -18,7 +17,8 @@ namespace uml {
     void MethodStruct::reset() {
         this->name_ = "";
         this->retType_ = "";
+        this->returnIsIndirect_ = false;
         this->params_.clear();
         this->accessMod_ = astfri::AccessModifier::Internal;
     }
-} // namespace uml
+} // namespace astfri::uml

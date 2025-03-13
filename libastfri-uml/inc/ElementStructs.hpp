@@ -2,13 +2,14 @@
 
 #include <string>
 #include <vector>
-#include "libastfri/inc/Stmt.hpp"
+#include <libastfri/inc/Stmt.hpp>
 
-namespace uml {
+namespace astfri::uml {
     enum class RelationType {
         ASSOCIATION = 0,
         COMPOSITION,
-        SPECIALIZATION
+        EXTENTION,
+        IMPLEMENTATION
     };
 
     struct ClassStruct {
@@ -31,6 +32,7 @@ namespace uml {
     struct MethodStruct {
         std::string name_;
         std::string retType_;
+        bool returnIsIndirect_= false;
         std::vector<VarStruct> params_;
         astfri::AccessModifier accessMod_;
 
@@ -42,4 +44,4 @@ namespace uml {
         std::string to_;
         RelationType type_;
     };
-} // namespace uml
+} // namespace astfri::uml

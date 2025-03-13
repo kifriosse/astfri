@@ -9,7 +9,7 @@
 
 #include <libastfri-uml/inc/ElementStructs.hpp>
 
-namespace uml {
+namespace astfri::uml {
     class ClassVisitor : public astfri::VisitorAdapter
     {
     private:
@@ -21,7 +21,15 @@ namespace uml {
         VarStruct currentVariable_;
 
         std::vector<RelationStruct> relations_;
+        std::vector<std::string> classes_;
+        std::vector<std::string> interfaces_;
 
+        void create_relation(std::string target, RelationType type);
+        RelationStruct* find_relation(RelationStruct const& rel);
+        bool find_class(std::string name);
+        bool find_interface(std::string name);
+
+        void finish();
     public:
         void set_config(Config const& config);
         void set_outputter(UMLOutputter const& outputter);
@@ -46,8 +54,8 @@ namespace uml {
 
         void visit (astfri::ClassDefStmt const& stmt) override;
 
-        void visit (astfri::TranslationUnit const& stmt) override;
+        void visit (astfri::InterfaceDefStmt const& stmt) override;
 
-        void finish();
+        void visit (astfri::TranslationUnit const& stmt) override;
     };
-} // namespace uml
+} // namespace astfri::uml

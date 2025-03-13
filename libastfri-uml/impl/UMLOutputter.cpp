@@ -1,6 +1,6 @@
 #include <libastfri-uml/inc/UMLOutputter.hpp>
 
-namespace uml {
+namespace astfri::uml {
     void UMLOutputter::set_config(Config const& config) {
         this->config_ = (Config*)&config;
     }
@@ -22,4 +22,4 @@ namespace uml {
         fclose(fhandle);
     }
 
-} // namespace uml
+} // namespace astfri::uml
