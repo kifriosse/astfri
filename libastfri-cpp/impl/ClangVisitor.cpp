@@ -6,6 +6,7 @@
 #include <clang/AST/Decl.h>
 #include <clang/AST/DeclTemplate.h>
 #include <clang/AST/Expr.h>
+#include <clang/AST/ExprCXX.h>
 #include <clang/AST/OperationKinds.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Stmt.h>
@@ -132,9 +133,10 @@ astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind
 bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     llvm::outs() << "Konstruktor zaciatok: " << Ctor->getNameAsString() << "\n";
 
-    // ak nema telo tak sa skipne ako pri metodach
-    if (!Ctor->hasBody()) {
-        return true;
+    // aby sa viac krat nevytvaral
+    if (!Ctor->isFirstDecl()) {
+        return true;bool TraverseCXXNewExpr(clang::CXXNewExpr *NE);
+        bool TraverseCXXDeleteExpr(clang::CXXDeleteExpr *DE);
     }
 
     // zapamatanie si AST location
@@ -146,7 +148,6 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     auto owner = this->get_existing_class(
         Ctor->getParent()->getNameAsString()
     );
-    //MethodDefStmt* new_ctor = nullptr;
     if (Ctor->hasBody()) {
         // vytvorenie konstruktora
         auto new_ctor = this->stmt_factory_->mk_constructor_def(
@@ -160,6 +161,26 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
 
         TraverseStmt(Ctor->getBody());
         new_ctor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
+        
+        // prejdenie CtorInitializers
+        for (auto init : Ctor->inits()) {
+            auto left = this->expr_factory_->mk_member_var_ref(
+                this->expr_factory_->mk_this(),
+                init->getMember()->getNameAsString()
+            );
+            TraverseStmt(init->getInit());
+            auto right = this->astfri_location.expr_;
+            new_ctor->body_->stmts_.push_back(
+                this->stmt_factory_->mk_expr(
+                    this->expr_factory_->mk_bin_on(
+                        left,
+                        BinOpType::Assign,
+                        right
+                    )
+                )
+            );
+        }
+
         for (auto parm : Ctor->parameters()) {
             TraverseDecl(parm);
             new_ctor->params_.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
@@ -177,7 +198,7 @@ bool ClangVisitor::TraverseCXXDestructorDecl(clang::CXXDestructorDecl *Dtor) {
     llvm::outs() << "Destruktor\n";
 
     // ak nema telo tak sa znova skipne
-    if (!Dtor->hasBody()) {
+    if (!Dtor->isFirstDecl()) {
         return true;
     }
 
@@ -248,7 +269,7 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl *FD) {
 }
 bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
     // ak nema telo (je to len declaracia), tak sa skipne, vytvori sa az ked pride na jej definiciu
-    if (!MD->hasBody()) {
+    if (!MD->isFirstDecl()) {
         return true;
     }
     llvm::outs() << "Metoda zaciatok: " << MD->getNameAsString() << "\n";
@@ -504,6 +525,9 @@ bool ClangVisitor::TraverseCompoundStmt(clang::CompoundStmt *CS) {
             this->expr_as_stmt = true;
             TraverseStmt(stmt);
             this->expr_as_stmt = false;
+        } else if (llvm::dyn_cast<clang::CXXThrowExpr>(stmt)) {
+            // je to expr ale v ASTFRI je to stmt, tak aby sa vyhadzovana expr neulozila znova
+            TraverseStmt(stmt);
         } else if (llvm::dyn_cast<clang::Expr>(stmt)) {
             TraverseStmt(stmt);
             new_compound->stmts_.push_back(
@@ -534,7 +558,7 @@ bool ClangVisitor::TraverseReturnStmt(clang::ReturnStmt *RS) {
     this->astfri_location.stmt_ = new_return;
     this->clang_location.stmt_ = RS;
 
-    TraverseStmt(RS->getRetValue());
+    TraverseStmt(RS->getRetValue()); // ->IgnoreCasts()
     // naplnenie return stmt
     new_return->val_ = this->astfri_location.expr_;
 
@@ -579,9 +603,6 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt *IS) {
         // TODO: ak ma else ako if dorobit, zatial sa prepoklada ze je to compound vzdy
         TraverseStmt(else_stmt);
         new_if->iffalse_ = this->astfri_location.stmt_;
-    } else {
-        // naplnenie prazdnym else-om
-        new_if->iffalse_ = this->stmt_factory_->mk_compound(std::vector<Stmt *> {});
     }
 
     // vratenie AST location
@@ -728,6 +749,10 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
     this->astfri_location.stmt_ = new_switch;
     this->clang_location.stmt_ = SS;
 
+    // Nastavenie podmienky
+    TraverseStmt(SS->getCond());
+    new_switch->expr_ = this->astfri_location.expr_;
+
     // naplnenie new_switch
     // akcia na kazdom case
     for (auto sw_case = SS->getSwitchCaseList(); sw_case; sw_case = sw_case->getNextSwitchCase()) {
@@ -735,11 +760,11 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
         // ak je to case stmt a nie default
         if (auto case_stmt = llvm::dyn_cast<clang::CaseStmt>(sw_case)) {
             auto new_case = this->stmt_factory_->mk_case(
-                nullptr,
+                std::vector<Expr*> {},
                 nullptr
             );
             // naplnenie case-u
-            auto case_cond = case_stmt->getLHS();
+            auto case_cond = case_stmt->getLHS(); //->IgnoreCasts()
             TraverseStmt(case_cond);
             new_case->exprs_.push_back(this->astfri_location.expr_);
 
@@ -785,6 +810,24 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt *SS) {
     this->clang_location = clang_temp;
 
     llvm::outs() << "Switch stmt koniec\n";
+    return true;
+}
+bool ClangVisitor::TraverseContinueStmt([[maybe_unused]] clang::ContinueStmt *CS) {
+    llvm::outs() << "Continue Stmt\n";
+
+    // akcia na tomto vrchole
+    auto new_continue = this->stmt_factory_->mk_continue();
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_continue);
+    
+    return true;
+}
+bool ClangVisitor::TraverseBreakStmt([[maybe_unused]] clang::BreakStmt *BS) {
+    llvm::outs() << "Break Stmt\n";
+
+    // akcia na tomto vrchole
+    auto new_break = this->stmt_factory_->mk_break();
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_break);
+    
     return true;
 }
 // visit expression
@@ -864,6 +907,9 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
     // akcia na tomto vrchole
     std::vector<Expr*> args;
     for (auto arg : MCE->arguments()) {
+        if (arg->isDefaultArgument()) {
+            continue;
+        }
         TraverseStmt(arg);
         args.push_back(this->astfri_location.expr_);
     }
@@ -901,6 +947,45 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
     this->clang_location.expr_ = MCE;
 
     llvm::outs() << "CXXMemberCallExpr koniec\n";
+    return true;
+}
+bool ClangVisitor::TraverseCXXNewExpr(clang::CXXNewExpr *NE) {
+    llvm::outs() << "New expression\n";
+
+    // akcia na tomto vrchole
+    TraverseCXXConstructExpr((clang::CXXConstructExpr*)NE->getConstructExpr());
+    auto new_new = this->expr_factory_->mk_new(
+        (ConstructorCallExpr*)this->astfri_location.expr_
+    );
+    this->astfri_location.expr_ = new_new;
+    this->clang_location.expr_ = NE;
+
+    return true;
+}
+bool ClangVisitor::TraverseCXXDeleteExpr(clang::CXXDeleteExpr *DE) {
+    llvm::outs() << "Delete Expr\n";
+
+    // akcia na tomto vrchole
+    TraverseStmt(DE->getArgument());
+    auto new_delete = this->expr_factory_->mk_delete(
+        this->astfri_location.expr_
+    );
+
+    this->astfri_location.expr_ = new_delete;
+    this->clang_location.expr_ = DE;
+
+    return true;
+}
+bool ClangVisitor::TraverseCXXThrowExpr(clang::CXXThrowExpr *TE) {
+    llvm::outs() << "Throw expr\n";
+
+    // akcia na tomto vrchole
+    TraverseStmt(TE->getSubExpr());
+    auto new_throw = this->stmt_factory_->mk_throw(
+        this->astfri_location.expr_
+    );
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_throw);
+
     return true;
 }
 // bool ClangVisitor::TraverseCallExpr(clang::CallExpr *CE) {
@@ -957,10 +1042,10 @@ bool ClangVisitor::TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE) {
 
     return true;
  }
- bool ClangVisitor::TraverseCharacterLiteralExpr(clang::CharacterLiteral *CL) {
+ bool ClangVisitor::TraverseCharacterLiteral(clang::CharacterLiteral *CL) {
     llvm::outs() << "Character Literal: " << (char)CL->getValue() << "\n";
 
-    auto new_char = this->expr_factory_->mk_char_literal(CL->getValue());
+    auto new_char = this->expr_factory_->mk_char_literal((char)CL->getValue());
     this->astfri_location.expr_ = new_char;
     this->clang_location.char_lit_ = CL;
 

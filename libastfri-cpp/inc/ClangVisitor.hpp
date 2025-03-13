@@ -74,19 +74,24 @@ public:
     bool TraverseWhileStmt(clang::WhileStmt *WS);
     bool TraverseDoStmt(clang::DoStmt *DS);
     bool TraverseSwitchStmt(clang::SwitchStmt *SS);
+    bool TraverseContinueStmt(clang::ContinueStmt *CS);
+    bool TraverseBreakStmt(clang::BreakStmt *BS);
     // // Traverse expression
     bool TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor);
     bool TraverseDeclRefExpr(clang::DeclRefExpr *DRE);
     bool TraverseMemberExpr(clang::MemberExpr *ME);
     bool TraverseCXXThisExpr(clang::CXXThisExpr *TE);
     bool TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE);
+    bool TraverseCXXNewExpr(clang::CXXNewExpr *NE);
+    bool TraverseCXXDeleteExpr(clang::CXXDeleteExpr *DE);
+    bool TraverseCXXThrowExpr(clang::CXXThrowExpr *TE);
     // bool TraverseCallExpr(clang::CallExpr *CE);
     // // Traverse literals
     bool TraverseIntegerLiteral(clang::IntegerLiteral *IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral *FL);
     bool TraverseStringLiteral(clang::StringLiteral *SL);
     bool TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL);
-    bool TraverseCharacterLiteralExpr(clang::CharacterLiteral *CL);
+    bool TraverseCharacterLiteral(clang::CharacterLiteral *CL);
     // Traverse operators
     bool TraverseCompoundAssignOperator(clang::CompoundAssignOperator *CAO);
     bool TraverseBinaryOperator(clang::BinaryOperator *BO);
