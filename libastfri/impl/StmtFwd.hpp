@@ -14,6 +14,7 @@ struct BaseInitializerStmt;
 struct ConstructorDefStmt;
 struct DestructorDefStmt;
 struct GenericParam;
+struct UserTypeDefStmt;
 struct InterfaceDefStmt;
 struct ClassDefStmt;
 struct CompoundStmt;
