@@ -148,7 +148,7 @@ struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
  */
 struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
-    ClassDefStmt* owner_{nullptr};
+    UserTypeDefStmt* owner_{nullptr};
     FunctionDefStmt* func_{nullptr};
     AccessModifier access_{AccessModifier::Public};
     Virtuality virtuality_{Virtuality::NotVirtual};
@@ -209,11 +209,19 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
 };
 
 /**
- * @brief TODO
+ * @brief Common base for Class and Interface
+ * In the future, it could also be used for union or strong type alias
  */
-struct InterfaceDefStmt : Stmt, details::MkVisitable<InterfaceDefStmt>
+struct UserTypeDefStmt : Stmt
 {
     std::string name_;
+};
+
+/**
+ * @brief TODO
+ */
+struct InterfaceDefStmt : UserTypeDefStmt, details::MkVisitable<InterfaceDefStmt>
+{
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
     std::vector<InterfaceDefStmt*> bases_;
@@ -222,9 +230,8 @@ struct InterfaceDefStmt : Stmt, details::MkVisitable<InterfaceDefStmt>
 /**
  * @brief TODO
  */
-struct ClassDefStmt : Stmt, details::MkVisitable<ClassDefStmt>
+struct ClassDefStmt : UserTypeDefStmt, details::MkVisitable<ClassDefStmt>
 {
-    std::string name_;
     std::vector<MemberVarDefStmt*> vars_;
     std::vector<ConstructorDefStmt*> constructors_;
     std::vector<DestructorDefStmt*> destructors_;

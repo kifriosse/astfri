@@ -339,6 +339,15 @@ struct MethodCallExpr : Expr, details::MkVisitable<MethodCallExpr>
 /**
  * @brief TODO
  */
+struct LambdaCallExpr : Expr, details::MkVisitable<LambdaCallExpr>
+{
+    Expr* lambda_{nullptr};
+    std::vector<Expr*> args_;
+};
+
+/**
+ * @brief TODO
+ */
 struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
 {
     std::vector<ParamVarDefStmt*> params_;
@@ -365,9 +374,7 @@ struct ConstructorCallExpr : Expr, details::MkVisitable<ConstructorCallExpr>
 };
 
 /**
- * @brief Operator new that allocates and possibly initializes memory
- * If @c init is null, then the memory is just allocated for the type
- * and it is not initialized.
+ * @brief Operator new that allocates and initializes it using a constructor
  */
 struct NewExpr : Expr, details::MkVisitable<NewExpr>
 {

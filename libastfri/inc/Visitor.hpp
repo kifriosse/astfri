@@ -39,6 +39,7 @@ struct IVisitor
     virtual void visit(ClassRefExpr const& expr)        = 0;
     virtual void visit(FunctionCallExpr const& expr)    = 0;
     virtual void visit(MethodCallExpr const& expr)      = 0;
+    virtual void visit(LambdaCallExpr const& expr)      = 0;
     virtual void visit(LambdaExpr const& expr)          = 0;
     virtual void visit(ThisExpr const& expr)            = 0;
     virtual void visit(ConstructorCallExpr const& expr) = 0;
@@ -189,6 +190,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(MethodCallExpr const& /*expr*/) override
+    {
+    }
+
+    void visit(LambdaCallExpr const& /*expr*/) override
     {
     }
 
