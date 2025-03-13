@@ -49,10 +49,11 @@ astfri::IVisitable* AstFriSerializer::serialize(std::string filePath)
         }
         return this->resolve_expr(document_);
     }
+    astfri::Stmt* stmt = this->resolve_stmt(document_);
     this->resolve_class_def_stmts(); 
     this->resolve_interface_def_stmts();
     this->clear_records();
-    return this->resolve_stmt(document_);
+    return stmt;
 
     
 
@@ -160,7 +161,7 @@ astfri::LocalVarRefExpr* AstFriSerializer::serialize_local_var_ref_expr(rapidjso
     
 }
 astfri::MemberVarRefExpr* AstFriSerializer::serialize_member_var_ref_expr(rapidjson::Value& value){
-    astfri::Expr* owner = this->resolveExpr(value["owner"]);
+    astfri::Expr* owner = this->resolve_expr(value["owner"]);
     return  this->expressionMaker_.mk_member_var_ref(owner, std::move(value["name"].GetString()));
 }
 
@@ -192,7 +193,7 @@ astfri::MethodCallExpr* AstFriSerializer::serialize_method_call_expr(rapidjson::
     return this->expressionMaker_.mk_method_call(value["owner"].IsNull() ? nullptr : this->resolve_expr(value["owner"])
                                                                 ,std::move(value["name"].GetString()),std::move(arguments));
 }
-//TODO
+
 astfri::LambdaExpr* AstFriSerializer::serialize_lambda_expr(rapidjson::Value& value){
     std::vector<astfri::ParamVarDefStmt*> params;
     
@@ -427,7 +428,7 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
     }
 
     astfri::Type* returnType = this->resolve_type(value["return_type"]); 
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::CompoundStmt* body = value["body"].IsNull() ? nullptr : this->serialize_compound_stmt(value["body"]);
 
     return this->statementMaker_.mk_function_def(std::move(value["name"].GetString()),std::move(params),returnType,body);
 }
