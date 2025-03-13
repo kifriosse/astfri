@@ -19,7 +19,7 @@ enum StmtNodeType{
     LocalVarDefStmt,ParamVarDefStmt,
     MemberVarDefStmt,GlobalVarDefStmt,FunctionDefStmt,MethodDefStmt,GenericParam,ClassDefStmt,CompoundStmt,ReturnStmt,
     ExprStmt,IfStmt,CaseStmt,SwitchStmt,WhileStmt,DoWhileStmt,ForStmt,ThrowStmt,UnknownStmt,TranslationUnit,
-    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt,BreakStmt,ContinueStmt,DefaultCaseStmt};
+    DefStmt,ConstructorDefStmt,DestructorDefStmt,BaseInitializerStmt,BreakStmt,ContinueStmt,DefaultCaseStmt,InterfaceDefStmt};
     
     
 
@@ -45,7 +45,7 @@ inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVar
     {"TranslationUnit",TranslationUnit},{"GenericParam",GenericParam},{"DefStmt",DefStmt},
     {"ConstructorDefStmt",ConstructorDefStmt},{"DestructorDefStmt",DestructorDefStmt},
     {"BaseInitializerStmt",BaseInitializerStmt},{"BreakStmt",BreakStmt},{"ContinueStmt",ContinueStmt},
-    {"DefaultCaseStmt",DefaultCaseStmt}};
+    {"DefaultCaseStmt",DefaultCaseStmt},{"InterfaceDefStmt",InterfaceDefStmt}};
 
 
 inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},
@@ -53,7 +53,12 @@ inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",
 {"==",astfri::BinOpType::Equal},{"!=",astfri::BinOpType::NotEqual},{"<",astfri::BinOpType::Less},{"<=",astfri::BinOpType::LessEqual},
 {">",astfri::BinOpType::Greater},{">=",astfri::BinOpType::GreaterEqual},{">>",astfri::BinOpType::BitShiftRight},
 {"<<",astfri::BinOpType::BitShiftLeft},{"&",astfri::BinOpType::BitAnd},{"|",astfri::BinOpType::BitOr},{"^",astfri::BinOpType::BitXor},
-{",",astfri::BinOpType::Comma},{"&&",astfri::BinOpType::LogicalAnd},{"||",astfri::BinOpType::LogicalOr}};
+{",",astfri::BinOpType::Comma},{"&&",astfri::BinOpType::LogicalAnd},{"||",astfri::BinOpType::LogicalOr},{"+=",astfri::BinOpType::AddAssign},
+{"-=",astfri::BinOpType::SubtractAssign},{"*=",astfri::BinOpType::MultiplyAssign},{"/=",astfri::BinOpType::DivideAssign},
+{"//=",astfri::BinOpType::FloorDivideAssign},{"%=",astfri::BinOpType::ModuloAssign},{"**=",astfri::BinOpType::ExponentiationAssign},
+{">>=",astfri::BinOpType::BitShiftRightAssign},{"&=",astfri::BinOpType::BitAndAssign},{"|=",astfri::BinOpType::BitOrAssign},
+{"^=",astfri::BinOpType::BitXorAssign},{"//",astfri::BinOpType::FloorDivide},{"**",astfri::BinOpType::Exponentiation},
+{"<<=",astfri::BinOpType::BitShiftLeftAssign},};
 
 
 //if it s post increment/decrement operator is solved in serialize_unary_expr-there is property to recognise,which says if its
@@ -64,9 +69,9 @@ inline std::unordered_map<std::string,astfri::UnaryOpType> unaryOpTypeMapping={{
 
 enum Types{IntType,FloatType,CharType,BoolType,VoidType,UserType,IndirectionType,UnknownType,DynamicType};
 
-inline std::unordered_map<std::string,Types> strToTypeMapping={{"Int",IntType},{"Float",FloatType},
-    {"Char",CharType},{"Bool",BoolType},{"Void",VoidType},{"User",UserType},
-    {"Indirection",IndirectionType},{"Unknown",UnknownType},{"Dynamic",DynamicType}};
+inline std::unordered_map<std::string,Types> strToTypeMapping={{"IntType",IntType},{"FloatType",FloatType},
+    {"CharType",CharType},{"BoolType",BoolType},{"VoidType",VoidType},{"UserType",UserType},
+    {"IndirectionType",IndirectionType},{"UnknownType",UnknownType},{"DynamicType",DynamicType}};
 
 }
 

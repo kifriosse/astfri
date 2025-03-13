@@ -49,8 +49,11 @@ astfri::IVisitable* AstFriSerializer::serialize(std::string filePath)
         }
         return this->resolve_expr(document_);
     }
-
-    return this->resolve_stmt(document_);
+    astfri::Stmt* stmt = this->resolve_stmt(document_);
+    this->resolve_class_def_stmts(); 
+    this->resolve_interface_def_stmts();
+    this->clear_records();
+    return stmt;
 
     
 
@@ -158,7 +161,8 @@ astfri::LocalVarRefExpr* AstFriSerializer::serialize_local_var_ref_expr(rapidjso
     
 }
 astfri::MemberVarRefExpr* AstFriSerializer::serialize_member_var_ref_expr(rapidjson::Value& value){
-   return  this->expressionMaker_.mk_member_var_ref(nullptr, std::move(value["name"].GetString()));
+    astfri::Expr* owner = this->resolve_expr(value["owner"]);
+    return  this->expressionMaker_.mk_member_var_ref(owner, std::move(value["name"].GetString()));
 }
 
 astfri::GlobalVarRefExpr* AstFriSerializer::serialize_global_var_ref_expr(rapidjson::Value& value){
@@ -189,7 +193,7 @@ astfri::MethodCallExpr* AstFriSerializer::serialize_method_call_expr(rapidjson::
     return this->expressionMaker_.mk_method_call(value["owner"].IsNull() ? nullptr : this->resolve_expr(value["owner"])
                                                                 ,std::move(value["name"].GetString()),std::move(arguments));
 }
-//TODO
+
 astfri::LambdaExpr* AstFriSerializer::serialize_lambda_expr(rapidjson::Value& value){
     std::vector<astfri::ParamVarDefStmt*> params;
     
@@ -311,8 +315,8 @@ astfri::Type* AstFriSerializer::resolve_type(rapidjson::Value& value)
         case astfri_serialize::UnknownType:
             return this->typeMaker_.mk_unknown();
         case astfri_serialize::DynamicType:
-            //return this->typeMaker_.mk_dynamic();
-            return nullptr;
+            return this->typeMaker_.mk_dynamic();
+            
     }
     return this->typeMaker_.mk_unknown();
 }
@@ -341,8 +345,7 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
         case astfri_serialize::GenericParam:
             return this->serialize_generic_param(value);
         case astfri_serialize::ClassDefStmt:
-            return this->statementMaker_.mk_uknown();
-            // return this->serialize_class_def_stmt(value);
+             return this->serialize_class_def_stmt(value);
         case astfri_serialize::CompoundStmt:
             return this->serialize_compound_stmt(value);
         case astfri_serialize::ReturnStmt:
@@ -376,14 +379,13 @@ astfri::Stmt* AstFriSerializer::resolve_stmt(rapidjson::Value& value){
         case astfri_serialize::BaseInitializerStmt:
             return this->serialize_base_initializer_stmt(value);
         case astfri_serialize::BreakStmt:
-        return this->statementMaker_.mk_uknown();
-            //return this->serialize_break_stmt();
+            return this->serialize_break_stmt();
         case astfri_serialize::ContinueStmt:
-        return this->statementMaker_.mk_uknown();
-            //return this->serialize_continue_stmt();
+            return this->serialize_continue_stmt();
         case astfri_serialize::DefaultCaseStmt:
-            return this->statementMaker_.mk_uknown();
-            //return this->serialize_default_case_stmt(value);   
+            return this->serialize_default_case_stmt(value);   
+        case astfri_serialize::InterfaceDefStmt:
+            return this->serialize_interface_def_stmt(value); 
 
     }
 
@@ -413,7 +415,7 @@ astfri::GlobalVarDefStmt* AstFriSerializer::serialize_global_var_def_stmt(rapidj
 astfri::MemberVarDefStmt* AstFriSerializer::serialize_member_var_def_stmt(rapidjson::Value& value){
     astfri::Type* type = this->resolve_type(value["type"]);
     astfri::Expr* initializer = value["initializer"].IsNull() ?  nullptr : this->resolve_expr(value["initializer"]);
-    astfri::AccessModifier modifier = accessModMapping.find(value["acces"].GetString())->second; 
+    astfri::AccessModifier modifier = accessModMapping.find(value["access"].GetString())->second; 
 
     return this->statementMaker_.mk_member_var_def(std::move(value["name"].GetString()),type,initializer,modifier);
 }
@@ -426,15 +428,17 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
     }
 
     astfri::Type* returnType = this->resolve_type(value["return_type"]); 
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::CompoundStmt* body = value["body"].IsNull() ? nullptr : this->serialize_compound_stmt(value["body"]);
 
     return this->statementMaker_.mk_function_def(std::move(value["name"].GetString()),std::move(params),returnType,body);
 }
 
 astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
+    std::string name = value["name"].GetString();
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
     astfri::AccessModifier accessMod = accessModMapping.find(value["access"].GetString())->second;
-    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, astfri::Virtuality::Virtual);
+    return this->statementMaker_.mk_method_def(owner,functDefStmt,accessMod, strcmp(value["virtual"].GetString(),"yes") == 0 ? 
+                                                                            astfri::Virtuality::Virtual : astfri::Virtuality::NotVirtual);
 }
 
 astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value& value){
@@ -443,19 +447,11 @@ astfri::GenericParam* AstFriSerializer::serialize_generic_param(rapidjson::Value
                                                     std::move(value["constraint"].GetString()),
                                                     std::move(value["name"].GetString()));
 }
-/*
+
 astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Value& value){
     
-    std::vector<astfri::MemberVarDefStmt*> attributes;
-    std::vector<astfri::GenericParam*> genericParams;
-    std::vector<astfri::ConstructorDefStmt*> constructors;
-    std::vector<astfri::MethodDefStmt*> methods;
-
-    //Create naked ClassDefStmt*only with name,values will be added later to particular ClassDefStmt's attributes 
-    astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()),std::move(attributes),
-                                                                            std::move(methods),std::move(genericParams));
-
-
+    astfri::ClassDefStmt*  classDefStmt = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()));
+    
     for (auto& attribute : value["attributes"].GetArray()){
         classDefStmt->vars_.push_back(this->serialize_member_var_def_stmt(attribute));
     }
@@ -467,18 +463,48 @@ astfri::ClassDefStmt* AstFriSerializer::serialize_class_def_stmt(rapidjson::Valu
     for (auto& method : value["methods"].GetArray()){
         classDefStmt->methods_.push_back(this->serialize_method_def_stmt(method,classDefStmt));
     }
-    /*
+    
     for (auto& constructor : value["constructors"].GetArray()){
         classDefStmt->constructors_.push_back(this->serialize_constructor_def_stmt(constructor,classDefStmt));
     }
 
-    classDefStmt->destructor_ = value["destructor"].IsNull() ? nullptr : 
-                                            this->serialize_destructor_def_stmt(value["destructor"],classDefStmt);
+    for (auto& destructor : value["destructors"].GetArray()){
+        classDefStmt->destructors_.push_back(this->serialize_destructor_def_stmt(destructor,classDefStmt));
+    }
 
+    //if the root of JSON file was Translation unit ,all InterfaceDefStmts should already be resolved
+    for(auto& base : value["interfaces"].GetArray()){
+        std::string name = base.GetString();
+        auto it = nameWithInterfaceDefStmtMapping_.find(name);
+        //if interface isnt among resolved interfaces create naked interface only with name and add it among resolved interfaces
+        if (it==nameWithInterfaceDefStmtMapping_.end()){
+            astfri::InterfaceDefStmt* interface = this->statementMaker_.mk_interface_def(base.GetString());
+            nameWithInterfaceDefStmtMapping_[name]=interface;
+            classDefStmt->interfaces_.push_back(interface);
+        }else{
+            classDefStmt->interfaces_.push_back(it->second);
+        }
+        
+    }
+
+    for (auto& base : value["bases"].GetArray() ){
+        std::string name = base.GetString();
+        auto it = nameWithClassDefStmtMapping_.find(name);
+        //if class mentioned among base classes isnt resolved yet ,do nothing except for create record in unresolvedClassDefStmt map
+        //and add this classDefStmt among classDefStmts which references to unresolved ClassDefStmt
+        if (it==nameWithClassDefStmtMapping_.end()){
+            unResolvedClassDefStmts_[name].push_back(classDefStmt);
+            
+        }else{
+            classDefStmt->bases_.push_back(it->second);
+        }
+    }
+
+    nameWithClassDefStmtMapping_[classDefStmt->name_]=classDefStmt;
     return classDefStmt;
     
 }
-*/
+
 astfri::CompoundStmt* AstFriSerializer::serialize_compound_stmt(rapidjson::Value& value){
     std::vector<astfri::Stmt*> statements;
 
@@ -511,7 +537,7 @@ astfri::SwitchStmt* AstFriSerializer::serialize_switch_stmt(rapidjson::Value& va
     std::vector<astfri::CaseBaseStmt*> cases;
 
     for (auto& caze : value["cases"].GetArray()){
-        cases.push_back(this->serialize_case_stmt(caze));
+        cases.push_back(dynamic_cast<astfri::CaseBaseStmt*>(this->resolve_stmt(caze)));
     }
 
     
@@ -526,20 +552,20 @@ astfri::CaseStmt* AstFriSerializer::serialize_case_stmt(rapidjson::Value& value)
     }
     astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
-    //whole vector will be sent to mk_case method after update
-    return this->statementMaker_.mk_case(expressions.size()== 0 ? nullptr : expressions[0],body);
+    
+    return this->statementMaker_.mk_case(std::move(expressions),body);
 }
 
 astfri::WhileStmt* AstFriSerializer::serialize_while_stmt(rapidjson::Value& value){
     astfri::Expr* condition = this->resolve_expr(value["condition"]);
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     return this->statementMaker_.mk_while(condition,body);
 }
 
 astfri::DoWhileStmt* AstFriSerializer::serialize_do_while_stmt(rapidjson::Value& value){
     astfri::Expr* condition = this->resolve_expr(value["condition"]);
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     return this->statementMaker_.mk_do_while(condition,body);    
 }
@@ -548,7 +574,7 @@ astfri::ForStmt* AstFriSerializer::serialize_for_stmt(rapidjson::Value& value){
     astfri::Stmt* init = value["init"].IsNull() ? nullptr : this->resolve_stmt(value["init"]);
     astfri::Expr* condition = value["condition"].IsNull() ? nullptr : this->resolve_expr(value["condition"]);
     astfri::Stmt* step = value["step"].IsNull() ? nullptr : this->resolve_stmt(value["step"]);
-    astfri::CompoundStmt* body = this->serialize_compound_stmt(value["body"]);
+    astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
     return this->statementMaker_.mk_for(init,condition,step,body);
 }
@@ -562,9 +588,15 @@ astfri::UnknownStmt* AstFriSerializer::serialize_unknown_stmt(){
 }
 
 astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson::Value& value){
+    
+    std::vector<astfri::InterfaceDefStmt*> interfaces;
+    for (auto& interface : value["interfaces"].GetArray()){
+        interfaces.push_back(this->serialize_interface_def_stmt(interface));
+    }
+    
     std::vector<astfri::ClassDefStmt*> classes;
     for (auto& classDef : value["classes"].GetArray()){
-      //  classes.push_back(this->serialize_class_def_stmt(classDef));
+        classes.push_back(this->serialize_class_def_stmt(classDef));
     }
 
     std::vector<astfri::FunctionDefStmt*> functions;
@@ -577,10 +609,13 @@ astfri::TranslationUnit* AstFriSerializer::serialize_translation_unit(rapidjson:
         globals.push_back(this->serialize_global_var_def_stmt(global));
     }
 
+    
+
     astfri::TranslationUnit* tu = this->statementMaker_.mk_translation_unit();
     tu->classes_ = std::move(classes);
     tu->functions_ = std::move(functions);
     tu->globals_ = std::move(globals);
+    tu->interfaces_=std::move(interfaces);
     return tu;
 }
 
@@ -626,16 +661,113 @@ astfri::BaseInitializerStmt* AstFriSerializer::serialize_base_initializer_stmt(r
     return this->statementMaker_.mak_base_initializer(value["base"].GetString(),std::move(arguments));
 }
 
-/*astfri::BreakStmt* AstFriSerializer::serialize_break_stmt(){
+astfri::BreakStmt* AstFriSerializer::serialize_break_stmt(){
     return this->statementMaker_.mk_break();
 }
-*/
 
-/*astfri::ContinueStmt* AstFriSerializer::serialize_continue_stmt(){
+
+astfri::ContinueStmt* AstFriSerializer::serialize_continue_stmt(){
     return this->statementMaker_.mk_continue();
 }
 
 astfri::DefaultCaseStmt* AstFriSerializer::serialize_default_case_stmt(rapidjson::Value& value){
     return this->statementMaker_.mk_default_case(this->resolve_stmt(value["body"]));
 }
-*/
+
+astfri::InterfaceDefStmt* AstFriSerializer::serialize_interface_def_stmt(rapidjson::Value& value){
+
+    astfri::InterfaceDefStmt* interfDefStmt =  this->statementMaker_.mk_interface_def(std::move(value["name"].GetString()));
+    
+    for(auto& base : value["bases"].GetArray()){
+        std::string name = base.GetString();
+        auto it = nameWithInterfaceDefStmtMapping_.find(name);
+        if (it == nameWithInterfaceDefStmtMapping_.end()){
+            unresolvedInterfaceDefStmts_[name].push_back(interfDefStmt);
+        }else{
+            interfDefStmt->bases_.push_back(it->second);
+        }
+        
+    }
+
+    for(auto& method : value["methods"].GetArray()){
+        interfDefStmt->methods_.push_back(this->serialize_method_def_stmt(method));
+    }
+
+    for(auto& genericParam : value["generic_parameters"].GetArray()){
+        interfDefStmt->tparams_.push_back(this->serialize_generic_param(genericParam));
+    }
+
+    nameWithInterfaceDefStmtMapping_[interfDefStmt->name_]=interfDefStmt;
+    return interfDefStmt;
+
+}
+
+void AstFriSerializer::resolve_class_def_stmts(){
+    //traverse throw all unresolved classDefStmts
+    for (auto& it : unResolvedClassDefStmts_){
+        std::string name = it.first;
+        //try to find name among already resolved classDefStmts
+        auto itResolvedClassStmt =  nameWithClassDefStmtMapping_.find(name);
+
+        //if name isnt among resolved statements ,create empty class def statement only with name,and add it to all child classes
+        if(itResolvedClassStmt == nameWithClassDefStmtMapping_.end()){
+            astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(name));
+            for(auto& clsDefStmt : it.second){
+                clsDefStmt->bases_.push_back(classDefStmt);
+            }
+
+        } else {
+            for(auto& clsDefStmt : it.second){
+                clsDefStmt->bases_.push_back(itResolvedClassStmt->second);
+            }
+        }
+
+
+    }
+
+
+}
+
+void AstFriSerializer::resolve_interface_def_stmts(){
+    //traverse throw all unresolved interfaceDefStmts
+    for (auto& it : unresolvedInterfaceDefStmts_){
+        std::string name = it.first;
+        
+        //try to find name among already resolved interfaceDefStmts
+        auto itResolvedInterfaceStmt = nameWithInterfaceDefStmtMapping_.find(name);
+        if (itResolvedInterfaceStmt == nameWithInterfaceDefStmtMapping_.end()){
+            astfri::InterfaceDefStmt* interfDefStmt = this->statementMaker_.mk_interface_def(std::move(name));
+            for (auto& defStmt : it.second){
+                if(is_class_def_stmt(defStmt)){
+                    dynamic_cast<astfri::ClassDefStmt*>(defStmt)->interfaces_.push_back(interfDefStmt);
+                }else{
+                    dynamic_cast<astfri::InterfaceDefStmt*>(defStmt)->bases_.push_back(interfDefStmt);
+                }
+
+            }
+        }else{
+            astfri::InterfaceDefStmt* interfDefStmt = itResolvedInterfaceStmt->second;
+            for (auto& defStmt : it.second){
+                if(is_class_def_stmt(defStmt)){
+                    dynamic_cast<astfri::ClassDefStmt*>(defStmt)->interfaces_.push_back(interfDefStmt);
+                }else{
+                    dynamic_cast<astfri::InterfaceDefStmt*>(defStmt)->bases_.push_back(interfDefStmt);
+                }
+
+            }
+
+        }
+
+    }
+}
+
+bool AstFriSerializer::is_class_def_stmt(astfri::Stmt* stmt){
+    return dynamic_cast<astfri::ClassDefStmt*>(stmt) != nullptr;
+}
+
+void AstFriSerializer::clear_records(){
+    nameWithClassDefStmtMapping_.clear();
+    nameWithInterfaceDefStmtMapping_.clear();
+    unResolvedClassDefStmts_.clear();
+    unresolvedInterfaceDefStmts_.clear();
+}
