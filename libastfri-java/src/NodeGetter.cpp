@@ -276,8 +276,9 @@ std::variant<
                                 .find("identifier")
                             != std::string::npos)
                         {
-                            if (get_node_text(grandChildNode, sourceCode)
-                                == referenceName)
+                            std::string grandChildNodeName = ts_node_string(grandChildNode);
+                            std::string grandChildNodeText = get_node_text(grandChildNode, sourceCode);
+                            if (grandChildNodeText == referenceName)
                             {
                                 return exprFactory.mk_param_var_ref(
                                     referenceName
@@ -530,7 +531,7 @@ std::vector<astfri::ParamVarDefStmt*> NodeGetter::get_params(
 
             if (captureName == "param_type")
             {
-                if (nodeName == "(type_identifier)")
+                if (nodeName == "(identifier)")
                 {
                     paramType = typeFactory.mk_user(nodeText);
                 }
@@ -678,6 +679,69 @@ astfri::IfStmt* NodeGetter::get_if_stmt(
     return stmtFactory.mk_if(condition, iftrue, iffalse);
 }
 
+astfri::SwitchStmt* NodeGetter::get_switch_stmt(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    TSNode conditionNode;
+    TSNode switchBodyNode;
+
+    astfri::Expr* condition = nullptr;
+    std::vector<astfri::CaseBaseStmt*> cases;
+
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        conditionNode = ts_node_named_child(tsNode, 0);
+        condition = this->get_expr(conditionNode, sourceCode);
+    }
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        switchBodyNode = ts_node_named_child(tsNode, 1);
+        uint32_t caseCount = ts_node_named_child_count(switchBodyNode);
+        
+        for (uint32_t i = 0; i < caseCount; i++)
+        {
+            TSNode caseNode = ts_node_named_child(switchBodyNode, i);
+            uint32_t switchCaseChildren = ts_node_named_child_count(caseNode);
+            astfri::Expr* expr = nullptr;
+            std::vector<astfri::Stmt*> stmts;
+            bool isDefaultCase = false;
+
+            for (uint32_t j = 0; j < switchCaseChildren; j++)
+            {
+                TSNode child = ts_node_named_child(caseNode, j);
+                std::string childText = get_node_text(child, sourceCode);
+
+                if (childText.find("case") == 0)
+                {
+                    TSNode caseChild = ts_node_named_child(child, 0);
+                    expr = this->get_expr(caseChild, sourceCode);
+                }
+                else if (childText.find("default") == 0)
+                {
+                    isDefaultCase = true;
+                }
+                else
+                {
+                    stmts.push_back(this->get_stmt(child, sourceCode));
+                }
+            }
+
+            if (isDefaultCase)
+            {
+                cases.push_back(stmtFactory.mk_default_case(stmtFactory.mk_compound(stmts)));
+            }
+            else
+            {
+                cases.push_back(stmtFactory.mk_case(expr, stmtFactory.mk_compound(stmts)));
+            }
+        }
+    }
+    return stmtFactory.mk_switch(condition, cases);
+}
+
+
 astfri::ForStmt* NodeGetter::get_for_stmt(
     TSNode tsNode,
     std::string const& sourceCode
@@ -800,6 +864,68 @@ astfri::ReturnStmt* NodeGetter::get_return_stmt(
     return stmtFactory.mk_return(expr);
 }
 
+astfri::Stmt* NodeGetter::get_stmt(TSNode tsNode, std::string const& sourceCode)
+{
+    std::string nodeName = ts_node_string(tsNode);
+    if (nodeName.find("(local_variable_declaration ") == 0)
+    {
+        return this->get_local_var(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(expression_statement ") == 0)
+    {
+        return this->get_expr_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(if_statement ") == 0)
+    {
+        return this->get_if_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(switch_expression ") == 0)
+    {
+        return this->get_switch_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(for_statement ") == 0)
+    {
+        return this->get_for_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(while_statement ") == 0)
+    {
+        return this->get_while_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(do_statement ") == 0)
+    {
+        return this->get_do_while_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(return_statement ") == 0)
+    {
+        return this->get_return_stmt(tsNode, sourceCode);
+    }
+    else if (nodeName.find("(break_statement ") == 0)
+    {
+        return stmtFactory.mk_break();
+    }
+    else if (nodeName.find("(continue_statement ") == 0)
+    {
+        return stmtFactory.mk_continue();
+    }
+    else if (nodeName.find("(explicit_constructor_invocation ") == 0)
+    {
+        std::vector<astfri::Expr*> args;
+        TSNode argumentsListNode = ts_node_named_child(tsNode, 1);
+        uint32_t argsCount = ts_node_named_child_count(argumentsListNode);
+        for (uint32_t i = 0; i < argsCount; i++)
+        {
+            TSNode argNode = ts_node_named_child(argumentsListNode, i);
+            std::string argNodeName = ts_node_string(argNode);
+            args.push_back(this->get_expr(argNode, sourceCode));
+        }
+        return stmtFactory.mak_base_initializer(get_node_text(ts_node_named_child(tsNode, 0), sourceCode), args);
+    }
+    else
+    {
+        return stmtFactory.mk_uknown();
+    }
+}
+
 astfri::CompoundStmt* NodeGetter::search_sub_tree(
     TSNode tsNode,
     std::string const& sourceCode
@@ -812,136 +938,75 @@ astfri::CompoundStmt* NodeGetter::search_sub_tree(
     {
         TSNode child          = ts_node_named_child(tsNode, i);
         std::string childName = ts_node_string(child);
-        if (childName.find("(local_variable_declaration ") == 0)
-        {
-            statements.push_back(this->get_local_var(child, sourceCode));
-        }
-        else if (childName.find("(expression_statement ") == 0)
-        {
-            statements.push_back(this->get_expr_stmt(child, sourceCode));
-        }
-        else if (childName.find("(if_statement ") == 0)
-        {
-            statements.push_back(this->get_if_stmt(child, sourceCode));
-        }
-        //else if (childName.find("(switch_expression ") == 0)
-        //{
-        //    statements.push_back(this->get_switch_stmt(child, sourceCode));
-        //}
-        else if (childName.find("(for_statement ") == 0)
-        {
-            statements.push_back(this->get_for_stmt(child, sourceCode));
-        }
-        else if (childName.find("(while_statement ") == 0)
-        {
-            statements.push_back(this->get_while_stmt(child, sourceCode));
-        }
-        else if (childName.find("(do_statement ") == 0)
-        {
-            statements.push_back(this->get_do_while_stmt(child, sourceCode));
-        }
-        else if (childName.find("(return_statement ") == 0)
-        {
-            statements.push_back(this->get_return_stmt(child, sourceCode));
-        }
+        statements.push_back(this->get_stmt(child, sourceCode));
     }
     return stmtFactory.mk_compound(statements);
 }
 
 astfri::ConstructorDefStmt* NodeGetter::get_constructor(
-    TSNode classNode,
+    TSNode tsNode,
     std::string const& sourceCode
 )
 {
-    astfri::ConstructorDefStmt* constructorDef;
+    astfri::AccessModifier access = astfri::AccessModifier::Internal;
+    std::string name;
+    std::vector<astfri::ParamVarDefStmt*> params;
+    std::vector<astfri::BaseInitializerStmt*> baseInit;
+    astfri::CompoundStmt* body = nullptr;
 
-    char const* queryString
-        = "(constructor_declaration (modifiers)? @constructor_modifiers "
-          "name: (identifier) @constructor_name (formal_parameter)? @params "
-          "body: (_) @constructor_body)";
-
-    TSQuery* tsQuery        = make_query(queryString);
-    TSQueryCursor* tsCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(tsCursor, tsQuery, classNode);
-    TSQueryMatch tsMatch;
-
-    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    uint32_t methodChildCount = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < methodChildCount; i++)
     {
-        std::vector<std::string> constructorModifiers;
-        std::string constructorName;
-        TSNode paramsNode;
-        TSNode constructorNode;
-        std::vector<astfri::ParamVarDefStmt*> params;
-        std::vector<astfri::LocalVarDefStmt*> vars;
-        astfri::AccessModifier access = astfri::AccessModifier::Internal;
+        TSNode methodChild = ts_node_named_child(tsNode, i);
+        std::string methodChildName = ts_node_string(methodChild);
 
-        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        if (methodChildName == "(modifiers)")
         {
-            TSQueryCapture tsCapture = tsMatch.captures[i];
-            uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeName(ts_node_string(tsCapture.node));
-            std::string nodeText(get_node_text(tsCapture.node, sourceCode));
-
-            if (captureName == "constructor_modifiers")
+            uint32_t modifiersCount = ts_node_child_count(methodChild);
+            for (uint32_t j = 0; j < modifiersCount; j++)
             {
-                constructorModifiers.push_back(nodeText);
-            }
-            else if (captureName == "constructor_name")
-            {
-                constructorName = nodeText;
-            }
-            else if (captureName == "params")
-            {
-                paramsNode = tsCapture.node;
-            }
-            else if (captureName == "constructor_body")
-            {
-                constructorNode = tsCapture.node;
+                TSNode modifierNode = ts_node_child(methodChild, j);
+                std::string modifierNodeName = get_node_text(modifierNode, sourceCode);
+                if (modifierNodeName == "private" || modifierNodeName == "public"
+                    || modifierNodeName == "internal" || modifierNodeName == "protected")
+                {
+                    access = this->nodeMapper->get_modMap().find(modifierNodeName)->second;
+                }
             }
         }
-
-        if (! ts_node_is_null(paramsNode))
+        else if (methodChildName == "(identifier)")
         {
-            params = get_params(paramsNode, sourceCode);
+            name = get_node_text(methodChild, sourceCode);
         }
-        if (! ts_node_is_null(constructorNode))
+        else if (methodChildName.find("(formal_parameters ") == 0)
         {
-            // vars = get_local_vars(constructorNode, sourceCode);
+            params = this->get_params(methodChild, sourceCode);
         }
-
-        for (std::string mod : constructorModifiers)
+        else if (methodChildName.find("(constructor_body ") == 0)
         {
-            if (mod == "public")
-            {
-                access = astfri::AccessModifier::Public;
-            }
-            else if (mod == "private")
-            {
-                access = astfri::AccessModifier::Private;
-            }
-            else if (mod == "internal")
-            {
-                access = astfri::AccessModifier::Internal;
-            }
-            else if (mod == "protected")
-            {
-                access = astfri::AccessModifier::Protected;
-            }
-        }
+            uint32_t bodyChildCount = ts_node_named_child_count(methodChild);
+            std::vector<astfri::Stmt*> bodyStatements;
 
-        constructorDef
-            = stmtFactory
-                  .mk_constructor_def(nullptr, params, {}, nullptr, access);
+            for (uint32_t j = 0; j < bodyChildCount; j++)
+            {
+                TSNode bodyChild = ts_node_named_child(methodChild, j);
+                astfri::Stmt* stmt = this->get_stmt(bodyChild, sourceCode);
+
+                if (auto baseInitStmt = dynamic_cast<astfri::BaseInitializerStmt*>(stmt))
+                {
+                    baseInit.push_back(baseInitStmt);
+                }
+                else
+                {
+                    bodyStatements.push_back(stmt);
+                }
+            }
+            body = stmtFactory.mk_compound(bodyStatements);
+        }
     }
 
-    ts_query_cursor_delete(tsCursor);
-    ts_query_delete(tsQuery);
-    return constructorDef;
+    return stmtFactory
+        .mk_constructor_def(nullptr, params, baseInit, body, access);
 }
 
 astfri::MethodDefStmt* NodeGetter::get_method(
@@ -949,64 +1014,59 @@ astfri::MethodDefStmt* NodeGetter::get_method(
     std::string const& sourceCode
 )
 {
-    TSNode modifierNode;
-    TSNode typeNode;
-    TSNode nameNode;
-    TSNode parameterNode;
-    TSNode bodyNode;
-
-    astfri::AccessModifier access = astfri::AccessModifier::Internal;
-    astfri::Type* type            = nullptr;
+    astfri::Type* type = nullptr;
     std::string name;
     std::vector<astfri::ParamVarDefStmt*> params;
     astfri::CompoundStmt* body = nullptr;
+    astfri::AccessModifier access = astfri::AccessModifier::Internal;
 
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    uint32_t methodChildCount = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < methodChildCount; i++)
     {
-        modifierNode        = ts_node_named_child(tsNode, 0);
-        uint32_t childCount = ts_node_child_count(modifierNode);
-        for (uint32_t i = 0; i < childCount; i++)
+        TSNode methodChild = ts_node_named_child(tsNode, i);
+        std::string methodChildName = ts_node_string(methodChild);
+
+        if (methodChildName == ("(modifiers)"))
         {
-            TSNode child          = ts_node_child(modifierNode, i);
-            std::string childName = get_node_text(child, sourceCode);
-            if (childName == "private" || childName == "public"
-                || childName == "internal" || childName == "protected")
+            uint32_t modifiersCount = ts_node_child_count(methodChild);
+            for (uint32_t j = 0; j < modifiersCount; j++)
             {
-                access = this->nodeMapper->get_modMap().find(childName)->second;
+                TSNode modifierNode = ts_node_child(methodChild, j);
+                std::string modifierNodeName = get_node_text(modifierNode, sourceCode);
+                if (modifierNodeName == "private" || modifierNodeName == "public"
+                    || modifierNodeName == "internal" || modifierNodeName == "protected")
+                {
+                    access = this->nodeMapper->get_modMap().find(modifierNodeName)->second;
+                }
             }
         }
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
-    {
-        typeNode                 = ts_node_named_child(tsNode, 1);
-        std::string typeNodeName = ts_node_string(typeNode);
-        std::string typeNodeText = get_node_text(typeNode, sourceCode);
-
-        if (typeNodeName == "(identifier)")
+        else if ((methodChildName.find("type") != std::string::npos || methodChildName.find("identifier") != std::string::npos) && (i == 1))
         {
-            type = typeFactory.mk_user(typeNodeText);
+            if (methodChildName.find("(identifier)") == 0)
+            {
+                type = typeFactory.mk_user(get_node_text(methodChild, sourceCode));
+            }
+            else if (methodChildName.find("(generic_type") == 0)
+            {
+                continue;
+            }
+            else 
+            {
+                type = this->nodeMapper->get_typeMap().find(get_node_text(methodChild, sourceCode))->second;
+            }
         }
-        else
+        else if (methodChildName == "(identifier)")
         {
-            type = this->nodeMapper->get_typeMap().find(typeNodeText)->second;
+            name = get_node_text(methodChild, sourceCode);
         }
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 2)))
-    {
-        nameNode = ts_node_named_child(tsNode, 2);
-        name     = get_node_text(nameNode, sourceCode);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 3)))
-    {
-        parameterNode                 = ts_node_named_child(tsNode, 3);
-        std::string parameterNodeName = ts_node_string(parameterNode);
-        params = this->get_params(parameterNode, sourceCode);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 4)))
-    {
-        bodyNode                 = ts_node_named_child(tsNode, 4);
-        std::string bodyNodeName = ts_node_string(parameterNode);
-        body                     = this->search_sub_tree(bodyNode, sourceCode);
+        else if (methodChildName.find("(formal_parameters ") == 0)
+        {
+            params = this->get_params(methodChild, sourceCode);
+        }
+        else if (methodChildName.find("(block ") == 0)
+        {
+            body = this->search_sub_tree(methodChild, sourceCode);
+        }
     }
 
     astfri::FunctionDefStmt* func
@@ -1081,6 +1141,22 @@ astfri::MemberVarDefStmt* NodeGetter::get_attribute(
     return stmtFactory.mk_member_var_def(name, type, init, access);
 }
 
+astfri::GenericParam* NodeGetter::get_tparam(TSNode tsNode, std::string const& sourceCode)
+{
+    std::string name;
+    std::string constraint;
+    if (!ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        name = get_node_text(ts_node_named_child(tsNode, 0), sourceCode);
+    }
+    if (!ts_node_is_null(ts_node_named_child(tsNode, 1)))
+    {
+        constraint = get_node_text(ts_node_named_child(tsNode, 1), sourceCode);
+    }
+
+    return stmtFactory.mk_generic_param(constraint, name);
+}
+
 std::vector<astfri::ClassDefStmt*> NodeGetter::get_classes(
     TSTree* tree,
     std::string const& sourceCode
@@ -1088,60 +1164,115 @@ std::vector<astfri::ClassDefStmt*> NodeGetter::get_classes(
 {
     TSNode rootNode = ts_tree_root_node(tree);
     TSNode classNode;
-    TSNode classNameNode;
-    TSNode classBodyNode;
     std::string className;
     std::vector<astfri::MemberVarDefStmt*> attributes;
     std::vector<astfri::MethodDefStmt*> methods;
+    std::vector<astfri::ConstructorDefStmt*> constructors;
     std::vector<astfri::ClassDefStmt*> classes;
+    std::vector<astfri::GenericParam*> tparams;
+    std::vector<astfri::ClassDefStmt*> bases;
+    std::vector<astfri::InterfaceDefStmt*> interfaces;
 
     uint32_t childCount = ts_node_named_child_count(rootNode);
     for (uint32_t i = 0; i < childCount; i++)
     {
         if (! ts_node_is_null(ts_node_named_child(rootNode, i)))
         {
-            classNode = ts_node_named_child(rootNode, i);
-        }
-
-        if (! ts_node_is_null(ts_node_named_child(classNode, 1)))
-        {
-            classNameNode = ts_node_named_child(classNode, 1);
-            className     = get_node_text(classNameNode, sourceCode);
-        }
-
-        if (! ts_node_is_null(ts_node_named_child(classNode, 2)))
-        {
-            classBodyNode = ts_node_named_child(classNode, 2);
-        }
-
-        uint32_t grandChildCount = ts_node_named_child_count(classBodyNode);
-        for (uint32_t i = 0; i < grandChildCount; i++)
-        {
-            TSNode grandChild          = ts_node_named_child(classBodyNode, i);
-            std::string grandChildName = ts_node_string(grandChild);
-
-            if (grandChildName.find("(field_declaration ") == 0)
+            TSNode child = ts_node_named_child(rootNode, i);
+            std::string childName = ts_node_string(child);
+            if (childName.find("(class_declaration ") == 0)
             {
-                attributes.push_back(this->get_attribute(grandChild, sourceCode)
-                );
+                classNode = child;
             }
-            else if (grandChildName.find("(method_declaration ") == 0)
+            else
             {
-                methods.push_back(this->get_method(grandChild, sourceCode));
+                continue;
+            }
+        }
+
+        uint32_t classChildCount = ts_node_named_child_count(classNode);
+        for (uint32_t j = 0; j < classChildCount; j++)
+        {
+            TSNode classChild = ts_node_named_child(classNode, j);
+            std::string classChildName = ts_node_string(classChild);
+
+            if (classChildName.find("(modifiers)") == 0)
+            {
+                continue;
+            }
+            else if (classChildName.find("(identifier)") == 0)
+            {
+                className = get_node_text(classChild, sourceCode);
+            }
+            else if (classChildName.find("(type_parameters ") == 0)
+            {
+                uint32_t parametersCount = ts_node_named_child_count(classChild);
+                for (uint32_t k = 0; k < parametersCount; k++)
+                {
+                    TSNode parameterNode = ts_node_named_child(classChild, k);
+                    tparams.push_back(this->get_tparam(parameterNode, sourceCode));
+                }
+            }
+            else if (classChildName.find("(superclass ") == 0)
+            {
+                bases.push_back(stmtFactory.mk_class_def(get_node_text(ts_node_named_child(classChild, 0), sourceCode)));
+            }
+            else if (classChildName.find("(super_interfaces ") == 0)
+            {
+                uint32_t typeListChildCount = ts_node_named_child_count(classChild);
+                for (uint32_t k = 0; k < typeListChildCount; k++)
+                {
+                    TSNode typeListChild = ts_node_named_child(classChild, k);
+                    interfaces.push_back(stmtFactory.mk_interface_def(get_node_text(typeListChild, sourceCode)));
+                }
+            }
+            else if (classChildName.find("(class_body ") == 0)
+            {
+                uint32_t classBodyChildCount = ts_node_named_child_count(classChild);
+                for (uint32_t k = 0; k < classBodyChildCount; k++)
+                {
+                    TSNode classBodyChild          = ts_node_named_child(classChild, k);
+                    std::string classBodyChildName = ts_node_string(classBodyChild);
+        
+                    if (classBodyChildName.find("(field_declaration ") == 0)
+                    {
+                        attributes.push_back(this->get_attribute(classBodyChild, sourceCode)
+                        );
+                    }
+                    else if (classBodyChildName.find("(method_declaration ") == 0)
+                    {
+                        methods.push_back(this->get_method(classBodyChild, sourceCode));
+                    }
+                    else if (classBodyChildName.find("(constructor_declaration ") == 0)
+                    {
+                        constructors.push_back(this->get_constructor(classBodyChild, sourceCode));
+                    }
+                }
             }
         }
 
         astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className);
         classDef->vars_                = attributes;
         classDef->methods_             = methods;
+        classDef->constructors_        = constructors;
+        classDef->tparams_             = tparams;
+        classDef->bases_               = bases;
+        classDef->interfaces_          = interfaces;
         classes.push_back(classDef);
 
         for (astfri::MethodDefStmt* method : methods)
         {
             method->owner_ = classDef;
         }
+        for (astfri::ConstructorDefStmt* constructor : constructors)
+        {
+            constructor->owner_ = classDef;
+        }
         attributes.clear();
         methods.clear();
+        constructors.clear();
+        tparams.clear();
+        bases.clear();
     }
 
     return classes;
