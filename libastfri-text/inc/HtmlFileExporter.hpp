@@ -4,6 +4,10 @@
 #include <libastfri-text/inc/Exporter.hpp>
 
 class HtmlFileExporter : public Exporter {
+    int maxRoundBrIndex_;
+    int maxCurlBrIndex_;
+    int roundBrIndex_;
+    int curlBrIndex_;
 public:
     HtmlFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
@@ -17,6 +21,7 @@ public:
     void write_round_bracket(std::string br) override;
     void write_curl_bracket(std::string br) override;
     void write_unknown_word() override;
+    void write_invalid_word() override;
     void write_public_word() override;
     void write_private_word() override;
     void write_protected_word() override;
@@ -33,6 +38,7 @@ public:
     void write_user_type(std::string usertype) override;
     void write_gen_param_name(std::string name) override;
     void write_class_name(std::string name) override;
+    void write_interface_name(std::string name) override;
     void write_method_name(std::string name) override;
     void write_function_name(std::string name) override;
     void write_global_var_name(std::string name) override;
@@ -49,8 +55,13 @@ public:
     void write_bool_val(bool val) override;
     void write_null_val() override;
     void write_class_word() override;
+    void write_interface_word() override;
+    void write_implement_word() override;
+    void write_extend_word() override;
     void write_this_word() override;
     void write_return_word() override;
+    void write_continue_word() override;
+    void write_break_word() override;
     void write_throw_word() override;
     void write_if_word() override;
     void write_else_word() override;
@@ -60,9 +71,11 @@ public:
     void write_repeat_word() override;
     void write_switch_word() override;
     void write_case_word() override;
+    void write_default_word() override;
     void write_new_word() override;
     void write_delete_word() override;
     void write_pointer_word() override;
+    void write_virtual_word() override;
     void write_constr_word() override;
     void write_destr_word() override;
     void write_method_word() override;

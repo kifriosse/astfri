@@ -16,6 +16,8 @@ private:
     std::unique_ptr<std::stringstream> defaultStyle_;
     std::unique_ptr<std::stringstream> unknownWord_;
     std::unique_ptr<std::stringstream> unknownWordStyle_;
+    std::unique_ptr<std::stringstream> invalidWord_;
+    std::unique_ptr<std::stringstream> invalidWordStyle_;
     std::unique_ptr<std::stringstream> view_;
     std::unique_ptr<std::stringstream> publicWord_;
     std::unique_ptr<std::stringstream> privateWord_;
@@ -42,6 +44,7 @@ private:
     std::unique_ptr<std::stringstream> defRefNameStyle_;
     std::unique_ptr<std::stringstream> generParamNameStyle_;
     std::unique_ptr<std::stringstream> classNameStyle_;
+    std::unique_ptr<std::stringstream> interfaceNameStyle_;
     std::unique_ptr<std::stringstream> methodNameStyle_;
     std::unique_ptr<std::stringstream> functionNameStyle_;
     std::unique_ptr<std::stringstream> globalVarNameStyle_;
@@ -76,6 +79,8 @@ public:
     const std::stringstream* get_default_style()       { return defaultStyle_.get(); };
     const std::stringstream* get_unknown_word()        { return unknownWord_.get(); };
     const std::stringstream* get_unknown_word_style()  { return unknownWordStyle_.get(); };
+    const std::stringstream* get_invalid_word()        { return invalidWord_.get(); };
+    const std::stringstream* get_invalid_word_style()  { return invalidWordStyle_.get(); };
     const std::stringstream* get_view()            { return view_.get(); };
     const std::stringstream* get_public_word()     { return publicWord_.get(); };
     const std::stringstream* get_private_word()    { return privateWord_.get(); };
@@ -102,6 +107,7 @@ public:
     const std::stringstream* get_def_ref_name_style() { return defRefNameStyle_.get(); };
     const std::stringstream* get_gener_param_name_style() { return generParamNameStyle_.get(); };
     const std::stringstream* get_class_name_style()       { return classNameStyle_.get(); };
+    const std::stringstream* get_interface_name_style()   { return interfaceNameStyle_.get(); };
     const std::stringstream* get_method_name_style()      { return methodNameStyle_.get(); };
     const std::stringstream* get_function_name_style()    { return functionNameStyle_.get(); };
     const std::stringstream* get_global_var_name_style()  { return globalVarNameStyle_.get(); };
