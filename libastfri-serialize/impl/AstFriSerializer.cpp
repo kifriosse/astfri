@@ -206,6 +206,15 @@ astfri::LambdaExpr* AstFriSerializer::serialize_lambda_expr(rapidjson::Value& va
    
 }
 
+astfri::LambdaCallExpr* AstFriSerializer::serialize_lambda_call_expr(rapidjson::Value& value){
+    astfri::Expr* lambda = this->resolve_expr(value["lambda"]);
+    std::vector<astfri::Expr*> arguments;
+    for(auto& arg : value["arguments"].GetArray()){
+        arguments.push_back(this->resolve_expr(arg));
+    }
+    return this->expressionMaker_.mk_lambda_call(lambda,std::move(arguments));
+}
+
 astfri::ThisExpr* AstFriSerializer::serialize_this_expr(){
     return this->expressionMaker_.mk_this();
 }
