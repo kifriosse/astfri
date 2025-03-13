@@ -120,6 +120,7 @@
             "delete_word":"vymaž",
             "pointer_word":"↑",
             "virtual_word":"je virtuálna",
+            "template_word":"šablóna",
             "STYLE":{
                 "general_style":"color:",
                 "class_word_style":"color:red",
@@ -143,7 +144,8 @@
                 "new_word_style":"color:",
                 "delete_word_style":"color:",
                 "pointer_word_style":"color:",
-                "virtual_word_style":"color:"
+                "virtual_word_style":"color:",
+                "template_word_style":"color:"
             }
         },
         "OTHER_EXPR":{

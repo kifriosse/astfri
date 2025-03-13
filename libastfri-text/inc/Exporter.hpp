@@ -81,6 +81,7 @@ public:
     virtual void write_delete_word();
     virtual void write_pointer_word();
     virtual void write_virtual_word();
+    virtual void write_template_word();
     virtual void write_constr_word();
     virtual void write_destr_word();
     virtual void write_method_word();

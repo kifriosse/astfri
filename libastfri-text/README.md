@@ -138,6 +138,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "delete_word":"delete",
             "pointer_word":"↑",
             "virtual_word":"is virtual",
+            "template_word":"template",
             "STYLE":{
                 "general_style":"",
                 "class_word_style":"",
@@ -161,7 +162,8 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
                 "new_word_style":"",
                 "delete_word_style":"",
                 "pointer_word_style":"",
-                "virtual_word_style":""
+                "virtual_word_style":"",
+                "template_word_style":""
             }
         },
         "OTHER_EXPR":{
