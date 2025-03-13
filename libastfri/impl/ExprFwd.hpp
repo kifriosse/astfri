@@ -20,6 +20,7 @@ struct GlobalVarRefExpr;
 struct ClassRefExpr;
 struct FunctionCallExpr;
 struct MethodCallExpr;
+struct LambdaCallExpr;
 struct LambdaExpr;
 struct ThisExpr;
 struct ConstructorCallExpr;

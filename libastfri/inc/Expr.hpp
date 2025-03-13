@@ -339,6 +339,15 @@ struct MethodCallExpr : Expr, details::MkVisitable<MethodCallExpr>
 /**
  * @brief TODO
  */
+struct LambdaCallExpr : Expr, details::MkVisitable<LambdaCallExpr>
+{
+    Expr* lambda_{nullptr};
+    std::vector<Expr*> args_;
+};
+
+/**
+ * @brief TODO
+ */
 struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
 {
     std::vector<ParamVarDefStmt*> params_;

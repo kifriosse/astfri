@@ -113,6 +113,22 @@ MethodCallExpr* ExprFactory::mk_method_call(
     );
 }
 
+LambdaCallExpr* ExprFactory::mk_lambda_call()
+{
+    return details::emplace_get<LambdaCallExpr>(exprs_);
+}
+
+LambdaCallExpr* ExprFactory::mk_lambda_call(
+    Expr* lambda,
+    std::vector<Expr*> args
+)
+{
+    LambdaCallExpr* c = this->mk_lambda_call();
+    c->lambda_        = lambda;
+    c->args_          = std::move(args);
+    return c;
+}
+
 LambdaExpr* ExprFactory::mk_lambda_expr(
     std::vector<ParamVarDefStmt*> params,
     Stmt* body
