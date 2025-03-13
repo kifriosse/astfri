@@ -374,9 +374,7 @@ struct ConstructorCallExpr : Expr, details::MkVisitable<ConstructorCallExpr>
 };
 
 /**
- * @brief Operator new that allocates and possibly initializes memory
- * If @c init is null, then the memory is just allocated for the type
- * and it is not initialized.
+ * @brief Operator new that allocates and initializes it using a constructor
  */
 struct NewExpr : Expr, details::MkVisitable<NewExpr>
 {
