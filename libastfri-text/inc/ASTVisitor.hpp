@@ -44,6 +44,7 @@ public:
     void visit(ClassRefExpr        const& expr) override;
     void visit(FunctionCallExpr    const& expr) override;
     void visit(MethodCallExpr      const& expr) override;
+    void visit(LambdaCallExpr      const& expr) override;
     void visit(LambdaExpr          const& expr) override;
     void visit(ThisExpr            const& expr) override;
     void visit(ConstructorCallExpr const& expr) override;

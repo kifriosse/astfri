@@ -257,6 +257,10 @@ void ASTVisitor::visit(MethodCallExpr const& expr) {
     write_parameters(expr.args_);
 }
 
+void ASTVisitor::visit(LambdaCallExpr const& expr) {
+
+}
+
 void ASTVisitor::visit(LambdaExpr const& expr) {
     if (!configurator_->sh_func_dec()) {
         return;
@@ -531,8 +535,9 @@ void ASTVisitor::visit(MethodDefStmt const& stmt) {
     configurator_->sh_other_expr() ? (exporter_->write_method_word(), exporter_->write_space()) : void();
     if (configurator_->sh_meth_owner() && stmt.owner_) {
         exporter_->write_class_name(stmt.owner_->name_);
-        if (configurator_->sh_gener_par() && !stmt.owner_->tparams_.empty()) {
-            write_gen_params(stmt.owner_->tparams_);
+        ClassDefStmt* ownerClass = static_cast<ClassDefStmt*>(stmt.owner_);
+        if (configurator_->sh_gener_par() && !ownerClass->tparams_.empty()) {
+            write_gen_params(ownerClass->tparams_);
         }
         exporter_->write_separator_sign(std::move("::"));
     }

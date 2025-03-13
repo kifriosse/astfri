@@ -11,11 +11,11 @@ astfri::IVisitable* node = serializer.serialize(argv[1]);
 
 astfri::TranslationUnit* tu = dynamic_cast<astfri::TranslationUnit*>(node);
 
-uml::Config conf;
-    uml::PlantUMLOutputter op;
-    uml::TypeBeforeConvention tc;
+astfri::uml::Config conf;
+    astfri::uml::PlantUMLOutputter op;
+    astfri::uml::TypeBeforeConvention tc;
 
-    uml::UMLLibWrapper uml;
+    astfri::uml::UMLLibWrapper uml;
     uml.init(conf, op, tc);
     uml.run(*tu);
 
