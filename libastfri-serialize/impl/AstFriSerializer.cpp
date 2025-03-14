@@ -444,7 +444,7 @@ astfri::FunctionDefStmt* AstFriSerializer::serialize_function_def_stmt(rapidjson
     return this->statementMaker_.mk_function_def(std::move(value["name"].GetString()),std::move(params),returnType,body);
 }
 
-astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner){
+astfri::MethodDefStmt* AstFriSerializer::serialize_method_def_stmt(rapidjson::Value& value,astfri::UserTypeDefStmt* owner){
     std::string name = value["name"].GetString();
     astfri::FunctionDefStmt* functDefStmt = this->serialize_function_def_stmt(value);
     astfri::AccessModifier accessMod = accessModMapping.find(value["access"].GetString())->second;
@@ -701,7 +701,7 @@ astfri::InterfaceDefStmt* AstFriSerializer::serialize_interface_def_stmt(rapidjs
     }
 
     for(auto& method : value["methods"].GetArray()){
-        astfri::MethodDefStmt* methodDefStmt =  this->serialize_method_def_stmt(method);
+        astfri::MethodDefStmt* methodDefStmt =  this->serialize_method_def_stmt(method,interfDefStmt);
         methodDefStmt->owner_ = interfDefStmt;
         interfDefStmt->methods_.push_back(methodDefStmt);
 

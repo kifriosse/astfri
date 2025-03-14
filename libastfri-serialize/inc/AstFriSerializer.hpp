@@ -70,7 +70,7 @@ astfri::ParamVarDefStmt* serialize_param_var_def_stmt(rapidjson::Value& value);
 astfri::MemberVarDefStmt* serialize_member_var_def_stmt(rapidjson::Value& value);
 astfri::GlobalVarDefStmt* serialize_global_var_def_stmt(rapidjson::Value& value);
 astfri::FunctionDefStmt* serialize_function_def_stmt(rapidjson::Value& value);
-astfri::MethodDefStmt* serialize_method_def_stmt(rapidjson::Value& value,astfri::ClassDefStmt* owner=nullptr);
+astfri::MethodDefStmt* serialize_method_def_stmt(rapidjson::Value& value,astfri::UserTypeDefStmt* owner=nullptr);
 astfri::GenericParam* serialize_generic_param(rapidjson::Value& value);
 astfri::ClassDefStmt* serialize_class_def_stmt(rapidjson::Value& value);
 astfri::CompoundStmt* serialize_compound_stmt(rapidjson::Value& value);
