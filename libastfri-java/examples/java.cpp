@@ -185,10 +185,10 @@ int main ()
     std::cout << "Root node: " << ts_node_type(root_node) << std::endl;
     TSNode next_node = ts_node_named_child(root_node, 0);
     std::cout << "Next node: " << ts_node_type(next_node) << std::endl;
-    TSNode body_node    = ts_node_named_child(next_node, 1);
-    TSNode body_sibling = ts_node_next_sibling(body_node);
-    std::cout << "Next sibling node: " << ts_node_type(body_sibling)
-              << std::endl;
+//    TSNode body_node    = ts_node_named_child(next_node, 1);
+//    TSNode body_sibling = ts_node_next_sibling(body_node);
+//    std::cout << "Next sibling node: " << ts_node_type(body_sibling)
+//              << std::endl;
     std::cout << "Children count " << ts_node_named_child_count(next_node)
               << std::endl;
 

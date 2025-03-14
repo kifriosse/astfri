@@ -36,15 +36,17 @@ private:
     astfri::LocalVarDefStmt* get_local_var(TSNode tsNode, std::string const& sourceCode);
     astfri::ExprStmt* get_expr_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::IfStmt* get_if_stmt(TSNode tsNode, std::string const& sourceCode);
-    //astfri::SwitchStmt* get_switch_stmt(TSNode tsNode, std::string const& sourceCode);
+    astfri::SwitchStmt* get_switch_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::ForStmt* get_for_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::WhileStmt* get_while_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::DoWhileStmt* get_do_while_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::ReturnStmt* get_return_stmt(TSNode tsNode, std::string const& sourceCode);
+    astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::CompoundStmt* search_sub_tree (TSNode tsNode, const std::string& sourceCode);
-    astfri::ConstructorDefStmt* get_constructor (TSNode classNode, const std::string& sourceCode);
+    astfri::ConstructorDefStmt* get_constructor (TSNode tsNode, const std::string& sourceCode);
     astfri::MethodDefStmt* get_method (TSNode tsNode, const std::string& sourceCode);
     astfri::MemberVarDefStmt* get_attribute (TSNode tsNode, const std::string& sourceCode);
+    astfri::GenericParam* get_tparam(TSNode tsNode, std::string const& sourceCode);
     std::vector<astfri::ClassDefStmt*> get_classes (TSTree* tree, const std::string& sourceCode);
 public:
     NodeGetter(TSTree* tree, const std::string& sourceCode);
