@@ -669,7 +669,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -711,7 +711,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -753,7 +753,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -789,7 +789,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -825,7 +825,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -901,7 +901,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -977,7 +977,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -1051,7 +1051,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -1308,7 +1308,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -1431,7 +1431,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -1588,7 +1588,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -1755,7 +1755,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -2025,7 +2025,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -2302,7 +2302,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -2380,7 +2380,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -2458,7 +2458,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -2490,7 +2490,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Picture",
@@ -2772,7 +2772,7 @@
             "ifFalse" : null
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : ["Shape"],
@@ -2981,7 +2981,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3012,7 +3012,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3043,7 +3043,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3074,7 +3074,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3152,7 +3152,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3280,7 +3280,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3338,7 +3338,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3387,7 +3387,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3436,7 +3436,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3540,7 +3540,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Ellipse",
@@ -3713,7 +3713,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : ["Shape"],
@@ -3924,7 +3924,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -3966,7 +3966,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4026,7 +4026,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4086,7 +4086,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4164,7 +4164,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4242,7 +4242,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4300,7 +4300,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4332,7 +4332,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4420,7 +4420,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Text",
@@ -4713,7 +4713,7 @@
             "ifFalse" : null
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : ["Shape"],
@@ -5163,7 +5163,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Canvas",
@@ -5242,7 +5242,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Canvas",
@@ -5391,7 +5391,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Canvas",
@@ -5463,7 +5463,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Canvas",
@@ -5883,7 +5883,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Canvas",
@@ -6193,7 +6193,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : [ ],
@@ -6394,7 +6394,7 @@
             }]
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "CanvasComponent",
@@ -6634,7 +6634,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : [ ],
@@ -7176,7 +7176,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Color",
@@ -7199,7 +7199,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Color",
@@ -7222,7 +7222,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : [ ],
@@ -7434,7 +7434,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -7479,7 +7479,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -7529,7 +7529,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -7579,7 +7579,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -7691,7 +7691,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -7927,7 +7927,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -7985,7 +7985,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -8017,7 +8017,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -8117,7 +8117,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Line",
@@ -8276,7 +8276,7 @@
             "ifFalse" : null
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : ["Shape"],
@@ -8563,7 +8563,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8594,7 +8594,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8625,7 +8625,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8656,7 +8656,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8734,7 +8734,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8862,7 +8862,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8920,7 +8920,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -8969,7 +8969,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -9018,7 +9018,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -9122,7 +9122,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Rectangle",
@@ -9295,7 +9295,7 @@
             }
           }]
         },
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "interfaces" : ["Shape"],
@@ -9314,7 +9314,7 @@
           "node" : "IntType"
         },
         "body" : null,
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Shape",
@@ -9325,7 +9325,7 @@
           "node" : "IntType"
         },
         "body" : null,
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Shape",
@@ -9336,7 +9336,7 @@
           "node" : "IntType"
         },
         "body" : null,
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Shape",
@@ -9347,7 +9347,7 @@
           "node" : "IntType"
         },
         "body" : null,
-        "virtual" : "yes"
+        "virtual" : "no"
       },{
         "node" : "MethodDefStmt",
         "owner" : "Shape",
@@ -9369,7 +9369,7 @@
           "node" : "VoidType"
         },
         "body" : null,
-        "virtual" : "yes"
+        "virtual" : "no"
       }],
       "generic_parameters" : [ ],
       "bases" : [ ]
