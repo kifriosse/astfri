@@ -295,6 +295,8 @@ astfri::Expr* AstFriSerializer::resolve_expr(rapidjson::Value& value)
             return this->serialize_constructor_call_expr(value);
         case astfri_serialize::ClassRefExpr:
             return this->serialize_class_ref_expr(value);
+        case astfri_serialize::LambdaCallExpr:
+            return this->serialize_lambda_call_expr(value);
 
 
     }
@@ -699,7 +701,11 @@ astfri::InterfaceDefStmt* AstFriSerializer::serialize_interface_def_stmt(rapidjs
     }
 
     for(auto& method : value["methods"].GetArray()){
-        interfDefStmt->methods_.push_back(this->serialize_method_def_stmt(method));
+        astfri::MethodDefStmt* methodDefStmt =  this->serialize_method_def_stmt(method);
+        methodDefStmt->owner_ = interfDefStmt;
+        interfDefStmt->methods_.push_back(methodDefStmt);
+
+
     }
 
     for(auto& genericParam : value["generic_parameters"].GetArray()){
