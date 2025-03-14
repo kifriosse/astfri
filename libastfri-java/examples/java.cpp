@@ -16,7 +16,8 @@
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
 
-#include "../src/NodeGetter.hpp"
+#include "../src/StatementTransformer.hpp"
+#include "libastfri-java/src/StatementTransformer.hpp"
 #include "libastfri/inc/Stmt.hpp"
 
 typedef struct Tree_Sitter_Node
@@ -209,9 +210,9 @@ int main ()
     std::cout << ts_node_type(ts_tree_cursor_current_node(&cursor))
               << std::endl;
 
-    NodeGetter* nodeGetter = new NodeGetter(tree, source_code);
-    std::vector<astfri::ClassDefStmt*> classes = nodeGetter->get_classes();
-    std::vector<astfri::InterfaceDefStmt*> interfaces = nodeGetter->get_interfaces();
+    StatementTransformer* stmtTransformer = new StatementTransformer(tree, source_code);
+    std::vector<astfri::ClassDefStmt*> classes = stmtTransformer->get_classes();
+    std::vector<astfri::InterfaceDefStmt*> interfaces = stmtTransformer->get_interfaces();
 
     ASTVisitor* visitor = new ASTVisitor();
     for (astfri::ClassDefStmt* classDef : classes)

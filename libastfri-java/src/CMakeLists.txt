@@ -3,7 +3,8 @@ find_package(TreeSitterJava REQUIRED)
 
 add_library(astfri-java SHARED dummy.cpp
                                 NodeMapper.cpp
-                                NodeGetter.cpp
+                                ExpressionTransformer.cpp
+                                StatementTransformer.cpp
                                 TreeMaker.cpp)
 
 target_compile_options(astfri-java PRIVATE -Wall -Wextra -Wpedantic)
