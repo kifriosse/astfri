@@ -210,12 +210,17 @@ int main ()
               << std::endl;
 
     NodeGetter* nodeGetter = new NodeGetter(tree, source_code);
-    std::vector<astfri::ClassDefStmt*> classes2 = nodeGetter->get_classes();
+    std::vector<astfri::ClassDefStmt*> classes = nodeGetter->get_classes();
+    std::vector<astfri::InterfaceDefStmt*> interfaces = nodeGetter->get_interfaces();
 
     ASTVisitor* visitor = new ASTVisitor();
-    for (astfri::ClassDefStmt* classDef : classes2)
+    for (astfri::ClassDefStmt* classDef : classes)
     {
         visitor->visit(*classDef);
+    }
+    for (astfri::InterfaceDefStmt* interfaceDef : interfaces)
+    {
+        visitor->visit(*interfaceDef);
     }
     visitor->write_file();
 

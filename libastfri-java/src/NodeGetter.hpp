@@ -24,15 +24,16 @@ private:
     astfri::StmtFactory& stmtFactory;
     NodeMapper* nodeMapper;
     std::vector<astfri::ClassDefStmt*> classes;
+    std::vector<astfri::InterfaceDefStmt*> interfaces;
     TSQuery* make_query(char const* queryString);
     std::string get_node_text(const TSNode& node, const std::string& sourceCode);
     astfri::Expr* get_expr(TSNode tsNode, const std::string& sourceCode);
     astfri::BinOpExpr* get_bin_op_expr (TSNode tsNode, const std::string& sourceCode);
-    astfri::UnaryOpExpr* get_un_op_expr(std::string qString, TSNode tsNode, const std::string& sourceCode);
-    std::variant<astfri::ParamVarRefExpr*, astfri::LocalVarRefExpr*, astfri::MemberVarRefExpr*> get_ref_expr(TSNode tsNode, std::string const& sourceCode);
+    astfri::UnaryOpExpr* get_un_op_expr(TSNode tsNode, const std::string& sourceCode);
+    std::variant<astfri::ParamVarRefExpr*, astfri::LocalVarRefExpr*, astfri::MemberVarRefExpr*, astfri::StringLiteralExpr*> get_ref_expr(TSNode tsNode, std::string const& sourceCode);
     astfri::MethodCallExpr* get_method_call(TSNode tsNode, std::string const& sourceCode);
     astfri::NewExpr* get_new_expr(TSNode paramsNode, std::string const& sourceCode);
-    std::vector<astfri::ParamVarDefStmt*> get_params (TSNode paramsNode, const std::string& sourceCode);
+    astfri::ParamVarDefStmt* get_param (TSNode paramsNode, const std::string& sourceCode);
     astfri::LocalVarDefStmt* get_local_var(TSNode tsNode, std::string const& sourceCode);
     astfri::ExprStmt* get_expr_stmt(TSNode tsNode, std::string const& sourceCode);
     astfri::IfStmt* get_if_stmt(TSNode tsNode, std::string const& sourceCode);
@@ -48,9 +49,11 @@ private:
     astfri::MemberVarDefStmt* get_attribute (TSNode tsNode, const std::string& sourceCode);
     astfri::GenericParam* get_tparam(TSNode tsNode, std::string const& sourceCode);
     std::vector<astfri::ClassDefStmt*> get_classes (TSTree* tree, const std::string& sourceCode);
+    std::vector<astfri::InterfaceDefStmt*> get_interfaces(TSTree* tree, std::string const& sourceCode);
 public:
     NodeGetter(TSTree* tree, const std::string& sourceCode);
-    std::vector<astfri::ClassDefStmt*> get_classes ();
+    std::vector<astfri::ClassDefStmt*> get_classes();
+    std::vector<astfri::InterfaceDefStmt*> get_interfaces();
 };
 
 #endif // NODE_GETTER_CLASS_HPP
