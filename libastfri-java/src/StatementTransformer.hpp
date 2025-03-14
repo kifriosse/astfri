@@ -28,6 +28,8 @@ private:
 
     astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
+    astfri::Type* make_return_type(TSNode tsNode, std::string const& sourceCode);
+
     astfri::ParamVarDefStmt* transform_param_node(
         TSNode tsNode,
         std::string const& sourceCode
@@ -102,7 +104,7 @@ private:
         TSTree* tree,
         std::string const& sourceCode
     );
-    
+
     std::vector<astfri::InterfaceDefStmt*> transform_interfaces(
         TSTree* tree,
         std::string const& sourceCode
