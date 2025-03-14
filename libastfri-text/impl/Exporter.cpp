@@ -194,7 +194,7 @@ void Exporter::write_float_val(float val) {
 }
 
 void Exporter::write_char_val(char val) {
-    write_word(std::to_string(std::move(val)));
+    write_word(std::string(1, std::move(val)));
 }
 
 void Exporter::write_string_val(std::string val) {
@@ -295,6 +295,14 @@ void Exporter::write_pointer_word() {
 
 void Exporter::write_virtual_word() {
     write_word(config_->get_virtual_word()->str());
+}
+
+void Exporter::write_abstract_word() {
+    write_word(config_->get_abstract_word()->str());
+}
+
+void Exporter::write_template_word() {
+    write_word(config_->get_template_word()->str());
 }
 
 void Exporter::write_constr_word() {

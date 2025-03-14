@@ -90,6 +90,7 @@ private:
     void write_body(Stmt* body);
     void write_cond(Expr* cond);
     void write_gen_params(const std::vector<GenericParam*>& params);
+    void write_identifier_from_string(std::string className);
     void write_implementations(const std::vector<InterfaceDefStmt*>& interfaces);
     template<typename Parameter>
     void write_parameters(const std::vector<Parameter*>& params);

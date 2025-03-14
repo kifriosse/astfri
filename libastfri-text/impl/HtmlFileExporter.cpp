@@ -76,6 +76,8 @@ void HtmlFileExporter::write_output_into_file(std::string filepath) {
     file << std::move(".delete-word{") << config_->get_delete_word_style()->str() << std::move("}\n");
     file << std::move(".pointer-word{") << config_->get_pointer_word_style()->str() << std::move("}\n");
     file << std::move(".virtual-word{") << config_->get_virtual_word_style()->str() << std::move("}\n");
+    file << std::move(".abstract-word{") << config_->get_abstract_word_style()->str() << std::move("}\n");
+    file << std::move(".template-word{") << config_->get_template_word_style()->str() << std::move("}\n");
     file << std::move(".other-expr{") << config_->get_other_expr_style()->str() << std::move("}\n");
     file << std::move(".constr-word{") << config_->get_constr_style()->str() << std::move("}\n");
     file << std::move(".destr-word{") << config_->get_destr_style()->str() << std::move("}\n");
@@ -322,7 +324,7 @@ void HtmlFileExporter::write_float_val(float val) {
 }
 
 void HtmlFileExporter::write_char_val(char val) {
-    std::string s = std::move("<span class=\"char-value\">") + std::to_string(std::move(val)) + std::move("</span>");
+    std::string s = std::move("<span class=\"char-value\">") + std::string(1, std::move(val)) + std::move("</span>");
     write_value_style(std::move(s));
 }
 
@@ -450,6 +452,16 @@ void HtmlFileExporter::write_pointer_word() {
 
 void HtmlFileExporter::write_virtual_word() {
     std::string s = std::move("<span class=\"virtual-word\">") + config_->get_virtual_word()->str() + std::move("</span>");
+    write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_abstract_word() {
+    std::string s = std::move("<span class=\"abstract-word\">") + config_->get_abstract_word()->str() + std::move("</span>");
+    write_system_expr_style(std::move(s));
+}
+
+void HtmlFileExporter::write_template_word() {
+    std::string s = std::move("<span class=\"template-word\">") + config_->get_template_word()->str() + std::move("</span>");
     write_system_expr_style(std::move(s));
 }
 

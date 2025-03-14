@@ -45,37 +45,7 @@ void ASTVisitor::visit(VoidType const& /*type*/) {
 }
 
 void ASTVisitor::visit(UserType const& type) {
-    std::string name = type.name_;
-    size_t st = std::move(name.find(std::move('<')));
-    size_t en = std::move(name.find(std::move('>')));
-    if (st != std::move(std::string::npos) && en != std::move(std::string::npos) && st < en) {
-        std::string cl = name.substr(0, st);
-        std::string genPar = name.substr(st + 1, en - st - 1);
-        exporter_->write_class_name(std::move(cl));
-        if (configurator_->sh_gener_par()) {
-            exporter_->write_separator_sign(std::move("<"));
-            exporter_->write_gen_param_name(std::move(genPar));
-            exporter_->write_separator_sign(std::move(">"));
-        }
-    } else {
-        if (!currGenParams_->empty()) {
-            for (auto& a : *currGenParams_) {
-                if (std::move(a.str()) == name) {
-                    exporter_->write_gen_param_name(std::move(name));
-                    return;
-                }
-            }
-        }
-        if (name == std::move(currClassName_->str())) {
-            exporter_->write_class_name(std::move(name));
-        } else if (name == std::move(currInterfName_->str())) {
-            exporter_->write_interface_name(std::move(name));
-        } else if (name[0] >= std::move('A') && name[0] <= std::move('Z')) {
-            exporter_->write_class_name(std::move(name));
-        } else {
-            exporter_->write_user_type(std::move(name));
-        }
-    }
+    write_identifier_from_string(type.name_);
 }
 
 void ASTVisitor::visit(IndirectionType const& type) {
@@ -136,9 +106,9 @@ void ASTVisitor::visit(BinOpExpr const& expr) {
         case BinOpType::Subtract: exporter_->write_operator_sign(std::move("-")); break;
         case BinOpType::Multiply: exporter_->write_operator_sign(std::move("*")); break;
         case BinOpType::Divide: exporter_->write_operator_sign(std::move("/")); break;
-        case BinOpType::FloorDivide: exporter_->write_separator_sign(std::move("div")); break;
+        case BinOpType::FloorDivide: exporter_->write_operator_sign(std::move("div")); break;
         case BinOpType::Modulo: exporter_->write_operator_sign(std::move("%")); break;
-        case BinOpType::Exponentiation: exporter_->write_separator_sign(std::move("**")); break;
+        case BinOpType::Exponentiation: exporter_->write_operator_sign(std::move("**")); break;
         case BinOpType::Equal: exporter_->write_operator_sign(std::move("==")); break;
         case BinOpType::NotEqual: exporter_->write_operator_sign(std::move("!=")); break;
         case BinOpType::Less: exporter_->write_operator_sign(std::move("<")); break;
@@ -153,18 +123,18 @@ void ASTVisitor::visit(BinOpExpr const& expr) {
         case BinOpType::BitOr: exporter_->write_operator_sign(std::move("|")); break;
         case BinOpType::BitXor: exporter_->write_operator_sign(std::move("^")); break;
         case BinOpType::Comma: exporter_->write_separator_sign(std::move(",")); break;
-        case BinOpType::AddAssign: exporter_->write_separator_sign(std::move("+=")); break;
-        case BinOpType::SubtractAssign: exporter_->write_separator_sign(std::move("-=")); break;
-        case BinOpType::MultiplyAssign: exporter_->write_separator_sign(std::move("*=")); break;
-        case BinOpType::DivideAssign: exporter_->write_separator_sign(std::move("/=")); break;
-        case BinOpType::FloorDivideAssign: exporter_->write_separator_sign(std::move("div=")); break;
-        case BinOpType::ModuloAssign: exporter_->write_separator_sign(std::move("%=")); break;
-        case BinOpType::ExponentiationAssign: exporter_->write_separator_sign(std::move("**=")); break;
-        case BinOpType::BitShiftRightAssign: exporter_->write_separator_sign(std::move(">>=")); break;
-        case BinOpType::BitShiftLeftAssign: exporter_->write_separator_sign(std::move("<<=")); break;
-        case BinOpType::BitAndAssign: exporter_->write_separator_sign(std::move("&=")); break;
-        case BinOpType::BitOrAssign: exporter_->write_separator_sign(std::move("|=")); break;
-        case BinOpType::BitXorAssign: exporter_->write_separator_sign(std::move("^=")); break;
+        case BinOpType::AddAssign: exporter_->write_operator_sign(std::move("+=")); break;
+        case BinOpType::SubtractAssign: exporter_->write_operator_sign(std::move("-=")); break;
+        case BinOpType::MultiplyAssign: exporter_->write_operator_sign(std::move("*=")); break;
+        case BinOpType::DivideAssign: exporter_->write_operator_sign(std::move("/=")); break;
+        case BinOpType::FloorDivideAssign: exporter_->write_operator_sign(std::move("div=")); break;
+        case BinOpType::ModuloAssign: exporter_->write_operator_sign(std::move("%=")); break;
+        case BinOpType::ExponentiationAssign: exporter_->write_operator_sign(std::move("**=")); break;
+        case BinOpType::BitShiftRightAssign: exporter_->write_operator_sign(std::move(">>=")); break;
+        case BinOpType::BitShiftLeftAssign: exporter_->write_operator_sign(std::move("<<=")); break;
+        case BinOpType::BitAndAssign: exporter_->write_operator_sign(std::move("&=")); break;
+        case BinOpType::BitOrAssign: exporter_->write_operator_sign(std::move("|=")); break;
+        case BinOpType::BitXorAssign: exporter_->write_operator_sign(std::move("^=")); break;
     }
     exporter_->write_space();
     expr.right_ ? expr.right_->accept(*this) : exporter_->write_invalid_word();
@@ -236,7 +206,7 @@ void ASTVisitor::visit(GlobalVarRefExpr const& expr) {
 }
 
 void ASTVisitor::visit(ClassRefExpr const& expr) {
-    exporter_->write_class_name(expr.name_);
+    write_identifier_from_string(expr.name_);
 }
 
 void ASTVisitor::visit(FunctionCallExpr const& expr) {
@@ -258,7 +228,8 @@ void ASTVisitor::visit(MethodCallExpr const& expr) {
 }
 
 void ASTVisitor::visit(LambdaCallExpr const& expr) {
-
+    expr.lambda_ ? expr.lambda_->accept(*this) : void();
+    write_parameters(expr.args_);
 }
 
 void ASTVisitor::visit(LambdaExpr const& expr) {
@@ -528,7 +499,7 @@ void ASTVisitor::visit(DefStmt const& stmt) {
 void ASTVisitor::visit(MethodDefStmt const& stmt) {
     if (!configurator_->sh_meth_def() ||
         (stmt.access_ != AccessModifier::Public && configurator_->get_view()->view() != std::move("inner")) ||
-        stmt.virtuality_ == Virtuality::Virtual
+        !stmt.func_ || !stmt.func_->body_
     ) {
         return;
     }
@@ -541,10 +512,14 @@ void ASTVisitor::visit(MethodDefStmt const& stmt) {
         }
         exporter_->write_separator_sign(std::move("::"));
     }
-    exporter_->write_method_name(stmt.func_->name_);
-    write_parameters(stmt.func_->params_);
-    write_return_type(stmt.func_->retType_);
-    write_body(stmt.func_->body_);
+    if (stmt.func_) {
+        exporter_->write_method_name(stmt.func_->name_);
+        write_parameters(stmt.func_->params_);
+        write_return_type(stmt.func_->retType_);
+        write_body(stmt.func_->body_);
+    } else {
+        exporter_->write_invalid_word();
+    }
 }
 
 void ASTVisitor::visit(BaseInitializerStmt const& stmt) {
@@ -554,23 +529,7 @@ void ASTVisitor::visit(BaseInitializerStmt const& stmt) {
         exporter_->write_constr_word();
         exporter_->write_space();
     }
-    std::string name = stmt.base_;
-    size_t st = name.find(std::move('<'));
-    size_t en = name.find(std::move('>'));
-    if (st != std::string::npos && en != std::string::npos && st < en) {
-        std::string cl = name.substr(0, st);
-        std::string genPar = name.substr(st + 1, en - st - 1);
-        exporter_->write_class_name(std::move(cl));
-        if (configurator_->sh_gener_par()) {
-            exporter_->write_separator_sign(std::move("<"));
-            exporter_->write_gen_param_name(std::move(genPar));
-            exporter_->write_separator_sign(std::move(">"));
-        }
-    } else if (name == std::move("this")) {
-        exporter_->write_this_word();
-    } else {
-        exporter_->write_class_name(std::move(name));
-    }
+    write_identifier_from_string(stmt.base_);
     write_parameters(stmt.args_);
 }
 
@@ -599,7 +558,7 @@ void ASTVisitor::visit(ConstructorDefStmt const& stmt) {
 }
 
 void ASTVisitor::visit(DestructorDefStmt const& stmt) {
-    if (!configurator_->sh_meth_def()) {
+    if (!configurator_->sh_meth_def() && !stmt.body_) {
         return;
     }
     configurator_->sh_other_expr() ? (exporter_->write_destr_word(), exporter_->write_space()) : void();
@@ -627,6 +586,8 @@ void ASTVisitor::visit(InterfaceDefStmt const& stmt) {
     }
     currInterfName_ = std::make_unique<std::stringstream>(stmt.name_);
     if (configurator_->sh_gener_par() && !stmt.tparams_.empty()) {
+        exporter_->write_template_word();
+        exporter_->write_space();
         write_gen_params(stmt.tparams_);
         exporter_->write_new_line();
     }
@@ -644,6 +605,10 @@ void ASTVisitor::visit(InterfaceDefStmt const& stmt) {
             write_methods(meth);
         }
         if (configurator_->get_view()->view() == std::move("inner")) {
+            if (has_acc_mod(stmt.methods_, meth, AccessModifier::Private)) {
+                exporter_->write_private_word();
+                write_methods(meth);
+            }
             if (has_acc_mod(stmt.methods_, meth, AccessModifier::Protected)) {
                 exporter_->write_protected_word();
                 write_methods(meth);
@@ -659,6 +624,8 @@ void ASTVisitor::visit(ClassDefStmt const& stmt) {
     currClassName_ = std::make_unique<std::stringstream>(stmt.name_);
     if (configurator_->sh_class_dec()) {
         if (configurator_->sh_gener_par() && !stmt.tparams_.empty()) {
+            exporter_->write_template_word();
+            exporter_->write_space();
             write_gen_params(stmt.tparams_);
             exporter_->write_new_line();
         }
@@ -766,14 +733,14 @@ void ASTVisitor::visit(ClassDefStmt const& stmt) {
             }
         }
         for (size_t i = 0; i < stmt.destructors_.size(); ++i) {
-            if (stmt.destructors_.at(i)) {
+            if (stmt.destructors_.at(i) && stmt.destructors_.at(i)->body_) {
                 exporter_->write_new_line();
                 stmt.destructors_.at(i)->accept(*this);
                 exporter_->write_new_line();
             }
         }
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
-            if (stmt.methods_.at(i) && stmt.methods_.at(i)->virtuality_ == Virtuality::NotVirtual) {
+            if (stmt.methods_.at(i) && stmt.methods_.at(i)->func_ && stmt.methods_.at(i)->func_->body_) {
                 exporter_->write_new_line();
                 stmt.methods_.at(i)->accept(*this);
                 exporter_->write_new_line();
@@ -856,8 +823,13 @@ void ASTVisitor::write_methods(std::vector<MethodDefStmt*>& meth) {
     bool once = false;
     for (size_t i = 0; i < meth.size(); ++i) {
         if (meth.at(i) && meth.at(i)->func_) {
-            if (meth.at(i)->virtuality_ == Virtuality::Virtual) {
-                exporter_->write_virtual_word();
+            if (meth.at(i)->func_->body_) {
+                if (meth.at(i)->virtuality_ == Virtuality::Virtual) {
+                    exporter_->write_virtual_word();
+                    write_arrow();
+                }
+            } else {
+                exporter_->write_abstract_word();
                 write_arrow();
             }
             exporter_->write_method_name(meth.at(i)->func_->name_);
@@ -903,6 +875,39 @@ void ASTVisitor::write_gen_params(const std::vector<GenericParam*>& params) {
         (i < params.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
     }
     exporter_->write_separator_sign(std::move(">"));
+}
+
+void ASTVisitor::write_identifier_from_string(std::string className) {
+    size_t st = std::move(className.find(std::move('<')));
+    size_t en = std::move(className.find(std::move('>')));
+    if (st != std::move(std::string::npos) && en != std::move(std::string::npos) && st < en) {
+        exporter_->write_class_name(className.substr(0, st));
+        if (configurator_->sh_gener_par()) {
+            exporter_->write_separator_sign(std::move("<"));
+            exporter_->write_gen_param_name(className.substr(st + 1, en - st - 1));
+            exporter_->write_separator_sign(std::move(">"));
+        }
+    } else {
+        if (!currGenParams_->empty()) {
+            for (auto& a : *currGenParams_) {
+                if (std::move(a.str()) == className) {
+                    exporter_->write_gen_param_name(std::move(className));
+                    return;
+                }
+            }
+        }
+        if (className == std::move(currClassName_->str())) {
+            exporter_->write_class_name(std::move(className));
+        } else if (className == std::move(currInterfName_->str())) {
+            exporter_->write_interface_name(std::move(className));
+        } else if (className == std::move("this")) {
+            exporter_->write_this_word();
+        }else if (className[0] >= std::move('A') && className[0] <= std::move('Z')) {
+            exporter_->write_class_name(std::move(className));
+        } else {
+            exporter_->write_user_type(std::move(className));
+        }
+    }
 }
 
 void ASTVisitor::write_implementations(const std::vector<InterfaceDefStmt*>& interfaces) {

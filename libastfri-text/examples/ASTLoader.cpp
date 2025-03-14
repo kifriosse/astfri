@@ -142,7 +142,7 @@ namespace my_ast_trees
                     }))
                 )),
                 std::move(AccessModifier::Public),
-                std::move(Virtuality::NotVirtual)
+                std::move(Virtuality::Virtual)
             )),
             std::move(sfc.mk_method_def(
                 cdsImplStack,
@@ -180,7 +180,7 @@ namespace my_ast_trees
                     }))
                 )),
                 std::move(AccessModifier::Public),
-                std::move(Virtuality::NotVirtual)
+                std::move(Virtuality::Virtual)
             )),
             std::move(sfc.mk_method_def(
                 cdsImplStack,
@@ -232,7 +232,7 @@ namespace my_ast_trees
                     }))
                 )),
                 std::move(AccessModifier::Public),
-                std::move(Virtuality::NotVirtual)
+                std::move(Virtuality::Virtual)
             )),
             std::move(sfc.mk_method_def(
                 cdsImplStack,
@@ -333,7 +333,7 @@ namespace my_ast_trees
                     }))
                 )),
                 std::move(AccessModifier::Public),
-                std::move(Virtuality::NotVirtual)
+                std::move(Virtuality::Virtual)
             )),
             std::move(sfc.mk_method_def(
                 cdsExplStack,
@@ -371,7 +371,7 @@ namespace my_ast_trees
                     }))
                 )),
                 std::move(AccessModifier::Public),
-                std::move(Virtuality::NotVirtual)
+                std::move(Virtuality::Virtual)
             )),
             std::move(sfc.mk_method_def(
                 cdsExplStack,
@@ -423,7 +423,7 @@ namespace my_ast_trees
                     }))
                 )),
                 std::move(AccessModifier::Public),
-                std::move(Virtuality::NotVirtual)
+                std::move(Virtuality::Virtual)
             )),
             std::move(sfc.mk_method_def(
                 cdsExplStack,

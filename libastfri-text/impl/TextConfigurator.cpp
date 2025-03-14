@@ -199,6 +199,12 @@ void TextConfigurator::load_new_config_file() {
             if (ex.HasMember(std::move("virtual_word")) && ex[std::move("virtual_word")].IsString() && ex[std::move("virtual_word")].GetStringLength() > 0) {
                 virtualWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("virtual_word")].GetString()));
             }
+            if (ex.HasMember(std::move("abstract_word")) && ex[std::move("abstract_word")].IsString() && ex[std::move("abstract_word")].GetStringLength() > 0) {
+                abstractWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("abstract_word")].GetString()));
+            }
+            if (ex.HasMember(std::move("template_word")) && ex[std::move("template_word")].IsString() && ex[std::move("template_word")].GetStringLength() > 0) {
+                templateWord_ = std::make_unique<std::stringstream>(std::move(ex[std::move("template_word")].GetString()));
+            }
             if (ex.HasMember(std::move("STYLE")) && ex[std::move("STYLE")].IsObject()) {
                 const rj::Value& st = std::move(ex[std::move("STYLE")]);
                 if (st.HasMember(std::move("general_style")) && st[std::move("general_style")].IsString()) {
@@ -269,6 +275,12 @@ void TextConfigurator::load_new_config_file() {
                 }
                 if (st.HasMember(std::move("virtual_word_style")) && st[std::move("virtual_word_style")].IsString()) {
                     virtualWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("virtual_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("abstract_word_style")) && st[std::move("abstract_word_style")].IsString()) {
+                    abstractWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("abstract_word_style")].GetString()));
+                }
+                if (st.HasMember(std::move("template_word_style")) && st[std::move("template_word_style")].IsString()) {
+                    templateWordStyle_ = std::make_unique<std::stringstream>(std::move(st[std::move("template_word_style")].GetString()));
                 }
             }
         }
@@ -379,6 +391,8 @@ void TextConfigurator::set_defaults() {
     deleteWord_ = std::make_unique<std::stringstream>(std::move("delete"));
     pointerWord_ = std::make_unique<std::stringstream>(std::move("↑"));
     virtualWord_ = std::make_unique<std::stringstream>(std::move("is virtual"));
+    abstractWord_ = std::make_unique<std::stringstream>(std::move("is abstract"));
+    templateWord_ = std::make_unique<std::stringstream>(std::move("template"));
     systExprStyle_ = std::make_unique<std::stringstream>();
     classWordStyle_ = std::make_unique<std::stringstream>();
     interfaceWordStyle_ = std::make_unique<std::stringstream>();
@@ -402,11 +416,13 @@ void TextConfigurator::set_defaults() {
     deleteWordStyle_ = std::make_unique<std::stringstream>();
     pointerWordStyle_ = std::make_unique<std::stringstream>();
     virtualWordStyle_ = std::make_unique<std::stringstream>();
+    abstractWordStyle_ = std::make_unique<std::stringstream>();
+    templateWordStyle_ = std::make_unique<std::stringstream>();
     constrWord_ = std::make_unique<std::stringstream>(std::move("constructor"));
     destrWord_ = std::make_unique<std::stringstream>(std::move("destructor"));
     methodWord_ = std::make_unique<std::stringstream>(std::move("method"));
     functionWord_ = std::make_unique<std::stringstream>(std::move("function"));
-    lambdaWord_ = std::make_unique<std::stringstream>(std::move("lambda"));
+    lambdaWord_ = std::make_unique<std::stringstream>(std::move("λ"));
     callWord_ = std::make_unique<std::stringstream>(std::move("call"));
     defineWord_ = std::make_unique<std::stringstream>(std::move("define"));
     returnsWord_ = std::make_unique<std::stringstream>(std::move("returns"));

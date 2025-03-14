@@ -76,6 +76,8 @@ public:
     void write_delete_word() override;
     void write_pointer_word() override;
     void write_virtual_word() override;
+    void write_abstract_word() override;
+    void write_template_word() override;
     void write_constr_word() override;
     void write_destr_word() override;
     void write_method_word() override;
