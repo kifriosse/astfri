@@ -19,9 +19,9 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
 {
     "CONFIGURATOR":{
         "FILE":{
-            "name":"suborik",
-            "path":"/mnt/c/users/marek/desktop/",
-            "format":"html"
+            "name":"output",
+            "path":"",
+            "format":"txt"
         },
         "DEFAULT_STYLE":"font-family:Consolas;font-size:18px",
         "UNKNOWN_WORD":"UNKNOWN EXPRESSION",
@@ -70,7 +70,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "param_var_name_style":""
         },
         "OPERATOR":{
-            "assign":"<-",
+            "assign":"=",
             "style":""
         },
         "SEPARATOR":{
@@ -138,6 +138,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "delete_word":"delete",
             "pointer_word":"↑",
             "virtual_word":"is virtual",
+            "abstract_word":"is abstract",
             "template_word":"template",
             "STYLE":{
                 "general_style":"",
@@ -163,6 +164,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
                 "delete_word_style":"",
                 "pointer_word_style":"",
                 "virtual_word_style":"",
+                "abstract_word_style":"",
                 "template_word_style":""
             }
         },
@@ -171,7 +173,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "destructor_word":"destructor",
             "method_word":"method",
             "function_word":"function",
-            "lambda_word":"lambda",
+            "lambda_word":"λ",
             "call_word":"call",
             "define_word":"define",
             "returns_word":"returns",

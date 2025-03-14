@@ -499,7 +499,7 @@ void ASTVisitor::visit(DefStmt const& stmt) {
 void ASTVisitor::visit(MethodDefStmt const& stmt) {
     if (!configurator_->sh_meth_def() ||
         (stmt.access_ != AccessModifier::Public && configurator_->get_view()->view() != std::move("inner")) ||
-        stmt.virtuality_ == Virtuality::Virtual
+        !stmt.func_ || !stmt.func_->body_
     ) {
         return;
     }
@@ -558,7 +558,7 @@ void ASTVisitor::visit(ConstructorDefStmt const& stmt) {
 }
 
 void ASTVisitor::visit(DestructorDefStmt const& stmt) {
-    if (!configurator_->sh_meth_def()) {
+    if (!configurator_->sh_meth_def() && !stmt.body_) {
         return;
     }
     configurator_->sh_other_expr() ? (exporter_->write_destr_word(), exporter_->write_space()) : void();
@@ -605,6 +605,10 @@ void ASTVisitor::visit(InterfaceDefStmt const& stmt) {
             write_methods(meth);
         }
         if (configurator_->get_view()->view() == std::move("inner")) {
+            if (has_acc_mod(stmt.methods_, meth, AccessModifier::Private)) {
+                exporter_->write_private_word();
+                write_methods(meth);
+            }
             if (has_acc_mod(stmt.methods_, meth, AccessModifier::Protected)) {
                 exporter_->write_protected_word();
                 write_methods(meth);
@@ -736,9 +740,7 @@ void ASTVisitor::visit(ClassDefStmt const& stmt) {
             }
         }
         for (size_t i = 0; i < stmt.methods_.size(); ++i) {
-            if (stmt.methods_.at(i) && stmt.methods_.at(i)->virtuality_ == Virtuality::NotVirtual &&
-                stmt.methods_.at(i)->func_ && stmt.methods_.at(i)->func_->body_
-            ) {
+            if (stmt.methods_.at(i) && stmt.methods_.at(i)->func_ && stmt.methods_.at(i)->func_->body_) {
                 exporter_->write_new_line();
                 stmt.methods_.at(i)->accept(*this);
                 exporter_->write_new_line();
@@ -821,8 +823,13 @@ void ASTVisitor::write_methods(std::vector<MethodDefStmt*>& meth) {
     bool once = false;
     for (size_t i = 0; i < meth.size(); ++i) {
         if (meth.at(i) && meth.at(i)->func_) {
-            if (meth.at(i)->virtuality_ == Virtuality::Virtual) {
-                exporter_->write_virtual_word();
+            if (meth.at(i)->func_->body_) {
+                if (meth.at(i)->virtuality_ == Virtuality::Virtual) {
+                    exporter_->write_virtual_word();
+                    write_arrow();
+                }
+            } else {
+                exporter_->write_abstract_word();
                 write_arrow();
             }
             exporter_->write_method_name(meth.at(i)->func_->name_);

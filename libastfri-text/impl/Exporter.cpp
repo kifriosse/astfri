@@ -297,6 +297,10 @@ void Exporter::write_virtual_word() {
     write_word(config_->get_virtual_word()->str());
 }
 
+void Exporter::write_abstract_word() {
+    write_word(config_->get_abstract_word()->str());
+}
+
 void Exporter::write_template_word() {
     write_word(config_->get_template_word()->str());
 }

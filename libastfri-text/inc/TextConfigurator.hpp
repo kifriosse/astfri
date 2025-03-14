@@ -48,6 +48,7 @@ class TextConfigurator : public Configurator {
     std::unique_ptr<std::stringstream> deleteWord_;
     std::unique_ptr<std::stringstream> pointerWord_;
     std::unique_ptr<std::stringstream> virtualWord_;
+    std::unique_ptr<std::stringstream> abstractWord_;
     std::unique_ptr<std::stringstream> templateWord_;
     std::unique_ptr<std::stringstream> systExprStyle_;
     std::unique_ptr<std::stringstream> classWordStyle_;
@@ -72,6 +73,7 @@ class TextConfigurator : public Configurator {
     std::unique_ptr<std::stringstream> deleteWordStyle_;
     std::unique_ptr<std::stringstream> pointerWordStyle_;
     std::unique_ptr<std::stringstream> virtualWordStyle_;
+    std::unique_ptr<std::stringstream> abstractWordStyle_;
     std::unique_ptr<std::stringstream> templateWordStyle_;
     std::unique_ptr<std::stringstream> constrWord_;
     std::unique_ptr<std::stringstream> destrWord_;
@@ -139,6 +141,7 @@ public:
     const std::stringstream* get_delete_word()    { return deleteWord_.get(); };
     const std::stringstream* get_pointer_word()   { return pointerWord_.get(); };
     const std::stringstream* get_virtual_word()   { return virtualWord_.get(); };
+    const std::stringstream* get_abstract_word()  { return abstractWord_.get(); };
     const std::stringstream* get_template_word()  { return templateWord_.get(); };
     const std::stringstream* get_sys_ex_style()         { return systExprStyle_.get(); };
     const std::stringstream* get_class_word_style()     { return classWordStyle_.get(); };
@@ -163,6 +166,7 @@ public:
     const std::stringstream* get_delete_word_style()    { return deleteWordStyle_.get(); };
     const std::stringstream* get_pointer_word_style()   { return pointerWordStyle_.get(); };
     const std::stringstream* get_virtual_word_style()   { return virtualWordStyle_.get(); };
+    const std::stringstream* get_abstract_word_style()  { return abstractWordStyle_.get(); };
     const std::stringstream* get_template_word_style()  { return templateWordStyle_.get(); };
     const std::stringstream* get_constr_word()          { return constrWord_.get(); };
     const std::stringstream* get_destr_word()           { return destrWord_.get(); };
