@@ -110,7 +110,7 @@ MethodDefStmt* StmtFactory::mk_method_def()
 }
 
 MethodDefStmt* StmtFactory::mk_method_def(
-    ClassDefStmt* owner,
+    UserTypeDefStmt* owner,
     FunctionDefStmt* func,
     AccessModifier access,
     Virtuality virtuality
