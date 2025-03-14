@@ -61,6 +61,7 @@ astfri::NewExpr* serialize_new_expr(rapidjson::Value& value);
 astfri::DeleteExpr* serialize_delete_expr(rapidjson::Value& value);
 astfri::UnknownExpr* serialize_unknown_expr();
 astfri::ClassRefExpr* serialize_class_ref_expr(rapidjson::Value& value);
+astfri::LambdaCallExpr* serialize_lambda_call_expr(rapidjson::Value& value);
 
 astfri::Stmt* resolve_stmt(rapidjson::Value& value);
 

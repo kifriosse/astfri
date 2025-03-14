@@ -13,7 +13,7 @@ enum  ExprNodeType{
     IntLiteralExpr,FloatLiteralExpr,CharLiteralExpr,StringLiteralExpr,BoolLiteralExpr,NullLiteralExpr,IfExpr,
     BinOpExpr,UnaryOpExpr,ParamVarRefExpr,LocalVarRefExpr,MemberVarRefExpr,
     GlobalVarRefExpr,FunctionCallExpr,MethodCallExpr,LambdaExpr,ThisExpr,UnknownExpr,ConstructorCallExpr,NewExpr,
-    DeleteExpr,ClassRefExpr};
+    DeleteExpr,ClassRefExpr,LambdaCallExpr};
     
 enum StmtNodeType{    
     LocalVarDefStmt,ParamVarDefStmt,
@@ -34,7 +34,7 @@ inline    std::unordered_map<std::string,ExprNodeType> strToExprMapping={
     {"LocalVarRefExpr",LocalVarRefExpr},{"MemberVarRefExpr",MemberVarRefExpr},{"GlobalVarRefExpr",GlobalVarRefExpr},
     {"FunctionCallExpr",FunctionCallExpr},{"MethodCallExpr",MethodCallExpr},{"LambdaExpr",LambdaExpr},
     {"ThisExpr",ThisExpr},{"UnknownExpr",UnknownExpr},{"ConstructorCallExpr",ConstructorCallExpr},{"NewExpr",NewExpr},
-    {"DeleteExpr",DeleteExpr},{"ClassRefExpr",ClassRefExpr}};
+    {"DeleteExpr",DeleteExpr},{"ClassRefExpr",ClassRefExpr},{"LambdaCallExpr",LambdaCallExpr}};
     
 inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVarDefStmt",LocalVarDefStmt},
     {"ParamVarDefStmt",ParamVarDefStmt},{"MemberVarDefStmt",MemberVarDefStmt},{"GlobalVarDefStmt",GlobalVarDefStmt},
@@ -48,7 +48,7 @@ inline std::unordered_map<std::string,StmtNodeType> strToStmtMapping={{"LocalVar
     {"DefaultCaseStmt",DefaultCaseStmt},{"InterfaceDefStmt",InterfaceDefStmt}};
 
 
-inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Equal},{"+",astfri::BinOpType::Add},
+inline std::unordered_map<std::string,astfri::BinOpType> binOpTypeMapping={{"=",astfri::BinOpType::Assign},{"+",astfri::BinOpType::Add},
 {"-",astfri::BinOpType::Subtract},{"*",astfri::BinOpType::Multiply},{"/",astfri::BinOpType::Divide},{"%",astfri::BinOpType::Modulo},
 {"==",astfri::BinOpType::Equal},{"!=",astfri::BinOpType::NotEqual},{"<",astfri::BinOpType::Less},{"<=",astfri::BinOpType::LessEqual},
 {">",astfri::BinOpType::Greater},{">=",astfri::BinOpType::GreaterEqual},{">>",astfri::BinOpType::BitShiftRight},
