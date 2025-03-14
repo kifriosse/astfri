@@ -18,12 +18,12 @@ private:
     astfri::ExprFactory& exprFactory;
     NodeMapper* nodeMapper;
 
-    astfri::BinOpExpr* get_bin_op_expr(
+    astfri::BinOpExpr* transform_bin_op_expr_node(
         TSNode tsNode,
         std::string const& sourceCode
     );
 
-    astfri::UnaryOpExpr* get_un_op_expr(
+    astfri::UnaryOpExpr* transform_un_op_expr_node(
         TSNode tsNode,
         std::string const& sourceCode
     );
@@ -33,14 +33,14 @@ private:
         astfri::LocalVarRefExpr*,
         astfri::MemberVarRefExpr*,
         astfri::StringLiteralExpr*>
-        get_ref_expr(TSNode tsNode, std::string const& sourceCode);
+        transform_ref_expr_node(TSNode tsNode, std::string const& sourceCode);
 
-    astfri::MethodCallExpr* get_method_call(
+    astfri::MethodCallExpr* transform_method_call_node(
         TSNode tsNode,
         std::string const& sourceCode
     );
 
-    astfri::NewExpr* get_new_expr(
+    astfri::NewExpr* transform_new_expr_node(
         TSNode paramsNode,
         std::string const& sourceCode
     );
