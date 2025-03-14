@@ -37,7 +37,7 @@ private:
 public:
     Chrysler(int cost) : Auto(cost) {
         this->time_ = 500;
-    }
+    };
     void ride() override;
 };
 
@@ -48,9 +48,11 @@ void Chrysler::ride() {
 }
 
 int main() {
-    Chrysler chr(500);
-    Audi au(1500);
-    chr.ride();
-    au.ride();
+    // Chrysler chr(500);
+    Audi* au = new Audi(1500);
+    // chr.ride();
+    au->ride();
+
+    delete au;
     return 0;
 }
