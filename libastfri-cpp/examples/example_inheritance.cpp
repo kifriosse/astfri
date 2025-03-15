@@ -3,25 +3,38 @@ private:
     bool is_good();
 protected:
     int cost_;
+    float speed_;
 public:
-    Auto(int cost) : cost_(cost) {};
-    virtual void ride() {}; // neskor testnut na = 0
+    Auto(int cost, float speed) : cost_(cost), speed_(speed) {};
+    virtual void ride(); // neskor testnut na = 0
+};
+
+void Auto::ride() {
+    int limit = 10;
+    for (int i = 0; i < limit; i++) {
+        limit++;
+    }
 };
 
 bool Auto::is_good() {
     return true;
 }
 
+// po tialto vsetko dobre
+
 class Audi : public Auto {
 public:
-    Audi(int cost);
+    Audi(int cost) : Auto(cost, 200.64){
+        this->cost_ = this->cost_ >> 2;
+        int nieco = 0;
+    };
     void ride() override;
 };
 
-Audi::Audi(int cost) : Auto(cost){
-    this->cost_ = this->cost_ * 2;
-    int nieco = 0;
-};
+// Audi::Audi(int cost) : Auto(cost){
+//     this->cost_ = this->cost_ * 2;
+//     int nieco = 0;
+// };
 
 void Audi::ride() {
     int time = 300;
@@ -35,22 +48,20 @@ class Chrysler : public Auto {
 private:
     int time_;
 public:
-    Chrysler(int cost) : Auto(cost) {
+    Chrysler(float speed) : Auto(25000, speed) {
         this->time_ = 500;
     };
-    void ride() override;
+    void ride() override {
+        while (this->time_ != 0) {
+            this->time_--;
+        }
+    };
 };
 
-void Chrysler::ride() {
-    while (this->time_ != 0) {
-        this->time_--;
-    }
-}
-
 int main() {
-    // Chrysler chr(500);
-    Audi* au = new Audi(1500);
-    // chr.ride();
+    Chrysler chr(130.128);
+    Audi* au = new Audi(50000);
+    chr.ride();
     au->ride();
 
     delete au;
