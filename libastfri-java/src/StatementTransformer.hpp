@@ -13,6 +13,10 @@
 
 #include "ExpressionTransformer.hpp"
 #include "NodeMapper.hpp"
+#include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
+
+using MethodBodyType = std::tuple<astfri::AccessModifier, astfri::Type*, std::string, std::vector<astfri::ParamVarDefStmt*>, std::vector<astfri::BaseInitializerStmt*>, astfri::CompoundStmt*>;
 
 class StatementTransformer
 {
@@ -76,6 +80,11 @@ private:
     );
 
     astfri::CompoundStmt* transform_body_node(
+        TSNode tsNode,
+        std::string const& sourceCode
+    );
+
+    MethodBodyType extract_body_node(
         TSNode tsNode,
         std::string const& sourceCode
     );

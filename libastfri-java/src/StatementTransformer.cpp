@@ -4,7 +4,12 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
+#include <tuple>
 #include <vector>
+
+#include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
 
 StatementTransformer::StatementTransformer(
     TSTree* tree,
@@ -66,6 +71,12 @@ astfri::Stmt* StatementTransformer::get_stmt(
     {
         return stmtFactory.mk_continue();
     }
+    else if (nodeName.find("(line_comment") == 0)
+    {
+        return stmtFactory.mk_expr(exprFactory.mk_string_literal(
+            this->exprTransformer->get_node_text(tsNode, sourceCode)
+        ));
+    }
     else if (nodeName.find("(explicit_constructor_invocation") == 0)
     {
         std::vector<astfri::Expr*> args;
@@ -104,7 +115,9 @@ astfri::Type* StatementTransformer::make_return_type(
     }
     else if (nodeName.find("(generic_type") == 0)
     {
-        type = typeFactory.mk_user(this->exprTransformer->get_node_text(tsNode, sourceCode));
+        type = typeFactory.mk_user(
+            this->exprTransformer->get_node_text(tsNode, sourceCode)
+        );
     }
     else if (nodeName.find("(array_type") == 0)
     {
@@ -306,8 +319,8 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
         {
             TSNode caseNode = ts_node_named_child(switchBodyNode, i);
             uint32_t switchCaseChildren = ts_node_named_child_count(caseNode);
-            astfri::Expr* expr          = nullptr;
             std::vector<astfri::Stmt*> stmts;
+            std::vector<astfri::Expr*> caseExprs;
             bool isDefaultCase = false;
 
             for (uint32_t j = 0; j < switchCaseChildren; j++)
@@ -318,8 +331,18 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
 
                 if (childText.find("case") == 0)
                 {
-                    TSNode caseChild = ts_node_named_child(child, 0);
-                    expr = exprTransformer->get_expr(caseChild, sourceCode);
+                    TSNode caseChild          = ts_node_named_child(child, 0);
+                    std::string caseChildName = ts_node_string(caseChild);
+                    uint32_t exprCount = ts_node_named_child_count(child);
+                    for (uint32_t k = 0; k < exprCount; k++)
+                    {
+                        TSNode exprNode    = ts_node_named_child(child, k);
+                        astfri::Expr* expr = this->exprTransformer->get_expr(
+                            exprNode,
+                            sourceCode
+                        );
+                        caseExprs.push_back(expr);
+                    }
                 }
                 else if (childText.find("default") == 0)
                 {
@@ -339,9 +362,10 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
             }
             else
             {
-                cases.push_back(
-                    stmtFactory.mk_case(expr, stmtFactory.mk_compound(stmts))
-                );
+                cases.push_back(stmtFactory.mk_case(
+                    caseExprs,
+                    stmtFactory.mk_compound(stmts)
+                ));
             }
         }
     }
@@ -487,7 +511,7 @@ astfri::CompoundStmt* StatementTransformer::transform_body_node(
     return stmtFactory.mk_compound(statements);
 }
 
-astfri::MethodDefStmt* StatementTransformer::transform_method_node(
+MethodBodyType StatementTransformer::extract_body_node(
     TSNode tsNode,
     std::string const& sourceCode
 )
@@ -495,83 +519,11 @@ astfri::MethodDefStmt* StatementTransformer::transform_method_node(
     astfri::Type* type = nullptr;
     std::string name;
     std::vector<astfri::ParamVarDefStmt*> params;
+    std::vector<astfri::BaseInitializerStmt*> baseInit;
     astfri::CompoundStmt* body    = nullptr;
     astfri::AccessModifier access = astfri::AccessModifier::Public;
 
-    uint32_t methodChildCount     = ts_node_named_child_count(tsNode);
-    bool typeSet                  = false;
-    for (uint32_t i = 0; i < methodChildCount; i++)
-    {
-        TSNode methodChild          = ts_node_named_child(tsNode, i);
-        std::string methodChildName = ts_node_string(methodChild);
-
-        if (methodChildName.find("(modifiers") == 0)
-        {
-            uint32_t modifiersCount = ts_node_child_count(methodChild);
-            for (uint32_t j = 0; j < modifiersCount; j++)
-            {
-                TSNode modifierNode = ts_node_child(methodChild, j);
-                std::string modifierNodeName
-                    = exprTransformer->get_node_text(modifierNode, sourceCode);
-                if (modifierNodeName == "private"
-                    || modifierNodeName == "public"
-                    || modifierNodeName == "internal"
-                    || modifierNodeName == "protected")
-                {
-                    access = this->nodeMapper->get_modMap()
-                                 .find(modifierNodeName)
-                                 ->second;
-                }
-            }
-        }
-        else if ((methodChildName.find("type") != std::string::npos
-                  || methodChildName.find("identifier") != std::string::npos)
-                 && ! typeSet)
-        {
-            type    = make_return_type(methodChild, sourceCode);
-            typeSet = true;
-        }
-        else if (methodChildName == "(identifier)")
-        {
-            name = exprTransformer->get_node_text(methodChild, sourceCode);
-        }
-        else if (methodChildName.find("(formal_parameters") == 0)
-        {
-            uint32_t paramtersCount = ts_node_named_child_count(methodChild);
-            for (uint32_t j = 0; j < paramtersCount; j++)
-            {
-                TSNode parameterNode = ts_node_named_child(methodChild, j);
-                std::string parameterNodeName = ts_node_string(parameterNode);
-                params.push_back(
-                    this->transform_param_node(parameterNode, sourceCode)
-                );
-            }
-        }
-        else if (methodChildName.find("(block ") == 0)
-        {
-            body = this->transform_body_node(methodChild, sourceCode);
-        }
-    }
-
-    astfri::FunctionDefStmt* func
-        = stmtFactory.mk_function_def(name, params, type, body);
-
-    return stmtFactory
-        .mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual);
-}
-
-astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
-    TSNode tsNode,
-    std::string const& sourceCode
-)
-{
-    astfri::AccessModifier access = astfri::AccessModifier::Public;
-    std::string name;
-    std::vector<astfri::ParamVarDefStmt*> params;
-    std::vector<astfri::BaseInitializerStmt*> baseInit;
-    astfri::CompoundStmt* body = nullptr;
-
-    uint32_t methodChildCount  = ts_node_named_child_count(tsNode);
+        uint32_t methodChildCount  = ts_node_named_child_count(tsNode);
     for (uint32_t i = 0; i < methodChildCount; i++)
     {
         TSNode methodChild          = ts_node_named_child(tsNode, i);
@@ -612,7 +564,7 @@ astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
                 );
             }
         }
-        else if (methodChildName.find("(constructor_body ") == 0)
+        else if (methodChildName.find("(constructor_body") == 0 || methodChildName.find("(block") == 0)
         {
             uint32_t bodyChildCount = ts_node_named_child_count(methodChild);
             std::vector<astfri::Stmt*> bodyStatements;
@@ -635,6 +587,52 @@ astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
             body = stmtFactory.mk_compound(bodyStatements);
         }
     }
+
+    return std::make_tuple(access, type, name, params, baseInit, body);
+}
+
+astfri::MethodDefStmt* StatementTransformer::transform_method_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Type* type = nullptr;
+    std::string name;
+    std::vector<astfri::ParamVarDefStmt*> params;
+    astfri::CompoundStmt* body    = nullptr;
+    astfri::AccessModifier access = astfri::AccessModifier::Public;
+
+    std::tuple methodBody         = this->extract_body_node(tsNode, sourceCode);
+    access = std::get<astfri::AccessModifier>(methodBody);
+    type   = std::get<astfri::Type*>(methodBody);
+    name   = std::get<std::string>(methodBody);
+    params = std::get<std::vector<astfri::ParamVarDefStmt*>>(methodBody);
+    body   = std::get<astfri::CompoundStmt*>(methodBody);
+
+    astfri::FunctionDefStmt* func
+        = stmtFactory.mk_function_def(name, params, type, body);
+
+    return stmtFactory
+        .mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual);
+}
+
+astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::AccessModifier access = astfri::AccessModifier::Public;
+    std::string name;
+    std::vector<astfri::ParamVarDefStmt*> params;
+    std::vector<astfri::BaseInitializerStmt*> baseInit;
+    astfri::CompoundStmt* body = nullptr;
+
+    std::tuple methodBody      = this->extract_body_node(tsNode, sourceCode);
+    access                     = std::get<astfri::AccessModifier>(methodBody);
+    name                       = std::get<std::string>(methodBody);
+    baseInit = std::get<std::vector<astfri::BaseInitializerStmt*>>(methodBody);
+    params = std::get<std::vector<astfri::ParamVarDefStmt*>>(methodBody);
+    body   = std::get<astfri::CompoundStmt*>(methodBody);
 
     return stmtFactory
         .mk_constructor_def(nullptr, params, baseInit, body, access);
