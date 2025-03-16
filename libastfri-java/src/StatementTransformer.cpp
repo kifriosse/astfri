@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
+#include <vector>
 
 StatementTransformer::StatementTransformer(
     TSTree* tree,
@@ -103,7 +104,7 @@ astfri::Type* StatementTransformer::make_return_type(
     }
     else if (nodeName.find("(generic_type") == 0)
     {
-        return type;
+        type = typeFactory.mk_user(this->exprTransformer->get_node_text(tsNode, sourceCode));
     }
     else if (nodeName.find("(array_type") == 0)
     {
@@ -504,7 +505,7 @@ astfri::MethodDefStmt* StatementTransformer::transform_method_node(
         TSNode methodChild          = ts_node_named_child(tsNode, i);
         std::string methodChildName = ts_node_string(methodChild);
 
-        if (methodChildName == ("(modifiers)"))
+        if (methodChildName.find("(modifiers") == 0)
         {
             uint32_t modifiersCount = ts_node_child_count(methodChild);
             for (uint32_t j = 0; j < modifiersCount; j++)
@@ -564,7 +565,7 @@ astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
     std::string const& sourceCode
 )
 {
-    astfri::AccessModifier access = astfri::AccessModifier::Internal;
+    astfri::AccessModifier access = astfri::AccessModifier::Public;
     std::string name;
     std::vector<astfri::ParamVarDefStmt*> params;
     std::vector<astfri::BaseInitializerStmt*> baseInit;
@@ -576,7 +577,7 @@ astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
         TSNode methodChild          = ts_node_named_child(tsNode, i);
         std::string methodChildName = ts_node_string(methodChild);
 
-        if (methodChildName == "(modifiers)")
+        if (methodChildName.find("(modifiers") == 0)
         {
             uint32_t modifiersCount = ts_node_child_count(methodChild);
             for (uint32_t j = 0; j < modifiersCount; j++)
