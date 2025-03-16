@@ -1,6 +1,11 @@
 #include "ExpressionTransformer.hpp"
 
+#include <cstdint>
+#include <cstring>
 #include <ranges>
+#include <string>
+#include <tree_sitter/api.h>
+#include "libastfri/inc/Expr.hpp"
 
 ExpressionTransformer::ExpressionTransformer() :
     typeFactory(astfri::TypeFactory::get_instance()),
@@ -62,21 +67,10 @@ astfri::Expr* ExpressionTransformer::get_expr(
     }
     else if (nodeName.find("(field_access ") == 0)
     {
-        TSNode object;
-        std::string objectName;
-        if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
-        {
-            object     = ts_node_named_child(tsNode, 0);
-            objectName = ts_node_string(object);
-        }
-        if (objectName == "(this)")
-        {
-            expr = exprFactory.mk_this();
-        }
-        else
-        {
-            expr = exprFactory.mk_class_ref(get_node_text(object, sourceCode));
-        }
+        TSNode identifierNode = ts_node_named_child(tsNode, 1);
+        auto refExprVariant
+            = this->transform_ref_expr_node(identifierNode, sourceCode);
+        std::visit([&expr](auto&& arg) { expr = arg; }, refExprVariant);
     }
     else if (nodeName == "(identifier)")
     {
@@ -123,6 +117,13 @@ astfri::Expr* ExpressionTransformer::get_expr(
     else if (nodeName.find("(parenthesized_expression") == 0)
     {
         expr = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
+    }
+    else if (nodeName.find("(ternary_expression") == 0)
+    {
+        astfri::Expr* cond = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
+        astfri::Expr* iftrue = this->get_expr(ts_node_named_child(tsNode, 1), sourceCode);
+        astfri::Expr* iffalse = this->get_expr(ts_node_named_child(tsNode, 2), sourceCode);
+        expr = exprFactory.mk_if(cond, iftrue, iffalse);
     }
     else
     {
@@ -223,155 +224,89 @@ std::variant<
         std::string const& sourceCode
     )
 {
-    std::string referenceName = get_node_text(tsNode, sourceCode);
-    TSNode currentNode        = tsNode;
-
-    while (std::string_view(ts_node_string(currentNode)).find("program")
-           == std::string::npos)
+    std::string referanceName = get_node_text(tsNode, sourceCode);
+    TSNode rootNode           = tsNode;
+    while (! ts_node_is_null(ts_node_parent(rootNode)))
     {
-        TSNode parentNode = ts_node_parent(currentNode);
-
-        // variable just for debugging
-        std::string debugParentNode = ts_node_string(parentNode);
-
-        if (std::string_view(ts_node_string(parentNode))
-                .find("formal_parameters")
-            != std::string::npos)
-        {
-            uint32_t childCount = ts_node_child_count(parentNode);
-            for (uint32_t i = 0; i < childCount; i++)
-            {
-                TSNode childNode = ts_node_child(parentNode, i);
-                if (std::string_view(ts_node_string(childNode))
-                        .find("formal_parameter")
-                    != std::string::npos)
-                {
-                    uint32_t grandChildCount = ts_node_child_count(childNode);
-                    for (uint32_t j = 0; j < grandChildCount; j++)
-                    {
-                        TSNode grandChildNode = ts_node_child(childNode, j);
-                        if (std::string_view(ts_node_string(grandChildNode))
-                                .find("identifier")
-                            != std::string::npos)
-                        {
-                            std::string grandChildNodeName
-                                = ts_node_string(grandChildNode);
-                            std::string grandChildNodeText
-                                = get_node_text(grandChildNode, sourceCode);
-                            if (grandChildNodeText == referenceName)
-                            {
-                                return exprFactory.mk_param_var_ref(
-                                    referenceName
-                                );
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (std::string_view(ts_node_string(parentNode)).find("block")
-            != std::string::npos)
-        {
-            uint32_t childCount = ts_node_child_count(parentNode);
-            for (uint32_t i = 0; i < childCount; i++)
-            {
-                TSNode childNode = ts_node_child(parentNode, i);
-                if (std::string_view(ts_node_string(childNode))
-                        .find("local_variable_declaration")
-                    != std::string::npos)
-                {
-                    uint32_t grandChildCount = ts_node_child_count(childNode);
-                    for (uint32_t j = 0; j < grandChildCount; j++)
-                    {
-                        TSNode grandChildNode = ts_node_child(childNode, j);
-                        if (std::string_view(ts_node_string(grandChildNode))
-                                .find("variable_declarator")
-                            != std::string::npos)
-                        {
-                            uint32_t greatGrandChildCount
-                                = ts_node_child_count(grandChildNode);
-                            for (uint32_t k = 0; k < greatGrandChildCount; k++)
-                            {
-                                TSNode greatGrandChildNode
-                                    = ts_node_child(grandChildNode, k);
-                                if (std::string_view(
-                                        ts_node_string(greatGrandChildNode)
-                                    )
-                                        .find("identifier")
-                                    != std::string::npos)
-                                {
-                                    if (get_node_text(
-                                            greatGrandChildNode,
-                                            sourceCode
-                                        )
-                                        == referenceName)
-                                    {
-                                        return exprFactory.mk_local_var_ref(
-                                            referenceName
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (std::string_view(ts_node_string(parentNode)).find("class_body")
-            != std::string::npos)
-        {
-            uint32_t childCount = ts_node_child_count(parentNode);
-            for (uint32_t i = 0; i < childCount; i++)
-            {
-                TSNode childNode = ts_node_child(parentNode, i);
-                if (std::string_view(ts_node_string(childNode))
-                        .find("field_declaration")
-                    != std::string::npos)
-                {
-                    uint32_t grandChildCount = ts_node_child_count(childNode);
-                    for (uint32_t j = 0; j < grandChildCount; j++)
-                    {
-                        TSNode grandChildNode = ts_node_child(childNode, j);
-                        if (std::string_view(ts_node_string(grandChildNode))
-                                .find("variable_declarator")
-                            != std::string::npos)
-                        {
-                            uint32_t greatGrandChildCount
-                                = ts_node_child_count(grandChildNode);
-                            for (uint32_t k = 0; k < greatGrandChildCount; k++)
-                            {
-                                TSNode greatGrandChildNode
-                                    = ts_node_child(grandChildNode, k);
-                                if (std::string_view(
-                                        ts_node_string(greatGrandChildNode)
-                                    )
-                                        .find("identifier")
-                                    != std::string::npos)
-                                {
-                                    if (get_node_text(
-                                            greatGrandChildNode,
-                                            sourceCode
-                                        )
-                                        == referenceName)
-                                    {
-                                        return exprFactory.mk_member_var_ref(
-                                            nullptr,
-                                            referenceName
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        currentNode = parentNode;
+        std::string nodeName = ts_node_string(rootNode);
+        rootNode             = ts_node_parent(rootNode);
     }
-    return exprFactory.mk_string_literal("?????");
+    char const* queryString
+        = "(local_variable_declaration type: (_) declarator: "
+          "(variable_declarator name: (identifier) @local_var_name value: "
+          "(_)?)) (formal_parameter type: (_) name: (identifier) @param_name) "
+          "(field_declaration (modifiers) type: (_) declarator: "
+          "(variable_declarator name: (identifier) @attr_name value: (_)?))";
+
+    uint32_t errorOffset;
+    TSQueryError errorType;
+
+    TSQuery* tsQuery = ts_query_new(
+        tree_sitter_java(),
+        queryString,
+        strlen(queryString),
+        &errorOffset,
+        &errorType
+    );
+
+    TSQueryCursor* tsCursor = ts_query_cursor_new();
+    ts_query_cursor_exec(tsCursor, tsQuery, rootNode);
+    TSQueryMatch tsMatch;
+
+    while (ts_query_cursor_next_match(tsCursor, &tsMatch))
+    {
+        for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+        {
+            TSQueryCapture tsCapture = tsMatch.captures[i];
+            uint32_t length;
+            std::string captureName = ts_query_capture_name_for_id(
+                tsQuery,
+                tsCapture.index,
+                &length
+            );
+            std::string nodeText = get_node_text(tsCapture.node, sourceCode);
+
+            if (captureName == "local_var_name" && referanceName == nodeText)
+            {
+                return exprFactory.mk_local_var_ref(referanceName);
+            }
+            if (captureName == "param_name" && referanceName == nodeText)
+            {
+                return exprFactory.mk_param_var_ref(referanceName);
+            }
+            if (captureName == "attr_name" && referanceName == nodeText)
+            {
+                astfri::Expr* owner = nullptr;
+
+                TSNode fieldAccessNode      = ts_node_parent(tsNode);
+                std::string fieldAccessNodeName = ts_node_string(fieldAccessNode);
+
+                if (fieldAccessNodeName.find("(field_access") == 0)
+                {
+                    TSNode objectNode = ts_node_child(
+                        fieldAccessNode,
+                        0
+                    );
+                    std::string objectNodeText
+                        = get_node_text(objectNode, sourceCode);
+
+                    if (objectNodeText == "this")
+                    {
+                        owner = exprFactory.mk_this();
+                    }
+                    else
+                    {
+                        owner = exprFactory.mk_class_ref(objectNodeText);
+                    }
+                }
+                return exprFactory.mk_member_var_ref(owner, referanceName);
+            }
+        }
+    }
+
+    ts_query_cursor_delete(tsCursor);
+    ts_query_delete(tsQuery);
+    return exprFactory.mk_string_literal("??????");
 }
 
 astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
@@ -383,21 +318,43 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
     std::string name;
     std::vector<astfri::Expr*> arguments;
     uint32_t childCount = ts_node_named_child_count(tsNode);
+    uint32_t childIndex = 0;
 
     for (uint32_t i = 0; i < childCount; i++)
     {
         TSNode child          = ts_node_named_child(tsNode, i);
-        std::string childName = ts_node_string(child);
+        std::string childType = ts_node_type(child);
+        char const* fieldName = ts_node_field_name_for_child(tsNode, childIndex);
 
-        if (childName.find("(field_access ") == 0 || childName == "(this)")
+        while (!fieldName)
         {
-            owner = this->get_expr(child, sourceCode);
+            fieldName = ts_node_field_name_for_child(tsNode, ++childIndex);
         }
-        else if (childName == ("(identifier)"))
+
+        if (childType == "field_access")
+        {
+            TSNode objectNode          = ts_node_named_child(child, 0);
+            std::string objectNodeName = ts_node_string(objectNode);
+            if (objectNodeName == "(this)")
+            {
+                owner = exprFactory.mk_this();
+            }
+            else
+            {
+                owner
+                    = exprFactory.mk_class_ref(get_node_text(child, sourceCode)
+                    );
+            }
+        }
+        else if (strcmp(fieldName,"object") == 0)
+        {
+            owner = exprFactory.mk_class_ref(get_node_text(child, sourceCode));
+        }
+        else if (strcmp(fieldName,"name") == 0)
         {
             name = get_node_text(child, sourceCode);
         }
-        else if (childName.find("(argument_list ") == 0)
+        else if (strcmp(fieldName,"arguments") == 0)
         {
             uint32_t argCount = ts_node_named_child_count(child);
             for (uint32_t j = 0; j < argCount; j++)
@@ -407,6 +364,7 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
                 arguments.push_back(get_expr(argNode, sourceCode));
             }
         }
+        ++childIndex;
     }
 
     return exprFactory.mk_method_call(owner, name, arguments);
