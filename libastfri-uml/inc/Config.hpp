@@ -6,6 +6,7 @@ namespace astfri::uml {
     struct Config {
         // type var, var : type
         TypeConvention* typeConvention_;
+        bool innerView_ = true;
         bool writeToFile_ = false;
         char indirectIndicator_ = '*';
         char destructorIndicator_ = '~';

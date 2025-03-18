@@ -85,6 +85,7 @@ int main()
     tu.interfaces_ = interfaces;
 
     astfri::uml::Config conf;
+    conf.innerView_ = false;
     // config can be changed at any point before calling run
     // either by directly accessing its member variables
     // or using its parse_json method (TODO - NOT YET IMPLEMENTED)
