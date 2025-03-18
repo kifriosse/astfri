@@ -22,6 +22,7 @@ private:
     std::unique_ptr<std::stringstream> publicWord_;
     std::unique_ptr<std::stringstream> privateWord_;
     std::unique_ptr<std::stringstream> protectedWord_;
+    std::unique_ptr<std::stringstream> internalWord_;
     std::unique_ptr<std::stringstream> accAtribWord_;
     std::unique_ptr<std::stringstream> accConstrWord_;
     std::unique_ptr<std::stringstream> accDestrWord_;
@@ -52,6 +53,9 @@ private:
     std::unique_ptr<std::stringstream> localVarNameStyle_;
     std::unique_ptr<std::stringstream> paramVarNameStyle_;
     std::unique_ptr<std::stringstream> assignOpWord_;
+    std::unique_ptr<std::stringstream> moduloOpWord_;
+    std::unique_ptr<std::stringstream> addressOpWord_;
+    std::unique_ptr<std::stringstream> derefOpWord_;
     std::unique_ptr<std::stringstream> operatorStyle_;
     std::unique_ptr<std::stringstream> separatorStyle_;
     std::unique_ptr<std::stringstream> trueVal_;
@@ -66,7 +70,7 @@ private:
     std::unique_ptr<std::stringstream> nullValStyle_;
 protected:
     Configurator();
-    void set_input_path(std::string path);
+    void set_input_path(const std::string& path);
     void reset_def_path();
     void reset_out_path();
     virtual void load_new_config_file();
@@ -85,6 +89,7 @@ public:
     const std::stringstream* get_public_word()     { return publicWord_.get(); };
     const std::stringstream* get_private_word()    { return privateWord_.get(); };
     const std::stringstream* get_protected_word()  { return protectedWord_.get(); };
+    const std::stringstream* get_internal_word()   { return internalWord_.get(); };
     const std::stringstream* get_acc_atrib_word()  { return accAtribWord_.get(); };
     const std::stringstream* get_acc_constr_word() { return accConstrWord_.get(); };
     const std::stringstream* get_acc_destr_word()  { return accDestrWord_.get(); };
@@ -115,6 +120,9 @@ public:
     const std::stringstream* get_local_var_name_style()   { return localVarNameStyle_.get(); };
     const std::stringstream* get_param_var_name_style()   { return paramVarNameStyle_.get(); };
     const std::stringstream* get_assign_op_word()   { return assignOpWord_.get(); };
+    const std::stringstream* get_modulo_op_word()   { return moduloOpWord_.get(); };
+    const std::stringstream* get_address_op_word()  { return addressOpWord_.get(); };
+    const std::stringstream* get_deref_op_word()    { return derefOpWord_.get(); };
     const std::stringstream* get_operator_style()   { return operatorStyle_.get(); };
     const std::stringstream* get_separator_style()  { return separatorStyle_.get(); };
     const std::stringstream* get_true_val()         { return trueVal_.get(); };

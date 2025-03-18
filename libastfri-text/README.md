@@ -33,6 +33,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "public":"public",
             "private":"private",
             "protected":"protected",
+            "internal":"internal",
             "attribs":"attributes",
             "constructors":"constructors",
             "destructors":"destructors",
@@ -71,6 +72,9 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
         },
         "OPERATOR":{
             "assign":"=",
+            "modulo":"%",
+            "address":"&",
+            "deref":"*",
             "style":""
         },
         "SEPARATOR":{
@@ -106,6 +110,7 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
             "show_meth_dec":true,
             "show_meth_def":true,
             "show_meth_owner":true,
+            "show_meth_templ":true,
             "show_func_dec":true,
             "show_func_def":true,
             "show_global_par":true,

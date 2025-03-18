@@ -9,4 +9,4 @@ add_library(astfri-text SHARED
 
 target_compile_options(astfri-text PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(astfri-text PRIVATE astfri-core)
-target_include_directories(astfri-text PUBLIC ${PROJECT_SOURCE_DIR}/lib)
+target_include_directories(astfri-text PRIVATE ${PROJECT_SOURCE_DIR}/lib)

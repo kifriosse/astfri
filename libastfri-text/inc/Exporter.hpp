@@ -12,9 +12,9 @@ protected:
     bool startedLine_;
 protected:
     Exporter(std::shared_ptr<TextConfigurator> conf);
-    virtual void write_output_into_file(std::string filepath) = 0;
-    void check_output_file_path(std::string suffix);
-    void write_word(std::string word);
+    virtual void write_output_into_file(const std::string& filepath) = 0;
+    void check_output_file_path(const std::string& suffix);
+    void write_word(const std::string& word);
     virtual void write_indentation();
     virtual void write_row_number();
 public:
@@ -23,13 +23,14 @@ public:
     void decrease_indentation();
     virtual void write_new_line();
     virtual void write_space();
-    virtual void write_round_bracket(std::string br);
-    virtual void write_curl_bracket(std::string br);
+    virtual void write_round_bracket(const std::string& br);
+    virtual void write_curl_bracket(const std::string& br);
     virtual void write_unknown_word();
     virtual void write_invalid_word();
     virtual void write_public_word();
     virtual void write_private_word();
     virtual void write_protected_word();
+    virtual void write_internal_word();
     virtual void write_attribs_word();
     virtual void write_constrs_word();
     virtual void write_destrs_word();
@@ -50,9 +51,12 @@ public:
     virtual void write_member_var_name(std::string name);
     virtual void write_local_var_name(std::string name);
     virtual void write_param_var_name(std::string name);
-    virtual void write_operator_sign(std::string sign);
+    virtual void write_operator_sign(const std::string& sign);
     virtual void write_assign_op_word();
-    virtual void write_separator_sign(std::string sign);
+    virtual void write_modulo_op_word();
+    virtual void write_address_op_word();
+    virtual void write_deref_op_word();
+    virtual void write_separator_sign(const std::string& sign);
     virtual void write_int_val(int val);
     virtual void write_float_val(float val);
     virtual void write_char_val(char val);
