@@ -41,7 +41,12 @@ private:
     );
 
     astfri::NewExpr* transform_new_expr_node(
-        TSNode paramsNode,
+        TSNode tsNode,
+        std::string const& sourceCode
+    );
+
+    astfri::IfExpr* transform_ternary_expr_node(
+        TSNode tsNode,
         std::string const& sourceCode
     );
 

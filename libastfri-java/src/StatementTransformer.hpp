@@ -12,11 +12,17 @@
 #include <vector>
 
 #include "ExpressionTransformer.hpp"
-#include "NodeMapper.hpp"
 #include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
+#include "NodeMapper.hpp"
 
-using MethodBodyType = std::tuple<astfri::AccessModifier, astfri::Type*, std::string, std::vector<astfri::ParamVarDefStmt*>, std::vector<astfri::BaseInitializerStmt*>, astfri::CompoundStmt*>;
+using FunctionType = std::tuple<
+    astfri::AccessModifier,
+    astfri::Type*,
+    std::string,
+    std::vector<astfri::ParamVarDefStmt*>,
+    std::vector<astfri::BaseInitializerStmt*>,
+    astfri::CompoundStmt*>;
 
 class StatementTransformer
 {
@@ -32,8 +38,16 @@ private:
 
     astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
-    astfri::Type* make_return_type(TSNode tsNode, std::string const& sourceCode);
-
+    astfri::AccessModifier get_access_modifier(
+        TSNode tsNode,
+        std::string const& sourceCode
+    );
+    
+    astfri::Type* get_return_type(
+        TSNode tsNode,
+        std::string const& sourceCode
+    );
+    
     astfri::ParamVarDefStmt* transform_param_node(
         TSNode tsNode,
         std::string const& sourceCode
@@ -84,7 +98,7 @@ private:
         std::string const& sourceCode
     );
 
-    MethodBodyType extract_body_node(
+    FunctionType transform_function(
         TSNode tsNode,
         std::string const& sourceCode
     );
