@@ -18,6 +18,7 @@ class TextConfigurator : public Configurator {
     bool shMethDec_;
     bool shMethDef_;
     bool shMethOwner_;
+    bool shMethTempl_;
     bool shFuncDec_;
     bool shFuncDef_;
     bool shGlobPar_;
@@ -111,6 +112,7 @@ public:
     const bool& sh_meth_dec()   { return shMethDec_; };
     const bool& sh_meth_def()   { return shMethDef_; };
     const bool& sh_meth_owner() { return shMethOwner_; };
+    const bool& sh_meth_templ() { return shMethTempl_; };
     const bool& sh_func_dec()   { return shFuncDec_; };
     const bool& sh_func_def()   { return shFuncDef_; };
     const bool& sh_glob_par()   { return shGlobPar_; };

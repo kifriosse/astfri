@@ -15,6 +15,7 @@
             "public":"verejné",
             "private":"súkromné",
             "protected":"chránené",
+            "internal":"vnútorné",
             "attribs":"atribúty",
             "constructors":"konštruktory",
             "destructors":"deštruktory",
@@ -53,6 +54,9 @@
         },
         "OPERATOR":{
             "assign":"<-",
+            "modulo":"mod",
+            "address":"daj adresu",
+            "deref":"*",
             "style":"font-weight:bold"
         },
         "SEPARATOR":{
@@ -88,6 +92,7 @@
             "show_meth_dec":true,
             "show_meth_def":true,
             "show_meth_owner":true,
+            "show_meth_templ":true,
             "show_func_dec":true,
             "show_func_def":true,
             "show_global_par":true,
@@ -121,7 +126,7 @@
             "pointer_word":"↑",
             "virtual_word":"je virtuálna",
             "abstract_word":"je abstraktná",
-            "template_word":"šablóna",
+            "template_word":"šablóna ",
             "STYLE":{
                 "general_style":"",
                 "class_word_style":"color:red",

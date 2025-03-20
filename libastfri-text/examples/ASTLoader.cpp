@@ -13,18 +13,18 @@ namespace my_ast_trees
         TypeFactory& tfc = TypeFactory::get_instance();
         TranslationUnit* tu = std::move(sfc.mk_translation_unit());
         //---------------------------------------------------------
-        InterfaceDefStmt* idsStack = std::move(sfc.mk_interface_def(std::move("Stack")));
-        idsStack->tparams_ = {std::move(sfc.mk_generic_param(std::move(""), std::move("T")))};
-        idsStack->bases_ = {std::move(sfc.mk_interface_def(std::move("ADT")))};
+        InterfaceDefStmt* idsStack = std::move(sfc.mk_interface_def("Stack"));
+        idsStack->tparams_ = {std::move(sfc.mk_generic_param("", "T"))};
+        idsStack->bases_ = {std::move(sfc.mk_interface_def("ADT"))};
         idsStack->methods_ = {
             std::move(sfc.mk_method_def(
                 {},
                 std::move(sfc.mk_function_def(
-                    std::move("push"),
+                    "push",
                     {
                         std::move(sfc.mk_param_var_def(
-                            std::move("element"),
-                            std::move(tfc.mk_user(std::move("T"))),
+                            "element",
+                            std::move(tfc.mk_user("T")),
                             {}
                         ))
                     },
@@ -37,9 +37,9 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 {},
                 std::move(sfc.mk_function_def(
-                    std::move("peek"),
+                    "peek",
                     {},
-                    std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("T"))))),
+                    std::move(tfc.mk_indirect(std::move(tfc.mk_user("T")))),
                     {}
                 )),
                 std::move(AccessModifier::Public),
@@ -48,9 +48,9 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 {},
                 std::move(sfc.mk_function_def(
-                    std::move("pop"),
+                    "pop",
                     {},
-                    std::move(tfc.mk_user(std::move("T"))),
+                    std::move(tfc.mk_user("T")),
                     {}
                 )),
                 std::move(AccessModifier::Public),
@@ -58,12 +58,12 @@ namespace my_ast_trees
             ))
         };
         //------------------------------------------------
-        ClassDefStmt* cdsImplStack = std::move(sfc.mk_class_def(std::move("ImplicitStack")));
-        cdsImplStack->tparams_ = {std::move(sfc.mk_generic_param(std::move(""), std::move("T")))};
+        ClassDefStmt* cdsImplStack = std::move(sfc.mk_class_def("ImplicitStack"));
+        cdsImplStack->tparams_ = {std::move(sfc.mk_generic_param("", "T"))};
         cdsImplStack->interfaces_.push_back(idsStack);
-        ClassDefStmt* ext = std::move(sfc.mk_class_def(std::move("ADS")));
+        ClassDefStmt* ext = std::move(sfc.mk_class_def("ADS"));
         ext->tparams_ = {
-            std::move(sfc.mk_generic_param(std::move(""), std::move("T")))
+            std::move(sfc.mk_generic_param("", "T"))
         };
         cdsImplStack->bases_.push_back(std::move(ext));
         cdsImplStack->constructors_ = {
@@ -72,10 +72,10 @@ namespace my_ast_trees
                 {},
                 {
                     std::move(sfc.mak_base_initializer(
-                        std::move("ADS<T>"),
+                        "ADS<T>",
                         {
                             std::move(efc.mk_new(std::move(efc.mk_constructor_call(
-                                std::move(tfc.mk_user(std::move("amt::IS<T>"))),
+                                std::move(tfc.mk_user("amt::IS<T>")),
                                 {}
                             ))))
                         }
@@ -88,20 +88,20 @@ namespace my_ast_trees
                 cdsImplStack,
                 {
                     std::move(sfc.mk_param_var_def(
-                        std::move("other"),
-                        std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("ImplicitStack"))))),
+                        "other",
+                        std::move(tfc.mk_indirect(std::move(tfc.mk_user("ImplicitStack")))),
                         {}
                     ))
                 },
                 {
                     std::move(sfc.mak_base_initializer(
-                        std::move("ADS<T>"),
+                        "ADS<T>",
                         {
                             std::move(efc.mk_new(std::move(efc.mk_constructor_call(
-                                std::move(tfc.mk_user(std::move("amt::IS<T>"))),
+                                std::move(tfc.mk_user("amt::IS<T>")),
                                 {}
                             )))),
-                            efc.mk_param_var_ref(std::move("other"))
+                            efc.mk_param_var_ref("other")
                         }
                     ))
                 },
@@ -113,11 +113,11 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsImplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("push"),
+                    "push",
                     {
                         std::move(sfc.mk_param_var_def(
-                            std::move("element"),
-                            std::move(tfc.mk_user(std::move("T"))),
+                            "element",
+                            std::move(tfc.mk_user("T")),
                             {}
                         ))
                     },
@@ -128,16 +128,16 @@ namespace my_ast_trees
                                 std::move(efc.mk_method_call(
                                     std::move(efc.mk_method_call(
                                         std::move(efc.mk_this()),
-                                        std::move("getSequence"),
+                                        "getSequence",
                                         {}
                                     )),
-                                    std::move("insertLast"),
+                                    "insertLast",
                                     {}
                                 )),
-                                std::move("data_")
+                                "data_"
                             )),
                             std::move(BinOpType::Assign),
-                            std::move(efc.mk_param_var_ref(std::move("element")))
+                            std::move(efc.mk_param_var_ref("element"))
                         ))))
                     }))
                 )),
@@ -147,20 +147,20 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsImplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("peek"),
+                    "peek",
                     {},
-                    std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("T"))))),
+                    std::move(tfc.mk_indirect(std::move(tfc.mk_user("T")))),
                     std::move(sfc.mk_compound({
                         std::move(sfc.mk_if(
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_this()),
-                                std::move("isEmpty"),
+                                "isEmpty",
                                 {}
                             )),
                             std::move(sfc.mk_throw(std::move(efc.mk_function_call(
-                                std::move("out_of_range"),
+                                "out_of_range",
                                 {
-                                    std::move(efc.mk_string_literal(std::move("Stack is empty!")))
+                                    std::move(efc.mk_string_literal("Stack is empty!"))
                                 }
                             )))),
                             {}
@@ -169,13 +169,13 @@ namespace my_ast_trees
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_method_call(
                                     std::move(efc.mk_this()),
-                                    std::move("getSequence"),
+                                    "getSequence",
                                     {}
                                 )),
-                                std::move("accessLast"),
+                                "accessLast",
                                 {}
                             )),
-                            std::move("data_")
+                            "data_"
                         ))))
                     }))
                 )),
@@ -185,50 +185,50 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsImplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("pop"),
+                    "pop",
                     {},
-                    std::move(tfc.mk_user(std::move("T"))),
+                    std::move(tfc.mk_user("T")),
                     std::move(sfc.mk_compound({
                         std::move(sfc.mk_if(
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_this()),
-                                std::move("isEmpty"),
+                                "isEmpty",
                                 {}
                             )),
                             std::move(sfc.mk_throw(std::move(efc.mk_function_call(
-                                std::move("out_of_range"),
+                                "out_of_range",
                                 {
-                                    std::move(efc.mk_string_literal(std::move("Stack is empty!")))
+                                    std::move(efc.mk_string_literal("Stack is empty!"))
                                 }
                             )))),
                             {}
                         )),
                         std::move(sfc.mk_local_var_def(
-                            std::move("result"),
-                            std::move(tfc.mk_user(std::move("T"))),
+                            "result",
+                            std::move(tfc.mk_user("T")),
                             std::move(efc.mk_member_var_ref(
                                 std::move(efc.mk_method_call(
                                     std::move(efc.mk_method_call(
                                         std::move(efc.mk_this()),
-                                        std::move("getSequence"),
+                                        "getSequence",
                                         {}
                                     )),
-                                    std::move("accessLast"),
+                                    "accessLast",
                                     {}
                                 )),
-                                std::move("data_")
+                                "data_"
                             ))
                         )),
                         std::move(sfc.mk_expr(std::move(efc.mk_method_call(
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_this()),
-                                std::move("getSequence"),
+                                "getSequence",
                                 {}
                             )),
-                            std::move("removeLast"),
+                            "removeLast",
                             {}
                         )))),
-                        std::move(sfc.mk_return(std::move(efc.mk_local_var_ref(std::move("result")))))
+                        std::move(sfc.mk_return(std::move(efc.mk_local_var_ref("result"))))
                     }))
                 )),
                 std::move(AccessModifier::Public),
@@ -237,9 +237,9 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsImplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("getSequence"),
+                    "getSequence",
                     {},
-                    std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("amt::IS<T>"))))),
+                    std::move(tfc.mk_indirect(std::move(tfc.mk_user("amt::IS<T>")))),
                     std::move(sfc.mk_compound({
                         std::move(sfc.mk_return(std::move(efc.mk_unknown())))
                     }))
@@ -249,12 +249,12 @@ namespace my_ast_trees
             ))
         };
         //---------------------------------------------------
-        ClassDefStmt* cdsExplStack = std::move(sfc.mk_class_def(std::move("ExplicitStack")));
-        cdsExplStack->tparams_ = {std::move(sfc.mk_generic_param(std::move(""), std::move("T")))};
+        ClassDefStmt* cdsExplStack = std::move(sfc.mk_class_def("ExplicitStack"));
+        cdsExplStack->tparams_ = {std::move(sfc.mk_generic_param("", "T"))};
         cdsExplStack->interfaces_.push_back(idsStack);
-        ClassDefStmt* ext2 = std::move(sfc.mk_class_def(std::move("ADS")));
+        ClassDefStmt* ext2 = std::move(sfc.mk_class_def("ADS"));
         ext2->tparams_ = {
-            std::move(sfc.mk_generic_param(std::move(""), std::move("T")))
+            std::move(sfc.mk_generic_param("", "T"))
         };
         cdsExplStack->bases_.push_back(std::move(ext2));
         cdsExplStack->constructors_ = {
@@ -263,10 +263,10 @@ namespace my_ast_trees
                 {},
                 {
                     std::move(sfc.mak_base_initializer(
-                        std::move("ADS<T>"),
+                        "ADS<T>",
                         {
                             std::move(efc.mk_new(std::move(efc.mk_constructor_call(
-                                std::move(tfc.mk_user(std::move("amt::SinglyLS<T>"))),
+                                std::move(tfc.mk_user("amt::SinglyLS<T>")),
                                 {}
                             ))))
                         }
@@ -279,20 +279,20 @@ namespace my_ast_trees
                 cdsExplStack,
                 {
                     std::move(sfc.mk_param_var_def(
-                        std::move("other"),
-                        std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("ExplicitStack"))))),
+                        "other",
+                        std::move(tfc.mk_indirect(std::move(tfc.mk_user("ExplicitStack")))),
                         {}
                     ))
                 },
                 {
                     std::move(sfc.mak_base_initializer(
-                        std::move("ADS<T>"),
+                        "ADS<T>",
                         {
                             std::move(efc.mk_new(std::move(efc.mk_constructor_call(
-                                std::move(tfc.mk_user(std::move("amt::SinglyLS<T>"))),
+                                std::move(tfc.mk_user("amt::SinglyLS<T>")),
                                 {}
                             )))),
-                            efc.mk_param_var_ref(std::move("other"))
+                            efc.mk_param_var_ref("other")
                         }
                     ))
                 },
@@ -304,11 +304,11 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsExplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("push"),
+                    "push",
                     {
                         std::move(sfc.mk_param_var_def(
-                            std::move("element"),
-                            std::move(tfc.mk_user(std::move("T"))),
+                            "element",
+                            std::move(tfc.mk_user("T")),
                             {}
                         ))
                     },
@@ -319,16 +319,16 @@ namespace my_ast_trees
                                 std::move(efc.mk_method_call(
                                     std::move(efc.mk_method_call(
                                         std::move(efc.mk_this()),
-                                        std::move("getSequence"),
+                                        "getSequence",
                                         {}
                                     )),
-                                    std::move("insertFirst"),
+                                    "insertFirst",
                                     {}
                                 )),
-                                std::move("data_")
+                                "data_"
                             )),
                             std::move(BinOpType::Assign),
-                            std::move(efc.mk_param_var_ref(std::move("element")))
+                            std::move(efc.mk_param_var_ref("element"))
                         ))))
                     }))
                 )),
@@ -338,20 +338,20 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsExplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("peek"),
+                    "peek",
                     {},
-                    std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("T"))))),
+                    std::move(tfc.mk_indirect(std::move(tfc.mk_user("T")))),
                     std::move(sfc.mk_compound({
                         std::move(sfc.mk_if(
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_this()),
-                                std::move("isEmpty"),
+                                "isEmpty",
                                 {}
                             )),
                             std::move(sfc.mk_throw(std::move(efc.mk_function_call(
-                                std::move("out_of_range"),
+                                "out_of_range",
                                 {
-                                    std::move(efc.mk_string_literal(std::move("Stack is empty!")))
+                                    std::move(efc.mk_string_literal("Stack is empty!"))
                                 }
                             )))),
                             {}
@@ -360,13 +360,13 @@ namespace my_ast_trees
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_method_call(
                                     std::move(efc.mk_this()),
-                                    std::move("getSequence"),
+                                    "getSequence",
                                     {}
                                 )),
-                                std::move("accessFirst"),
+                                "accessFirst",
                                 {}
                             )),
-                            std::move("data_")
+                            "data_"
                         ))))
                     }))
                 )),
@@ -376,50 +376,50 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsExplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("pop"),
+                    "pop",
                     {},
-                    std::move(tfc.mk_user(std::move("T"))),
+                    std::move(tfc.mk_user("T")),
                     std::move(sfc.mk_compound({
                         std::move(sfc.mk_if(
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_this()),
-                                std::move("isEmpty"),
+                                "isEmpty",
                                 {}
                             )),
                             std::move(sfc.mk_throw(std::move(efc.mk_function_call(
-                                std::move("out_of_range"),
+                                "out_of_range",
                                 {
-                                    std::move(efc.mk_string_literal(std::move("Stack is empty!")))
+                                    std::move(efc.mk_string_literal("Stack is empty!"))
                                 }
                             )))),
                             {}
                         )),
                         std::move(sfc.mk_local_var_def(
-                            std::move("result"),
-                            std::move(tfc.mk_user(std::move("T"))),
+                            "result",
+                            std::move(tfc.mk_user("T")),
                             std::move(efc.mk_member_var_ref(
                                 std::move(efc.mk_method_call(
                                     std::move(efc.mk_method_call(
                                         std::move(efc.mk_this()),
-                                        std::move("getSequence"),
+                                        "getSequence",
                                         {}
                                     )),
-                                    std::move("accessFirst"),
+                                    "accessFirst",
                                     {}
                                 )),
-                                std::move("data_")
+                                "data_"
                             ))
                         )),
                         std::move(sfc.mk_expr(std::move(efc.mk_method_call(
                             std::move(efc.mk_method_call(
                                 std::move(efc.mk_this()),
-                                std::move("getSequence"),
+                                "getSequence",
                                 {}
                             )),
-                            std::move("removeFirst"),
+                            "removeFirst",
                             {}
                         )))),
-                        std::move(sfc.mk_return(std::move(efc.mk_local_var_ref(std::move("result")))))
+                        std::move(sfc.mk_return(std::move(efc.mk_local_var_ref("result"))))
                     }))
                 )),
                 std::move(AccessModifier::Public),
@@ -428,9 +428,9 @@ namespace my_ast_trees
             std::move(sfc.mk_method_def(
                 cdsExplStack,
                 std::move(sfc.mk_function_def(
-                    std::move("getSequence"),
+                    "getSequence",
                     {},
-                    std::move(tfc.mk_indirect(std::move(tfc.mk_user(std::move("amt::SinglyLS<T>"))))),
+                    std::move(tfc.mk_indirect(std::move(tfc.mk_user("amt::SinglyLS<T>")))),
                     std::move(sfc.mk_compound({
                         std::move(sfc.mk_return(std::move(efc.mk_unknown())))
                     }))
@@ -444,101 +444,5 @@ namespace my_ast_trees
         tu->classes_.push_back(std::move(cdsImplStack));
         tu->classes_.push_back(std::move(cdsExplStack));
         tv.visit(std::move(*tu));
-    }
-
-    template <typename TreeVisitor>
-    void load_ast_tree_2(TreeVisitor& tv) {
-        //class TestClass {
-        //private:
-        //    int a;
-        //    int b = 1;
-        //    std::string s = "textik";
-        //public:
-        //    TestClass(int cislo1, int cislo2 = 5) : a(cislo1), b(cislo2) {}
-        //    ~TestClass();
-        //    int getCislo() const { return a * b; }
-        //};
-        astfri::ExprFactory& expressions = astfri::ExprFactory::get_instance();
-        astfri::StmtFactory& statements = astfri::StmtFactory::get_instance();
-        astfri::TypeFactory& types = astfri::TypeFactory::get_instance();
-        astfri::ClassDefStmt* cds = statements.mk_class_def("TestClass");
-        std::vector<astfri::MemberVarDefStmt*> atributes{
-            statements.mk_member_var_def("a", types.mk_int(), nullptr, astfri::AccessModifier::Protected),
-            statements.mk_member_var_def("b", types.mk_int(), expressions.mk_int_literal(1), astfri::AccessModifier::Private),
-            statements.mk_member_var_def("s", types.mk_user("string"), expressions.mk_string_literal("textik"), astfri::AccessModifier::Public)
-        };
-        std::vector<astfri::ParamVarDefStmt*> constructorParams{
-            statements.mk_param_var_def("cislo1", types.mk_int(), nullptr),
-            statements.mk_param_var_def("cislo2", types.mk_int(), expressions.mk_int_literal(5))
-        };
-        std::vector<astfri::MethodDefStmt*> methods {
-            statements.mk_method_def(
-                cds,
-                statements.mk_function_def(
-                    cds->name_,
-                    constructorParams,
-                    types.mk_void(),
-                    statements.mk_compound(
-                        {
-                            statements.mk_expr(expressions.mk_bin_on(
-                                expressions.mk_member_var_ref(
-                                    expressions.mk_class_ref(cds->name_),
-                                    "a"
-                                ),
-                                astfri::BinOpType::Assign,
-                                expressions.mk_param_var_ref("cislo1")
-                                )
-                            ),
-                            statements.mk_expr(
-                                expressions.mk_bin_on(
-                                    expressions.mk_member_var_ref(
-                                        expressions.mk_class_ref(cds->name_),
-                                        "b"
-                                    ),
-                                    astfri::BinOpType::Assign,
-                                    expressions.mk_param_var_ref("cislo2")
-                                )
-                            )
-                        }
-                    )
-                ),
-                astfri::AccessModifier::Public,
-                astfri::Virtuality::NotVirtual
-            ),
-            statements.mk_method_def(
-                cds,
-                statements.mk_function_def(
-                    "~TestClass",
-                    {},
-                    types.mk_unknown(),
-                    {}
-                ),
-                astfri::AccessModifier::Public,
-                astfri::Virtuality::NotVirtual
-            ),
-            statements.mk_method_def(
-                cds,
-                statements.mk_function_def(
-                    "getCislo",
-                    {},
-                    types.mk_int(),
-                    statements.mk_compound({
-                        statements.mk_return(
-                            expressions.mk_bin_on(
-                                expressions.mk_member_var_ref(expressions.mk_class_ref(cds->name_), "a"),
-                                astfri::BinOpType::Multiply,
-                                expressions.mk_member_var_ref(expressions.mk_class_ref(cds->name_), "b")
-                            )
-                        )
-                    })
-                ),
-                astfri::AccessModifier::Private,
-                astfri::Virtuality::NotVirtual
-            )
-        };
-        cds = statements.mk_class_def(cds->name_);
-        cds->vars_ = atributes;
-        cds->methods_ = methods;
-        cds->accept(tv);
     }
 }

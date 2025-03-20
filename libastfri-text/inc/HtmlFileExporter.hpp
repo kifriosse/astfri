@@ -12,19 +12,20 @@ public:
     HtmlFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
 private:
-    void write_output_into_file(std::string filepath) override;
+    void write_output_into_file(const std::string& filepath) override;
     void write_indentation() override;
     void write_row_number() override;
 public:
     void write_new_line() override;
     void write_space() override;
-    void write_round_bracket(std::string br) override;
-    void write_curl_bracket(std::string br) override;
+    void write_round_bracket(const std::string& br) override;
+    void write_curl_bracket(const std::string& br) override;
     void write_unknown_word() override;
     void write_invalid_word() override;
     void write_public_word() override;
     void write_private_word() override;
     void write_protected_word() override;
+    void write_internal_word() override;
     void write_attribs_word() override;
     void write_constrs_word() override;
     void write_destrs_word() override;
@@ -45,9 +46,12 @@ public:
     void write_member_var_name(std::string name) override;
     void write_local_var_name(std::string name) override;
     void write_param_var_name(std::string name) override;
-    void write_operator_sign(std::string sign) override;
+    void write_operator_sign(const std::string& sign) override;
     void write_assign_op_word() override;
-    void write_separator_sign(std::string sign) override;
+    void write_modulo_op_word() override;
+    void write_address_op_word() override;
+    void write_deref_op_word() override;
+    void write_separator_sign(const std::string& sign) override;
     void write_int_val(int val) override;
     void write_float_val(float val) override;
     void write_char_val(char val) override;
@@ -87,14 +91,14 @@ public:
     void write_define_word() override;
     void write_returns_word() override;
 private:
-    void write_acc_mod_style(std::string accmod);
-    void write_data_type_style(std::string datatype);
-    void write_ref_name_style(std::string name);
-    void write_operator_style(std::string op);
-    void write_separator_style(std::string sep);
-    void write_value_style(std::string val);
-    void write_system_expr_style(std::string expr);
-    void write_other_expr_style(std::string expr);
+    void write_acc_mod_style(const std::string& accmod);
+    void write_data_type_style(const std::string& datatype);
+    void write_ref_name_style(const std::string& name);
+    void write_operator_style(const std::string& op);
+    void write_separator_style(const std::string& sep);
+    void write_value_style(const std::string& val);
+    void write_system_expr_style(const std::string& expr);
+    void write_other_expr_style(const std::string& expr);
 };
 
 #endif
