@@ -4,4 +4,5 @@ target_sources(uml-example PRIVATE
 )
 target_link_libraries(uml-example PRIVATE
 	astfri-uml
+    astfri-cpp
 )

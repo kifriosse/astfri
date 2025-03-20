@@ -3,6 +3,7 @@
 #include <libastfri/inc/TypeFactory.hpp>
 
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <libastfri-cpp/impl/ClangManagement.hpp>
 #include <vector>
 #include "libastfri/inc/Stmt.hpp"
 
