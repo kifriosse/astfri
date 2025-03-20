@@ -10,12 +10,16 @@
 #include <variant>
 
 #include "libastfri-java/src/NodeMapper.hpp"
+#include "libastfri-java/src/StatementTransformer.hpp"
+
+class StatementTransformer;
 
 class ExpressionTransformer
 {
 private:
     astfri::TypeFactory& typeFactory;
     astfri::ExprFactory& exprFactory;
+    StatementTransformer* stmtTransformer;
     NodeMapper* nodeMapper;
 
     astfri::BinOpExpr* transform_bin_op_expr_node(
@@ -51,7 +55,8 @@ private:
     );
 
 public:
-    ExpressionTransformer();
+    ExpressionTransformer(TSTree* tree,
+        std::string const& sourceCode);
 
     std::string get_node_text(
         TSNode const& node,

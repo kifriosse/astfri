@@ -11,10 +11,12 @@
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
 
-#include "ExpressionTransformer.hpp"
+
 #include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
 #include "NodeMapper.hpp"
+
+class ExpressionTransformer;
 
 using FunctionType = std::tuple<
     astfri::AccessModifier,

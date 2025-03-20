@@ -1,4 +1,5 @@
 #include "StatementTransformer.hpp"
+#include "ExpressionTransformer.hpp"
 
 #include <cstdint>
 #include <cstdlib>
@@ -18,7 +19,7 @@ StatementTransformer::StatementTransformer(
     typeFactory(astfri::TypeFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
     stmtFactory(astfri::StmtFactory::get_instance()),
-    exprTransformer(new ExpressionTransformer()),
+    exprTransformer(new ExpressionTransformer(tree, sourceCode)),
     nodeMapper(new NodeMapper())
 {
     this->classes    = transform_classes(tree, sourceCode);
