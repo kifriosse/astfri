@@ -2,17 +2,19 @@
 #include <string>
 
 namespace astfri::uml {
-        void ClassVisitor::create_relation(std::string target, RelationType type) {
-            RelationStruct r;
-            r.from_ = this->currentClass_.name_;
-            r.to_ = target;
-            r.type_ = type;
+    void ClassVisitor::create_relation(std::string target, RelationType type) {
+        if (!this->find_class(target) && !this->find_interface(target)) return;
 
-            RelationStruct* found = this->find_relation(r);
-            if (!found) this->relations_.push_back(r);
-        }
+        RelationStruct r;
+        r.from_ = this->currentClass_.name_;
+        r.to_ = target;
+        r.type_ = type;
 
-        RelationStruct* ClassVisitor::find_relation(RelationStruct const& rel) {
+        RelationStruct* found = this->find_relation(r);
+        if (!found) this->relations_.push_back(r);
+    }
+
+    RelationStruct* ClassVisitor::find_relation(RelationStruct const& rel) {
         for (size_t i = 0; i < this->relations_.size(); ++i) {
             if ((this->relations_[i].from_.compare(rel.from_) == 0) &&
                 (this->relations_[i].to_.compare(rel.to_) == 0)) {
@@ -91,6 +93,7 @@ namespace astfri::uml {
     }
 
     void ClassVisitor::visit (astfri::MemberVarDefStmt const& stmt) {
+        if (!this->config_->innerView_ && stmt.access_ == astfri::AccessModifier::Private) return;
         stmt.type_->accept(*this);
         this->currentVariable_.name_ = stmt.name_;
         this->currentVariable_.accessMod_ = stmt.access_;
@@ -108,6 +111,7 @@ namespace astfri::uml {
     }
 
     void ClassVisitor::visit (astfri::MethodDefStmt const& stmt) {
+        if (!this->config_->innerView_ && stmt.access_ == astfri::AccessModifier::Private) return;
         stmt.func_->retType_->accept(*this);
         this->currentMethod_.retType_ = this->currentVariable_.type_;
         this->currentMethod_.returnIsIndirect_ = this->currentVariable_.isIndirect_;
@@ -139,8 +143,13 @@ namespace astfri::uml {
         }
 
         for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
+            if (!this->config_->innerView_) {
+                if (constructor->access_ == astfri::AccessModifier::Private) continue;
+                this->currentMethod_.name_ = "<<constructor>> new " + constructor->owner_->name_;
+            } else {
+                this->currentMethod_.name_ = constructor->owner_->name_;
+            }
             this->currentMethod_.accessMod_ = constructor->access_;
-            this->currentMethod_.name_ = constructor->owner_->name_;
             for (astfri::ParamVarDefStmt* p : constructor->params_) {
                 p->accept(*this);
                 this->currentMethod_.params_.push_back(this->currentVariable_);
