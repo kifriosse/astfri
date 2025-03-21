@@ -11,21 +11,21 @@ Exporter::Exporter(std::shared_ptr<TextConfigurator> conf) {
     row_ = 1;
 }
 
-void Exporter::check_output_file_path(std::string suffix) {
-    const std::string& path = config_->get_output_file_path()->str() + suffix;
+void Exporter::check_output_file_path(const std::string& suffix) {
+    std::string path = config_->get_output_file_path()->str() + suffix;
     std::ofstream file(path);
     if (file) {
         file.close();
-        write_output_into_file(path);
+        write_output_into_file(std::move(path));
     } else {
         file.close();
-        const std::string& defaultPath = config_->get_default_output_path()->str() + std::move(suffix);
-        std::cout << std::move("Zadaná cesta neexistuje! ");
-        check_output_file_path(defaultPath);
+        std::string defaultPath = config_->get_default_output_path()->str() + std::move(suffix);
+        std::cout << "Zadaná cesta neexistuje! ";
+        check_output_file_path(std::move(defaultPath));
     }
 }
 
-void Exporter::write_word(std::string word) {
+void Exporter::write_word(const std::string& word) {
     !startedLine_ ? write_indentation() : void();
     *output_ << std::move(word);
 }
@@ -52,24 +52,24 @@ void Exporter::write_indentation() {
 }
 
 void Exporter::write_row_number() {
-    *output_ << std::setw(4) << row_ << std::move(".");
+    *output_ << std::setw(4) << row_ << ".";
 }
 
 void Exporter::write_new_line() {
-    write_word(std::move("\n"));
+    write_word("\n");
     startedLine_ = false;
     ++row_;
 }
 
 void Exporter::write_space() {
-    write_word(std::move(" "));
+    write_word(" ");
 }
 
-void Exporter::write_round_bracket(std::string br) {
+void Exporter::write_round_bracket(const std::string& br) {
     write_word(std::move(br));
 }
 
-void Exporter::write_curl_bracket(std::string br) {
+void Exporter::write_curl_bracket(const std::string& br) {
     write_word(std::move(br));
 }
 
@@ -91,6 +91,10 @@ void Exporter::write_private_word() {
 
 void Exporter::write_protected_word() {
     write_word(config_->get_protected_word()->str());
+}
+
+void Exporter::write_internal_word() {
+    write_word(config_->get_internal_word()->str());
 }
 
 void Exporter::write_attribs_word() {
@@ -173,7 +177,7 @@ void Exporter::write_param_var_name(std::string name) {
     write_word(std::move(name));
 }
 
-void Exporter::write_operator_sign(std::string sign) {
+void Exporter::write_operator_sign(const std::string& sign) {
     write_word(std::move(sign));
 }
 
@@ -181,7 +185,19 @@ void Exporter::write_assign_op_word() {
     write_word(config_->get_assign_op_word()->str());
 }
 
-void Exporter::write_separator_sign(std::string sign) {
+void Exporter::write_modulo_op_word() {
+    write_word(config_->get_modulo_op_word()->str());
+}
+
+void Exporter::write_address_op_word() {
+    write_word(config_->get_address_op_word()->str());
+}
+
+void Exporter::write_deref_op_word() {
+    write_word(config_->get_deref_op_word()->str());
+}
+
+void Exporter::write_separator_sign(const std::string& sign) {
     write_word(std::move(sign));
 }
 

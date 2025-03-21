@@ -1,16 +1,17 @@
 #pragma once
 
+// astfri
 #include <libastfri/impl/ExprFwd.hpp>
 #include <libastfri/impl/StmtFwd.hpp>
 #include <libastfri/impl/TypeFwd.hpp>
+#include <libastfri/inc/Expr.hpp>
+#include <libastfri/inc/ExprFactory.hpp>
+#include <libastfri/inc/Stmt.hpp>
+#include <libastfri/inc/StmtFactory.hpp>
+#include <libastfri/inc/Type.hpp>
+#include <libastfri/inc/TypeFactory.hpp>
 
-#include "libastfri/inc/Expr.hpp"
-#include "libastfri/inc/ExprFactory.hpp"
-#include "libastfri/inc/Stmt.hpp"
-#include "libastfri/inc/StmtFactory.hpp"
-#include "libastfri/inc/Type.hpp"
-#include "libastfri/inc/TypeFactory.hpp"
-
+// clang a llvm
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Decl.h>
@@ -21,12 +22,23 @@
 #include <clang/AST/OperationKinds.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Stmt.h>
+#include <clang/AST/APValue.h>
+#include <clang/AST/DeclTemplate.h>
+#include <clang/Basic/Specifiers.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/FrontendActions.h>
 #include <clang/Tooling/Tooling.h>
-#include <vector>
+#include <clang/Tooling/CommonOptionsParser.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Casting.h>
 
-namespace astfri::cpp
+// potrebne
+#include <vector>
+#include <iostream>
+
+namespace astfri::astfri_cpp
 {
     struct ClangASTLocation {
         const clang::Decl* decl_ = nullptr;
@@ -39,14 +51,12 @@ namespace astfri::cpp
         const clang::CXXBoolLiteralExpr *bool_lit_ = nullptr;
         const clang::StringLiteral *string_lit_ = nullptr;
         const clang::CharacterLiteral *char_lit_ = nullptr;
-        const ClangASTLocation* parent_ = nullptr;
     };
 
     struct AstfriASTLocation {
         Stmt* stmt_ = nullptr;
         Expr* expr_ = nullptr;
         Type* type_ = nullptr;
-        AstfriASTLocation* parent_ = nullptr;
     };
         
 class ClangVisitor : public clang::RecursiveASTVisitor<ClangVisitor>
@@ -80,6 +90,8 @@ public:
     bool TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor);
     bool TraverseDeclRefExpr(clang::DeclRefExpr *DRE);
     bool TraverseMemberExpr(clang::MemberExpr *ME);
+    bool TraverseCallExpr(clang::CallExpr *CE);
+    bool TraverseCXXDependentScopeMemberExpr(clang::CXXDependentScopeMemberExpr *DSME);
     bool TraverseCXXThisExpr(clang::CXXThisExpr *TE);
     bool TraverseCXXMemberCallExpr(clang::CXXMemberCallExpr* MCE);
     bool TraverseCXXNewExpr(clang::CXXNewExpr *NE);

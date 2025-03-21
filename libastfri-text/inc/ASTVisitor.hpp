@@ -82,42 +82,64 @@ public:
 private:
     void write_open_curl_bracket();
     void write_arrow();
-    void write_initialization(const VarDefStmt* init);
-    void write_member_vars(std::vector<MemberVarDefStmt*>& vars);
-    void write_constructors(std::vector<ConstructorDefStmt*>& constr);
-    void write_methods(std::vector<MethodDefStmt*>& meth);
-    void write_return_type(Type* type);
     void write_body(Stmt* body);
     void write_cond(Expr* cond);
-    void write_gen_params(const std::vector<GenericParam*>& params);
-    void write_identifier_from_string(std::string className);
-    void write_implementations(const std::vector<InterfaceDefStmt*>& interfaces);
-    template<typename Parameter>
-    void write_parameters(const std::vector<Parameter*>& params);
-    template<typename Member>
-    bool has_acc_mod(const std::vector<Member*>& stmts, std::vector<Member*>& found, AccessModifier acc);
+    void write_return_type(Type* type);
+    void write_identifier_from_string(std::string classname);
+    void write_initialization(const VarDefStmt* init);
+    void write_generic_params_decl(const std::vector<GenericParam*>& vgeneric);
+    void write_generic_params(const std::vector<GenericParam*>& vgeneric);
+    void write_member_var_decl(const std::vector<MemberVarDefStmt*>& vmembervars);
+    void write_member_var(std::vector<MemberVarDefStmt*>& vmembervars);
+    void write_constructor_decl(const std::vector<ConstructorDefStmt*>& vconstructors);
+    void write_constructor(std::vector<ConstructorDefStmt*>& vconstructors);
+    void write_destructor_decl(const std::vector<DestructorDefStmt*>& vdestructors);
+    void write_method_decl(const std::vector<MethodDefStmt*>& vmethods);
+    void write_method(std::vector<MethodDefStmt*>& vmethods);
+    template <typename VParams>
+    void write_parameters(const VParams& vparams);
+    template <typename VMembers>
+    bool has_acc_mod(const VMembers& vstmts, VMembers& vfound, const AccessModifier& accmod);
+    template <typename VRelations>
+    void write_relations(const VRelations& vrel, const bool& ispolym);
 };
 
-template<typename Parameter>
-void ASTVisitor::write_parameters(const std::vector<Parameter*>& params) {
-    exporter_->write_round_bracket(std::move("("));
-    for (size_t i = 0; i < params.size(); ++i) {
-        params.at(i) ? params.at(i)->accept(*this) : exporter_->write_invalid_word();
-        (i < params.size() - 1) ? (exporter_->write_separator_sign(std::move(",")), exporter_->write_space()) : void();
+template <typename VParams>
+void ASTVisitor::write_parameters(const VParams& vparams) {
+    exporter_->write_round_bracket("(");
+    for (size_t i = 0; i < vparams.size(); ++i) {
+        vparams.at(i) ? vparams.at(i)->accept(*this) : exporter_->write_invalid_word();
+        (i < vparams.size() - 1) ? (exporter_->write_separator_sign(",")), exporter_->write_space() : void();
     }
-    exporter_->write_round_bracket(std::move(")"));
+    exporter_->write_round_bracket(")");
 }
 
-template<typename Member>
-bool ASTVisitor::has_acc_mod(const std::vector<Member*>& stmts, std::vector<Member*>& found, AccessModifier acc) {
+template <typename VMembers>
+bool ASTVisitor::has_acc_mod(const VMembers& vstmts, VMembers& vfound, const AccessModifier& accmod) {
     bool hasMod = false;
-    for (size_t i = 0; i < stmts.size(); ++i) {
-        if (stmts.at(i)->access_ == acc) {
-            found.push_back(stmts.at(i));
+    for (size_t i = 0; i < vstmts.size(); ++i) {
+        if (vstmts.at(i)->access_ == accmod) {
+            vfound.push_back(vstmts.at(i));
             hasMod = true;
         }
     }
     return hasMod;
+}
+
+template <typename VRelations>
+void ASTVisitor::write_relations(const VRelations& vrel, const bool& ispolym) {
+    for (size_t i = 0; i < vrel.size(); ++i) {
+        exporter_->write_new_line();
+        write_arrow();
+        ispolym ? exporter_->write_implement_word() : exporter_->write_extend_word();
+        exporter_->write_space();
+        if (vrel.at(i)) {
+            ispolym ? exporter_->write_interface_name(vrel.at(i)->name_) : exporter_->write_class_name(vrel.at(i)->name_);
+            vrel.at(i)->tparams_.empty() ? void() : write_generic_params(vrel.at(i)->tparams_);
+        } else {
+            exporter_->write_invalid_word();
+        }
+    }
 }
 
 #endif

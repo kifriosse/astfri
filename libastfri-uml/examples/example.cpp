@@ -38,6 +38,16 @@ int main()
     descructorsBar.push_back(dstrctrBar);
     classBar->destructors_ = descructorsBar;
 
+    std::vector<astfri::MemberVarDefStmt*> fieldsBar;
+    auto memberBar = statements.mk_member_var_def(
+        "nameStr_",
+        types.mk_user("std::string"),
+        nullptr,
+        astfri::AccessModifier::Private
+    ); 
+    fieldsBar.push_back(memberBar);
+    classBar->vars_ = fieldsBar;
+
     std::vector<astfri::InterfaceDefStmt*> interfacesFoo;
     interfacesFoo.push_back(interfaceIVisitable);
     classFoo->interfaces_ = interfacesFoo;
@@ -85,6 +95,7 @@ int main()
     tu.interfaces_ = interfaces;
 
     astfri::uml::Config conf;
+    conf.innerView_ = true;
     // config can be changed at any point before calling run
     // either by directly accessing its member variables
     // or using its parse_json method (TODO - NOT YET IMPLEMENTED)
