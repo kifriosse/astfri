@@ -197,7 +197,7 @@ astfri::MethodCallExpr* AstFriSerializer::serialize_method_call_expr(rapidjson::
 astfri::LambdaExpr* AstFriSerializer::serialize_lambda_expr(rapidjson::Value& value){
     std::vector<astfri::ParamVarDefStmt*> params;
     
-    for (auto& param : value["params"].GetArray()){
+    for (auto& param : value["parameters"].GetArray()){
         params.push_back(this->serialize_param_var_def_stmt(param));
     }
     astfri::Stmt* body = this->resolve_stmt(value["body"]);
