@@ -1,16 +1,16 @@
 ## How to use 
 1.include header for AstFriSerialiesr: 
 ```cpp
-#include <libastfri-serialize/inc/AstFriSerializer.hpp>
+#include <libastfri-serialize/inc/AstFriDeSerializer.hpp>
 ```
 2.AstFriSerialiser is singleton - to create object do this:
 ```cpp
-AstFriSerializer& serializer = AstFriSerializer::get_instance();
+AstFriDeSerializer& deserializer = AstFriDeSerializer::get_instance();
 ```
-3.To serialize objects from JSON to ASTFRI use method serialize,which takes one argument of type std::string-path to JSON file,method returns astfri::IVisitable* type,which is root of AST from JSON,
-in following example argument passed to serialise method is second argument of program
+3.To deserialize objects from JSON to ASTFRI use method deserialize,which takes one argument of type std::string-path to JSON file,method returns astfri::IVisitable* type,which is root of AST from JSON,
+in following example argument passed to deserialise method is second argument of program
 ```cpp
-astfri::IVisitable* node = serializer.serialize(argv[1]);
+astfri::IVisitable* node = deserializer.deserialize(argv[1]);
 ```
 Look at whole example [here](https://github.com/kifriosse/astfri/blob/dev-jm/libastfri-serialize/examples/TestWithTextOutput.cpp)
 

@@ -1,4 +1,4 @@
-add_library(astfri-serialize SHARED AstFriSerializer.cpp
+add_library(astfri-serialize SHARED AstFriDeSerializer.cpp
                                     JsonFormatChecker.cpp)
 
 

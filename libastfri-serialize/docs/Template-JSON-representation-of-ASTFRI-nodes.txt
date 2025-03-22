@@ -6,12 +6,18 @@ LiteralExpressions:
 }
 UnknownExpression:
 {”node”: ”UnknownExpr”}
-Návrh pre ThisExpression:
+ ThisExpression:
 {”node” : ”ThisExpr”}
 LambdaExpression:
 {”node” :”LambdaExpr”,
-”params” : [{ParamDefStmt},...],
+”parameters” : [{ParamDefStmt},...],
 ”body” : {SomeStatement}
+}
+LambdaCallExpression:
+{
+”node” : LambdaCallExpr
+”lambda” : {SomeExpression},
+”arguments” : [{SomeExpression},.....]
 }
 FunctionCallExpression:
 {
@@ -29,10 +35,15 @@ FunctionCallExpression:
  Referencies:
 {
 ”node” : ” TypeOfReference”(
-ParamVarRefExpr|LocalVarRefExpr,MemberVarRefExpr|ThisExpr|ClassRefExpr|GlobalVarRefExpr),
+ParamVarRefExpr|LocalVarRefExpr |ThisExpr|ClassRefExpr|GlobalVarRefExpr),
 ”name”: ”SomeName”
 }
-
+MemberVarRefExpr
+{
+”node” : ”MemberVarRefExpr”,
+”name” : ”SomeName”,
+”owner” : {SomeExpression}
+}
 BinOpExpression:
 {
 ”node” : ”BinOpExpr”,
@@ -75,7 +86,7 @@ Statements:
 MemberVarDefStmt :
 {
 ”node” : ”MemberVarDefStmt”
-”acces”  : ”private/public/protected/internal”,
+”access”  : ”private/public/protected/internal”,
 ”name” : ”SomeName”,
 ”type”: {SomeType},
 ”initializer” : {SomeExpresion} !! or null if there is no initializer
@@ -111,26 +122,26 @@ CaseStmt
 DefaultCaseStmt:
 {
 ”node” : ”DefaultCaseStmt”,
-”body”  : {SomeStatement}
+”body”  : {SomeStatement} 
 }
 SwitchStmt
 {
 ”node”:“SwitchStmt”,
 ”entry” : {SomeExpression},
-”cases”: [{CaseStmt},...]
+”cases”: [{BaseCaseStmt},...] ->contains CaseStmt‘s and can contain DefaultCaseStmt also
 }
 WhileStmt
 {
 ”node” : ”WhileStmt”,
 ”condition” : {SomeExpression},
-”body” : {CompoundStmt}
+”body” : {SomeStmt} 
 }
 
 DoWhileStmt
 {
 ”node” : ”DoWhileStmt”,
 ”condition” : {SomeExpression},
-”body” : {CompoundStmt}
+”body” : {SomeStmt}
 }
 ForStmt
 {
@@ -138,7 +149,7 @@ ForStmt
 ”init” : {SomeStatement} !! or null if this part is empty
 ”condition” : {SomeExpression} !! or null if this part is empty 
 ”step” : {SomeStatement} !! or null if this part is empty
-”body” : {CompoundStmt}
+”body” : {SomeStmt}
 }
 ThrowStmt
 {
@@ -156,7 +167,7 @@ FunctionDefStmt
 ”parameters” : [{ParamVarDefStmt},...],
 ”return_type” : {SometType},
 ”body” : {CompoundStmt}
-{
+}
 
 
 MethodDefStmt
@@ -167,7 +178,8 @@ MethodDefStmt
 ”access” : ”private/public/protected/internal”,
 ”parameters” : [{ParamVarDefStmt},...];
 ”return_type” : {SomeType},
-”body” : {CompoundStmt},
+”body” : {CompoundStmt} !! or null
+”virtual” : ”yes/no”
 }
 GenericParam
 {
@@ -184,8 +196,8 @@ ClassDefStmt
 ”destructors” : [{DestructorDefStmt},...], 
 ”methods” : [{MethodDefStmt},...],
 ”generic_parameters” : [{GenericParam},..],
-”interfaces” : [{InterfaceDefStmt},...],
-”bases” : [{ClassDefStmt},...],
+”interfaces” : [”SomeName”,...],
+”bases” : [”SomeName”,...],
 }
 InterfaceDefStmt
 {
@@ -193,7 +205,7 @@ InterfaceDefStmt
 ”name” : ”SomeName”,
 ”methods” : [{MethodDefStmt},...],
 ”generic_parameters” : [{GenericParam},...],
-”bases” : [{IntefaceDefStmt},....]
+”bases” : [”SomeName”,....]
 }
 TranslationUnit
 {
@@ -249,44 +261,44 @@ ContinueStmt:
 Types:
 DynamicType:
 {
-”node” : ”Dynamic”
+”node” : ”DynamicType”
 }
 IntType:
 {
-”node” : ”Int”
+”node” : ”IntType”
 }
 
 FloatType:
 {
-”node” : ” Float”
+”node” : ” FloatType”
 }
 CharType:
 {
-”node” : ” Char”
+”node” : ” CharType”
 }
 BoolType:
 {
-”node” : ” Bool”
+”node” : ” BoolType”
 }
 VoidType:
 {
-”node” : ” Void”
+”node” : ” VoidType”
 }
 UserType:
 {
-”node” :  ”User”,
+”node” :  ”UserType”,
 ”name” : ”SomeName”
 }
 InDirectionType:
 {
-”node” :  ”Indirection”,
+”node” :  ”IndirectionType”,
 ”indirect” : {SomeType}
 }
 
 
 UnknownType:
 {
-”node” :  ”Unknown”
+”node” :  ”UnknownType”
 }
 
 
