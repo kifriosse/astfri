@@ -1,4 +1,8 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include <clang/AST/Type.h>
+#include <clang/Basic/TargetInfo.h>
+#include <llvm-18/llvm/Support/Casting.h>
+#include "libastfri/inc/Type.hpp"
 
 namespace astfri::astfri_cpp
 {
@@ -240,11 +244,13 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl *FD) {
         return true;
     }
 
+    Type* retType = this->get_astfri_type(FD->getReturnType());
+
     // akcia na tomto vrchole
     auto new_function = this->stmt_factory_->mk_function_def(
         FD->getNameAsString(),
         std::vector<ParamVarDefStmt*> {},
-        this->type_factory_->mk_user(FD->getReturnType().getAsString()), //TODO: fixnut typ
+        retType,
         nullptr
     );
     this->tu_->functions_.push_back(new_function);
@@ -299,7 +305,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl *MD) {
         this->stmt_factory_->mk_function_def(
             MD->getNameAsString(),
             std::vector<ParamVarDefStmt*> {},
-            this->type_factory_->mk_user(MD->getReturnType().getAsString()), //TODO: fixnut typ
+            this->get_astfri_type(MD->getReturnType()),
             nullptr),
             this->getAccessModifier(MD),
             virtuality
@@ -385,12 +391,14 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl *VD) {
     llvm::outs() << "Variabilna zaciatok: " << VD->getNameAsString() << "\n";
 
     // akcia na tomto vrchole
+    Type* type = this->get_astfri_type(VD->getType());
+
     VarDefStmt* new_var = nullptr;
     if (this->astfri_location.stmt_) {
         // premenna v compounde premenna
         new_var = this->stmt_factory_->mk_local_var_def(
             VD->getNameAsString(),
-            this->type_factory_->mk_user(VD->getType().getAsString()), //TODO: fixnut
+            type,
             nullptr
         );
         ((DefStmt*)this->astfri_location.stmt_)->defs_.push_back(new_var);
@@ -398,7 +406,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl *VD) {
         // globalna premenna
         new_var = this->stmt_factory_->mk_global_var_def(
             VD->getNameAsString(),
-            this->type_factory_->mk_user(VD->getType().getAsString()), //TODO: fixnut
+            type,
             nullptr
         );
         this->tu_->globals_.push_back((GlobalVarDefStmt*)new_var);
@@ -430,7 +438,7 @@ bool ClangVisitor::TraverseParmVarDecl(clang::ParmVarDecl *PVD) {
     // akcia na tomto vrchole
     ParamVarDefStmt* new_par = this->stmt_factory_->mk_param_var_def(
         PVD->getNameAsString(),
-        this->type_factory_->mk_user(PVD->getType().getAsString()), //TODO: fixnut typ
+        this->get_astfri_type(PVD->getType()),
         nullptr
     );
 
@@ -454,7 +462,7 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl *FD) {
     astfri::AccessModifier access = this->getAccessModifier(FD);
     auto new_member = this->stmt_factory_->mk_member_var_def(
         FD->getNameAsString(),
-        this->type_factory_->mk_user(FD->getType().getAsString()), //TODO: fixnut typ
+        this->get_astfri_type(FD->getType()),
         nullptr,
         access
     );
@@ -842,7 +850,22 @@ bool ClangVisitor::TraverseBreakStmt([[maybe_unused]] clang::BreakStmt *BS) {
 }
 // visit expression
 bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor) {
-    llvm::outs() << "CXXConstructExpr: " << Ctor->getConstructor()->getNameAsString() << "\n";
+    llvm::outs() << "CXXConstructExpr: " << "\n";
+
+    // ak je pre buildin typy
+    if (Ctor->getType()->isBuiltinType()) {
+        std::cout << "Je buildin                         jjj\n";
+        // TODO: dorobit typy
+        auto new_ctor_expr = this->expr_factory_->mk_constructor_call(
+            this->type_factory_->mk_int(),
+            std::vector<Expr *> {}
+        );
+        this->astfri_location.expr_ = new_ctor_expr;
+        this->clang_location.expr_ = Ctor;
+        std::cout << "Je buildin                         koniec\n";
+        return true;
+    }
+    std::cout << "NUEJe buildin                         jjj\n";
 
     // akcia na tomto vrchole
     auto new_ctor_expr = this->expr_factory_->mk_constructor_call(

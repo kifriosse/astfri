@@ -40,6 +40,7 @@ add_library(
   astfri-cpp SHARED
     ClangManagement.cpp
     ClangVisitor.cpp
+    ClangVisitor_Types.cpp
 )
 
 # Public compile options

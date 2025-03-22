@@ -112,8 +112,14 @@ public:
 private:
     astfri::AccessModifier getAccessModifier(clang::Decl* decl);
     astfri::ClassDefStmt* get_existing_class(std::string name);
+    // types
     astfri::BinOpType get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type);
     astfri::UnaryOpType get_astfri_un_op_type(clang::UnaryOperatorKind clang_type);
+    // types:types :D
+    astfri::Type* get_astfri_type(clang::QualType QT); // only this is used in visitor
+    astfri::Type* get_astfri_type_from_clang_builtintype(const clang::BuiltinType* builtin);
+    void get_pointee_and_fill_type(const clang::PointerType* pointer, astfri::IndirectionType* astfri_type);
+    
     TranslationUnit* tu_;
 
     StmtFactory* stmt_factory_;
