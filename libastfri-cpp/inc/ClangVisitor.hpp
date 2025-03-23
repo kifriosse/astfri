@@ -51,6 +51,7 @@ namespace astfri::astfri_cpp
         const clang::CXXBoolLiteralExpr *bool_lit_ = nullptr;
         const clang::StringLiteral *string_lit_ = nullptr;
         const clang::CharacterLiteral *char_lit_ = nullptr;
+        const clang::CXXNullPtrLiteralExpr *nullptr_lit_ = nullptr;
     };
 
     struct AstfriASTLocation {
@@ -104,6 +105,7 @@ public:
     bool TraverseStringLiteral(clang::StringLiteral *SL);
     bool TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL);
     bool TraverseCharacterLiteral(clang::CharacterLiteral *CL);
+    bool TraverseCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr *NPLE);
     // Traverse operators
     bool TraverseCompoundAssignOperator(clang::CompoundAssignOperator *CAO);
     bool TraverseBinaryOperator(clang::BinaryOperator *BO);

@@ -32,64 +32,58 @@ clang::BuiltinType::Kind get_clang_type_from_builtin(const clang::BuiltinType* b
     return clang::BuiltinType::Char32;
 }
 astfri::Type* ClangVisitor::get_astfri_type_from_clang_builtintype(const clang::BuiltinType* builtin) {
+    Type* new_type = nullptr;
     switch (get_clang_type_from_builtin(builtin)) {
         case clang::BuiltinType::Void: {
             //std::cout << "Void\n\n\n";
-            return this->type_factory_->mk_void();
+            new_type = this->type_factory_->mk_void();
         } break;
         case clang::BuiltinType::Bool: {
             //std::cout << "Bool\n\n\n";
-            return this->type_factory_->mk_bool();
+            new_type = this->type_factory_->mk_bool();
         } break;
         case clang::BuiltinType::Char8: {
             //std::cout << "Char\n\n\n";
-            return this->type_factory_->mk_char();
+            new_type = this->type_factory_->mk_char();
         } break;
         case clang::BuiltinType::Float: {
             //std::cout << "Float\n\n\n";
-            return this->type_factory_->mk_float();
+            new_type = this->type_factory_->mk_float();
         } break;
         case clang::BuiltinType::Int: {
             //std::cout << "Int\n\n\n";
-            return this->type_factory_->mk_int();
+            new_type = this->type_factory_->mk_int();
         } break;
-        default: return this->type_factory_->mk_unknown(); break;
+        default: new_type = this->type_factory_->mk_unknown(); break;
     }
+    return new_type;
 }
 // rekurzivna fukncia na naplnenie astfri::typu
 void ClangVisitor::get_pointee_and_fill_type(const clang::PointerType* pointer, astfri::IndirectionType* astfri_type) {
-    
-    // std::cout << "Je to pointer\n\n\n";
 
-    auto pointee = pointer->getPointeeType();
+    auto pointee = pointer->getPointeeType().getTypePtr();
 
     // ak je to builtin, koniec rekurzie
-    if (auto builtin_pointee = llvm::dyn_cast<clang::BuiltinType>(pointee.getTypePtr())) {
+    if (auto builtin_pointee = llvm::dyn_cast<clang::BuiltinType>(pointee)) {
         astfri_type->indirect_ = this->get_astfri_type_from_clang_builtintype(builtin_pointee);
         // std::cout << "Pointer na builtin\n\n\n";
     }
 
     // ak je to Record, koniec rekurzie
-    if (pointee.getTypePtr()->isRecordType()) {
-        auto record = pointee.getTypePtr()->getAsCXXRecordDecl();
+    if (pointee->isRecordType()) {
+        auto record = pointee->getAsCXXRecordDecl();
         astfri_type->indirect_ = this->type_factory_->mk_user(record->getNameAsString());
         // std::cout << "Je to pointer na triedu\n\n\n";
     }
 
     // ak je pointee pointer
-    if (auto pointer_as_pointee = llvm::dyn_cast<clang::PointerType>(pointee.getTypePtr())) {
-        astfri_type->indirect_ = this->type_factory_->mk_indirect(nullptr);
+    if (auto pointer_as_pointee = llvm::dyn_cast<clang::PointerType>(pointee)) {
+        astfri_type->indirect_ = new IndirectionType(nullptr);
         this->get_pointee_and_fill_type(pointer_as_pointee, (IndirectionType*)(astfri_type->indirect_));
     }
 }
 astfri::Type* ClangVisitor::get_astfri_type(clang::QualType QT) {
 
-    // na debuggovacie ucely
-    // return this->type_factory_->mk_indirect(
-    //     this->type_factory_->mk_indirect(
-    //         this->type_factory_->mk_bool()
-    //     )
-    // );
     auto clangType = QT.getTypePtr();
 
     // ak je to buildin tak sa vrati rovno to
@@ -101,7 +95,7 @@ astfri::Type* ClangVisitor::get_astfri_type(clang::QualType QT) {
 
     // ak je to pointer, bude sa spustat rekurzivne pokym bude pointer
     if (auto pointer = llvm::dyn_cast<clang::PointerType>(clangType)) {
-        auto type = this->type_factory_->mk_indirect(nullptr);
+        IndirectionType* type = new IndirectionType(nullptr);
         this->get_pointee_and_fill_type(pointer, type);
         return type;
     }

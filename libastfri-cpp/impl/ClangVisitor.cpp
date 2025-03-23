@@ -1112,6 +1112,15 @@ bool ClangVisitor::TraverseCXXThrowExpr(clang::CXXThrowExpr *TE) {
 
     return true;
  }
+ bool ClangVisitor::TraverseCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr *NPLE) {
+    llvm::outs() << "Nullptr\n";
+
+    auto new_null = this->expr_factory_->mk_null_literal();
+    this->astfri_location.expr_ = new_null;
+    this->clang_location.nullptr_lit_ = NPLE;
+    
+    return true;
+ }
  // operatory
  bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator *CAO) {
     llvm::outs() << "Compound Assign: " << CAO->getOpcodeStr() << "\n";
