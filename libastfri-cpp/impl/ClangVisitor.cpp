@@ -2,6 +2,8 @@
 #include <clang/AST/Type.h>
 #include <clang/Basic/TargetInfo.h>
 #include <llvm-18/llvm/Support/Casting.h>
+#include <vector>
+#include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Type.hpp"
 
 namespace astfri::astfri_cpp
@@ -850,23 +852,18 @@ bool ClangVisitor::TraverseBreakStmt([[maybe_unused]] clang::BreakStmt *BS) {
 }
 // visit expression
 bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr *Ctor) {
-    llvm::outs() << "CXXConstructExpr: " << "\n";
+    llvm::outs() << "CXXConstructExpr:\n";
 
-    // ak je pre buildin typy
-    if (Ctor->getType()->isBuiltinType()) {
-        std::cout << "Je buildin                         jjj\n";
-        // TODO: dorobit typy
-        auto new_ctor_expr = this->expr_factory_->mk_constructor_call(
-            this->type_factory_->mk_int(),
-            std::vector<Expr *> {}
-        );
-        this->astfri_location.expr_ = new_ctor_expr;
-        this->clang_location.expr_ = Ctor;
-        std::cout << "Je buildin                         koniec\n";
-        return true;
-    }
-    std::cout << "NUEJe buildin                         jjj\n";
-
+    // // ak je pre buildin typy
+    // if (Ctor->getType()->isBuiltinType()) {
+    //     auto new_ctor_expr = this->expr_factory_->mk_constructor_call(
+    //         this->get_astfri_type(Ctor->getType()),
+    //         std::vector<Expr *> {}
+    //     );
+    //     this->astfri_location.expr_ = new_ctor_expr;
+    //     this->clang_location.expr_ = Ctor;
+    //     return true;
+    // }
     // akcia na tomto vrchole
     auto new_ctor_expr = this->expr_factory_->mk_constructor_call(
         nullptr,
@@ -1018,10 +1015,23 @@ bool ClangVisitor::TraverseCXXNewExpr(clang::CXXNewExpr *NE) {
     llvm::outs() << "New expression\n";
 
     // akcia na tomto vrchole
-    TraverseCXXConstructExpr((clang::CXXConstructExpr*)NE->getConstructExpr());
-    auto new_new = this->expr_factory_->mk_new(
-        (ConstructorCallExpr*)this->astfri_location.expr_
-    );
+    NewExpr* new_new;
+    // ak je alokovany typ builtin typ
+    if (NE->getAllocatedType().getTypePtr()->isBuiltinType()) {
+        // vytvori sa newExpr a potom sa priradia argumenty construktora
+        new_new = this->expr_factory_->mk_new(
+            this->expr_factory_->mk_constructor_call(
+                this->get_astfri_type(NE->getAllocatedType()),
+                std::vector<Expr *> {}
+            )
+        );
+        // TODO: dorobit aby sa argumenty priradovali pri builtin new>  int* cislo = new int(5);
+    } else {
+        TraverseCXXConstructExpr((clang::CXXConstructExpr*)NE->getConstructExpr());
+        new_new = this->expr_factory_->mk_new(
+            (ConstructorCallExpr*)this->astfri_location.expr_
+        );
+    }
     this->astfri_location.expr_ = new_new;
     this->clang_location.expr_ = NE;
 

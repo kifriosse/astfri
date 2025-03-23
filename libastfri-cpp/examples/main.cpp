@@ -10,11 +10,11 @@
 #include <libastfri-text/inc/ASTVisitor.hpp>
 
 // to co je treba na moje
-#include <libastfri-cpp/impl/ClangManagement.hpp>
+#include <libastfri-cpp/inc/ClangManagement.hpp>
 
 int main(int argc, const char **argv) {
     astfri::TranslationUnit tu;
-    if (astfri::astfri_cpp::fill_translation_unit(tu, argc, argv) != 0) {
+    if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0) {
         std::cout << "chyba pri fill_translation_unit\n";
         return 1;
     }

@@ -1,6 +1,7 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/Type.h>
+#include <clang/AST/TypeLoc.h>
 #include <clang/Basic/Specifiers.h>
 #include <clang/Frontend/FrontendActions.h>
 #include <llvm-18/llvm/Support/Casting.h>
@@ -76,6 +77,13 @@ void ClangVisitor::get_pointee_and_fill_type(const clang::PointerType* pointer, 
         // std::cout << "Je to pointer na triedu\n\n\n";
     }
 
+    // ak je to template
+    if (pointee->isTemplateTypeParmType()) {
+        auto template_type = pointee->getContainedAutoType();
+        astfri_type->indirect_ = this->type_factory_->mk_user(template_type->getTypeClassName());
+        // std::cout << "Je to pointer na Template\n\n\n";
+    }
+
     // ak je pointee pointer
     if (auto pointer_as_pointee = llvm::dyn_cast<clang::PointerType>(pointee)) {
         astfri_type->indirect_ = new IndirectionType(nullptr);
@@ -90,6 +98,21 @@ astfri::Type* ClangVisitor::get_astfri_type(clang::QualType QT) {
     if (auto builtin = llvm::dyn_cast<clang::BuiltinType>(clangType)) {
         auto type =  this->get_astfri_type_from_clang_builtintype(builtin);
         // std::cout << "Je to builtin typ\n\n\n";
+        return type;
+    }
+
+    // ak je to Record tak sa vrati rovno to
+    if (clangType->isRecordType()) {
+        auto record = clangType->getAsCXXRecordDecl();
+        auto type =  this->type_factory_->mk_user(record->getNameAsString());
+        // std::cout << "Je to record typ\n\n\n";
+        return type;
+    }
+
+    // ak je to template tak sa vrati rovno to
+    if (auto template_type = llvm::dyn_cast<clang::TemplateTypeParmType>(clangType)) {
+        auto type =  this->type_factory_->mk_user(template_type->getDecl()->getNameAsString());
+        // std::cout << "Je to template typ\n\n\n";
         return type;
     }
 

@@ -73,6 +73,6 @@ class CppASTConsumer : public clang::ASTConsumer {
         astfri::TranslationUnit& tu;
     };
     
-    int fill_translation_unit(TranslationUnit& tu, int argc, const char** argv);
+    int fill_translation_unit(astfri::TranslationUnit& tu, const std::string& file_path);
 
 } // namespace libastfri::astfri_cpp

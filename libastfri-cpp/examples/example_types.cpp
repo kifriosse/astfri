@@ -28,5 +28,7 @@ int main(int argc, char** argv) {
     float* pointer_float;
     char* pointer_char;
     const char* pointer_string = "Jozef";
+    int* haldovy_int = new int(5);
+    delete haldovy_int;
     return 0;
 }

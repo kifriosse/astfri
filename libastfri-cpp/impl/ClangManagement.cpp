@@ -1,4 +1,4 @@
-#include <libastfri-cpp/impl/ClangManagement.hpp>
+#include <libastfri-cpp/inc/ClangManagement.hpp>
 
 namespace astfri::astfri_cpp
 {
@@ -54,18 +54,29 @@ std::unique_ptr<clang::FrontendAction> CppFrontendActionFactory::create() {
 }
 
 
-int fill_translation_unit(TranslationUnit& tu, int argc, const char** argv) {
+// int fill_translation_unit(TranslationUnit& tu, int argc, const char** argv) {
     
-    // Main function
-    static llvm::cl::OptionCategory MyToolCategory("my-tool options");
+//     // Main function
+//     static llvm::cl::OptionCategory MyToolCategory("my-tool options");
 
-    auto OptionsParser = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory);
-    if (!OptionsParser) {
-        llvm::errs() << OptionsParser.takeError();
-        return 1;
-    }
-    clang::tooling::ClangTool Tool(OptionsParser->getCompilations(), OptionsParser->getSourcePathList());
-    Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
-    return 0;
+//     auto OptionsParser = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory);
+//     if (!OptionsParser) {
+//         llvm::errs() << OptionsParser.takeError();
+//         return 1;
+//     }
+//     clang::tooling::ClangTool Tool(OptionsParser->getCompilations(), OptionsParser->getSourcePathList());
+//     Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+//     return 0;
+// }
+
+int fill_translation_unit(astfri::TranslationUnit& tu, const std::string& file_path) {
+    // kompilacne argumenty
+    std::vector<std::string> compilations = {};
+    // fixna kompilacna databaza
+    clang::tooling::FixedCompilationDatabase Compilations(".", compilations);
+    // spustenie ClangTool
+    clang::tooling::ClangTool Tool(Compilations, {file_path});
+    return Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
 }
+
 } // namespace libastfri::astfri_cpp
