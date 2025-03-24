@@ -120,7 +120,7 @@ private:
     // types:types :D
     astfri::Type* get_astfri_type(clang::QualType QT); // only this is used in visitor
     astfri::Type* get_astfri_type_from_clang_builtintype(const clang::BuiltinType* builtin);
-    void get_pointee_and_fill_type(const clang::PointerType* pointer, astfri::IndirectionType* astfri_type);
+    astfri::Type* get_astfri_pointee(const clang::PointerType* pointer);
     
     TranslationUnit* tu_;
 
