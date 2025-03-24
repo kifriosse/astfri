@@ -127,14 +127,6 @@ namespace astfri::uml {
         }
         this->outputter_->open_class(this->currentClass_);
 
-        for (astfri::ClassDefStmt* base : stmt.bases_) {
-            this->create_relation(base->name_, RelationType::EXTENTION);
-        }
-
-        for (astfri::InterfaceDefStmt* interface : stmt.interfaces_) {
-            this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
-        }
-
         for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
             if (!this->config_->innerView_) {
                 if (constructor->access_ == astfri::AccessModifier::Private) continue;
@@ -180,9 +172,7 @@ namespace astfri::uml {
         }
         this->outputter_->open_interface(this->currentClass_);
 
-        for (astfri::InterfaceDefStmt* base : stmt.bases_) {
-            this->create_relation(base->name_, RelationType::EXTENTION);
-        }
+        
 
         for (astfri::MethodDefStmt* method : stmt.methods_)
         {
@@ -194,14 +184,37 @@ namespace astfri::uml {
     }
 
     void ClassVisitor::visit(astfri::TranslationUnit const& stmt) {
+        // insert names of all classes in the TU into a set
         for (astfri::ClassDefStmt* c : stmt.classes_) {
             this->classes_.insert(c->name_);
         }
-
+        
+        // insert names of all interfaces in the TU into a set
         for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
             this->interfaces_.insert(i->name_);
         }
+
+        // go through every class in the TU and create realations for it's base classes and interfaces
+        for (astfri::ClassDefStmt* c : stmt.classes_) {
+            this->currentClass_.name_ = c->name_;
+            for (astfri::ClassDefStmt* base : c->bases_) {
+                this->create_relation(base->name_, RelationType::EXTENTION);
+            }
+
+            for (astfri::InterfaceDefStmt* interface : c->interfaces_) {
+                this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
+            }
+        }
+
+        // go through every interface in the TU and create relations for it's base interfaces
+        for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
+            this->currentClass_.name_ = i->name_;
+            for (astfri::InterfaceDefStmt* base : i->bases_) {
+                this->create_relation(base->name_, RelationType::EXTENTION);
+            }
+        }
         
+
         for (astfri::ClassDefStmt* c : stmt.classes_) {
             c->accept(*this);
         }
