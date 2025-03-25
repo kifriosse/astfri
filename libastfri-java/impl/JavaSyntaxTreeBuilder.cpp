@@ -1,17 +1,16 @@
-#include <libastfri-java/inc/TreeMaker.hpp>
+#include <libastfri-java/inc/JavaSyntaxTreeBuilder.hpp>
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <filesystem>
-#include "libastfri/inc/Stmt.hpp"
 
-TreeMaker::TreeMaker() : stmtTransformer(new StatementTransformer())
+JavaSyntaxTreeBuilder::JavaSyntaxTreeBuilder() : stmtTransformer(new StatementTransformer())
 {    
 }
 
-std::string TreeMaker::load_file(std::string const& path)
+std::string JavaSyntaxTreeBuilder::load_file(std::string const& path)
 {
     std::ifstream file(path);
     if (! file.is_open())
@@ -26,7 +25,7 @@ std::string TreeMaker::load_file(std::string const& path)
     return buffer.str();
 }
 
-std::string TreeMaker::load_directory(std::string const& path)
+std::string JavaSyntaxTreeBuilder::load_directory(std::string const& path)
 {
     std::string sourceCode = "";
     const std::filesystem::path directory{path};
@@ -47,7 +46,7 @@ std::string TreeMaker::load_directory(std::string const& path)
     return sourceCode;
 }
 
-TSTree* TreeMaker::make_syntax_tree(std::string const& sourceCodeString)
+TSTree* JavaSyntaxTreeBuilder::make_syntax_tree(std::string const& sourceCodeString)
 {
     char const* sourceCode = sourceCodeString.c_str();
     TSParser* parser = ts_parser_new();
@@ -58,7 +57,7 @@ TSTree* TreeMaker::make_syntax_tree(std::string const& sourceCodeString)
     return tree;
 }
 
-astfri::TranslationUnit* TreeMaker::get_translation_unit(TSTree* tree, std::string const& sourceCode)
+astfri::TranslationUnit* JavaSyntaxTreeBuilder::get_translation_unit(TSTree* tree, std::string const& sourceCode)
 {
     astfri::TranslationUnit* translationUnit = stmtTransformer->fill_translation_unit(tree, sourceCode);
     return translationUnit;

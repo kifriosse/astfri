@@ -5,7 +5,7 @@ add_library(astfri-java SHARED dummy.cpp
                                 NodeMapper.cpp
                                 ExpressionTransformer.cpp
                                 StatementTransformer.cpp
-                                TreeMaker.cpp)
+                                JavaSyntaxTreeBuilder.cpp)
 
 target_compile_options(astfri-java PRIVATE -Wall -Wextra -Wpedantic)
 

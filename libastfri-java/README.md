@@ -29,7 +29,7 @@ sudo make install
 # Usage
 Link library astfri-java in CMakeLists.txt
 
-1. Include >> #include <libastfri-java/inc/TreeMaker.hpp>
+1. Include >> #include <libastfri-java/inc/JavaSyntaxTreeBuilder.hpp>
 2. Make a instance of TreeMaker that has parameterless constructor.
 3. Then call one of functions:
     3.1 For text output call function load_file that returns string and takes string parameter for path to file.
