@@ -1,0 +1,25 @@
+@startuml Mammal
+class Mammal {
++ Mammal(String name)
+-String name
++String getName()
+}
+class Main {
++void main(String[] args)
+}
+class Cat {
++ Cat(String name)
++String makeSound()
+}
+class Dog {
++ Dog(String name)
++String makeSound()
+}
+interface Animal {
++String makeSound()
++String getName()
+}
+Animal<|..Mammal
+Mammal<|--Cat
+Mammal<|--Dog
+@enduml

@@ -1,0 +1,48 @@
+public class ExampleClass {
+    // Attributes
+    private int count;
+    private String name;
+
+    // Constructor
+    public ExampleClass(int count, String name) {
+        this.count = count;
+        this.name = name;
+    }
+
+    // Method 1: Prints a message count times using a for loop
+    public void printMessages() {
+        for (int i = 0; i < count; i++) {
+            System.out.println("Hello, " + name + "! This is message number: " + (i + 1));
+        }
+    }
+
+    // Method 2: Nested for loops with if statements and a while loop
+    public void nestedLoops() {
+        int outerCount = 3;
+        
+        for (int i = 1; i <= outerCount; i++) {
+            System.out.println("Outer loop iteration: " + i);
+
+            for (int j = 1; j <= count; j++) {
+                if (j % 2 == 0) {
+                    System.out.println("  Inner loop (even): " + j);
+                } else {
+                    System.out.println("  Inner loop (odd): " + j);
+                }
+            }
+        }
+
+        int k = 0;
+        while (k < count) {
+            System.out.println("While loop iteration: " + k);
+            k++;
+        }
+    }
+
+    // Main method to test the class
+    public static void main(String[] args) {
+        ExampleClass example = new ExampleClass(5, "Alice");
+        example.printMessages();
+        example.nestedLoops();
+    }
+}
