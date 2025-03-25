@@ -4,16 +4,10 @@
 #include <cstring>
 #include <ranges>
 #include <string>
-#include <tree_sitter/api.h>
 
-#include "libastfri-java/src/StatementTransformer.hpp"
-#include "libastfri/inc/Expr.hpp"
-
-ExpressionTransformer::ExpressionTransformer(TSTree* tree,
-    std::string const& sourceCode) :
+ExpressionTransformer::ExpressionTransformer() :
     typeFactory(astfri::TypeFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
-    stmtTransformer(new StatementTransformer(tree, sourceCode)),
     nodeMapper(new NodeMapper())
 {
 }

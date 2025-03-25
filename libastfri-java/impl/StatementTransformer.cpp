@@ -4,27 +4,15 @@
 #include <cstdint>
 #include <cstdlib>
 #include <sys/types.h>
-#include <tree_sitter/api.h>
-#include <tuple>
-#include <vector>
 
-#include "libastfri/inc/Expr.hpp"
-#include "libastfri/inc/Stmt.hpp"
-#include "libastfri/inc/Type.hpp"
-
-StatementTransformer::StatementTransformer(
-    TSTree* tree,
-    std::string const& sourceCode
-) :
+StatementTransformer::StatementTransformer() :
     typeFactory(astfri::TypeFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
     stmtFactory(astfri::StmtFactory::get_instance()),
-    exprTransformer(new ExpressionTransformer(tree, sourceCode)),
+    exprTransformer(new ExpressionTransformer()),
     nodeMapper(new NodeMapper())
-{
-    this->classes    = transform_classes(tree, sourceCode);
-    this->interfaces = transform_interfaces(tree, sourceCode);
-}
+    {
+    }
 
 astfri::Stmt* StatementTransformer::get_stmt(
     TSNode tsNode,
@@ -981,12 +969,10 @@ std::vector<astfri::InterfaceDefStmt*> StatementTransformer::
     return interfaces;
 }
 
-std::vector<astfri::ClassDefStmt*> StatementTransformer::get_classes()
+astfri::TranslationUnit* StatementTransformer::fill_translation_unit(TSTree* tree, std::string const& sourceCode)
 {
-    return this->classes;
-}
-
-std::vector<astfri::InterfaceDefStmt*> StatementTransformer::get_interfaces()
-{
-    return this->interfaces;
+    astfri::TranslationUnit* tu = this->stmtFactory.mk_translation_unit();
+    tu->classes_ = this->transform_classes(tree, sourceCode);
+    tu->interfaces_ = this->transform_interfaces(tree, sourceCode);
+    return tu;
 }

@@ -2,6 +2,7 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
 #include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -16,9 +17,7 @@
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
 
-#include "../src/StatementTransformer.hpp"
-#include "libastfri-java/src/StatementTransformer.hpp"
-#include "libastfri/inc/Stmt.hpp"
+#include <libastfri-java/impl/StatementTransformer.hpp>
 
 typedef struct Tree_Sitter_Node
 {
@@ -151,7 +150,7 @@ int main ()
 
     // Get current directory and append the file name
     std::string current_dir = get_directory(__FILE__);
-    std::string path        = current_dir + "Dummy.txt";
+    std::string path        = current_dir + "../resources/Dummy.txt";
 
     // Load file content
     std::string source_code = load(path);
@@ -210,20 +209,20 @@ int main ()
     std::cout << ts_node_type(ts_tree_cursor_current_node(&cursor))
               << std::endl;
 
-    StatementTransformer* stmtTransformer = new StatementTransformer(tree, source_code);
-    std::vector<astfri::ClassDefStmt*> classes = stmtTransformer->get_classes();
-    std::vector<astfri::InterfaceDefStmt*> interfaces = stmtTransformer->get_interfaces();
+    StatementTransformer* stmtTransformer = new StatementTransformer();
 
-    ASTVisitor* visitor = new ASTVisitor();
-    for (astfri::ClassDefStmt* classDef : classes)
-    {
-        visitor->visit(*classDef);
-    }
-    for (astfri::InterfaceDefStmt* interfaceDef : interfaces)
-    {
-        visitor->visit(*interfaceDef);
-    }
-    visitor->write_file();
+    //ASTVisitor* visitor = new ASTVisitor();
+    //visitor->visit(*stmtTransformer->fill_translation_unit(tree, source_code));
+    //visitor->write_file();
+
+    astfri::uml::Config conf;
+    conf.innerView_ = true;
+    
+    astfri::uml::PlantUMLOutputter op;
+    astfri::uml::TypeBeforeConvention tc;
+    astfri::uml::UMLLibWrapper uml;
+    uml.init(conf, op, tc);
+    uml.run(*stmtTransformer->fill_translation_unit(tree, source_code));
 
     // Free all of the heap-allocated memory.
     free(string);

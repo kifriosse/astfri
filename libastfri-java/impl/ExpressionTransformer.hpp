@@ -4,22 +4,18 @@
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include <libastfri-java/impl/NodeMapper.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 #include <variant>
 
-#include "libastfri-java/src/NodeMapper.hpp"
-#include "libastfri-java/src/StatementTransformer.hpp"
-
-class StatementTransformer;
 
 class ExpressionTransformer
 {
 private:
     astfri::TypeFactory& typeFactory;
     astfri::ExprFactory& exprFactory;
-    StatementTransformer* stmtTransformer;
     NodeMapper* nodeMapper;
 
     astfri::BinOpExpr* transform_bin_op_expr_node(
@@ -55,8 +51,7 @@ private:
     );
 
 public:
-    ExpressionTransformer(TSTree* tree,
-        std::string const& sourceCode);
+    ExpressionTransformer();
 
     std::string get_node_text(
         TSNode const& node,

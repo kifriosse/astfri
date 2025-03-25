@@ -1,8 +1,4 @@
 #include "NodeMapper.hpp"
-#include <map>
-#include "libastfri/inc/Expr.hpp"
-#include "libastfri/inc/Type.hpp"
-#include "libastfri/inc/TypeFactory.hpp"
 
 NodeMapper::NodeMapper() : typeFactory(astfri::TypeFactory::get_instance()), 
                            typeMap({

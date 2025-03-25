@@ -4,19 +4,14 @@
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include <libastfri-java/impl/NodeMapper.hpp>
+#include <libastfri-java/impl/ExpressionTransformer.hpp>
 
 #include <cstring>
 #include <string>
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
-
-
-#include "libastfri/inc/Stmt.hpp"
-#include "libastfri/inc/Type.hpp"
-#include "NodeMapper.hpp"
-
-class ExpressionTransformer;
 
 using FunctionType = std::tuple<
     astfri::AccessModifier,
@@ -34,9 +29,6 @@ private:
     astfri::StmtFactory& stmtFactory;
     ExpressionTransformer* exprTransformer;
     NodeMapper* nodeMapper;
-
-    std::vector<astfri::ClassDefStmt*> classes;
-    std::vector<astfri::InterfaceDefStmt*> interfaces;
 
     astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
@@ -136,9 +128,8 @@ private:
     );
 
 public:
-    StatementTransformer(TSTree* tree, std::string const& sourceCode);
-    std::vector<astfri::ClassDefStmt*> get_classes();
-    std::vector<astfri::InterfaceDefStmt*> get_interfaces();
+    StatementTransformer();
+    astfri::TranslationUnit* fill_translation_unit(TSTree* tree, std::string const& sourceCode);
 };
 
 #endif // STATEMENT_TRANSFORMER_CLASS_HPP
