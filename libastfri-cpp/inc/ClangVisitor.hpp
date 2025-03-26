@@ -24,7 +24,10 @@
 #include <clang/AST/Stmt.h>
 #include <clang/AST/APValue.h>
 #include <clang/AST/DeclTemplate.h>
+#include <clang/AST/Type.h>
+#include <clang/AST/TypeLoc.h>
 #include <clang/Basic/Specifiers.h>
+#include <clang/Basic/TargetInfo.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Frontend/ASTConsumers.h>
@@ -33,6 +36,7 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Casting.h>
+#include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
 
 // potrebne
 #include <vector>
@@ -74,8 +78,6 @@ public:
     bool TraverseVarDecl(clang::VarDecl *VD);
     bool TraverseParmVarDecl(clang::ParmVarDecl *PVD);
     bool TraverseFieldDecl(clang::FieldDecl *FD);
-    // bool TraverseTypedefDecl(clang::TypedefDecl *TD);
-    // bool TraverseEnumDecl(clang::EnumDecl *ED);
     // // Traverse statementy
     bool TraverseDeclStmt(clang::DeclStmt *DS);
     bool TraverseCompoundStmt(clang::CompoundStmt *CS);
@@ -98,7 +100,6 @@ public:
     bool TraverseCXXNewExpr(clang::CXXNewExpr *NE);
     bool TraverseCXXDeleteExpr(clang::CXXDeleteExpr *DE);
     bool TraverseCXXThrowExpr(clang::CXXThrowExpr *TE);
-    // bool TraverseCallExpr(clang::CallExpr *CE);
     // // Traverse literals
     bool TraverseIntegerLiteral(clang::IntegerLiteral *IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral *FL);

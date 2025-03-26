@@ -1,11 +1,4 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
-#include <clang/AST/DeclCXX.h>
-#include <clang/AST/Type.h>
-#include <clang/AST/TypeLoc.h>
-#include <clang/Basic/Specifiers.h>
-#include <clang/Frontend/FrontendActions.h>
-#include <llvm-18/llvm/Support/Casting.h>
-#include "libastfri/inc/Type.hpp"
 
 namespace astfri::astfri_cpp 
 {

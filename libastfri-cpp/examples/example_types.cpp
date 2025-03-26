@@ -18,7 +18,15 @@ const char* global_string = "Jojo";
 class Trieda {
 public:
     Trieda(int* pCislo) : cislo(*pCislo){};
+    Trieda(float* pCislo) : cislo(*pCislo){
+        const char* konstruktor2 = "Toto je naozaj druhy konstruktor\n";
+    };
     int cislo;
+    ~Trieda(){
+        int* smernik_na_nic_mozno = &this->cislo;
+        this->cislo = 0;
+        delete smernik_na_nic_mozno;
+    };
 };
 
 
