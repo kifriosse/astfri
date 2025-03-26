@@ -1,4 +1,5 @@
 #include <libastfri-text/inc/Exporter.hpp>
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -12,11 +13,19 @@ Exporter::Exporter(std::shared_ptr<TextConfigurator> conf) {
 }
 
 void Exporter::check_output_file_path(const std::string& suffix) {
-    std::string path = config_->get_output_file_path()->str() + suffix;
-    std::ofstream file(path);
+    std::string path = config_->get_output_file_path()->str();
+    std::filesystem::path fullp = path + suffix;
+    if (std::filesystem::exists(fullp) && std::filesystem::is_regular_file(fullp)) {
+        int index = 0;
+        do {
+            ++index;
+            fullp = path + "(" + std::to_string(index) + ")" + suffix;
+        } while (std::filesystem::exists(fullp) && std::filesystem::is_regular_file(fullp));
+    }
+    std::ofstream file(fullp);
     if (file) {
         file.close();
-        write_output_into_file(std::move(path));
+        write_output_into_file(std::move(fullp));
     } else {
         file.close();
         std::string defaultPath = config_->get_default_output_path()->str() + std::move(suffix);

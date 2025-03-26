@@ -13,13 +13,12 @@ void HtmlFileExporter::make_export() { check_output_file_path(".html"); }
 
 void HtmlFileExporter::write_output_into_file(const std::string& filepath) {
     std::cout << "Súbor nájdeš na ceste: " << filepath << "\n";
-    std::string title = config_->get_output_file_name()->str() + ".html";
     std::ofstream file(std::move(filepath));
     file << "<!DOCTYPE html>\n";
     file << "<html lang=\"sk\">\n";
     file << "<head>\n";
     file << "<meta charset=\"UTF-8\">\n";
-    file << "<title>" << std::move(title) << "</title>\n";
+    file << "<title>" << config_->get_output_file_name()->str() << "</title>\n";
     file << "<style>\n";
     file << ".unknown-word{" << config_->get_unknown_word_style()->str() << "}\n";
     file << ".invalid-word{" << config_->get_invalid_word_style()->str() << "}\n";
