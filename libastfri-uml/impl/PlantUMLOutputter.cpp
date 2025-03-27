@@ -85,6 +85,10 @@ namespace astfri::uml {
     }
 
     void PlantUMLOutputter::add_relation(RelationStruct r) {
-        this->outputString_ += r.to_ + this->config_->relationArrows_[(int)r.type_] + r.from_ + "\n";
+        this->outputString_ +=
+            r.to_ + " " +
+            this->config_->relationArrows_[(int)r.type_] +
+            " " + r.from_ +
+            "\n";
     }
 } // namespace astfri::uml
