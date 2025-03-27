@@ -6,24 +6,27 @@
 #include <libastfri/inc/TypeFactory.hpp>
 #include <map>
 
-class NodeMapper
+namespace astfri::java
 {
-private:
-    astfri::TypeFactory& typeFactory;
-    const std::map<std::string, astfri::Type*> typeMap;
+    class NodeMapper
+    {
+    private:
+        astfri::TypeFactory& typeFactory;
+        const std::map<std::string, astfri::Type*> typeMap;
 
-    astfri::StmtFactory& stmtFactory;
-    astfri::ExprFactory& exprFactory;
+        astfri::StmtFactory& stmtFactory;
+        astfri::ExprFactory& exprFactory;
 
-    const std::map<std::string, astfri::BinOpType> binOpMap;
-    const std::map<std::string, astfri::UnaryOpType> unaryOpMap;
-    const std::map<std::string, astfri::AccessModifier> modMap;
+        const std::map<std::string, astfri::BinOpType> binOpMap;
+        const std::map<std::string, astfri::UnaryOpType> unaryOpMap;
+        const std::map<std::string, astfri::AccessModifier> modMap;
 
-public:
-    NodeMapper();
-    std::map<std::string, astfri::Type*> get_typeMap ();
-    std::map<std::string, astfri::BinOpType> get_binOpMap ();
-    std::map<std::string, astfri::UnaryOpType> get_unaryOpMap ();
-    std::map<std::string, astfri::AccessModifier> get_modMap ();
-};
+    public:
+        NodeMapper();
+        std::map<std::string, astfri::Type*> get_typeMap ();
+        std::map<std::string, astfri::BinOpType> get_binOpMap ();
+        std::map<std::string, astfri::UnaryOpType> get_unaryOpMap ();
+        std::map<std::string, astfri::AccessModifier> get_modMap ();
+    };
+} // namespace astfri::java
 #endif // NODE_MAPPER_CLASS_HPP

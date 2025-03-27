@@ -1,5 +1,5 @@
 //include for java input and making of java syntax tree
-#include <libastfri-java/inc/JavaSyntaxTreeBuilder.hpp>
+#include <libastfri-java/inc/ASTBuilder.hpp>
 
 //includes for uml output
 #include <libastfri-uml/inc/PlantUMLOutputter.hpp>
@@ -8,7 +8,7 @@
 int main()
 {
     //code for java source code input and making of java syntax tree
-    JavaSyntaxTreeBuilder* tb = new JavaSyntaxTreeBuilder();
+    astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 
     std::string sourceCode = tb->load_directory("/home/adam/projects/astfri/libastfri-java/resources/java_project");
     TSTree* tree = tb->make_syntax_tree(sourceCode);

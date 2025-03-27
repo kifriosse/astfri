@@ -209,7 +209,7 @@ int main ()
     std::cout << ts_node_type(ts_tree_cursor_current_node(&cursor))
               << std::endl;
 
-    StatementTransformer* stmtTransformer = new StatementTransformer();
+    astfri::java::StatementTransformer* stmtTransformer = new astfri::java::StatementTransformer();
 
     //ASTVisitor* visitor = new ASTVisitor();
     //visitor->visit(*stmtTransformer->fill_translation_unit(tree, source_code));

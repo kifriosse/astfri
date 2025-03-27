@@ -1,11 +1,10 @@
 find_package(TreeSitter REQUIRED)
 find_package(TreeSitterJava REQUIRED)
 
-add_library(astfri-java SHARED dummy.cpp
-                                NodeMapper.cpp
-                                ExpressionTransformer.cpp
-                                StatementTransformer.cpp
-                                JavaSyntaxTreeBuilder.cpp)
+add_library(astfri-java SHARED NodeMapper.cpp
+                               ExpressionTransformer.cpp
+                               StatementTransformer.cpp
+                               ASTBuilder.cpp)
 
 target_compile_options(astfri-java PRIVATE -Wall -Wextra -Wpedantic)
 

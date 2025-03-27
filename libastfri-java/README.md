@@ -29,8 +29,8 @@ sudo make install
 # Usage
 Link library astfri-java in CMakeLists.txt
 
-1. Include >> #include <libastfri-java/inc/JavaSyntaxTreeBuilder.hpp>
-2. Make a instance of TreeMaker that has parameterless constructor.
+1. Include >> #include <libastfri-java/inc/ASTBuilder.hpp>
+2. Make a instance of ASTBuilder that has parameterless constructor.
 3. Then call one of functions:
     3.1 For text output call function load_file that returns string and takes string parameter for path to file.
     3.2 For uml output call function load_directory that returns string and takes string parameter for path to project directory.
