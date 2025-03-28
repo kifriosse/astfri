@@ -56,6 +56,9 @@ public:
             this->time_--;
         }
     };
+    int* return_intptr() {
+        return nullptr;
+    }
 };
 
 int main() {

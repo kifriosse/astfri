@@ -2,9 +2,37 @@
 
 namespace astfri::astfri_cpp
 {
-ClangVisitor::ClangVisitor(TranslationUnit& visitedTranslationUnit) :
+bool ClangVisitor::isInMainFile(clang::SourceLocation Loc) const {
+    if (Loc.isInvalid()) return false;
+    return this->SM->getFileID(this->SM->getExpansionLoc(Loc)) == this->MainFileID;
+}
+clang::NamespaceDecl* ClangVisitor::get_desired_namespace(clang::TranslationUnitDecl* TU) {
+    for (auto decl : TU->decls()) {
+        if (auto NSD = llvm::dyn_cast<clang::NamespaceDecl>(decl)) {
+            if (this->isInMainFile(NSD->getLocation())) {
+                return NSD;
+            }
+        }
+    }
+    return nullptr;
+}
+void ClangVisitor::setSM(clang::SourceManager* pSM) {
+    this->SM = pSM;
+}
+clang::SourceManager* ClangVisitor::getSM() {
+    return this->SM;
+}
+void ClangVisitor::setMainFileID(clang::FileID MFID) {
+    this->MainFileID = MFID;
+}
+clang::FileID ClangVisitor::getMFID() {
+    return this->MainFileID;
+}
+
+ClangVisitor::ClangVisitor(TranslationUnit& visitedTranslationUnit, clang::SourceManager* pSM) :
     tu_(&visitedTranslationUnit)
 {
+    this->SM = pSM;
     this->stmt_factory_ = &StmtFactory::get_instance();
     this->expr_factory_ = &ExprFactory::get_instance();
     this->type_factory_ = &TypeFactory::get_instance();
@@ -112,6 +140,10 @@ astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind
 }
 
 // traverse deklaracie
+bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl *ND) {
+    std::cout << "Traversing namespace: " << ND->getNameAsString() << "\n";
+    return true; // Pokračujeme v prechádzaní poduzlov
+}
 bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor) {
     // aby sa viac krat nevytvaral
     if (!Ctor->isFirstDecl()) {
@@ -358,7 +390,7 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl *RD) {
                     tparams->getParam(i)->getNameAsString()
                 )
             );
-            std::cout << tparams->getParam(i)->getNameAsString() << "\n"; // Vratilo T konecne
+            // std::cout << tparams->getParam(i)->getNameAsString() << "\n"; // Vratilo T konecne
         }
     }
 
@@ -570,9 +602,17 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt *IS) {
 
     // else vetva
     if (auto else_stmt = IS->getElse()) {
-        // TODO: ak ma else ako if dorobit, zatial sa prepoklada ze je to compound vzdy
-        TraverseStmt(else_stmt);
-        new_if->iffalse_ = this->astfri_location.stmt_;
+        // ak je else compound
+        if (auto compound = llvm::dyn_cast<clang::CompoundStmt>(IS->getElse())) {
+            TraverseStmt(compound);
+            new_if->iffalse_ = this->astfri_location.stmt_;
+        } else {
+            // ak je to iba jeden prikaz
+            CompoundStmt* tempCmpd = this->stmt_factory_->mk_compound(std::vector<Stmt *> {});
+            this->astfri_location.stmt_ = tempCmpd;
+            TraverseStmt(else_stmt);
+            new_if->iffalse_ = tempCmpd->stmts_[0];
+        }
     }
 
     // vratenie AST location
@@ -962,6 +1002,13 @@ bool ClangVisitor::TraverseCXXThrowExpr(clang::CXXThrowExpr *TE) {
 
     return true;
 }
+// bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE) {
+//     if (auto oper = llvm::dyn_cast<clang::BinaryOperatorKind>(COCE->getOperatorLoc())) {
+//         oper
+//         TraverseStmt(oper);
+//     }
+//     return true;
+// }
 
 // literaly
  bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral *IL) {
