@@ -1,6 +1,8 @@
 #include <libastfri/impl/Utils.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
 
+#include <cassert>
+
 namespace astfri
 {
 
@@ -47,6 +49,7 @@ DynamicType* TypeFactory::mk_dynamic()
 
 IndirectionType* TypeFactory::mk_indirect(Type* type)
 {
+    assert(type != nullptr);
     return details::emplace_get<IndirectionType>(type, indirect_, type);
 }
 
