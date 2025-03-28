@@ -4,7 +4,6 @@
 
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include <vector>
-#include "libastfri/inc/Stmt.hpp"
 
 int main()
 {

@@ -10,18 +10,11 @@ namespace astfri::uml {
         r.to_ = target;
         r.type_ = type;
 
-        RelationStruct* found = this->find_relation(r);
-        if (!found) this->relations_.push_back(r);
+        if (!this->find_relation(r)) this->relations_.emplace(r.from_ + r.to_, r);
     }
 
-    RelationStruct* ClassVisitor::find_relation(RelationStruct const& rel) {
-        for (size_t i = 0; i < this->relations_.size(); ++i) {
-            if ((this->relations_[i].from_.compare(rel.from_) == 0) &&
-                (this->relations_[i].to_.compare(rel.to_) == 0)) {
-                    return &this->relations_[i];
-            }
-        }
-        return nullptr;
+    bool ClassVisitor::find_relation(RelationStruct const& rel) {
+        return this->relations_.contains(rel.from_ + rel.to_);
     }
 
     bool ClassVisitor::find_class(std::string name) {
@@ -134,14 +127,6 @@ namespace astfri::uml {
         }
         this->outputter_->open_class(this->currentClass_);
 
-        for (astfri::ClassDefStmt* base : stmt.bases_) {
-            this->create_relation(base->name_, RelationType::EXTENTION);
-        }
-
-        for (astfri::InterfaceDefStmt* interface : stmt.interfaces_) {
-            this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
-        }
-
         for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
             if (!this->config_->innerView_) {
                 if (constructor->access_ == astfri::AccessModifier::Private) continue;
@@ -187,9 +172,7 @@ namespace astfri::uml {
         }
         this->outputter_->open_interface(this->currentClass_);
 
-        for (astfri::InterfaceDefStmt* base : stmt.bases_) {
-            this->create_relation(base->name_, RelationType::EXTENTION);
-        }
+        
 
         for (astfri::MethodDefStmt* method : stmt.methods_)
         {
@@ -201,14 +184,37 @@ namespace astfri::uml {
     }
 
     void ClassVisitor::visit(astfri::TranslationUnit const& stmt) {
+        // insert names of all classes in the TU into a set
         for (astfri::ClassDefStmt* c : stmt.classes_) {
-            this->classes_.push_back(c->name_);
-        }
-
-        for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
-            this->interfaces_.push_back(i->name_);
+            this->classes_.insert(c->name_);
         }
         
+        // insert names of all interfaces in the TU into a set
+        for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
+            this->interfaces_.insert(i->name_);
+        }
+
+        // go through every class in the TU and create realations for it's base classes and interfaces
+        for (astfri::ClassDefStmt* c : stmt.classes_) {
+            this->currentClass_.name_ = c->name_;
+            for (astfri::ClassDefStmt* base : c->bases_) {
+                this->create_relation(base->name_, RelationType::EXTENTION);
+            }
+
+            for (astfri::InterfaceDefStmt* interface : c->interfaces_) {
+                this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
+            }
+        }
+
+        // go through every interface in the TU and create relations for it's base interfaces
+        for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
+            this->currentClass_.name_ = i->name_;
+            for (astfri::InterfaceDefStmt* base : i->bases_) {
+                this->create_relation(base->name_, RelationType::EXTENTION);
+            }
+        }
+        
+
         for (astfri::ClassDefStmt* c : stmt.classes_) {
             c->accept(*this);
         }
@@ -217,8 +223,8 @@ namespace astfri::uml {
             i->accept(*this);
         }
 
-        for (RelationStruct r : this->relations_) {
-            this->outputter_->add_relation(r);
+        for (auto&[str, rel] : this->relations_) {
+            this->outputter_->add_relation(rel);
         }
 
         this->finish();

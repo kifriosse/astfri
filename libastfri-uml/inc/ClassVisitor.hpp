@@ -1,5 +1,8 @@
 #pragma once
 
+#include <map>
+#include <set>
+
 #include <libastfri/inc/Visitor.hpp>
 #include <libastfri/inc/Type.hpp>
 #include <libastfri/inc/Stmt.hpp>
@@ -20,12 +23,12 @@ namespace astfri::uml {
         MethodStruct currentMethod_;
         VarStruct currentVariable_;
 
-        std::vector<RelationStruct> relations_;
-        std::vector<std::string> classes_;
-        std::vector<std::string> interfaces_;
+        std::map<std::string, RelationStruct> relations_;
+        std::set<std::string> classes_;
+        std::set<std::string> interfaces_;
 
         void create_relation(std::string target, RelationType type);
-        RelationStruct* find_relation(RelationStruct const& rel);
+        bool find_relation(RelationStruct const& rel);
         bool find_class(std::string name);
         bool find_interface(std::string name);
 
