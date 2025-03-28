@@ -1,4 +1,4 @@
-@startuml Mammal
+@startuml UMLDiagram
 class Mammal {
 + Mammal(String name)
 -String name
@@ -19,7 +19,7 @@ interface Animal {
 +String makeSound()
 +String getName()
 }
-Animal<|..Mammal
-Mammal<|--Cat
-Mammal<|--Dog
+Mammal <|-- Cat
+Mammal <|-- Dog
+Animal <|.. Mammal
 @enduml

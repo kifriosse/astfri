@@ -1,13 +1,13 @@
 #ifndef JAVA_SYNTAX_TREE_BUILDER_HPP
-#    define JAVA_SYNTAX_TREE_BUILDER_HPP
+#define JAVA_SYNTAX_TREE_BUILDER_HPP
 
-#    include <libastfri-java/impl/StatementTransformer.hpp>
-#    include <libastfri/inc/StmtFactory.hpp>
+#include <libastfri-java/impl/StatementTransformer.hpp>
+#include <libastfri/inc/StmtFactory.hpp>
 
-#    include <cstring>
-#    include <string>
-#    include <tree_sitter/api.h>
-#    include <tree_sitter/tree-sitter-java.h>
+#include <cstring>
+#include <string>
+#include <tree_sitter/api.h>
+#include <tree_sitter/tree-sitter-java.h>
 
 namespace astfri::java
 {
@@ -30,6 +30,5 @@ namespace astfri::java
             std::string const& sourceCode
         );
     };
-    
-    #endif // JAVA_SYNTAX_TREE_BUILDER_HPP
-}
+} // namespace astfri::java
+#endif // JAVA_SYNTAX_TREE_BUILDER_HPP

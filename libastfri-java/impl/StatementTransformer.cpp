@@ -186,7 +186,7 @@ namespace astfri::java
     {
         astfri::Type* type = typeFactory.mk_unknown();
         std::string name;
-        astfri::Expr* init;
+        astfri::Expr* init = nullptr;
 
         std::string tsNodeName = ts_node_string(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
@@ -237,7 +237,7 @@ namespace astfri::java
         std::string const& sourceCode
     )
     {
-        astfri::Expr* expr;
+        astfri::Expr* expr = nullptr;
 
         TSNode child          = ts_node_named_child(tsNode, 0);
         std::string childName = ts_node_string(child);
@@ -482,7 +482,7 @@ namespace astfri::java
         std::string const& sourceCode
     )
     {
-        astfri::Expr* expr;
+        astfri::Expr* expr = nullptr;
 
         TSNode child          = ts_node_named_child(tsNode, 0);
         std::string childName = ts_node_string(child);
