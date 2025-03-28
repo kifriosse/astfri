@@ -24,6 +24,13 @@ list(GET COMPILE_OPTIONS_PUBLIC 0 FIRST_OPTION)
 if (FIRST_OPTION MATCHES "-I.*")
   list(REMOVE_AT COMPILE_OPTIONS_PUBLIC 0)
 endif()
+
+# Remove option that sets standard, hardcoded for the first option
+# TODO this needs to be changed to for each loop
+list(GET COMPILE_OPTIONS_PUBLIC 0 FIRST_OPTION)
+if (FIRST_OPTION MATCHES "-std=.*")
+  list(REMOVE_AT COMPILE_OPTIONS_PUBLIC 0)
+endif()
 unset(FIRST_OPTION)
 
 # Append no rtti option
