@@ -24,7 +24,10 @@
 #include <clang/AST/Stmt.h>
 #include <clang/AST/APValue.h>
 #include <clang/AST/DeclTemplate.h>
+#include <clang/AST/Type.h>
+#include <clang/AST/TypeLoc.h>
 #include <clang/Basic/Specifiers.h>
+#include <clang/Basic/TargetInfo.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Frontend/ASTConsumers.h>
@@ -33,6 +36,7 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Casting.h>
+#include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
 
 // potrebne
 #include <vector>
@@ -51,6 +55,7 @@ namespace astfri::astfri_cpp
         const clang::CXXBoolLiteralExpr *bool_lit_ = nullptr;
         const clang::StringLiteral *string_lit_ = nullptr;
         const clang::CharacterLiteral *char_lit_ = nullptr;
+        const clang::CXXNullPtrLiteralExpr *nullptr_lit_ = nullptr;
     };
 
     struct AstfriASTLocation {
@@ -73,8 +78,6 @@ public:
     bool TraverseVarDecl(clang::VarDecl *VD);
     bool TraverseParmVarDecl(clang::ParmVarDecl *PVD);
     bool TraverseFieldDecl(clang::FieldDecl *FD);
-    // bool TraverseTypedefDecl(clang::TypedefDecl *TD);
-    // bool TraverseEnumDecl(clang::EnumDecl *ED);
     // // Traverse statementy
     bool TraverseDeclStmt(clang::DeclStmt *DS);
     bool TraverseCompoundStmt(clang::CompoundStmt *CS);
@@ -97,13 +100,13 @@ public:
     bool TraverseCXXNewExpr(clang::CXXNewExpr *NE);
     bool TraverseCXXDeleteExpr(clang::CXXDeleteExpr *DE);
     bool TraverseCXXThrowExpr(clang::CXXThrowExpr *TE);
-    // bool TraverseCallExpr(clang::CallExpr *CE);
     // // Traverse literals
     bool TraverseIntegerLiteral(clang::IntegerLiteral *IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral *FL);
     bool TraverseStringLiteral(clang::StringLiteral *SL);
     bool TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *BL);
     bool TraverseCharacterLiteral(clang::CharacterLiteral *CL);
+    bool TraverseCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr *NPLE);
     // Traverse operators
     bool TraverseCompoundAssignOperator(clang::CompoundAssignOperator *CAO);
     bool TraverseBinaryOperator(clang::BinaryOperator *BO);
@@ -112,8 +115,14 @@ public:
 private:
     astfri::AccessModifier getAccessModifier(clang::Decl* decl);
     astfri::ClassDefStmt* get_existing_class(std::string name);
+    // types
     astfri::BinOpType get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type);
     astfri::UnaryOpType get_astfri_un_op_type(clang::UnaryOperatorKind clang_type);
+    // types:types :D
+    astfri::Type* get_astfri_type(clang::QualType QT); // only this is used in visitor
+    astfri::Type* get_astfri_type_from_clang_builtintype(const clang::BuiltinType* builtin);
+    astfri::Type* get_astfri_pointee(const clang::PointerType* pointer);
+    
     TranslationUnit* tu_;
 
     StmtFactory* stmt_factory_;

@@ -1,4 +1,4 @@
-#include <libastfri-cpp/impl/ClangManagement.hpp>
+#include <libastfri-cpp/inc/ClangManagement.hpp>
 
 namespace astfri::astfri_cpp
 {
@@ -39,7 +39,9 @@ namespace astfri::astfri_cpp
 
 CppASTConsumer::CppASTConsumer(astfri::TranslationUnit& _tu) : Visitor(_tu) {}
 void CppASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
+    std::cout << "Beginning of filling ASTFRI Translation Unit.\n";
     this->Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+    std::cout << "ASTFRI Translation Unit is filled succesfully.\n";
 }    
     
 CppFrontendAction::CppFrontendAction(astfri::TranslationUnit& _tu) : tu(_tu) {}
@@ -53,19 +55,16 @@ std::unique_ptr<clang::FrontendAction> CppFrontendActionFactory::create() {
     return std::make_unique<CppFrontendAction>(tu);
 }
 
+int fill_translation_unit(astfri::TranslationUnit& tu, const std::string& file_path) {
+    // kompilacne argumenty
+    std::vector<std::string> compilations = {};
+    // fixna kompilacna databaza
+    clang::tooling::FixedCompilationDatabase Compilations(".", compilations);
+    // spustenie ClangTool
+    clang::tooling::ClangTool Tool(Compilations, {file_path});
+    return Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
 
-int fill_translation_unit(TranslationUnit& tu, int argc, const char** argv) {
-    
-    // Main function
-    static llvm::cl::OptionCategory MyToolCategory("my-tool options");
-
-    auto OptionsParser = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory);
-    if (!OptionsParser) {
-        llvm::errs() << OptionsParser.takeError();
-        return 1;
-    }
-    clang::tooling::ClangTool Tool(OptionsParser->getCompilations(), OptionsParser->getSourcePathList());
-    Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
     return 0;
 }
+
 } // namespace libastfri::astfri_cpp
