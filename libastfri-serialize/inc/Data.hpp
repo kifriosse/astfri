@@ -6,7 +6,7 @@
 #include <libastfri/inc/Type.hpp>
 #include <unordered_map>
 #include <string>
-namespace astfri_serialize{
+namespace astfri_deserialize{
 
 
 enum  ExprNodeType{
