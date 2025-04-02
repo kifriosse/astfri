@@ -21,9 +21,8 @@ namespace astfri::uml {
 
         virtual std::string getFileExtension() = 0;
 
-        virtual void open_class(ClassStruct c) = 0;
-        virtual void open_interface(ClassStruct i) = 0;
-        virtual void close_class() = 0;
+        virtual void open_user_type(ClassStruct c, UserType t) = 0;
+        virtual void close_user_type() = 0;
 
         virtual void add_data_member(VarStruct v) = 0;
         virtual void add_function_member(MethodStruct m) = 0;

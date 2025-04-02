@@ -12,6 +12,13 @@ namespace astfri::uml {
         IMPLEMENTATION
     };
 
+    enum class UserType {
+        CLASS = 0,
+        STRUCT,
+        INTERFACE,
+        ENUM
+    };
+
     struct ClassStruct {
         std::string name_;
         std::vector<std::string> genericParams_;
