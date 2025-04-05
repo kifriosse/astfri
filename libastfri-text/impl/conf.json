@@ -2,7 +2,7 @@
     "CONFIGURATOR":{
         "FILE":{
             "name":"suborik",
-            "path":"/mnt/c/users/marek/desktop/",
+            "path":"desktop",
             "format":"html"
         },
         "DEFAULT_STYLE":"line-height:1.1;font-family:Consolas;font-size:23px;background-color:#f7f9f9",

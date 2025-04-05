@@ -13,7 +13,7 @@ protected:
 protected:
     Exporter(std::shared_ptr<TextConfigurator> conf);
     virtual void write_output_into_file(const std::string& filepath) = 0;
-    void check_output_file_path(const std::string& suffix);
+    void create_folder(const std::string& suffix);
     void write_word(const std::string& word);
     virtual void write_indentation();
     virtual void write_row_number();

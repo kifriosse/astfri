@@ -6,8 +6,6 @@
 
 class Configurator {
     std::unique_ptr<std::stringstream> configFilePath_;
-    std::unique_ptr<std::stringstream> defFolderPath_;
-    std::unique_ptr<std::stringstream> outFolderPath_;
     std::unique_ptr<std::stringstream> defaultOutputFilePath_;
 private:
     std::unique_ptr<std::stringstream> outputFileName_;
@@ -71,13 +69,10 @@ private:
 protected:
     Configurator();
     void set_input_path(const std::string& path);
-    void reset_def_path();
-    void reset_out_path();
     virtual void load_new_config_file();
     virtual void set_defaults();
 public:
     const std::stringstream* get_output_file_name()    { return outputFileName_.get(); };
-    const std::stringstream* get_default_output_path() { return defaultOutputFilePath_.get(); };
     const std::stringstream* get_output_file_path()    { return outputFilePath_.get(); };
     const std::stringstream* get_output_file_format()  { return outputFileFormat_.get(); };
     const std::stringstream* get_default_style()       { return defaultStyle_.get(); };

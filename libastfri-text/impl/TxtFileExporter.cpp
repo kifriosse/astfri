@@ -4,7 +4,7 @@
 
 TxtFileExporter::TxtFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {}
 
-void TxtFileExporter::make_export() { check_output_file_path(".txt"); }
+void TxtFileExporter::make_export() { create_folder(".txt"); }
 
 void TxtFileExporter::write_output_into_file(const std::string& filepath) {
     std::cout << "Súbor nájdeš na ceste: " << filepath << "\n";

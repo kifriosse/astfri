@@ -9,7 +9,7 @@ HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) : Exp
     curlBrIndex_ = 0;
 }
 
-void HtmlFileExporter::make_export() { check_output_file_path(".html"); }
+void HtmlFileExporter::make_export() { create_folder(".html"); }
 
 void HtmlFileExporter::write_output_into_file(const std::string& filepath) {
     std::cout << "Súbor nájdeš na ceste: " << filepath << "\n";
