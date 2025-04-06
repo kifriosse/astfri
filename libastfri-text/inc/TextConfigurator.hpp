@@ -95,8 +95,9 @@ class TextConfigurator : public Configurator {
     std::unique_ptr<std::stringstream> returnsWordStyle_;
 public:
     TextConfigurator();
-    void load_new_config_file() override;
+    void reset();
 private:
+    void load_new_config_file() override;
     void set_defaults() override;
 public:
     const bool& use_cpp_br()    { return useCppBr_; };

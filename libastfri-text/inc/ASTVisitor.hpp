@@ -19,6 +19,7 @@ public:
     ASTVisitor();
     void write_file();
     void reset_exporter();
+    void reset_configurator();
 public:
     void visit(DynamicType         const& type) override;
     void visit(IntType             const& type) override;

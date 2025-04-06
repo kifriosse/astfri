@@ -8,6 +8,11 @@ TextConfigurator::TextConfigurator() : Configurator() {
     load_new_config_file();
 }
 
+void TextConfigurator::reset() {
+    Configurator::set_defaults();
+    load_new_config_file();
+}
+
 void TextConfigurator::load_new_config_file() {
     set_defaults();
     std::string input;
