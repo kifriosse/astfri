@@ -12,4 +12,5 @@ void TxtFileExporter::write_output_into_file(const std::string& filepath) {
     file << output_->str();
     file.close();
     std::cout << "Zápis prebehol úspešne!\n";
+    reset();
 }

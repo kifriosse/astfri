@@ -38,6 +38,13 @@ void Exporter::create_folder(const std::string& suffix) {
     }
 }
 
+void Exporter::reset() {
+    output_ = std::make_unique<std::stringstream>();
+    currentIndentation_ = 0;
+    startedLine_ = false;
+    row_ = 1;
+}
+
 void Exporter::write_word(const std::string& word) {
     !startedLine_ ? write_indentation() : void();
     *output_ << std::move(word);

@@ -18,6 +18,7 @@ class ASTVisitor : public IVisitor {
 public:
     ASTVisitor();
     void write_file();
+    void reset_exporter();
 public:
     void visit(DynamicType         const& type) override;
     void visit(IntType             const& type) override;

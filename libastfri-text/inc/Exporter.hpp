@@ -19,6 +19,7 @@ protected:
     virtual void write_row_number();
 public:
     virtual void make_export() = 0;
+    virtual void reset();
     void increase_indentation();
     void decrease_indentation();
     virtual void write_new_line();
