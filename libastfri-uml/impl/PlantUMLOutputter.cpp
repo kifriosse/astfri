@@ -38,17 +38,27 @@ namespace astfri::uml {
         return ".puml";
     }
 
-    void PlantUMLOutputter::open_class(ClassStruct c) {
-        this->outputString_ += "class ";
+    void PlantUMLOutputter::open_user_type(ClassStruct c, UserType t) {
+        switch (t) {
+            case UserType::CLASS:
+                this->outputString_ += "class ";
+                break;
+            case UserType::STRUCT:
+                this->outputString_ += "struct ";
+                break;
+            case UserType::INTERFACE:
+                this->outputString_ += "interface ";
+                break;
+            case UserType::ENUM:
+                this->outputString_ += "enum ";
+                break;
+            default:
+                break;
+        }
         this->open(c);
     }
 
-    void PlantUMLOutputter::open_interface(ClassStruct i) {
-        this->outputString_ += "interface ";
-        this->open(i);
-    }
-
-    void PlantUMLOutputter::close_class() {
+    void PlantUMLOutputter::close_user_type() {
         this->outputString_ += "}\n";
     }
 

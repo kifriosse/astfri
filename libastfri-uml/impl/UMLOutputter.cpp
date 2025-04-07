@@ -6,6 +6,7 @@ namespace astfri::uml {
     }
 
     void UMLOutputter::write_to_console() {
+        std::cout << "UMLOutputter - diagram output:" << std::endl;
         std::cout << this->outputString_;
     }
 

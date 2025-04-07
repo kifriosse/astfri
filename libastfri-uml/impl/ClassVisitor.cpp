@@ -125,7 +125,7 @@ namespace astfri::uml {
         for (astfri::GenericParam* gp : stmt.tparams_) {
             this->currentClass_.genericParams_.push_back(gp->name_);
         }
-        this->outputter_->open_class(this->currentClass_);
+        this->outputter_->open_user_type(this->currentClass_, UserType::CLASS);
 
         for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
             if (!this->config_->innerView_) {
@@ -162,7 +162,7 @@ namespace astfri::uml {
         }
 
         this->currentClass_.reset();
-        this->outputter_->close_class();
+        this->outputter_->close_user_type();
     }
 
     void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt) {
@@ -170,7 +170,7 @@ namespace astfri::uml {
         for (astfri::GenericParam* gp : stmt.tparams_) {
             this->currentClass_.genericParams_.push_back(gp->name_);
         }
-        this->outputter_->open_interface(this->currentClass_);
+        this->outputter_->open_user_type(this->currentClass_, UserType::INTERFACE);
 
         
 
@@ -180,7 +180,7 @@ namespace astfri::uml {
         }
 
         this->currentClass_.reset();
-        this->outputter_->close_class();
+        this->outputter_->close_user_type();
     }
 
     void ClassVisitor::visit(astfri::TranslationUnit const& stmt) {
@@ -223,7 +223,7 @@ namespace astfri::uml {
             i->accept(*this);
         }
 
-        for (auto&[str, rel] : this->relations_) {
+        for (auto&[key, rel] : this->relations_) {
             this->outputter_->add_relation(rel);
         }
 
