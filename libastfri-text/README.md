@@ -1,21 +1,29 @@
-Ak chceš použiť knižnicu na textový výstup, sprav nasledovné.
+Fully functional library for generating pseudocode from AST. Each input is printed into separated output file. If file exists, it will create new file with index.
+Example: If file "output.txt" exists, it will create files "output(1).txt" and so on.
 
-1) Musíš spraviť správny build. Knižnica sa volá "astfri-text".
-2) Použi takýto include: "#include <libastfri-text/inc/ASTVisitor.hpp>"
-3) Vytvor si inštanciu ASTVisitor-a: "std::unique_ptr<ASTVisitor> visitor = std::make_unique<ASTVisitor>();"
-4) Inštancií pošli správu visit s ľubovoľným vrcholom: "visitor.visit(astfri::VoidType);"
-5) Zavolaj metódu: "visitor->write_file();"
+Before use, you need to do the following:
+1) Make build. Library is called "astfri-text".
+2) Include header file: "#include <libastfri-text/inc/ASTVisitor.hpp>".
+3) Create an instantiation of ASTVisitor: "ASTVisitor* visitor = new ASTVisitor();".
+4) It will also create configuration, you will be asked for input json file.
+5) Call "visit" method with any AST peak that is visitable: "visitor->visit(...);".
+6) After visit you need to call method "write_file": "visitor->write_file();".
 
-Program funguje aj bez konfiguračného súboru, vtedy sa použije predvolený formát(txt súbor).
-Program vypíše cestu, kde vytvorí exportovaný súbor.
-Konfigurácia(formátovanie výstupu) je plne ošetrená voči chybám v konfiguračnom súbore. Konfiguráciu je možné nastaviť pre ľubovoľné parametre, podmienka je zachovanie "hierarchie" tohto súboru. Na samotnom poradí nezáleží.
+There is no need to create multiple instantiations of ASTVisitor. After any write_file is done, program will be ready for next input. So basically it is alternation of just 2 methods - visit and write_file. If you visit peak and you do not want to write it anywhere, just call method "visitor->reset_exporter()". And again: visit -> write ... and so on. Also you can change your input configuration .json file while program is running by simply call method "visitor->reset_configurator()".
 
-Vstupný konfiguračný súbor je buď možné použiť predvolený v priečinku impl, alebo si môžeš vytvoriť svoj(program sa ťa opýta na cestu ku .json súboru).
-Cestu k výstupu si buď zadáš cez konfigurák, alebo sa použije predvolená cesta. Tá ukazuje buď priamo do priečinka "build", ak taký v ceste ku programu máš, a ak nie, tak sa použije adresár "/home/USER/", kde USER je aktuálne prihlásený používateľ. Pri hocijakej chybe sa taktiež použije predvolená cesta.
+You don't have to use input json file, default output settings will be used. If you set [ "format":"html" ] in json file, output will be created as .html file. In any other case it will be .txt file. Bear in mind that any '/' or ' ' (spaces) in [ "name":"..." ] will be removed. Do not use file suffix in there also.
+For output path there are multiple options: ... [ "path":"..." ], any ' ' (spaces) and multiple '//...' will be removed.
+1) Default path is either a) .../build/text_output/ - if build directory is present or b) /home/USER/text_output/ - if build dir is not present. USER refers to current logged user in linux.
+2) If "path" is not present or "path":"build" -> output path will be same as default path.
+3) If "path":"desktop" -> path will be /mnt/c/Users/USER/Desktop/text_output/, where USER refers to current logged user in windows.
+4) If "path" starts with '/', output file will be placed exactly where it refers if it is possible. If not, default path will be used. There will not be any text_output folder created.
+5) If "path":"" or does not start with '/', it is relative path from where the program runs. It will also create text_output folder.
+6) If there is any error in path, default path will be used.
+Don't worry about finding output file, it will print to console where it is being created.
 
+Feel free to create your own json configuration file.
 
-"format": txt/html
-Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
+This is example of json file with default settings.
 {
     "CONFIGURATOR":{
         "FILE":{
@@ -196,17 +204,3 @@ Takto vyzerá kompletný konfiguračný súbor s defaultnými hodnotami.
         }
     }
 }
-
-mkdir build
-cd build
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DASTFRI_BUILD_TEXT_OUTPUT=ON -DCMAKE_BUILD_TYPE=Debug ..
-make
-cp compile_commands.json ..
-
-alebo
-
-mkdir build
-cd build
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DASTFRI_BUILD_TEXT_OUTPUT=ON ..
-make
-cp compile_commands.json ..
