@@ -8,5 +8,6 @@ add_executable(test_JR ${SOURCE_FILES_JR})
 
 target_link_libraries(test_JR
     astfri-cpp
-    astfri-text)
+    astfri-text
+    astfri-uml)
 #target_link_libraries(testASTs_JR astfri-cpp)

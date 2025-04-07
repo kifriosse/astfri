@@ -1,3 +1,9 @@
+#include <llvm-18/llvm/IR/DerivedTypes.h>
+#include <string>
+#include <vector>
+
+namespace example_types {
+
 int* funkcia_co_vracia_intptr() {
     return nullptr;
 }
@@ -9,6 +15,8 @@ bool* global_bool_ptr;
 int* global_int_ptr;
 float** global_float_ptr;
 
+std::string string = "toto je string";
+std::vector<int> cisla = {0, 1, 2};
 
 int global_int = 100;
 float global_float = 100.123;
@@ -26,6 +34,11 @@ public:
         int* smernik_na_nic_mozno = &this->cislo;
         this->cislo = 0;
         delete smernik_na_nic_mozno;
+        std::string string;
+        string = "toto je string";
+        std::string string2 = "toto je string2";
+        std::vector<int> cisla;
+        cisla.push_back(0);
     };
 };
 
@@ -40,3 +53,5 @@ int main(int argc, char** argv) {
     delete haldovy_int;
     return 0;
 }
+
+};

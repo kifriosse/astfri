@@ -67,9 +67,19 @@ namespace astfri::astfri_cpp
 class ClangVisitor : public clang::RecursiveASTVisitor<ClangVisitor>
 {
 public:
-    ClangVisitor(TranslationUnit& visitedTranslationUnit);
+    // filtering includes
+    bool isInMainFile(clang::SourceLocation Loc) const;
+    // returning desired namespace (filtering includes)
+    clang::NamespaceDecl* get_desired_namespace(clang::TranslationUnitDecl* TU);
+    void setSM(clang::SourceManager* pSM);
+    clang::SourceManager* getSM();
+    void setMainFileID(clang::FileID MFID);
+    clang::FileID getMFID();
+
+    ClangVisitor(TranslationUnit& visitedTranslationUnit, clang::SourceManager* pSM);
     TranslationUnit* visitedTranslationUnit;
     // traverse deklaracie
+    bool VisitNamespaceDecl(clang::NamespaceDecl *ND);
     bool TraverseCXXConstructorDecl(clang::CXXConstructorDecl *Ctor);
     bool TraverseCXXDestructorDecl(clang::CXXDestructorDecl *Dtor);
     bool TraverseFunctionDecl(clang::FunctionDecl *FD);
@@ -100,6 +110,7 @@ public:
     bool TraverseCXXNewExpr(clang::CXXNewExpr *NE);
     bool TraverseCXXDeleteExpr(clang::CXXDeleteExpr *DE);
     bool TraverseCXXThrowExpr(clang::CXXThrowExpr *TE);
+    // bool TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE);
     // // Traverse literals
     bool TraverseIntegerLiteral(clang::IntegerLiteral *IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral *FL);
@@ -113,6 +124,10 @@ public:
     bool TraverseUnaryOperator(clang::UnaryOperator *UO);
 
 private:
+    // for filtering includes
+    clang::SourceManager* SM;
+    clang::FileID MainFileID;
+
     astfri::AccessModifier getAccessModifier(clang::Decl* decl);
     astfri::ClassDefStmt* get_existing_class(std::string name);
     // types

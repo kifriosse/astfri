@@ -76,6 +76,15 @@ class Base {
         // Štruktúry a triedy
         Derived obj;
         obj.speak();
+
+        // ify
+        if (3 < 1) {
+            int nothing;
+        } else if (1 < 3) {
+            int something;
+        } else {
+            int anything;
+        }
     
         Box<double> box(2.5);
         double val = box.get();
