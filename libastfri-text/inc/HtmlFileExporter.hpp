@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_TEXT_INC_HTML_EXPORTER
-#define LIBASTFRI_TEXT_INC_HTML_EXPORTER
+#ifndef LIBASTFRI_TEXT_HTML_EXPORTER
+#define LIBASTFRI_TEXT_HTML_EXPORTER
 
 #include <libastfri-text/inc/Exporter.hpp>
 
@@ -11,6 +11,7 @@ class HtmlFileExporter : public Exporter {
 public:
     HtmlFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
+    void reset() override;
 private:
     void write_output_into_file(const std::string& filepath) override;
     void write_indentation() override;

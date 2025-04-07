@@ -9,10 +9,18 @@ HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) : Exp
     curlBrIndex_ = 0;
 }
 
-void HtmlFileExporter::make_export() { check_output_file_path(".html"); }
+void HtmlFileExporter::make_export() { create_folder(".html"); }
+
+void HtmlFileExporter::reset() {
+    maxRoundBrIndex_ = config_->get_round_br_col()->size();
+    maxCurlBrIndex_ = config_->get_curl_br_col()->size();
+    roundBrIndex_ = 0;
+    curlBrIndex_ = 0;
+    Exporter::reset();
+}
 
 void HtmlFileExporter::write_output_into_file(const std::string& filepath) {
-    std::cout << "Súbor nájdeš na ceste: " << filepath << "\n";
+    std::cout << " > You can find output file on path: " << filepath << "\n";
     std::ofstream file(std::move(filepath));
     file << "<!DOCTYPE html>\n";
     file << "<html lang=\"sk\">\n";
@@ -92,7 +100,8 @@ void HtmlFileExporter::write_output_into_file(const std::string& filepath) {
     file << "</body>\n";
     file << "</html>";
     file.close();
-    std::cout << "Zápis prebehol úspešne!\n";
+    std::cout << " > File write completed!\n";
+    reset();
 }
 
 void HtmlFileExporter::write_indentation() {

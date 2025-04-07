@@ -20,6 +20,14 @@ void ASTVisitor::write_file() {
     exporter_->make_export();
 }
 
+void ASTVisitor::reset_exporter() {
+    exporter_->reset();
+}
+
+void ASTVisitor::reset_configurator() {
+    configurator_->reset();
+}
+
 void ASTVisitor::visit(DynamicType const& /*type*/) {
     exporter_->write_dynamic_type();
 }

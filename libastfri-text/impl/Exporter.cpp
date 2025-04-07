@@ -1,8 +1,5 @@
 #include <libastfri-text/inc/Exporter.hpp>
 #include <filesystem>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
 
 Exporter::Exporter(std::shared_ptr<TextConfigurator> conf) {
     config_ = std::move(conf);
@@ -12,26 +9,40 @@ Exporter::Exporter(std::shared_ptr<TextConfigurator> conf) {
     row_ = 1;
 }
 
-void Exporter::check_output_file_path(const std::string& suffix) {
-    std::string path = config_->get_output_file_path()->str();
-    std::filesystem::path fullp = path + suffix;
-    if (std::filesystem::exists(fullp) && std::filesystem::is_regular_file(fullp)) {
-        int index = 0;
-        do {
-            ++index;
-            fullp = path + "(" + std::to_string(index) + ")" + suffix;
-        } while (std::filesystem::exists(fullp) && std::filesystem::is_regular_file(fullp));
-    }
-    std::ofstream file(fullp);
-    if (file) {
-        file.close();
-        write_output_into_file(std::move(fullp));
+void Exporter::create_folder(const std::string& suffix) {
+    namespace fs = std::filesystem;
+    fs::path folder = config_->get_output_file_path()->str();
+    if (fs::exists(folder) && fs::is_directory(folder)) {
+        folder.concat(config_->get_output_file_name()->str());
+        fs::path file = folder;
+        file.concat(suffix);
+        if (fs::exists(file) && fs::is_regular_file(file)) {
+            int index = 0;
+            do {
+                ++index;
+                file.clear();
+                file = folder;
+                file.concat("(");
+                file.concat(std::to_string(index));
+                file.concat(")");
+                file.concat(suffix);
+            } while (fs::exists(file) && fs::is_regular_file(file));
+        }
+        write_output_into_file(file);
     } else {
-        file.close();
-        std::string defaultPath = config_->get_default_output_path()->str() + std::move(suffix);
-        std::cout << "Zadaná cesta neexistuje! ";
-        check_output_file_path(std::move(defaultPath));
+        fs::create_directories(folder);
+        std::string file = folder;
+        file.append(config_->get_output_file_name()->str());
+        file.append(suffix);
+        write_output_into_file(file);
     }
+}
+
+void Exporter::reset() {
+    output_ = std::make_unique<std::stringstream>();
+    currentIndentation_ = 0;
+    startedLine_ = false;
+    row_ = 1;
 }
 
 void Exporter::write_word(const std::string& word) {

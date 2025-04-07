@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_TEXT_INC_EXPORTER
-#define LIBASTFRI_TEXT_INC_EXPORTER
+#ifndef LIBASTFRI_TEXT_EXPORTER
+#define LIBASTFRI_TEXT_EXPORTER
 
 #include <libastfri-text/inc/TextConfigurator.hpp>
 
@@ -13,12 +13,13 @@ protected:
 protected:
     Exporter(std::shared_ptr<TextConfigurator> conf);
     virtual void write_output_into_file(const std::string& filepath) = 0;
-    void check_output_file_path(const std::string& suffix);
+    void create_folder(const std::string& suffix);
     void write_word(const std::string& word);
     virtual void write_indentation();
     virtual void write_row_number();
 public:
     virtual void make_export() = 0;
+    virtual void reset();
     void increase_indentation();
     void decrease_indentation();
     virtual void write_new_line();

@@ -2,9 +2,12 @@
 #include <lib/rapidjson/filereadstream.h>
 #include <lib/rapidjson/document.h>
 #include <filesystem>
+#include <vector>
+
+namespace fs = std::filesystem;
 
 Configurator::Configurator() {
-    std::filesystem::path currentPath = std::filesystem::current_path();
+    fs::path currentPath = fs::current_path();
     bool foundBuildFolder = false;
     while (currentPath.has_filename() || currentPath.parent_path().has_filename()) {
         if (currentPath.filename() == "build") {
@@ -18,21 +21,13 @@ Configurator::Configurator() {
         std::string user = getenv("USER");
         currentPath = "/home/" + user;
     }
-    currentPath.concat("/");
-    defFolderPath_ = std::make_unique<std::stringstream>(std::move(currentPath));
+    currentPath.concat("/text_output/");
+    defaultOutputFilePath_ = std::make_unique<std::stringstream>(std::move(currentPath));
     set_defaults();
 }
 
 void Configurator::set_input_path(const std::string& path) {
     configFilePath_ = std::make_unique<std::stringstream>(std::move(path));
-}
-
-void Configurator::reset_def_path() {
-    defaultOutputFilePath_ = std::make_unique<std::stringstream>(defFolderPath_->str() + outputFileName_->str());
-}
-
-void Configurator::reset_out_path() {
-    outputFilePath_ = std::make_unique<std::stringstream>(outFolderPath_->str() + outputFileName_->str());
 }
 
 void Configurator::load_new_config_file() {
@@ -42,71 +37,125 @@ void Configurator::load_new_config_file() {
     rj::FileReadStream inputStream(configFile, readBuffer, sizeof(readBuffer));
     rj::Document doc;
     doc.ParseStream(inputStream);
-    bool resetPath = false;
     if (doc.HasMember("CONFIGURATOR") && doc["CONFIGURATOR"].IsObject()) {
         rj::Value& conf = doc["CONFIGURATOR"];
         if (conf.HasMember("FILE") && conf["FILE"].IsObject()) {
             rj::Value& file = conf["FILE"];
             if (file.HasMember("name") && file["name"].IsString() && file["name"].GetStringLength() > 0) {
                 std::string name = file["name"].GetString();
-                bool isOk = true;
-                for (size_t i = 0; i < name.length(); ++i) {
-                    if (name[i] == ' ') {
-                        isOk = false;
-                        break;
-                    }
+                size_t pos = 0;
+                while ((pos = name.find(" ", pos)) != std::string::npos) { // remove spaces from name
+                    name.replace(pos, 1, "");
                 }
-                if (isOk) {
-                    outputFileName_ = std::make_unique<std::stringstream>(name);
-                    resetPath = true;
+                pos = 0;
+                while ((pos = name.find("/", pos)) != std::string::npos) { // remove / from name
+                    name.replace(pos, 1, "");
+                }
+                if (name.length() > 0) {
+                    outputFileName_ = std::make_unique<std::stringstream>(std::move(name));
                 }
             }
             if (file.HasMember("path") && file["path"].IsString()) {
-                namespace fs = std::filesystem;
                 std::string path = file["path"].GetString();
-                if (path.length() > 0) {
-                    bool isOk = true;
-                    bool otherChar = false;
-                    for (size_t i = 0; i < path.length(); ++i) {
-                        if (path[i] == ' ') {
-                            isOk = false;
-                            break;
-                        }
-                        if (!otherChar && path[i] != '/') {
-                            otherChar = true;
-                        }
-                    }
-                    if (isOk && otherChar) {
-                        if (path[0] == '/') {
-                            if (fs::exists(path) && fs::is_directory(path)) {
-                                if (path[path.length() - 1] != '/') {
-                                    path.append("/");
-                                }
-                                outFolderPath_ = std::make_unique<std::stringstream>(std::move(path));
-                                resetPath = true;
-                            }
-                        } else {
-                            std::string tryPath = fs::current_path();
-                            tryPath.append("/");
-                            tryPath.append(path);
-                            if (fs::exists(tryPath) && fs::is_directory(tryPath)) {
-                                if (tryPath[tryPath.length() - 1] != '/') {
-                                    tryPath.append("/");
-                                }
-                                outFolderPath_ = std::make_unique<std::stringstream>(std::move(tryPath));
-                                resetPath = true;
-                            } else {
-                                std::string newPath = fs::current_path();
-                                outFolderPath_ = std::make_unique<std::stringstream>(newPath + "/");
-                                resetPath = true;
-                            }
-                        }
-                    }
-                } else {
-                    std::string newPath = fs::current_path();
-                    outFolderPath_ = std::make_unique<std::stringstream>(newPath + "/");
-                    resetPath = true;
+                size_t pos = 0;
+                while ((pos = path.find(" ", pos)) != std::string::npos) { // remove spaces from path
+                    path.replace(pos, 1, "");
                 }
+                pos = 0;
+                while ((pos = path.find("//", pos)) != std::string::npos) { // replace multiple /// by single /
+                    path.replace(pos, 2, "/");
+                }
+                if (path == "build") { // path == "build" -> default path
+                    outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
+                } else if (path == "desktop") { // path == "desktop" -> active user desktop + text_folder
+                    FILE* file = popen("cd /mnt/c && cmd.exe /c whoami", "r");
+                    std::stringstream result;
+                    char ch;
+                    while ((ch = fgetc(file)) != EOF) {
+                        result.put(ch);
+                    }
+                    pclose(file);
+                    std::string user = result.str();
+                    user.pop_back();
+                    user.pop_back();
+                    user = user.substr(user.find_last_of("\\") + 1);
+                    outputFilePath_ = std::make_unique<std::stringstream>("/mnt/c/Users/" + user + "/Desktop/text_output/");
+                } else if (path.length() > 0 && path.at(0) == '/') { // if path starts with / -> it is absolute path
+                    path = path.substr(1);
+                    std::stringstream ss(path);
+                    std::string seg;
+                    std::vector<std::string> segments;
+                    while (std::getline(ss, seg, '/')) {
+                        segments.push_back(seg);
+                    }
+                    if (!segments.empty()) { // if path contains any folder
+                        fs::path newPath = "/";
+                        bool useDef = false;
+                        int level = 0;
+                        for (size_t i = 0; i < segments.size(); ++i) {
+                            newPath.concat(segments.at(i));
+                            if (i != segments.size() - 1) {
+                                newPath.concat("/");
+                            }
+                            try { // try to open folder
+                                if (fs::exists(newPath) && fs::is_directory(newPath)) { // if partial path exists and it is folder
+                                    if (i == segments.size() - 1) { // it is full path
+                                        if (access(newPath.c_str(), W_OK) == 0) { // if folder has permission to write into itself
+                                            std::string out = newPath;
+                                            out.append("/");
+                                            outputFilePath_ = std::make_unique<std::stringstream>(std::move(out));
+                                        } else {
+                                            useDef = true;
+                                        }
+                                    }
+                                } else { // partial path does not exist
+                                    fs::create_directory(newPath);
+                                    ++level;
+                                    if (i == segments.size() - 1) { // if it is full created path
+                                        if (access(newPath.c_str(), W_OK) == 0) { // if new folder has permission to write into itself
+                                            std::string out = newPath;
+                                            out.append("/");
+                                            outputFilePath_ = std::make_unique<std::stringstream>(std::move(out));
+                                        } else {
+                                            useDef = true;
+                                        }
+                                        while (level != 1) { // need to delete created folder for now
+                                            --level;
+                                            newPath = newPath.parent_path();
+                                        }
+                                        fs::remove_all(newPath);
+                                    }
+                                }
+                            } catch (const std::exception&) { // error in entering folder
+                                useDef = true;
+                            }
+                            if (useDef) { // should use default path?
+                                if (level > 0) { // if directories were created, need to delete them
+                                    while (level != 1) {
+                                        --level;
+                                        newPath = newPath.parent_path();
+                                    }
+                                    fs::remove_all(newPath);
+                                }
+                                outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
+                                break;
+                            }
+                        }
+                    } else { // if path does not contain anything except /
+                        outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
+                    }
+                } else { // if path == "" or is relative -> program/path/text_folder
+                    fs::path currentPath = fs::current_path();
+                    currentPath.concat("/");
+                    if (path.length() > 0 && !path.ends_with("/")) {
+                        path.append("/");
+                    }
+                    path.append("text_output/");
+                    currentPath.concat(path);
+                    outputFilePath_ = std::make_unique<std::stringstream>(std::move(currentPath));
+                }
+            } else { // explicitly set default path, if not present
+                outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
             }
             if (file.HasMember("format") && file["format"].IsString()) {
                 outputFileFormat_ = std::make_unique<std::stringstream>(file["format"].GetString());
@@ -303,16 +352,10 @@ void Configurator::load_new_config_file() {
         }
     }
     fclose(configFile);
-    if (resetPath) {
-        reset_def_path();
-        reset_out_path();
-    }
 }
 
 void Configurator::set_defaults() {
     outputFileName_ = std::make_unique<std::stringstream>("output");
-    outFolderPath_ = std::make_unique<std::stringstream>(defFolderPath_->str());
-    defaultOutputFilePath_ = std::make_unique<std::stringstream>(defFolderPath_->str() + outputFileName_->str());
     outputFilePath_ = std::make_unique<std::stringstream>(defaultOutputFilePath_->str());
     outputFileFormat_ = std::make_unique<std::stringstream>("txt");
     defaultStyle_ = std::make_unique<std::stringstream>("font-family:Consolas;font-size:18px");
