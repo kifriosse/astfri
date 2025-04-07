@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_TEXT_INC_AST_VISITOR
-#define LIBASTFRI_TEXT_INC_AST_VISITOR
+#ifndef LIBASTFRI_TEXT_AST_VISITOR
+#define LIBASTFRI_TEXT_AST_VISITOR
 
 #include <libastfri/inc/Stmt.hpp>
 #include <libastfri-text/inc/TxtFileExporter.hpp>

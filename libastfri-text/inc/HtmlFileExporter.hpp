@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_TEXT_INC_HTML_EXPORTER
-#define LIBASTFRI_TEXT_INC_HTML_EXPORTER
+#ifndef LIBASTFRI_TEXT_HTML_EXPORTER
+#define LIBASTFRI_TEXT_HTML_EXPORTER
 
 #include <libastfri-text/inc/Exporter.hpp>
 

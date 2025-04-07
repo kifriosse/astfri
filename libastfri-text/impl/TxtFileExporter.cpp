@@ -7,10 +7,10 @@ TxtFileExporter::TxtFileExporter(std::shared_ptr<TextConfigurator> conf) : Expor
 void TxtFileExporter::make_export() { create_folder(".txt"); }
 
 void TxtFileExporter::write_output_into_file(const std::string& filepath) {
-    std::cout << "Súbor nájdeš na ceste: " << filepath << "\n";
+    std::cout << " > You can find output file on path: " << filepath << "\n";
     std::ofstream file(std::move(filepath));
     file << output_->str();
     file.close();
-    std::cout << "Zápis prebehol úspešne!\n";
+    std::cout << " > File write completed!\n";
     reset();
 }

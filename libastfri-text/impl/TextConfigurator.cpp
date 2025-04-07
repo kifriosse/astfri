@@ -9,6 +9,7 @@ TextConfigurator::TextConfigurator() : Configurator() {
 }
 
 void TextConfigurator::reset() {
+    std::cout << " > Reloading configuration file.\n";
     Configurator::set_defaults();
     load_new_config_file();
 }
@@ -16,20 +17,20 @@ void TextConfigurator::reset() {
 void TextConfigurator::load_new_config_file() {
     set_defaults();
     std::string input;
-    std::cout << "Chceš načítať konfiguračný súbor? [\"y\"/...]: ";
+    std::cout << " > Do you want to load configuration file? [\"y\"/...]: ";
     std::getline(std::cin, input);
     if (input != "y") {
-        std::cout << "Použijem predvolený výstup.\n";
+        std::cout << " > Loading default output option.\n";
         Configurator::set_defaults();
         return;
     }
-    std::cout << "Chceš použiť vlastný konfiguračný súbor? [\"y\"/...]: ";
+    std::cout << " > Do you want to load your own configuration file? [\"y\"/...]: ";
     std::getline(std::cin, input);
     if (input == "y") {
-        std::cout << "Zadaj celú cestu ku .json súboru: ";
+        std::cout << " > Put path to .json file: ";
         std::getline(std::cin, input);
         if (!input.ends_with(".json")) {
-            std::cout << "Zlý typ súboru! Použijem predvolený výstup.\n";
+            std::cout << " > Wrong file format! Loading default output option.\n";
             Configurator::set_defaults();
             return;
         }
@@ -47,14 +48,14 @@ void TextConfigurator::load_new_config_file() {
             currentPath = currentPath.parent_path() / "libastfri-text" / "impl" / "conf.json";
             input = std::move(currentPath);
         } else {
-            std::cout << "Zlá cesta! Použijem predvolený výstup.\n";
+            std::cout << " > Wrong path! Loading default output option.\n";
             Configurator::set_defaults();
             return;
         }
     }
     FILE* configFile = fopen(input.c_str(), "r");
     if (!configFile) {
-        std::cout << "Zlá cesta! Použijem predvolený formát.\n";
+        std::cout << " > Wrong path! Loading default output option.\n";
         Configurator::set_defaults();
         return;
     }
@@ -64,7 +65,7 @@ void TextConfigurator::load_new_config_file() {
     rj::Document doc;
     doc.ParseStream(inputStream);
     if (doc.HasParseError()) {
-        std::cout << "Chyba pri čítaní súboru! Použijem predvolený výstup.\n";
+        std::cout << " > Error in parsing json file! Loading default output option.\n";
         Configurator::set_defaults();
         return;
     }
@@ -366,8 +367,8 @@ void TextConfigurator::load_new_config_file() {
             }
         }
     }
-    fclose(configFile);
-    Configurator::set_input_path(input);
+    fclose(std::move(configFile));
+    Configurator::set_input_path(std::move(input));
     Configurator::load_new_config_file();
 }
 

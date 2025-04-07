@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_TEXT_INC_EXPORTER
-#define LIBASTFRI_TEXT_INC_EXPORTER
+#ifndef LIBASTFRI_TEXT_EXPORTER
+#define LIBASTFRI_TEXT_EXPORTER
 
 #include <libastfri-text/inc/TextConfigurator.hpp>
 

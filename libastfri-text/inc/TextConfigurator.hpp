@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_TEXT_INC_TEXT_CONFIG
-#define LIBASTFRI_TEXT_INC_TEXT_CONFIG
+#ifndef LIBASTFRI_TEXT_TEXT_CONFIGURATOR
+#define LIBASTFRI_TEXT_TEXT_CONFIGURATOR
 
 #include <libastfri-text/inc/Configurator.hpp>
 #include <vector>
