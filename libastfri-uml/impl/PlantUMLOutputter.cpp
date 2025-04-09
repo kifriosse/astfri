@@ -20,17 +20,30 @@ namespace astfri::uml {
         this->outputString_ += " {\n";
     }
 
-    PlantUMLOutputter::PlantUMLOutputter() {
-        this->outputString_ += "@startuml\n";
+    void PlantUMLOutputter::apply_style_from_config() {
+        std::string style = "<style>\n";
+        style += "classDiagram {\nBackGroundColor " + this->config_->diagramBG_ + "\n";
+        style += "class {\nBackGroundColor " + this->config_->elementBG_ + "\n";
+        style += "LineColor " + this->config_->elementBorder_ + "\n";
+        style += "FontColor " + this->config_->fontColor_ + "\n" + "}\n";
+        style += "arrow {\nLineColor " + this->config_->arrowColor_ + "\n}\n}\n";
+        style += "</style>\n";
+        this->outputString_ = style + this->outputString_;
+    }
+
+    void PlantUMLOutputter::add_tags_and_style() {
+        this->outputString_ += "@enduml\n";
+        this->apply_style_from_config();
+        this->outputString_ = "@startuml\n" + this->outputString_;
     }
 
     void PlantUMLOutputter::write_to_file() {
-        this->outputString_ += "@enduml\n";
+        this->add_tags_and_style();
         UMLOutputter::write_to_file();
     }
 
     void PlantUMLOutputter::write_to_console() {
-        this->outputString_ += "@enduml\n";
+        this->add_tags_and_style();
         UMLOutputter::write_to_console();
     }
 
