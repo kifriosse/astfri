@@ -8,7 +8,6 @@
 namespace astfri::java
 {
     StatementTransformer::StatementTransformer() :
-        typeFactory(astfri::TypeFactory::get_instance()),
         exprFactory(astfri::ExprFactory::get_instance()),
         stmtFactory(astfri::StmtFactory::get_instance()),
         exprTransformer(new ExpressionTransformer()),
@@ -119,31 +118,37 @@ namespace astfri::java
         std::string const& sourceCode
     )
     {
-        astfri::Type* type   = typeFactory.mk_unknown();
-        std::string nodeName = ts_node_string(tsNode);
-        if (nodeName.find("(identifier)") == 0)
+        auto& tf = astfri::TypeFactory::get_instance();
+        astfri::Type* type   = tf.mk_unknown();
+        std::string typeNodeText = this->exprTransformer->get_node_text(tsNode, sourceCode);
+
+        if (typeNodeText == "int")
         {
-            type = typeFactory.mk_user(
-                exprTransformer->get_node_text(tsNode, sourceCode)
-            );
+            type = tf.mk_int();
         }
-        else if (nodeName.find("(generic_type") == 0)
+        else if (typeNodeText == "char")
         {
-            type = typeFactory.mk_user(
-                this->exprTransformer->get_node_text(tsNode, sourceCode)
-            );
+            type = tf.mk_char();
         }
-        else if (nodeName.find("(array_type") == 0)
+        else if (typeNodeText == "float")
         {
-            type = typeFactory.mk_user(
-                this->exprTransformer->get_node_text(tsNode, sourceCode)
-            );
+            type = tf.mk_float();
+        }
+        else if (typeNodeText == "double")
+        {
+            type = tf.mk_float();
+        }
+        else if (typeNodeText == "boolean")
+        {
+            type = tf.mk_bool();
+        }
+        else if (typeNodeText == "void")
+        {
+            type = tf.mk_void();
         }
         else
         {
-            std::string typeNodeText
-                = this->exprTransformer->get_node_text(tsNode, sourceCode);
-            type = this->nodeMapper->get_typeMap().find(typeNodeText)->second;
+            type = tf.mk_user(typeNodeText);
         }
         return type;
     }
@@ -153,8 +158,8 @@ namespace astfri::java
         std::string const& sourceCode
     )
     {
-        astfri::Type* type = typeFactory.mk_unknown();
-        std::string name;
+        astfri::Type* type = nullptr;
+        std::string name = "";
 
         std::string tsNodeName = ts_node_string(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
@@ -173,7 +178,7 @@ namespace astfri::java
             }
             else if (childName == "(identifier)")
             {
-                name = exprTransformer->get_node_text(child, sourceCode);
+                name = this->exprTransformer->get_node_text(child, sourceCode);
             }
         }
         return stmtFactory.mk_param_var_def(name, type, nullptr);
@@ -184,8 +189,8 @@ namespace astfri::java
         std::string const& sourceCode
     )
     {
-        astfri::Type* type = typeFactory.mk_unknown();
-        std::string name;
+        astfri::Type* type = nullptr;
+        std::string name = "";
         astfri::Expr* init = nullptr;
 
         std::string tsNodeName = ts_node_string(tsNode);
