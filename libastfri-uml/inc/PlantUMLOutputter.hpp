@@ -6,10 +6,10 @@ namespace astfri::uml {
     class PlantUMLOutputter : public UMLOutputter {
     private:
         void open(ClassStruct const& cs);
+        void apply_style_from_config();
+        void add_tags_and_style();
 
     public:
-        PlantUMLOutputter();
-
         virtual void write_to_file() override;
         virtual void write_to_console() override;
         
