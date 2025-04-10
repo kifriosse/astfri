@@ -8,7 +8,6 @@
 namespace astfri::java
 {
     StatementTransformer::StatementTransformer() :
-        exprFactory(astfri::ExprFactory::get_instance()),
         stmtFactory(astfri::StmtFactory::get_instance()),
         exprTransformer(new ExpressionTransformer()),
         nodeMapper(new NodeMapper())
@@ -63,9 +62,7 @@ namespace astfri::java
         }
         else if (nodeType == "line_comment")
         {
-            return stmtFactory.mk_expr(exprFactory.mk_string_literal(
-                this->exprTransformer->get_node_text(tsNode, sourceCode)
-            ));
+            return stmtFactory.mk_expr(this->exprTransformer->get_expr(tsNode, sourceCode));
         }
         else if (nodeType == "explicit_constructor_invocation")
         {
@@ -740,8 +737,8 @@ namespace astfri::java
             if (! ts_node_is_null(ts_node_named_child(rootNode, i)))
             {
                 TSNode child          = ts_node_named_child(rootNode, i);
-                std::string childName = ts_node_string(child);
-                if (childName.find("(class_declaration ") == 0)
+                std::string childType = ts_node_type(child);
+                if (childType == "class_declaration")
                 {
                     classNode = child;
                 }
@@ -755,18 +752,18 @@ namespace astfri::java
             for (uint32_t j = 0; j < classChildCount; j++)
             {
                 TSNode classChild          = ts_node_named_child(classNode, j);
-                std::string classChildName = ts_node_string(classChild);
+                std::string classChildType = ts_node_type(classChild);
 
-                if (classChildName.find("(modifiers)") == 0)
+                if (classChildType == "modifiers")
                 {
                     continue;
                 }
-                else if (classChildName.find("(identifier)") == 0)
+                else if (classChildType == "identifier")
                 {
                     className
                         = exprTransformer->get_node_text(classChild, sourceCode);
                 }
-                else if (classChildName.find("(type_parameters ") == 0)
+                else if (classChildType == "type_parameters")
                 {
                     uint32_t parametersCount
                         = ts_node_named_child_count(classChild);
@@ -778,7 +775,7 @@ namespace astfri::java
                         );
                     }
                 }
-                else if (classChildName.find("(superclass ") == 0)
+                else if (classChildType == "superclass")
                 {
                     bases.push_back(
                         stmtFactory.mk_class_def(exprTransformer->get_node_text(
@@ -787,7 +784,7 @@ namespace astfri::java
                         ))
                     );
                 }
-                else if (classChildName.find("(super_interfaces ") == 0)
+                else if (classChildType == "super_interfaces")
                 {
                     uint32_t typeListChildCount
                         = ts_node_named_child_count(classChild);
@@ -800,34 +797,31 @@ namespace astfri::java
                         ));
                     }
                 }
-                else if (classChildName.find("(class_body ") == 0)
+                else if (classChildType == "class_body")
                 {
                     uint32_t classBodyChildCount
                         = ts_node_named_child_count(classChild);
                     for (uint32_t k = 0; k < classBodyChildCount; k++)
                     {
                         TSNode classBodyChild = ts_node_named_child(classChild, k);
-                        std::string classBodyChildName
-                            = ts_node_string(classBodyChild);
+                        std::string classBodyChildType
+                            = ts_node_type(classBodyChild);
 
-                        if (classBodyChildName.find("(field_declaration ") == 0)
+                        if (classBodyChildType == "field_declaration")
                         {
                             attributes.push_back(this->transform_attribute_node(
                                 classBodyChild,
                                 sourceCode
                             ));
                         }
-                        else if (classBodyChildName.find("(method_declaration ")
-                                 == 0)
+                        else if (classBodyChildType == "method_declaration")
                         {
                             methods.push_back(this->transform_method_node(
                                 classBodyChild,
                                 sourceCode
                             ));
                         }
-                        else if (classBodyChildName.find("(constructor_declaration "
-                                 )
-                                 == 0)
+                        else if (classBodyChildType == "constructor_declaration")
                         {
                             constructors.push_back(this->transform_constructor_node(
                                 classBodyChild,
@@ -883,8 +877,8 @@ namespace astfri::java
             if (! ts_node_is_null(ts_node_named_child(rootNode, i)))
             {
                 TSNode child          = ts_node_named_child(rootNode, i);
-                std::string childName = ts_node_string(child);
-                if (childName.find("(interface_declaration ") == 0)
+                std::string childType = ts_node_type(child);
+                if (childType == "interface_declaration")
                 {
                     interfaceNode = child;
                 }
@@ -898,16 +892,16 @@ namespace astfri::java
             for (uint32_t j = 0; j < interfaceChildCount; j++)
             {
                 TSNode interfaceChild = ts_node_named_child(interfaceNode, j);
-                std::string interfaceChildName = ts_node_string(interfaceChild);
+                std::string interfaceChildType = ts_node_type(interfaceChild);
 
-                if (interfaceChildName.find("(identifier)") == 0)
+                if (interfaceChildType.find("(identifier)") == 0)
                 {
                     interfaceName = exprTransformer->get_node_text(
                         interfaceChild,
                         sourceCode
                     );
                 }
-                else if (interfaceChildName.find("(type_parameters ") == 0)
+                else if (interfaceChildType == "type_parameters")
                 {
                     uint32_t parametersCount
                         = ts_node_named_child_count(interfaceChild);
@@ -920,7 +914,7 @@ namespace astfri::java
                         );
                     }
                 }
-                else if (interfaceChildName.find("(extends_interfaces ") == 0)
+                else if (interfaceChildType == "extends_interfaces")
                 {
                     uint32_t typeListChildCount
                         = ts_node_named_child_count(interfaceChild);
@@ -934,7 +928,7 @@ namespace astfri::java
                         ));
                     }
                 }
-                else if (interfaceChildName.find("(interface_body ") == 0)
+                else if (interfaceChildType == "interface_body")
                 {
                     uint32_t interfaceBodyChildCount
                         = ts_node_named_child_count(interfaceChild);
@@ -942,16 +936,19 @@ namespace astfri::java
                     {
                         TSNode interfaceBodyChild
                             = ts_node_named_child(interfaceChild, k);
-                        std::string interfaceBodyChildName
-                            = ts_node_string(interfaceBodyChild);
+                        std::string interfaceBodyChildType
+                            = ts_node_type(interfaceBodyChild);
 
-                        if (interfaceBodyChildName.find("(method_declaration ")
-                            == 0)
+                        if (interfaceBodyChildType == "method_declaration")
                         {
                             methods.push_back(this->transform_method_node(
                                 interfaceBodyChild,
                                 sourceCode
                             ));
+                        }
+                        else
+                        {
+                            continue;
                         }
                     }
                 }

@@ -109,6 +109,12 @@ astfri::Expr* ExpressionTransformer::get_expr(
     {
         expr = this->transform_ternary_expr_node(tsNode, sourceCode);
     }
+    else if (nodeType == "line_comment" || nodeType == "block_comment")
+    {
+        expr = this->exprFactory.mk_string_literal(
+            this->get_node_text(tsNode, sourceCode)
+        );
+    }
     else
     {
         expr = exprFactory.mk_unknown();

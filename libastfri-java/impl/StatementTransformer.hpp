@@ -26,7 +26,6 @@ namespace astfri::java
     class StatementTransformer
     {
     private:
-        astfri::ExprFactory& exprFactory;
         astfri::StmtFactory& stmtFactory;
         ExpressionTransformer* exprTransformer;
         NodeMapper* nodeMapper;
