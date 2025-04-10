@@ -5,6 +5,7 @@
 #include <cstring>
 #include <ranges>
 #include <string>
+#include <tree_sitter/api.h>
 
 namespace astfri::java
 {
@@ -13,6 +14,11 @@ ExpressionTransformer::ExpressionTransformer() :
     exprFactory(astfri::ExprFactory::get_instance()),
     nodeMapper(new NodeMapper())
 {
+}
+
+ExpressionTransformer::~ExpressionTransformer()
+{
+    delete this->nodeMapper;
 }
 
 std::string ExpressionTransformer::get_node_text(
@@ -138,13 +144,13 @@ astfri::BinOpExpr* ExpressionTransformer::transform_bin_op_expr_node(
     if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
     {
         leftOperandNode             = ts_node_named_child(tsNode, 0);
-        std::string leftOperandName = ts_node_string(leftOperandNode);
+        std::string leftOperandType = ts_node_type(leftOperandNode);
         leftExpr = this->get_expr(leftOperandNode, sourceCode);
     }
     if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
     {
         rightOperandNode             = ts_node_named_child(tsNode, 1);
-        std::string rightOperandName = ts_node_string(rightOperandNode);
+        std::string rightOperandType = ts_node_type(rightOperandNode);
         rightExpr = this->get_expr(rightOperandNode, sourceCode);
     }
     if (! ts_node_is_null(ts_node_child(tsNode, 1)))
@@ -173,12 +179,12 @@ astfri::UnaryOpExpr* ExpressionTransformer::transform_un_op_expr_node(
     if (! ts_node_is_null(ts_node_child(tsNode, 0)))
     {
         firstNode                 = ts_node_child(tsNode, 0);
-        std::string firstNodeName = ts_node_string(firstNode);
+        std::string firstNodeType = ts_node_type(firstNode);
         std::string firstNodeText = get_node_text(firstNode, sourceCode);
         if (! ts_node_is_null(ts_node_child(tsNode, 1)))
         {
             secondNode                 = ts_node_child(tsNode, 1);
-            std::string secondNodeName = ts_node_string(secondNode);
+            std::string secondNodeType = ts_node_type(secondNode);
             std::string secondNodeText = get_node_text(secondNode, sourceCode);
             for (std::string op :
                  std::views::keys(this->nodeMapper->get_unaryOpMap()))
@@ -399,7 +405,7 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
             for (uint32_t j = 0; j < argCount; j++)
             {
                 TSNode argNode          = ts_node_named_child(child, j);
-                std::string argNodeName = ts_node_string(argNode);
+                std::string argNodeType = ts_node_type(argNode);
                 arguments.push_back(get_expr(argNode, sourceCode));
             }
         }

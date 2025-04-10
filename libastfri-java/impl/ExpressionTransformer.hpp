@@ -53,6 +53,7 @@ namespace astfri::java
 
     public:
         ExpressionTransformer();
+        ~ExpressionTransformer();
 
         std::string get_node_text(
             TSNode const& node,

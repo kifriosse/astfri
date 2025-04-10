@@ -13,6 +13,12 @@ namespace astfri::java
         nodeMapper(new NodeMapper())
         {
         }
+    
+    StatementTransformer::~StatementTransformer()
+    {
+        delete this->exprTransformer;
+        delete this->nodeMapper;
+    }
 
     astfri::Stmt* StatementTransformer::get_stmt(
         TSNode tsNode,
@@ -72,7 +78,7 @@ namespace astfri::java
             for (uint32_t i = 0; i < argsCount; i++)
             {
                 TSNode argNode          = ts_node_named_child(argumentsListNode, i);
-                std::string argNodeName = ts_node_string(argNode);
+                std::string argNodeType = ts_node_type(argNode);
                 args.push_back(exprTransformer->get_expr(argNode, sourceCode));
             }
             return stmtFactory.mak_base_initializer(
@@ -158,24 +164,24 @@ namespace astfri::java
         astfri::Type* type = nullptr;
         std::string name = "";
 
-        std::string tsNodeName = ts_node_string(tsNode);
+        std::string tsNodeType = ts_node_type(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
         bool typeSet           = false;
         for (uint32_t j = 0; j < childCount; j++)
         {
-            TSNode child          = ts_node_named_child(tsNode, j);
-            std::string childName = ts_node_string(child);
+            TSNode paramNode          = ts_node_named_child(tsNode, j);
+            std::string paramNodeType = ts_node_type(paramNode);
 
-            if ((childName == "(identifier)"
-                 || childName.find("type") != std::string::npos)
+            if ((paramNodeType == "identifier"
+                 || paramNodeType.find("type") != std::string::npos)
                 && (! typeSet))
             {
-                type    = this->get_return_type(child, sourceCode);
+                type    = this->get_return_type(paramNode, sourceCode);
                 typeSet = true;
             }
-            else if (childName == "(identifier)")
+            else if (paramNodeType == "identifier")
             {
-                name = this->exprTransformer->get_node_text(child, sourceCode);
+                name = this->exprTransformer->get_node_text(paramNode, sourceCode);
             }
         }
         return stmtFactory.mk_param_var_def(name, type, nullptr);
@@ -190,41 +196,41 @@ namespace astfri::java
         std::string name = "";
         astfri::Expr* init = nullptr;
 
-        std::string tsNodeName = ts_node_string(tsNode);
+        std::string tsNodeType = ts_node_type(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
         bool typeSet           = false;
         for (uint32_t j = 0; j < childCount; j++)
         {
-            TSNode child          = ts_node_named_child(tsNode, j);
-            std::string childName = ts_node_string(child);
+            TSNode varNode          = ts_node_named_child(tsNode, j);
+            std::string varNodeType = ts_node_type(varNode);
 
-            if ((childName == "(identifier)"
-                 || childName.find("type") != std::string::npos)
+            if ((varNodeType == "identifier"
+                 || varNodeType.find("type") != std::string::npos)
                 && (! typeSet))
             {
-                type    = this->get_return_type(child, sourceCode);
+                type    = this->get_return_type(varNode, sourceCode);
                 typeSet = true;
             }
-            else if (childName.find("(variable_declarator") == 0)
+            else if (varNodeType == "variable_declarator")
             {
-                uint32_t greatGrandChildCount = ts_node_named_child_count(child);
-                for (uint32_t k = 0; k < greatGrandChildCount; k++)
+                uint32_t declaratorChildCount = ts_node_named_child_count(varNode);
+                for (uint32_t k = 0; k < declaratorChildCount; k++)
                 {
-                    TSNode greatGrandChild = ts_node_named_child(child, k);
-                    std::string greatGrandChildName
-                        = ts_node_string(greatGrandChild);
+                    TSNode declaratorChild = ts_node_named_child(varNode, k);
+                    std::string declaratorChildType
+                        = ts_node_type(declaratorChild);
 
-                    if (greatGrandChildName == "(identifier)" && k == 0)
+                    if (declaratorChildType == "identifier" && k == 0)
                     {
                         name = exprTransformer->get_node_text(
-                            greatGrandChild,
+                            declaratorChild,
                             sourceCode
                         );
                     }
                     else
                     {
                         init = exprTransformer->get_expr(
-                            greatGrandChild,
+                            declaratorChild,
                             sourceCode
                         );
                     }
@@ -242,7 +248,7 @@ namespace astfri::java
         astfri::Expr* expr = nullptr;
 
         TSNode child          = ts_node_named_child(tsNode, 0);
-        std::string childName = ts_node_string(child);
+        std::string childType = ts_node_type(child);
         expr                  = exprTransformer->get_expr(child, sourceCode);
 
         return stmtFactory.mk_expr(expr);
@@ -261,31 +267,31 @@ namespace astfri::java
         for (uint32_t j = 0; j < childCount; j++)
         {
             TSNode child          = ts_node_named_child(tsNode, j);
-            std::string childName = ts_node_string(child);
+            std::string childType = ts_node_type(child);
             TSNode conditionNode  = ts_node_named_child(child, 0);
             TSNode iftrueNode;
             TSNode iffalseNode;
-            if (childName.find("(parenthesized_expression ") == 0)
+            if (childType == "parenthesized_expression")
             {
-                std::string conditionNodeName = ts_node_string(conditionNode);
+                std::string conditionNodeType = ts_node_type(conditionNode);
                 condition = exprTransformer->get_expr(conditionNode, sourceCode);
             }
-            else if ((childName.find("(block ") == 0 && j == 1))
+            else if ((childType == "block" && j == 1))
             {
                 iftrueNode                 = child;
-                std::string iftrueNodeName = ts_node_string(iftrueNode);
+                std::string iftrueNodeType = ts_node_type(iftrueNode);
                 iftrue = this->transform_body_node(iftrueNode, sourceCode);
             }
-            else if (childName.find("(block ") == 0 && j == 2)
+            else if (childType == "block" && j == 2)
             {
                 iffalseNode                 = child;
-                std::string iffalseNodeName = ts_node_string(iffalseNode);
+                std::string iffalseNodeType = ts_node_type(iffalseNode);
                 iffalse = this->transform_body_node(iffalseNode, sourceCode);
             }
-            else if (childName.find("(if_statement ") == 0)
+            else if (childType == "if_statement")
             {
                 iffalseNode                 = child;
-                std::string iffalseNodeName = ts_node_string(iffalseNode);
+                std::string iffalseNodeType = ts_node_type(iffalseNode);
                 iffalse = this->transform_if_stmt_node(iffalseNode, sourceCode);
             }
         }
@@ -331,7 +337,7 @@ namespace astfri::java
                     if (childText.find("case") == 0)
                     {
                         TSNode caseChild          = ts_node_named_child(child, 0);
-                        std::string caseChildName = ts_node_string(caseChild);
+                        std::string caseChildType = ts_node_type(caseChild);
                         uint32_t exprCount = ts_node_named_child_count(child);
                         for (uint32_t k = 0; k < exprCount; k++)
                         {
@@ -389,26 +395,26 @@ namespace astfri::java
         if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
         {
             initNode                 = ts_node_named_child(tsNode, 0);
-            std::string initNodeName = ts_node_string(initNode);
+            std::string initNodeType = ts_node_type(initNode);
             init = this->transform_local_var_node(initNode, sourceCode);
         }
         if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
         {
             conditionNode                 = ts_node_named_child(tsNode, 1);
-            std::string conditionNodeName = ts_node_string(conditionNode);
+            std::string conditionNodeType = ts_node_type(conditionNode);
             condition = exprTransformer->get_expr(conditionNode, sourceCode);
         }
         if (! ts_node_is_null(ts_node_named_child(tsNode, 2)))
         {
             stepNode                 = ts_node_named_child(tsNode, 2);
-            std::string stepNodeName = ts_node_string(stepNode);
+            std::string stepNodeType = ts_node_type(stepNode);
             astfri::Expr* expr = exprTransformer->get_expr(stepNode, sourceCode);
             step               = stmtFactory.mk_expr(expr);
         }
         if (! ts_node_is_null(ts_node_named_child(tsNode, 3)))
         {
             bodyNode                 = ts_node_named_child(tsNode, 3);
-            std::string bodyNodeName = ts_node_string(bodyNode);
+            std::string bodyNodeType = ts_node_type(bodyNode);
             body = this->transform_body_node(bodyNode, sourceCode);
         }
 
@@ -433,14 +439,14 @@ namespace astfri::java
             if (! ts_node_is_null(ts_node_named_child(helpNode, 0)))
             {
                 conditionNode                 = ts_node_named_child(helpNode, 0);
-                std::string conditionNodeName = ts_node_string(conditionNode);
+                std::string conditionNodeType = ts_node_type(conditionNode);
                 condition = exprTransformer->get_expr(conditionNode, sourceCode);
             }
         }
         if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
         {
             bodyNode                 = ts_node_named_child(tsNode, 1);
-            std::string bodyNodeName = ts_node_string(bodyNode);
+            std::string bodyNodeType = ts_node_type(bodyNode);
             body = this->transform_body_node(bodyNode, sourceCode);
         }
 
@@ -462,7 +468,7 @@ namespace astfri::java
         if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
         {
             bodyNode                 = ts_node_named_child(tsNode, 0);
-            std::string bodyNodeName = ts_node_string(bodyNode);
+            std::string bodyNodeType = ts_node_type(bodyNode);
             body = this->transform_body_node(bodyNode, sourceCode);
         }
         if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
@@ -471,7 +477,7 @@ namespace astfri::java
             if (! ts_node_is_null(ts_node_named_child(helpNode, 0)))
             {
                 conditionNode                 = ts_node_named_child(helpNode, 0);
-                std::string conditionNodeName = ts_node_string(conditionNode);
+                std::string conditionNodeType = ts_node_type(conditionNode);
                 condition = exprTransformer->get_expr(conditionNode, sourceCode);
             }
         }
@@ -487,7 +493,7 @@ namespace astfri::java
         astfri::Expr* expr = nullptr;
 
         TSNode child          = ts_node_named_child(tsNode, 0);
-        std::string childName = ts_node_string(child);
+        std::string childType = ts_node_type(child);
         expr                  = exprTransformer->get_expr(child, sourceCode);
 
         return stmtFactory.mk_return(expr);
@@ -504,7 +510,7 @@ namespace astfri::java
         for (uint32_t i = 0; i < tsNodeChildeCount; i++)
         {
             TSNode child          = ts_node_named_child(tsNode, i);
-            std::string childName = ts_node_string(child);
+            std::string childType = ts_node_type(child);
             statements.push_back(this->get_stmt(child, sourceCode));
         }
         return stmtFactory.mk_compound(statements);
@@ -527,37 +533,37 @@ namespace astfri::java
         for (uint32_t i = 0; i < methodChildCount; i++)
         {
             TSNode methodChild          = ts_node_named_child(tsNode, i);
-            std::string methodChildName = ts_node_string(methodChild);
+            std::string methodChildType = ts_node_type(methodChild);
 
-            if (methodChildName.find("(modifiers") == 0)
+            if (methodChildType == "modifiers")
             {
                 access = get_access_modifier(methodChild, sourceCode);
             }
-            else if ((methodChildName == "(identifier)"
-                      || methodChildName.find("type") != std::string::npos)
+            else if ((methodChildType == "identifier"
+                      || methodChildType.find("type") != std::string::npos)
                      && ! typeSet)
             {
                 type    = this->get_return_type(methodChild, sourceCode);
                 typeSet = true;
             }
-            else if (methodChildName == "(identifier)")
+            else if (methodChildType == "identifier")
             {
                 name = exprTransformer->get_node_text(methodChild, sourceCode);
             }
-            else if (methodChildName.find("(formal_parameters ") == 0)
+            else if (methodChildType == "formal_parameters")
             {
                 uint32_t paramtersCount = ts_node_named_child_count(methodChild);
                 for (uint32_t j = 0; j < paramtersCount; j++)
                 {
                     TSNode parameterNode = ts_node_named_child(methodChild, j);
-                    std::string parameterNodeName = ts_node_string(parameterNode);
+                    std::string parameterNodeType = ts_node_type(parameterNode);
                     params.push_back(
                         this->transform_param_node(parameterNode, sourceCode)
                     );
                 }
             }
-            else if (methodChildName.find("(constructor_body") == 0
-                     || methodChildName.find("(block") == 0)
+            else if (methodChildType == "constructor_body"
+                     || methodChildType == "block")
             {
                 uint32_t bodyChildCount = ts_node_named_child_count(methodChild);
                 std::vector<astfri::Stmt*> bodyStatements;
@@ -642,44 +648,44 @@ namespace astfri::java
         bool typeSet                  = false;
         std::string name;
 
-        std::string tsNodeName = ts_node_string(tsNode);
+        std::string tsNodeType = ts_node_type(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
         for (uint32_t j = 0; j < childCount; j++)
         {
-            TSNode child          = ts_node_named_child(tsNode, j);
-            std::string childName = ts_node_string(child);
+            TSNode attrNode          = ts_node_named_child(tsNode, j);
+            std::string attrNodeType = ts_node_type(attrNode);
 
-            if (childName == "(modifiers)")
+            if (attrNodeType == "modifiers")
             {
-                access = get_access_modifier(child, sourceCode);
+                access = get_access_modifier(attrNode, sourceCode);
             }
-            else if ((childName == "(identifier)"
-                      || childName.find("type") != std::string::npos)
+            else if ((attrNodeType == "identifier"
+                      || attrNodeType.find("type") != std::string::npos)
                      && (! typeSet))
             {
-                type    = this->get_return_type(child, sourceCode);
+                type    = this->get_return_type(attrNode, sourceCode);
                 typeSet = true;
             }
-            else if (childName.find("(variable_declarator") == 0)
+            else if (attrNodeType == "variable_declarator")
             {
-                uint32_t greatGrandChildCount = ts_node_named_child_count(child);
-                for (uint32_t k = 0; k < greatGrandChildCount; k++)
+                uint32_t declaratorChildCount = ts_node_named_child_count(attrNode);
+                for (uint32_t k = 0; k < declaratorChildCount; k++)
                 {
-                    TSNode greatGrandChild = ts_node_named_child(child, k);
-                    std::string greatGrandChildName
-                        = ts_node_string(greatGrandChild);
+                    TSNode declaratorChild = ts_node_named_child(attrNode, k);
+                    std::string declaratorChildType
+                        = ts_node_type(declaratorChild);
 
-                    if (greatGrandChildName == "(identifier)" && k == 0)
+                    if (declaratorChildType == "identifier" && k == 0)
                     {
                         name = exprTransformer->get_node_text(
-                            greatGrandChild,
+                            declaratorChild,
                             sourceCode
                         );
                     }
                     else
                     {
                         init = exprTransformer->get_expr(
-                            greatGrandChild,
+                            declaratorChild,
                             sourceCode
                         );
                     }

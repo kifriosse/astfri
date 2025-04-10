@@ -129,6 +129,7 @@ namespace astfri::java
 
     public:
         StatementTransformer();
+        ~StatementTransformer();
         astfri::TranslationUnit* fill_translation_unit(TSTree* tree, std::string const& sourceCode);
     };
 

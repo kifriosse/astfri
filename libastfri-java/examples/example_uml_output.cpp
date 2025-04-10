@@ -23,4 +23,9 @@ int main()
     astfri::uml::UMLLibWrapper uml;
     uml.init(conf, op, tc);
     uml.run(*tu);
+
+    //freeing memory
+    ts_tree_delete(tree);
+    delete(tb);
+    return 0;
 }

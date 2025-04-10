@@ -18,6 +18,7 @@ namespace astfri::java
     
     public:
         ASTBuilder();
+        ~ASTBuilder();
         
         std::string load_file(std::string const& path);
         

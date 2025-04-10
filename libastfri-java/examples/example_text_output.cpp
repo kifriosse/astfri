@@ -18,5 +18,9 @@ int main()
     visitor->visit(*tu);
     visitor->write_file();
 
+    //freeing memory
+    ts_tree_delete(tree);
+    delete(tb);
+    delete(visitor);
     return 0;
 }

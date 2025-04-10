@@ -12,11 +12,10 @@ namespace astfri::java
     {
     private:
         astfri::TypeFactory& typeFactory;
-        const std::map<std::string, astfri::Type*> typeMap;
-
         astfri::StmtFactory& stmtFactory;
         astfri::ExprFactory& exprFactory;
-
+        
+        const std::map<std::string, astfri::Type*> typeMap;
         const std::map<std::string, astfri::BinOpType> binOpMap;
         const std::map<std::string, astfri::UnaryOpType> unaryOpMap;
         const std::map<std::string, astfri::AccessModifier> modMap;

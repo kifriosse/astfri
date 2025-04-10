@@ -12,6 +12,11 @@ namespace astfri::java
         stmtTransformer(new StatementTransformer())
     {
     }
+
+    ASTBuilder::~ASTBuilder()
+    {
+        delete this->stmtTransformer;
+    }
     
     std::string ASTBuilder::load_file(std::string const& path)
     {
@@ -57,6 +62,7 @@ namespace astfri::java
         TSTree* tree
             = ts_parser_parse_string(parser, NULL, sourceCode, strlen(sourceCode));
     
+        ts_parser_delete(parser);
         return tree;
     }
     

@@ -3,6 +3,8 @@
 namespace astfri::java
 {
     NodeMapper::NodeMapper() : typeFactory(astfri::TypeFactory::get_instance()), 
+                               stmtFactory(astfri::StmtFactory::get_instance()), 
+                               exprFactory(astfri::ExprFactory::get_instance()), 
                                typeMap({
                                 {"int", typeFactory.mk_int()},
                                 {"float", typeFactory.mk_float()},
@@ -10,9 +12,7 @@ namespace astfri::java
                                 {"char", typeFactory.mk_char()},
                                 {"boolean", typeFactory.mk_bool()},
                                 {"void", typeFactory.mk_void()},
-                             }), 
-                               stmtFactory(astfri::StmtFactory::get_instance()), 
-                               exprFactory(astfri::ExprFactory::get_instance()),
+                             }),
                                binOpMap({
                                    {"=", astfri::BinOpType::Assign},
                                    {"+", astfri::BinOpType::Add},
