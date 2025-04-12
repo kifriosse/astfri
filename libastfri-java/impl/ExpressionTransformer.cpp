@@ -5,7 +5,6 @@
 #include <cstring>
 #include <ranges>
 #include <string>
-#include <tree_sitter/api.h>
 
 namespace astfri::java
 {
@@ -73,10 +72,10 @@ astfri::Expr* ExpressionTransformer::get_expr(
     }
     else if (nodeType == "field_access")
     {
-        TSNode identifierNode = ts_node_named_child(tsNode, 1);
-        auto refExprVariant
-            = this->transform_ref_expr_node(identifierNode, sourceCode);
-        std::visit([&expr](auto&& arg) { expr = arg; }, refExprVariant);
+        expr = exprFactory.mk_member_var_ref(
+            this->exprFactory.mk_this(),
+            get_node_text(ts_node_named_child(tsNode, 1), sourceCode)
+        );
     }
     else if (nodeType == "identifier")
     {
@@ -374,6 +373,10 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
                 owner = this->exprFactory.mk_class_ref(
                     get_node_text(child, sourceCode)
                 );
+            }
+            else if (nodeText == "this")
+            {
+                owner = this->exprFactory.mk_this();
             }
             else
             {
