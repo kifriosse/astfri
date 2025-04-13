@@ -640,12 +640,11 @@ bool ClangVisitor::TraverseForStmt(clang::ForStmt *FS) {
     this->clang_location.stmt_ = FS;
 
     //naplnenie new_for
-    auto cond = FS->getCond();
-    TraverseStmt(cond);
+    TraverseStmt(FS->getCond());
     new_for->cond_ = this->astfri_location.expr_;
 
-    auto body = FS->getBody();
-    TraverseStmt(body);
+    //naplnenie tela
+    TraverseStmt(FS->getBody());
     new_for->body_ = (CompoundStmt*)this->astfri_location.stmt_;
 
     // vytvorim si compound stmt a do toho pojdu init statementy, potom ich hodim do vardef
@@ -656,17 +655,10 @@ bool ClangVisitor::TraverseForStmt(clang::ForStmt *FS) {
     TraverseStmt(FS->getInit());
     new_for->init_ = ((CompoundStmt*)this->astfri_location.stmt_)->stmts_[0];
 
-    // auto step = FS->getInc();
-    // TraverseStmt(step);
-    // new_for->step_ = this->stmt_factory_->mk_expr(
-    //     this->astfri_location.expr_
-    // );
-    // TODO: dorobit aj exoticke srandy na forku
+    auto step = FS->getInc();
+    TraverseStmt(step);
     new_for->step_ = this->stmt_factory_->mk_expr(
-        this->expr_factory_->mk_unary_op(
-            UnaryOpType::PostIncrement,
-            this->expr_factory_->mk_local_var_ref("i")
-        )
+        this->astfri_location.expr_
     );
 
     // vratenie AST location
