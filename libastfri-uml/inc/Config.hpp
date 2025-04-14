@@ -1,6 +1,11 @@
 #pragma once
 
+#include <fstream>
 #include <libastfri-uml/inc/TypeConvention.hpp>
+#include <lib/rapidjson/document.h>
+#include <lib/rapidjson/writer.h>
+#include <lib/rapidjson/stringbuffer.h>
+
 
 namespace astfri::uml {
     struct Config {
@@ -29,9 +34,15 @@ namespace astfri::uml {
 
         std::string outputFilePath_ = "/tmp/class_diagram";
 
-        void parse_json(const char* path);
-
-        void save_json(const char* path);
+        bool save_json(const char* path);
+        bool parse_json(const char* path);
+    private:
+        bool parse_file_info(const rapidjson::Value& val);
+        bool parse_types_info(const rapidjson::Value& val);
+        bool parse_access_info(const rapidjson::Value& val);
+        bool parse_colors_info(const rapidjson::Value& val);
+        bool parse_relations_info(const rapidjson::Value& val);
+        bool parse_destructor_info(const rapidjson::Value& val);
     };
 
 } // namespace astfri::uml

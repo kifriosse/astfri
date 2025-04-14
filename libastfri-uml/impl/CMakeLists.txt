@@ -6,5 +6,6 @@ target_sources(astfri-uml PRIVATE
     ClassVisitor.cpp
     TypeConvention.cpp
     ElementStructs.cpp
+    Config.cpp
 )
 target_link_libraries(astfri-uml PUBLIC astfri-core)

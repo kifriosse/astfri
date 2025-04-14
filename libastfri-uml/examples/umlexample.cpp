@@ -95,9 +95,12 @@ int main()
 
     astfri::uml::Config conf;
     conf.innerView_ = true;
+    if (!conf.parse_json("../../libastfri-uml/examples/default_config.json")) {
+        std::cout << "Unable to parse JSON config.\n";
+    }
     // config can be changed at any point before calling run
     // either by directly accessing its member variables
-    // or using its parse_json method (TODO - NOT YET IMPLEMENTED)
+    // or using its parse_json method
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::TypeBeforeConvention tc;
     astfri::uml::UMLLibWrapper uml;
