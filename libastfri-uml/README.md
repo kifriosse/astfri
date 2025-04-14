@@ -6,7 +6,7 @@ Your CMake target must link library "astfri-uml".
 - Create an instance of astfri::uml::UMLLibWrapper
 - Create an instance of:
     1. astfri::uml::UMLOutputter (currently only PlantUMLOutputter is implemented)
-    2. astfri::uml::Config (json loading currently not implemented, only default config)
+    2. astfri::uml::Config
     3. astfri::uml::TypeConvention (TypeBeforeConvention/TypeAfterConvention)
 - Call the init method on your astfri::uml::UMLLibWrapper instance
 - Call the run method on your astfri::uml::UMLLibWrapper instance
