@@ -501,7 +501,7 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
     for (auto& base : value["bases"].GetArray() ){
         std::string name = base.GetString();
         auto it = nameWithClassDefStmtMapping_.find(name);
-        //if class mentioned among badese clasdeses isnt resolved yet ,do nothing except for create record in unresolvedClassDefStmt map
+        //if class mentioned among base classes isnt resolved yet ,do nothing except for create record in unresolvedClassDefStmt map
         //and add this classDefStmt among classDefStmts which references to unresolved ClassDefStmt
         if (it==nameWithClassDefStmtMapping_.end()){
             unResolvedClassDefStmts_[name].push_back(classDefStmt);
@@ -720,7 +720,8 @@ void AstFriDeSerializer::resolve_class_def_stmts(){
         //try to find name among already resolved classDefStmts
         auto itResolvedClassStmt =  nameWithClassDefStmtMapping_.find(name);
 
-        //if name isnt among resolved statements ,create empty class def statement only with name,and add it to all child clasdeses
+        //if name isnt among resolved statements ,create empty class def statement only 
+        //with name,and add it to all child classes
         if(itResolvedClassStmt == nameWithClassDefStmtMapping_.end()){
             astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(name));
             for(auto& clsDefStmt : it.second){
@@ -732,7 +733,6 @@ void AstFriDeSerializer::resolve_class_def_stmts(){
                 clsDefStmt->bases_.push_back(itResolvedClassStmt->second);
             }
         }
-
 
     }
 
@@ -747,24 +747,16 @@ void AstFriDeSerializer::resolve_interface_def_stmts(){
         //try to find name among already resolved interfaceDefStmts
         auto itResolvedInterfaceStmt = nameWithInterfaceDefStmtMapping_.find(name);
         if (itResolvedInterfaceStmt == nameWithInterfaceDefStmtMapping_.end()){
-            astfri::InterfaceDefStmt* interfDefStmt = this->statementMaker_.mk_interface_def(std::move(name));
-            for (auto& defStmt : it.second){
-                if(is_class_def_stmt(defStmt)){
-                    dynamic_cast<astfri::ClassDefStmt*>(defStmt)->interfaces_.push_back(interfDefStmt);
-                }else{
-                    dynamic_cast<astfri::InterfaceDefStmt*>(defStmt)->bases_.push_back(interfDefStmt);
-                }
+            astfri::InterfaceDefStmt* newInterfDefStmt = this->statementMaker_.mk_interface_def(std::move(name));
+            for (auto& interfaceDefStmt : it.second){
+                interfaceDefStmt->bases_.push_back(newInterfDefStmt);
 
             }
         }else{
-            astfri::InterfaceDefStmt* interfDefStmt = itResolvedInterfaceStmt->second;
-            for (auto& defStmt : it.second){
-                if(is_class_def_stmt(defStmt)){
-                    dynamic_cast<astfri::ClassDefStmt*>(defStmt)->interfaces_.push_back(interfDefStmt);
-                }else{
-                    dynamic_cast<astfri::InterfaceDefStmt*>(defStmt)->bases_.push_back(interfDefStmt);
-                }
-
+            astfri::InterfaceDefStmt* resolvedInterfDefStmt = itResolvedInterfaceStmt->second;
+            for (auto& interfDefStmt : it.second){
+               interfDefStmt->bases_.push_back(resolvedInterfDefStmt);
+            
             }
 
         }
