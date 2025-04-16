@@ -31,7 +31,7 @@ std::unordered_map<std::string,astfri::InterfaceDefStmt*> nameWithInterfaceDefSt
 //key is name of unresolved class or interface def statement,value is vector of class or interface def statements,which innherit or implement
 //that unresolved Class/Interface
 std::unordered_map<std::string,std::vector<astfri::ClassDefStmt*>> unResolvedClassDefStmts_;
-std::unordered_map<std::string,std::vector<astfri::Stmt*>> unresolvedInterfaceDefStmts_;
+std::unordered_map<std::string,std::vector<astfri::InterfaceDefStmt*>> unresolvedInterfaceDefStmts_;
 
 void resolve_class_def_stmts();
 void resolve_interface_def_stmts();

@@ -12,9 +12,7 @@ std::unique_ptr<ASTVisitor> visitor = std::make_unique<ASTVisitor>();
 node->accept(*visitor);
 visitor->write_file();
 
-
 std::cout << "Parsing JSON file successfull";
-
-
 return 0;
 }
+
