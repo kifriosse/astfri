@@ -8,7 +8,6 @@
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
-#include <variant>
 
 namespace astfri::java
 {
@@ -29,12 +28,7 @@ namespace astfri::java
             std::string const& sourceCode
         );
 
-        std::variant<
-            astfri::ParamVarRefExpr*,
-            astfri::LocalVarRefExpr*,
-            astfri::MemberVarRefExpr*,
-            astfri::StringLiteralExpr*>
-            transform_ref_expr_node(TSNode tsNode, std::string const& sourceCode);
+        Expr* transform_ref_expr_node(TSNode tsNode, std::string const& sourceCode);
 
         astfri::MethodCallExpr* transform_method_call_node(
             TSNode tsNode,

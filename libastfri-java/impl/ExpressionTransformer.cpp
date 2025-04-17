@@ -79,8 +79,7 @@ astfri::Expr* ExpressionTransformer::get_expr(
     }
     else if (nodeType == "identifier")
     {
-        auto refExprVariant = this->transform_ref_expr_node(tsNode, sourceCode);
-        std::visit([&expr](auto&& arg) { expr = arg; }, refExprVariant);
+        expr = this->transform_ref_expr_node(tsNode, sourceCode);
     }
     else if (nodeType == "binary_expression")
     {
@@ -209,12 +208,7 @@ astfri::UnaryOpExpr* ExpressionTransformer::transform_un_op_expr_node(
     return exprFactory.mk_unary_op(unOperator, expr);
 }
 
-std::variant<
-    astfri::ParamVarRefExpr*,
-    astfri::LocalVarRefExpr*,
-    astfri::MemberVarRefExpr*,
-    astfri::StringLiteralExpr*>
-    ExpressionTransformer::transform_ref_expr_node(
+Expr* ExpressionTransformer::transform_ref_expr_node(
         TSNode tsNode,
         std::string const& sourceCode
     )
@@ -380,10 +374,7 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
             }
             else
             {
-                astfri::Expr* expr = nullptr;
-                auto refExprVariant
-                    = this->transform_ref_expr_node(child, sourceCode);
-                std::visit([&expr](auto&& arg) { expr = arg; }, refExprVariant);
+                astfri::Expr* expr = this->transform_ref_expr_node(child, sourceCode);
 
                 if (astfri::MemberVarRefExpr* memVarExpr
                     = dynamic_cast<astfri::MemberVarRefExpr*>(expr))

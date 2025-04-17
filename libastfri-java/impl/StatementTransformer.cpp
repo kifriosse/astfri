@@ -166,18 +166,15 @@ namespace astfri::java
 
         std::string tsNodeType = ts_node_type(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
-        bool typeSet           = false;
+        
         for (uint32_t j = 0; j < childCount; j++)
         {
             TSNode paramNode          = ts_node_named_child(tsNode, j);
             std::string paramNodeType = ts_node_type(paramNode);
 
-            if ((paramNodeType == "identifier"
-                 || paramNodeType.find("type") != std::string::npos)
-                && (! typeSet))
+            if (paramNodeType.find("type") != std::string::npos)
             {
-                type    = this->get_return_type(paramNode, sourceCode);
-                typeSet = true;
+                type = this->get_return_type(paramNode, sourceCode);
             }
             else if (paramNodeType == "identifier")
             {
@@ -198,18 +195,15 @@ namespace astfri::java
 
         std::string tsNodeType = ts_node_type(tsNode);
         uint32_t childCount    = ts_node_named_child_count(tsNode);
-        bool typeSet           = false;
+        
         for (uint32_t j = 0; j < childCount; j++)
         {
             TSNode varNode          = ts_node_named_child(tsNode, j);
             std::string varNodeType = ts_node_type(varNode);
 
-            if ((varNodeType == "identifier"
-                 || varNodeType.find("type") != std::string::npos)
-                && (! typeSet))
+            if (varNodeType.find("type") != std::string::npos)
             {
-                type    = this->get_return_type(varNode, sourceCode);
-                typeSet = true;
+                type = this->get_return_type(varNode, sourceCode);
             }
             else if (varNodeType == "variable_declarator")
             {
@@ -645,7 +639,6 @@ namespace astfri::java
         astfri::AccessModifier access = astfri::AccessModifier::Private;
         astfri::Type* type            = nullptr;
         astfri::Expr* init            = nullptr;
-        bool typeSet                  = false;
         std::string name;
 
         std::string tsNodeType = ts_node_type(tsNode);
@@ -659,12 +652,9 @@ namespace astfri::java
             {
                 access = get_access_modifier(attrNode, sourceCode);
             }
-            else if ((attrNodeType == "identifier"
-                      || attrNodeType.find("type") != std::string::npos)
-                     && (! typeSet))
+            else if (attrNodeType.find("type") != std::string::npos)
             {
                 type    = this->get_return_type(attrNode, sourceCode);
-                typeSet = true;
             }
             else if (attrNodeType == "variable_declarator")
             {
