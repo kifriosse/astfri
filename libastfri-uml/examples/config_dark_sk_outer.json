@@ -1,0 +1,39 @@
+{
+    "FILE":{
+        "write_to_file":false,
+        "file_path":"/tmp/class_diagram"
+    },
+    "TYPES":{
+        "int":"celé číslo",
+        "float":"desatinné číslo",
+        "char":"znak",
+        "bool":"boolovská hodnota",
+        "void":"void",
+        "indirect_indicator":"*",
+        "separator":" ",
+        "type_convention":"TypeBeforeConvention"
+    },
+    "ACCESS_MOD":{
+        "inner_view":false,
+        "public":"+",
+        "private":"-",
+        "protected":"#",
+        "package_private":"~"
+    },
+    "COLORS":{
+        "bg_diagram":"#000000",
+        "bg_element":"#222222",
+        "element_border":"#FFFFFF",
+        "font_color":"#FFFFFF",
+        "arrow_color":"#FFFFFF"
+    },
+    "RELATIONS":{
+        "association":"<--",
+        "composition":"*--",
+        "extention":"<|--",
+        "implementation":"<|.."
+    },
+    "DESTRUCTOR":{
+        "indicator":"~"
+    }
+}
