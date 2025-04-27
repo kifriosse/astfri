@@ -72,11 +72,19 @@ astfri::Expr* ExpressionTransformer::get_expr(
     }
     else if (nodeType == "field_access")
     {
-        expr = exprFactory.mk_member_var_ref(
-            this->exprFactory.mk_this(),
-            get_node_text(ts_node_named_child(tsNode, 1), sourceCode)
-        );
+        if (this->get_node_text(ts_node_named_child(tsNode, 0), sourceCode) == "this")
+        {
+            expr = this->exprFactory.mk_member_var_ref(
+                this->exprFactory.mk_this(),
+                get_node_text(ts_node_named_child(tsNode, 1), sourceCode)
+            );
+        }
+        else
+        {
+            expr = this->transform_ref_expr_node(ts_node_named_child(tsNode, 1), sourceCode);
+        }
     }
+
     else if (nodeType == "identifier")
     {
         expr = this->transform_ref_expr_node(tsNode, sourceCode);
@@ -242,64 +250,65 @@ Expr* ExpressionTransformer::transform_ref_expr_node(
 
         while (ts_query_cursor_next_match(tsCursor, &tsMatch))
         {
-            for (uint32_t i = 0; i < tsMatch.capture_count; i++)
+            
+            uint32_t index = 0;   
+            TSQueryCapture tsCapture = tsMatch.captures[index];
+            ++index;
+            uint32_t length;
+            std::string captureName = ts_query_capture_name_for_id(
+                tsQuery,
+                tsCapture.index,
+                &length
+            );
+            std::string nodeText
+                = get_node_text(tsCapture.node, sourceCode);
+
+            if (captureName == "local_var_name"
+                && referanceName == nodeText)
             {
-                TSQueryCapture tsCapture = tsMatch.captures[i];
-                uint32_t length;
-                std::string captureName = ts_query_capture_name_for_id(
-                    tsQuery,
-                    tsCapture.index,
-                    &length
-                );
-                std::string nodeText
-                    = get_node_text(tsCapture.node, sourceCode);
+                ts_query_cursor_delete(tsCursor);
+                ts_query_delete(tsQuery);
+                return exprFactory.mk_local_var_ref(referanceName);
+            }
+            if (captureName == "param_name" && referanceName == nodeText)
+            {
+                ts_query_cursor_delete(tsCursor);
+                ts_query_delete(tsQuery);
+                return exprFactory.mk_param_var_ref(referanceName);
+            }
+            if (captureName == "attr_name" && referanceName == nodeText)
+            {
+                ts_query_cursor_delete(tsCursor);
+                ts_query_delete(tsQuery);
+                return exprFactory.mk_member_var_ref(exprFactory.mk_this(), referanceName);
+            }
+            else
+            {
+                TSNode fieldAccessNode = ts_node_parent(tsNode);
+                std::string fieldAccessNodeType
+                    = ts_node_type(fieldAccessNode);
 
-                if (captureName == "local_var_name"
-                    && referanceName == nodeText)
+                if (fieldAccessNodeType == "field_access")
                 {
-                    ts_query_cursor_delete(tsCursor);
-                    ts_query_delete(tsQuery);
-                    return exprFactory.mk_local_var_ref(referanceName);
-                }
-                if (captureName == "param_name" && referanceName == nodeText)
-                {
-                    ts_query_cursor_delete(tsCursor);
-                    ts_query_delete(tsQuery);
-                    return exprFactory.mk_param_var_ref(referanceName);
-                }
-                if (captureName == "attr_name" && referanceName == nodeText)
-                {
-                    ts_query_cursor_delete(tsCursor);
-                    ts_query_delete(tsQuery);
-                    return exprFactory.mk_member_var_ref(exprFactory.mk_this(), referanceName);
-                }
-                else
-                {
-                    TSNode fieldAccessNode = ts_node_parent(tsNode);
-                    std::string fieldAccessNodeType
-                        = ts_node_type(fieldAccessNode);
+                    TSNode objectNode;
+                    std::string objectNodeText;
 
-                    if (fieldAccessNodeType == "field_access")
+                    if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)
+                        ))
                     {
-                        TSNode objectNode;
-                        std::string objectNodeText;
-
-                        if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)
-                            ))
-                        {
-                            objectNode = ts_node_child(fieldAccessNode, 0);
-                            objectNodeText
-                                = get_node_text(objectNode, sourceCode);
-                        }
-                        ts_query_cursor_delete(tsCursor);
-                        ts_query_delete(tsQuery);
-                        return this->exprFactory.mk_member_var_ref(
-                            this->exprFactory.mk_class_ref(objectNodeText),
-                            referanceName
-                        );
+                        objectNode = ts_node_child(fieldAccessNode, 0);
+                        objectNodeText
+                            = get_node_text(objectNode, sourceCode);
                     }
+                    ts_query_cursor_delete(tsCursor);
+                    ts_query_delete(tsQuery);
+                    return this->exprFactory.mk_member_var_ref(
+                        this->exprFactory.mk_class_ref(objectNodeText),
+                        referanceName
+                    );
                 }
             }
+            
         }
 
         checkNode = ts_node_parent(checkNode);
@@ -387,6 +396,12 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
                 {
                     owner = localVarExpr;
                 }
+                else if (astfri::ParamVarRefExpr* paramVarExpr
+                    = dynamic_cast<astfri::ParamVarRefExpr*>(expr))
+                {
+                    owner = paramVarExpr;
+                }
+
             }
         }
         else if (strcmp(fieldName, "name") == 0)
