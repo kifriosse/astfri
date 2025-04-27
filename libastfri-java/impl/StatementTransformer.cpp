@@ -890,7 +890,7 @@ namespace astfri::java
                 TSNode interfaceChild = ts_node_named_child(interfaceNode, j);
                 std::string interfaceChildType = ts_node_type(interfaceChild);
 
-                if (interfaceChildType.find("(identifier)") == 0)
+                if (interfaceChildType == "identifier")
                 {
                     interfaceName = exprTransformer->get_node_text(
                         interfaceChild,
