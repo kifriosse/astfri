@@ -1,10 +1,6 @@
 #include <libastfri-uml/inc/Config.hpp>
 
 namespace astfri::uml {
-    bool Config::save_json(const char* path) {
-        return false;
-    }
-
     bool Config::parse_json(const char* path) {
         std::string jsonString;
         std::string line;
@@ -63,6 +59,8 @@ namespace astfri::uml {
     bool Config::parse_access_info(const rapidjson::Value& val) {
         if (!val.HasMember("inner_view")) return false;
         this->innerView_ = val["inner_view"].GetBool();
+        if (!val.HasMember("draw_icons")) return false;
+        this->drawAccessModIcons_ = val["draw_icons"].GetBool();
         if (!val.HasMember("public")) return false;
         this->accessPrefix_[0] = val["public"].GetString()[0];
         if (!val.HasMember("private")) return false;
@@ -104,6 +102,39 @@ namespace astfri::uml {
         if (!val.HasMember("indicator")) return false;
         this->destructorIndicator_ = val["indicator"].GetString()[0];
         return true;
+    }
+
+    void Config::use_default_values() {
+
+        this->innerView_ = true;
+        this->writeToFile_ = false;
+        this->drawAccessModIcons_ = true;
+
+        this->indirectIndicator_ = '*';
+        this->destructorIndicator_ = '~';
+        this->separator_ = ' ';
+        this->accessPrefix_[0] = '+';
+        this->accessPrefix_[1] = '-';
+        this->accessPrefix_[2] = '#';
+        this->accessPrefix_[3] = '~';
+
+        this->relationArrows_[0] = "<--";
+        this->relationArrows_[1] = "*--";
+        this->relationArrows_[2] = "<|--";
+        this->relationArrows_[3] = "<|..";
+        this->intTypeName_ = "int";
+        this->floatTypeName_ = "float";
+        this->charTypeName_ = "char";
+        this->boolTypeName_ = "bool";
+        this->voidTypeName_ = "void";
+
+        this->diagramBG_ = "#FFFFFF";
+        this->elementBG_ = "#FFDDDD";
+        this->elementBorder_ = "#000000";
+        this->fontColor_ = "#000000";
+        this->arrowColor_ = "#000000";
+
+        this->outputFilePath_ = "/tmp/class_diagram";
     }
 
 } // namespace astfri::uml

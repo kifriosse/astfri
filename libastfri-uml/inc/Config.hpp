@@ -13,6 +13,7 @@ namespace astfri::uml {
         TypeConvention* typeConvention_;
         bool innerView_ = true;
         bool writeToFile_ = false;
+        bool drawAccessModIcons_ = true;
 
         char indirectIndicator_ = '*';
         char destructorIndicator_ = '~';
@@ -34,8 +35,8 @@ namespace astfri::uml {
 
         std::string outputFilePath_ = "/tmp/class_diagram";
 
-        bool save_json(const char* path);
         bool parse_json(const char* path);
+        void use_default_values();
     private:
         bool parse_file_info(const rapidjson::Value& val);
         bool parse_types_info(const rapidjson::Value& val);
