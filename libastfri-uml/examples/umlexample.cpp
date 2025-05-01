@@ -102,7 +102,8 @@ int main(int argc, char **argv)
         config_file = "../../libastfri-uml/examples/default_config.json";
     }
     if (!conf.parse_json(config_file.c_str())) {
-        std::cout << "Unable to parse JSON config.\n";
+        conf.use_default_values();
+        std::cout << "Unable to parse JSON config. Using default values.\n";
     }
     // config can be changed at any point before calling run
     // either by directly accessing its member variables

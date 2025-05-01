@@ -15,6 +15,7 @@
     },
     "ACCESS_MOD":{
         "inner_view":false,
+        "draw_icons":true,
         "public":"+",
         "private":"-",
         "protected":"#",
