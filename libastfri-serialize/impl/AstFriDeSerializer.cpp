@@ -718,25 +718,26 @@ void AstFriDeSerializer::resolve_class_def_stmts(){
     for (auto& it : unResolvedClassDefStmts_){
         std::string name = it.first;
         //try to find name among already resolved classDefStmts
-        auto itResolvedClassStmt =  nameWithClassDefStmtMapping_.find(name);
+        auto itResolvedClassStmt =  
+            nameWithClassDefStmtMapping_.find(name);
 
-        //if name isnt among resolved statements ,create empty class def statement only 
+        //if name isnt among resolved statements 
+        //create empty class def statement only 
         //with name,and add it to all child classes
         if(itResolvedClassStmt == nameWithClassDefStmtMapping_.end()){
-            astfri::ClassDefStmt* classDefStmt = this->statementMaker_.mk_class_def(std::move(name));
+            astfri::ClassDefStmt* classDefStmt = 
+                this->statementMaker_.mk_class_def(std::move(name));
             for(auto& clsDefStmt : it.second){
                 clsDefStmt->bases_.push_back(classDefStmt);
             }
 
         } else {
             for(auto& clsDefStmt : it.second){
-                clsDefStmt->bases_.push_back(itResolvedClassStmt->second);
+                clsDefStmt->bases_.push_back(
+                    itResolvedClassStmt->second);
             }
         }
-
     }
-
-
 }
 
 void AstFriDeSerializer::resolve_interface_def_stmts(){
