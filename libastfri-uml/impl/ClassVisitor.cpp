@@ -140,10 +140,14 @@ namespace astfri::uml {
         this->currentMethod_.reset();
     }
 
+    void ClassVisitor::visit (astfri::GenericParam const& stmt) {
+        this->currentClass_.genericParams_.push_back(stmt.name_);
+    }
+
     void ClassVisitor::visit (astfri::ClassDefStmt const& stmt) {
         this->currentClass_.name_ = stmt.name_;
         for (astfri::GenericParam* gp : stmt.tparams_) {
-            this->currentClass_.genericParams_.push_back(gp->name_);
+            gp->accept(*this);
         }
         this->outputter_->open_user_type(this->currentClass_, UserType::CLASS);
 

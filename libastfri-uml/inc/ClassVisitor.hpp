@@ -51,6 +51,7 @@ namespace astfri::uml {
         void visit (astfri::MethodDefStmt const& stmt) override;
         void visit (astfri::ConstructorDefStmt const& stmt) override;
         void visit (astfri::DestructorDefStmt const& stmt) override;
+        void visit (astfri::GenericParam const& stmt) override;
         void visit (astfri::ClassDefStmt const& stmt) override;
         void visit (astfri::InterfaceDefStmt const& stmt) override;
         void visit (astfri::TranslationUnit const& stmt) override;
