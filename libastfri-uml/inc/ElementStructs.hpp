@@ -8,7 +8,7 @@ namespace astfri::uml {
     enum class RelationType {
         ASSOCIATION = 0,
         COMPOSITION,
-        EXTENTION,
+        EXTENSION,
         IMPLEMENTATION
     };
 

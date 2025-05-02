@@ -95,10 +95,6 @@ namespace astfri::uml {
         this->currentVariable_.reset();
     }
 
-    void ClassVisitor::visit (astfri::GlobalVarDefStmt const& /*stmt*/) {
-
-    }
-
     void ClassVisitor::visit (astfri::FunctionDefStmt const& /*stmt*/) {
 
     }
@@ -144,9 +140,9 @@ namespace astfri::uml {
             this->currentMethod_.reset();
         }
 
-        for (astfri::DestructorDefStmt* descructor : stmt.destructors_) {
+        for (astfri::DestructorDefStmt* destructor : stmt.destructors_) {
             this->currentMethod_.accessMod_ = AccessModifier::Public;
-            this->currentMethod_.name_ = this->config_->destructorIndicator_ + descructor->owner_->name_;
+            this->currentMethod_.name_ = this->config_->destructorIndicator_ + destructor->owner_->name_;
             this->outputter_->add_function_member(this->currentMethod_);
             this->currentMethod_.reset();
         }
@@ -172,8 +168,6 @@ namespace astfri::uml {
         }
         this->outputter_->open_user_type(this->currentClass_, UserType::INTERFACE);
 
-        
-
         for (astfri::MethodDefStmt* method : stmt.methods_)
         {
             method->accept(*this);
@@ -198,11 +192,11 @@ namespace astfri::uml {
         for (astfri::ClassDefStmt* c : stmt.classes_) {
             this->currentClass_.name_ = c->name_;
             for (astfri::ClassDefStmt* base : c->bases_) {
-                this->create_relation(base->name_, RelationType::EXTENTION);
+                this->create_relation(base->name_, RelationType::EXTENSION);
             }
 
-            for (astfri::InterfaceDefStmt* interface : c->interfaces_) {
-                this->create_relation(interface->name_, RelationType::IMPLEMENTATION);
+            for (astfri::InterfaceDefStmt* i: c->interfaces_) {
+                this->create_relation(i->name_, RelationType::IMPLEMENTATION);
             }
         }
 
@@ -210,11 +204,10 @@ namespace astfri::uml {
         for (astfri::InterfaceDefStmt* i : stmt.interfaces_) {
             this->currentClass_.name_ = i->name_;
             for (astfri::InterfaceDefStmt* base : i->bases_) {
-                this->create_relation(base->name_, RelationType::EXTENTION);
+                this->create_relation(base->name_, RelationType::EXTENSION);
             }
         }
         
-
         for (astfri::ClassDefStmt* c : stmt.classes_) {
             c->accept(*this);
         }
