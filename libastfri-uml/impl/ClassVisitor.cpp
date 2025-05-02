@@ -116,6 +116,30 @@ namespace astfri::uml {
         this->currentMethod_.reset();
     }
 
+    void ClassVisitor::visit (astfri::ConstructorDefStmt const& stmt) {
+        if (!this->config_->innerView_) {
+            if (stmt.access_ == astfri::AccessModifier::Private) return;
+            this->currentMethod_.name_ = "<<constructor>> new " + stmt.owner_->name_;
+        } else {
+            this->currentMethod_.name_ = stmt.owner_->name_;
+        }
+        this->currentMethod_.accessMod_ = stmt.access_;
+        for (astfri::ParamVarDefStmt* p : stmt.params_) {
+            p->accept(*this);
+            this->currentMethod_.params_.push_back(this->currentVariable_);
+            this->currentVariable_.reset();
+        }
+        this->outputter_->add_function_member(this->currentMethod_);
+        this->currentMethod_.reset();
+    }
+
+    void ClassVisitor::visit (astfri::DestructorDefStmt const& stmt) {
+        this->currentMethod_.accessMod_ = AccessModifier::Public;
+        this->currentMethod_.name_ = this->config_->destructorIndicator_ + stmt.owner_->name_;
+        this->outputter_->add_function_member(this->currentMethod_);
+        this->currentMethod_.reset();
+    }
+
     void ClassVisitor::visit (astfri::ClassDefStmt const& stmt) {
         this->currentClass_.name_ = stmt.name_;
         for (astfri::GenericParam* gp : stmt.tparams_) {
@@ -124,27 +148,11 @@ namespace astfri::uml {
         this->outputter_->open_user_type(this->currentClass_, UserType::CLASS);
 
         for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
-            if (!this->config_->innerView_) {
-                if (constructor->access_ == astfri::AccessModifier::Private) continue;
-                this->currentMethod_.name_ = "<<constructor>> new " + constructor->owner_->name_;
-            } else {
-                this->currentMethod_.name_ = constructor->owner_->name_;
-            }
-            this->currentMethod_.accessMod_ = constructor->access_;
-            for (astfri::ParamVarDefStmt* p : constructor->params_) {
-                p->accept(*this);
-                this->currentMethod_.params_.push_back(this->currentVariable_);
-                this->currentVariable_.reset();
-            }
-            this->outputter_->add_function_member(this->currentMethod_);
-            this->currentMethod_.reset();
+            constructor->accept(*this);
         }
 
         for (astfri::DestructorDefStmt* destructor : stmt.destructors_) {
-            this->currentMethod_.accessMod_ = AccessModifier::Public;
-            this->currentMethod_.name_ = this->config_->destructorIndicator_ + destructor->owner_->name_;
-            this->outputter_->add_function_member(this->currentMethod_);
-            this->currentMethod_.reset();
+            destructor->accept(*this);
         }
 
         for (astfri::MemberVarDefStmt* var : stmt.vars_)
