@@ -95,23 +95,23 @@ namespace astfri::uml {
         this->currentVariable_.reset();
     }
 
-    void ClassVisitor::visit (astfri::FunctionDefStmt const& /*stmt*/) {
-
-    }
-
-    void ClassVisitor::visit (astfri::MethodDefStmt const& stmt) {
-        if (!this->config_->innerView_ && stmt.access_ == astfri::AccessModifier::Private) return;
-        stmt.func_->retType_->accept(*this);
+    void ClassVisitor::visit (astfri::FunctionDefStmt const& stmt) {
+        stmt.retType_->accept(*this);
         this->currentMethod_.retType_ = this->currentVariable_.type_;
         this->currentMethod_.returnIsIndirect_ = this->currentVariable_.isIndirect_;
-        this->currentMethod_.name_ = stmt.func_->name_;
-        this->currentMethod_.accessMod_ = stmt.access_;
-        for (astfri::ParamVarDefStmt* p : stmt.func_->params_) {
+        this->currentMethod_.name_ = stmt.name_;
+        for (astfri::ParamVarDefStmt* p : stmt.params_) {
             p->accept(*this);
             // TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
             this->currentMethod_.params_.push_back(this->currentVariable_);
             this->currentVariable_.reset();
         }
+    }
+
+    void ClassVisitor::visit (astfri::MethodDefStmt const& stmt) {
+        if (!this->config_->innerView_ && stmt.access_ == astfri::AccessModifier::Private) return;
+        stmt.func_->accept(*this);
+        this->currentMethod_.accessMod_ = stmt.access_;
         this->outputter_->add_function_member(this->currentMethod_);
         this->currentMethod_.reset();
     }
