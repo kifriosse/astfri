@@ -18,17 +18,11 @@ namespace astfri::uml {
     }
 
     bool ClassVisitor::find_class(std::string name) {
-        for (std::string c : this->classes_) {
-            if (c.compare(name) == 0) return true;
-        }
-        return false;
+        return this->classes_.contains(name);
     }
     
     bool ClassVisitor::find_interface(std::string name) {
-        for (std::string i : this->interfaces_) {
-            if (i.compare(name) == 0) return true;
-        }
-        return false;
+        return this->interfaces_.contains(name);
     }
 
     void ClassVisitor::finish() {
@@ -82,7 +76,7 @@ namespace astfri::uml {
     void ClassVisitor::visit (astfri::ParamVarDefStmt const& stmt) {
         stmt.type_->accept(*this);
         this->currentVariable_.name_ = stmt.name_;
-        //if (stmt.initializer_) stmt.initializer_->accept(*this);
+        //TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
     }
 
     void ClassVisitor::visit (astfri::MemberVarDefStmt const& stmt) {
@@ -90,7 +84,7 @@ namespace astfri::uml {
         stmt.type_->accept(*this);
         this->currentVariable_.name_ = stmt.name_;
         this->currentVariable_.accessMod_ = stmt.access_;
-        //if (stmt.initializer_) stmt.initializer_->accept(*this);
+        //TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
         this->outputter_->add_data_member(this->currentVariable_);
         this->currentVariable_.reset();
     }
@@ -102,7 +96,6 @@ namespace astfri::uml {
         this->currentMethod_.name_ = stmt.name_;
         for (astfri::ParamVarDefStmt* p : stmt.params_) {
             p->accept(*this);
-            // TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
             this->currentMethod_.params_.push_back(this->currentVariable_);
             this->currentVariable_.reset();
         }
