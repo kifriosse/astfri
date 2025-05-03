@@ -3,9 +3,6 @@
 #include <fstream>
 #include <libastfri-uml/inc/TypeConvention.hpp>
 #include <lib/rapidjson/document.h>
-#include <lib/rapidjson/writer.h>
-#include <lib/rapidjson/stringbuffer.h>
-
 
 namespace astfri::uml {
     struct Config {
