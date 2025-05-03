@@ -22,11 +22,11 @@ namespace astfri::uml {
 
     void PlantUMLOutputter::apply_style_from_config() {
         std::string style = "<style>\n";
-        style += "classDiagram {\nBackGroundColor " + this->config_->diagramBG_ + "\n";
+        style += "classDiagram {\nBackGroundColor " + this->config_->diagramBG_ + "\n}\n";
         style += "class {\nBackGroundColor " + this->config_->elementBG_ + "\n";
         style += "LineColor " + this->config_->elementBorder_ + "\n";
         style += "FontColor " + this->config_->fontColor_ + "\n" + "}\n";
-        style += "arrow {\nLineColor " + this->config_->arrowColor_ + "\n}\n}\n";
+        style += "arrow {\nLineColor " + this->config_->arrowColor_ + "\n}\n";
         style += "</style>\n";
         if (!this->config_->drawAccessModIcons_) style += "skinparam classAttributeIconSize 0\n";
         this->outputString_ = style + this->outputString_;
