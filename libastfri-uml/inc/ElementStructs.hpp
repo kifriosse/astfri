@@ -12,7 +12,7 @@ namespace astfri::uml {
         IMPLEMENTATION
     };
 
-    enum class UserType {
+    enum class UserDefinedType {
         CLASS = 0,
         STRUCT,
         INTERFACE,

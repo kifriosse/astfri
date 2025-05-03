@@ -15,7 +15,7 @@ namespace astfri::uml {
         
         virtual std::string getFileExtension() override;
 
-        virtual void open_user_type(ClassStruct c, UserType t) override;
+        virtual void open_user_type(ClassStruct c, UserDefinedType t) override;
         virtual void close_user_type() override;
 
         virtual void add_data_member(VarStruct v) override;

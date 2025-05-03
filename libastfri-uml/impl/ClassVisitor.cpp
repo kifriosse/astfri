@@ -142,7 +142,7 @@ namespace astfri::uml {
         for (astfri::GenericParam* gp : stmt.tparams_) {
             gp->accept(*this);
         }
-        this->outputter_->open_user_type(this->currentClass_, UserType::CLASS);
+        this->outputter_->open_user_type(this->currentClass_, UserDefinedType::CLASS);
 
         for (astfri::ConstructorDefStmt* constructor : stmt.constructors_) {
             constructor->accept(*this);
@@ -171,7 +171,7 @@ namespace astfri::uml {
         for (astfri::GenericParam* gp : stmt.tparams_) {
             this->currentClass_.genericParams_.push_back(gp->name_);
         }
-        this->outputter_->open_user_type(this->currentClass_, UserType::INTERFACE);
+        this->outputter_->open_user_type(this->currentClass_, UserDefinedType::INTERFACE);
 
         for (astfri::MethodDefStmt* method : stmt.methods_)
         {
