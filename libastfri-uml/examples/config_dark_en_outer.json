@@ -31,7 +31,7 @@
     "RELATIONS":{
         "association":"<--",
         "composition":"*--",
-        "extention":"<|--",
+        "extension":"<|--",
         "implementation":"<|.."
     },
     "DESTRUCTOR":{
