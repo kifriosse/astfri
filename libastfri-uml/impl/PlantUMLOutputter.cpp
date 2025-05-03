@@ -52,18 +52,18 @@ namespace astfri::uml {
         return ".puml";
     }
 
-    void PlantUMLOutputter::open_user_type(ClassStruct c, UserType t) {
+    void PlantUMLOutputter::open_user_type(ClassStruct c, UserDefinedType t) {
         switch (t) {
-            case UserType::CLASS:
+            case UserDefinedType::CLASS:
                 this->outputString_ += "class ";
                 break;
-            case UserType::STRUCT:
+            case UserDefinedType::STRUCT:
                 this->outputString_ += "struct ";
                 break;
-            case UserType::INTERFACE:
+            case UserDefinedType::INTERFACE:
                 this->outputString_ += "interface ";
                 break;
-            case UserType::ENUM:
+            case UserDefinedType::ENUM:
                 this->outputString_ += "enum ";
                 break;
             default:
