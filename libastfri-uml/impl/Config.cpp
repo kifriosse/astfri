@@ -91,8 +91,8 @@ namespace astfri::uml {
         this->relationArrows_[0] = val["association"].GetString();
         if (!val.HasMember("composition")) return false;
         this->relationArrows_[1] = val["composition"].GetString();
-        if (!val.HasMember("extention")) return false;
-        this->relationArrows_[2] = val["extention"].GetString();
+        if (!val.HasMember("extension")) return false;
+        this->relationArrows_[2] = val["extension"].GetString();
         if (!val.HasMember("implementation")) return false;
         this->relationArrows_[3] = val["implementation"].GetString();
         return true;
