@@ -8,11 +8,11 @@ namespace astfri::uml {
     enum class RelationType {
         ASSOCIATION = 0,
         COMPOSITION,
-        EXTENTION,
+        EXTENSION,
         IMPLEMENTATION
     };
 
-    enum class UserType {
+    enum class UserDefinedType {
         CLASS = 0,
         STRUCT,
         INTERFACE,

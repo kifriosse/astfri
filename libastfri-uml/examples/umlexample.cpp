@@ -5,7 +5,7 @@
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include <vector>
 
-int main()
+int main(int argc, char **argv)
 {
     auto& statements = astfri::StmtFactory::get_instance();
     //auto& expressions = astfri::ExprFactory::get_instance();
@@ -95,9 +95,19 @@ int main()
 
     astfri::uml::Config conf;
     conf.innerView_ = true;
+    std::string config_file;
+    if (argc > 1) {
+        config_file = argv[1]; 
+    } else {
+        config_file = "../../libastfri-uml/examples/default_config.json";
+    }
+    if (!conf.parse_json(config_file.c_str())) {
+        conf.use_default_values();
+        std::cout << "Unable to parse JSON config. Using default values.\n";
+    }
     // config can be changed at any point before calling run
     // either by directly accessing its member variables
-    // or using its parse_json method (TODO - NOT YET IMPLEMENTED)
+    // or using its parse_json method
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::TypeBeforeConvention tc;
     astfri::uml::UMLLibWrapper uml;
