@@ -1,6 +1,7 @@
 #ifndef JSONFORMATCHECKER_HPP
-#define JSONFORMATCHECKER_HPP   
-#include <lib/rapidjson/document.h>
+#define JSONFORMATCHECKER_HPP
+
+#include <rapidjson/document.h>
 
 /*
     inline std::unordered_map<std::string,Types> strToTypeMapping={{"Int",IntType},{"Float",FloatType},

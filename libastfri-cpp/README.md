@@ -3,7 +3,12 @@ TODO
 ## Dependencies
 ### LLVM and clang
 
-Install the following packages. Tested with `Ubuntu 22.04`. Using LLVM and Clang versions `14.0.0`.
+#### Ubuntu
 ```sh
-sudo sudo apt install libllvm14 llvm-dev clang libclang-dev
+apt install TODO
+```
+
+#### Void Linux
+```sh
+xbps-install -Su llvm19-devel
 ```

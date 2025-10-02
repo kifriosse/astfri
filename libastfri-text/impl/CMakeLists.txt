@@ -1,12 +1,16 @@
-add_library(astfri-text SHARED
+add_library(astfri-text SHARED)
+
+target_sources(astfri-text PRIVATE
   ASTVisitor.cpp
   Configurator.cpp
-  TextConfigurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
   TxtFileExporter.cpp
+  TextConfigurator.cpp
 )
 
-target_compile_options(astfri-text PRIVATE -Wall -Wextra -Wpedantic)
+target_include_directories(astfri-text PRIVATE
+    ${PROJECT_SOURCE_DIR}/external
+)
+
 target_link_libraries(astfri-text PRIVATE astfri-core)
-target_include_directories(astfri-text PRIVATE ${PROJECT_SOURCE_DIR}/lib)

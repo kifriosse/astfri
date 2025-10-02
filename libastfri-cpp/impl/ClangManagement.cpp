@@ -1,5 +1,7 @@
 #include <libastfri-cpp/inc/ClangManagement.hpp>
 
+#include <iostream>
+
 namespace astfri::astfri_cpp
 {
 // ClangConsumer::ClangConsumer(

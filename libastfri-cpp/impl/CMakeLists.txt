@@ -1,73 +1,66 @@
-# Find LLVM
-find_package(LLVM REQUIRED)
-
-# Find Clang
-find_package(Clang REQUIRED)
-
-# Obtain LLVM options from their config tool
+# Obtain LLVM cmake dir from their config tool.
 execute_process(
-  COMMAND llvm-config --cxxflags
-  OUTPUT_VARIABLE COMPILE_OPTIONS_PUBLIC
+    COMMAND llvm-config --cmakedir
+    OUTPUT_VARIABLE ASTFRI_CPP_LLVM_CMAKEDIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# Remove trailing and leading spaces, most importantly, newlines!
-string(STRIP "${COMPILE_OPTIONS_PUBLIC}" COMPILE_OPTIONS_PUBLIC)
+# Derive Clang cmake dir from the LLVM one.
+get_filename_component(
+    ASTFRI_CPP_LLMV_BASEDIR "${ASTFRI_CPP_LLVM_CMAKEDIR}" DIRECTORY
+)
+set(ASTFRI_CPP_CLANG_CMAKEDIR "${ASTFRI_CPP_LLMV_BASEDIR}/clang")
+
+# Extend cmake search path with LLVM dir and Clang dir with their *.cmake files.
+list(APPEND CMAKE_PREFIX_PATH "${ASTFRI_CPP_LLVM_CMAKEDIR}")
+list(APPEND CMAKE_PREFIX_PATH "${ASTFRI_CPP_CLANG_CMAKEDIR}")
+
+# Find LLVM.
+find_package(LLVM REQUIRED CONFIG)
+
+# Find Clang.
+find_package(Clang REQUIRED CONFIG)
+
+# Obtain LLVM options from their config tool.
+execute_process(
+    COMMAND llvm-config --cxxflags
+    OUTPUT_VARIABLE ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 # Replace spaces with ; to turn it into list
 # target_* functions work better with lists---
-# avoiding quotes and ugly spaces
-string(REGEX REPLACE " +" ";" COMPILE_OPTIONS_PUBLIC "${COMPILE_OPTIONS_PUBLIC}")
+# avoiding quotes and ugly spaces.
+string(
+    REGEX REPLACE " +" ";"
+        ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE
+        "${ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE}"
+)
 
-# If the first option is include path, remove it
-# It is set later from LLVM_INCLUDE_DIRS as system include to surpress warnings
-list(GET COMPILE_OPTIONS_PUBLIC 0 FIRST_OPTION)
-if (FIRST_OPTION MATCHES "-I.*")
-  list(REMOVE_AT COMPILE_OPTIONS_PUBLIC 0)
-endif()
+# Remove include path, it is set later as system include.
+list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-I.*")
 
-# Remove option that sets standard, hardcoded for the first option
-# TODO this needs to be changed to for each loop
-list(GET COMPILE_OPTIONS_PUBLIC 0 FIRST_OPTION)
-if (FIRST_OPTION MATCHES "-std=.*")
-  list(REMOVE_AT COMPILE_OPTIONS_PUBLIC 0)
-endif()
-unset(FIRST_OPTION)
+# Remove standard, it is inherited from astfri-core.
+list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-std=.*")
 
-# Append no rtti option
-list(APPEND COMPILE_OPTIONS_PUBLIC -fno-rtti)
+# Append no rtti option.
+list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
 
-# Append our options
-list(APPEND COMPILE_OPTIONS_PUBLIC -std=c++20)
-
-# Define and append our private options
-list(APPEND COMPILE_OPTIONS_PRIVATE -Wall -Wextra -Wpedantic)
-
-# Finally, add our library and set its properties
-add_library(
-  astfri-cpp SHARED
+# Finally, add our library and set its properties.
+add_library(astfri-cpp SHARED
     ClangManagement.cpp
     ClangVisitor.cpp
     ClangVisitor_Types.cpp
 )
 
-# Public compile options
-target_compile_options(
-  astfri-cpp PUBLIC ${COMPILE_OPTIONS_PUBLIC}
-)
+# Privae compile options.
+target_compile_options(astfri-cpp PRIVATE ${ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE})
 
-# Private compile options
-target_compile_options(
-  astfri-cpp PRIVATE ${COMPILE_OPTIONS_PRIVATE}
-)
+# Set LLVM include as system to avoid warnings from their code.
+target_include_directories(astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS})
 
-# Set LLVM include as system to avoid warnings from their code
-target_include_directories(
-  astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS}
-)
-
-# Link the core module and clang libraries
-target_link_libraries(
-  astfri-cpp PUBLIC
+# Link the core module and clang libraries.
+target_link_libraries(astfri-cpp PUBLIC
     astfri-core
     clang
     clangAST

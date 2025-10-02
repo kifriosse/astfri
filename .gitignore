@@ -3,4 +3,3 @@
 build/
 .clangd
 compile_commands.json
-launch.json

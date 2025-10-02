@@ -1,5 +1,7 @@
 #include <libastfri-uml/inc/Config.hpp>
 
+#include <fstream>
+
 namespace astfri::uml {
     bool Config::parse_json(const char* path) {
         std::string jsonString;

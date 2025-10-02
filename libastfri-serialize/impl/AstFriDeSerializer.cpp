@@ -1,5 +1,7 @@
 #include <libastfri-serialize/inc/AstFriDeSerializer.hpp>
 
+#include <fstream>
+
 AstFriDeSerializer& AstFriDeSerializer::get_instance(){
     static AstFriDeSerializer instance;
     return instance;
@@ -22,7 +24,7 @@ astfri::IVisitable* AstFriDeSerializer::deserialize(std::string filePath)
     document_.ParseStream(isw);
 
     if (document_.HasParseError()) {
-        throw std::runtime_error("JSON pardese error: "+ document_.GetParseError());
+        throw std::runtime_error("JSON pardese error: " + std::to_string(document_.GetParseError()));
         
     }
     if (!document_.HasMember("node")) {

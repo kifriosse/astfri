@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Print help and die
 help_and_die() {
@@ -52,10 +52,11 @@ BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp"
 
 if [ "$MODE" = "pull" ]; then    # pull
   heading "# Pulling changes"
+  git switch main
+  git pull
   for branch in ${BRANCHES}; do
     git switch ${branch}
     possibly_die "Failed to switch to ${branch}"
-
     git pull
     possibly_die "Failed to pull ${branch}"
   done
@@ -67,13 +68,13 @@ elif [ "$MODE" = "merge" ]; then   # merge
     git merge ${branch}
     possibly_die "Failed to merge ${branch}"
   done
+  git switch main
   ok
 elif [ "$MODE" = "rebase" ]; then  # rebase
   heading "# Rebasing on main"
   for branch in ${BRANCHES}; do
     git switch ${branch}
     possibly_die "Failed to switch to ${branch}"
-
     git rebase main
     possibly_die "Failed to rebase ${branch}"
   done
@@ -83,19 +84,15 @@ elif [ "$MODE" = "push" ]; then    # push
   for branch in ${BRANCHES}; do
     git switch ${branch}
     possibly_die "Failed to switch to ${branch}"
-
     git push
     possibly_die "Failed to push ${branch}"
   done
   ok
-
   # Push main
   git switch main
   possibly_die "Failed to switch to main"
-
   git push
   possibly_die "Failed to push main"
-
   # Switch back home
   git switch dev-mm
   possibly_die "Failed to switch to dev-mm"

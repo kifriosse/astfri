@@ -36,11 +36,7 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Casting.h>
-#include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
-
-// potrebne
-#include <vector>
-#include <iostream>
+// #include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
 
 namespace astfri::astfri_cpp
 {

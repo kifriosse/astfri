@@ -5,12 +5,9 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
 #include <libastfri-serialize/inc/JsonFormatChecker.hpp>
-#include <lib/rapidjson/istreamwrapper.h>
+#include <rapidjson/istreamwrapper.h>
 
-#include <format>
 #include <functional>
-#include <fstream>
-#include <algorithm>
 #include <libastfri-serialize/inc/Data.hpp>
 
 class AstFriDeSerializer {

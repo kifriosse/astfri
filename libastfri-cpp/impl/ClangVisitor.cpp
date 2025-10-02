@@ -1,5 +1,7 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
+#include <iostream>
+
 namespace astfri::astfri_cpp
 {
 bool ClangVisitor::isInMainFile(clang::SourceLocation Loc) const {

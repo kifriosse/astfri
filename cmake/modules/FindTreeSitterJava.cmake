@@ -19,9 +19,7 @@ find_package_handle_standard_args(
 )
 
 if (TreeSitterJava_FOUND)
-  add_library(
-    tree-sitter-java UNKNOWN IMPORTED
-  )
+  add_library(tree-sitter-java UNKNOWN IMPORTED)
 
   set_target_properties(
     tree-sitter-java PROPERTIES

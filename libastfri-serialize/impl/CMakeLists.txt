@@ -1,7 +1,12 @@
-add_library(astfri-serialize SHARED AstFriDeSerializer.cpp
-                                    JsonFormatChecker.cpp)
+add_library(astfri-serialize SHARED)
 
+target_sources(astfri-serialize PRIVATE
+    AstFriDeSerializer.cpp
+    JsonFormatChecker.cpp
+)
 
-target_compile_options(astfri-serialize PRIVATE -Wall -Wextra -Wpedantic)
+target_include_directories(astfri-serialize PUBLIC
+    ${PROJECT_SOURCE_DIR}/external
+)
+
 target_link_libraries(astfri-serialize PUBLIC astfri-core)
-target_include_directories(astfri-serialize PUBLIC ${PROJECT_SOURCE_DIR}/lib)

@@ -1,15 +1,18 @@
 find_package(TreeSitter REQUIRED)
+
 find_package(TreeSitterJava REQUIRED)
 
-add_library(astfri-java SHARED NodeMapper.cpp
-                               ExpressionTransformer.cpp
-                               StatementTransformer.cpp
-                               ASTBuilder.cpp)
+add_library(astfri-java SHARED)
 
-target_compile_options(astfri-java PRIVATE -Wall -Wextra -Wpedantic)
+target_sources(astfri-java PRIVATE
+    ASTBuilder.cpp
+    ExpressionTransformer.cpp
+    NodeMapper.cpp
+    StatementTransformer.cpp
+)
 
-target_link_libraries(
-  astfri-java PUBLIC
+target_link_libraries(astfri-java PUBLIC
     astfri-core
     tree-sitter
-    tree-sitter-java)
+    tree-sitter-java
+)

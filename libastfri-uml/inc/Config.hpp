@@ -1,8 +1,7 @@
 #pragma once
 
-#include <fstream>
 #include <libastfri-uml/inc/TypeConvention.hpp>
-#include <lib/rapidjson/document.h>
+#include <rapidjson/document.h>
 
 namespace astfri::uml {
     struct Config {

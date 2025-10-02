@@ -1,5 +1,6 @@
-add_library(
-  astfri-core SHARED
+add_library(astfri-core SHARED)
+
+target_sources(astfri-core PRIVATE
     Expr.cpp
     ExprFactory.cpp
     Stmt.cpp
@@ -9,8 +10,11 @@ add_library(
     TypeQueries.cpp
 )
 
-target_compile_options(astfri-core PRIVATE -Wall -Wextra -Wpedantic)
-
-target_compile_options(astfri-core PUBLIC -std=c++20)
+target_compile_options(astfri-core PUBLIC
+    -Wall
+    -Wextra
+    -Wpedantic
+    -std=c++20
+)
 
 target_include_directories(astfri-core PUBLIC ${PROJECT_SOURCE_DIR})

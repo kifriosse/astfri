@@ -1,13 +1,11 @@
-# Nastavenie zdrojových súborov
-set(SOURCE_FILES_JR
+add_executable(test_JR)
+
+target_sources(test_JR PRIVATE
     main.cpp
 )
 
-add_executable(test_JR ${SOURCE_FILES_JR})
-#add_executable(testASTs_JR created_ASTs.cpp)
-
-target_link_libraries(test_JR
+target_link_libraries(test_JR PRIVATE
     astfri-cpp
     astfri-text
-    astfri-uml)
-#target_link_libraries(testASTs_JR astfri-cpp)
+    astfri-uml
+)

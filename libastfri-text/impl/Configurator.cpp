@@ -1,6 +1,6 @@
 #include <libastfri-text/inc/Configurator.hpp>
-#include <lib/rapidjson/filereadstream.h>
-#include <lib/rapidjson/document.h>
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/document.h>
 #include <filesystem>
 #include <vector>
 

@@ -19,9 +19,7 @@ find_package_handle_standard_args(
 )
 
 if (TreeSitter_FOUND)
-  add_library(
-    tree-sitter UNKNOWN IMPORTED
-  )
+  add_library(tree-sitter UNKNOWN IMPORTED)
 
   set_target_properties(
     tree-sitter PROPERTIES
