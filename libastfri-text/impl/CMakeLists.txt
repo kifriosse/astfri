@@ -9,8 +9,8 @@ target_sources(astfri-text PRIVATE
   TextConfigurator.cpp
 )
 
-target_include_directories(astfri-text PRIVATE
+target_include_directories(astfri-text PUBLIC
     ${PROJECT_SOURCE_DIR}/external
 )
 
-target_link_libraries(astfri-text PRIVATE astfri-core)
+target_link_libraries(astfri-text PUBLIC astfri-core)

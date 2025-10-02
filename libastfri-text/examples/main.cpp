@@ -1,4 +1,4 @@
-#include <libastfri-text/examples/ASTLoader.cpp>
+#include "ASTLoader.hpp"
 #include <libastfri-text/inc/ASTVisitor.hpp>
 
 int main()

@@ -1,21 +1,13 @@
-add_executable(testWithTextOutput TestWithTextOutput.cpp)
+add_executable(testWithTextOutput)
+
+target_sources(testWithTextOutput PRIVATE TestWithTextOutput.cpp)
+
+target_link_libraries(testWithTextOutput PRIVATE astfri-serialize astfri-text)
 
 
-          
-target_compile_options(testWithTextOutput PRIVATE -Wall -Wextra -Wpedantic)
+add_executable(testWithUmlOutput)
 
-target_link_libraries(testWithTextOutput PRIVATE astfri-core)
-target_link_libraries(testWithTextOutput PRIVATE astfri-text)
-target_link_libraries(testWithTextOutput PRIVATE astfri-serialize)
+target_sources(testWithUmlOutput PRIVATE TestWithUmlOutput.cpp)
 
-
-add_executable(testWithUmlOutput TestWithUmlOutput.cpp)
-
-target_compile_options(testWithTextOutput PRIVATE -Wall -Wextra -Wpedantic)
-
-target_link_libraries(testWithUmlOutput PRIVATE astfri-core)
-target_link_libraries(testWithUmlOutput PRIVATE astfri-uml)
-target_link_libraries(testWithUmlOutput PRIVATE astfri-serialize)
-
-
+target_link_libraries(testWithUmlOutput PRIVATE astfri-serialize astfri-uml)
 

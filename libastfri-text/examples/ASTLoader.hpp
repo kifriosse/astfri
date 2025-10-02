@@ -1,3 +1,5 @@
+#pragma once
+
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
