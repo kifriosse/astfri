@@ -79,11 +79,7 @@ FunctionCallExpr::FunctionCallExpr(std::string name, std::vector<Expr*> args) :
 {
 }
 
-MethodCallExpr::MethodCallExpr(
-    Expr* owner,
-    std::string name,
-    std::vector<Expr*> args
-) :
+MethodCallExpr::MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args) :
     owner_(owner),
     name_(std::move(name)),
     args_(std::move(args))

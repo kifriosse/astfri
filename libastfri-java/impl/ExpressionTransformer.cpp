@@ -20,20 +20,14 @@ ExpressionTransformer::~ExpressionTransformer()
     delete this->nodeMapper;
 }
 
-std::string ExpressionTransformer::get_node_text(
-    TSNode const& node,
-    std::string const& sourceCode
-)
+std::string ExpressionTransformer::get_node_text(TSNode const& node, std::string const& sourceCode)
 {
     uint32_t start = ts_node_start_byte(node);
     uint32_t end   = ts_node_end_byte(node);
     return sourceCode.substr(start, end - start);
 }
 
-astfri::Expr* ExpressionTransformer::get_expr(
-    TSNode tsNode,
-    std::string const& sourceCode
-)
+astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& sourceCode)
 {
     std::string nodeType = ts_node_type(tsNode);
     std::string nodeText = get_node_text(tsNode, sourceCode);
@@ -123,9 +117,7 @@ astfri::Expr* ExpressionTransformer::get_expr(
     }
     else if (nodeType == "line_comment" || nodeType == "block_comment")
     {
-        expr = this->exprFactory.mk_string_literal(
-            this->get_node_text(tsNode, sourceCode)
-        );
+        expr = this->exprFactory.mk_string_literal(this->get_node_text(tsNode, sourceCode));
     }
     else
     {
@@ -151,21 +143,19 @@ astfri::BinOpExpr* ExpressionTransformer::transform_bin_op_expr_node(
     {
         leftOperandNode             = ts_node_named_child(tsNode, 0);
         std::string leftOperandType = ts_node_type(leftOperandNode);
-        leftExpr = this->get_expr(leftOperandNode, sourceCode);
+        leftExpr                    = this->get_expr(leftOperandNode, sourceCode);
     }
     if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
     {
         rightOperandNode             = ts_node_named_child(tsNode, 1);
         std::string rightOperandType = ts_node_type(rightOperandNode);
-        rightExpr = this->get_expr(rightOperandNode, sourceCode);
+        rightExpr                    = this->get_expr(rightOperandNode, sourceCode);
     }
     if (! ts_node_is_null(ts_node_child(tsNode, 1)))
     {
-        binOperatorNode = ts_node_child(tsNode, 1);
-        std::string binOperatorName
-            = get_node_text(binOperatorNode, sourceCode);
-        binOperator
-            = this->nodeMapper->get_binOpMap().find(binOperatorName)->second;
+        binOperatorNode             = ts_node_child(tsNode, 1);
+        std::string binOperatorName = get_node_text(binOperatorNode, sourceCode);
+        binOperator = this->nodeMapper->get_binOpMap().find(binOperatorName)->second;
     }
 
     return exprFactory.mk_bin_on(leftExpr, binOperator, rightExpr);
@@ -192,23 +182,18 @@ astfri::UnaryOpExpr* ExpressionTransformer::transform_un_op_expr_node(
             secondNode                 = ts_node_child(tsNode, 1);
             std::string secondNodeType = ts_node_type(secondNode);
             std::string secondNodeText = get_node_text(secondNode, sourceCode);
-            for (std::string op :
-                 std::views::keys(this->nodeMapper->get_unaryOpMap()))
+            for (std::string op : std::views::keys(this->nodeMapper->get_unaryOpMap()))
             {
                 if (op == firstNodeText)
                 {
-                    unOperator = this->nodeMapper->get_unaryOpMap()
-                                     .find(firstNodeText)
-                                     ->second;
-                    expr = this->get_expr(secondNode, sourceCode);
+                    unOperator = this->nodeMapper->get_unaryOpMap().find(firstNodeText)->second;
+                    expr       = this->get_expr(secondNode, sourceCode);
                     break;
                 }
                 else
                 {
                     expr       = this->get_expr(firstNode, sourceCode);
-                    unOperator = this->nodeMapper->get_unaryOpMap()
-                                     .find(secondNodeText)
-                                     ->second;
+                    unOperator = this->nodeMapper->get_unaryOpMap().find(secondNodeText)->second;
                 }
             }
         }
@@ -216,23 +201,19 @@ astfri::UnaryOpExpr* ExpressionTransformer::transform_un_op_expr_node(
     return exprFactory.mk_unary_op(unOperator, expr);
 }
 
-Expr* ExpressionTransformer::transform_ref_expr_node(
-        TSNode tsNode,
-        std::string const& sourceCode
-    )
+Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string const& sourceCode)
 {
     std::string referanceName = get_node_text(tsNode, sourceCode);
 
-    char const* queryString
-        = "(local_variable_declaration type: (_) declarator: "
-          "(variable_declarator name: (identifier) @local_var_name value: "
-          "(_)?)) (formal_parameter type: (_) name: (identifier) @param_name) "
-          "(field_declaration (modifiers) type: (_) declarator: "
-          "(variable_declarator name: (identifier) @attr_name value: (_)?))";
+    char const* queryString   = "(local_variable_declaration type: (_) declarator: "
+                                "(variable_declarator name: (identifier) @local_var_name value: "
+                                "(_)?)) (formal_parameter type: (_) name: (identifier) @param_name) "
+                                "(field_declaration (modifiers) type: (_) declarator: "
+                                "(variable_declarator name: (identifier) @attr_name value: (_)?))";
 
     uint32_t errorOffset;
     TSQueryError errorType;
-    
+
     TSNode checkNode = tsNode;
     while (! ts_node_is_null(ts_node_parent(checkNode)))
     {
@@ -250,21 +231,16 @@ Expr* ExpressionTransformer::transform_ref_expr_node(
 
         while (ts_query_cursor_next_match(tsCursor, &tsMatch))
         {
-            
-            uint32_t index = 0;   
+
+            uint32_t index           = 0;
             TSQueryCapture tsCapture = tsMatch.captures[index];
             ++index;
             uint32_t length;
-            std::string captureName = ts_query_capture_name_for_id(
-                tsQuery,
-                tsCapture.index,
-                &length
-            );
-            std::string nodeText
-                = get_node_text(tsCapture.node, sourceCode);
+            std::string captureName
+                = ts_query_capture_name_for_id(tsQuery, tsCapture.index, &length);
+            std::string nodeText = get_node_text(tsCapture.node, sourceCode);
 
-            if (captureName == "local_var_name"
-                && referanceName == nodeText)
+            if (captureName == "local_var_name" && referanceName == nodeText)
             {
                 ts_query_cursor_delete(tsCursor);
                 ts_query_delete(tsQuery);
@@ -284,21 +260,18 @@ Expr* ExpressionTransformer::transform_ref_expr_node(
             }
             else
             {
-                TSNode fieldAccessNode = ts_node_parent(tsNode);
-                std::string fieldAccessNodeType
-                    = ts_node_type(fieldAccessNode);
+                TSNode fieldAccessNode          = ts_node_parent(tsNode);
+                std::string fieldAccessNodeType = ts_node_type(fieldAccessNode);
 
                 if (fieldAccessNodeType == "field_access")
                 {
                     TSNode objectNode;
                     std::string objectNodeText;
 
-                    if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)
-                        ))
+                    if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)))
                     {
-                        objectNode = ts_node_child(fieldAccessNode, 0);
-                        objectNodeText
-                            = get_node_text(objectNode, sourceCode);
+                        objectNode     = ts_node_child(fieldAccessNode, 0);
+                        objectNodeText = get_node_text(objectNode, sourceCode);
                     }
                     ts_query_cursor_delete(tsCursor);
                     ts_query_delete(tsQuery);
@@ -308,7 +281,6 @@ Expr* ExpressionTransformer::transform_ref_expr_node(
                     );
                 }
             }
-            
         }
 
         checkNode = ts_node_parent(checkNode);
@@ -334,8 +306,7 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
     {
         TSNode child          = ts_node_named_child(tsNode, i);
         std::string childType = ts_node_type(child);
-        char const* fieldName
-            = ts_node_field_name_for_child(tsNode, childIndex);
+        char const* fieldName = ts_node_field_name_for_child(tsNode, childIndex);
 
         while (! fieldName)
         {
@@ -356,14 +327,11 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
                 fieldNode = ts_node_named_child(child, 1);
             }
 
-            std::string objectNodeText
-                = this->get_node_text(objectNode, sourceCode);
+            std::string objectNodeText = this->get_node_text(objectNode, sourceCode);
             if (isupper(objectNodeText[0]))
             {
                 owner = this->exprFactory.mk_member_var_ref(
-                    this->exprFactory.mk_class_ref(
-                        get_node_text(objectNode, sourceCode)
-                    ),
+                    this->exprFactory.mk_class_ref(get_node_text(objectNode, sourceCode)),
                     get_node_text(fieldNode, sourceCode)
                 );
             }
@@ -373,9 +341,7 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
             std::string nodeText = get_node_text(child, sourceCode);
             if (isupper(nodeText[0]))
             {
-                owner = this->exprFactory.mk_class_ref(
-                    get_node_text(child, sourceCode)
-                );
+                owner = this->exprFactory.mk_class_ref(get_node_text(child, sourceCode));
             }
             else if (nodeText == "this")
             {
@@ -397,11 +363,10 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
                     owner = localVarExpr;
                 }
                 else if (astfri::ParamVarRefExpr* paramVarExpr
-                    = dynamic_cast<astfri::ParamVarRefExpr*>(expr))
+                         = dynamic_cast<astfri::ParamVarRefExpr*>(expr))
                 {
                     owner = paramVarExpr;
                 }
-
             }
         }
         else if (strcmp(fieldName, "name") == 0)
@@ -448,12 +413,9 @@ astfri::IfExpr* ExpressionTransformer::transform_ternary_expr_node(
     std::string const& sourceCode
 )
 {
-    astfri::Expr* cond
-        = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
-    astfri::Expr* iftrue
-        = this->get_expr(ts_node_named_child(tsNode, 1), sourceCode);
-    astfri::Expr* iffalse
-        = this->get_expr(ts_node_named_child(tsNode, 2), sourceCode);
+    astfri::Expr* cond    = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
+    astfri::Expr* iftrue  = this->get_expr(ts_node_named_child(tsNode, 1), sourceCode);
+    astfri::Expr* iffalse = this->get_expr(ts_node_named_child(tsNode, 2), sourceCode);
     return exprFactory.mk_if(cond, iftrue, iffalse);
 }
 } // namespace astfri::java

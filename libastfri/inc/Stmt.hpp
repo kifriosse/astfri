@@ -87,12 +87,7 @@ struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt>
 {
     AccessModifier access_;
 
-    MemberVarDefStmt(
-        std::string name,
-        Type* type,
-        Expr* initializer,
-        AccessModifier access
-    );
+    MemberVarDefStmt(std::string name, Type* type, Expr* initializer, AccessModifier access);
 };
 
 /**

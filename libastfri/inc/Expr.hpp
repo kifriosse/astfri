@@ -53,9 +53,7 @@ struct CharLiteralExpr : Literal<char>, details::MkVisitable<CharLiteralExpr>
 /**
  * @brief TODO
  */
-struct StringLiteralExpr :
-    Literal<std::string>,
-    details::MkVisitable<StringLiteralExpr>
+struct StringLiteralExpr : Literal<std::string>, details::MkVisitable<StringLiteralExpr>
 {
     explicit StringLiteralExpr(std::string val);
 };

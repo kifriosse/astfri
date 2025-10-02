@@ -11,25 +11,22 @@
 
 namespace astfri::java
 {
-    class ASTBuilder
-    {
-    private:
-        StatementTransformer* stmtTransformer;
-    
-    public:
-        ASTBuilder();
-        ~ASTBuilder();
-        
-        std::string load_file(std::string const& path);
-        
-        std::string load_directory(std::string const& path);
+class ASTBuilder
+{
+private:
+    StatementTransformer* stmtTransformer;
 
-        TSTree* make_syntax_tree(std::string const& sourceCodeString);
+public:
+    ASTBuilder();
+    ~ASTBuilder();
 
-        astfri::TranslationUnit* get_translation_unit(
-            TSTree* tree,
-            std::string const& sourceCode
-        );
-    };
+    std::string load_file(std::string const& path);
+
+    std::string load_directory(std::string const& path);
+
+    TSTree* make_syntax_tree(std::string const& sourceCodeString);
+
+    astfri::TranslationUnit* get_translation_unit(TSTree* tree, std::string const& sourceCode);
+};
 } // namespace astfri::java
 #endif // JAVA_SYNTAX_TREE_BUILDER_HPP

@@ -1,59 +1,59 @@
 #pragma once
 
+#include <libastfri-uml/inc/ElementStructs.hpp>
+#include <libastfri-uml/inc/UMLOutputter.hpp>
+#include <libastfri/inc/Expr.hpp>
+#include <libastfri/inc/Stmt.hpp>
+#include <libastfri/inc/Type.hpp>
+#include <libastfri/inc/Visitor.hpp>
+
 #include <map>
 #include <set>
 
-#include <libastfri/inc/Visitor.hpp>
-#include <libastfri/inc/Type.hpp>
-#include <libastfri/inc/Stmt.hpp>
-#include <libastfri/inc/Expr.hpp>
+namespace astfri::uml
+{
+class ClassVisitor : public astfri::VisitorAdapter
+{
+private:
+    UMLOutputter* outputter_;
+    Config* config_;
 
-#include <libastfri-uml/inc/UMLOutputter.hpp>
+    ClassStruct currentClass_;
+    MethodStruct currentMethod_;
+    VarStruct currentVariable_;
 
-#include <libastfri-uml/inc/ElementStructs.hpp>
+    std::map<std::string, RelationStruct> relations_;
+    std::set<std::string> classes_;
+    std::set<std::string> interfaces_;
 
-namespace astfri::uml {
-    class ClassVisitor : public astfri::VisitorAdapter
-    {
-    private:
-        UMLOutputter* outputter_;
-        Config* config_;
+    void create_relation(std::string target, RelationType type);
+    bool find_relation(RelationStruct const& rel);
+    bool find_class(std::string name);
+    bool find_interface(std::string name);
 
-        ClassStruct currentClass_;
-        MethodStruct currentMethod_;
-        VarStruct currentVariable_;
+    void finish();
 
-        std::map<std::string, RelationStruct> relations_;
-        std::set<std::string> classes_;
-        std::set<std::string> interfaces_;
+public:
+    void set_config(Config const& config);
+    void set_outputter(UMLOutputter const& outputter);
 
-        void create_relation(std::string target, RelationType type);
-        bool find_relation(RelationStruct const& rel);
-        bool find_class(std::string name);
-        bool find_interface(std::string name);
+    void visit(astfri::IntType const& type) override;
+    void visit(astfri::FloatType const& type) override;
+    void visit(astfri::CharType const& type) override;
+    void visit(astfri::BoolType const& type) override;
+    void visit(astfri::VoidType const& type) override;
+    void visit(astfri::UserType const& type) override;
+    void visit(astfri::IndirectionType const& type) override;
 
-        void finish();
-    public:
-        void set_config(Config const& config);
-        void set_outputter(UMLOutputter const& outputter);
-
-        void visit (astfri::IntType const& type) override;
-        void visit (astfri::FloatType const& type) override;
-        void visit (astfri::CharType const& type) override;
-        void visit (astfri::BoolType const& type) override;
-        void visit (astfri::VoidType const& type) override;
-        void visit (astfri::UserType const& type) override;
-        void visit (astfri::IndirectionType const& type) override;
-        
-        void visit (astfri::ParamVarDefStmt const& stmt) override;
-        void visit (astfri::MemberVarDefStmt const& stmt) override;
-        void visit (astfri::FunctionDefStmt const& stmt) override;
-        void visit (astfri::MethodDefStmt const& stmt) override;
-        void visit (astfri::ConstructorDefStmt const& stmt) override;
-        void visit (astfri::DestructorDefStmt const& stmt) override;
-        void visit (astfri::GenericParam const& stmt) override;
-        void visit (astfri::ClassDefStmt const& stmt) override;
-        void visit (astfri::InterfaceDefStmt const& stmt) override;
-        void visit (astfri::TranslationUnit const& stmt) override;
-    };
+    void visit(astfri::ParamVarDefStmt const& stmt) override;
+    void visit(astfri::MemberVarDefStmt const& stmt) override;
+    void visit(astfri::FunctionDefStmt const& stmt) override;
+    void visit(astfri::MethodDefStmt const& stmt) override;
+    void visit(astfri::ConstructorDefStmt const& stmt) override;
+    void visit(astfri::DestructorDefStmt const& stmt) override;
+    void visit(astfri::GenericParam const& stmt) override;
+    void visit(astfri::ClassDefStmt const& stmt) override;
+    void visit(astfri::InterfaceDefStmt const& stmt) override;
+    void visit(astfri::TranslationUnit const& stmt) override;
+};
 } // namespace astfri::uml

@@ -9,32 +9,14 @@ StmtFactory& StmtFactory::get_instance()
     return instance;
 }
 
-LocalVarDefStmt* StmtFactory::mk_local_var_def(
-    std::string name,
-    Type* type,
-    Expr* initializer
-)
+LocalVarDefStmt* StmtFactory::mk_local_var_def(std::string name, Type* type, Expr* initializer)
 {
-    return details::emplace_get<LocalVarDefStmt>(
-        stmts_,
-        std::move(name),
-        type,
-        initializer
-    );
+    return details::emplace_get<LocalVarDefStmt>(stmts_, std::move(name), type, initializer);
 }
 
-ParamVarDefStmt* StmtFactory::mk_param_var_def(
-    std::string name,
-    Type* type,
-    Expr* initializer
-)
+ParamVarDefStmt* StmtFactory::mk_param_var_def(std::string name, Type* type, Expr* initializer)
 {
-    return details::emplace_get<ParamVarDefStmt>(
-        stmts_,
-        std::move(name),
-        type,
-        initializer
-    );
+    return details::emplace_get<ParamVarDefStmt>(stmts_, std::move(name), type, initializer);
 }
 
 MemberVarDefStmt* StmtFactory::mk_member_var_def(
@@ -53,18 +35,9 @@ MemberVarDefStmt* StmtFactory::mk_member_var_def(
     );
 }
 
-GlobalVarDefStmt* StmtFactory::mk_global_var_def(
-    std::string name,
-    Type* type,
-    Expr* initializer
-)
+GlobalVarDefStmt* StmtFactory::mk_global_var_def(std::string name, Type* type, Expr* initializer)
 {
-    return details::emplace_get<GlobalVarDefStmt>(
-        stmts_,
-        std::move(name),
-        type,
-        initializer
-    );
+    return details::emplace_get<GlobalVarDefStmt>(stmts_, std::move(name), type, initializer);
 }
 
 DefStmt* StmtFactory::mk_def()
@@ -178,37 +151,20 @@ ConstructorDefStmt* StmtFactory::mk_constructor_def(
     );
 }
 
-BaseInitializerStmt* StmtFactory::mak_base_initializer(
-    std::string base,
-    std::vector<Expr*> args
-)
+BaseInitializerStmt* StmtFactory::mak_base_initializer(std::string base, std::vector<Expr*> args)
 {
-    return details::emplace_get<BaseInitializerStmt>(
-        stmts_,
-        std::move(base),
-        std::move(args)
-    );
+    return details::emplace_get<BaseInitializerStmt>(stmts_, std::move(base), std::move(args));
 }
 
-DestructorDefStmt* StmtFactory::mk_destructor_def(
-    ClassDefStmt* owner,
-    CompoundStmt* body
-)
+DestructorDefStmt* StmtFactory::mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body)
 {
 
     return details::emplace_get<DestructorDefStmt>(stmts_, owner, body);
 }
 
-GenericParam* StmtFactory::mk_generic_param(
-    std::string constraint,
-    std::string name
-)
+GenericParam* StmtFactory::mk_generic_param(std::string constraint, std::string name)
 {
-    return details::emplace_get<GenericParam>(
-        stmts_,
-        std::move(constraint),
-        std::move(name)
-    );
+    return details::emplace_get<GenericParam>(stmts_, std::move(constraint), std::move(name));
 }
 
 CompoundStmt* StmtFactory::mk_compound(std::vector<Stmt*> stmts)
@@ -233,11 +189,7 @@ IfStmt* StmtFactory::mk_if(Expr* cond, Stmt* iftrue, Stmt* iffalse)
 
 CaseStmt* StmtFactory::mk_case(Expr* expr, Stmt* body)
 {
-    return details::emplace_get<CaseStmt>(
-        stmts_,
-        std::vector<Expr*>{expr},
-        body
-    );
+    return details::emplace_get<CaseStmt>(stmts_, std::vector<Expr*>{expr}, body);
 }
 
 CaseStmt* StmtFactory::mk_case(std::vector<Expr*> exprs, Stmt* body)

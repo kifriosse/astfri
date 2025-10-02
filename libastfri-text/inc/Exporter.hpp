@@ -3,20 +3,23 @@
 
 #include <libastfri-text/inc/TextConfigurator.hpp>
 
-class Exporter {
+class Exporter
+{
 protected:
     std::shared_ptr<TextConfigurator> config_;
     std::unique_ptr<std::stringstream> output_;
     int currentIndentation_;
     int row_;
     bool startedLine_;
+
 protected:
     Exporter(std::shared_ptr<TextConfigurator> conf);
-    virtual void write_output_into_file(const std::string& filepath) = 0;
-    void create_folder(const std::string& suffix);
-    void write_word(const std::string& word);
+    virtual void write_output_into_file(std::string const& filepath) = 0;
+    void create_folder(std::string const& suffix);
+    void write_word(std::string const& word);
     virtual void write_indentation();
     virtual void write_row_number();
+
 public:
     virtual void make_export() = 0;
     virtual void reset();
@@ -24,8 +27,8 @@ public:
     void decrease_indentation();
     virtual void write_new_line();
     virtual void write_space();
-    virtual void write_round_bracket(const std::string& br);
-    virtual void write_curl_bracket(const std::string& br);
+    virtual void write_round_bracket(std::string const& br);
+    virtual void write_curl_bracket(std::string const& br);
     virtual void write_unknown_word();
     virtual void write_invalid_word();
     virtual void write_public_word();
@@ -52,12 +55,12 @@ public:
     virtual void write_member_var_name(std::string name);
     virtual void write_local_var_name(std::string name);
     virtual void write_param_var_name(std::string name);
-    virtual void write_operator_sign(const std::string& sign);
+    virtual void write_operator_sign(std::string const& sign);
     virtual void write_assign_op_word();
     virtual void write_modulo_op_word();
     virtual void write_address_op_word();
     virtual void write_deref_op_word();
-    virtual void write_separator_sign(const std::string& sign);
+    virtual void write_separator_sign(std::string const& sign);
     virtual void write_int_val(int val);
     virtual void write_float_val(float val);
     virtual void write_char_val(char val);

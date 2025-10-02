@@ -1,30 +1,40 @@
-int main() {
+int main()
+{
     char x = 'x';
-    while (true) {
+    while (true)
+    {
         x++;
-        if (x % 2 == 0) {
+        if (x % 2 == 0)
+        {
             break;
-        } else {
+        }
+        else
+        {
             continue;
         }
     }
 
     int koniec = 100;
-    for (int i = 0; i < koniec; i++) {
+    for (int i = 0; i < koniec; i++)
+    {
         koniec = koniec << 3;
-        if (koniec > 50) {
+        if (koniec > 50)
+        {
             break;
         }
         continue;
     }
 
-    do {
+    do
+    {
         char slovo[] = "Ahoj";
-        if (slovo[2] == 'a') {
+        if (slovo[2] == 'a')
+        {
             break;
         }
-        if (slovo[0] == 'A') {
+        if (slovo[0] == 'A')
+        {
             continue;
         }
-    }while (false);
+    } while (false);
 }

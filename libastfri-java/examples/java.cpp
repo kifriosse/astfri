@@ -1,8 +1,9 @@
+#include <libastfri-java/impl/StatementTransformer.hpp>
+#include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
-#include <libastfri-text/inc/ASTVisitor.hpp>
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -17,8 +18,6 @@
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
 
-#include <libastfri-java/impl/StatementTransformer.hpp>
-
 typedef struct Tree_Sitter_Node
 {
     TSNode node;
@@ -26,7 +25,7 @@ typedef struct Tree_Sitter_Node
     std::vector<TSNode> children;
 } Tree_Sitter_Node;
 
-std::string load (std::string const& path)
+std::string load(std::string const& path)
 {
     std::ifstream file(path);
     if (! file.is_open())
@@ -39,7 +38,7 @@ std::string load (std::string const& path)
     return buffer.str();
 }
 
-std::string get_directory (std::string const& file_path)
+std::string get_directory(std::string const& file_path)
 {
     size_t last_slash_idx = file_path.find_last_of("/\\");
     if (last_slash_idx != std::string::npos)
@@ -49,7 +48,7 @@ std::string get_directory (std::string const& file_path)
     return "./";
 }
 
-std::vector<TSNode> get_nodes (TSNode node)
+std::vector<TSNode> get_nodes(TSNode node)
 {
     std::vector<TSNode> nodes;
     nodes.push_back(node);
@@ -66,7 +65,7 @@ std::vector<TSNode> get_nodes (TSNode node)
     return nodes;
 }
 
-std::vector<TSNode> get_named_nodes (TSNode node)
+std::vector<TSNode> get_named_nodes(TSNode node)
 {
     std::vector<TSNode> nodes;
 
@@ -87,7 +86,7 @@ std::vector<TSNode> get_named_nodes (TSNode node)
     return nodes;
 }
 
-void print_nodes (std::vector<TSNode> nodes, TSNode root)
+void print_nodes(std::vector<TSNode> nodes, TSNode root)
 {
     nodes = get_nodes(root);
 
@@ -97,7 +96,7 @@ void print_nodes (std::vector<TSNode> nodes, TSNode root)
     }
 }
 
-void print_named_nodes (std::vector<TSNode> nodes, TSNode root)
+void print_named_nodes(std::vector<TSNode> nodes, TSNode root)
 {
     nodes = get_nodes(root);
 
@@ -113,12 +112,12 @@ void print_named_nodes (std::vector<TSNode> nodes, TSNode root)
     }
 }
 
-std::string get_node_type (TSNode node)
+std::string get_node_type(TSNode node)
 {
     return ts_node_type(node);
 }
 
-TSQuery* make_query (char const* queryString)
+TSQuery* make_query(char const* queryString)
 {
     uint32_t errorOffset;
     TSQueryError errorType;
@@ -134,13 +133,14 @@ TSQuery* make_query (char const* queryString)
     return tsQuery;
 }
 
-std::string get_node_text(const TSNode& node, const std::string& source_code) {
+std::string get_node_text(TSNode const& node, std::string const& source_code)
+{
     uint32_t start = ts_node_start_byte(node);
-    uint32_t end = ts_node_end_byte(node);
+    uint32_t end   = ts_node_end_byte(node);
     return source_code.substr(start, end - start);
 }
 
-int main ()
+int main()
 {
     // Create a parser.
     TSParser* parser = ts_parser_new();
@@ -165,12 +165,7 @@ int main ()
     std::cout << source_code << std::endl;
 
     // Parse the source code
-    TSTree* tree = ts_parser_parse_string(
-        parser,
-        nullptr,
-        source_code.c_str(),
-        source_code.size()
-    );
+    TSTree* tree = ts_parser_parse_string(parser, nullptr, source_code.c_str(), source_code.size());
 
     // Check if parsing was successful
     if (! tree)
@@ -185,12 +180,11 @@ int main ()
     std::cout << "Root node: " << ts_node_type(root_node) << std::endl;
     TSNode next_node = ts_node_named_child(root_node, 0);
     std::cout << "Next node: " << ts_node_type(next_node) << std::endl;
-//    TSNode body_node    = ts_node_named_child(next_node, 1);
-//    TSNode body_sibling = ts_node_next_sibling(body_node);
-//    std::cout << "Next sibling node: " << ts_node_type(body_sibling)
-//              << std::endl;
-    std::cout << "Children count " << ts_node_named_child_count(next_node)
-              << std::endl;
+    //    TSNode body_node    = ts_node_named_child(next_node, 1);
+    //    TSNode body_sibling = ts_node_next_sibling(body_node);
+    //    std::cout << "Next sibling node: " << ts_node_type(body_sibling)
+    //              << std::endl;
+    std::cout << "Children count " << ts_node_named_child_count(next_node) << std::endl;
 
     // Print the syntax tree as an S-expression.
     char* string = ts_node_string(TSNode(ts_tree_root_node(tree)));
@@ -206,18 +200,17 @@ int main ()
     TSTreeCursor cursor = ts_tree_cursor_new(root_node);
     bool result         = ts_tree_cursor_goto_first_child(&cursor);
     std::cout << result << std::endl;
-    std::cout << ts_node_type(ts_tree_cursor_current_node(&cursor))
-              << std::endl;
+    std::cout << ts_node_type(ts_tree_cursor_current_node(&cursor)) << std::endl;
 
     astfri::java::StatementTransformer* stmtTransformer = new astfri::java::StatementTransformer();
 
-    //ASTVisitor* visitor = new ASTVisitor();
-    //visitor->visit(*stmtTransformer->fill_translation_unit(tree, source_code));
-    //visitor->write_file();
+    // ASTVisitor* visitor = new ASTVisitor();
+    // visitor->visit(*stmtTransformer->fill_translation_unit(tree, source_code));
+    // visitor->write_file();
 
     astfri::uml::Config conf;
     conf.innerView_ = true;
-    
+
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::TypeBeforeConvention tc;
     astfri::uml::UMLLibWrapper uml;

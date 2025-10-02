@@ -18,17 +18,9 @@ public:
     static StmtFactory& get_instance();
 
 public:
-    LocalVarDefStmt* mk_local_var_def(
-        std::string name,
-        Type* type,
-        Expr* initializer
-    );
+    LocalVarDefStmt* mk_local_var_def(std::string name, Type* type, Expr* initializer);
 
-    ParamVarDefStmt* mk_param_var_def(
-        std::string name,
-        Type* type,
-        Expr* initializer
-    );
+    ParamVarDefStmt* mk_param_var_def(std::string name, Type* type, Expr* initializer);
 
     MemberVarDefStmt* mk_member_var_def(
         std::string name,
@@ -37,11 +29,7 @@ public:
         AccessModifier access
     );
 
-    GlobalVarDefStmt* mk_global_var_def(
-        std::string name,
-        Type* type,
-        Expr* initializer
-    );
+    GlobalVarDefStmt* mk_global_var_def(std::string name, Type* type, Expr* initializer);
 
     DefStmt* mk_def();
     DefStmt* mk_def(std::vector<VarDefStmt*> defs);
@@ -71,15 +59,9 @@ public:
         AccessModifier access
     );
 
-    BaseInitializerStmt* mak_base_initializer(
-        std::string base,
-        std::vector<Expr*> args
-    );
+    BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
 
-    DestructorDefStmt* mk_destructor_def(
-        ClassDefStmt* owner,
-        CompoundStmt* body
-    );
+    DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
     GenericParam* mk_generic_param(std::string constraint, std::string name);
 

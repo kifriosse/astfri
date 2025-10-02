@@ -65,16 +65,9 @@ LocalVarRefExpr* ExprFactory::mk_local_var_ref(std::string var)
     return details::emplace_get<LocalVarRefExpr>(exprs_, std::move(var));
 }
 
-MemberVarRefExpr* ExprFactory::mk_member_var_ref(
-    Expr* owner,
-    std::string member
-)
+MemberVarRefExpr* ExprFactory::mk_member_var_ref(Expr* owner, std::string member)
 {
-    return details::emplace_get<MemberVarRefExpr>(
-        exprs_,
-        owner,
-        std::move(member)
-    );
+    return details::emplace_get<MemberVarRefExpr>(exprs_, owner, std::move(member));
 }
 
 GlobalVarRefExpr* ExprFactory::mk_global_var_ref(std::string global)
@@ -87,30 +80,14 @@ ClassRefExpr* ExprFactory::mk_class_ref(std::string name)
     return details::emplace_get<ClassRefExpr>(exprs_, std::move(name));
 }
 
-FunctionCallExpr* ExprFactory::mk_function_call(
-    std::string name,
-    std::vector<Expr*> args
-)
+FunctionCallExpr* ExprFactory::mk_function_call(std::string name, std::vector<Expr*> args)
 {
-    return details::emplace_get<FunctionCallExpr>(
-        exprs_,
-        std::move(name),
-        std::move(args)
-    );
+    return details::emplace_get<FunctionCallExpr>(exprs_, std::move(name), std::move(args));
 }
 
-MethodCallExpr* ExprFactory::mk_method_call(
-    Expr* owner,
-    std::string name,
-    std::vector<Expr*> args
-)
+MethodCallExpr* ExprFactory::mk_method_call(Expr* owner, std::string name, std::vector<Expr*> args)
 {
-    return details::emplace_get<MethodCallExpr>(
-        exprs_,
-        owner,
-        std::move(name),
-        std::move(args)
-    );
+    return details::emplace_get<MethodCallExpr>(exprs_, owner, std::move(name), std::move(args));
 }
 
 LambdaCallExpr* ExprFactory::mk_lambda_call()
@@ -118,10 +95,7 @@ LambdaCallExpr* ExprFactory::mk_lambda_call()
     return details::emplace_get<LambdaCallExpr>(exprs_);
 }
 
-LambdaCallExpr* ExprFactory::mk_lambda_call(
-    Expr* lambda,
-    std::vector<Expr*> args
-)
+LambdaCallExpr* ExprFactory::mk_lambda_call(Expr* lambda, std::vector<Expr*> args)
 {
     LambdaCallExpr* c = this->mk_lambda_call();
     c->lambda_        = lambda;
@@ -129,10 +103,7 @@ LambdaCallExpr* ExprFactory::mk_lambda_call(
     return c;
 }
 
-LambdaExpr* ExprFactory::mk_lambda_expr(
-    std::vector<ParamVarDefStmt*> params,
-    Stmt* body
-)
+LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body)
 {
     return details::emplace_get<LambdaExpr>(exprs_, std::move(params), body);
 }
@@ -142,16 +113,9 @@ ThisExpr* ExprFactory::mk_this()
     return &this_;
 }
 
-ConstructorCallExpr* ExprFactory::mk_constructor_call(
-    Type* type,
-    std::vector<Expr*> args
-)
+ConstructorCallExpr* ExprFactory::mk_constructor_call(Type* type, std::vector<Expr*> args)
 {
-    return details::emplace_get<ConstructorCallExpr>(
-        exprs_,
-        type,
-        std::move(args)
-    );
+    return details::emplace_get<ConstructorCallExpr>(exprs_, type, std::move(args));
 }
 
 NewExpr* ExprFactory::mk_new(ConstructorCallExpr* init)

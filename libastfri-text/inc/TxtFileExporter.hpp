@@ -3,12 +3,14 @@
 
 #include <libastfri-text/inc/Exporter.hpp>
 
-class TxtFileExporter : public Exporter {
+class TxtFileExporter : public Exporter
+{
 public:
     TxtFileExporter(std::shared_ptr<TextConfigurator> conf);
     void make_export() override;
+
 private:
-    void write_output_into_file(const std::string& filepath) override;
+    void write_output_into_file(std::string const& filepath) override;
 };
 
 #endif

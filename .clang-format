@@ -1,5 +1,5 @@
 ---
-Language:        Cpp
+Language: Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: Left
@@ -12,7 +12,7 @@ AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
-# AllowShortCompoundRequirementOnASingleLine: true
+AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
@@ -45,16 +45,16 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
-# BreakAfterAttributes: Leave
+BreakAfterAttributes: Leave
 BreakBeforeBinaryOperators: All
-# BreakBeforeConceptDeclarations: Always
+BreakBeforeConceptDeclarations: Always
 BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
 BreakInheritanceList: AfterColon
 BreakConstructorInitializers: AfterColon
 BreakStringLiterals: true
-ColumnLimit:     80
+ColumnLimit: 100
 CompactNamespaces: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
@@ -68,16 +68,18 @@ EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
 ExperimentalAutoDetectBinPacking: false
 PackConstructorInitializers: Never
-BasedOnStyle:    ''
+BasedOnStyle: ''
 FixNamespaceComments: true
-IncludeBlocks:   Regroup
+IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:           '^<libastfri/*'
     Priority:        1
-  - Regex:           '<.+>'
+  - Regex:           '^<rapidjson/*'
     Priority:        2
-  - Regex:           '".+"'
+  - Regex:           '<.+>'
     Priority:        3
+  - Regex:           '".+"'
+    Priority:        4
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
@@ -86,14 +88,14 @@ IndentCaseBlocks: false
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
 IndentExternBlock: AfterExternBlock
-# IndentRequiresClause: false
+IndentRequiresClause: false
 IndentWidth: 4
 IndentWrappedFunctionNames: true
 InsertTrailingCommas: None
 KeepEmptyLinesAtTheStartOfBlocks: true
 LambdaBodyIndentation: Signature
 MaxEmptyLinesToKeep: 1
-NamespaceIndentation: Inner
+NamespaceIndentation: None
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
@@ -133,7 +135,7 @@ SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: true
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  Never
+SpacesInAngles: Never
 SpacesInContainerLiterals: false
 SpacesInLineCommentPrefix:
   Minimum:         1
@@ -144,4 +146,5 @@ Standard:        c++20
 TabWidth:        8
 UseCRLF:         false
 UseTab:          Never
+# WrapNamespaceBodyWithEmptyLines: Always
 ...

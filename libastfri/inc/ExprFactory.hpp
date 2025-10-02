@@ -49,31 +49,18 @@ public:
 
     ClassRefExpr* mk_class_ref(std::string name);
 
-    FunctionCallExpr* mk_function_call(
-        std::string name,
-        std::vector<Expr*> args
-    );
+    FunctionCallExpr* mk_function_call(std::string name, std::vector<Expr*> args);
 
-    MethodCallExpr* mk_method_call(
-        Expr* owner,
-        std::string name,
-        std::vector<Expr*> args
-    );
+    MethodCallExpr* mk_method_call(Expr* owner, std::string name, std::vector<Expr*> args);
 
     LambdaCallExpr* mk_lambda_call();
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
-    LambdaExpr* mk_lambda_expr(
-        std::vector<ParamVarDefStmt*> params,
-        Stmt* body
-    );
+    LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
 
     ThisExpr* mk_this();
 
-    ConstructorCallExpr* mk_constructor_call(
-        Type* type,
-        std::vector<Expr*> args
-    );
+    ConstructorCallExpr* mk_constructor_call(Type* type, std::vector<Expr*> args);
 
     NewExpr* mk_new(ConstructorCallExpr* init);
 

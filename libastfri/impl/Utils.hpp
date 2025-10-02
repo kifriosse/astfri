@@ -36,8 +36,7 @@ concept map_like = requires(Map m, typename Map::key_type k) {
  * @brief TODO
  */
 template<typename Vector>
-concept vector_like
-    = requires(Vector v, typename Vector::value_type x) { v.push_back(x); };
+concept vector_like = requires(Vector v, typename Vector::value_type x) { v.push_back(x); };
 
 /**
  * @brief Gets pointer to value from @p map if exists or constructs a new value
@@ -53,8 +52,7 @@ Val* emplace_get(Key&& key, Map& map, Args&&... args)
     {
         return &it->second;
     }
-    return &map.try_emplace(std::move(key), std::forward<Args>(args)...)
-                .first->second;
+    return &map.try_emplace(std::move(key), std::forward<Args>(args)...).first->second;
 }
 
 /**

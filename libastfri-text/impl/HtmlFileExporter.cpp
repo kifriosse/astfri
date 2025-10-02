@@ -1,25 +1,33 @@
 #include <libastfri-text/inc/HtmlFileExporter.hpp>
-#include <iostream>
-#include <fstream>
 
-HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) : Exporter(std::move(conf)) {
+#include <fstream>
+#include <iostream>
+
+HtmlFileExporter::HtmlFileExporter(std::shared_ptr<TextConfigurator> conf) :
+    Exporter(std::move(conf))
+{
     maxRoundBrIndex_ = config_->get_round_br_col()->size();
-    maxCurlBrIndex_ = config_->get_curl_br_col()->size();
-    roundBrIndex_ = 0;
-    curlBrIndex_ = 0;
+    maxCurlBrIndex_  = config_->get_curl_br_col()->size();
+    roundBrIndex_    = 0;
+    curlBrIndex_     = 0;
 }
 
-void HtmlFileExporter::make_export() { create_folder(".html"); }
+void HtmlFileExporter::make_export()
+{
+    create_folder(".html");
+}
 
-void HtmlFileExporter::reset() {
+void HtmlFileExporter::reset()
+{
     maxRoundBrIndex_ = config_->get_round_br_col()->size();
-    maxCurlBrIndex_ = config_->get_curl_br_col()->size();
-    roundBrIndex_ = 0;
-    curlBrIndex_ = 0;
+    maxCurlBrIndex_  = config_->get_curl_br_col()->size();
+    roundBrIndex_    = 0;
+    curlBrIndex_     = 0;
     Exporter::reset();
 }
 
-void HtmlFileExporter::write_output_into_file(const std::string& filepath) {
+void HtmlFileExporter::write_output_into_file(std::string const& filepath)
+{
     std::cout << " > You can find output file on path: " << filepath << "\n";
     std::ofstream file(std::move(filepath));
     file << "<!DOCTYPE html>\n";
@@ -104,473 +112,601 @@ void HtmlFileExporter::write_output_into_file(const std::string& filepath) {
     reset();
 }
 
-void HtmlFileExporter::write_indentation() {
+void HtmlFileExporter::write_indentation()
+{
     startedLine_ = true;
     config_->sh_row() ? write_row_number() : void();
-    for (int i = 0; i < config_->get_marg_len(); ++i) {
+    for (int i = 0; i < config_->get_marg_len(); ++i)
+    {
         write_space();
     }
-    for (int i = 0; i < currentIndentation_; ++i) {
-        for (int j = 0; j < config_->get_tab_len(); ++j) {
+    for (int i = 0; i < currentIndentation_; ++i)
+    {
+        for (int j = 0; j < config_->get_tab_len(); ++j)
+        {
             write_space();
         }
     }
 }
 
-void HtmlFileExporter::write_row_number() {
+void HtmlFileExporter::write_row_number()
+{
     write_word("<span class=\"row-num\">");
-    if (row_ > 999) {
+    if (row_ > 999)
+    {
         *output_ << row_ << ".";
-    } else if (row_ > 99) {
+    }
+    else if (row_ > 99)
+    {
         *output_ << "&nbsp;" << row_ << ".";
-    } else if (row_ > 9) {
+    }
+    else if (row_ > 9)
+    {
         *output_ << "&nbsp;&nbsp;" << row_ << ".";
-    } else {
+    }
+    else
+    {
         *output_ << "&nbsp;&nbsp;&nbsp;" << row_ << ".";
     }
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_new_line() {
+void HtmlFileExporter::write_new_line()
+{
     write_word("<br>");
     Exporter::write_new_line();
 }
 
-void HtmlFileExporter::write_space() {
+void HtmlFileExporter::write_space()
+{
     write_word("&nbsp;");
 }
 
-void HtmlFileExporter::write_round_bracket(const std::string& br) {
-    if (config_->use_br_col() && maxRoundBrIndex_ > 0) {
+void HtmlFileExporter::write_round_bracket(std::string const& br)
+{
+    if (config_->use_br_col() && maxRoundBrIndex_ > 0)
+    {
         std::string out = "<span style=\"color:";
-        if (br == "(") {
+        if (br == "(")
+        {
             out.append(config_->get_round_br_col()->at(roundBrIndex_).str());
             out.append("\">(</span>");
             ++roundBrIndex_;
-            if (roundBrIndex_ == maxRoundBrIndex_) {
+            if (roundBrIndex_ == maxRoundBrIndex_)
+            {
                 roundBrIndex_ = 0;
             }
-        } else {
-            if (roundBrIndex_ == 0) {
+        }
+        else
+        {
+            if (roundBrIndex_ == 0)
+            {
                 roundBrIndex_ = maxRoundBrIndex_ - 1;
-            } else {
+            }
+            else
+            {
                 --roundBrIndex_;
             }
             out.append(config_->get_round_br_col()->at(roundBrIndex_).str());
             out.append("\">)</span>");
         }
         write_word(std::move(out));
-    } else {
+    }
+    else
+    {
         write_word(std::move(br));
     }
 }
 
-void HtmlFileExporter::write_curl_bracket(const std::string& br) {
-    if (config_->use_br_col() && maxCurlBrIndex_ > 0) {
+void HtmlFileExporter::write_curl_bracket(std::string const& br)
+{
+    if (config_->use_br_col() && maxCurlBrIndex_ > 0)
+    {
         std::string out = "<span style=\"color:";
-        if (br == "{") {
+        if (br == "{")
+        {
             out.append(config_->get_curl_br_col()->at(curlBrIndex_).str());
             out.append("\">{</span>");
             ++curlBrIndex_;
-            if (curlBrIndex_ == maxCurlBrIndex_) {
+            if (curlBrIndex_ == maxCurlBrIndex_)
+            {
                 curlBrIndex_ = 0;
             }
-        } else {
-            if (curlBrIndex_ == 0) {
+        }
+        else
+        {
+            if (curlBrIndex_ == 0)
+            {
                 curlBrIndex_ = maxCurlBrIndex_ - 1;
-            } else {
+            }
+            else
+            {
                 --curlBrIndex_;
             }
             out.append(config_->get_curl_br_col()->at(curlBrIndex_).str());
             out.append("\">}</span>");
         }
         write_word(std::move(out));
-    } else {
+    }
+    else
+    {
         write_word(std::move(br));
     }
 }
 
-void HtmlFileExporter::write_unknown_word() {
-    std::string s = "<span class=\"unknown-word\">" + config_->get_unknown_word()->str() + "</span>";
+void HtmlFileExporter::write_unknown_word()
+{
+    std::string s
+        = "<span class=\"unknown-word\">" + config_->get_unknown_word()->str() + "</span>";
     write_word(std::move(s));
 }
 
-void HtmlFileExporter::write_invalid_word() {
-    std::string s = "<span class=\"invalid-word\">" + config_->get_invalid_word()->str() + "</span>";
+void HtmlFileExporter::write_invalid_word()
+{
+    std::string s
+        = "<span class=\"invalid-word\">" + config_->get_invalid_word()->str() + "</span>";
     write_word(std::move(s));
 }
 
-void HtmlFileExporter::write_public_word() {
+void HtmlFileExporter::write_public_word()
+{
     write_acc_mod_style(config_->get_public_word()->str());
 }
 
-void HtmlFileExporter::write_private_word() {
+void HtmlFileExporter::write_private_word()
+{
     write_acc_mod_style(config_->get_private_word()->str());
 }
 
-void HtmlFileExporter::write_protected_word() {
+void HtmlFileExporter::write_protected_word()
+{
     write_acc_mod_style(config_->get_protected_word()->str());
 }
 
-void HtmlFileExporter::write_internal_word() {
+void HtmlFileExporter::write_internal_word()
+{
     write_acc_mod_style(config_->get_internal_word()->str());
 }
 
-void HtmlFileExporter::write_attribs_word() {
+void HtmlFileExporter::write_attribs_word()
+{
     write_acc_mod_style(config_->get_acc_atrib_word()->str());
 }
 
-void HtmlFileExporter::write_constrs_word() {
+void HtmlFileExporter::write_constrs_word()
+{
     write_acc_mod_style(config_->get_acc_constr_word()->str());
 }
 
-void HtmlFileExporter::write_destrs_word() {
+void HtmlFileExporter::write_destrs_word()
+{
     write_acc_mod_style(config_->get_acc_destr_word()->str());
 }
 
-void HtmlFileExporter::write_meths_word() {
+void HtmlFileExporter::write_meths_word()
+{
     write_acc_mod_style(config_->get_acc_meth_word()->str());
 }
 
-void HtmlFileExporter::write_dynamic_type() {
-    std::string s = "<span class=\"dynamic-type\">" + config_->get_dynamic_word()->str() + "</span>";
+void HtmlFileExporter::write_dynamic_type()
+{
+    std::string s
+        = "<span class=\"dynamic-type\">" + config_->get_dynamic_word()->str() + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_int_type() {
+void HtmlFileExporter::write_int_type()
+{
     std::string s = "<span class=\"int-type\">" + config_->get_int_word()->str() + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_float_type() {
+void HtmlFileExporter::write_float_type()
+{
     std::string s = "<span class=\"float-type\">" + config_->get_float_word()->str() + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_char_type() {
+void HtmlFileExporter::write_char_type()
+{
     std::string s = "<span class=\"char-type\">" + config_->get_char_word()->str() + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_bool_type() {
+void HtmlFileExporter::write_bool_type()
+{
     std::string s = "<span class=\"bool-type\">" + config_->get_bool_word()->str() + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_void_type() {
+void HtmlFileExporter::write_void_type()
+{
     std::string s = "<span class=\"void-type\">" + config_->get_void_word()->str() + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_user_type(std::string usertype) {
+void HtmlFileExporter::write_user_type(std::string usertype)
+{
     std::string s = "<span class=\"user-type\">" + std::move(usertype) + "</span>";
     write_data_type_style(std::move(s));
 }
 
-void HtmlFileExporter::write_gen_param_name(std::string name) {
+void HtmlFileExporter::write_gen_param_name(std::string name)
+{
     std::string s = "<span class=\"gen-par-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_class_name(std::string name) {
+void HtmlFileExporter::write_class_name(std::string name)
+{
     std::string s = "<span class=\"class-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_interface_name(std::string name) {
+void HtmlFileExporter::write_interface_name(std::string name)
+{
     std::string s = "<span class=\"interface-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_method_name(std::string name) {
+void HtmlFileExporter::write_method_name(std::string name)
+{
     std::string s = "<span class=\"method-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_function_name(std::string name) {
+void HtmlFileExporter::write_function_name(std::string name)
+{
     std::string s = "<span class=\"function-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_global_var_name(std::string name) {
+void HtmlFileExporter::write_global_var_name(std::string name)
+{
     std::string s = "<span class=\"global-var-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_member_var_name(std::string name) {
+void HtmlFileExporter::write_member_var_name(std::string name)
+{
     std::string s = "<span class=\"member-var-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_local_var_name(std::string name) {
+void HtmlFileExporter::write_local_var_name(std::string name)
+{
     std::string s = "<span class=\"local-var-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_param_var_name(std::string name) {
+void HtmlFileExporter::write_param_var_name(std::string name)
+{
     std::string s = "<span class=\"param-var-name\">" + std::move(name) + "</span>";
     write_ref_name_style(std::move(s));
 }
 
-void HtmlFileExporter::write_operator_sign(const std::string& sign) {
+void HtmlFileExporter::write_operator_sign(std::string const& sign)
+{
     write_operator_style(std::move(sign));
 }
 
-void HtmlFileExporter::write_assign_op_word() {
+void HtmlFileExporter::write_assign_op_word()
+{
     write_operator_style(config_->get_assign_op_word()->str());
 }
 
-void HtmlFileExporter::write_modulo_op_word() {
+void HtmlFileExporter::write_modulo_op_word()
+{
     write_operator_style(config_->get_modulo_op_word()->str());
 }
 
-void HtmlFileExporter::write_address_op_word() {
+void HtmlFileExporter::write_address_op_word()
+{
     write_operator_style(config_->get_address_op_word()->str());
 }
 
-void HtmlFileExporter::write_deref_op_word() {
+void HtmlFileExporter::write_deref_op_word()
+{
     write_operator_style(config_->get_deref_op_word()->str());
 }
 
-void HtmlFileExporter::write_separator_sign(const std::string& sign) {
+void HtmlFileExporter::write_separator_sign(std::string const& sign)
+{
     write_separator_style(std::move(sign));
 }
 
-void HtmlFileExporter::write_int_val(int val) {
+void HtmlFileExporter::write_int_val(int val)
+{
     std::string s = "<span class=\"int-value\">" + std::to_string(std::move(val)) + "</span>";
     write_value_style(std::move(s));
 }
 
-void HtmlFileExporter::write_float_val(float val) {
+void HtmlFileExporter::write_float_val(float val)
+{
     std::string s = "<span class=\"float-value\">" + std::to_string(std::move(val)) + "</span>";
     write_value_style(std::move(s));
 }
 
-void HtmlFileExporter::write_char_val(char val) {
+void HtmlFileExporter::write_char_val(char val)
+{
     std::string s = "<span class=\"char-value\">" + std::string(1, std::move(val)) + "</span>";
     write_value_style(std::move(s));
 }
 
-void HtmlFileExporter::write_string_val(std::string val) {
+void HtmlFileExporter::write_string_val(std::string val)
+{
     std::string s = "<span class=\"string-value\">" + std::move(val) + "</span>";
     write_value_style(std::move(s));
 }
 
-void HtmlFileExporter::write_bool_val(bool val) {
+void HtmlFileExporter::write_bool_val(bool val)
+{
     std::string s = "<span class=\"bool-value\">";
-    val ? s.append(std::move(config_->get_true_val()->str())) : s.append(std::move(config_->get_false_val()->str()));
+    val ? s.append(std::move(config_->get_true_val()->str()))
+        : s.append(std::move(config_->get_false_val()->str()));
     s.append("</span>");
     write_value_style(std::move(s));
 }
 
-void HtmlFileExporter::write_null_val() {
+void HtmlFileExporter::write_null_val()
+{
     std::string s = "<span class=\"null-value\">" + config_->get_null_val()->str() + "</span>";
     write_value_style(std::move(s));
 }
 
-void HtmlFileExporter::write_class_word() {
+void HtmlFileExporter::write_class_word()
+{
     std::string s = "<span class=\"class-word\">" + config_->get_class_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_interface_word() {
-    std::string s = "<span class=\"interface-word\">" + config_->get_interface_word()->str() + "</span>";
+void HtmlFileExporter::write_interface_word()
+{
+    std::string s
+        = "<span class=\"interface-word\">" + config_->get_interface_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_implement_word() {
-    std::string s = "<span class=\"implement-word\">" + config_->get_implement_word()->str() + "</span>";
+void HtmlFileExporter::write_implement_word()
+{
+    std::string s
+        = "<span class=\"implement-word\">" + config_->get_implement_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_extend_word() {
+void HtmlFileExporter::write_extend_word()
+{
     std::string s = "<span class=\"extend-word\">" + config_->get_extend_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_this_word() {
+void HtmlFileExporter::write_this_word()
+{
     std::string s = "<span class=\"this-word\">" + config_->get_this_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_return_word() {
+void HtmlFileExporter::write_return_word()
+{
     std::string s = "<span class=\"return-word\">" + config_->get_return_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_continue_word() {
-    std::string s = "<span class=\"continue-word\">" + config_->get_continue_word()->str() + "</span>";
+void HtmlFileExporter::write_continue_word()
+{
+    std::string s
+        = "<span class=\"continue-word\">" + config_->get_continue_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_break_word() {
+void HtmlFileExporter::write_break_word()
+{
     std::string s = "<span class=\"break-word\">" + config_->get_break_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_throw_word() {
+void HtmlFileExporter::write_throw_word()
+{
     std::string s = "<span class=\"throw-word\">" + config_->get_throw_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_if_word() {
+void HtmlFileExporter::write_if_word()
+{
     std::string s = "<span class=\"if-word\">" + config_->get_if_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_else_word() {
+void HtmlFileExporter::write_else_word()
+{
     std::string s = "<span class=\"else-word\">" + config_->get_else_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_do_word() {
+void HtmlFileExporter::write_do_word()
+{
     std::string s = "<span class=\"do-word\">" + config_->get_do_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_while_word() {
+void HtmlFileExporter::write_while_word()
+{
     std::string s = "<span class=\"while-word\">" + config_->get_while_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_for_word() {
+void HtmlFileExporter::write_for_word()
+{
     std::string s = "<span class=\"for-word\">" + config_->get_for_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_repeat_word() {
+void HtmlFileExporter::write_repeat_word()
+{
     std::string s = "<span class=\"repeat-word\">" + config_->get_repeat_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_switch_word() {
+void HtmlFileExporter::write_switch_word()
+{
     std::string s = "<span class=\"switch-word\">" + config_->get_switch_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_case_word() {
+void HtmlFileExporter::write_case_word()
+{
     std::string s = "<span class=\"case-word\">" + config_->get_case_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_default_word() {
-    std::string s = "<span class=\"default-word\">" + config_->get_default_word()->str() + "</span>";
+void HtmlFileExporter::write_default_word()
+{
+    std::string s
+        = "<span class=\"default-word\">" + config_->get_default_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_new_word() {
+void HtmlFileExporter::write_new_word()
+{
     std::string s = "<span class=\"new-word\">" + config_->get_new_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_delete_word() {
+void HtmlFileExporter::write_delete_word()
+{
     std::string s = "<span class=\"delete-word\">" + config_->get_delete_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_pointer_word() {
-    std::string s = "<span class=\"pointer-word\">" + config_->get_pointer_word()->str() + "</span>";
+void HtmlFileExporter::write_pointer_word()
+{
+    std::string s
+        = "<span class=\"pointer-word\">" + config_->get_pointer_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_virtual_word() {
-    std::string s = "<span class=\"virtual-word\">" + config_->get_virtual_word()->str() + "</span>";
+void HtmlFileExporter::write_virtual_word()
+{
+    std::string s
+        = "<span class=\"virtual-word\">" + config_->get_virtual_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_abstract_word() {
-    std::string s = "<span class=\"abstract-word\">" + config_->get_abstract_word()->str() + "</span>";
+void HtmlFileExporter::write_abstract_word()
+{
+    std::string s
+        = "<span class=\"abstract-word\">" + config_->get_abstract_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_template_word() {
-    std::string s = "<span class=\"template-word\">" + config_->get_template_word()->str() + "</span>";
+void HtmlFileExporter::write_template_word()
+{
+    std::string s
+        = "<span class=\"template-word\">" + config_->get_template_word()->str() + "</span>";
     write_system_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_constr_word() {
+void HtmlFileExporter::write_constr_word()
+{
     std::string s = "<span class=\"constr-word\">" + config_->get_constr_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_destr_word() {
+void HtmlFileExporter::write_destr_word()
+{
     std::string s = "<span class=\"destr-word\">" + config_->get_destr_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_method_word() {
+void HtmlFileExporter::write_method_word()
+{
     std::string s = "<span class=\"method-word\">" + config_->get_method_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_function_word() {
-    std::string s = "<span class=\"function-word\">" + config_->get_function_word()->str() + "</span>";
+void HtmlFileExporter::write_function_word()
+{
+    std::string s
+        = "<span class=\"function-word\">" + config_->get_function_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_lambda_word() {
+void HtmlFileExporter::write_lambda_word()
+{
     std::string s = "<span class=\"lambda-word\">" + config_->get_lambda_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_call_word() {
+void HtmlFileExporter::write_call_word()
+{
     std::string s = "<span class=\"call-word\">" + config_->get_call_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_define_word() {
+void HtmlFileExporter::write_define_word()
+{
     std::string s = "<span class=\"define-word\">" + config_->get_define_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_returns_word() {
-    std::string s = "<span class=\"returns-word\">" + config_->get_returns_word()->str() + "</span>";
+void HtmlFileExporter::write_returns_word()
+{
+    std::string s
+        = "<span class=\"returns-word\">" + config_->get_returns_word()->str() + "</span>";
     write_other_expr_style(std::move(s));
 }
 
-void HtmlFileExporter::write_acc_mod_style(const std::string& accmod) {
+void HtmlFileExporter::write_acc_mod_style(std::string const& accmod)
+{
     write_word("<span class=\"access-mod\">");
     write_word(std::move(accmod));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_data_type_style(const std::string& datatype) {
+void HtmlFileExporter::write_data_type_style(std::string const& datatype)
+{
     write_word("<span class=\"data-type\">");
     write_word(std::move(datatype));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_ref_name_style(const std::string& name) {
+void HtmlFileExporter::write_ref_name_style(std::string const& name)
+{
     write_word("<span class=\"ref-name\">");
     write_word(std::move(name));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_operator_style(const std::string& op) {
+void HtmlFileExporter::write_operator_style(std::string const& op)
+{
     write_word("<span class=\"operator\">");
     write_word(std::move(op));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_separator_style(const std::string& sep) {
+void HtmlFileExporter::write_separator_style(std::string const& sep)
+{
     write_word("<span class=\"separator\">");
     write_word(std::move(sep));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_value_style(const std::string& val) {
+void HtmlFileExporter::write_value_style(std::string const& val)
+{
     write_word("<span class=\"value\">");
     write_word(std::move(val));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_system_expr_style(const std::string& expr) {
+void HtmlFileExporter::write_system_expr_style(std::string const& expr)
+{
     write_word("<span class=\"system-expr\">");
     write_word(std::move(expr));
     write_word("</span>");
 }
 
-void HtmlFileExporter::write_other_expr_style(const std::string& expr) {
+void HtmlFileExporter::write_other_expr_style(std::string const& expr)
+{
     write_word("<span class=\"other-expr\">");
     write_word(std::move(expr));
     write_word("</span>");

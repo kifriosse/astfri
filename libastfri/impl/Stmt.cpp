@@ -10,20 +10,12 @@ VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
 {
 }
 
-LocalVarDefStmt::LocalVarDefStmt(
-    std::string name,
-    Type* type,
-    Expr* initializer
-) :
+LocalVarDefStmt::LocalVarDefStmt(std::string name, Type* type, Expr* initializer) :
     VarDefStmt(name, type, initializer)
 {
 }
 
-ParamVarDefStmt::ParamVarDefStmt(
-    std::string name,
-    Type* type,
-    Expr* initializer
-) :
+ParamVarDefStmt::ParamVarDefStmt(std::string name, Type* type, Expr* initializer) :
     VarDefStmt(name, type, initializer)
 {
 }
@@ -39,11 +31,7 @@ MemberVarDefStmt::MemberVarDefStmt(
 {
 }
 
-GlobalVarDefStmt::GlobalVarDefStmt(
-    std::string name,
-    Type* type,
-    Expr* initializer
-) :
+GlobalVarDefStmt::GlobalVarDefStmt(std::string name, Type* type, Expr* initializer) :
     VarDefStmt(name, type, initializer)
 {
 }
@@ -66,10 +54,7 @@ FunctionDefStmt::FunctionDefStmt(
 {
 }
 
-BaseInitializerStmt::BaseInitializerStmt(
-    std::string base,
-    std::vector<Expr*> args
-) :
+BaseInitializerStmt::BaseInitializerStmt(std::string base, std::vector<Expr*> args) :
     base_(std::move(base)),
     args_(std::move(args))
 {

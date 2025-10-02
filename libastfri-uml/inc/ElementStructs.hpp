@@ -1,54 +1,62 @@
 #pragma once
 
-#include <string>
-#include <vector>
 #include <libastfri/inc/Stmt.hpp>
 
-namespace astfri::uml {
-    enum class RelationType {
-        ASSOCIATION = 0,
-        COMPOSITION,
-        EXTENSION,
-        IMPLEMENTATION
-    };
+#include <string>
+#include <vector>
 
-    enum class UserDefinedType {
-        CLASS = 0,
-        STRUCT,
-        INTERFACE,
-        ENUM
-    };
+namespace astfri::uml
+{
+enum class RelationType
+{
+    ASSOCIATION = 0,
+    COMPOSITION,
+    EXTENSION,
+    IMPLEMENTATION
+};
 
-    struct ClassStruct {
-        std::string name_;
-        std::vector<std::string> genericParams_;
+enum class UserDefinedType
+{
+    CLASS = 0,
+    STRUCT,
+    INTERFACE,
+    ENUM
+};
 
-        void reset();
-    };
+struct ClassStruct
+{
+    std::string name_;
+    std::vector<std::string> genericParams_;
 
-    struct VarStruct {
-        std::string name_;
-        std::string type_;
-        std::string init_;
-        bool isIndirect_ = false;
-        astfri::AccessModifier accessMod_;
+    void reset();
+};
 
-        void reset();
-    };
+struct VarStruct
+{
+    std::string name_;
+    std::string type_;
+    std::string init_;
+    bool isIndirect_ = false;
+    astfri::AccessModifier accessMod_;
 
-    struct MethodStruct {
-        std::string name_;
-        std::string retType_;
-        bool returnIsIndirect_= false;
-        std::vector<VarStruct> params_;
-        astfri::AccessModifier accessMod_;
+    void reset();
+};
 
-        void reset();
-    };
+struct MethodStruct
+{
+    std::string name_;
+    std::string retType_;
+    bool returnIsIndirect_ = false;
+    std::vector<VarStruct> params_;
+    astfri::AccessModifier accessMod_;
 
-    struct RelationStruct {
-        std::string from_;
-        std::string to_;
-        RelationType type_;
-    };
+    void reset();
+};
+
+struct RelationStruct
+{
+    std::string from_;
+    std::string to_;
+    RelationType type_;
+};
 } // namespace astfri::uml

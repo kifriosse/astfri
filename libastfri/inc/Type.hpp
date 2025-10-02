@@ -19,10 +19,7 @@ struct Type : virtual IVisitable
 /**
  * @brief TODO
  */
-struct DynamicType :
-    Type,
-    details::MkVisitable<DynamicType>,
-    details::TypeQueriesAdapter
+struct DynamicType : Type, details::MkVisitable<DynamicType>, details::TypeQueriesAdapter
 {
     DynamicType* as_dynamic() noexcept override;
 };
@@ -37,10 +34,7 @@ struct PrimitiveType : Type
 /**
  * @brief TODO
  */
-struct IntType :
-    PrimitiveType,
-    details::MkVisitable<IntType>,
-    details::TypeQueriesAdapter
+struct IntType : PrimitiveType, details::MkVisitable<IntType>, details::TypeQueriesAdapter
 {
     IntType* as_int() noexcept override;
 };
@@ -48,10 +42,7 @@ struct IntType :
 /**
  * @brief TODO
  */
-struct FloatType :
-    PrimitiveType,
-    details::MkVisitable<FloatType>,
-    details::TypeQueriesAdapter
+struct FloatType : PrimitiveType, details::MkVisitable<FloatType>, details::TypeQueriesAdapter
 {
     FloatType* as_float() noexcept override;
 };
@@ -59,10 +50,7 @@ struct FloatType :
 /**
  * @brief TODO
  */
-struct CharType :
-    PrimitiveType,
-    details::MkVisitable<CharType>,
-    details::TypeQueriesAdapter
+struct CharType : PrimitiveType, details::MkVisitable<CharType>, details::TypeQueriesAdapter
 {
     CharType* as_char() noexcept override;
 };
@@ -70,10 +58,7 @@ struct CharType :
 /**
  * @brief TODO
  */
-struct BoolType :
-    PrimitiveType,
-    details::MkVisitable<BoolType>,
-    details::TypeQueriesAdapter
+struct BoolType : PrimitiveType, details::MkVisitable<BoolType>, details::TypeQueriesAdapter
 {
     BoolType* as_bool() noexcept override;
 };
@@ -81,10 +66,7 @@ struct BoolType :
 /**
  * @brief TODO
  */
-struct VoidType :
-    PrimitiveType,
-    details::MkVisitable<VoidType>,
-    details::TypeQueriesAdapter
+struct VoidType : PrimitiveType, details::MkVisitable<VoidType>, details::TypeQueriesAdapter
 {
     VoidType* as_void() noexcept override;
 };
@@ -92,10 +74,7 @@ struct VoidType :
 /**
  * @brief TODO
  */
-struct UserType :
-    Type,
-    details::MkVisitable<UserType>,
-    details::TypeQueriesAdapter
+struct UserType : Type, details::MkVisitable<UserType>, details::TypeQueriesAdapter
 {
     std::string name_;
 
@@ -107,10 +86,7 @@ struct UserType :
 /**
  * @brief TODO
  */
-struct IndirectionType :
-    Type,
-    details::MkVisitable<IndirectionType>,
-    details::TypeQueriesAdapter
+struct IndirectionType : Type, details::MkVisitable<IndirectionType>, details::TypeQueriesAdapter
 {
     Type* indirect_;
 
