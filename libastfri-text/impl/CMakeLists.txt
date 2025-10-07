@@ -7,6 +7,8 @@ target_sources(astfri-text PRIVATE
   HtmlFileExporter.cpp
   TxtFileExporter.cpp
   TextConfigurator.cpp
+  GeneralConfigurator.cpp
+  OutputFileManager.cpp
 )
 
 target_include_directories(astfri-text PUBLIC

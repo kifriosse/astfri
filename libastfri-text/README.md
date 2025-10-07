@@ -1,6 +1,10 @@
 Fully functional library for generating pseudocode from AST. Each input is printed into separated output file. If file exists, it will create new file with index.
 Example: If file "output.txt" exists, it will create files "output(1).txt" and so on.
 
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DASTFRI_BUILD_TEXT_OUTPUT=ON ..
+make
+cp compile_commands.json ..
+
 Before use, you need to do the following:
 1) Make build. Library is called "astfri-text".
 2) Include header file: "#include <libastfri-text/inc/ASTVisitor.hpp>".
