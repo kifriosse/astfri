@@ -45,5 +45,7 @@ int main()
         = stmtFactory
               .mk_function_def("repeatMessage", std::move(params), typeFactory.mk_void(), body);
 
+    (void) func;
+
     return 0;
 }
