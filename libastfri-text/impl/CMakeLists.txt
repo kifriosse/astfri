@@ -1,7 +1,7 @@
 add_library(astfri-text SHARED)
 
 target_sources(astfri-text PRIVATE
-  ASTVisitor.cpp
+  ASTTextVisitor.cpp
   Configurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
