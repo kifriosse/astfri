@@ -1,16 +1,15 @@
-#ifndef LIBASTFRI_TEXT_TXT_EXPORTER
-#define LIBASTFRI_TEXT_TXT_EXPORTER
+#ifndef LIBASTFRI_TEXT_TXT_FILE_EXPORTER
+#define LIBASTFRI_TEXT_TXT_FILE_EXPORTER
 
 #include <libastfri-text/inc/Exporter.hpp>
 
-class TxtFileExporter : public Exporter
+namespace astfri::text
 {
-public:
-    TxtFileExporter(std::shared_ptr<TextConfigurator> conf);
-    void make_export() override;
-
-private:
-    void write_output_into_file(std::string const& filepath) override;
-};
+    class TxtFileExporter : public Exporter
+    {
+    public:
+        inline TxtFileExporter() : Exporter() {}
+    };
+}
 
 #endif

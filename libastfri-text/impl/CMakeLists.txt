@@ -5,7 +5,6 @@ target_sources(astfri-text PRIVATE
   Configurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
-  TxtFileExporter.cpp
   TextConfigurator.cpp
   GeneralConfigurator.cpp
   OutputFileManager.cpp
