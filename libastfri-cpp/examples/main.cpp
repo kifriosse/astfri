@@ -22,6 +22,7 @@
 
 int main(int argc, char const** argv)
 {
+    (void)argc;
     astfri::TranslationUnit tu;
     if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
     {
