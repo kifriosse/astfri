@@ -7,10 +7,6 @@
 
 #include <iostream>
 
-#include "libastfri-uml/inc/Config.hpp"
-#include "libastfri-uml/inc/PlantUMLOutputter.hpp"
-#include "libastfri-uml/inc/TypeConvention.hpp"
-
 // ASTFRI visitor
 #include <libastfri-text/inc/ASTVisitor.hpp>
 
