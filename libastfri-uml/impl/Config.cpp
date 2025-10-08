@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/Config.hpp>
+#include <libastfri-uml/impl/Config.hpp>
 
 #include <fstream>
 

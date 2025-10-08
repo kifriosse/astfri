@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/TypeConvention.hpp>
+#include <libastfri-uml/impl/TypeConvention.hpp>
 
 namespace astfri::uml
 {

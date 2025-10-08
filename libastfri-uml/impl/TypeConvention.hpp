@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LIBASTFRIUML_TYPE_CONVENTION_HPP
+#define LIBASTFRIUML_TYPE_CONVENTION_HPP
 
 #include <string>
 
@@ -22,3 +23,5 @@ public:
     std::string get_string(std::string type, std::string val, char separator) override;
 };
 } // namespace astfri::uml
+
+#endif

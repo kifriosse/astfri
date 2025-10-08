@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/UMLOutputter.hpp>
+#include <libastfri-uml/impl/UMLOutputter.hpp>
 
 namespace astfri::uml
 {

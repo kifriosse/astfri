@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/ElementStructs.hpp>
+#include <libastfri-uml/impl/ElementStructs.hpp>
 
 namespace astfri::uml
 {

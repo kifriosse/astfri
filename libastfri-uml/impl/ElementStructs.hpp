@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LIBASTFRIUML_ELEMENT_STRUCTS_HPP
+#define LIBASTFRIUML_ELEMENT_STRUCTS_HPP
 
 #include <libastfri/inc/Stmt.hpp>
 
@@ -60,3 +61,5 @@ struct RelationStruct
     RelationType type_;
 };
 } // namespace astfri::uml
+
+#endif

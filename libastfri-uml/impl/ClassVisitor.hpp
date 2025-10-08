@@ -1,7 +1,8 @@
-#pragma once
+#ifndef LIBASTFRIUML_CLASS_VISITOR_HPP
+#define LIBASTFRIUML_CLASS_VISITOR_HPP
 
-#include <libastfri-uml/inc/ElementStructs.hpp>
-#include <libastfri-uml/inc/UMLOutputter.hpp>
+#include <libastfri-uml/impl/ElementStructs.hpp>
+#include <libastfri-uml/impl/UMLOutputter.hpp>
 #include <libastfri/inc/Expr.hpp>
 #include <libastfri/inc/Stmt.hpp>
 #include <libastfri/inc/Type.hpp>
@@ -57,3 +58,5 @@ public:
     void visit(astfri::TranslationUnit const& stmt) override;
 };
 } // namespace astfri::uml
+
+#endif

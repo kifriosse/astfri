@@ -1,6 +1,7 @@
-#pragma once
+#ifndef LIBASTFRIUML_PLANT_UML_OUTPUTTER_HPP
+#define LIBASTFRIUML_PLANT_UML_OUTPUTTER_HPP
 
-#include <libastfri-uml/inc/UMLOutputter.hpp>
+#include <libastfri-uml/impl/UMLOutputter.hpp>
 
 namespace astfri::uml
 {
@@ -27,3 +28,5 @@ public:
 };
 
 } // namespace astfri::uml
+
+#endif
