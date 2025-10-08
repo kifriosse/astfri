@@ -1,13 +1,13 @@
 add_library(astfri-text SHARED)
 
 target_sources(astfri-text PRIVATE
-  ASTTextVisitor.cpp
-  Configurator.cpp
+  OutputFileManager.cpp
+  GeneralConfigurator.cpp
+  TextConfigurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
-  TextConfigurator.cpp
-  GeneralConfigurator.cpp
-  OutputFileManager.cpp
+  ASTTextVisitor.cpp
+  TextLibManager.cpp
 )
 
 target_include_directories(astfri-text PUBLIC

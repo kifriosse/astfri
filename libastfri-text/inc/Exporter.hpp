@@ -16,8 +16,9 @@ namespace astfri::text
         bool isEmptyLine_;
     protected:
         Exporter();
+    public:
         virtual ~Exporter() = default;
-    protected:
+    public:
         virtual void reset();
         void execute_export();
     private:
