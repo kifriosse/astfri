@@ -143,7 +143,7 @@ struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
  */
 struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
-    UserTypeDefStmt* owner_{nullptr};
+    UserTypeDefStmt* owner_{nullptr}; // TODO ClassType?
     FunctionDefStmt* func_{nullptr};
     AccessModifier access_{AccessModifier::Public};
     Virtuality virtuality_{Virtuality::NotVirtual};
