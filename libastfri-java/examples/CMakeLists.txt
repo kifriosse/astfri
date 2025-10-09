@@ -1,8 +1,8 @@
-add_executable(ts-java)
+# add_executable(ts-java)
 
-target_sources(ts-java PRIVATE java.cpp)
+# target_sources(ts-java PRIVATE java.cpp)
 
-target_link_libraries(ts-java PRIVATE astfri-java astfri-text astfri-uml)
+# target_link_libraries(ts-java PRIVATE astfri-java astfri-text astfri-uml)
 
 
 add_executable(example_ak)

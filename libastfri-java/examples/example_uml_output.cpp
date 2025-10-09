@@ -2,7 +2,6 @@
 #include <libastfri-java/inc/ASTBuilder.hpp>
 
 // includes for uml output
-#include <libastfri-uml/inc/PlantUMLOutputter.hpp>
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
 int main()
