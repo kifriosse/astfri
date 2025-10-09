@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/PlantUMLOutputter.hpp>
+#include <libastfri-uml/impl/PlantUMLOutputter.hpp>
 
 #include <cstddef>
 #include <cstring>

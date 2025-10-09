@@ -3,6 +3,9 @@
 
 int main(int argc, char const** argv)
 {
+    if (argc != 2) {
+        return -1;
+    }
     astfri::TranslationUnit tu;
 
     if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)

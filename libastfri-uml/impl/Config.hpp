@@ -1,6 +1,7 @@
-#pragma once
+#ifndef LIBASTFRIUML_CONFIG_HPP
+#define LIBASTFRIUML_CONFIG_HPP
 
-#include <libastfri-uml/inc/TypeConvention.hpp>
+#include <libastfri-uml/impl/TypeConvention.hpp>
 
 #include <rapidjson/document.h>
 
@@ -47,3 +48,5 @@ private:
 };
 
 } // namespace astfri::uml
+
+#endif

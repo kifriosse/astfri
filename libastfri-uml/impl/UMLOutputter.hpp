@@ -1,7 +1,8 @@
-#pragma once
+#ifndef LIBASTFRIUML_UML_OUTPUTTER_HPP
+#define LIBASTFRIUML_UML_OUTPUTTER_HPP
 
-#include <libastfri-uml/inc/Config.hpp>
-#include <libastfri-uml/inc/ElementStructs.hpp>
+#include <libastfri-uml/impl/Config.hpp>
+#include <libastfri-uml/impl/ElementStructs.hpp>
 
 #include <iostream>
 
@@ -32,3 +33,5 @@ public:
 };
 
 } // namespace astfri::uml
+
+#endif

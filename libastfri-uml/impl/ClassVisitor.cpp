@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/ClassVisitor.hpp>
+#include <libastfri-uml/impl/ClassVisitor.hpp>
 
 #include <string>
 
