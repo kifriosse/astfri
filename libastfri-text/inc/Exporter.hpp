@@ -14,9 +14,8 @@ namespace astfri::text
     private:
         int currentIndentationLevel_;
         bool isEmptyLine_;
-    protected:
-        Exporter();
     public:
+        Exporter();
         virtual ~Exporter() = default;
     public:
         virtual void reset();

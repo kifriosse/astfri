@@ -5,11 +5,14 @@
 
 namespace astfri::text
 {
-    template <typename ASTFRI_PEAK>
-    concept Visitable_ASTFRI_Peak =
-        !std::is_abstract_v<ASTFRI_PEAK> &&
-        requires(ASTFRI_PEAK& peak) {
-            peak.accept(std::declval<IVisitor&>());
+    template<typename AstfriPeak>
+    concept VisitableAstfriPeak =
+        !std::is_abstract_v<AstfriPeak> &&
+        requires(AstfriPeak& peak)
+        {
+            {
+                peak.accept(std::declval<IVisitor&>())
+            } -> std::same_as<void>;
         };
 
     class TextLibManager
@@ -19,40 +22,42 @@ namespace astfri::text
         Exporter* exporter_;
         std::string currentOutputFileFormat_;
     public:
-        TextLibManager(const TextLibManager&) = delete;
-        TextLibManager(TextLibManager&&)      = delete;
-        TextLibManager& operator=(const TextLibManager&) = delete;
-        TextLibManager& operator=(TextLibManager&&)      = delete;
         static TextLibManager& get_instance();
+        TextLibManager(TextLibManager const&) = delete;
+        TextLibManager(TextLibManager&&)      = delete;
+        TextLibManager& operator=(TextLibManager const&) = delete;
+        TextLibManager& operator=(TextLibManager&&)      = delete;
     private:
         TextLibManager();
         ~TextLibManager();
     public:
-        template <Visitable_ASTFRI_Peak ASTFRI_PEAK>
-        void visit(const ASTFRI_PEAK& peak);
-        template <Visitable_ASTFRI_Peak ASTFRI_PEAK>
-        void visit_and_export(const ASTFRI_PEAK& peak);
-        void reload_configuration(); // use for default settings
-        void update_configuration(); // only read json file
+        void update_configuration();
+        void reload_configuration();
         void execute_export();
         void reset_exporter();
         void write_new_line();
+        // -----
+        template<VisitableAstfriPeak AstfriPeak>
+        void visit(AstfriPeak const& peak);
+        // -----
+        template<VisitableAstfriPeak AstfriPeak>
+        void visit_and_export(AstfriPeak const& peak);
     private:
         void check_current_file_format();
-        void create_new_exporter(const std::string& fileformat);
+        void create_new_exporter();
     };
 
-    template <Visitable_ASTFRI_Peak ASTFRI_PEAK>
-    inline void TextLibManager::visit(const ASTFRI_PEAK& peak)
+    template<VisitableAstfriPeak AstfriPeak>
+    void TextLibManager::visit(AstfriPeak const& peak)
     {
         visitor_->visit(peak);
     }
 
-    template <Visitable_ASTFRI_Peak ASTFRI_PEAK>
-    inline void TextLibManager::visit_and_export(const ASTFRI_PEAK& peak)
+    template<VisitableAstfriPeak AstfriPeak>
+    void TextLibManager::visit_and_export(AstfriPeak const& peak)
     {
         visitor_->visit(peak);
-        execute_export();
+        exporter_->execute_export();
     }
 }
 
