@@ -16,14 +16,14 @@ namespace astfri::text
     private:
         void write_pseudocode_into_file(STRING fullfilepath) override;
         // WRAPPING CLASSES
-        void write_acc_mod_style(const std::string& accmod);
-        void write_data_type_style(const std::string& datatype);
-        void write_ref_name_style(const std::string& name);
-        void write_operator_style(const std::string& op);
-        void write_separator_style(const std::string& sep);
-        void write_value_style(const std::string& val);
-        void write_system_expr_style(const std::string& expr);
-        void write_other_expr_style(const std::string& expr);
+        void write_acc_mod_style(std::string const& accmod);
+        void write_data_type_style(std::string const& datatype);
+        void write_ref_name_style(std::string const& name);
+        void write_operator_style(std::string const& op);
+        void write_separator_style(std::string const& sep);
+        void write_value_style(std::string const& val);
+        void write_system_expr_style(std::string const& expr);
+        void write_other_expr_style(std::string const& expr);
     public:
         // BRACKETS
         void write_left_bracket(STRING br) override;

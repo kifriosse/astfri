@@ -6,6 +6,7 @@ target_sources(astfri-text PRIVATE
   TextConfigurator.cpp
   Exporter.cpp
   HtmlFileExporter.cpp
+  GeneralASTVisitor.cpp
   ASTTextVisitor.cpp
   TextLibManager.cpp
 )

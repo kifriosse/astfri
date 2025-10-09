@@ -6,58 +6,63 @@
 
 namespace astfri::text
 {
-    template <typename ASTFRI_PEAK>
-    concept Acceptable_ASTFRI_Peak = requires(ASTFRI_PEAK& peak)
-    {
-        { peak.accept(std::declval<IVisitor&>()) };
-    };
+    template<typename AstfriPeak>
+    concept AcceptableAstfriPeak =
+        requires(AstfriPeak& peak)
+        {
+            {
+                peak.accept(std::declval<IVisitor&>())
+            } -> std::same_as<void>;
+        };
 
-    template <typename VParamsOrArgs>
-    concept Vector_of_Params_or_Args =
-        std::same_as<VParamsOrArgs, std::vector<ParamVarDefStmt*>> ||
-        std::same_as<VParamsOrArgs, std::vector<GenericParam*>> ||
+    // -----
+
+    template<typename VectorAstfriPeak>
+    concept VectorParamOrArg =
+        std::same_as<VectorAstfriPeak, std::vector<ParamVarDefStmt*>> ||
+        std::same_as<VectorAstfriPeak, std::vector<GenericParam*>> ||
         //std::same_as<VParamOrArg, std::vector<GenericArg*>> ||
-        std::same_as<VParamsOrArgs, std::vector<Expr*>>;
+        std::same_as<VectorAstfriPeak, std::vector<Expr*>>;
 
-    template <typename VMembers>
-    concept Vector_of_Members =
-        std::same_as<VMembers, std::vector<MemberVarDefStmt*>> ||
-        std::same_as<VMembers, std::vector<ConstructorDefStmt*>> ||
-        std::same_as<VMembers, std::vector<MethodDefStmt*>>;
+    // -----
+
+    template<typename VectorAstfriPeak>
+    concept VectorMember =
+        std::same_as<VectorAstfriPeak, std::vector<MemberVarDefStmt*>> ||
+        std::same_as<VectorAstfriPeak, std::vector<ConstructorDefStmt*>> ||
+        std::same_as<VectorAstfriPeak, std::vector<MethodDefStmt*>>;
+
+    // -----
 
     class GeneralASTVisitor : public virtual IVisitor
     {
     protected:
         Exporter* exporter_;
+    protected:
+        GeneralASTVisitor(Exporter*& exp);
+        virtual ~GeneralASTVisitor() = default;
     public:
-        inline GeneralASTVisitor(Exporter*& exp) : exporter_(exp) {}
-        virtual ~GeneralASTVisitor() = 0;
-        inline void set_exporter(Exporter*& exp) { exporter_ = exp; }
+        void set_exporter(Exporter*& exp);
     protected:
         void write_comma_space(bool isNotLast);
-        template <Acceptable_ASTFRI_Peak ASTFRI_PEAK>
-        void check_and_accept_pointer_w_error(ASTFRI_PEAK* pointer);
-        template <Acceptable_ASTFRI_Peak ASTFRI_PEAK>
-        void check_and_accept_pointer(ASTFRI_PEAK* pointer);
-        template <Vector_of_Params_or_Args VParamsOrArgs>
-        void write_params_or_args(const VParamsOrArgs& vectorPA, bool isGeneric = false);
-        template <Vector_of_Members VMembers>
-        bool has_acc_mod(const VMembers& vectorStmts, VMembers& vectorStmtsTmp, AccessModifier accmod);
+        // -----
+        template<AcceptableAstfriPeak AstfriPeak>
+        void check_and_accept_pointer_w_error(AstfriPeak* pointer);
+        // -----
+        template<AcceptableAstfriPeak AstfriPeak>
+        void check_and_accept_pointer(AstfriPeak* pointer);
+        // -----
+        template<VectorParamOrArg VectorAstfriPeak>
+        void write_params_or_args(VectorAstfriPeak const vectorPA, bool isGeneric = false);
+        // -----
+        template<VectorMember VectorAstfriPeak>
+        bool has_acc_mod(VectorAstfriPeak const& vectorStmts, VectorAstfriPeak& vectorStmtsTmp, AccessModifier accmod);
     };
 
-    inline GeneralASTVisitor::~GeneralASTVisitor() = default;
+    // -----
 
-    inline void GeneralASTVisitor::write_comma_space(bool isNotLast)
-    {
-        if (isNotLast)
-        {
-            exporter_->write_separator_sign(",");
-            exporter_->write_space();
-        }
-    }
-
-    template <Acceptable_ASTFRI_Peak ASTFRI_PEAK>
-    inline void GeneralASTVisitor::check_and_accept_pointer_w_error(ASTFRI_PEAK* pointer)
+    template<AcceptableAstfriPeak AstfriPeak>
+    void GeneralASTVisitor::check_and_accept_pointer_w_error(AstfriPeak* pointer)
     {
         if (pointer)
         {
@@ -69,8 +74,8 @@ namespace astfri::text
         }
     }
 
-    template <Acceptable_ASTFRI_Peak ASTFRI_PEAK>
-    inline void GeneralASTVisitor::check_and_accept_pointer(ASTFRI_PEAK* pointer)
+    template<AcceptableAstfriPeak AstfriPeak>
+    void GeneralASTVisitor::check_and_accept_pointer(AstfriPeak* pointer)
     {
         if (pointer)
         {
@@ -78,8 +83,8 @@ namespace astfri::text
         }
     }
 
-    template <Vector_of_Params_or_Args VParamsOrArgs>
-    void GeneralASTVisitor::write_params_or_args(const VParamsOrArgs& vectorPA, bool isGeneric)
+    template<VectorParamOrArg VectorAstfriPeak>
+    void GeneralASTVisitor::write_params_or_args(VectorAstfriPeak const vectorPA, bool isGeneric)
     {
         if (isGeneric)
         {
@@ -104,8 +109,8 @@ namespace astfri::text
         }
     }
 
-    template <Vector_of_Members VMembers>
-    bool GeneralASTVisitor::has_acc_mod(const VMembers& vectorStmts, VMembers& vectorStmtsTmp, AccessModifier accmod)
+    template<VectorMember VectorAstfriPeak>
+    bool GeneralASTVisitor::has_acc_mod(VectorAstfriPeak const& vectorStmts, VectorAstfriPeak& vectorStmtsTmp, AccessModifier accmod)
     {
         bool hasAccMod = false;
         for (size_t i = 0; i < vectorStmts.size(); ++i)

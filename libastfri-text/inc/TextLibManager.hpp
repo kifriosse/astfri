@@ -15,6 +15,8 @@ namespace astfri::text
             } -> std::same_as<void>;
         };
 
+    // -----
+
     class TextLibManager
     {
         TextConfigurator* configurator_;
@@ -46,6 +48,8 @@ namespace astfri::text
         void check_current_file_format();
         void create_new_exporter();
     };
+
+    // -----
 
     template<VisitableAstfriPeak AstfriPeak>
     void TextLibManager::visit(AstfriPeak const& peak)

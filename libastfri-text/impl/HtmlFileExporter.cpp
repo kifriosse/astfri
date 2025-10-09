@@ -149,56 +149,56 @@ void HtmlFileExporter::write_pseudocode_into_file(STRING fullfilepath)
 
 // WRAPPING CLASSES
 
-void HtmlFileExporter::write_acc_mod_style(const std::string& accmod)
+void HtmlFileExporter::write_acc_mod_style(std::string const& accmod)
 {
     write_text("<span class=\"access-mod\">");
     write_text(std::move(accmod));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_data_type_style(const std::string& datatype)
+void HtmlFileExporter::write_data_type_style(std::string const& datatype)
 {
     write_text("<span class=\"data-type\">");
     write_text(std::move(datatype));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_ref_name_style(const std::string& name)
+void HtmlFileExporter::write_ref_name_style(std::string const& name)
 {
     write_text("<span class=\"ref-name\">");
     write_text(std::move(name));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_operator_style(const std::string& op)
+void HtmlFileExporter::write_operator_style(std::string const& op)
 {
     write_text("<span class=\"operator\">");
     write_text(std::move(op));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_separator_style(const std::string& sep)
+void HtmlFileExporter::write_separator_style(std::string const& sep)
 {
     write_text("<span class=\"separator\">");
     write_text(std::move(sep));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_value_style(const std::string& val)
+void HtmlFileExporter::write_value_style(std::string const& val)
 {
     write_text("<span class=\"value\">");
     write_text(std::move(val));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_system_expr_style(const std::string& expr)
+void HtmlFileExporter::write_system_expr_style(std::string const& expr)
 {
     write_text("<span class=\"system-expr\">");
     write_text(std::move(expr));
     write_text("</span>");
 }
 
-void HtmlFileExporter::write_other_expr_style(const std::string& expr)
+void HtmlFileExporter::write_other_expr_style(std::string const& expr)
 {
     write_text("<span class=\"other-expr\">");
     write_text(std::move(expr));
