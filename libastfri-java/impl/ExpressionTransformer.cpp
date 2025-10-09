@@ -5,6 +5,7 @@
 #include <cstring>
 #include <ranges>
 #include <string>
+#include "libastfri-java/impl/StatementTransformer.hpp"
 
 namespace astfri::java
 {
@@ -31,7 +32,7 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
 {
     std::string nodeType = ts_node_type(tsNode);
     std::string nodeText = get_node_text(tsNode, sourceCode);
-    astfri::Expr* expr;
+    astfri::Expr* expr = nullptr;
     if (nodeType == "decimal_integer_literal")
     {
         expr = exprFactory.mk_int_literal(atoi(nodeText.c_str()));
@@ -118,6 +119,11 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
     else if (nodeType == "line_comment" || nodeType == "block_comment")
     {
         expr = this->exprFactory.mk_string_literal(this->get_node_text(tsNode, sourceCode));
+    }
+    else if (nodeType == "lambda_expression")
+    {
+        auto stmtTr = std::make_unique<StatementTransformer>();
+        return stmtTr->transform_lambda_expr_node(tsNode, sourceCode);
     }
     else
     {
