@@ -1,661 +1,612 @@
 #include <libastfri-text/inc/TextConfigurator.hpp>
 
-#include <rapidjson/document.h>
-#include <rapidjson/filereadstream.h>
+#include <rapidjson/istreamwrapper.h>
 
 #include <filesystem>
 #include <iostream>
+#include <fstream>
+
+using namespace astfri::text;
+
+TextConfigurator& TextConfigurator::get_instance()
+{
+    static TextConfigurator configurator;
+    return configurator;
+}
 
 TextConfigurator::TextConfigurator() :
-    Configurator()
+    GeneralConfigurator()
 {
-    load_new_config_file();
-}
-
-void TextConfigurator::reset()
-{
-    std::cout << " > Reloading configuration file.\n";
-    Configurator::set_defaults();
-    load_new_config_file();
-}
-
-void TextConfigurator::load_new_config_file()
-{
+    isDefaultState_ = true;
+    doOnlyUpdate_ = false;
     set_defaults();
+}
+
+void TextConfigurator::update_configuration()
+{
+    doOnlyUpdate_ = true;
+    reload_configuration();
+    doOnlyUpdate_ = false;
+}
+
+void TextConfigurator::reload_configuration()
+{
     std::string input;
-    std::cout << " > Do you want to load configuration file? [\"y\"/...]: ";
-    std::getline(std::cin, input);
-    if (input != "y")
-    {
-        std::cout << " > Loading default output option.\n";
-        Configurator::set_defaults();
-        return;
-    }
-    std::cout << " > Do you want to load your own configuration file? [\"y\"/...]: ";
+    std::cout << " > Do you want to use configuration file? [\"y\"/...]: ";
     std::getline(std::cin, input);
     if (input == "y")
     {
-        std::cout << " > Put path to .json file: ";
+        std::cout << " > Put path to .json file (without suffix): ";
         std::getline(std::cin, input);
-        if (! input.ends_with(".json"))
+        input.append(".json");
+        std::error_code ec;
+        if (std::filesystem::is_regular_file(input, ec) && !ec)
         {
-            std::cout << " > Wrong file format! Loading default output option.\n";
-            Configurator::set_defaults();
-            return;
+            std::ifstream jsonfile(input);
+            if (!jsonfile)
+            {
+                std::cout << " > File cannot be opened!\n";
+                std::cout << " > No changes applied to configuration.\n";
+                return;
+            }
+            rj::IStreamWrapper wrap(jsonfile);
+            rj::Document doc;
+            doc.ParseStream(wrap);
+            if (doc.HasParseError())
+            {
+                std::cout << " > Error while parsing configuration file!\n";
+                std::cout << " > No changes applied to configuration.\n";
+                return;
+            }
+            if (!doOnlyUpdate_)
+            {
+                set_defaults();
+                GeneralConfigurator::set_defaults();
+            }
+            isDefaultState_ = false;
+            rj::Value const* docPtr = &doc;
+            process_document(docPtr);
+            GeneralConfigurator::process_document(docPtr);
+            std::cout << " > Configuration has been successfully changed.\n";
+        }
+        else
+        {
+            std::cout << " > File not found!\n";
+            std::cout << " > No changes applied to configuration.\n";
         }
     }
     else
     {
-        std::filesystem::path currentPath = std::filesystem::current_path();
-        bool foundBuildFolder             = false;
-        while (currentPath.has_filename() || currentPath.parent_path().has_filename())
+        if (!isDefaultState_)
         {
-            if (currentPath.filename() == "build")
-            {
-                foundBuildFolder = true;
-                break;
-            }
-            currentPath = currentPath.parent_path();
-        }
-        if (foundBuildFolder)
-        {
-            currentPath = currentPath.parent_path() / "libastfri-text" / "impl" / "conf.json";
-            input       = std::move(currentPath);
+            set_defaults();
+            GeneralConfigurator::set_defaults();
+            isDefaultState_ = true;
+            std::cout << " > Configuration set to default values.\n";
         }
         else
         {
-            std::cout << " > Wrong path! Loading default output option.\n";
-            Configurator::set_defaults();
-            return;
+            std::cout << " > No changes applied to configuration.\n";
         }
     }
-    FILE* configFile = fopen(input.c_str(), "r");
-    if (! configFile)
-    {
-        std::cout << " > Wrong path! Loading default output option.\n";
-        Configurator::set_defaults();
-        return;
-    }
-    char readBuffer[65536];
-    namespace rj = rapidjson;
-    rj::FileReadStream inputStream(configFile, readBuffer, sizeof(readBuffer));
-    rj::Document doc;
-    doc.ParseStream(inputStream);
-    if (doc.HasParseError())
-    {
-        std::cout << " > Error in parsing json file! Loading default output option.\n";
-        Configurator::set_defaults();
-        return;
-    }
-    if (doc.HasMember("TEXT_CONFIGURATOR") && doc["TEXT_CONFIGURATOR"].IsObject())
-    {
-        rj::Value& tconf = doc["TEXT_CONFIGURATOR"];
-        if (tconf.HasMember("STRUCT_SETTING") && tconf["STRUCT_SETTING"].IsObject())
-        {
-            rj::Value& sett = tconf["STRUCT_SETTING"];
-            if (sett.HasMember("use_cpp_bracket") && sett["use_cpp_bracket"].IsBool())
-            {
-                useCppBr_ = sett["use_cpp_bracket"].GetBool();
-            }
-            if (sett.HasMember("use_br_color") && sett["use_br_color"].IsBool())
-            {
-                useBrCol_ = sett["use_br_color"].GetBool();
-            }
-            if (sett.HasMember("show_row") && sett["show_row"].IsBool())
-            {
-                shRow_ = sett["show_row"].GetBool();
-            }
-            if (sett.HasMember("show_other_expr") && sett["show_other_expr"].IsBool())
-            {
-                shOtherExpr_ = sett["show_other_expr"].GetBool();
-            }
-            if (sett.HasMember("show_class_dec") && sett["show_class_dec"].IsBool())
-            {
-                shClassDec_ = sett["show_class_dec"].GetBool();
-            }
-            if (sett.HasMember("show_class_def") && sett["show_class_def"].IsBool())
-            {
-                shClassDef_ = sett["show_class_def"].GetBool();
-            }
-            if (sett.HasMember("show_interf_dec") && sett["show_interf_dec"].IsBool())
-            {
-                shInterfDec_ = sett["show_interf_dec"].GetBool();
-            }
-            if (sett.HasMember("show_interf_def") && sett["show_interf_def"].IsBool())
-            {
-                shInterfDef_ = sett["show_interf_def"].GetBool();
-            }
-            if (sett.HasMember("show_gener_par") && sett["show_gener_par"].IsBool())
-            {
-                shGenerPar_ = sett["show_gener_par"].GetBool();
-            }
-            if (sett.HasMember("show_attribute") && sett["show_attribute"].IsBool())
-            {
-                shAttrib_ = sett["show_attribute"].GetBool();
-            }
-            if (sett.HasMember("show_meth_dec") && sett["show_meth_dec"].IsBool())
-            {
-                shMethDec_ = sett["show_meth_dec"].GetBool();
-            }
-            if (sett.HasMember("show_meth_def") && sett["show_meth_def"].IsBool())
-            {
-                shMethDef_ = sett["show_meth_def"].GetBool();
-            }
-            if (sett.HasMember("show_meth_owner") && sett["show_meth_owner"].IsBool())
-            {
-                shMethOwner_ = sett["show_meth_owner"].GetBool();
-            }
-            if (sett.HasMember("show_meth_templ") && sett["show_meth_templ"].IsBool())
-            {
-                shMethTempl_ = sett["show_meth_templ"].GetBool();
-            }
-            if (sett.HasMember("show_func_dec") && sett["show_func_dec"].IsBool())
-            {
-                shFuncDec_ = sett["show_func_dec"].GetBool();
-            }
-            if (sett.HasMember("show_func_def") && sett["show_func_def"].IsBool())
-            {
-                shFuncDef_ = sett["show_func_def"].GetBool();
-            }
-            if (sett.HasMember("show_global_par") && sett["show_global_par"].IsBool())
-            {
-                shGlobPar_ = sett["show_global_par"].GetBool();
-            }
-            if (sett.HasMember("tab_length") && sett["tab_length"].IsInt())
-            {
-                int val = sett["tab_length"].GetInt();
-                if (val >= 0 && val <= 10)
-                {
-                    tabLen_ = val;
-                }
-            }
-            if (sett.HasMember("margin_length") && sett["margin_length"].IsInt())
-            {
-                int val = sett["margin_length"].GetInt();
-                if (val >= 0 && val <= 10)
-                {
-                    margLen_ = val;
-                }
-            }
-            if (sett.HasMember("round_br_colors") && sett["round_br_colors"].IsArray())
-            {
-                rj::Value& colors = sett["round_br_colors"];
-                for (size_t i = 0; i < colors.Size() && i < 4; ++i)
-                {
-                    if (colors[i].IsString())
-                    {
-                        roundBrCol_->push_back(std::stringstream(colors[i].GetString()));
-                    }
-                }
-            }
-            if (sett.HasMember("curl_br_colors") && sett["curl_br_colors"].IsArray())
-            {
-                rj::Value& colors = sett["curl_br_colors"];
-                for (size_t i = 0; i < colors.Size() && i < 4; ++i)
-                {
-                    if (colors[i].IsString())
-                    {
-                        curlBrCol_->push_back(std::stringstream(colors[i].GetString()));
-                    }
-                }
-            }
-            if (sett.HasMember("row_style") && sett["row_style"].IsString())
-            {
-                rowStyle_ = std::make_unique<std::stringstream>(sett["row_style"].GetString());
-            }
-        }
-        if (tconf.HasMember("SYSTEM_EXPR") && tconf["SYSTEM_EXPR"].IsObject())
-        {
-            rj::Value& ex = tconf["SYSTEM_EXPR"];
-            if (ex.HasMember("class_word") && ex["class_word"].IsString()
-                && ex["class_word"].GetStringLength() > 0)
-            {
-                classWord_ = std::make_unique<std::stringstream>(ex["class_word"].GetString());
-            }
-            if (ex.HasMember("interface_word") && ex["interface_word"].IsString()
-                && ex["interface_word"].GetStringLength() > 0)
-            {
-                interfaceWord_
-                    = std::make_unique<std::stringstream>(ex["interface_word"].GetString());
-            }
-            if (ex.HasMember("implement_word") && ex["implement_word"].IsString()
-                && ex["implement_word"].GetStringLength() > 0)
-            {
-                implementWord_
-                    = std::make_unique<std::stringstream>(ex["implement_word"].GetString());
-            }
-            if (ex.HasMember("extend_word") && ex["extend_word"].IsString()
-                && ex["extend_word"].GetStringLength() > 0)
-            {
-                extendWord_ = std::make_unique<std::stringstream>(ex["extend_word"].GetString());
-            }
-            if (ex.HasMember("this_word") && ex["this_word"].IsString()
-                && ex["this_word"].GetStringLength() > 0)
-            {
-                thisWord_ = std::make_unique<std::stringstream>(ex["this_word"].GetString());
-            }
-            if (ex.HasMember("return_word") && ex["return_word"].IsString()
-                && ex["return_word"].GetStringLength() > 0)
-            {
-                returnWord_ = std::make_unique<std::stringstream>(ex["return_word"].GetString());
-            }
-            if (ex.HasMember("continue_word") && ex["continue_word"].IsString()
-                && ex["continue_word"].GetStringLength() > 0)
-            {
-                continueWord_
-                    = std::make_unique<std::stringstream>(ex["continue_word"].GetString());
-            }
-            if (ex.HasMember("break_word") && ex["break_word"].IsString()
-                && ex["break_word"].GetStringLength() > 0)
-            {
-                breakWord_ = std::make_unique<std::stringstream>(ex["break_word"].GetString());
-            }
-            if (ex.HasMember("throw_word") && ex["throw_word"].IsString()
-                && ex["throw_word"].GetStringLength() > 0)
-            {
-                throwWord_ = std::make_unique<std::stringstream>(ex["throw_word"].GetString());
-            }
-            if (ex.HasMember("if_word") && ex["if_word"].IsString()
-                && ex["if_word"].GetStringLength() > 0)
-            {
-                ifWord_ = std::make_unique<std::stringstream>(ex["if_word"].GetString());
-            }
-            if (ex.HasMember("else_word") && ex["else_word"].IsString()
-                && ex["else_word"].GetStringLength() > 0)
-            {
-                elseWord_ = std::make_unique<std::stringstream>(ex["else_word"].GetString());
-            }
-            if (ex.HasMember("do_word") && ex["do_word"].IsString()
-                && ex["do_word"].GetStringLength() > 0)
-            {
-                doWord_ = std::make_unique<std::stringstream>(ex["do_word"].GetString());
-            }
-            if (ex.HasMember("while_word") && ex["while_word"].IsString()
-                && ex["while_word"].GetStringLength() > 0)
-            {
-                whileWord_ = std::make_unique<std::stringstream>(ex["while_word"].GetString());
-            }
-            if (ex.HasMember("for_word") && ex["for_word"].IsString()
-                && ex["for_word"].GetStringLength() > 0)
-            {
-                forWord_ = std::make_unique<std::stringstream>(ex["for_word"].GetString());
-            }
-            if (ex.HasMember("repeat_word") && ex["repeat_word"].IsString()
-                && ex["repeat_word"].GetStringLength() > 0)
-            {
-                repeatWord_ = std::make_unique<std::stringstream>(ex["repeat_word"].GetString());
-            }
-            if (ex.HasMember("switch_word") && ex["switch_word"].IsString()
-                && ex["switch_word"].GetStringLength() > 0)
-            {
-                switchWord_ = std::make_unique<std::stringstream>(ex["switch_word"].GetString());
-            }
-            if (ex.HasMember("case_word") && ex["case_word"].IsString()
-                && ex["case_word"].GetStringLength() > 0)
-            {
-                caseWord_ = std::make_unique<std::stringstream>(ex["case_word"].GetString());
-            }
-            if (ex.HasMember("default_word") && ex["default_word"].IsString()
-                && ex["default_word"].GetStringLength() > 0)
-            {
-                defaultWord_ = std::make_unique<std::stringstream>(ex["default_word"].GetString());
-            }
-            if (ex.HasMember("new_word") && ex["new_word"].IsString()
-                && ex["new_word"].GetStringLength() > 0)
-            {
-                newWord_ = std::make_unique<std::stringstream>(ex["new_word"].GetString());
-            }
-            if (ex.HasMember("delete_word") && ex["delete_word"].IsString()
-                && ex["delete_word"].GetStringLength() > 0)
-            {
-                deleteWord_ = std::make_unique<std::stringstream>(ex["delete_word"].GetString());
-            }
-            if (ex.HasMember("pointer_word") && ex["pointer_word"].IsString()
-                && ex["pointer_word"].GetStringLength() > 0)
-            {
-                pointerWord_ = std::make_unique<std::stringstream>(ex["pointer_word"].GetString());
-            }
-            if (ex.HasMember("virtual_word") && ex["virtual_word"].IsString()
-                && ex["virtual_word"].GetStringLength() > 0)
-            {
-                virtualWord_ = std::make_unique<std::stringstream>(ex["virtual_word"].GetString());
-            }
-            if (ex.HasMember("abstract_word") && ex["abstract_word"].IsString()
-                && ex["abstract_word"].GetStringLength() > 0)
-            {
-                abstractWord_
-                    = std::make_unique<std::stringstream>(ex["abstract_word"].GetString());
-            }
-            if (ex.HasMember("template_word") && ex["template_word"].IsString()
-                && ex["template_word"].GetStringLength() > 0)
-            {
-                templateWord_
-                    = std::make_unique<std::stringstream>(ex["template_word"].GetString());
-            }
-            if (ex.HasMember("STYLE") && ex["STYLE"].IsObject())
-            {
-                rj::Value& st = ex["STYLE"];
-                if (st.HasMember("general_style") && st["general_style"].IsString())
-                {
-                    systExprStyle_
-                        = std::make_unique<std::stringstream>(st["general_style"].GetString());
-                }
-                if (st.HasMember("class_word_style") && st["class_word_style"].IsString())
-                {
-                    classWordStyle_
-                        = std::make_unique<std::stringstream>(st["class_word_style"].GetString());
-                }
-                if (st.HasMember("interface_word_style") && st["interface_word_style"].IsString())
-                {
-                    interfaceWordStyle_
-                        = std::make_unique<std::stringstream>(st["interface_word_style"].GetString()
-                        );
-                }
-                if (st.HasMember("implement_word_style") && st["implement_word_style"].IsString())
-                {
-                    implementWordStyle_
-                        = std::make_unique<std::stringstream>(st["implement_word_style"].GetString()
-                        );
-                }
-                if (st.HasMember("extend_word_style") && st["extend_word_style"].IsString())
-                {
-                    extendWordStyle_
-                        = std::make_unique<std::stringstream>(st["extend_word_style"].GetString());
-                }
-                if (st.HasMember("this_word_style") && st["this_word_style"].IsString())
-                {
-                    thisWordStyle_
-                        = std::make_unique<std::stringstream>(st["this_word_style"].GetString());
-                }
-                if (st.HasMember("return_word_style") && st["return_word_style"].IsString())
-                {
-                    returnWordStyle_
-                        = std::make_unique<std::stringstream>(st["return_word_style"].GetString());
-                }
-                if (st.HasMember("continue_word_style") && st["continue_word_style"].IsString())
-                {
-                    continueWordStyle_
-                        = std::make_unique<std::stringstream>(st["continue_word_style"].GetString()
-                        );
-                }
-                if (st.HasMember("break_word_style") && st["break_word_style"].IsString())
-                {
-                    breakWordStyle_
-                        = std::make_unique<std::stringstream>(st["break_word_style"].GetString());
-                }
-                if (st.HasMember("throw_word_style") && st["throw_word_style"].IsString())
-                {
-                    throwWordStyle_
-                        = std::make_unique<std::stringstream>(st["throw_word_style"].GetString());
-                }
-                if (st.HasMember("if_word_style") && st["if_word_style"].IsString())
-                {
-                    ifWordStyle_
-                        = std::make_unique<std::stringstream>(st["if_word_style"].GetString());
-                }
-                if (st.HasMember("else_word_style") && st["else_word_style"].IsString())
-                {
-                    elseWordStyle_
-                        = std::make_unique<std::stringstream>(st["else_word_style"].GetString());
-                }
-                if (st.HasMember("do_word_style") && st["do_word_style"].IsString())
-                {
-                    doWordStyle_
-                        = std::make_unique<std::stringstream>(st["do_word_style"].GetString());
-                }
-                if (st.HasMember("while_word_style") && st["while_word_style"].IsString())
-                {
-                    whileWordStyle_
-                        = std::make_unique<std::stringstream>(st["while_word_style"].GetString());
-                }
-                if (st.HasMember("for_word_style") && st["for_word_style"].IsString())
-                {
-                    forWordStyle_
-                        = std::make_unique<std::stringstream>(st["for_word_style"].GetString());
-                }
-                if (st.HasMember("repeat_word_style") && st["repeat_word_style"].IsString())
-                {
-                    repeatWordStyle_
-                        = std::make_unique<std::stringstream>(st["repeat_word_style"].GetString());
-                }
-                if (st.HasMember("switch_word_style") && st["switch_word_style"].IsString())
-                {
-                    switchWordStyle_
-                        = std::make_unique<std::stringstream>(st["switch_word_style"].GetString());
-                }
-                if (st.HasMember("case_word_style") && st["case_word_style"].IsString())
-                {
-                    caseWordStyle_
-                        = std::make_unique<std::stringstream>(st["case_word_style"].GetString());
-                }
-                if (st.HasMember("default_word_style") && st["default_word_style"].IsString())
-                {
-                    defaultWordStyle_
-                        = std::make_unique<std::stringstream>(st["default_word_style"].GetString());
-                }
-                if (st.HasMember("new_word_style") && st["new_word_style"].IsString())
-                {
-                    newWordStyle_
-                        = std::make_unique<std::stringstream>(st["new_word_style"].GetString());
-                }
-                if (st.HasMember("delete_word_style") && st["delete_word_style"].IsString())
-                {
-                    deleteWordStyle_
-                        = std::make_unique<std::stringstream>(st["delete_word_style"].GetString());
-                }
-                if (st.HasMember("pointer_word_style") && st["pointer_word_style"].IsString())
-                {
-                    pointerWordStyle_
-                        = std::make_unique<std::stringstream>(st["pointer_word_style"].GetString());
-                }
-                if (st.HasMember("virtual_word_style") && st["virtual_word_style"].IsString())
-                {
-                    virtualWordStyle_
-                        = std::make_unique<std::stringstream>(st["virtual_word_style"].GetString());
-                }
-                if (st.HasMember("abstract_word_style") && st["abstract_word_style"].IsString())
-                {
-                    abstractWordStyle_
-                        = std::make_unique<std::stringstream>(st["abstract_word_style"].GetString()
-                        );
-                }
-                if (st.HasMember("template_word_style") && st["template_word_style"].IsString())
-                {
-                    templateWordStyle_
-                        = std::make_unique<std::stringstream>(st["template_word_style"].GetString()
-                        );
-                }
-            }
-        }
-        if (tconf.HasMember("OTHER_EXPR") && tconf["OTHER_EXPR"].IsObject())
-        {
-            rj::Value& ex = tconf["OTHER_EXPR"];
-            if (ex.HasMember("constructor_word") && ex["constructor_word"].IsString()
-                && ex["constructor_word"].GetStringLength() > 0)
-            {
-                constrWord_
-                    = std::make_unique<std::stringstream>(ex["constructor_word"].GetString());
-            }
-            if (ex.HasMember("destructor_word") && ex["destructor_word"].IsString()
-                && ex["destructor_word"].GetStringLength() > 0)
-            {
-                destrWord_ = std::make_unique<std::stringstream>(ex["destructor_word"].GetString());
-            }
-            if (ex.HasMember("method_word") && ex["method_word"].IsString()
-                && ex["method_word"].GetStringLength() > 0)
-            {
-                methodWord_ = std::make_unique<std::stringstream>(ex["method_word"].GetString());
-            }
-            if (ex.HasMember("function_word") && ex["function_word"].IsString()
-                && ex["function_word"].GetStringLength() > 0)
-            {
-                functionWord_
-                    = std::make_unique<std::stringstream>(ex["function_word"].GetString());
-            }
-            if (ex.HasMember("lambda_word") && ex["lambda_word"].IsString())
-            {
-                lambdaWord_ = std::make_unique<std::stringstream>(ex["lambda_word"].GetString());
-            }
-            if (ex.HasMember("call_word") && ex["call_word"].IsString()
-                && ex["call_word"].GetStringLength() > 0)
-            {
-                callWord_ = std::make_unique<std::stringstream>(ex["call_word"].GetString());
-            }
-            if (ex.HasMember("define_word") && ex["define_word"].IsString()
-                && ex["define_word"].GetStringLength() > 0)
-            {
-                defineWord_ = std::make_unique<std::stringstream>(ex["define_word"].GetString());
-            }
-            if (ex.HasMember("returns_word") && ex["returns_word"].IsString()
-                && ex["returns_word"].GetStringLength() > 0)
-            {
-                returnsWord_ = std::make_unique<std::stringstream>(ex["returns_word"].GetString());
-            }
-            if (ex.HasMember("STYLE") && ex["STYLE"].IsObject())
-            {
-                rj::Value& st = ex["STYLE"];
-                if (st.HasMember("general_style") && st["general_style"].IsString())
-                {
-                    otherExprStyle_
-                        = std::make_unique<std::stringstream>(st["general_style"].GetString());
-                }
-                if (st.HasMember("constructor_style") && st["constructor_style"].IsString())
-                {
-                    constrStyle_
-                        = std::make_unique<std::stringstream>(st["constructor_style"].GetString());
-                }
-                if (st.HasMember("destructor_style") && st["destructor_style"].IsString())
-                {
-                    destrStyle_
-                        = std::make_unique<std::stringstream>(st["destructor_style"].GetString());
-                }
-                if (st.HasMember("method_word_style") && st["method_word_style"].IsString())
-                {
-                    methodWordStyle_
-                        = std::make_unique<std::stringstream>(st["method_word_style"].GetString());
-                }
-                if (st.HasMember("function_word_style") && st["function_word_style"].IsString())
-                {
-                    functionWordStyle_
-                        = std::make_unique<std::stringstream>(st["function_word_style"].GetString()
-                        );
-                }
-                if (st.HasMember("lambda_word_style") && st["lambda_word_style"].IsString())
-                {
-                    lambdaWordStyle_
-                        = std::make_unique<std::stringstream>(st["lambda_word_style"].GetString());
-                }
-                if (st.HasMember("call_word_style") && st["call_word_style"].IsString())
-                {
-                    callWordStyle_
-                        = std::make_unique<std::stringstream>(st["call_word_style"].GetString());
-                }
-                if (st.HasMember("define_word_style") && st["define_word_style"].IsString())
-                {
-                    defineWordStyle_
-                        = std::make_unique<std::stringstream>(st["define_word_style"].GetString());
-                }
-                if (st.HasMember("returns_word_style") && st["returns_word_style"].IsString())
-                {
-                    returnsWordStyle_
-                        = std::make_unique<std::stringstream>(st["returns_word_style"].GetString());
-                }
-            }
-        }
-    }
-    fclose(std::move(configFile));
-    Configurator::set_input_path(std::move(input));
-    Configurator::load_new_config_file();
 }
 
 void TextConfigurator::set_defaults()
 {
-    useCppBr_           = true;
-    useBrCol_           = true;
-    shRow_              = true;
-    shOtherExpr_        = true;
-    shClassDec_         = true;
-    shClassDef_         = true;
-    shInterfDec_        = true;
-    shInterfDef_        = true;
-    shGenerPar_         = true;
-    shAttrib_           = true;
-    shMethDec_          = true;
-    shMethDef_          = true;
-    shMethOwner_        = true;
-    shMethTempl_        = true;
-    shFuncDec_          = true;
-    shFuncDef_          = true;
-    shGlobPar_          = true;
-    tabLen_             = 4;
-    margLen_            = 3;
-    roundBrCol_         = std::make_unique<std::vector<std::stringstream>>();
-    curlBrCol_          = std::make_unique<std::vector<std::stringstream>>();
-    rowStyle_           = std::make_unique<std::stringstream>();
-    classWord_          = std::make_unique<std::stringstream>("class");
-    interfaceWord_      = std::make_unique<std::stringstream>("interface");
-    implementWord_      = std::make_unique<std::stringstream>("implements");
-    extendWord_         = std::make_unique<std::stringstream>("extends");
-    thisWord_           = std::make_unique<std::stringstream>("this");
-    returnWord_         = std::make_unique<std::stringstream>("return");
-    continueWord_       = std::make_unique<std::stringstream>("continue");
-    breakWord_          = std::make_unique<std::stringstream>("break");
-    throwWord_          = std::make_unique<std::stringstream>("throw");
-    ifWord_             = std::make_unique<std::stringstream>("if");
-    elseWord_           = std::make_unique<std::stringstream>("else");
-    doWord_             = std::make_unique<std::stringstream>("do");
-    whileWord_          = std::make_unique<std::stringstream>("while");
-    forWord_            = std::make_unique<std::stringstream>("for");
-    repeatWord_         = std::make_unique<std::stringstream>("repeat");
-    switchWord_         = std::make_unique<std::stringstream>("switch");
-    caseWord_           = std::make_unique<std::stringstream>("case");
-    defaultWord_        = std::make_unique<std::stringstream>("default");
-    newWord_            = std::make_unique<std::stringstream>("new");
-    deleteWord_         = std::make_unique<std::stringstream>("delete");
-    pointerWord_        = std::make_unique<std::stringstream>("↑");
-    virtualWord_        = std::make_unique<std::stringstream>("is virtual");
-    abstractWord_       = std::make_unique<std::stringstream>("is abstract");
-    templateWord_       = std::make_unique<std::stringstream>("template");
-    systExprStyle_      = std::make_unique<std::stringstream>();
-    classWordStyle_     = std::make_unique<std::stringstream>();
-    interfaceWordStyle_ = std::make_unique<std::stringstream>();
-    implementWordStyle_ = std::make_unique<std::stringstream>();
-    extendWordStyle_    = std::make_unique<std::stringstream>();
-    thisWordStyle_      = std::make_unique<std::stringstream>();
-    returnWordStyle_    = std::make_unique<std::stringstream>();
-    continueWordStyle_  = std::make_unique<std::stringstream>();
-    breakWordStyle_     = std::make_unique<std::stringstream>();
-    throwWordStyle_     = std::make_unique<std::stringstream>();
-    ifWordStyle_        = std::make_unique<std::stringstream>();
-    elseWordStyle_      = std::make_unique<std::stringstream>();
-    doWordStyle_        = std::make_unique<std::stringstream>();
-    whileWordStyle_     = std::make_unique<std::stringstream>();
-    forWordStyle_       = std::make_unique<std::stringstream>();
-    repeatWordStyle_    = std::make_unique<std::stringstream>();
-    switchWordStyle_    = std::make_unique<std::stringstream>();
-    caseWordStyle_      = std::make_unique<std::stringstream>();
-    defaultWordStyle_   = std::make_unique<std::stringstream>();
-    newWordStyle_       = std::make_unique<std::stringstream>();
-    deleteWordStyle_    = std::make_unique<std::stringstream>();
-    pointerWordStyle_   = std::make_unique<std::stringstream>();
-    virtualWordStyle_   = std::make_unique<std::stringstream>();
-    abstractWordStyle_  = std::make_unique<std::stringstream>();
-    templateWordStyle_  = std::make_unique<std::stringstream>();
-    constrWord_         = std::make_unique<std::stringstream>("constructor");
-    destrWord_          = std::make_unique<std::stringstream>("destructor");
-    methodWord_         = std::make_unique<std::stringstream>("method");
-    functionWord_       = std::make_unique<std::stringstream>("function");
-    lambdaWord_         = std::make_unique<std::stringstream>("λ");
-    callWord_           = std::make_unique<std::stringstream>("call");
-    defineWord_         = std::make_unique<std::stringstream>("define");
-    returnsWord_        = std::make_unique<std::stringstream>("returns");
-    otherExprStyle_     = std::make_unique<std::stringstream>();
-    constrStyle_        = std::make_unique<std::stringstream>();
-    destrStyle_         = std::make_unique<std::stringstream>();
-    methodWordStyle_    = std::make_unique<std::stringstream>();
-    functionWordStyle_  = std::make_unique<std::stringstream>();
-    lambdaWordStyle_    = std::make_unique<std::stringstream>();
-    callWordStyle_      = std::make_unique<std::stringstream>();
-    defineWordStyle_    = std::make_unique<std::stringstream>();
-    returnsWordStyle_   = std::make_unique<std::stringstream>();
+    // TEXT_FORMAT
+    defaultTextStyle_ = std::make_unique<ss>("font-family:Consolas;font-size:18px");
+    rowNumStyle_ = std::make_unique<ss>();
+    bracketColors_ = std::make_unique<std::vector<ss>>();
+    tabulatorLen_ = 4;
+    textMarginLeftLen_ = 3;
+    rowNumMarginLeftLen_ = 1;
+    useBracketColors_ = true;
+    shRowNum_ = true;
+    shDotAfterRowNum_ = true;
+    shRowNumOnEmptyRow_ = true;
+    resetRowNumOnEmptyRow_ = false;
+    newLineForCurlBracket_ = true;
+    // CODE_STRUCTURE
+    shOtherExpressions_ = true;
+    shGlobalVars_ = true;
+    shGenericParams_ = true;
+    shClassDeclar_ = true;
+    shClassDefin_ = true;
+    shClassInline_ = false;
+    shInterfDeclar_ = true;
+    shInterfDefin_ = true;
+    shMemberVars_ = true;
+    shCoDeMeDeclar_ = true;
+    shCoDeMeDefin_ = true;
+    shCoDeMeOwner_ = true;
+    shCoDeMeTemplate_ = true;
+    shFuncDeclar_ = true;
+    shFuncDefin_ = true;
+    // SYSTEM_EXPRESSIONS
+    classWord_     = std::make_unique<ss>("class");
+    interfaceWord_ = std::make_unique<ss>("interface");
+    implementWord_ = std::make_unique<ss>("implements");
+    extendWord_    = std::make_unique<ss>("extends");
+    thisWord_      = std::make_unique<ss>("this");
+    returnWord_    = std::make_unique<ss>("return");
+    continueWord_  = std::make_unique<ss>("continue");
+    breakWord_     = std::make_unique<ss>("break");
+    throwWord_     = std::make_unique<ss>("throw");
+    ifWord_        = std::make_unique<ss>("if");
+    elseWord_      = std::make_unique<ss>("else");
+    doWord_        = std::make_unique<ss>("do");
+    whileWord_     = std::make_unique<ss>("while");
+    forWord_       = std::make_unique<ss>("for");
+    repeatWord_    = std::make_unique<ss>("repeat");
+    switchWord_    = std::make_unique<ss>("switch");
+    caseWord_      = std::make_unique<ss>("case");
+    defaultWord_   = std::make_unique<ss>("default");
+    newWord_       = std::make_unique<ss>("new");
+    deleteWord_    = std::make_unique<ss>("delete");
+    pointerWord_   = std::make_unique<ss>("↑");
+    virtualWord_   = std::make_unique<ss>("is virtual");
+    abstractWord_  = std::make_unique<ss>("is abstract");
+    templateWord_  = std::make_unique<ss>("template");
+    // STYLE
+    systExprStyle_      = std::make_unique<ss>();
+    classWordStyle_     = std::make_unique<ss>();
+    interfaceWordStyle_ = std::make_unique<ss>();
+    implementWordStyle_ = std::make_unique<ss>();
+    extendWordStyle_    = std::make_unique<ss>();
+    thisWordStyle_      = std::make_unique<ss>();
+    returnWordStyle_    = std::make_unique<ss>();
+    continueWordStyle_  = std::make_unique<ss>();
+    breakWordStyle_     = std::make_unique<ss>();
+    throwWordStyle_     = std::make_unique<ss>();
+    ifWordStyle_        = std::make_unique<ss>();
+    elseWordStyle_      = std::make_unique<ss>();
+    doWordStyle_        = std::make_unique<ss>();
+    whileWordStyle_     = std::make_unique<ss>();
+    forWordStyle_       = std::make_unique<ss>();
+    repeatWordStyle_    = std::make_unique<ss>();
+    switchWordStyle_    = std::make_unique<ss>();
+    caseWordStyle_      = std::make_unique<ss>();
+    defaultWordStyle_   = std::make_unique<ss>();
+    newWordStyle_       = std::make_unique<ss>();
+    deleteWordStyle_    = std::make_unique<ss>();
+    pointerWordStyle_   = std::make_unique<ss>();
+    virtualWordStyle_   = std::make_unique<ss>();
+    abstractWordStyle_  = std::make_unique<ss>();
+    templateWordStyle_  = std::make_unique<ss>();
+    // OTHER_EXPRESSIONS
+    constructorWord_ = std::make_unique<ss>("constructor");
+    destructorWord_  = std::make_unique<ss>("destructor");
+    methodWord_      = std::make_unique<ss>("method");
+    functionWord_    = std::make_unique<ss>("function");
+    lambdaWord_      = std::make_unique<ss>("λ");
+    callWord_        = std::make_unique<ss>("call");
+    defineWord_      = std::make_unique<ss>("define");
+    returnsWord_     = std::make_unique<ss>("returns");
+    // STYLE
+    otherExprStyle_       = std::make_unique<ss>();
+    constructorWordStyle_ = std::make_unique<ss>();
+    destructorWordStyle_  = std::make_unique<ss>();
+    methodWordStyle_      = std::make_unique<ss>();
+    functionWordStyle_    = std::make_unique<ss>();
+    lambdaWordStyle_      = std::make_unique<ss>();
+    callWordStyle_        = std::make_unique<ss>();
+    defineWordStyle_      = std::make_unique<ss>();
+    returnsWordStyle_     = std::make_unique<ss>();
+}
+
+void TextConfigurator::process_document(rj::Value const*& doc)
+{
+    rj::Value const* textConf;
+    // TEXT_CONFIGURATOR
+    if (is_object("TEXT_CONFIGURATOR", doc, textConf))
+    {
+        rj::Value const* tmp;
+        // TEXT_FORMAT
+        if (is_object("TEXT_FORMAT", textConf, tmp))
+        {
+            process_text_format(tmp);
+        }
+        // CODE_STRUCTURE
+        if (is_object("CODE_STRUCTURE", textConf, tmp))
+        {
+            process_code_structure(tmp);
+        }
+        // SYSTEM_EXPRESSIONS
+        if (is_object("SYSTEM_EXPRESSIONS", textConf, tmp))
+        {
+            process_system_expressions(tmp);
+        }
+        // OTHER_EXPRESSIONS
+        if (is_object("OTHER_EXPRESSIONS", textConf, tmp))
+        {
+            process_other_expressions(tmp);
+        }
+    }
+}
+
+void TextConfigurator::process_text_format(rj::Value const*& format)
+{
+    std::string stringVal;
+    if (is_string("default_text_style", format, stringVal, false))
+    {
+        defaultTextStyle_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("row_number_style", format, stringVal, false))
+    {
+        rowNumStyle_ = std::make_unique<ss>(stringVal);
+    }
+    rj::Value const* array;
+    if (is_array("bracket_colors", format, array))
+    {
+        bracketColors_->clear();
+        for (size_t i = 0; i < array->Size(); ++i)
+        {
+            if (array[i].IsString() && array[i].GetStringLength() > 0)
+            {
+                bracketColors_->push_back(ss(array[i].GetString()));
+                if (bracketColors_->size() == 4)
+                {
+                    break;
+                }
+            }
+        }
+    }
+    if (is_int("tabulator_length", format, tabulatorLen_))
+    {
+    }
+    if (is_int("text_margin_left_length", format, textMarginLeftLen_))
+    {
+    }
+    if (is_int("row_number_margin_left_length", format, rowNumMarginLeftLen_))
+    {
+    }
+    if (is_bool("use_bracket_colors", format, useBracketColors_))
+    {
+    }
+    if (is_bool("show_row_number", format, shRowNum_))
+    {
+    }
+    if (is_bool("show_dot_after_row_number", format, shDotAfterRowNum_))
+    {
+    }
+    if (is_bool("show_row_num_on_empty_row", format, shRowNumOnEmptyRow_))
+    {
+    }
+    if (is_bool("reset_row_number_on_empty_row", format, resetRowNumOnEmptyRow_))
+    {
+    }
+    if (is_bool("new_line_for_curl_bracket", format, newLineForCurlBracket_))
+    {
+    }
+}
+
+void TextConfigurator::process_code_structure(rj::Value const*& structure)
+{
+    if (is_bool("show_other_expressions", structure, shOtherExpressions_))
+    {
+    }
+    if (is_bool("show_global_vars", structure, shGlobalVars_))
+    {
+    }
+    if (is_bool("show_generic_params", structure, shGenericParams_))
+    {
+    }
+    if (is_bool("show_class_declaration", structure, shClassDeclar_))
+    {
+    }
+    if (is_bool("show_class_definition", structure, shClassDefin_))
+    {
+    }
+    if (is_bool("show_class_inline", structure, shClassInline_))
+    {
+    }
+    if (is_bool("show_interface_declaration", structure, shInterfDeclar_))
+    {
+    }
+    if (is_bool("show_interface_definition", structure, shInterfDefin_))
+    {
+    }
+    if (is_bool("show_member_vars", structure, shMemberVars_))
+    {
+    }
+    if (is_bool("show_member_operations_declaration", structure, shCoDeMeDeclar_))
+    {
+    }
+    if (is_bool("show_member_operations_definition", structure, shCoDeMeDefin_))
+    {
+    }
+    if (is_bool("show_member_operations_owner", structure, shCoDeMeOwner_))
+    {
+    }
+    if (is_bool("show_member_operations_template", structure, shCoDeMeTemplate_))
+    {
+    }
+    if (is_bool("show_function_declaration", structure, shFuncDeclar_))
+    {
+    }
+    if (is_bool("show_function_definition", structure, shFuncDefin_))
+    {
+    }
+}
+
+void TextConfigurator::process_system_expressions(rj::Value const*& expr)
+{
+    std::string stringVal;
+    if (is_string("class_word", expr, stringVal, true))
+    {
+        classWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("interface_word", expr, stringVal, true))
+    {
+        interfaceWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("implement_word", expr, stringVal, true))
+    {
+        implementWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("extend_word", expr, stringVal, true))
+    {
+        extendWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("this_word", expr, stringVal, true))
+    {
+        thisWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("return_word", expr, stringVal, true))
+    {
+        returnWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("continue_word", expr, stringVal, true))
+    {
+        continueWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("break_word", expr, stringVal, true))
+    {
+        breakWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("throw_word", expr, stringVal, true))
+    {
+        throwWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("if_word", expr, stringVal, true))
+    {
+        ifWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("else_word", expr, stringVal, true))
+    {
+        elseWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("do_word", expr, stringVal, true))
+    {
+        doWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("while_word", expr, stringVal, true))
+    {
+        whileWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("for_word", expr, stringVal, true))
+    {
+        forWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("repeat_word", expr, stringVal, true))
+    {
+        repeatWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("switch_word", expr, stringVal, true))
+    {
+        switchWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("case_word", expr, stringVal, true))
+    {
+        caseWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("default_word", expr, stringVal, true))
+    {
+        defaultWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("new_word", expr, stringVal, true))
+    {
+        newWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("delete_word", expr, stringVal, true))
+    {
+        deleteWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("pointer_word", expr, stringVal, false))
+    {
+        pointerWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("virtual_word", expr, stringVal, true))
+    {
+        virtualWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("abstract_word", expr, stringVal, true))
+    {
+        abstractWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("template_word", expr, stringVal, true))
+    {
+        templateWord_ = std::make_unique<ss>(stringVal);
+    }
+    rj::Value const* style;
+    if (is_object("STYLE", expr, style))
+    {
+        if (is_string("default_style", style, stringVal, false))
+        {
+            systExprStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("class_word_style", style, stringVal, false))
+        {
+            classWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("interface_word_style", style, stringVal, false))
+        {
+            interfaceWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("implement_word_style", style, stringVal, false))
+        {
+            implementWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("extend_word_style", style, stringVal, false))
+        {
+            extendWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("this_word_style", style, stringVal, false))
+        {
+            thisWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("return_word_style", style, stringVal, false))
+        {
+            returnWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("continue_word_style", style, stringVal, false))
+        {
+            continueWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("break_word_style", style, stringVal, false))
+        {
+            breakWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("throw_word_style", style, stringVal, false))
+        {
+            throwWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("if_word_style", style, stringVal, false))
+        {
+            ifWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("else_word_style", style, stringVal, false))
+        {
+            elseWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("do_word_style", style, stringVal, false))
+        {
+            doWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("while_word_style", style, stringVal, false))
+        {
+            whileWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("for_word_style", style, stringVal, false))
+        {
+            forWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("repeat_word_style", style, stringVal, false))
+        {
+            repeatWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("switch_word_style", style, stringVal, false))
+        {
+            switchWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("case_word_style", style, stringVal, false))
+        {
+            caseWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("default_word_style", style, stringVal, false))
+        {
+            defaultWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("new_word_style", style, stringVal, false))
+        {
+            newWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("delete_word_style", style, stringVal, false))
+        {
+            deleteWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("pointer_word_style", style, stringVal, false))
+        {
+            pointerWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("virtual_word_style", style, stringVal, false))
+        {
+            virtualWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("abstract_word_style", style, stringVal, false))
+        {
+            abstractWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("template_word_style", style, stringVal, false))
+        {
+            templateWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+    }
+}
+
+void TextConfigurator::process_other_expressions(rj::Value const*& expr)
+{
+    std::string stringVal;
+    if (is_string("constructor_word", expr, stringVal, true))
+    {
+        constructorWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("destructor_word", expr, stringVal, true))
+    {
+        destructorWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("method_word", expr, stringVal, true))
+    {
+        methodWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("function_word", expr, stringVal, true))
+    {
+        functionWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("lambda_word", expr, stringVal, false))
+    {
+        lambdaWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("call_word", expr, stringVal, true))
+    {
+        callWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("define_word", expr, stringVal, true))
+    {
+        defineWord_ = std::make_unique<ss>(stringVal);
+    }
+    if (is_string("returns_word", expr, stringVal, true))
+    {
+        returnsWord_ = std::make_unique<ss>(stringVal);
+    }
+    rj::Value const* style;
+    if (is_object("STYLE", expr, style))
+    {
+        if (is_string("default_style", style, stringVal, false))
+        {
+            otherExprStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("constructor_word_style", style, stringVal, false))
+        {
+            constructorWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("destructor_word_style", style, stringVal, false))
+        {
+            destructorWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("method_word_style", style, stringVal, false))
+        {
+            methodWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("function_word_style", style, stringVal, false))
+        {
+            functionWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("lambda_word_style", style, stringVal, false))
+        {
+            lambdaWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("call_word_style", style, stringVal, false))
+        {
+            callWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("define_word_style", style, stringVal, false))
+        {
+            defineWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+        if (is_string("returns_word_style", style, stringVal, false))
+        {
+            returnsWordStyle_ = std::make_unique<ss>(stringVal);
+        }
+    }
 }
