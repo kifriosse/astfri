@@ -7,10 +7,6 @@
 
 #include <iostream>
 
-#include "libastfri-uml/inc/Config.hpp"
-#include "libastfri-uml/inc/PlantUMLOutputter.hpp"
-#include "libastfri-uml/inc/TypeConvention.hpp"
-
 // ASTFRI visitor
 #include <libastfri-text/inc/ASTVisitor.hpp>
 
@@ -22,6 +18,7 @@
 
 int main(int argc, char const** argv)
 {
+    (void)argc;
     astfri::TranslationUnit tu;
     if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
     {

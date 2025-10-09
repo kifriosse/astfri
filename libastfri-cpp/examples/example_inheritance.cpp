@@ -32,6 +32,8 @@ bool Auto::is_good()
 
 class Audi : public Auto
 {
+private:
+    int nieco_private_void();
 public:
     Audi(int cost) :
         Auto(cost, 200.64)
@@ -42,6 +44,11 @@ public:
 
     void ride() override;
 };
+
+int Audi::nieco_private_void()
+{
+    return 5;
+}
 
 // Audi::Audi(int cost) : Auto(cost){
 //     this->cost_ = this->cost_ * 2;

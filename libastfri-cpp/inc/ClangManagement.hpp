@@ -1,8 +1,10 @@
-#pragma once
+#ifndef CLANGMANAGEMENT_HPP
+#define CLANGMANAGEMENT_HPP
 
+// astfri
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 #include <libastfri/inc/Stmt.hpp>
-
+// clang
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Decl.h>
@@ -14,32 +16,6 @@
 
 namespace astfri::astfri_cpp
 {
-// class ClangConsumer : public clang::ASTConsumer
-// {
-// public:
-//     clang::ASTContext* context;
-//     astfri::TranslationUnit* visitedTranslationUnit;
-
-//     ClangConsumer(
-//         clang::ASTContext& context,
-//         astfri::TranslationUnit& visitedTranslationUnit
-//     );
-//     void HandleTranslationUnit (clang::ASTContext& p_context);
-// };
-
-// class ClangTraverseAction : public clang::ASTFrontendAction
-// {
-//     using TUnit = astfri::TranslationUnit;
-//     TUnit* visitedTranslationUnit;
-
-// public:
-//     ClangTraverseAction(TUnit& visitedTranslationUnit);
-//     std::unique_ptr<clang::ASTConsumer> CreateASTConsumer (
-//         clang::CompilerInstance& compiler,
-//         llvm::StringRef
-//     );
-// };
-
 class CppASTConsumer : public clang::ASTConsumer
 {
 public:
@@ -79,3 +55,4 @@ private:
 int fill_translation_unit(astfri::TranslationUnit& tu, std::string const& file_path);
 
 } // namespace astfri::astfri_cpp
+#endif // CLANGMANAGEMENT_HPP
