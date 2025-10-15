@@ -1004,6 +1004,29 @@ bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr* DRE)
     return true;
 }
 
+bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
+{
+    (void)LBD;
+    // std::cout << "Som na lamde, zachytené premenné sú: ";
+    // for (auto zachytena : (LBD->captures())) {
+    //     std::cout << zachytena.getCapturedVar()->getNameAsString() << " ";
+    // }
+    // std::cout << "\n";
+
+    // std::cout << "Parametre sú: ";
+    // for (auto parameter : (LBD->getCallOperator()->parameters())) {
+    //     std::cout << parameter->getNameAsString() << " ";
+    // }
+    // std::cout << "\n";
+
+    // std::cout << "Telo operátora ():\n";
+    // for (auto prikaz : (LBD->getBody()->children())) {
+    //     (void)prikaz;
+    //     std::cout << "Toto je príkaz\n";
+    // }
+    return true;
+}
+
 bool ClangVisitor::TraverseMemberExpr(clang::MemberExpr* ME)
 {
     // akcia na tomto vrchole

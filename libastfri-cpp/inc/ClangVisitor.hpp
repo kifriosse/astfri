@@ -102,6 +102,7 @@ public:
     // // Traverse expression
     bool TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor);
     bool TraverseDeclRefExpr(clang::DeclRefExpr* DRE);
+    bool TraverseLambdaExpr(clang::LambdaExpr* LBD);
     bool TraverseMemberExpr(clang::MemberExpr* ME);
     bool TraverseCallExpr(clang::CallExpr* CE);
     bool TraverseCXXDependentScopeMemberExpr(clang::CXXDependentScopeMemberExpr* DSME);

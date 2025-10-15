@@ -26,10 +26,12 @@ int main(int argc, char const** argv)
         return 1;
     }
     // koniec mojho
-    std::cout << "Ill be back!" << std::endl;
+    // std::cout << "Ill be back!" << std::endl;
     // AST Visitor - nice
-    astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
-    visitor.visit(tu);
+    
+    // ako toto rozbehať?
+    //astfri::text::TextLibManager& man = astfri::text::TextLibManager::get_instance();
+    //man.visit(tu);
 
     // UML
     astfri::uml::UMLLibWrapper wrapper;
