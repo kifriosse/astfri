@@ -10,7 +10,7 @@ namespace astfri::uml
 struct Config
 {
     // type var, var : type
-    TypeConvention* typeConvention_;
+    TypeConventions typeConvention_= TypeConventions::TYPE_AFTER_IDENTIFIER;
     bool innerView_                = true;
     bool writeToFile_              = false;
     bool drawAccessModIcons_       = true;

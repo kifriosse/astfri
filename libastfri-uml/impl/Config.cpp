@@ -81,9 +81,9 @@ bool Config::parse_types_info(rapidjson::Value const& val)
         return false;
     std::string str = val["type_convention"].GetString();
     if (str.compare("TypeBeforeConvention") == 0)
-        ; // allocate an instance of type convention and assign it to config
+        this->typeConvention_ = TypeConventions::TYPE_BEFORE_IDENTIFIER;
     if (str.compare("TypeAfterConvention") == 0)
-        ; // allocate an instance of type convention and assign it to config
+        this->typeConvention_ = TypeConventions::TYPE_AFTER_IDENTIFIER;
     return true;
 }
 

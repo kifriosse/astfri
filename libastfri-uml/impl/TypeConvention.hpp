@@ -5,22 +5,23 @@
 
 namespace astfri::uml
 {
+enum class TypeConventions
+{
+    TYPE_BEFORE_IDENTIFIER = 0,
+    TYPE_AFTER_IDENTIFIER
+};
+
 class TypeConvention
 {
 public:
-    virtual std::string get_string(std::string type, std::string val, char separator) = 0;
-};
+    static std::string get_string(
+            std::string type,
+            std::string identifier,
+            char separator,
+            TypeConventions conv
+    );
 
-class TypeBeforeConvention : public TypeConvention
-{
-public:
-    std::string get_string(std::string type, std::string val, char separator) override;
-};
-
-class TypeAfterConvention : public TypeConvention
-{
-public:
-    std::string get_string(std::string type, std::string val, char separator) override;
+    TypeConvention() = delete;
 };
 } // namespace astfri::uml
 

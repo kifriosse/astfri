@@ -97,7 +97,11 @@ void PlantUMLOutputter::add_data_member(VarStruct v)
         v.type_ += this->config_->indirectIndicator_;
     this->outputString_
         += this->config_->accessPrefix_[(int)v.accessMod_]
-         + this->config_->typeConvention_->get_string(v.type_, v.name_, this->config_->separator_)
+         + TypeConvention::get_string(
+                 v.type_,
+                 v.name_,
+                 this->config_->separator_,
+                 this->config_->typeConvention_)
          + "\n";
 }
 
@@ -111,8 +115,11 @@ void PlantUMLOutputter::add_function_member(MethodStruct m)
     {
         if (p.isIndirect_)
             p.type_ += this->config_->indirectIndicator_;
-        header += this->config_->typeConvention_
-                      ->get_string(p.type_, p.name_, this->config_->separator_);
+        header += TypeConvention::get_string(
+                p.type_,
+                p.name_,
+                this->config_->separator_,
+                this->config_->typeConvention_);
         if (index != m.params_.size() - 1)
         {
             header += ", ";
@@ -123,7 +130,11 @@ void PlantUMLOutputter::add_function_member(MethodStruct m)
 
     this->outputString_
         += this->config_->accessPrefix_[(int)m.accessMod_]
-         + this->config_->typeConvention_->get_string(m.retType_, header, this->config_->separator_)
+         + TypeConvention::get_string(
+                 m.retType_,
+                 header,
+                 this->config_->separator_,
+                 this->config_->typeConvention_)
          + "\n";
 }
 

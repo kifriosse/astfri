@@ -91,8 +91,6 @@ int main(int argc, char** argv)
     tu.classes_    = classes;
     tu.interfaces_ = interfaces;
 
-    astfri::uml::Config conf;
-    conf.innerView_ = true;
     std::string config_file;
     if (argc > 1)
     {
@@ -102,6 +100,9 @@ int main(int argc, char** argv)
     {
         config_file = "../../libastfri-uml/examples/default_config.json";
     }
+
+    astfri::uml::Config conf;
+    conf.innerView_ = true;
     if (! conf.parse_json(config_file.c_str()))
     {
         conf.use_default_values();
@@ -111,8 +112,7 @@ int main(int argc, char** argv)
     // either by directly accessing its member variables
     // or using its parse_json method
     astfri::uml::PlantUMLOutputter op;
-    astfri::uml::TypeBeforeConvention tc;
     astfri::uml::UMLLibWrapper uml;
-    uml.init(conf, op, tc);
+    uml.init(conf, op);
     uml.run(tu);
 }

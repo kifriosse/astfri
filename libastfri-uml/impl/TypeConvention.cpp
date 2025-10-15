@@ -2,13 +2,20 @@
 
 namespace astfri::uml
 {
-std::string TypeAfterConvention::get_string(std::string type, std::string val, char separator)
+std::string TypeConvention::get_string(
+        std::string type,
+        std::string identifier,
+        char separator,
+        TypeConventions conv
+)
 {
-    return val + separator + type;
-}
-
-std::string TypeBeforeConvention::get_string(std::string type, std::string val, char separator)
-{
-    return type + separator + val;
+    switch (conv)
+    {
+        case TypeConventions::TYPE_BEFORE_IDENTIFIER:
+            return type + separator + identifier;
+        case TypeConventions::TYPE_AFTER_IDENTIFIER:
+        default:
+            return identifier + separator + type;
+    }
 }
 } // namespace astfri::uml

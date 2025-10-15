@@ -2,9 +2,8 @@
 
 namespace astfri::uml
 {
-void UMLLibWrapper::init(Config& config, UMLOutputter& output, TypeConvention const& typeConvention)
+void UMLLibWrapper::init(Config& config, UMLOutputter& output)
 {
-    config.typeConvention_ = (TypeConvention*)&typeConvention;
     output.set_config(config);
     this->classVisitor_.set_config(config);
     this->classVisitor_.set_outputter(output);
