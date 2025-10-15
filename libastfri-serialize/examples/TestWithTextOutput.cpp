@@ -1,5 +1,5 @@
 #include <libastfri-serialize/inc/AstFriDeSerializer.hpp>
-#include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-text/inc/TextLibManager.hpp>
 
 #include <iostream>
 
@@ -11,10 +11,10 @@ int main(int argc, char** argv)
     AstFriDeSerializer& serializer      = AstFriDeSerializer::get_instance();
 
     astfri::IVisitable* node            = serializer.deserialize(argv[1]);
-    std::unique_ptr<ASTVisitor> visitor = std::make_unique<ASTVisitor>();
+    astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
 
-    node->accept(*visitor);
-    visitor->write_file();
+
+    // visitor.visit(*node);
 
     std::cout << "Parsing JSON file successfull";
     return 0;

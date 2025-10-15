@@ -1,5 +1,5 @@
 #include <libastfri-java/impl/StatementTransformer.hpp>
-#include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-text/inc/TextLibManager.hpp>
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/StmtFactory.hpp>

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CLANGVISITOR_HPP
+#define CLANGVISITOR_HPP
 
 // astfri
 #include <libastfri/impl/ExprFwd.hpp>
@@ -149,3 +150,4 @@ private:
     bool expr_as_stmt;
 };
 } // namespace astfri::astfri_cpp
+#endif // CLANGVISITOR_HPP

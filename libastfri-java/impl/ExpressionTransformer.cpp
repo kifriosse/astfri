@@ -5,6 +5,7 @@
 #include <cstring>
 #include <ranges>
 #include <string>
+#include "libastfri-java/impl/StatementTransformer.hpp"
 
 namespace astfri::java
 {
@@ -31,7 +32,7 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
 {
     std::string nodeType = ts_node_type(tsNode);
     std::string nodeText = get_node_text(tsNode, sourceCode);
-    astfri::Expr* expr;
+    astfri::Expr* expr = nullptr;
     if (nodeType == "decimal_integer_literal")
     {
         expr = exprFactory.mk_int_literal(atoi(nodeText.c_str()));
@@ -118,6 +119,11 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
     else if (nodeType == "line_comment" || nodeType == "block_comment")
     {
         expr = this->exprFactory.mk_string_literal(this->get_node_text(tsNode, sourceCode));
+    }
+    else if (nodeType == "lambda_expression")
+    {
+        auto stmtTr = std::make_unique<StatementTransformer>();
+        return stmtTr->transform_lambda_expr_node(tsNode, sourceCode);
     }
     else
     {
@@ -231,54 +237,56 @@ Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string 
 
         while (ts_query_cursor_next_match(tsCursor, &tsMatch))
         {
+            for (uint32_t i = 0; i < tsMatch.capture_count; ++i)
+            {
+                uint32_t index           = 0;
+                TSQueryCapture tsCapture = tsMatch.captures[index];
+                ++index;
+                uint32_t length;
+                std::string captureName
+                    = ts_query_capture_name_for_id(tsQuery, tsCapture.index, &length);
+                std::string nodeText = get_node_text(tsCapture.node, sourceCode);
 
-            uint32_t index           = 0;
-            TSQueryCapture tsCapture = tsMatch.captures[index];
-            ++index;
-            uint32_t length;
-            std::string captureName
-                = ts_query_capture_name_for_id(tsQuery, tsCapture.index, &length);
-            std::string nodeText = get_node_text(tsCapture.node, sourceCode);
-
-            if (captureName == "local_var_name" && referanceName == nodeText)
-            {
-                ts_query_cursor_delete(tsCursor);
-                ts_query_delete(tsQuery);
-                return exprFactory.mk_local_var_ref(referanceName);
-            }
-            if (captureName == "param_name" && referanceName == nodeText)
-            {
-                ts_query_cursor_delete(tsCursor);
-                ts_query_delete(tsQuery);
-                return exprFactory.mk_param_var_ref(referanceName);
-            }
-            if (captureName == "attr_name" && referanceName == nodeText)
-            {
-                ts_query_cursor_delete(tsCursor);
-                ts_query_delete(tsQuery);
-                return exprFactory.mk_member_var_ref(exprFactory.mk_this(), referanceName);
-            }
-            else
-            {
-                TSNode fieldAccessNode          = ts_node_parent(tsNode);
-                std::string fieldAccessNodeType = ts_node_type(fieldAccessNode);
-
-                if (fieldAccessNodeType == "field_access")
+                if (captureName == "local_var_name" && referanceName == nodeText)
                 {
-                    TSNode objectNode;
-                    std::string objectNodeText;
-
-                    if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)))
-                    {
-                        objectNode     = ts_node_child(fieldAccessNode, 0);
-                        objectNodeText = get_node_text(objectNode, sourceCode);
-                    }
                     ts_query_cursor_delete(tsCursor);
                     ts_query_delete(tsQuery);
-                    return this->exprFactory.mk_member_var_ref(
-                        this->exprFactory.mk_class_ref(objectNodeText),
-                        referanceName
-                    );
+                    return exprFactory.mk_local_var_ref(referanceName);
+                }
+                if (captureName == "param_name" && referanceName == nodeText)
+                {
+                    ts_query_cursor_delete(tsCursor);
+                    ts_query_delete(tsQuery);
+                    return exprFactory.mk_param_var_ref(referanceName);
+                }
+                if (captureName == "attr_name" && referanceName == nodeText)
+                {
+                    ts_query_cursor_delete(tsCursor);
+                    ts_query_delete(tsQuery);
+                    return exprFactory.mk_member_var_ref(exprFactory.mk_this(), referanceName);
+                }
+                else
+                {
+                    TSNode fieldAccessNode          = ts_node_parent(tsNode);
+                    std::string fieldAccessNodeType = ts_node_type(fieldAccessNode);
+
+                    if (fieldAccessNodeType == "field_access")
+                    {
+                        TSNode objectNode;
+                        std::string objectNodeText;
+
+                        if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)))
+                        {
+                            objectNode     = ts_node_child(fieldAccessNode, 0);
+                            objectNodeText = get_node_text(objectNode, sourceCode);
+                        }
+                        ts_query_cursor_delete(tsCursor);
+                        ts_query_delete(tsQuery);
+                        return this->exprFactory.mk_member_var_ref(
+                            this->exprFactory.mk_class_ref(objectNodeText),
+                            referanceName
+                        );
+                    }
                 }
             }
         }

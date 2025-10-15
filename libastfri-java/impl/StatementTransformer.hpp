@@ -55,36 +55,42 @@ private:
     astfri::ReturnStmt* transform_return_stmt_node(TSNode tsNode, std::string const& sourceCode);
 
     astfri::CompoundStmt* transform_body_node(TSNode tsNode, std::string const& sourceCode);
-
+    
     FunctionType transform_function(TSNode tsNode, std::string const& sourceCode);
-
+    
     astfri::MethodDefStmt* transform_method_node(TSNode tsNode, std::string const& sourceCode);
-
+    
     astfri::ConstructorDefStmt* transform_constructor_node(
         TSNode tsNode,
         std::string const& sourceCode
     );
-
+    
     astfri::MemberVarDefStmt* transform_attribute_node(
         TSNode tsNode,
         std::string const& sourceCode
     );
-
+    
     astfri::GenericParam* transform_tparam_node(TSNode tsNode, std::string const& sourceCode);
 
     std::vector<astfri::ClassDefStmt*> transform_classes(
         TSTree* tree,
         std::string const& sourceCode
     );
-
+    
     std::vector<astfri::InterfaceDefStmt*> transform_interfaces(
         TSTree* tree,
         std::string const& sourceCode
     );
-
-public:
+    
+    public:
     StatementTransformer();
     ~StatementTransformer();
+
+    astfri::LambdaExpr* transform_lambda_expr_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+    );
+    
     astfri::TranslationUnit* fill_translation_unit(TSTree* tree, std::string const& sourceCode);
 };
 

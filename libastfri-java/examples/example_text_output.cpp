@@ -2,7 +2,7 @@
 #include <libastfri-java/inc/ASTBuilder.hpp>
 
 // include for text output
-#include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-text/inc/TextLibManager.hpp>
 
 int main()
 {
@@ -15,13 +15,13 @@ int main()
     astfri::TranslationUnit* tu = tb->get_translation_unit(tree, sourceCode);
 
     // code for text output
-    ASTVisitor* visitor = new ASTVisitor();
-    visitor->visit(*tu);
-    visitor->write_file();
+    astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
+    visitor.visit(*tu);
+    // visitor->write_file();
 
     // freeing memory
     ts_tree_delete(tree);
     delete (tb);
-    delete (visitor);
+    // delete (visitor);
     return 0;
 }

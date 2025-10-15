@@ -7,12 +7,8 @@
 
 #include <iostream>
 
-#include "libastfri-uml/inc/Config.hpp"
-#include "libastfri-uml/inc/PlantUMLOutputter.hpp"
-#include "libastfri-uml/inc/TypeConvention.hpp"
-
 // ASTFRI visitor
-#include <libastfri-text/inc/ASTVisitor.hpp>
+#include <libastfri-text/inc/TextLibManager.hpp>
 
 // ASTFRI UML
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
@@ -22,6 +18,7 @@
 
 int main(int argc, char const** argv)
 {
+    (void)argc;
     astfri::TranslationUnit tu;
     if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
     {
@@ -31,9 +28,8 @@ int main(int argc, char const** argv)
     // koniec mojho
     std::cout << "Ill be back!" << std::endl;
     // AST Visitor - nice
-    ASTVisitor* visitor = new ASTVisitor();
-    visitor->visit(tu);
-    visitor->write_file();
+    astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
+    visitor.visit(tu);
 
     // UML
     astfri::uml::UMLLibWrapper wrapper;

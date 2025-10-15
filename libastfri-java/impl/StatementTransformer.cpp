@@ -5,6 +5,7 @@
 #include <sys/types.h>
 
 #include "ExpressionTransformer.hpp"
+#include "libastfri/inc/ExprFactory.hpp"
 
 namespace astfri::java
 {
@@ -663,6 +664,54 @@ astfri::GenericParam* StatementTransformer::transform_tparam_node(
 
     return stmtFactory.mk_generic_param(constraint, name);
 }
+
+astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    std::vector<ParamVarDefStmt*> lambdaParams;
+    Stmt* lambdaBody = nullptr;
+    uint32_t lambdaChildCount = ts_node_named_child_count(tsNode);
+
+    for (uint32_t i = 0; i < lambdaChildCount; i++)
+    {
+        TSNode lambdaChild = ts_node_named_child(tsNode, i);
+        std::string lambdaChildType = ts_node_type(lambdaChild);
+
+        if (lambdaChildType == "inferred_parameters")
+        {
+            uint32_t parametrCount = ts_node_named_child_count(lambdaChild);
+            for (uint32_t j = 0; j < parametrCount; j++)
+            {
+                TSNode parameterNode = ts_node_named_child(lambdaChild, j);
+                lambdaParams.push_back(stmtFactory.mk_param_var_def(exprTransformer->get_node_text(parameterNode, sourceCode), nullptr, nullptr));
+            }
+            continue;
+        }
+        else if (lambdaChildType == "identifier")
+        {
+            lambdaParams.push_back(stmtFactory.mk_param_var_def(exprTransformer->get_node_text(lambdaChild, sourceCode), nullptr, nullptr));
+            continue;
+        }
+        else 
+        {
+            continue;
+        }
+
+        if (lambdaChildType == "block")
+        {
+            lambdaBody = this->transform_body_node(lambdaChild, sourceCode);
+        }
+        else 
+        {
+            lambdaBody = this->transform_expr_stmt_node(lambdaChild, sourceCode);
+        }
+    }
+
+    return astfri::ExprFactory::get_instance().mk_lambda_expr(lambdaParams, lambdaBody);
+}
+
 
 std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
     TSTree* tree,

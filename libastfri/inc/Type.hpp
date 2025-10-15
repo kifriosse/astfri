@@ -5,6 +5,7 @@
 #include <libastfri/impl/Utils.hpp>
 
 #include <string>
+#include <vector>
 
 namespace astfri
 {
@@ -73,6 +74,7 @@ struct VoidType : PrimitiveType, details::MkVisitable<VoidType>, details::TypeQu
 
 /**
  * @brief TODO
+ * @deprecated Deprecated in favor of more specific representation of user types
  */
 struct UserType : Type, details::MkVisitable<UserType>, details::TypeQueriesAdapter
 {
@@ -82,6 +84,37 @@ struct UserType : Type, details::MkVisitable<UserType>, details::TypeQueriesAdap
 
     UserType* as_user() noexcept override;
 };
+
+
+struct ClassType
+{
+
+};
+
+
+struct EnumType
+{
+
+};
+
+
+/**
+ * @brief Product type
+ */
+struct RecordType
+{
+
+};
+
+
+/**
+ * @brief Sum type
+ */
+struct UnionType
+{
+    // std::vector<Type*> types_;
+};
+
 
 /**
  * @brief TODO
