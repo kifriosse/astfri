@@ -16,9 +16,8 @@ int main(int argc, char const** argv)
 
     astfri::uml::Config conf;
     astfri::uml::PlantUMLOutputter op;
-    astfri::uml::TypeBeforeConvention tc;
     astfri::uml::UMLLibWrapper uml;
-    uml.init(conf, op, tc);
+    uml.init(conf, op);
     uml.run(tu);
 
     return 0;

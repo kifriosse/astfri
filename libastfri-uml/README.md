@@ -7,11 +7,10 @@ Your CMake target must link library "astfri-uml".
 - Create an instance of:
     1. astfri::uml::UMLOutputter (currently only astfri::uml::PlantUMLOutputter is implemented)
     2. astfri::uml::Config
-    3. astfri::uml::TypeConvention (TypeBeforeConvention/TypeAfterConvention)
 - Call the init method on your astfri::uml::UMLLibWrapper instance
 - Call the run method on your astfri::uml::UMLLibWrapper instance
 
-Note: see [this example (line 96)](examples/umlexample.cpp)
+Note: see [this example (line 104)](examples/umlexample.cpp)
 
 # Config
 
@@ -22,4 +21,4 @@ If a longer string is provided, only the first char will be used.
 
 All colors are RGB Hex values (with or without a leading # character).
 
-`type_convention` currently not implemented, can only be configured in the source code.
+`type_convention` currently only accepts values `TypeBeforeConvention` and `TypeAfterConvention`. 

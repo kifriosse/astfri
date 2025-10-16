@@ -12,7 +12,7 @@ private:
     ClassVisitor classVisitor_;
 
 public:
-    void init(Config& config, UMLOutputter& output, TypeConvention const& typeConvention);
+    void init(Config& config, UMLOutputter& output);
     void run(astfri::TranslationUnit& translationUnit);
 };
 } // namespace astfri::uml
