@@ -7,6 +7,7 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/Type.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include <libastfri/inc/TypeInfo.hpp>
 #include <libastfri/inc/Visitor.hpp>
 
 #endif
