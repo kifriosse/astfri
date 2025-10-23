@@ -5,6 +5,21 @@
 
 namespace astfri::uml
 {
+std::string PlantUMLOutputter::assemble_param(VarStruct p)
+{
+    std::string result;
+
+    if (p.isIndirect_)
+        p.type_ += this->config_->indirectIndicator_;
+    result += TypeConvention::get_string(
+            p.type_,
+            p.name_,
+            this->config_->separator_,
+            this->config_->typeConvention_);
+
+    return result;
+}
+
 void PlantUMLOutputter::open(ClassStruct const& cs)
 {
     this->outputString_ += cs.name_;
@@ -64,9 +79,9 @@ std::string PlantUMLOutputter::getFileExtension()
     return ".puml";
 }
 
-void PlantUMLOutputter::open_user_type(ClassStruct c, UserDefinedType t)
+void PlantUMLOutputter::open_user_type(ClassStruct c)
 {
-    switch (t)
+    switch (c.type_)
     {
     case UserDefinedType::CLASS:
         this->outputString_ += "class ";
@@ -113,13 +128,7 @@ void PlantUMLOutputter::add_function_member(MethodStruct m)
     size_t index       = 0;
     for (VarStruct p : m.params_)
     {
-        if (p.isIndirect_)
-            p.type_ += this->config_->indirectIndicator_;
-        header += TypeConvention::get_string(
-                p.type_,
-                p.name_,
-                this->config_->separator_,
-                this->config_->typeConvention_);
+        header += this->assemble_param(p);
         if (index != m.params_.size() - 1)
         {
             header += ", ";
@@ -136,6 +145,45 @@ void PlantUMLOutputter::add_function_member(MethodStruct m)
                  this->config_->separator_,
                  this->config_->typeConvention_)
          + "\n";
+}
+
+void PlantUMLOutputter::add_constructor(ConstructorStruct c)
+{
+    std::string header;
+    if (config_->innerView_)
+    {
+        header += c.class_ + "(";
+    }
+    else
+    {
+        if (c.accessMod_ != AccessModifier::Public) return;
+        header += "<<constructor>> new(";
+    }
+    size_t index = 0;
+    for (VarStruct p : c.params_)
+    {
+        header += this->assemble_param(p);
+        if (index != c.params_.size() - 1) header += ", ";
+        ++index;
+    }
+    header += ")";
+
+    this->outputString_ +=
+        this->config_->accessPrefix_[(int)c.accessMod_] +
+        TypeConvention::get_string(
+                c.class_,
+                header,
+                this->config_->separator_,
+                this->config_->typeConvention_)
+        + "\n";
+}
+
+void PlantUMLOutputter::add_destructor(DestructorStruct d)
+{
+    this->outputString_ += 
+        this->config_->accessPrefix_[(int)AccessModifier::Public] +
+        this->config_->destructorIndicator_;
+    this->outputString_ += d.class_ + "()";
 }
 
 void PlantUMLOutputter::add_relation(RelationStruct r)
