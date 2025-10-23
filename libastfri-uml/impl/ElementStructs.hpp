@@ -27,6 +27,7 @@ enum class UserDefinedType
 struct ClassStruct
 {
     std::string name_;
+    UserDefinedType type_;
     std::vector<std::string> genericParams_;
 
     void reset();
@@ -50,6 +51,22 @@ struct MethodStruct
     bool returnIsIndirect_ = false;
     std::vector<VarStruct> params_;
     astfri::AccessModifier accessMod_;
+
+    void reset();
+};
+
+struct ConstructorStruct
+{
+    std::string class_;
+    std::vector<VarStruct> params_;
+    astfri::AccessModifier accessMod_;
+
+    void reset();
+};
+
+struct DestructorStruct
+{
+    std::string class_;
 
     void reset();
 };

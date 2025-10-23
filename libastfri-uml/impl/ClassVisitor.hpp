@@ -21,6 +21,8 @@ private:
 
     ClassStruct currentClass_;
     MethodStruct currentMethod_;
+    ConstructorStruct currentConstructor_;
+    DestructorStruct currentDestructor_;
     VarStruct currentVariable_;
 
     std::map<std::string, RelationStruct> relations_;
