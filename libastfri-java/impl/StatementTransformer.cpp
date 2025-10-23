@@ -3,16 +3,19 @@
 #include <cstdint>
 #include <cstdlib>
 #include <sys/types.h>
+#include <tree_sitter/api.h>
 
 #include "ExpressionTransformer.hpp"
 #include "libastfri/inc/ExprFactory.hpp"
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::java
 {
 StatementTransformer::StatementTransformer() :
     stmtFactory(astfri::StmtFactory::get_instance()),
-    exprTransformer(new ExpressionTransformer()),
-    nodeMapper(new NodeMapper())
+    exprTransformer(new ExpressionTransformer(this)),
+    nodeMapper(new NodeMapper()),
+    functionalInterfaces()
 {
 }
 
@@ -96,18 +99,17 @@ astfri::AccessModifier StatementTransformer::get_access_modifier(
     std::string const& sourceCode
 )
 {
-    astfri::AccessModifier access;
+    astfri::AccessModifier access = astfri::AccessModifier::Internal;
     uint32_t modifiersCount = ts_node_child_count(tsNode);
     for (uint32_t j = 0; j < modifiersCount; j++)
     {
         TSNode modifierNode = ts_node_child(tsNode, j);
         std::string modifierNodeName
             = this->exprTransformer->get_node_text(modifierNode, sourceCode);
-        if (modifierNodeName == "private" || modifierNodeName == "public"
-            || modifierNodeName == "internal" || modifierNodeName == "protected")
-        {
-            access = this->nodeMapper->get_modMap().find(modifierNodeName)->second;
-        }
+
+        access = this->nodeMapper->get_modMap().contains(modifierNodeName)
+           ? this->nodeMapper->get_modMap().at(modifierNodeName)
+           : access;
     }
     return access;
 }
@@ -671,8 +673,41 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
 )
 {
     std::vector<ParamVarDefStmt*> lambdaParams;
+    std::vector<ParamVarDefStmt*> funcInterfaceParams;
     Stmt* lambdaBody = nullptr;
     uint32_t lambdaChildCount = ts_node_named_child_count(tsNode);
+    astfri::InterfaceDefStmt* funcInterface = nullptr;
+
+    if (! ts_node_is_null(ts_node_parent(tsNode)))
+    {
+        TSNode lambdaParent = ts_node_parent(tsNode);
+        TSNode lambdaParentPrevSibling = ts_node_prev_named_sibling(lambdaParent);
+        std::string lambdaParentPrevSiblingType = ts_node_type(lambdaParentPrevSibling);
+
+        for (auto i : this->functionalInterfaces)
+        {
+            std::string typeName = exprTransformer->get_node_text(lambdaParentPrevSibling, sourceCode);
+            if (i->name_ == typeName)
+            {
+                funcInterface = i;
+                break;
+            }
+        }
+
+        if (funcInterface != nullptr)
+                {
+                    for (auto m : funcInterface->methods_)
+                    {
+                        if (m->func_->body_ == nullptr)
+                        {
+                            for (auto p : m->func_->params_)
+                            {
+                                funcInterfaceParams.push_back(p);
+                            }
+                        }
+                    }
+                }
+    }
 
     for (uint32_t i = 0; i < lambdaChildCount; i++)
     {
@@ -681,31 +716,36 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
 
         if (lambdaChildType == "inferred_parameters")
         {
-            uint32_t parametrCount = ts_node_named_child_count(lambdaChild);
-            for (uint32_t j = 0; j < parametrCount; j++)
+            uint32_t parameterCount = ts_node_named_child_count(lambdaChild);
+            for (uint32_t j = 0; j < parameterCount; j++)
             {
                 TSNode parameterNode = ts_node_named_child(lambdaChild, j);
-                lambdaParams.push_back(stmtFactory.mk_param_var_def(exprTransformer->get_node_text(parameterNode, sourceCode), nullptr, nullptr));
+                lambdaParams.push_back(stmtFactory.mk_param_var_def(
+                                        exprTransformer->get_node_text(parameterNode, sourceCode),
+                                        funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[j]->type_, 
+                                        nullptr));
             }
             continue;
         }
         else if (lambdaChildType == "identifier")
         {
-            lambdaParams.push_back(stmtFactory.mk_param_var_def(exprTransformer->get_node_text(lambdaChild, sourceCode), nullptr, nullptr));
+            lambdaParams.push_back(stmtFactory.mk_param_var_def(
+                                    exprTransformer->get_node_text(lambdaChild, sourceCode), 
+                                    funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[0]->type_, 
+                                    nullptr));
             continue;
         }
-        else 
-        {
-            continue;
-        }
-
-        if (lambdaChildType == "block")
+        else if (lambdaChildType == "block")
         {
             lambdaBody = this->transform_body_node(lambdaChild, sourceCode);
         }
-        else 
+        else if (lambdaChildType == "expression_statement") 
         {
             lambdaBody = this->transform_expr_stmt_node(lambdaChild, sourceCode);
+        }
+        else 
+        {
+            continue;
         }
     }
 
@@ -854,6 +894,7 @@ std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interface
     std::vector<astfri::GenericParam*> tparams;
     std::vector<astfri::InterfaceDefStmt*> bases;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
+    bool funcInterface = false;
 
     uint32_t childCount = ts_node_named_child_count(rootNode);
     for (uint32_t i = 0; i < childCount; i++)
@@ -877,8 +918,25 @@ std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interface
         {
             TSNode interfaceChild          = ts_node_named_child(interfaceNode, j);
             std::string interfaceChildType = ts_node_type(interfaceChild);
-
-            if (interfaceChildType == "identifier")
+            
+            if (interfaceChildType == "modifiers")
+            {
+                uint32_t modifiersChildrenCount = ts_node_child_count(interfaceChild);
+                if (modifiersChildrenCount > 0)
+                {
+                    for (uint32_t k = 0; k < modifiersChildrenCount; ++k)
+                    {
+                        TSNode modChild = ts_node_child(interfaceChild, k);
+                        std::string modChildType = ts_node_type(modChild);
+                        std::string annotation = exprTransformer->get_node_text(modChild, sourceCode);
+                        if (modChildType == "marker_annotation" && annotation == "@FunctionalInterface")
+                        {
+                            funcInterface = true;
+                        }
+                    }
+                }
+            }
+            else if (interfaceChildType == "identifier")
             {
                 interfaceName = exprTransformer->get_node_text(interfaceChild, sourceCode);
             }
@@ -930,6 +988,12 @@ std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interface
         interfaceDef->bases_                   = bases;
         interfaces.push_back(interfaceDef);
 
+        if (funcInterface)
+        {
+            this->functionalInterfaces.push_back(interfaceDef);
+            funcInterface = false;
+        }
+
         for (astfri::MethodDefStmt* method : methods)
         {
             method->owner_ = interfaceDef;
@@ -948,8 +1012,8 @@ astfri::TranslationUnit* StatementTransformer::fill_translation_unit(
 )
 {
     astfri::TranslationUnit* tu = this->stmtFactory.mk_translation_unit();
-    tu->classes_                = this->transform_classes(tree, sourceCode);
     tu->interfaces_             = this->transform_interfaces(tree, sourceCode);
+    tu->classes_                = this->transform_classes(tree, sourceCode);
     return tu;
 }
 } // namespace astfri::java

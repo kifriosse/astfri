@@ -11,12 +11,16 @@
 
 namespace astfri::java
 {
+
+class StatementTransformer;
+
 class ExpressionTransformer
 {
 private:
     astfri::TypeFactory& typeFactory;
     astfri::ExprFactory& exprFactory;
     NodeMapper* nodeMapper;
+    StatementTransformer* stmtTr;
 
     astfri::BinOpExpr* transform_bin_op_expr_node(TSNode tsNode, std::string const& sourceCode);
 
@@ -34,7 +38,7 @@ private:
     astfri::IfExpr* transform_ternary_expr_node(TSNode tsNode, std::string const& sourceCode);
 
 public:
-    ExpressionTransformer();
+    ExpressionTransformer(StatementTransformer* stmtTr);
     ~ExpressionTransformer();
 
     std::string get_node_text(TSNode const& node, std::string const& sourceCode);

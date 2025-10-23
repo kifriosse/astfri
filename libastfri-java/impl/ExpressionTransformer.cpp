@@ -9,10 +9,11 @@
 
 namespace astfri::java
 {
-ExpressionTransformer::ExpressionTransformer() :
+ExpressionTransformer::ExpressionTransformer(StatementTransformer* stmtTr) :
     typeFactory(astfri::TypeFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
-    nodeMapper(new NodeMapper())
+    nodeMapper(new NodeMapper()),
+    stmtTr(stmtTr)
 {
 }
 
@@ -122,8 +123,7 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
     }
     else if (nodeType == "lambda_expression")
     {
-        auto stmtTr = std::make_unique<StatementTransformer>();
-        return stmtTr->transform_lambda_expr_node(tsNode, sourceCode);
+        return this->stmtTr->transform_lambda_expr_node(tsNode, sourceCode);
     }
     else
     {
@@ -215,7 +215,8 @@ Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string 
                                 "(variable_declarator name: (identifier) @local_var_name value: "
                                 "(_)?)) (formal_parameter type: (_) name: (identifier) @param_name) "
                                 "(field_declaration (modifiers) type: (_) declarator: "
-                                "(variable_declarator name: (identifier) @attr_name value: (_)?))";
+                                "(variable_declarator name: (identifier) @attr_name value: (_)?))"
+                                "(inferred_parameters (identifier) @param_name)";
 
     uint32_t errorOffset;
     TSQueryError errorType;

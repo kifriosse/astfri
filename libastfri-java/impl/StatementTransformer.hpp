@@ -15,6 +15,9 @@
 
 namespace astfri::java
 {
+
+class ExpressionTransformer;
+
 using FunctionType = std::tuple<
     astfri::AccessModifier,
     astfri::Type*,
@@ -29,6 +32,8 @@ private:
     astfri::StmtFactory& stmtFactory;
     ExpressionTransformer* exprTransformer;
     NodeMapper* nodeMapper;
+    std::vector<astfri::InterfaceDefStmt*> functionalInterfaces;
+    
 
     astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
