@@ -7,7 +7,7 @@ namespace astfri::text
 {
     template<typename AstfriPeak>
     concept VisitableAstfriPeak =
-        !std::is_abstract_v<AstfriPeak> &&
+        //!std::is_abstract_v<AstfriPeak> &&
         requires(AstfriPeak& peak)
         {
             {
