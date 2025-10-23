@@ -7,7 +7,6 @@ target_sources(astfri-core PRIVATE
     StmtFactory.cpp
     Type.cpp
     TypeFactory.cpp
-    TypeQueries.cpp
 )
 
 target_compile_options(astfri-core PUBLIC

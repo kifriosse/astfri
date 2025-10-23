@@ -8,6 +8,7 @@
 
 namespace astfri
 {
+
 /**
  * @brief TODO
  */
@@ -26,6 +27,7 @@ public:
     DynamicType* mk_dynamic();
     IndirectionType* mk_indirect(Type* type);
     UserType* mk_user(std::string const& name);
+    ClassType *mk_class(std::string name, Scope scope);
 
 public:
     TypeFactory(TypeFactory const&)    = delete;
@@ -44,7 +46,10 @@ private:
     DynamicType dynamic_;
     std::map<Type*, IndirectionType> indirect_;
     std::map<std::string, UserType> user_;
+
+    std::map<std::string, ClassType> classes_;
 };
+
 } // namespace astfri
 
 #endif
