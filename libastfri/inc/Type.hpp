@@ -1,7 +1,6 @@
 #ifndef LIBASTFRI_TYPE_HPP
 #define LIBASTFRI_TYPE_HPP
 
-#include <libastfri/impl/TypeQueries.hpp>
 #include <libastfri/impl/Utils.hpp>
 
 #include <string>
@@ -9,6 +8,7 @@
 
 namespace astfri
 {
+
 /**
  * @brief TODO
  */
@@ -20,9 +20,8 @@ struct Type : virtual IVisitable
 /**
  * @brief TODO
  */
-struct DynamicType : Type, details::MkVisitable<DynamicType>, details::TypeQueriesAdapter
+struct DynamicType : Type, details::MkVisitable<DynamicType>
 {
-    DynamicType* as_dynamic() noexcept override;
 };
 
 /**
@@ -35,98 +34,104 @@ struct PrimitiveType : Type
 /**
  * @brief TODO
  */
-struct IntType : PrimitiveType, details::MkVisitable<IntType>, details::TypeQueriesAdapter
+struct IntType : PrimitiveType, details::MkVisitable<IntType>
 {
-    IntType* as_int() noexcept override;
 };
 
 /**
  * @brief TODO
  */
-struct FloatType : PrimitiveType, details::MkVisitable<FloatType>, details::TypeQueriesAdapter
+struct FloatType : PrimitiveType, details::MkVisitable<FloatType>
 {
-    FloatType* as_float() noexcept override;
 };
 
 /**
  * @brief TODO
  */
-struct CharType : PrimitiveType, details::MkVisitable<CharType>, details::TypeQueriesAdapter
+struct CharType : PrimitiveType, details::MkVisitable<CharType>
 {
-    CharType* as_char() noexcept override;
 };
 
 /**
  * @brief TODO
  */
-struct BoolType : PrimitiveType, details::MkVisitable<BoolType>, details::TypeQueriesAdapter
+struct BoolType : PrimitiveType, details::MkVisitable<BoolType>
 {
-    BoolType* as_bool() noexcept override;
 };
 
 /**
  * @brief TODO
  */
-struct VoidType : PrimitiveType, details::MkVisitable<VoidType>, details::TypeQueriesAdapter
+struct VoidType : PrimitiveType, details::MkVisitable<VoidType>
 {
-    VoidType* as_void() noexcept override;
+};
+
+/**
+ * @brief TODO
+ */
+struct IndirectionType : Type, details::MkVisitable<IndirectionType>
+{
+    Type* indirect_;
+    explicit IndirectionType(Type* indirect); // TODO remove
 };
 
 /**
  * @brief TODO
  * @deprecated Deprecated in favor of more specific representation of user types
  */
-struct UserType : Type, details::MkVisitable<UserType>, details::TypeQueriesAdapter
+struct UserType : Type, details::MkVisitable<UserType>
 {
     std::string name_;
 
     explicit UserType(std::string name);
-
-    UserType* as_user() noexcept override;
 };
-
-
-struct ClassType
-{
-
-};
-
-
-struct EnumType
-{
-
-};
-
-
-/**
- * @brief Product type
- */
-struct RecordType
-{
-
-};
-
-
-/**
- * @brief Sum type
- */
-struct UnionType
-{
-    // std::vector<Type*> types_;
-};
-
 
 /**
  * @brief TODO
  */
-struct IndirectionType : Type, details::MkVisitable<IndirectionType>, details::TypeQueriesAdapter
+struct Scope
 {
-    Type* indirect_;
-
-    explicit IndirectionType(Type* indirect);
-
-    IndirectionType* as_indirection() noexcept override;
+    std::vector<std::string> names_;
 };
+
+/**
+ * @brief TODO
+ */
+struct ScopedType : Type
+{
+    Scope scope_;
+    std::string name_;
+};
+
+/**
+ * @brief TODO
+ */
+struct ClassType : ScopedType, details::MkVisitable<ClassType>
+{
+};
+
+// /**
+//  * @brief TODO
+//  */
+// struct EnumType : ScopedType, details::MkVisitable<EnumType>
+// {
+// };
+
+// /**
+//  * @brief Product type
+//  */
+// struct RecordType : ScopedType, details::MkVisitable<RecordType>
+// {
+//     std::vector<Type*> types_;
+// };
+
+// /**
+//  * @brief Sum type
+//  */
+// struct UnionType : ScopedType, details::MkVisitable<UnionType>
+// {
+//     std::vector<Type*> types_; // TODO otazka ci by mali mat aj typy
+// };
 
 /**
  * @brief TODO
@@ -134,6 +139,7 @@ struct IndirectionType : Type, details::MkVisitable<IndirectionType>, details::T
 struct UnknownType : PrimitiveType, details::MkVisitable<VoidType>
 {
 };
+
 } // namespace astfri
 
 #endif

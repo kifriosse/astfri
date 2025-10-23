@@ -36,6 +36,7 @@ namespace astfri::text
         void visit(CharType const& type) override;
         void visit(BoolType const& type) override;
         void visit(VoidType const& type) override;
+        void visit(ClassType const& type) override {} // MM: TODO
         void visit(UserType const& type) override;
         void visit(IndirectionType const& type) override;
         //void visit(ObjectType const& type) override;
