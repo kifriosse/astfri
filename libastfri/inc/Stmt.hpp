@@ -227,6 +227,7 @@ struct InterfaceDefStmt : UserTypeDefStmt, details::MkVisitable<InterfaceDefStmt
  */
 struct ClassDefStmt : UserTypeDefStmt, details::MkVisitable<ClassDefStmt>
 {
+    ClassType *type_;
     std::vector<MemberVarDefStmt*> vars_;
     std::vector<ConstructorDefStmt*> constructors_;
     std::vector<DestructorDefStmt*> destructors_;
