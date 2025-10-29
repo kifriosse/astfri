@@ -1,7 +1,7 @@
 #ifndef LIBASTFRIUML_ELEMENT_STRUCTS_HPP
 #define LIBASTFRIUML_ELEMENT_STRUCTS_HPP
 
-#include <libastfri/inc/Stmt.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <string>
 #include <vector>

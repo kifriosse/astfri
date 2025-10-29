@@ -3,10 +3,6 @@
 
 #include <libastfri-uml/impl/ElementStructs.hpp>
 #include <libastfri-uml/impl/UMLOutputter.hpp>
-#include <libastfri/inc/Expr.hpp>
-#include <libastfri/inc/Stmt.hpp>
-#include <libastfri/inc/Type.hpp>
-#include <libastfri/inc/Visitor.hpp>
 
 #include <map>
 #include <set>

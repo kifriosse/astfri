@@ -1,7 +1,4 @@
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
 
 #include <vector>
 
