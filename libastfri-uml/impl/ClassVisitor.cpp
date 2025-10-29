@@ -80,6 +80,18 @@ void ClassVisitor::visit(astfri::VoidType const& /*type*/)
     this->currentVariable_.type_ = this->config_->voidTypeName_;
 }
 
+void ClassVisitor::visit(astfri::ClassType const& type)
+{
+    if (type.name_.compare(this->currentClass_.name_) != 0)
+    {
+        this->create_relation(type.name_, RelationType::ASSOCIATION);
+    }
+    this->currentVariable_.type_ = type.name_;
+}
+
+/**
+ * @deprecated
+ */
 void ClassVisitor::visit(astfri::UserType const& type)
 {
     if (type.name_.compare(this->currentClass_.name_) != 0)
@@ -167,6 +179,7 @@ void ClassVisitor::visit(astfri::GenericParam const& stmt)
 void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 {
     this->currentClass_.name_ = stmt.name_;
+    //this->currentClass_.name_ = stmt.type_->name_;
     this->currentClass_.type_ = UserDefinedType::CLASS;
     for (astfri::GenericParam* gp : stmt.tparams_)
     {
