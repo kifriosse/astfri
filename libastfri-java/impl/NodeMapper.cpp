@@ -7,7 +7,10 @@ NodeMapper::NodeMapper() :
     stmtFactory(astfri::StmtFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
     typeMap({
-        {"int",     typeFactory.mk_int()  },
+        {"byte",    typeFactory.mk_int()},
+        {"short",   typeFactory.mk_int()},
+        {"int",     typeFactory.mk_int()},
+        {"long",    typeFactory.mk_int()},
         {"float",   typeFactory.mk_float()},
         {"double",  typeFactory.mk_float()},
         {"char",    typeFactory.mk_char() },
