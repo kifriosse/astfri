@@ -157,7 +157,7 @@ void PlantUMLOutputter::add_constructor(ConstructorStruct c)
     else
     {
         if (c.accessMod_ != AccessModifier::Public) return;
-        header += "<<constructor>> new(";
+        header += "{static}<<constructor>> new(";
     }
     size_t index = 0;
     for (VarStruct p : c.params_)
@@ -180,10 +180,12 @@ void PlantUMLOutputter::add_constructor(ConstructorStruct c)
 
 void PlantUMLOutputter::add_destructor(DestructorStruct d)
 {
-    this->outputString_ += 
-        this->config_->accessPrefix_[(int)AccessModifier::Public] +
-        this->config_->destructorIndicator_;
-    this->outputString_ += d.class_ + "()";
+    std::string header = "";
+    header += this->config_->accessPrefix_[(int)AccessModifier::Public];
+    header += this->config_->destructorIndicator_;
+    header += d.class_;
+    header += "()\n";
+    this->outputString_ += header;
 }
 
 void PlantUMLOutputter::add_relation(RelationStruct r)
