@@ -6,21 +6,6 @@
 namespace astfri
 {
 
-namespace
-{
-
-std::string scope_to_key(const std::string &name, const Scope &scope)
-{
-    std::string key = name;
-    for (const std::string &s : scope.names_) {
-        key += "::";
-        key += s;
-    }
-    return key;
-}
-
-}
-
 TypeFactory& TypeFactory::get_instance()
 {
     static TypeFactory instance;
@@ -73,10 +58,11 @@ UserType* TypeFactory::mk_user(std::string const& name)
     return details::emplace_get<UserType>(name, user_, name);
 }
 
-ClassType *TypeFactory::mk_class(std::string name, Scope scope)
+ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope)
 {
-    std::string key = scope_to_key(name, scope);
-    ClassType *t = details::emplace_get<ClassType>(std::move(key), classes_);
+    std::string key = mk_fqn(scope, name);
+    ClassType *t = details::emplace_get<ClassType>(std::move(key), m_classes);
+    // TODO class type should have a constructor so that emplace get could use these to initialize it
     t->name_ = std::move(name);
     t->scope_ = std::move(scope);
     return t;

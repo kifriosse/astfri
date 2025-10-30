@@ -1,10 +1,10 @@
 #ifndef LIBASTFRI_TYPE_HPP
 #define LIBASTFRI_TYPE_HPP
 
-#include <libastfri/impl/Utils.hpp>
+#include <libastfri/impl/Scope.hpp>
+#include <libastfri/inc/Visitor.hpp>
 
 #include <string>
-#include <vector>
 
 namespace astfri
 {
@@ -84,14 +84,6 @@ struct UserType : Type, details::MkVisitable<UserType>
     std::string name_;
 
     explicit UserType(std::string name);
-};
-
-/**
- * @brief TODO
- */
-struct Scope
-{
-    std::vector<std::string> names_;
 };
 
 /**

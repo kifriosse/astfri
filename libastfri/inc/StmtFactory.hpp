@@ -2,12 +2,16 @@
 #define LIBASTFRI_STATEMENT_FACTORY_HPP
 
 #include <libastfri/inc/Stmt.hpp>
+#include <libastfri/inc/Type.hpp>
 
+#include <map>
 #include <memory>
 #include <vector>
 
 namespace astfri
 {
+
+class TypeFactory;
 
 /**
  * @brief TODO
@@ -59,17 +63,38 @@ public:
         AccessModifier access
     );
 
+    /**
+     * @deprecated
+     */
     BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
+
+    /**
+     * TODO ako so scopom base? nemal by tu byť pointer na base class type alebo def?
+     */
+    BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
 
     DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
     GenericParam* mk_generic_param(std::string constraint, std::string name);
 
+    /**
+     * TODO ako s tymto?
+     */
     InterfaceDefStmt* mk_interface_def();
     InterfaceDefStmt* mk_interface_def(std::string name);
 
+
+    /**
+     * @deprecated
+     */
     ClassDefStmt* mk_class_def();
+    /**
+     * @deprecated
+     */
     ClassDefStmt* mk_class_def(std::string name);
+
+    ClassDefStmt* mk_class_def(std::string name, Scope scope);
+
 
     CompoundStmt* mk_compound(std::vector<Stmt*> stmts);
 
@@ -109,7 +134,12 @@ public:
     );
 
 private:
+    StmtFactory();
+
+private:
+    TypeFactory *m_types;
     std::vector<std::unique_ptr<Stmt>> stmts_;
+    std::map<std::string, ClassDefStmt> m_classes;
     ContinueStmt continue_;
     BreakStmt break_;
     UnknownStmt unknown_;

@@ -339,6 +339,25 @@ struct VisitorAdapter : IVisitor
     }
 };
 
+
+namespace details
+{
+
+/**
+ * @brief CRTP mixin that makes @c This child class visitable.
+ * @tparam This Type of the child class.
+ */
+template<typename This>
+struct MkVisitable : virtual IVisitable
+{
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(static_cast<This const&>(*this));
+    }
+};
+
+} // namespace details
+
 } // namespace astfri
 
 #endif

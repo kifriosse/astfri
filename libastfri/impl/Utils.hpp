@@ -8,18 +8,6 @@
 
 namespace astfri::details
 {
-/**
- * @brief CRTP mixin that makes @c This child class visitable.
- * @tparam This Type of the child class.
- */
-template<typename This>
-struct MkVisitable : virtual IVisitable
-{
-    void accept(IVisitor& visitor) override
-    {
-        visitor.visit(static_cast<This const&>(*this));
-    }
-};
 
 /**
  * @brief TODO
@@ -66,6 +54,7 @@ T* emplace_get(Vector& store, Args&&... args)
     store.push_back(std::move(e));
     return static_cast<T*>(store.back().get());
 }
+
 } // namespace astfri::details
 
 #endif
