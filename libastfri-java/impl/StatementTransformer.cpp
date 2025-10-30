@@ -116,38 +116,13 @@ astfri::AccessModifier StatementTransformer::get_access_modifier(
 
 astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string const& sourceCode)
 {
-    auto& tf                 = astfri::TypeFactory::get_instance();
-    astfri::Type* type       = tf.mk_unknown();
+    astfri::Type* type = astfri::TypeFactory::get_instance().mk_unknown();
+    std::string typeNodeType = ts_node_type(tsNode);
     std::string typeNodeText = this->exprTransformer->get_node_text(tsNode, sourceCode);
 
-    if (typeNodeText == "int")
-    {
-        type = tf.mk_int();
-    }
-    else if (typeNodeText == "char")
-    {
-        type = tf.mk_char();
-    }
-    else if (typeNodeText == "float")
-    {
-        type = tf.mk_float();
-    }
-    else if (typeNodeText == "double")
-    {
-        type = tf.mk_float();
-    }
-    else if (typeNodeText == "boolean")
-    {
-        type = tf.mk_bool();
-    }
-    else if (typeNodeText == "void")
-    {
-        type = tf.mk_void();
-    }
-    else
-    {
-        type = tf.mk_user(typeNodeText);
-    }
+    type = this->nodeMapper->get_typeMap().contains(typeNodeText)
+        ? this->nodeMapper->get_typeMap().at(typeNodeText)
+        : astfri::TypeFactory::get_instance().mk_user(typeNodeText);
     return type;
 }
 
@@ -360,35 +335,29 @@ astfri::ForStmt* StatementTransformer::transform_for_stmt_node(
     astfri::Stmt* step      = nullptr;
     astfri::Stmt* body      = nullptr;
 
-    TSNode initNode;
-    TSNode conditionNode;
-    TSNode stepNode;
-    TSNode bodyNode;
+    uint32_t childCount     = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < childCount; i++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+        char const* fieldName = ts_node_field_name_for_named_child(tsNode, i);
 
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
-    {
-        initNode                 = ts_node_named_child(tsNode, 0);
-        std::string initNodeType = ts_node_type(initNode);
-        init                     = this->transform_local_var_node(initNode, sourceCode);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
-    {
-        conditionNode                 = ts_node_named_child(tsNode, 1);
-        std::string conditionNodeType = ts_node_type(conditionNode);
-        condition                     = exprTransformer->get_expr(conditionNode, sourceCode);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 2)))
-    {
-        stepNode                 = ts_node_named_child(tsNode, 2);
-        std::string stepNodeType = ts_node_type(stepNode);
-        astfri::Expr* expr       = exprTransformer->get_expr(stepNode, sourceCode);
-        step                     = stmtFactory.mk_expr(expr);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 3)))
-    {
-        bodyNode                 = ts_node_named_child(tsNode, 3);
-        std::string bodyNodeType = ts_node_type(bodyNode);
-        body                     = this->transform_body_node(bodyNode, sourceCode);
+        if (fieldName != nullptr && std::strcmp(fieldName, "init") == 0)
+        {
+            init = this->transform_local_var_node(child, sourceCode);
+        }
+        if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0)
+        {
+            condition = exprTransformer->get_expr(child, sourceCode);
+        }
+        if (fieldName != nullptr && std::strcmp(fieldName, "update") == 0)
+        {
+            step = stmtFactory.mk_expr(exprTransformer->get_expr(child, sourceCode));
+        }
+        if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0)
+        {
+            body = this->transform_body_node(child, sourceCode);
+        }
     }
 
     return stmtFactory.mk_for(init, condition, step, body);
@@ -402,25 +371,21 @@ astfri::WhileStmt* StatementTransformer::transform_while_stmt_node(
     astfri::Expr* condition    = nullptr;
     astfri::CompoundStmt* body = nullptr;
 
-    TSNode helpNode;
-    TSNode conditionNode;
-    TSNode bodyNode;
+    uint32_t childCount     = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < childCount; i++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+        char const* fieldName = ts_node_field_name_for_named_child(tsNode, i);
 
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
-    {
-        helpNode = ts_node_named_child(tsNode, 0);
-        if (! ts_node_is_null(ts_node_named_child(helpNode, 0)))
+        if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0)
         {
-            conditionNode                 = ts_node_named_child(helpNode, 0);
-            std::string conditionNodeType = ts_node_type(conditionNode);
-            condition                     = exprTransformer->get_expr(conditionNode, sourceCode);
+            condition = exprTransformer->get_expr(child, sourceCode);
         }
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
-    {
-        bodyNode                 = ts_node_named_child(tsNode, 1);
-        std::string bodyNodeType = ts_node_type(bodyNode);
-        body                     = this->transform_body_node(bodyNode, sourceCode);
+        if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0)
+        {
+            body = this->transform_body_node(child, sourceCode);
+        }
     }
 
     return stmtFactory.mk_while(condition, body);
@@ -434,24 +399,20 @@ astfri::DoWhileStmt* StatementTransformer::transform_do_while_stmt_node(
     astfri::Expr* condition    = nullptr;
     astfri::CompoundStmt* body = nullptr;
 
-    TSNode helpNode;
-    TSNode conditionNode;
-    TSNode bodyNode;
+    uint32_t childCount     = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < childCount; i++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+        char const* fieldName = ts_node_field_name_for_named_child(tsNode, i);
 
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
-    {
-        bodyNode                 = ts_node_named_child(tsNode, 0);
-        std::string bodyNodeType = ts_node_type(bodyNode);
-        body                     = this->transform_body_node(bodyNode, sourceCode);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
-    {
-        helpNode = ts_node_named_child(tsNode, 1);
-        if (! ts_node_is_null(ts_node_named_child(helpNode, 0)))
+        if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0)
         {
-            conditionNode                 = ts_node_named_child(helpNode, 0);
-            std::string conditionNodeType = ts_node_type(conditionNode);
-            condition                     = exprTransformer->get_expr(conditionNode, sourceCode);
+            body = this->transform_body_node(child, sourceCode);
+        }
+        if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0)
+        {
+            condition = exprTransformer->get_expr(child, sourceCode);
         }
     }
 
