@@ -10,14 +10,14 @@ int main()
     astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 
     std::string sourceCode
-        = tb->load_file("/home/adam/projects/astfri/libastfri-java/resources/Dummy.txt");
+        = tb->load_file("/home/adam/projects/astfri/libastfri-java/resources/lambda2.java");
     TSTree* tree                = tb->make_syntax_tree(sourceCode);
     astfri::TranslationUnit* tu = tb->get_translation_unit(tree, sourceCode);
 
     // code for text output
     astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
-    visitor.visit(*tu);
-    // visitor->write_file();
+
+    visitor.visit_and_export(*tu);
 
     // freeing memory
     ts_tree_delete(tree);
