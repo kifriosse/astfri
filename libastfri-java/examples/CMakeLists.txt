@@ -5,13 +5,6 @@
 # target_link_libraries(ts-java PRIVATE astfri-java astfri-text astfri-uml)
 
 
-add_executable(example_ak)
-
-target_sources(example_ak PRIVATE main.cpp)
-
-target_link_libraries(example_ak PRIVATE astfri-java)
-
-
 add_executable(example_to)
 
 target_sources(example_to PRIVATE example_text_output.cpp)

@@ -11,6 +11,8 @@ namespace astfri::uml
 class UMLOutputter
 {
 private:
+    virtual std::string assemble_param(VarStruct p)               = 0;
+
 protected:
     Config* config_;
     std::string outputString_;
@@ -23,11 +25,13 @@ public:
 
     virtual std::string getFileExtension()                        = 0;
 
-    virtual void open_user_type(ClassStruct c, UserDefinedType t) = 0;
+    virtual void open_user_type(ClassStruct c)                    = 0;
     virtual void close_user_type()                                = 0;
 
     virtual void add_data_member(VarStruct v)                     = 0;
     virtual void add_function_member(MethodStruct m)              = 0;
+    virtual void add_constructor(ConstructorStruct c)             = 0;
+    virtual void add_destructor(DestructorStruct d)               = 0;
 
     virtual void add_relation(RelationStruct r)                   = 0;
 };

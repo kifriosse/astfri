@@ -6,6 +6,7 @@ void ClassStruct::reset()
 {
     this->name_ = "";
     this->genericParams_.clear();
+    this->type_ = UserDefinedType::CLASS;
 }
 
 void VarStruct::reset()
@@ -24,5 +25,17 @@ void MethodStruct::reset()
     this->returnIsIndirect_ = false;
     this->params_.clear();
     this->accessMod_ = astfri::AccessModifier::Internal;
+}
+
+void ConstructorStruct::reset()
+{
+    this->class_ = "";
+    this->accessMod_ = astfri::AccessModifier::Internal;
+    this->params_.clear();
+}
+
+void DestructorStruct::reset()
+{
+    this->class_ = "";
 }
 } // namespace astfri::uml

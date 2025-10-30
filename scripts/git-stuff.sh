@@ -78,6 +78,8 @@ elif [ "$MODE" = "rebase" ]; then  # rebase
     git rebase main
     possibly_die "Failed to rebase ${branch}"
   done
+  git switch main
+  possibly_die "Failed to switch to main"
   ok
 elif [ "$MODE" = "push" ]; then    # push
   heading "# Pushing rebased branches"

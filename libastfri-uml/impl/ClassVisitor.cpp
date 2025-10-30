@@ -140,33 +140,23 @@ void ClassVisitor::visit(astfri::MethodDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::ConstructorDefStmt const& stmt)
 {
-    if (! this->config_->innerView_)
-    {
-        if (stmt.access_ == astfri::AccessModifier::Private)
-            return;
-        this->currentMethod_.name_ = "<<constructor>> new " + stmt.owner_->name_;
-    }
-    else
-    {
-        this->currentMethod_.name_ = stmt.owner_->name_;
-    }
-    this->currentMethod_.accessMod_ = stmt.access_;
+    this->currentConstructor_.class_ = stmt.owner_->name_;
+    this->currentConstructor_.accessMod_ = stmt.access_;
     for (astfri::ParamVarDefStmt* p : stmt.params_)
     {
         p->accept(*this);
-        this->currentMethod_.params_.push_back(this->currentVariable_);
+        this->currentConstructor_.params_.push_back(this->currentVariable_);
         this->currentVariable_.reset();
     }
-    this->outputter_->add_function_member(this->currentMethod_);
-    this->currentMethod_.reset();
+    this->outputter_->add_constructor(currentConstructor_);
+    this->currentConstructor_.reset();
 }
 
 void ClassVisitor::visit(astfri::DestructorDefStmt const& stmt)
 {
-    this->currentMethod_.accessMod_ = AccessModifier::Public;
-    this->currentMethod_.name_      = this->config_->destructorIndicator_ + stmt.owner_->name_;
-    this->outputter_->add_function_member(this->currentMethod_);
-    this->currentMethod_.reset();
+    this->currentDestructor_.class_ = stmt.owner_->name_;
+    this->outputter_->add_destructor(currentDestructor_);
+    this->currentDestructor_.reset();
 }
 
 void ClassVisitor::visit(astfri::GenericParam const& stmt)
@@ -177,11 +167,12 @@ void ClassVisitor::visit(astfri::GenericParam const& stmt)
 void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 {
     this->currentClass_.name_ = stmt.name_;
+    this->currentClass_.type_ = UserDefinedType::CLASS;
     for (astfri::GenericParam* gp : stmt.tparams_)
     {
         gp->accept(*this);
     }
-    this->outputter_->open_user_type(this->currentClass_, UserDefinedType::CLASS);
+    this->outputter_->open_user_type(this->currentClass_);
 
     for (astfri::ConstructorDefStmt* constructor : stmt.constructors_)
     {
@@ -210,11 +201,12 @@ void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt)
 {
     this->currentClass_.name_ = stmt.name_;
+    this->currentClass_.type_ = UserDefinedType::INTERFACE;
     for (astfri::GenericParam* gp : stmt.tparams_)
     {
         this->currentClass_.genericParams_.push_back(gp->name_);
     }
-    this->outputter_->open_user_type(this->currentClass_, UserDefinedType::INTERFACE);
+    this->outputter_->open_user_type(this->currentClass_);
 
     for (astfri::MethodDefStmt* method : stmt.methods_)
     {
