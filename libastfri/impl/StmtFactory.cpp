@@ -9,6 +9,11 @@ StmtFactory& StmtFactory::get_instance()
     return instance;
 }
 
+StmtFactory::StmtFactory() :
+    m_types(&TypeFactory::get_instance())
+{
+}
+
 LocalVarDefStmt* StmtFactory::mk_local_var_def(std::string name, Type* type, Expr* initializer)
 {
     return details::emplace_get<LocalVarDefStmt>(stmts_, std::move(name), type, initializer);
@@ -120,6 +125,19 @@ ClassDefStmt* StmtFactory::mk_class_def(std::string name)
     c->name_        = std::move(name);
     return c;
 }
+
+ClassDefStmt* StmtFactory::mk_class_def(std::string name, Scope scope)
+{
+    std::string key = mk_fqn(scope, name);
+    ClassDefStmt *c = details::emplace_get<ClassDefStmt>(
+        std::move(key),
+        m_classes);
+    // TODO same as TypeFactory::mk_class
+    c->type_ = m_types->mk_class(name, scope);
+    return c;
+}
+
+
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def()
 {

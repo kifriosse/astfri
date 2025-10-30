@@ -27,7 +27,7 @@ public:
     DynamicType* mk_dynamic();
     IndirectionType* mk_indirect(Type* type);
     UserType* mk_user(std::string const& name);
-    ClassType *mk_class(std::string name, Scope scope);
+    ClassType *mk_class(const std::string &name, const Scope &scope);
 
 public:
     TypeFactory(TypeFactory const&)    = delete;
@@ -45,9 +45,9 @@ private:
     UnknownType unknown_;
     DynamicType dynamic_;
     std::map<Type*, IndirectionType> indirect_;
+    // deprecated
     std::map<std::string, UserType> user_;
-
-    std::map<std::string, ClassType> classes_;
+    std::map<std::string, ClassType> m_classes;
 };
 
 } // namespace astfri
