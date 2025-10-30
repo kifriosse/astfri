@@ -537,7 +537,7 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
 {
 
     astfri::ClassDefStmt* classDefStmt
-        = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()));
+        = this->statementMaker_.mk_class_def(std::move(value["name"].GetString()), astfri::mk_scope());
 
     for (auto& attribute : value["attributes"].GetArray())
     {
@@ -870,7 +870,7 @@ void AstFriDeSerializer::resolve_class_def_stmts()
         if (itResolvedClassStmt == nameWithClassDefStmtMapping_.end())
         {
             astfri::ClassDefStmt* classDefStmt
-                = this->statementMaker_.mk_class_def(std::move(name));
+                = this->statementMaker_.mk_class_def(std::move(name), astfri::mk_scope());
             for (auto& clsDefStmt : it.second)
             {
                 clsDefStmt->bases_.push_back(classDefStmt);

@@ -8,9 +8,9 @@ int main(int argc, char** argv)
     // auto& expressions = astfri::ExprFactory::get_instance();
     auto& types                                   = astfri::TypeFactory::get_instance();
 
-    astfri::ClassDefStmt* classFoo                = statements.mk_class_def("Foo");
-    astfri::ClassDefStmt* classBar                = statements.mk_class_def("Bar");
-    astfri::ClassDefStmt* classParent             = statements.mk_class_def("Parent");
+    astfri::ClassDefStmt* classFoo                = statements.mk_class_def("Foo", astfri::mk_scope());
+    astfri::ClassDefStmt* classBar                = statements.mk_class_def("Bar", astfri::mk_scope());
+    astfri::ClassDefStmt* classParent             = statements.mk_class_def("Parent", astfri::mk_scope());
     astfri::InterfaceDefStmt* interfaceIVisitable = statements.mk_interface_def("IVisitable");
 
     std::vector<astfri::GenericParam*> genericParamsFoo;

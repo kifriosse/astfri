@@ -100,6 +100,16 @@ struct ScopedType : Type
  */
 struct ClassType : ScopedType, details::MkVisitable<ClassType>
 {
+    ClassDefStmt *m_def;
+};
+
+
+/**
+ * @brief TODO
+ */
+struct InterfaceType : ScopedType, details::MkVisitable<InterfaceType>
+{
+    InterfaceDefStmt *m_def;
 };
 
 // /**

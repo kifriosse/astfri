@@ -26,6 +26,9 @@ public:
     UnknownType* mk_unknown();
     DynamicType* mk_dynamic();
     IndirectionType* mk_indirect(Type* type);
+    /**
+     * @deprecated
+     */
     UserType* mk_user(std::string const& name);
     ClassType *mk_class(const std::string &name, const Scope &scope);
 

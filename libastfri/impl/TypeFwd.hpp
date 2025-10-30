@@ -12,6 +12,7 @@ struct VoidType;
 struct IndirectionType;
 struct UserType; // TODO deprecated
 struct ClassType;
+struct InterfaceType;
 struct EnumType;
 struct RecordType;
 struct UnionType;

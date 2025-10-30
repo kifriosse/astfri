@@ -84,15 +84,6 @@ public:
     InterfaceDefStmt* mk_interface_def(std::string name);
 
 
-    /**
-     * @deprecated
-     */
-    ClassDefStmt* mk_class_def();
-    /**
-     * @deprecated
-     */
-    ClassDefStmt* mk_class_def(std::string name);
-
     ClassDefStmt* mk_class_def(std::string name, Scope scope);
 
 

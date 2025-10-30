@@ -65,6 +65,7 @@ ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope)
     // TODO class type should have a constructor so that emplace get could use these to initialize it
     t->name_ = std::move(name);
     t->scope_ = std::move(scope);
+    t->m_def = nullptr;
     return t;
 }
 

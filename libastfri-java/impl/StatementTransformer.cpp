@@ -773,8 +773,8 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
             else if (classChildType == "superclass")
             {
                 bases.push_back(stmtFactory.mk_class_def(
-                    exprTransformer->get_node_text(ts_node_named_child(classChild, 0), sourceCode)
-                ));
+                    exprTransformer->get_node_text(ts_node_named_child(classChild, 0), sourceCode),
+                    mk_scope()));
             }
             else if (classChildType == "super_interfaces")
             {
@@ -815,7 +815,7 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
             }
         }
 
-        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className);
+        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, mk_scope());
         classDef->vars_                = attributes;
         classDef->methods_             = methods;
         classDef->constructors_        = constructors;

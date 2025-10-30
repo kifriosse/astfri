@@ -9,5 +9,6 @@
 #include <libastfri/inc/TypeFactory.hpp>
 #include <libastfri/inc/TypeInfo.hpp>
 #include <libastfri/inc/Visitor.hpp>
+#include <libastfri/impl/Scope.hpp>
 
 #endif

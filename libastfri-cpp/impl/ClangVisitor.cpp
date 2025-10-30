@@ -4,6 +4,7 @@
 #include <iostream>
 #include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Stmt.hpp"
+#include <libastfri/inc/Astfri.hpp>
 
 namespace astfri::astfri_cpp
 {
@@ -484,7 +485,9 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
     }
 
     // akcia na vrchole
-    auto new_class = this->stmt_factory_->mk_class_def(RD->getNameAsString());
+    auto new_class = this->stmt_factory_->mk_class_def(
+        RD->getNameAsString(),
+        mk_scope());
     this->tu_->classes_.push_back(new_class);
 
     // nastavenie bases
