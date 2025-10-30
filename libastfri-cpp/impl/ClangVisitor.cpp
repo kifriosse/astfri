@@ -1,6 +1,9 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
+#include <clang/AST/DeclCXX.h>
 #include <iostream>
+#include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::astfri_cpp
 {
@@ -475,6 +478,11 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD)
 
 bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
 {
+    // ak je to trieda, ktorú vygenerovala lambda, tak skipnem
+    if (RD->isLambda()) {
+        return true;
+    }
+
     // akcia na vrchole
     auto new_class = this->stmt_factory_->mk_class_def(RD->getNameAsString());
     this->tu_->classes_.push_back(new_class);
@@ -1006,24 +1014,35 @@ bool ClangVisitor::TraverseDeclRefExpr(clang::DeclRefExpr* DRE)
 
 bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
 {
-    (void)LBD;
+    // akcia na tomto vrchole
+    // získam si potrebné veci na lambda uzol
+    std::vector<ParamVarDefStmt*> params {};
+    astfri::Stmt* body;
+    
+    // ak by bolo treba riešiť captures
     // std::cout << "Som na lamde, zachytené premenné sú: ";
     // for (auto zachytena : (LBD->captures())) {
     //     std::cout << zachytena.getCapturedVar()->getNameAsString() << " ";
     // }
     // std::cout << "\n";
 
-    // std::cout << "Parametre sú: ";
-    // for (auto parameter : (LBD->getCallOperator()->parameters())) {
-    //     std::cout << parameter->getNameAsString() << " ";
-    // }
-    // std::cout << "\n";
+    // získanie parametrov
+    for (auto parameter : (LBD->getCallOperator()->parameters())) {
+        TraverseDecl(parameter);
+        params.push_back((astfri::ParamVarDefStmt*)astfri_location.stmt_);
+    }
+    
+    // získanie tela lambdy
+    TraverseStmt(LBD->getBody());
+    body = this->astfri_location.stmt_;
 
-    // std::cout << "Telo operátora ():\n";
-    // for (auto prikaz : (LBD->getBody()->children())) {
-    //     (void)prikaz;
-    //     std::cout << "Toto je príkaz\n";
-    // }
+    // vytvorenie uzla
+    auto lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body);    
+    
+    // nastavenie location
+    this->astfri_location.expr_ = lambdaExpr;
+    this->clang_location.expr_ = LBD;
+    
     return true;
 }
 

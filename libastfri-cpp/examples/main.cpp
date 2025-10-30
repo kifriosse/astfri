@@ -37,9 +37,8 @@ int main(int argc, char const** argv)
     astfri::uml::UMLLibWrapper wrapper;
     astfri::uml::Config config;
     astfri::uml::PlantUMLOutputter op;
-    astfri::uml::TypeAfterConvention con;
     config.separator_ = ':';
-    wrapper.init(config, op, con);
+    wrapper.init(config, op);
     wrapper.run(tu);
 
     return 0;
