@@ -133,32 +133,32 @@ namespace astfri::text
         void process_other_expressions(rj::Value const*& expr);
     public:
         // TEXT_FORMAT
-        ss const* get_default_text_style()
+        ss const* default_text_style()
         {
             return defaultTextStyle_.get();
         }
 
-        ss const* get_row_num_style()
+        ss const* row_num_style()
         {
             return rowNumStyle_.get();
         }
 
-        std::vector<ss> const* get_bracket_colors()
+        std::vector<ss> const* bracket_colors()
         {
             return bracketColors_.get();
         }
 
-        int const& get_tabulator_len()
+        int const& tabulator_len()
         {
             return tabulatorLen_;
         }
 
-        int const& get_text_margin_left_len()
+        int const& text_margin_left_len()
         {
             return textMarginLeftLen_;
         }
 
-        int const& get_row_num_margin_left_len()
+        int const& row_num_margin_left_len()
         {
             return rowNumMarginLeftLen_;
         }
@@ -270,334 +270,334 @@ namespace astfri::text
         }
 
         // SYSTEM_EXPRESSIONS
-        ss const* get_class_word()
+        ss const* class_word()
         {
             return classWord_.get();
         }
 
-        ss const* get_interface_word()
+        ss const* interface_word()
         {
             return interfaceWord_.get();
         }
 
-        ss const* get_implement_word()
+        ss const* implement_word()
         {
             return implementWord_.get();
         }
 
-        ss const* get_extend_word()
+        ss const* extend_word()
         {
             return extendWord_.get();
         }
 
-        ss const* get_this_word()
+        ss const* this_word()
         {
             return thisWord_.get();
         }
 
-        ss const* get_return_word()
+        ss const* return_word()
         {
             return returnWord_.get();
         }
 
-        ss const* get_continue_word()
+        ss const* continue_word()
         {
             return continueWord_.get();
         }
 
-        ss const* get_break_word()
+        ss const* break_word()
         {
             return breakWord_.get();
         }
 
-        ss const* get_throw_word()
+        ss const* throw_word()
         {
             return throwWord_.get();
         }
 
-        ss const* get_if_word()
+        ss const* if_word()
         {
             return ifWord_.get();
         }
 
-        ss const* get_else_word()
+        ss const* else_word()
         {
             return elseWord_.get();
         }
 
-        ss const* get_do_word()
+        ss const* do_word()
         {
             return doWord_.get();
         }
 
-        ss const* get_while_word()
+        ss const* while_word()
         {
             return whileWord_.get();
         }
 
-        ss const* get_for_word()
+        ss const* for_word()
         {
             return forWord_.get();
         }
 
-        ss const* get_repeat_word()
+        ss const* repeat_word()
         {
             return repeatWord_.get();
         }
 
-        ss const* get_switch_word()
+        ss const* switch_word()
         {
             return switchWord_.get();
         }
 
-        ss const* get_case_word()
+        ss const* case_word()
         {
             return caseWord_.get();
         }
 
-        ss const* get_default_word()
+        ss const* default_word()
         {
             return defaultWord_.get();
         }
 
-        ss const* get_new_word()
+        ss const* new_word()
         {
             return newWord_.get();
         }
 
-        ss const* get_delete_word()
+        ss const* delete_word()
         {
             return deleteWord_.get();
         }
 
-        ss const* get_pointer_word()
+        ss const* pointer_word()
         {
             return pointerWord_.get();
         }
 
-        ss const* get_virtual_word()
+        ss const* virtual_word()
         {
             return virtualWord_.get();
         }
 
-        ss const* get_abstract_word()
+        ss const* abstract_word()
         {
             return abstractWord_.get();
         }
 
-        ss const* get_template_word()
+        ss const* template_word()
         {
             return templateWord_.get();
         }
 
         // STYLE
-        ss const* get_system_expr_style()
+        ss const* system_expr_style()
         {
             return systExprStyle_.get();
         }
 
-        ss const* get_class_word_style()
+        ss const* class_word_style()
         {
             return classWordStyle_.get();
         }
 
-        ss const* get_interface_word_style()
+        ss const* interface_word_style()
         {
             return interfaceWordStyle_.get();
         }
 
-        ss const* get_implement_word_style()
+        ss const* implement_word_style()
         {
             return implementWordStyle_.get();
         }
 
-        ss const* get_extend_word_style()
+        ss const* extend_word_style()
         {
             return extendWordStyle_.get();
         }
 
-        ss const* get_this_word_style()
+        ss const* this_word_style()
         {
             return thisWordStyle_.get();
         }
 
-        ss const* get_return_word_style()
+        ss const* return_word_style()
         {
             return returnWordStyle_.get();
         }
 
-        ss const* get_continue_word_style()
+        ss const* continue_word_style()
         {
             return continueWordStyle_.get();
         }
 
-        ss const* get_break_word_style()
+        ss const* break_word_style()
         {
             return breakWordStyle_.get();
         }
 
-        ss const* get_throw_word_style()
+        ss const* throw_word_style()
         {
             return throwWordStyle_.get();
         }
 
-        ss const* get_if_word_style()
+        ss const* if_word_style()
         {
             return ifWordStyle_.get();
         }
 
-        ss const* get_else_word_style()
+        ss const* else_word_style()
         {
             return elseWordStyle_.get();
         }
 
-        ss const* get_do_word_style()
+        ss const* do_word_style()
         {
             return doWordStyle_.get();
         }
 
-        ss const* get_while_word_style()
+        ss const* while_word_style()
         {
             return whileWordStyle_.get();
         }
 
-        ss const* get_for_word_style()
+        ss const* for_word_style()
         {
             return forWordStyle_.get();
         }
 
-        ss const* get_repeat_word_style()
+        ss const* repeat_word_style()
         {
             return repeatWordStyle_.get();
         }
 
-        ss const* get_switch_word_style()
+        ss const* switch_word_style()
         {
             return switchWordStyle_.get();
         }
 
-        ss const* get_case_word_style()
+        ss const* case_word_style()
         {
             return caseWordStyle_.get();
         }
 
-        ss const* get_default_word_style()
+        ss const* default_word_style()
         {
             return defaultWordStyle_.get();
         }
 
-        ss const* get_new_word_style()
+        ss const* new_word_style()
         {
             return newWordStyle_.get();
         }
 
-        ss const* get_delete_word_style()
+        ss const* delete_word_style()
         {
             return deleteWordStyle_.get();
         }
 
-        ss const* get_pointer_word_style()
+        ss const* pointer_word_style()
         {
             return pointerWordStyle_.get();
         }
 
-        ss const* get_virtual_word_style()
+        ss const* virtual_word_style()
         {
             return virtualWordStyle_.get();
         }
 
-        ss const* get_abstract_word_style()
+        ss const* abstract_word_style()
         {
             return abstractWordStyle_.get();
         }
 
-        ss const* get_template_word_style()
+        ss const* template_word_style()
         {
             return templateWordStyle_.get();
         }
 
         // OTHER_EXPRESSIONS
-        ss const* get_constructor_word()
+        ss const* constructor_word()
         {
             return constructorWord_.get();
         }
 
-        ss const* get_destructor_word()
+        ss const* destructor_word()
         {
             return destructorWord_.get();
         }
 
-        ss const* get_method_word()
+        ss const* method_word()
         {
             return methodWord_.get();
         }
 
-        ss const* get_function_word()
+        ss const* function_word()
         {
             return functionWord_.get();
         }
 
-        ss const* get_lambda_word()
+        ss const* lambda_word()
         {
             return lambdaWord_.get();
         }
 
-        ss const* get_call_word()
+        ss const* call_word()
         {
             return callWord_.get();
         }
 
-        ss const* get_define_word()
+        ss const* define_word()
         {
             return defineWord_.get();
         }
 
-        ss const* get_returns_word()
+        ss const* returns_word()
         {
             return returnsWord_.get();
         }
 
-        ss const* get_other_expression_style()
+        ss const* other_expression_style()
         {
             return otherExprStyle_.get();
         }
 
-        ss const* get_constructor_word_style()
+        ss const* constructor_word_style()
         {
             return constructorWordStyle_.get();
         }
 
-        ss const* get_destructor_word_style()
+        ss const* destructor_word_style()
         {
             return destructorWordStyle_.get();
         }
 
-        ss const* get_method_word_style()
+        ss const* method_word_style()
         {
             return methodWordStyle_.get();
         }
 
-        ss const* get_function_word_style()
+        ss const* function_word_style()
         {
             return functionWordStyle_.get();
         }
 
-        ss const* get_lambda_word_style()
+        ss const* lambda_word_style()
         {
             return lambdaWordStyle_.get();
         }
 
-        ss const* get_call_word_style()
+        ss const* call_word_style()
         {
             return callWordStyle_.get();
         }
 
-        ss const* get_define_word_style()
+        ss const* define_word_style()
         {
             return defineWordStyle_.get();
         }
 
-        ss const* get_returns_word_style()
+        ss const* returns_word_style()
         {
             return returnsWordStyle_.get();
         }

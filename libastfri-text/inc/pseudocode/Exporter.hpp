@@ -20,7 +20,7 @@ namespace astfri::text
     public:
         virtual void reset();
         void execute_export();
-    private:
+    protected:
         virtual void write_pseudocode_into_file(STRING fullfilepath);
     public:
         // GENERAL

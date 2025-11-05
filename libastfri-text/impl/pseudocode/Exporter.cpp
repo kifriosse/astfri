@@ -1,4 +1,4 @@
-#include <libastfri-text/inc/Exporter.hpp>
+#include <libastfri-text/inc/pseudocode/Exporter.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -24,9 +24,9 @@ void Exporter::reset()
 void Exporter::execute_export()
 {
     std::string suffix;
-    suffix = configurator_->get_output_file_format()->str() == "html" ? ".html" : ".txt";
-    std::filesystem::path outputpath = configurator_->get_output_file_path()->str();
-    std::string filename = configurator_->get_output_file_name()->str();
+    suffix = configurator_->output_file_format()->str() == "html" ? ".html" : ".txt";
+    std::filesystem::path outputpath = configurator_->output_file_path()->str();
+    std::string filename = configurator_->output_file_name()->str();
     outputpath.concat(filename + suffix);
     if (!configurator_->overwrite_file())
     {
@@ -63,7 +63,7 @@ void Exporter::write_pseudocode_into_file(STRING fullfilepath)
         {
             if (!line.empty() || (line.empty() && configurator_->sh_row_num_empty_row()))
             {
-                for (int i = 0; i < configurator_->get_row_num_margin_left_len(); ++i)
+                for (int i = 0; i < configurator_->row_num_margin_left_len(); ++i)
                 {
                     file << " ";
                 }
@@ -106,13 +106,13 @@ void Exporter::write_text(std::string const& text)
     if (isEmptyLine_)
     {
         isEmptyLine_ = false;
-        for (int i = 0; i < configurator_->get_text_margin_left_len(); ++i)
+        for (int i = 0; i < configurator_->text_margin_left_len(); ++i)
         {
             write_space();
         }
         for (int i = 0; i < currentIndentationLevel_; ++i)
         {
-            for (int j = 0; j < configurator_->get_tabulator_len(); ++j)
+            for (int j = 0; j < configurator_->tabulator_len(); ++j)
             {
                 write_space();
             }
@@ -123,7 +123,7 @@ void Exporter::write_text(std::string const& text)
 
 void Exporter::write_new_line()
 {
-    if (configurator_->get_output_file_format()->str() == "html")
+    if (configurator_->output_file_format()->str() == "html")
     {
         *outputPseudocode_ << std::move("<br>");
     }
@@ -134,7 +134,7 @@ void Exporter::write_new_line()
 
 void Exporter::write_space()
 {
-    if (configurator_->get_output_file_format()->str() == "html")
+    if (configurator_->output_file_format()->str() == "html")
     {
         write_text("&nbsp;");
     }
@@ -160,106 +160,106 @@ void Exporter::write_right_bracket(STRING br)
 
 void Exporter::write_unknown_type_word()
 {
-    write_text(configurator_->get_unknown_type_word()->str());
+    write_text(configurator_->unknown_type_word()->str());
 }
 
 void Exporter::write_unknown_expr_word()
 {
-    write_text(configurator_->get_unknown_expr_word()->str());
+    write_text(configurator_->unknown_expr_word()->str());
 }
 
 void Exporter::write_unknown_stmt_word()
 {
-    write_text(configurator_->get_unknown_stmt_word()->str());
+    write_text(configurator_->unknown_stmt_word()->str());
 }
 
 void Exporter::write_invalid_type_word()
 {
-    write_text(configurator_->get_invalid_type_word()->str());
+    write_text(configurator_->invalid_type_word()->str());
 }
 
 void Exporter::write_invalid_expr_word()
 {
-    write_text(configurator_->get_invalid_expr_word()->str());
+    write_text(configurator_->invalid_expr_word()->str());
 }
 
 void Exporter::write_invalid_stmt_word()
 {
-    write_text(configurator_->get_invalid_stmt_word()->str());
+    write_text(configurator_->invalid_stmt_word()->str());
 }
 
 // ACCESS_MODIFIERS
 
 void Exporter::write_public_word()
 {
-    write_text(configurator_->get_public_word()->str());
+    write_text(configurator_->public_word()->str());
 }
 
 void Exporter::write_protected_word()
 {
-    write_text(configurator_->get_protected_word()->str());
+    write_text(configurator_->protected_word()->str());
 }
 
 void Exporter::write_private_word()
 {
-    write_text(configurator_->get_private_word()->str());
+    write_text(configurator_->private_word()->str());
 }
 
 void Exporter::write_internal_word()
 {
-    write_text(configurator_->get_internal_word()->str());
+    write_text(configurator_->internal_word()->str());
 }
 
 void Exporter::write_attributes_word()
 {
-    write_text(configurator_->get_attributes_word()->str());
+    write_text(configurator_->attributes_word()->str());
 }
 
 void Exporter::write_constructors_word()
 {
-    write_text(configurator_->get_constructors_word()->str());
+    write_text(configurator_->constructors_word()->str());
 }
 
 void Exporter::write_destructors_word()
 {
-    write_text(configurator_->get_destructors_word()->str());
+    write_text(configurator_->destructors_word()->str());
 }
 
 void Exporter::write_methods_word()
 {
-    write_text(configurator_->get_methods_word()->str());
+    write_text(configurator_->methods_word()->str());
 }
 
 // DATA_TYPES
 
 void Exporter::write_dynamic_type_word()
 {
-    write_text(configurator_->get_dynamic_type_word()->str());
+    write_text(configurator_->dynamic_type_word()->str());
 }
 
 void Exporter::write_int_type_word()
 {
-    write_text(configurator_->get_int_type_word()->str());
+    write_text(configurator_->int_type_word()->str());
 }
 
 void Exporter::write_float_type_word()
 {
-    write_text(configurator_->get_float_type_word()->str());
+    write_text(configurator_->float_type_word()->str());
 }
 
 void Exporter::write_char_type_word()
 {
-    write_text(configurator_->get_char_type_word()->str());
+    write_text(configurator_->char_type_word()->str());
 }
 
 void Exporter::write_bool_type_word()
 {
-    write_text(configurator_->get_bool_type_word()->str());
+    write_text(configurator_->bool_type_word()->str());
 }
 
 void Exporter::write_void_type_word()
 {
-    write_text(configurator_->get_void_type_word()->str());
+    write_text(configurator_->void_type_word()->str());
 }
 
 void Exporter::write_user_type(std::string usertype)
@@ -323,22 +323,22 @@ void Exporter::write_operator_sign(STRING sign)
 
 void Exporter::write_assign_op_word()
 {
-    write_text(configurator_->get_assign_op_word()->str());
+    write_text(configurator_->assign_op_word()->str());
 }
 
 void Exporter::write_modulo_op_word()
 {
-    write_text(configurator_->get_modulo_op_word()->str());
+    write_text(configurator_->modulo_op_word()->str());
 }
 
 void Exporter::write_address_op_word()
 {
-    write_text(configurator_->get_address_op_word()->str());
+    write_text(configurator_->address_op_word()->str());
 }
 
 void Exporter::write_deref_op_word()
 {
-    write_text(configurator_->get_deref_op_word()->str());
+    write_text(configurator_->deref_op_word()->str());
 }
 
 void Exporter::write_separator_sign(STRING sign)
@@ -372,179 +372,179 @@ void Exporter::write_bool_val(bool val)
 {
     if (val)
     {
-        write_text(configurator_->get_true_val_word()->str());
+        write_text(configurator_->true_val_word()->str());
     }
     else
     {
-        write_text(configurator_->get_false_val_word()->str());
+        write_text(configurator_->false_val_word()->str());
     }
 }
 
 void Exporter::write_null_val()
 {
-    write_text(configurator_->get_null_val_word()->str());
+    write_text(configurator_->null_val_word()->str());
 }
 
 // SYSTEM_EXPRESSIONS
 
 void Exporter::write_class_word()
 {
-    write_text(configurator_->get_class_word()->str());
+    write_text(configurator_->class_word()->str());
 }
 
 void Exporter::write_interface_word()
 {
-    write_text(configurator_->get_interface_word()->str());
+    write_text(configurator_->interface_word()->str());
 }
 
 void Exporter::write_implement_word()
 {
-    write_text(configurator_->get_implement_word()->str());
+    write_text(configurator_->implement_word()->str());
 }
 
 void Exporter::write_extend_word()
 {
-    write_text(configurator_->get_extend_word()->str());
+    write_text(configurator_->extend_word()->str());
 }
 
 void Exporter::write_this_word()
 {
-    write_text(configurator_->get_this_word()->str());
+    write_text(configurator_->this_word()->str());
 }
 
 void Exporter::write_return_word()
 {
-    write_text(configurator_->get_return_word()->str());
+    write_text(configurator_->return_word()->str());
 }
 
 void Exporter::write_continue_word()
 {
-    write_text(configurator_->get_continue_word()->str());
+    write_text(configurator_->continue_word()->str());
 }
 
 void Exporter::write_break_word()
 {
-    write_text(configurator_->get_break_word()->str());
+    write_text(configurator_->break_word()->str());
 }
 
 void Exporter::write_throw_word()
 {
-    write_text(configurator_->get_throw_word()->str());
+    write_text(configurator_->throw_word()->str());
 }
 
 void Exporter::write_if_word()
 {
-    write_text(configurator_->get_if_word()->str());
+    write_text(configurator_->if_word()->str());
 }
 
 void Exporter::write_else_word()
 {
-    write_text(configurator_->get_else_word()->str());
+    write_text(configurator_->else_word()->str());
 }
 
 void Exporter::write_do_word()
 {
-    write_text(configurator_->get_do_word()->str());
+    write_text(configurator_->do_word()->str());
 }
 
 void Exporter::write_while_word()
 {
-    write_text(configurator_->get_while_word()->str());
+    write_text(configurator_->while_word()->str());
 }
 
 void Exporter::write_for_word()
 {
-    write_text(configurator_->get_for_word()->str());
+    write_text(configurator_->for_word()->str());
 }
 
 void Exporter::write_repeat_word()
 {
-    write_text(configurator_->get_repeat_word()->str());
+    write_text(configurator_->repeat_word()->str());
 }
 
 void Exporter::write_switch_word()
 {
-    write_text(configurator_->get_switch_word()->str());
+    write_text(configurator_->switch_word()->str());
 }
 
 void Exporter::write_case_word()
 {
-    write_text(configurator_->get_case_word()->str());
+    write_text(configurator_->case_word()->str());
 }
 
 void Exporter::write_default_word()
 {
-    write_text(configurator_->get_default_word()->str());
+    write_text(configurator_->default_word()->str());
 }
 
 void Exporter::write_new_word()
 {
-    write_text(configurator_->get_new_word()->str());
+    write_text(configurator_->new_word()->str());
 }
 
 void Exporter::write_delete_word()
 {
-    write_text(configurator_->get_delete_word()->str());
+    write_text(configurator_->delete_word()->str());
 }
 
 void Exporter::write_pointer_word()
 {
-    write_text(configurator_->get_pointer_word()->str());
+    write_text(configurator_->pointer_word()->str());
 }
 
 void Exporter::write_virtual_word()
 {
-    write_text(configurator_->get_virtual_word()->str());
+    write_text(configurator_->virtual_word()->str());
 }
 
 void Exporter::write_abstract_word()
 {
-    write_text(configurator_->get_abstract_word()->str());
+    write_text(configurator_->abstract_word()->str());
 }
 
 void Exporter::write_template_word()
 {
-    write_text(configurator_->get_template_word()->str());
+    write_text(configurator_->template_word()->str());
 }
 
 // OTHER_EXPRESSIONS
 
 void Exporter::write_constructor_word()
 {
-    write_text(configurator_->get_constructor_word()->str());
+    write_text(configurator_->constructor_word()->str());
 }
 
 void Exporter::write_destructor_word()
 {
-    write_text(configurator_->get_destructor_word()->str());
+    write_text(configurator_->destructor_word()->str());
 }
 
 void Exporter::write_method_word()
 {
-    write_text(configurator_->get_method_word()->str());
+    write_text(configurator_->method_word()->str());
 }
 
 void Exporter::write_function_word()
 {
-    write_text(configurator_->get_function_word()->str());
+    write_text(configurator_->function_word()->str());
 }
 
 void Exporter::write_lambda_word()
 {
-    write_text(configurator_->get_lambda_word()->str());
+    write_text(configurator_->lambda_word()->str());
 }
 
 void Exporter::write_call_word()
 {
-    write_text(configurator_->get_call_word()->str());
+    write_text(configurator_->call_word()->str());
 }
 
 void Exporter::write_define_word()
 {
-    write_text(configurator_->get_define_word()->str());
+    write_text(configurator_->define_word()->str());
 }
 
 void Exporter::write_returns_word()
 {
-    write_text(configurator_->get_returns_word()->str());
+    write_text(configurator_->returns_word()->str());
 }

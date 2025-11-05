@@ -205,8 +205,7 @@ bool GeneralConfigurator::is_int(STRING name, rj::Value const*& rjval, int& getI
 void GeneralConfigurator::process_file_settings(rj::Value const*& settings)
 {
     if (is_bool("overwrite_file", settings, overwriteFile_))
-    {
-    }
+    { }
     std::string stringVal;
     if (is_string("output_file_name", settings, stringVal, true))
     {
@@ -288,8 +287,7 @@ void GeneralConfigurator::process_unknown_phrases(rj::Value const*& phrases)
 void GeneralConfigurator::process_access_modifiers(rj::Value const*& modifiers)
 {
     if (is_bool("use_inner_view", modifiers, useInnerView_))
-    {
-    }
+    { }
     std::string stringVal;
     if (is_string("public_word", modifiers, stringVal, true))
     {

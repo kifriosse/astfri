@@ -36,7 +36,7 @@ void TextConfigurator::reload_configuration()
     std::getline(std::cin, input);
     if (input == "y")
     {
-        std::cout << " > Put path to .json file (without suffix): ";
+        std::cout << " > Path to .json file (without suffix): ";
         std::getline(std::cin, input);
         input.append(".json");
         std::error_code ec;
@@ -45,8 +45,8 @@ void TextConfigurator::reload_configuration()
             std::ifstream jsonfile(input);
             if (!jsonfile)
             {
-                std::cout << " > File cannot be opened!\n";
-                std::cout << " > No changes applied to configuration.\n";
+                std::cout << " > File cannot be opened.\n";
+                std::cout << " > No change in configuration.\n";
                 return;
             }
             rj::IStreamWrapper wrap(jsonfile);
@@ -54,8 +54,8 @@ void TextConfigurator::reload_configuration()
             doc.ParseStream(wrap);
             if (doc.HasParseError())
             {
-                std::cout << " > Error while parsing configuration file!\n";
-                std::cout << " > No changes applied to configuration.\n";
+                std::cout << " > Error when parsing configuration file.\n";
+                std::cout << " > No change in configuration.\n";
                 return;
             }
             if (!doOnlyUpdate_)
@@ -67,12 +67,12 @@ void TextConfigurator::reload_configuration()
             rj::Value const* docPtr = &doc;
             process_document(docPtr);
             GeneralConfigurator::process_document(docPtr);
-            std::cout << " > Configuration has been successfully changed.\n";
+            std::cout << " > Configuration was changed.\n";
         }
         else
         {
-            std::cout << " > File not found!\n";
-            std::cout << " > No changes applied to configuration.\n";
+            std::cout << " > File not found.\n";
+            std::cout << " > No change in configuration.\n";
         }
     }
     else
@@ -82,11 +82,11 @@ void TextConfigurator::reload_configuration()
             set_defaults();
             GeneralConfigurator::set_defaults();
             isDefaultState_ = true;
-            std::cout << " > Configuration set to default values.\n";
+            std::cout << " > Configuration set to default state.\n";
         }
         else
         {
-            std::cout << " > No changes applied to configuration.\n";
+            std::cout << " > No change in configuration.\n";
         }
     }
 }
@@ -100,7 +100,7 @@ void TextConfigurator::set_defaults()
     tabulatorLen_ = 4;
     textMarginLeftLen_ = 3;
     rowNumMarginLeftLen_ = 1;
-    useBracketColors_ = true;
+    useBracketColors_ = false;
     shRowNum_ = true;
     shDotAfterRowNum_ = true;
     shRowNumOnEmptyRow_ = true;
@@ -252,81 +252,57 @@ void TextConfigurator::process_text_format(rj::Value const*& format)
         }
     }
     if (is_int("tabulator_length", format, tabulatorLen_))
-    {
-    }
+    { }
     if (is_int("text_margin_left_length", format, textMarginLeftLen_))
-    {
-    }
+    { }
     if (is_int("row_number_margin_left_length", format, rowNumMarginLeftLen_))
-    {
-    }
+    { }
     if (is_bool("use_bracket_colors", format, useBracketColors_))
-    {
-    }
+    { }
     if (is_bool("show_row_number", format, shRowNum_))
-    {
-    }
+    { }
     if (is_bool("show_dot_after_row_number", format, shDotAfterRowNum_))
-    {
-    }
+    { }
     if (is_bool("show_row_num_on_empty_row", format, shRowNumOnEmptyRow_))
-    {
-    }
+    { }
     if (is_bool("reset_row_number_on_empty_row", format, resetRowNumOnEmptyRow_))
-    {
-    }
+    { }
     if (is_bool("new_line_for_curl_bracket", format, newLineForCurlBracket_))
-    {
-    }
+    { }
 }
 
 void TextConfigurator::process_code_structure(rj::Value const*& structure)
 {
     if (is_bool("show_other_expressions", structure, shOtherExpressions_))
-    {
-    }
+    { }
     if (is_bool("show_global_vars", structure, shGlobalVars_))
-    {
-    }
+    { }
     if (is_bool("show_generic_params", structure, shGenericParams_))
-    {
-    }
+    { }
     if (is_bool("show_class_declaration", structure, shClassDeclar_))
-    {
-    }
+    { }
     if (is_bool("show_class_definition", structure, shClassDefin_))
-    {
-    }
+    { }
     if (is_bool("show_class_inline", structure, shClassInline_))
-    {
-    }
+    { }
     if (is_bool("show_interface_declaration", structure, shInterfDeclar_))
-    {
-    }
+    { }
     if (is_bool("show_interface_definition", structure, shInterfDefin_))
-    {
-    }
+    { }
     if (is_bool("show_member_vars", structure, shMemberVars_))
-    {
-    }
+    { }
     if (is_bool("show_member_operations_declaration", structure, shCoDeMeDeclar_))
-    {
-    }
+    { }
     if (is_bool("show_member_operations_definition", structure, shCoDeMeDefin_))
-    {
-    }
+    { }
     if (is_bool("show_member_operations_owner", structure, shCoDeMeOwner_))
-    {
-    }
+    { }
     if (is_bool("show_member_operations_template", structure, shCoDeMeTemplate_))
-    {
-    }
+    { }
     if (is_bool("show_function_declaration", structure, shFuncDeclar_))
-    {
-    }
+    { }
     if (is_bool("show_function_definition", structure, shFuncDefin_))
-    {
-    }
+    { }
 }
 
 void TextConfigurator::process_system_expressions(rj::Value const*& expr)

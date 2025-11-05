@@ -1,16 +1,16 @@
-#ifndef LIBASTFRI_TEXT_HTML_FILE_EXPORTER
-#define LIBASTFRI_TEXT_HTML_FILE_EXPORTER
+#ifndef LIBASTFRI_TEXT_HTML_EXPORTER
+#define LIBASTFRI_TEXT_HTML_EXPORTER
 
-#include <libastfri-text/inc/Exporter.hpp>
+#include <libastfri-text/inc/pseudocode/Exporter.hpp>
 
 namespace astfri::text
 {
-    class HtmlFileExporter : public Exporter
+    class HtmlExporter : public Exporter
     {
         int maxBracketIndex_;
         int currentBrIndex_;
     public:
-        HtmlFileExporter();
+        HtmlExporter();
     public:
         void reset() override;
     private:

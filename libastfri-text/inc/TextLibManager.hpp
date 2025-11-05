@@ -1,26 +1,14 @@
 #ifndef LIBASTFRI_TEXT_TEXT_LIB_MANAGER
 #define LIBASTFRI_TEXT_TEXT_LIB_MANAGER
 
-#include <libastfri-text/inc/ASTTextVisitor.hpp>
+#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 
 namespace astfri::text
 {
-    template<typename AstfriPeak>
-    concept VisitableAstfriPeak =
-        //!std::is_abstract_v<AstfriPeak> &&
-        requires(AstfriPeak& peak)
-        {
-            {
-                peak.accept(std::declval<IVisitor&>())
-            } -> std::same_as<void>;
-        };
-
-    // -----
-
     class TextLibManager
     {
         TextConfigurator* configurator_;
-        ASTTextVisitor* visitor_;
+        PseudocodeVisitor* visitor_;
         Exporter* exporter_;
         std::string currentOutputFileFormat_;
     public:
@@ -39,28 +27,30 @@ namespace astfri::text
         void reset_exporter();
         void write_new_line();
         // -----
-        template<VisitableAstfriPeak AstfriPeak>
-        void visit(AstfriPeak const& peak);
+        template<AnyAstfriNode AstfriNode>
+        void visit(AstfriNode const& node);
         // -----
-        template<VisitableAstfriPeak AstfriPeak>
-        void visit_and_export(AstfriPeak const& peak);
+        template<AnyAstfriNode AstfriNode>
+        void visit_and_export(AstfriNode const& node);
     private:
         void check_current_file_format();
         void create_new_exporter();
     };
 
+    //
     // -----
+    //
 
-    template<VisitableAstfriPeak AstfriPeak>
-    void TextLibManager::visit(AstfriPeak const& peak)
+    template<AnyAstfriNode AstfriNode>
+    void TextLibManager::visit(AstfriNode const& node)
     {
-        visitor_->visit(peak);
+        const_cast<AstfriNode&>(node).accept(*visitor_);
     }
 
-    template<VisitableAstfriPeak AstfriPeak>
-    void TextLibManager::visit_and_export(AstfriPeak const& peak)
+    template<AnyAstfriNode AstfriNode>
+    void TextLibManager::visit_and_export(AstfriNode const& node)
     {
-        visitor_->visit(peak);
+        const_cast<AstfriNode&>(node).accept(*visitor_);
         exporter_->execute_export();
     }
 }

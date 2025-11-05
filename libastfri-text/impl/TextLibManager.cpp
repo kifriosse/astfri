@@ -1,6 +1,6 @@
 #include <libastfri-text/inc/TextLibManager.hpp>
 
-#include <libastfri-text/inc/HtmlFileExporter.hpp>
+#include <libastfri-text/inc/pseudocode/HtmlExporter.hpp>
 
 using namespace astfri::text;
 
@@ -13,9 +13,9 @@ TextLibManager& TextLibManager::get_instance()
 TextLibManager::TextLibManager()
 {
     configurator_ = &TextConfigurator::get_instance();
-    currentOutputFileFormat_ = configurator_->get_output_file_format()->str();
+    currentOutputFileFormat_ = configurator_->output_file_format()->str();
     create_new_exporter();
-    visitor_ = &ASTTextVisitor::get_instance(exporter_);
+    visitor_ = &PseudocodeVisitor::get_instance(exporter_);
 }
 
 TextLibManager::~TextLibManager()
@@ -52,7 +52,7 @@ void TextLibManager::write_new_line()
 
 void TextLibManager::check_current_file_format()
 {
-    std::string format = configurator_->get_output_file_format()->str();
+    std::string format = configurator_->output_file_format()->str();
     if (format != currentOutputFileFormat_)
     {
         currentOutputFileFormat_ = format;
@@ -66,7 +66,7 @@ void TextLibManager::create_new_exporter()
 {
     if (currentOutputFileFormat_ == "html")
     {
-        exporter_ = new HtmlFileExporter();
+        exporter_ = new HtmlExporter();
     }
     else
     {
