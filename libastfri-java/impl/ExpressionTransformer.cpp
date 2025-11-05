@@ -1,11 +1,11 @@
 #include "ExpressionTransformer.hpp"
 
+#include <libastfri-java/impl/StatementTransformer.hpp>
 #include <cctype>
 #include <cstdint>
 #include <cstring>
 #include <ranges>
 #include <string>
-#include "libastfri-java/impl/StatementTransformer.hpp"
 
 namespace astfri::java
 {

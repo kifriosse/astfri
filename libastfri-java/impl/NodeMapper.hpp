@@ -1,9 +1,7 @@
 #ifndef NODE_MAPPER_CLASS_HPP
 #define NODE_MAPPER_CLASS_HPP
 
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <map>
 

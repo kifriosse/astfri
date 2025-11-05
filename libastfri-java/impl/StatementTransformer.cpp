@@ -5,10 +5,6 @@
 #include <sys/types.h>
 #include <tree_sitter/api.h>
 
-#include "ExpressionTransformer.hpp"
-#include "libastfri/inc/ExprFactory.hpp"
-#include "libastfri/inc/Stmt.hpp"
-
 namespace astfri::java
 {
 StatementTransformer::StatementTransformer() :

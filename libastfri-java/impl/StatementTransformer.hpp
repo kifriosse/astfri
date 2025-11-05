@@ -1,11 +1,9 @@
 #ifndef STATEMENT_TRANSFORMER_CLASS_HPP
 #define STATEMENT_TRANSFORMER_CLASS_HPP
 
+#include <libastfri/inc/Astfri.hpp>
 #include <libastfri-java/impl/ExpressionTransformer.hpp>
 #include <libastfri-java/impl/NodeMapper.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
 
 #include <cstring>
 #include <string>

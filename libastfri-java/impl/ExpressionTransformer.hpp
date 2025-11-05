@@ -1,10 +1,8 @@
 #ifndef EXPRESSION_TRANSFORMER_CLASS_HPP
 #define EXPRESSION_TRANSFORMER_CLASS_HPP
 
+#include <libastfri/inc/Astfri.hpp>
 #include <libastfri-java/impl/NodeMapper.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
