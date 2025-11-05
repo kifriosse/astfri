@@ -41,8 +41,8 @@ public:
     void visit(astfri::CharType const& type) override;
     void visit(astfri::BoolType const& type) override;
     void visit(astfri::VoidType const& type) override;
-    void visit(astfri::UserType const& type) override;
     void visit(astfri::ClassType const& type) override;
+    void visit(astfri::InterfaceType const& type) override;
     void visit(astfri::IndirectionType const& type) override;
 
     void visit(astfri::ParamVarDefStmt const& stmt) override;
