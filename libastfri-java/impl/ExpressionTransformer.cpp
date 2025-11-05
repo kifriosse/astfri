@@ -405,7 +405,7 @@ astfri::NewExpr* ExpressionTransformer::transform_new_expr_node(
 {
     TSNode typeNode      = ts_node_named_child(tsNode, 0);
     std::string typeName = get_node_text(typeNode, sourceCode);
-    astfri::Type* type   = typeFactory.mk_user(typeName);
+    astfri::Type* type   = typeFactory.mk_class(typeName, {});
     std::vector<astfri::Expr*> arguments;
     TSNode argumentsListNode = ts_node_named_child(tsNode, 1);
     uint32_t argsCount       = ts_node_named_child_count(argumentsListNode);

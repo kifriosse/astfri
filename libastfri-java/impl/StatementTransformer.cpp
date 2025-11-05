@@ -118,7 +118,7 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string c
 
     type = this->nodeMapper->get_typeMap().contains(typeNodeText)
         ? this->nodeMapper->get_typeMap().at(typeNodeText)
-        : astfri::TypeFactory::get_instance().mk_user(typeNodeText);
+        : astfri::TypeFactory::get_instance().mk_class(typeNodeText, {});
     return type;
 }
 
