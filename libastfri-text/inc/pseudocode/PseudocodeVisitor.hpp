@@ -30,7 +30,6 @@ namespace astfri::text
         void visit(BoolType const& type) override;
         void visit(VoidType const& type) override;
         void visit(ClassType const& type) override;
-        void visit(UserType const& type) override {}; // TODO remove this line after merge
         void visit(InterfaceType const& type) override;
         void visit(LambdaType const& type) override {} // MM: TODO
         void visit(IndirectionType const& type) override;

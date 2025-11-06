@@ -10,7 +10,6 @@ struct CharType;
 struct BoolType;
 struct VoidType;
 struct IndirectionType;
-struct UserType; // TODO deprecated
 struct ClassType;
 struct InterfaceType;
 struct LambdaType;

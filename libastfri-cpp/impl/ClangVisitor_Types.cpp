@@ -92,14 +92,14 @@ astfri::Type* ClangVisitor::get_astfri_pointee(clang::PointerType const* pointer
     if (pointee->isRecordType())
     {
         auto record = pointee->getAsCXXRecordDecl();
-        return this->type_factory_->mk_user(record->getNameAsString());
+        return this->type_factory_->mk_class(record->getNameAsString(), {});
     }
 
     // ak je to template
     if (pointee->isTemplateTypeParmType())
     {
         auto template_type = pointee->getContainedAutoType();
-        return this->type_factory_->mk_user(template_type->getTypeClassName());
+        return this->type_factory_->mk_class(template_type->getTypeClassName(), {});
     }
 
     // ak je pointee pointer
@@ -128,14 +128,14 @@ astfri::Type* ClangVisitor::get_astfri_type(clang::QualType QT)
     if (clangType->isRecordType())
     {
         auto record = clangType->getAsCXXRecordDecl();
-        auto type   = this->type_factory_->mk_user(record->getNameAsString());
+        auto type   = this->type_factory_->mk_class(record->getNameAsString(), {});
         return type;
     }
 
     // ak je to template tak sa vrati rovno to
     if (auto template_type = llvm::dyn_cast<clang::TemplateTypeParmType>(clangType))
     {
-        auto type = this->type_factory_->mk_user(template_type->getDecl()->getNameAsString());
+        auto type = this->type_factory_->mk_class(template_type->getDecl()->getNameAsString(), {});
         return type;
     }
 

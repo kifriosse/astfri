@@ -363,7 +363,7 @@ astfri::Type* AstFriDeSerializer::resolve_type(rapidjson::Value& value)
     case astfri_deserialize::VoidType:
         return this->typeMaker_.mk_void();
     case astfri_deserialize::UserType:
-        return this->typeMaker_.mk_user(value["name"].GetString());
+        return this->typeMaker_.mk_class(value["name"].GetString(), {});
     case astfri_deserialize::IndirectionType:
         return this->typeMaker_.mk_indirect(this->resolve_type(value["indirect"]));
     case astfri_deserialize::UnknownType:

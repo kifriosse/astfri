@@ -53,10 +53,10 @@ IndirectionType* TypeFactory::mk_indirect(Type* type)
     return details::emplace_get<IndirectionType>(type, indirect_, type);
 }
 
-UserType* TypeFactory::mk_user(std::string const& name)
-{
-    return details::emplace_get<UserType>(name, user_, name);
-}
+// UserType* TypeFactory::mk_user(std::string const& name)
+// {
+    // return details::emplace_get<UserType>(name, user_, name);
+// }
 
 ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope)
 {

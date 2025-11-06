@@ -27,10 +27,6 @@ public:
     UnknownType* mk_unknown();
     DynamicType* mk_dynamic();
     IndirectionType* mk_indirect(Type* type);
-    /**
-     * @deprecated
-     */
-    UserType* mk_user(std::string const& name);
     ClassType *mk_class(const std::string &name, const Scope &scope);
     ClassType *mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def);
     InterfaceType *mk_interface(const std::string &name, const Scope &scope);
@@ -53,8 +49,6 @@ private:
     UnknownType unknown_;
     DynamicType dynamic_;
     std::map<Type*, IndirectionType> indirect_;
-    // deprecated
-    std::map<std::string, UserType> user_;
     std::map<std::string, ClassType> m_classes;
     std::map<std::string, InterfaceType> m_interfaces;
     std::vector<std::unique_ptr<Type>> m_types;

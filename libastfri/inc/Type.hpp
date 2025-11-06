@@ -77,17 +77,6 @@ struct IndirectionType : Type, details::MkVisitable<IndirectionType>
 
 /**
  * @brief TODO
- * @deprecated Deprecated in favor of more specific representation of user types
- */
-struct UserType : Type, details::MkVisitable<UserType>
-{
-    std::string name_;
-
-    explicit UserType(std::string name);
-};
-
-/**
- * @brief TODO
  */
 struct ScopedType : Type
 {

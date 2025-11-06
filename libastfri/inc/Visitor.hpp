@@ -22,10 +22,6 @@ struct IVisitor
     virtual void visit(IndirectionType const& type)     = 0;
     virtual void visit(ClassType const& type)           = 0;
     virtual void visit(InterfaceType const& type)       = 0;
-    /**
-    * @deprecated
-    */
-    virtual void visit(UserType const& type)            = 0;
     virtual void visit(LambdaType const& type)          = 0;
     virtual void visit(UnknownType const& type)         = 0;
 
@@ -132,10 +128,6 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(InterfaceType const& /*type*/) override
-    {
-    }
-
-    void visit(UserType const& /*type*/) override
     {
     }
 

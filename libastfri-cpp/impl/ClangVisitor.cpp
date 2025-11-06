@@ -973,7 +973,8 @@ bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor)
     // akcia na tomto vrchole
     auto new_ctor_expr   = this->expr_factory_->mk_constructor_call(nullptr, std::vector<Expr*>{});
 
-    auto type            = this->type_factory_->mk_user(Ctor->getType().getAsString().c_str());
+    // auto type            = this->type_factory_->mk_user(Ctor->getType().getAsString().c_str());
+    auto type            = this->type_factory_->mk_class(Ctor->getType().getAsString(), {});
     new_ctor_expr->type_ = type;
 
     for (auto arg : Ctor->arguments())
