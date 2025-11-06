@@ -72,7 +72,7 @@ struct VoidType : PrimitiveType, details::MkVisitable<VoidType>
 struct IndirectionType : Type, details::MkVisitable<IndirectionType>
 {
     Type* indirect_;
-    explicit IndirectionType(Type* indirect); // TODO remove
+    explicit IndirectionType(Type* indirect);
 };
 
 /**
@@ -91,8 +91,9 @@ struct UserType : Type, details::MkVisitable<UserType>
  */
 struct ScopedType : Type
 {
-    Scope scope_;
     std::string name_;
+    Scope scope_;
+    ScopedType(std::string name, Scope scope);
 };
 
 /**
@@ -101,8 +102,8 @@ struct ScopedType : Type
 struct ClassType : ScopedType, details::MkVisitable<ClassType>
 {
     ClassDefStmt *m_def;
+    ClassType(std::string name, Scope scope, ClassDefStmt *def);
 };
-
 
 /**
  * @brief TODO
@@ -110,7 +111,19 @@ struct ClassType : ScopedType, details::MkVisitable<ClassType>
 struct InterfaceType : ScopedType, details::MkVisitable<InterfaceType>
 {
     InterfaceDefStmt *m_def;
+    InterfaceType(std::string name, Scope scope, InterfaceDefStmt *def);
 };
+
+/**
+ * @brief TODO
+ */
+struct LambdaType : Type, details::MkVisitable<LambdaType>
+{
+    std::string m_name;
+    LambdaExpr *m_def;
+    LambdaType(std::string name, LambdaExpr *def);
+};
+
 
 // /**
 //  * @brief TODO

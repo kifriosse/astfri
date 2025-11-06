@@ -114,20 +114,18 @@ InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name)
     return i;
 }
 
+InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name, Scope scope) {
+    InterfaceDefStmt*i = details::emplace_get<InterfaceDefStmt>(mk_fqn(scope, name), m_interfaces);
+    i->m_type = m_types->mk_interface(name, scope, i);
+    return i;
+}
 
 ClassDefStmt* StmtFactory::mk_class_def(std::string name, Scope scope)
 {
-    std::string key = mk_fqn(scope, name);
-    ClassDefStmt *c = details::emplace_get<ClassDefStmt>(
-        std::move(key),
-        m_classes);
-    // TODO same as TypeFactory::mk_class
-    c->type_ = m_types->mk_class(name, scope);
-    c->type_->m_def = c;
+    ClassDefStmt *c = details::emplace_get<ClassDefStmt>(mk_fqn(scope, name), m_classes);
+    c->type_ = m_types->mk_class(name, scope, c);
     return c;
 }
-
-
 
 ConstructorDefStmt* StmtFactory::mk_constructor_def()
 {

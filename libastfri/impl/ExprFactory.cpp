@@ -10,6 +10,10 @@ ExprFactory& ExprFactory::get_instance()
     return instance;
 }
 
+ExprFactory::ExprFactory() : m_types(&TypeFactory::get_instance())
+{
+}
+
 IntLiteralExpr* ExprFactory::mk_int_literal(int const val)
 {
     return details::emplace_get<IntLiteralExpr>(val, ints_, val);
@@ -103,9 +107,23 @@ LambdaCallExpr* ExprFactory::mk_lambda_call(Expr* lambda, std::vector<Expr*> arg
     return c;
 }
 
+LambdaExpr* ExprFactory::mk_lambda_expr()
+{
+    LambdaExpr *e = details::emplace_get<LambdaExpr>(exprs_);
+    e->m_type = m_types->mk_lambda("", e);
+    return e;
+}
+
 LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body)
 {
-    return details::emplace_get<LambdaExpr>(exprs_, std::move(params), body);
+    return mk_lambda_expr(std::move(params), body, "");
+}
+
+LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name)
+{
+    LambdaExpr *e = details::emplace_get<LambdaExpr>(exprs_, std::move(params), body);
+    e->m_type = m_types->mk_lambda(std::move(name), e);
+    return e;
 }
 
 ThisExpr* ExprFactory::mk_this()

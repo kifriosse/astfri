@@ -60,13 +60,54 @@ UserType* TypeFactory::mk_user(std::string const& name)
 
 ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope)
 {
-    std::string key = mk_fqn(scope, name);
-    ClassType *t = details::emplace_get<ClassType>(std::move(key), m_classes);
-    // TODO class type should have a constructor so that emplace get could use these to initialize it
-    t->name_ = std::move(name);
-    t->scope_ = std::move(scope);
-    t->m_def = nullptr;
+    return mk_class(name, scope, nullptr);
+}
+
+ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def)
+{
+    ClassType *t = details::emplace_get<ClassType>(
+        mk_fqn(scope, name),
+        m_classes,
+        name,
+        scope,
+        def);
+    if (!t->m_def && def) {
+        t->m_def = def;
+    }
+    if (t->m_def && def) {
+        assert(t->m_def == def);
+    }
     return t;
+}
+
+InterfaceType *TypeFactory::mk_interface(const std::string &name, const Scope &scope)
+{
+    return mk_interface(name, scope, nullptr);
+}
+
+InterfaceType *TypeFactory::mk_interface(const std::string &name, const Scope &scope, InterfaceDefStmt *def)
+{
+    InterfaceType *i = details::emplace_get<InterfaceType>(
+        mk_fqn(scope, name),
+        m_interfaces,
+        name,
+        scope,
+        def);
+    if (!i->m_def && def) {
+        i->m_def = def;
+    }
+    if (i->m_def && def) {
+        assert(i->m_def == def);
+    }
+    return i;
+}
+
+LambdaType* TypeFactory::mk_lambda(std::string name, LambdaExpr *def)
+{
+    return details::emplace_get<LambdaType>(
+        m_types,
+        std::move(name),
+        def);
 }
 
 } // namespace astfri
