@@ -7,7 +7,7 @@
 namespace astfri::text
 {
     template<typename AstfriNode>
-    concept AnyAstfriNode =
+    concept astfri_node =
         requires(AstfriNode& node)
         {
             {
@@ -18,7 +18,7 @@ namespace astfri::text
     // -----
 
     template<typename VectorAstfriNode>
-    concept VectorParamOrArg =
+    concept vect_param_arg =
         std::same_as<VectorAstfriNode, std::vector<ParamVarDefStmt*>> ||
         std::same_as<VectorAstfriNode, std::vector<GenericParam*>> ||
         std::same_as<VectorAstfriNode, std::vector<Expr*>>;
@@ -26,7 +26,7 @@ namespace astfri::text
     // -----
 
     template<typename VectorAstfriNode>
-    concept VectorMember =
+    concept vect_member =
         std::same_as<VectorAstfriNode, std::vector<MemberVarDefStmt*>> ||
         std::same_as<VectorAstfriNode, std::vector<ConstructorDefStmt*>> ||
         std::same_as<VectorAstfriNode, std::vector<MethodDefStmt*>>;
@@ -45,22 +45,22 @@ namespace astfri::text
     protected:
         void write_comma_space(bool isNotLast);
         // -----
-        template<AnyAstfriNode AstfriNode>
+        template<astfri_node AstfriNode>
         void check_and_accept_pointer_w_error(AstfriNode* pointer);
         // -----
-        template<AnyAstfriNode AstfriNode>
+        template<astfri_node AstfriNode>
         void check_and_accept_pointer(AstfriNode* pointer);
         // -----
-        template<VectorParamOrArg VectorAstfriNode>
+        template<vect_param_arg VectorAstfriNode>
         void write_params_or_args(VectorAstfriNode const vectorPA, bool isGeneric = false);
         // -----
-        template<VectorMember VectorAstfriNode>
+        template<vect_member VectorAstfriNode>
         bool has_acc_mod(VectorAstfriNode const& vectorStmts, VectorAstfriNode& vectorStmtsTmp, AccessModifier accmod);
     };
 
     // -----
 
-    template<AnyAstfriNode AstfriNode>
+    template<astfri_node AstfriNode>
     void AstfriVisitor::check_and_accept_pointer_w_error(AstfriNode* pointer)
     {
         if (pointer)
@@ -73,7 +73,7 @@ namespace astfri::text
         }
     }
 
-    template<AnyAstfriNode AstfriNode>
+    template<astfri_node AstfriNode>
     void AstfriVisitor::check_and_accept_pointer(AstfriNode* pointer)
     {
         if (pointer)
@@ -82,7 +82,7 @@ namespace astfri::text
         }
     }
 
-    template<VectorParamOrArg VectorAstfriNode>
+    template<vect_param_arg VectorAstfriNode>
     void AstfriVisitor::write_params_or_args(VectorAstfriNode const vectorPA, bool isGeneric)
     {
         if (isGeneric)
@@ -108,7 +108,7 @@ namespace astfri::text
         }
     }
 
-    template<VectorMember VectorAstfriNode>
+    template<vect_member VectorAstfriNode>
     bool AstfriVisitor::has_acc_mod(VectorAstfriNode const& vectorStmts, VectorAstfriNode& vectorStmtsTmp, AccessModifier accmod)
     {
         bool hasAccMod = false;

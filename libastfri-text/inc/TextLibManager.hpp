@@ -27,10 +27,10 @@ namespace astfri::text
         void reset_exporter();
         void write_new_line();
         // -----
-        template<AnyAstfriNode AstfriNode>
+        template<astfri_node AstfriNode>
         void visit(AstfriNode const& node);
         // -----
-        template<AnyAstfriNode AstfriNode>
+        template<astfri_node AstfriNode>
         void visit_and_export(AstfriNode const& node);
     private:
         void check_current_file_format();
@@ -41,13 +41,13 @@ namespace astfri::text
     // -----
     //
 
-    template<AnyAstfriNode AstfriNode>
+    template<astfri_node AstfriNode>
     void TextLibManager::visit(AstfriNode const& node)
     {
         const_cast<AstfriNode&>(node).accept(*visitor_);
     }
 
-    template<AnyAstfriNode AstfriNode>
+    template<astfri_node AstfriNode>
     void TextLibManager::visit_and_export(AstfriNode const& node)
     {
         const_cast<AstfriNode&>(node).accept(*visitor_);
