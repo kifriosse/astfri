@@ -57,6 +57,7 @@ public:
     LambdaCallExpr* mk_lambda_call();
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
+    LambdaExpr* mk_lambda_expr();
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name);
 

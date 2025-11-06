@@ -107,6 +107,13 @@ LambdaCallExpr* ExprFactory::mk_lambda_call(Expr* lambda, std::vector<Expr*> arg
     return c;
 }
 
+LambdaExpr* ExprFactory::mk_lambda_expr()
+{
+    LambdaExpr *e = details::emplace_get<LambdaExpr>(exprs_);
+    e->m_type = m_types->mk_lambda("", e);
+    return e;
+}
+
 LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body)
 {
     return mk_lambda_expr(std::move(params), body, "");
