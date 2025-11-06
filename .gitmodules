@@ -1,0 +1,9 @@
+[submodule "external/tree-sitter-c-sharp"]
+	path = external/tree-sitter-c-sharp
+	url = https://github.com/tree-sitter/tree-sitter-c-sharp
+[submodule "external/tree-sitter"]
+	path = external/tree-sitter
+	url = https://github.com/tree-sitter/tree-sitter.git
+[submodule "external/tree-sitter-java"]
+	path = external/tree-sitter-java
+	url = https://github.com/tree-sitter/tree-sitter-java.git

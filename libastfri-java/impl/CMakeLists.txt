@@ -1,6 +1,6 @@
-find_package(TreeSitter REQUIRED)
+# find_package(TreeSitter REQUIRED)
 
-find_package(TreeSitterJava REQUIRED)
+# find_package(TreeSitterJava REQUIRED)
 
 add_library(astfri-java SHARED)
 
