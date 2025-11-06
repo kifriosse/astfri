@@ -1,7 +1,4 @@
-#include <libastfri-text/inc/ASTTextVisitor.hpp>
-
-#include <libastfri/inc/Expr.hpp>
-#include <libastfri/inc/Type.hpp>
+#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 
 using namespace astfri::text;
 
@@ -10,14 +7,14 @@ constexpr int PARAM_VAR = 1;
 constexpr int MEMBER_VAR = 2;
 constexpr int GLOBAL_VAR = 3;
 
-ASTTextVisitor& ASTTextVisitor::get_instance(Exporter*& exp)
+PseudocodeVisitor& PseudocodeVisitor::get_instance(Exporter*& exp)
 {
-    static ASTTextVisitor visitor(exp);
+    static PseudocodeVisitor visitor(exp);
     return visitor;
 }
 
-ASTTextVisitor::ASTTextVisitor(Exporter*& exp) :
-    GeneralASTVisitor(exp),
+PseudocodeVisitor::PseudocodeVisitor(Exporter*& exp) :
+    AstfriVisitor(exp),
     configurator_(&TextConfigurator::get_instance()),
     isMethodCall_(false),
     isConstructorCall_(false)
@@ -27,98 +24,86 @@ ASTTextVisitor::ASTTextVisitor(Exporter*& exp) :
     currGenParams_ = std::make_unique<std::vector<std::stringstream>>();
 }
 
-void ASTTextVisitor::visit(DynamicType const& /*type*/)
+void PseudocodeVisitor::visit(DynamicType const&)
 {
     exporter_->write_dynamic_type_word();
 }
 
-void ASTTextVisitor::visit(IntType const& /*type*/)
+void PseudocodeVisitor::visit(IntType const&)
 {
     exporter_->write_int_type_word();
 }
 
-void ASTTextVisitor::visit(FloatType const& /*type*/)
+void PseudocodeVisitor::visit(FloatType const&)
 {
     exporter_->write_float_type_word();
 }
 
-void ASTTextVisitor::visit(CharType const& /*type*/)
+void PseudocodeVisitor::visit(CharType const&)
 {
     exporter_->write_char_type_word();
 }
 
-void ASTTextVisitor::visit(BoolType const& /*type*/)
+void PseudocodeVisitor::visit(BoolType const&)
 {
     exporter_->write_bool_type_word();
 }
 
-void ASTTextVisitor::visit(VoidType const& /*type*/)
+void PseudocodeVisitor::visit(VoidType const&)
 {
     exporter_->write_void_type_word();
 }
 
-void ASTTextVisitor::visit(UserType const& type)
-{
-    //type.ref_->accept(*this);
+void PseudocodeVisitor::visit(ClassType const& type) {
     write_identifier_from_string(type.name_);
 }
 
-void ASTTextVisitor::visit(IndirectionType const& type)
+void PseudocodeVisitor::visit(InterfaceType const& type) {
+    write_identifier_from_string(type.name_);
+}
+
+void PseudocodeVisitor::visit(IndirectionType const& type)
 {
     check_and_accept_pointer_w_error(type.indirect_);
     exporter_->write_pointer_word();
 }
 
-/*void ASTTextVisitor::visit(ObjectType const& type)
-{
-    exporter_->write_object_type(type.name_);
-    if (!type.targs_.empty())
-    {
-        write_params_or_args(type.targs_, true);
-    }
-}*/
-
-/*void ASTTextVisitor::visit(GenericType const& type)
-{
-    exporter_->write_gen_arg_name(type.name_);
-}*/
-
-void ASTTextVisitor::visit(UnknownType const& /*type*/)
+void PseudocodeVisitor::visit(UnknownType const&)
 {
     exporter_->write_unknown_type_word();
 }
 
-void ASTTextVisitor::visit(IntLiteralExpr const& expr)
+void PseudocodeVisitor::visit(IntLiteralExpr const& expr)
 {
     exporter_->write_int_val(expr.val_);
 }
 
-void ASTTextVisitor::visit(FloatLiteralExpr const& expr)
+void PseudocodeVisitor::visit(FloatLiteralExpr const& expr)
 {
     exporter_->write_float_val(expr.val_);
 }
 
-void ASTTextVisitor::visit(CharLiteralExpr const& expr)
+void PseudocodeVisitor::visit(CharLiteralExpr const& expr)
 {
     exporter_->write_char_val(expr.val_);
 }
 
-void ASTTextVisitor::visit(StringLiteralExpr const& expr)
+void PseudocodeVisitor::visit(StringLiteralExpr const& expr)
 {
     exporter_->write_string_val(expr.val_);
 }
 
-void ASTTextVisitor::visit(BoolLiteralExpr const& expr)
+void PseudocodeVisitor::visit(BoolLiteralExpr const& expr)
 {
     exporter_->write_bool_val(expr.val_);
 }
 
-void ASTTextVisitor::visit(NullLiteralExpr const& /*expr*/)
+void PseudocodeVisitor::visit(NullLiteralExpr const&)
 {
     exporter_->write_null_val();
 }
 
-void ASTTextVisitor::visit(IfExpr const& expr)
+void PseudocodeVisitor::visit(IfExpr const& expr)
 {
     exporter_->write_if_word();
     write_cond(expr.cond_);
@@ -134,7 +119,7 @@ void ASTTextVisitor::visit(IfExpr const& expr)
     exporter_->decrease_indentation();
 }
 
-void ASTTextVisitor::visit(BinOpExpr const& expr)
+void PseudocodeVisitor::visit(BinOpExpr const& expr)
 {
     bool usebr = false;
     switch (expr.op_)
@@ -276,7 +261,7 @@ void ASTTextVisitor::visit(BinOpExpr const& expr)
     }
 }
 
-void ASTTextVisitor::visit(UnaryOpExpr const& expr)
+void PseudocodeVisitor::visit(UnaryOpExpr const& expr)
 {
     switch (expr.op_)
     {
@@ -328,17 +313,17 @@ void ASTTextVisitor::visit(UnaryOpExpr const& expr)
     }
 }
 
-void ASTTextVisitor::visit(ParamVarRefExpr const& expr)
+void PseudocodeVisitor::visit(ParamVarRefExpr const& expr)
 {
     exporter_->write_param_var_name(expr.param_);
 }
 
-void ASTTextVisitor::visit(LocalVarRefExpr const& expr)
+void PseudocodeVisitor::visit(LocalVarRefExpr const& expr)
 {
     exporter_->write_local_var_name(expr.var_);
 }
 
-void ASTTextVisitor::visit(MemberVarRefExpr const& expr)
+void PseudocodeVisitor::visit(MemberVarRefExpr const& expr)
 {
     if (expr.owner_)
     {
@@ -348,41 +333,17 @@ void ASTTextVisitor::visit(MemberVarRefExpr const& expr)
     exporter_->write_member_var_name(expr.member_);
 }
 
-void ASTTextVisitor::visit(GlobalVarRefExpr const& expr)
+void PseudocodeVisitor::visit(GlobalVarRefExpr const& expr)
 {
     exporter_->write_global_var_name(expr.global_);
 }
 
-/*void ASTTextVisitor::visit(TypeExpr const& expr)
+void PseudocodeVisitor::visit(ClassRefExpr const& expr)
 {
-    check_and_accept_pointer_w_error(expr.type_);
-}*/
-
-/*void ASTTextVisitor::visit(GenericArg const& expr)
-{
-    check_and_accept_pointer_w_error(expr.arg_);
-}*/
-
-void ASTTextVisitor::visit(ClassRefExpr const& expr)
-{
-    /*exporter_->write_class_name(expr.def_->name_);
-    if (!expr.targs_.empty() && !isConstructorCall_)
-    {
-        write_params_or_args(expr.targs_, true);
-    }*/
     write_identifier_from_string(expr.name_);
 }
 
-/*void ASTTextVisitor::visit(InterfaceRefExpr const& expr)
-{
-    exporter_->write_interface_name(expr.def_->name_);
-    if (!expr.targs_.empty() && !isConstructorCall_)
-    {
-        write_params_or_args(expr.targs_, true);
-    }
-}*/
-
-void ASTTextVisitor::visit(FunctionCallExpr const& expr)
+void PseudocodeVisitor::visit(FunctionCallExpr const& expr)
 {
     if (configurator_->sh_other_expr())
     {
@@ -390,14 +351,10 @@ void ASTTextVisitor::visit(FunctionCallExpr const& expr)
         exporter_->write_space();
     }
     exporter_->write_function_name(expr.name_);
-    /*if (!expr.targs_.empty())
-    {
-        write_params_or_args(expr.targs_, true);
-    }*/
     write_params_or_args(expr.args_);
 }
 
-void ASTTextVisitor::visit(MethodCallExpr const& expr)
+void PseudocodeVisitor::visit(MethodCallExpr const& expr)
 {
     if (configurator_->sh_other_expr() && !isMethodCall_)
     {
@@ -412,32 +369,28 @@ void ASTTextVisitor::visit(MethodCallExpr const& expr)
     }
     isMethodCall_ = false;
     exporter_->write_method_name(expr.name_);
-    /*if (!expr.targs_.empty())
-    {
-        write_params_or_args(expr.targs_, true);
-    }*/
     write_params_or_args(expr.args_);
 }
 
-void ASTTextVisitor::visit(LambdaCallExpr const& expr)
+void PseudocodeVisitor::visit(LambdaCallExpr const& expr)
 {
     check_and_accept_pointer(expr.lambda_);
     write_params_or_args(expr.args_);
 }
 
-void ASTTextVisitor::visit(LambdaExpr const& expr)
+void PseudocodeVisitor::visit(LambdaExpr const& expr)
 {
     exporter_->write_lambda_word();
     write_params_or_args(expr.params_);
     write_body(expr.body_);
 }
 
-void ASTTextVisitor::visit(ThisExpr const& /*expr*/)
+void PseudocodeVisitor::visit(ThisExpr const&)
 {
     exporter_->write_this_word();
 }
 
-void ASTTextVisitor::visit(ConstructorCallExpr const& expr)
+void PseudocodeVisitor::visit(ConstructorCallExpr const& expr)
 {
     if (configurator_->sh_other_expr() && !isConstructorCall_)
     {
@@ -449,43 +402,10 @@ void ASTTextVisitor::visit(ConstructorCallExpr const& expr)
     isConstructorCall_ = true;
     check_and_accept_pointer_w_error(expr.type_);
     isConstructorCall_ = false;
-    /*if (!expr.targs_.empty())
-    {
-        write_params_or_args(expr.targs_, true);
-    }*/
     write_params_or_args(expr.args_);
 }
 
-/*void ASTTextVisitor::visit(DestructorCallExpr const& expr)
-{
-    if (configurator_->sh_other_expr())
-    {
-        exporter_->write_call_word();
-        exporter_->write_space();
-        exporter_->write_destr_word();
-        exporter_->write_space();
-    }
-    if (expr.owner_)
-    {
-        expr.owner_->accept(*this);
-        exporter_->write_separator_sign(".");
-    }
-    if (expr.type_)
-    {
-        exporter_->write_class_name("~");
-        isConstructorCall_ = true;
-        expr.type_->accept(*this);
-        isConstructorCall_ = false;
-        exporter_->write_round_bracket("(");
-        exporter_->write_round_bracket(")");
-    }
-        else
-        {
-        exporter_->write_invalid_word();
-    }
-}*/
-
-void ASTTextVisitor::visit(NewExpr const& expr)
+void PseudocodeVisitor::visit(NewExpr const& expr)
 {
     exporter_->write_new_word();
     exporter_->write_space();
@@ -494,19 +414,19 @@ void ASTTextVisitor::visit(NewExpr const& expr)
     isConstructorCall_ = false;
 }
 
-void ASTTextVisitor::visit(DeleteExpr const& expr)
+void PseudocodeVisitor::visit(DeleteExpr const& expr)
 {
     exporter_->write_delete_word();
     exporter_->write_space();
     check_and_accept_pointer_w_error(expr.arg_);
 }
 
-void ASTTextVisitor::visit(UnknownExpr const& /*expr*/)
+void PseudocodeVisitor::visit(UnknownExpr const&)
 {
     exporter_->write_unknown_expr_word();
 }
 
-void ASTTextVisitor::visit(TranslationUnit const& stmt)
+void PseudocodeVisitor::visit(TranslationUnit const& stmt)
 {
     bool predch = false;
     if (configurator_->sh_global_vars())
@@ -521,15 +441,6 @@ void ASTTextVisitor::visit(TranslationUnit const& stmt)
             }
         }
     }
-    /*for (Concept* a : stmt.concepts_)
-    {
-        if (a)
-        {
-            a->accept(*this);
-            exporter_->write_new_line();
-            predch = true;
-        }
-    }*/
     if (configurator_->sh_func_declar())
     {
         for (FunctionDefStmt* a : stmt.functions_)
@@ -577,7 +488,7 @@ void ASTTextVisitor::visit(TranslationUnit const& stmt)
     }
 }
 
-void ASTTextVisitor::visit(CompoundStmt const& stmt)
+void PseudocodeVisitor::visit(CompoundStmt const& stmt)
 {
     for (size_t i = 0; i < stmt.stmts_.size(); ++i)
     {
@@ -589,7 +500,7 @@ void ASTTextVisitor::visit(CompoundStmt const& stmt)
     }
 }
 
-void ASTTextVisitor::visit(ReturnStmt const& stmt)
+void PseudocodeVisitor::visit(ReturnStmt const& stmt)
 {
     exporter_->write_return_word();
     if (stmt.val_)
@@ -599,12 +510,12 @@ void ASTTextVisitor::visit(ReturnStmt const& stmt)
     }
 }
 
-void ASTTextVisitor::visit(ExprStmt const& stmt)
+void PseudocodeVisitor::visit(ExprStmt const& stmt)
 {
     check_and_accept_pointer_w_error(stmt.expr_);
 }
 
-void ASTTextVisitor::visit(IfStmt const& stmt)
+void PseudocodeVisitor::visit(IfStmt const& stmt)
 {
     exporter_->write_if_word();
     write_cond(stmt.cond_);
@@ -619,7 +530,7 @@ void ASTTextVisitor::visit(IfStmt const& stmt)
     }
 }
 
-void ASTTextVisitor::visit(CaseStmt const& stmt)
+void PseudocodeVisitor::visit(CaseStmt const& stmt)
 {
     exporter_->write_case_word();
     exporter_->write_space();
@@ -640,7 +551,7 @@ void ASTTextVisitor::visit(CaseStmt const& stmt)
     write_body(stmt.body_);
 }
 
-void ASTTextVisitor::visit(DefaultCaseStmt const& stmt)
+void PseudocodeVisitor::visit(DefaultCaseStmt const& stmt)
 {
     exporter_->write_default_word();
     exporter_->write_space();
@@ -648,7 +559,7 @@ void ASTTextVisitor::visit(DefaultCaseStmt const& stmt)
     write_body(stmt.body_);
 }
 
-void ASTTextVisitor::visit(SwitchStmt const& stmt)
+void PseudocodeVisitor::visit(SwitchStmt const& stmt)
 {
     exporter_->write_switch_word();
     write_cond(stmt.expr_);
@@ -667,7 +578,7 @@ void ASTTextVisitor::visit(SwitchStmt const& stmt)
     exporter_->write_right_bracket("}");
 }
 
-void ASTTextVisitor::visit(WhileStmt const& stmt)
+void PseudocodeVisitor::visit(WhileStmt const& stmt)
 {
     exporter_->write_while_word();
     write_cond(stmt.cond_);
@@ -676,7 +587,7 @@ void ASTTextVisitor::visit(WhileStmt const& stmt)
     write_body(stmt.body_);
 }
 
-void ASTTextVisitor::visit(DoWhileStmt const& stmt)
+void PseudocodeVisitor::visit(DoWhileStmt const& stmt)
 {
     exporter_->write_repeat_word();
     write_body(stmt.body_);
@@ -685,7 +596,7 @@ void ASTTextVisitor::visit(DoWhileStmt const& stmt)
     write_cond(stmt.cond_);
 }
 
-void ASTTextVisitor::visit(ForStmt const& stmt)
+void PseudocodeVisitor::visit(ForStmt const& stmt)
 {
     exporter_->write_for_word();
     exporter_->write_space();
@@ -703,61 +614,44 @@ void ASTTextVisitor::visit(ForStmt const& stmt)
     write_body(stmt.body_);
 }
 
-/*void ASTTextVisitor::visit(ForEachStmt const& stmt)
-{
-    exporter_->write_foreach_word();
-    exporter_->write_space();
-    exporter_->write_round_bracket("(");
-    check_and_accept_pointer_w_error(stmt.item_);
-    exporter_->write_space();
-    exporter_->write_from_word();
-    exporter_->write_space();
-    check_and_accept_pointer_w_error(stmt.container_);
-    exporter_->write_round_bracket(")");
-    exporter_->write_space();
-    exporter_->write_repeat_word();
-    write_body(stmt.body_);
-}*/
-
-void ASTTextVisitor::visit(ThrowStmt const& stmt)
+void PseudocodeVisitor::visit(ThrowStmt const& stmt)
 {
     exporter_->write_throw_word();
     exporter_->write_space();
     check_and_accept_pointer_w_error(stmt.val_);
 }
 
-void ASTTextVisitor::visit(UnknownStmt const& /*stmt*/)
+void PseudocodeVisitor::visit(UnknownStmt const&)
 {
     exporter_->write_unknown_stmt_word();
 }
 
-void ASTTextVisitor::visit(LocalVarDefStmt const& stmt)
+void PseudocodeVisitor::visit(LocalVarDefStmt const& stmt)
 {
     write_var_def(stmt, LOCAL_VAR);
 }
 
-void ASTTextVisitor::visit(ParamVarDefStmt const& stmt)
+void PseudocodeVisitor::visit(ParamVarDefStmt const& stmt)
 {
     write_var_def(stmt, PARAM_VAR);
 }
 
-void ASTTextVisitor::visit(MemberVarDefStmt const& stmt)
+void PseudocodeVisitor::visit(MemberVarDefStmt const& stmt)
 {
     write_var_def(stmt, MEMBER_VAR);
 }
 
-void ASTTextVisitor::visit(GlobalVarDefStmt const& stmt)
+void PseudocodeVisitor::visit(GlobalVarDefStmt const& stmt)
 {
     write_var_def(stmt, GLOBAL_VAR);
 }
 
-void ASTTextVisitor::visit(FunctionDefStmt const& stmt)
+void PseudocodeVisitor::visit(FunctionDefStmt const& stmt)
 {
     if (!configurator_->sh_func_declar())
     {
         return;
     }
-    //write_template_head(stmt.tparams_);
     if (configurator_->sh_other_expr())
     {
         exporter_->write_function_word();
@@ -776,7 +670,7 @@ void ASTTextVisitor::visit(FunctionDefStmt const& stmt)
     exporter_->write_right_bracket("}");
 }
 
-void ASTTextVisitor::visit(DefStmt const& stmt)
+void PseudocodeVisitor::visit(DefStmt const& stmt)
 {
     if (stmt.defs_.empty())
     {
@@ -801,7 +695,7 @@ void ASTTextVisitor::visit(DefStmt const& stmt)
     }
 }
 
-void ASTTextVisitor::visit(MethodDefStmt const& stmt)
+void PseudocodeVisitor::visit(MethodDefStmt const& stmt)
 {
     if (!configurator_->sh_con_des_meth_defin() ||
         (stmt.access_ != AccessModifier::Public && !configurator_->use_inner_view()) ||
@@ -810,13 +704,11 @@ void ASTTextVisitor::visit(MethodDefStmt const& stmt)
     {
         return;
     }
-    ClassDefStmt* ownerClass = static_cast<ClassDefStmt*>(stmt.owner_);//
+    ClassDefStmt* ownerClass = static_cast<ClassDefStmt*>(stmt.owner_);
     if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template() && stmt.owner_)
     {
-        //write_template_head(stmt.owner_->tparams_);
-        write_generic_params_decl(ownerClass->tparams_);//
+        write_generic_params_decl(ownerClass->tparams_);
     }
-    //write_template_head(stmt.func_->tparams_);
     if (configurator_->sh_other_expr())
     {
         exporter_->write_method_word();
@@ -825,10 +717,6 @@ void ASTTextVisitor::visit(MethodDefStmt const& stmt)
     if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
     {
         exporter_->write_class_name(stmt.owner_->name_);
-        /*if (!stmt.owner_->tparams_.empty() && configurator_->sh_meth_templ())
-        {
-            write_params_or_args(stmt.owner_->tparams_, true);
-        }*/
         if (!ownerClass->tparams_.empty() && configurator_->sh_con_des_meth_template())
         {
             write_generic_params(ownerClass->tparams_);
@@ -841,12 +729,7 @@ void ASTTextVisitor::visit(MethodDefStmt const& stmt)
     write_body(stmt.func_->body_);
 }
 
-/*void ASTTextVisitor::visit(BaseInitializerStmt const& stmt)
-{
-    check_and_accept_pointer_w_error(stmt.base_);
-}*/
-
-void ASTTextVisitor::visit(BaseInitializerStmt const& stmt)
+void PseudocodeVisitor::visit(BaseInitializerStmt const& stmt)
 {
     if (configurator_->sh_other_expr())
     {
@@ -859,7 +742,7 @@ void ASTTextVisitor::visit(BaseInitializerStmt const& stmt)
     write_params_or_args(stmt.args_);
 }
 
-void ASTTextVisitor::visit(ConstructorDefStmt const& stmt)
+void PseudocodeVisitor::visit(ConstructorDefStmt const& stmt)
 {
     if (!configurator_->sh_con_des_meth_defin() || (stmt.access_ != AccessModifier::Public && !configurator_->use_inner_view()))
     {
@@ -869,7 +752,6 @@ void ASTTextVisitor::visit(ConstructorDefStmt const& stmt)
     {
         write_template_head(stmt.owner_->tparams_);
     }
-    //write_template_head(stmt.tparams_);
     if (configurator_->sh_other_expr())
     {
         exporter_->write_constructor_word();
@@ -905,7 +787,7 @@ void ASTTextVisitor::visit(ConstructorDefStmt const& stmt)
     write_body(stmt.body_);
 }
 
-void ASTTextVisitor::visit(DestructorDefStmt const& stmt)
+void PseudocodeVisitor::visit(DestructorDefStmt const& stmt)
 {
     if (!configurator_->sh_con_des_meth_defin() && !stmt.body_)
     {
@@ -942,30 +824,13 @@ void ASTTextVisitor::visit(DestructorDefStmt const& stmt)
     write_body(stmt.body_);
 }
 
-/*
-void ASTTextVisitor::visit(Concept const& stmt)
-{
-}*/
-
-/*void ASTTextVisitor::visit(GenericParam const& stmt)
-{
-    if (stmt.type_)
-    {
-        exporter_->write_gen_param_name(stmt.type_->name_);
-    }
-        else
-        {
-        exporter_->write_invalid_word();
-    }
-}*/
-
-void ASTTextVisitor::visit(GenericParam const& stmt)
+void PseudocodeVisitor::visit(GenericParam const& stmt)
 {
     exporter_->write_gen_param_name(stmt.name_);
     currGenParams_->push_back(std::stringstream(stmt.name_));
 }
 
-void ASTTextVisitor::visit(InterfaceDefStmt const& stmt)
+void PseudocodeVisitor::visit(InterfaceDefStmt const& stmt)
 {
     if (!configurator_->sh_interf_declar())
     {
@@ -988,7 +853,7 @@ void ASTTextVisitor::visit(InterfaceDefStmt const& stmt)
     exporter_->write_new_line();
 }
 
-void ASTTextVisitor::visit(ClassDefStmt const& stmt)
+void PseudocodeVisitor::visit(ClassDefStmt const& stmt)
 {
     if (configurator_->sh_class_declar())
     {
@@ -1062,12 +927,12 @@ void ASTTextVisitor::visit(ClassDefStmt const& stmt)
     }
 }
 
-void ASTTextVisitor::visit(ContinueStmt const& /*stmt*/)
+void PseudocodeVisitor::visit(ContinueStmt const&)
 {
     exporter_->write_continue_word();
 }
 
-void ASTTextVisitor::visit(BreakStmt const& /*stmt*/)
+void PseudocodeVisitor::visit(BreakStmt const&)
 {
     exporter_->write_break_word();
 }
@@ -1076,7 +941,7 @@ void ASTTextVisitor::visit(BreakStmt const& /*stmt*/)
 //----------------------------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-void ASTTextVisitor::write_open_curl_bracket()
+void PseudocodeVisitor::write_open_curl_bracket()
 {
     if (configurator_->new_line_curl_bracket())
     {
@@ -1090,14 +955,14 @@ void ASTTextVisitor::write_open_curl_bracket()
     exporter_->write_new_line();
 }
 
-void ASTTextVisitor::write_arrow()
+void PseudocodeVisitor::write_arrow()
 {
     exporter_->write_space();
     exporter_->write_separator_sign("->");
     exporter_->write_space();
 }
 
-void ASTTextVisitor::write_body(Stmt* body)
+void PseudocodeVisitor::write_body(Stmt* body)
 {
     write_open_curl_bracket();
     exporter_->increase_indentation();
@@ -1110,7 +975,7 @@ void ASTTextVisitor::write_body(Stmt* body)
     exporter_->write_right_bracket("}");
 }
 
-void ASTTextVisitor::write_cond(Expr* cond)
+void PseudocodeVisitor::write_cond(Expr* cond)
 {
     exporter_->write_space();
     exporter_->write_left_bracket("(");
@@ -1118,7 +983,7 @@ void ASTTextVisitor::write_cond(Expr* cond)
     exporter_->write_right_bracket(")");
 }
 
-void ASTTextVisitor::write_return_type(Type* type)
+void PseudocodeVisitor::write_return_type(Type* type)
 {
     write_arrow();
     if (configurator_->sh_other_expr())
@@ -1129,7 +994,7 @@ void ASTTextVisitor::write_return_type(Type* type)
     check_and_accept_pointer_w_error(type);
 }
 
-void ASTTextVisitor::write_identifier_from_string(std::string classname)
+void PseudocodeVisitor::write_identifier_from_string(std::string classname)
 {
     size_t st = std::move(classname.find('<'));
     size_t en = std::move(classname.find('>'));
@@ -1179,7 +1044,7 @@ void ASTTextVisitor::write_identifier_from_string(std::string classname)
     }
 }
 
-void ASTTextVisitor::write_initialization(VarDefStmt const* var)
+void PseudocodeVisitor::write_initialization(VarDefStmt const* var)
 {
     exporter_->write_space();
     exporter_->write_assign_op_word();
@@ -1187,7 +1052,7 @@ void ASTTextVisitor::write_initialization(VarDefStmt const* var)
     var->initializer_->accept(*this);
 }
 
-void ASTTextVisitor::write_generic_params_decl(std::vector<GenericParam*> const& vgeneric)
+void PseudocodeVisitor::write_generic_params_decl(std::vector<GenericParam*> const& vgeneric)
 {
     if (configurator_->sh_generic_param() && !vgeneric.empty())
     {
@@ -1197,23 +1062,16 @@ void ASTTextVisitor::write_generic_params_decl(std::vector<GenericParam*> const&
     }
 }
 
-void ASTTextVisitor::write_generic_params(std::vector<GenericParam*> const& vgeneric)
+void PseudocodeVisitor::write_generic_params(std::vector<GenericParam*> const& vgeneric)
 {
     if (!configurator_->sh_generic_param())
     {
         return;
     }
     write_params_or_args(vgeneric, true);
-    /*exporter_->write_separator_sign("<");
-    for (size_t i = 0; i < vgeneric.size(); ++i)
-    {
-        vgeneric.at(i) ? vgeneric.at(i)->accept(*this) : exporter_->write_invalid_word();
-        (i < vgeneric.size() - 1) ? (exporter_->write_separator_sign(","), exporter_->write_space()) : void();
-    }
-    exporter_->write_separator_sign(">");*/
 }
 
-void ASTTextVisitor::write_var_def(VarDefStmt const& var, int vartype)
+void PseudocodeVisitor::write_var_def(VarDefStmt const& var, int vartype)
 {
     if (configurator_->sh_other_expr() && vartype != PARAM_VAR)
     {
@@ -1244,7 +1102,7 @@ void ASTTextVisitor::write_var_def(VarDefStmt const& var, int vartype)
     }
 }
 
-void ASTTextVisitor::write_template_head(std::vector<GenericParam*> const& vgen)
+void PseudocodeVisitor::write_template_head(std::vector<GenericParam*> const& vgen)
 {
     if (configurator_->sh_generic_param() && !vgen.empty())
     {
@@ -1254,7 +1112,7 @@ void ASTTextVisitor::write_template_head(std::vector<GenericParam*> const& vgen)
     }
 }
 
-void ASTTextVisitor::write_member_var_decl(std::vector<MemberVarDefStmt*> const& vmembervars)
+void PseudocodeVisitor::write_member_var_decl(std::vector<MemberVarDefStmt*> const& vmembervars)
 {
     std::vector<MemberVarDefStmt*> vfound {};
     if (has_acc_mod(vmembervars, vfound, AccessModifier::Public))
@@ -1282,7 +1140,7 @@ void ASTTextVisitor::write_member_var_decl(std::vector<MemberVarDefStmt*> const&
     }
 }
 
-void ASTTextVisitor::write_member_var(std::vector<MemberVarDefStmt*>& vmembervars)
+void PseudocodeVisitor::write_member_var(std::vector<MemberVarDefStmt*>& vmembervars)
 {
     exporter_->write_space();
     exporter_->write_attributes_word();
@@ -1300,7 +1158,7 @@ void ASTTextVisitor::write_member_var(std::vector<MemberVarDefStmt*>& vmembervar
     vmembervars.clear();
 }
 
-void ASTTextVisitor::write_constructor_decl(std::vector<ConstructorDefStmt*> const& vconstructors)
+void PseudocodeVisitor::write_constructor_decl(std::vector<ConstructorDefStmt*> const& vconstructors)
 {
     std::vector<ConstructorDefStmt*> vfound {};
     if (has_acc_mod(vconstructors, vfound, std::move(AccessModifier::Public)))
@@ -1328,7 +1186,7 @@ void ASTTextVisitor::write_constructor_decl(std::vector<ConstructorDefStmt*> con
     }
 }
 
-void ASTTextVisitor::write_constructor(std::vector<ConstructorDefStmt*>& constr)
+void PseudocodeVisitor::write_constructor(std::vector<ConstructorDefStmt*>& constr)
 {
     exporter_->write_space();
     exporter_->write_constructors_word();
@@ -1339,10 +1197,6 @@ void ASTTextVisitor::write_constructor(std::vector<ConstructorDefStmt*>& constr)
         if (constr.at(i) && constr.at(i)->owner_)
         {
             exporter_->write_class_name(constr.at(i)->owner_->name_);
-            /*if (!constr.at(i)->tparams_.empty())
-            {
-                write_params_or_args(constr.at(i)->tparams_, true);
-            }*/
             write_params_or_args(constr.at(i)->params_);
         }
         else
@@ -1355,7 +1209,7 @@ void ASTTextVisitor::write_constructor(std::vector<ConstructorDefStmt*>& constr)
     constr.clear();
 }
 
-void ASTTextVisitor::write_destructor_decl(std::vector<DestructorDefStmt*> const& vdestructors)
+void PseudocodeVisitor::write_destructor_decl(std::vector<DestructorDefStmt*> const& vdestructors)
 {
     exporter_->write_destructors_word();
     exporter_->write_new_line();
@@ -1377,7 +1231,7 @@ void ASTTextVisitor::write_destructor_decl(std::vector<DestructorDefStmt*> const
     exporter_->decrease_indentation();
 }
 
-void ASTTextVisitor::write_method_decl(std::vector<MethodDefStmt*> const& vmethods)
+void PseudocodeVisitor::write_method_decl(std::vector<MethodDefStmt*> const& vmethods)
 {
     std::vector<MethodDefStmt*> vfound {};
     if (has_acc_mod(vmethods, vfound, AccessModifier::Public))
@@ -1405,7 +1259,7 @@ void ASTTextVisitor::write_method_decl(std::vector<MethodDefStmt*> const& vmetho
     }
 }
 
-void ASTTextVisitor::write_method(std::vector<MethodDefStmt*>& meth)
+void PseudocodeVisitor::write_method(std::vector<MethodDefStmt*>& meth)
 {
     exporter_->write_space();
     exporter_->write_methods_word();
@@ -1429,10 +1283,6 @@ void ASTTextVisitor::write_method(std::vector<MethodDefStmt*>& meth)
                 write_arrow();
             }
             exporter_->write_method_name(meth.at(i)->func_->name_);
-            /*if (!meth.at(i)->func_->tparams_.empty())
-            {
-                write_params_or_args(meth.at(i)->func_->tparams_, true);
-            }*/
             write_params_or_args(meth.at(i)->func_->params_);
             write_return_type(meth.at(i)->func_->retType_);
         }

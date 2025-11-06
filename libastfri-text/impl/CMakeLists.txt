@@ -1,13 +1,15 @@
 add_library(astfri-text SHARED)
 
 target_sources(astfri-text PRIVATE
-  OutputFileManager.cpp
+  code/CxxCodeVisitor.cpp
+  code/JavaCodeVisitor.cpp
+  pseudocode/Exporter.cpp
+  pseudocode/HtmlExporter.cpp
+  pseudocode/PseudocodeVisitor.cpp
+  AstfriVisitor.cpp
   GeneralConfigurator.cpp
+  OutputFileManager.cpp
   TextConfigurator.cpp
-  Exporter.cpp
-  HtmlFileExporter.cpp
-  GeneralASTVisitor.cpp
-  ASTTextVisitor.cpp
   TextLibManager.cpp
 )
 

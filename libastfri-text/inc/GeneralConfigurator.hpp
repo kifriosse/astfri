@@ -2,6 +2,7 @@
 #define LIBASTFRI_TEXT_GENERAL_CONFIGURATOR
 
 #include <libastfri-text/inc/OutputFileManager.hpp>
+
 #include <rapidjson/document.h>
 
 #include <sstream>
@@ -126,84 +127,84 @@ namespace astfri::text
             return overwriteFile_;
         }
 
-        ss const* get_output_file_name()
+        ss const* output_file_name()
         {
             return outputFileName_.get();
         }
 
-        ss const* get_output_file_path()
+        ss const* output_file_path()
         {
             return outputFilePath_.get();
         }
 
-        ss const* get_output_file_format()
+        ss const* output_file_format()
         {
             return outputFileFormat_.get();
         }
 
         // UNKNOWN_PHRASES
-        ss const* get_unknown_type_word()
+        ss const* unknown_type_word()
         {
             return unknownTypeWord_.get();
         }
 
-        ss const* get_unknown_expr_word()
+        ss const* unknown_expr_word()
         {
             return unknownExprWord_.get();
         }
 
-        ss const* get_unknown_stmt_word()
+        ss const* unknown_stmt_word()
         {
             return unknownStmtWord_.get();
         }
 
-        ss const* get_invalid_type_word()
+        ss const* invalid_type_word()
         {
             return invalidTypeWord_.get();
         }
 
-        ss const* get_invalid_expr_word()
+        ss const* invalid_expr_word()
         {
             return invalidExprWord_.get();
         }
 
-        ss const* get_invalid_stmt_word()
+        ss const* invalid_stmt_word()
         {
             return invalidStmtWord_.get();
         }
 
         // STYLE
-        ss const* get_default_NA_phrase_style()
+        ss const* default_NA_phrase_style()
         {
             return defaultPhraseStyle_.get();
         }
 
-        ss const* get_unknown_type_word_style()
+        ss const* unknown_type_word_style()
         {
             return unknownTypeWordStyle_.get();
         }
 
-        ss const* get_unknown_expr_word_style()
+        ss const* unknown_expr_word_style()
         {
             return unknownExprWordStyle_.get();
         }
 
-        ss const* get_unknown_stmt_word_style()
+        ss const* unknown_stmt_word_style()
         {
             return unknownStmtWordStyle_.get();
         }
 
-        ss const* get_invalid_type_word_style()
+        ss const* invalid_type_word_style()
         {
             return invalidTypeWordStyle_.get();
         }
 
-        ss const* get_invalid_expr_word_style()
+        ss const* invalid_expr_word_style()
         {
             return invalidExprWordStyle_.get();
         }
 
-        ss const* get_invalid_stmt_word_style()
+        ss const* invalid_stmt_word_style()
         {
             return invalidStmtWordStyle_.get();
         }
@@ -214,259 +215,259 @@ namespace astfri::text
             return useInnerView_;
         }
 
-        ss const* get_public_word()
+        ss const* public_word()
         {
             return publicWord_.get();
         }
 
-        ss const* get_protected_word()
+        ss const* protected_word()
         {
             return protectedWord_.get();
         }
 
-        ss const* get_private_word()
+        ss const* private_word()
         {
             return privateWord_.get();
         }
 
-        ss const* get_internal_word()
+        ss const* internal_word()
         {
             return internalWord_.get();
         }
 
-        ss const* get_attributes_word()
+        ss const* attributes_word()
         {
             return attributesWord_.get();
         }
 
-        ss const* get_constructors_word()
+        ss const* constructors_word()
         {
             return constructorsWord_.get();
         }
 
-        ss const* get_destructors_word()
+        ss const* destructors_word()
         {
             return destructorsWord_.get();
         }
 
-        ss const* get_methods_word()
+        ss const* methods_word()
         {
             return methodsWord_.get();
         }
 
-        ss const* get_access_mod_style()
+        ss const* access_mod_style()
         {
             return accessModifierStyle_.get();
         }
 
         // DATA_TYPES
-        ss const* get_dynamic_type_word()
+        ss const* dynamic_type_word()
         {
             return dynamicTypeWord_.get();
         }
 
-        ss const* get_int_type_word()
+        ss const* int_type_word()
         {
             return intTypeWord_.get();
         }
 
-        ss const* get_float_type_word()
+        ss const* float_type_word()
         {
             return floatTypeWord_.get();
         }
 
-        ss const* get_char_type_word()
+        ss const* char_type_word()
         {
             return charTypeWord_.get();
         }
 
-        ss const* get_bool_type_word()
+        ss const* bool_type_word()
         {
             return boolTypeWord_.get();
         }
 
-        ss const* get_void_type_word()
+        ss const* void_type_word()
         {
             return voidTypeWord_.get();
         }
 
         // STYLE
-        ss const* get_default_type_word_style()
+        ss const* default_type_word_style()
         {
             return defaultTypeWordStyle_.get();
         }
 
-        ss const* get_dynamic_type_word_style()
+        ss const* dynamic_type_word_style()
         {
             return dynamicTypeWordStyle_.get();
         }
 
-        ss const* get_int_type_word_style()
+        ss const* int_type_word_style()
         {
             return intTypeWordStyle_.get();
         }
 
-        ss const* get_float_type_word_style()
+        ss const* float_type_word_style()
         {
             return floatTypeWordStyle_.get();
         }
 
-        ss const* get_char_type_word_style()
+        ss const* char_type_word_style()
         {
             return charTypeWordStyle_.get();
         }
 
-        ss const* get_bool_type_word_style()
+        ss const* bool_type_word_style()
         {
             return boolTypeWordStyle_.get();
         }
 
-        ss const* get_void_type_word_style()
+        ss const* void_type_word_style()
         {
             return voidTypeWordStyle_.get();
         }
 
-        ss const* get_user_type_style()
+        ss const* user_type_style()
         {
             return userTypeStyle_.get();
         }
 
         // REFERENCE_NAMES
-        ss const* get_default_ref_name_style()
+        ss const* default_ref_name_style()
         {
             return defaultRefNameStyle_.get();
         }
 
-        ss const* get_gen_param_name_style()
+        ss const* gen_param_name_style()
         {
             return genericParamNameStyle_.get();
         }
 
-        ss const* get_class_name_style()
+        ss const* class_name_style()
         {
             return classNameStyle_.get();
         }
 
-        ss const* get_interface_name_style()
+        ss const* interface_name_style()
         {
             return interfaceNameStyle_.get();
         }
 
-        ss const* get_method_name_style()
+        ss const* method_name_style()
         {
             return methodNameStyle_.get();
         }
 
-        ss const* get_function_name_style()
+        ss const* function_name_style()
         {
             return functionNameStyle_.get();
         }
 
-        ss const* get_default_var_name_style()
+        ss const* default_var_name_style()
         {
             return defaultVarNameStyle_.get();
         }
 
-        ss const* get_global_var_name_style()
+        ss const* global_var_name_style()
         {
             return globalVarNameStyle_.get();
         }
 
-        ss const* get_member_var_name_style()
+        ss const* member_var_name_style()
         {
             return memberVarNameStyle_.get();
         }
 
-        ss const* get_local_var_name_style()
+        ss const* local_var_name_style()
         {
             return localVarNameStyle_.get();
         }
 
-        ss const* get_param_var_name_style()
+        ss const* param_var_name_style()
         {
             return paramVarNameStyle_.get();
         }
 
         // OPERATORS
-        ss const* get_assign_op_word()
+        ss const* assign_op_word()
         {
             return assignOpWord_.get();
         }
 
-        ss const* get_modulo_op_word()
+        ss const* modulo_op_word()
         {
             return moduloOpWord_.get();
         }
 
-        ss const* get_address_op_word()
+        ss const* address_op_word()
         {
             return addressOpWord_.get();
         }
 
-        ss const* get_deref_op_word()
+        ss const* deref_op_word()
         {
             return derefOpWord_.get();
         }
 
-        ss const* get_operator_style()
+        ss const* operator_style()
         {
             return operatorStyle_.get();
         }
 
         // SEPARATORS
-        ss const* get_separator_style()
+        ss const* separator_style()
         {
             return separatorStyle_.get();
         }
 
         // VALUES
-        ss const* get_true_val_word()
+        ss const* true_val_word()
         {
             return trueValWord_.get();
         }
 
-        ss const* get_false_val_word()
+        ss const* false_val_word()
         {
             return falseValWord_.get();
         }
 
-        ss const* get_null_val_word()
+        ss const* null_val_word()
         {
             return nullValWord_.get();
         }
 
         // STYLE
-        ss const* get_default_val_style()
+        ss const* default_val_style()
         {
             return defaultValStyle_.get();
         }
 
-        ss const* get_int_val_style()
+        ss const* int_val_style()
         {
             return intValStyle_.get();
         }
 
-        ss const* get_float_val_style()
+        ss const* float_val_style()
         {
             return floatValStyle_.get();
         }
 
-        ss const* get_char_val_style()
+        ss const* char_val_style()
         {
             return charValStyle_.get();
         }
 
-        ss const* get_string_val_style()
+        ss const* string_val_style()
         {
             return stringValStyle_.get();
         }
 
-        ss const* get_bool_val_style()
+        ss const* bool_val_style()
         {
             return boolValStyle_.get();
         }
 
-        ss const* get_null_val_style()
+        ss const* null_val_style()
         {
             return nullValStyle_.get();
         }

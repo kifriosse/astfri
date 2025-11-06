@@ -126,7 +126,7 @@ void OutputFileManager::set_build_folder_path()
 void OutputFileManager::remove_spaces(std::string& text)
 {
     size_t p = 0;
-    while ((p = text.find(" ", p)) != std::string::npos)
+    while ((p = text.find(' ', p)) != std::string::npos)
     {
         text.replace(p, 1, "");
     }
@@ -135,12 +135,12 @@ void OutputFileManager::remove_spaces(std::string& text)
 void OutputFileManager::remove_all_slashes(std::string& text)
 {
     size_t p = 0;
-    while ((p = text.find("/", p)) != std::string::npos)
+    while ((p = text.find('/', p)) != std::string::npos)
     {
         text.replace(p, 1, "");
     }
     p = 0;
-    while ((p = text.find("\\", p)) != std::string::npos)
+    while ((p = text.find('\\', p)) != std::string::npos)
     {
         text.replace(p, 1, "");
     }
@@ -149,7 +149,7 @@ void OutputFileManager::remove_all_slashes(std::string& text)
 void OutputFileManager::remove_multiple_slashes(std::string& text)
 {
     size_t p = 0;
-    while ((p = text.find("\\", p)) != std::string::npos)
+    while ((p = text.find('\\', p)) != std::string::npos)
     {
         text.replace(p, 1, "/");
     }
