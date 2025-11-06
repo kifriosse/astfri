@@ -89,10 +89,7 @@ void ClassVisitor::visit(astfri::ClassType const& type)
     this->currentVariable_.type_ = type.name_;
 }
 
-/**
- * @deprecated
- */
-void ClassVisitor::visit(astfri::UserType const& type)
+void ClassVisitor::visit(astfri::InterfaceType const& type)
 {
     if (type.name_.compare(this->currentClass_.name_) != 0)
     {
@@ -152,7 +149,7 @@ void ClassVisitor::visit(astfri::MethodDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::ConstructorDefStmt const& stmt)
 {
-    this->currentConstructor_.class_ = stmt.owner_->name_;
+    this->currentConstructor_.class_ = stmt.owner_->type_->name_;
     this->currentConstructor_.accessMod_ = stmt.access_;
     for (astfri::ParamVarDefStmt* p : stmt.params_)
     {
@@ -166,7 +163,7 @@ void ClassVisitor::visit(astfri::ConstructorDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::DestructorDefStmt const& stmt)
 {
-    this->currentDestructor_.class_ = stmt.owner_->name_;
+    this->currentDestructor_.class_ = stmt.owner_->type_->name_;
     this->outputter_->add_destructor(currentDestructor_);
     this->currentDestructor_.reset();
 }
@@ -178,13 +175,14 @@ void ClassVisitor::visit(astfri::GenericParam const& stmt)
 
 void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 {
-    this->currentClass_.name_ = stmt.name_;
-    //this->currentClass_.name_ = stmt.type_->name_;
+    this->currentClass_.name_ = stmt.type_->name_;
     this->currentClass_.type_ = UserDefinedType::CLASS;
+
     for (astfri::GenericParam* gp : stmt.tparams_)
     {
         gp->accept(*this);
     }
+
     this->outputter_->open_user_type(this->currentClass_);
 
     for (astfri::ConstructorDefStmt* constructor : stmt.constructors_)
@@ -215,10 +213,12 @@ void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt)
 {
     this->currentClass_.name_ = stmt.name_;
     this->currentClass_.type_ = UserDefinedType::INTERFACE;
+
     for (astfri::GenericParam* gp : stmt.tparams_)
     {
         this->currentClass_.genericParams_.push_back(gp->name_);
     }
+
     this->outputter_->open_user_type(this->currentClass_);
 
     for (astfri::MethodDefStmt* method : stmt.methods_)
@@ -235,7 +235,7 @@ void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
     // insert names of all classes in the TU into a set
     for (astfri::ClassDefStmt* c : stmt.classes_)
     {
-        this->classes_.insert(c->name_);
+        this->classes_.insert(c->type_->name_);
     }
 
     // insert names of all interfaces in the TU into a set
@@ -247,16 +247,17 @@ void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
     // go through every class in the TU and create realations for it's base classes and interfaces
     for (astfri::ClassDefStmt* c : stmt.classes_)
     {
-        this->currentClass_.name_ = c->name_;
+        this->currentClass_.name_ = c->type_->name_;
         for (astfri::ClassDefStmt* base : c->bases_)
         {
-            this->create_relation(base->name_, RelationType::EXTENSION);
+            this->create_relation(base->type_->name_, RelationType::EXTENSION);
         }
 
         for (astfri::InterfaceDefStmt* i : c->interfaces_)
         {
             this->create_relation(i->name_, RelationType::IMPLEMENTATION);
         }
+        this->currentClass_.reset();
     }
 
     // go through every interface in the TU and create relations for it's base interfaces
@@ -267,6 +268,7 @@ void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
         {
             this->create_relation(base->name_, RelationType::EXTENSION);
         }
+        this->currentClass_.reset();
     }
 
     for (astfri::ClassDefStmt* c : stmt.classes_)

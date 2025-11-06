@@ -8,10 +8,22 @@ int main(int argc, char** argv)
     // auto& expressions = astfri::ExprFactory::get_instance();
     auto& types                                   = astfri::TypeFactory::get_instance();
 
-    astfri::ClassDefStmt* classFoo                = statements.mk_class_def("Foo", astfri::mk_scope());
-    astfri::ClassDefStmt* classBar                = statements.mk_class_def("Bar", astfri::mk_scope());
-    astfri::ClassDefStmt* classParent             = statements.mk_class_def("Parent", astfri::mk_scope());
+    astfri::Scope scope = astfri::mk_scope("Global");
+
+    astfri::ClassDefStmt* classFoo                = statements.mk_class_def("Foo", scope);
+    astfri::ClassDefStmt* classBar                = statements.mk_class_def("Bar", scope);
+    astfri::ClassDefStmt* classParent             = statements.mk_class_def("Parent", scope);
     astfri::InterfaceDefStmt* interfaceIVisitable = statements.mk_interface_def("IVisitable");
+
+    astfri::ClassType* classTypeFoo = types.mk_class("Foo", scope);
+    astfri::ClassType* classTypeBar = types.mk_class("Bar", scope);
+    astfri::ClassType* classTypeParent = types.mk_class("Parent", scope);
+    //astfri::InterfaceType* interfaceTypeIVisitable = types.mk_interface("IVisitable", scope);
+
+    classFoo->type_ = classTypeFoo;
+    classBar->type_ = classTypeBar;
+    classParent->type_ = classTypeParent;
+    //interfaceIVisitable->type_ = interfaceTypeIVisitable;
 
     std::vector<astfri::GenericParam*> genericParamsFoo;
     genericParamsFoo.push_back(statements.mk_generic_param("", "T"));
@@ -37,7 +49,7 @@ int main(int argc, char** argv)
     std::vector<astfri::MemberVarDefStmt*> fieldsBar;
     auto memberBar = statements.mk_member_var_def(
         "nameStr_",
-        types.mk_user("std::string"),
+        types.mk_class("std::string", astfri::mk_scope()),
         nullptr,
         astfri::AccessModifier::Private
     );
@@ -55,7 +67,7 @@ int main(int argc, char** argv)
     );
     fieldsFoo.push_back(statements.mk_member_var_def(
         "bar_",
-        types.mk_indirect(types.mk_user("Bar")),
+        types.mk_indirect(types.mk_class("Bar", astfri::mk_scope())),
         nullptr,
         astfri::AccessModifier::Private
     ));
@@ -63,7 +75,7 @@ int main(int argc, char** argv)
 
     auto func       = statements.mk_function_def();
     func->name_     = "foo";
-    func->retType_  = types.mk_indirect(types.mk_user("Bar"));
+    func->retType_  = types.mk_indirect(types.mk_class("Bar", astfri::mk_scope()));
     std::vector<astfri::ParamVarDefStmt*> params;
     params.push_back(statements.mk_param_var_def("number", types.mk_int(), nullptr));
     func->params_ = params;
