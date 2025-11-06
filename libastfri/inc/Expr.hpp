@@ -352,6 +352,7 @@ struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
     Type *m_returnType;
     std::vector<ParamVarDefStmt*> params_;
     Stmt* body_;
+    LambdaExpr() = default;
     LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body);
 };
 
