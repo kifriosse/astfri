@@ -2,7 +2,7 @@
 #define LIBASTFRI_STATEMENT_FACTORY_HPP
 
 #include <libastfri/inc/Stmt.hpp>
-#include <libastfri/inc/Type.hpp>
+#include <libastfri/inc/TypeFactory.hpp>
 
 #include <map>
 #include <memory>
@@ -78,14 +78,24 @@ public:
     GenericParam* mk_generic_param(std::string constraint, std::string name);
 
     /**
-     * TODO ako s tymto?
+     * @deprecated
      */
     InterfaceDefStmt* mk_interface_def();
+
+    /**
+     * @deprecated
+     */
     InterfaceDefStmt* mk_interface_def(std::string name);
 
+    /**
+     * @brief TODO
+     */
+    InterfaceDefStmt* mk_interface_def(std::string name, Scope scope);
 
+    /**
+     * @brief TODO
+     */
     ClassDefStmt* mk_class_def(std::string name, Scope scope);
-
 
     CompoundStmt* mk_compound(std::vector<Stmt*> stmts);
 
@@ -117,6 +127,10 @@ public:
     UnknownStmt* mk_uknown();
 
     TranslationUnit* mk_translation_unit();
+
+    /**
+     * @deprecated
+     */
     TranslationUnit* mk_translation_unit(
         std::vector<ClassDefStmt*> classes,
         std::vector<InterfaceDefStmt*> interfaces,
@@ -126,10 +140,15 @@ public:
 
 private:
     StmtFactory();
+    StmtFactory(const StmtFactory &) = delete;
+    StmtFactory(StmtFactory&&) = delete;
+    StmtFactory& operator=(const StmtFactory &) = delete;
+    StmtFactory& operator=(StmtFactory &&) = delete;
 
 private:
     TypeFactory *m_types;
     std::vector<std::unique_ptr<Stmt>> stmts_;
+    std::map<std::string, InterfaceDefStmt> m_interfaces;
     std::map<std::string, ClassDefStmt> m_classes;
     ContinueStmt continue_;
     BreakStmt break_;

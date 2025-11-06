@@ -4,6 +4,7 @@
 #include <libastfri/inc/Type.hpp>
 
 #include <map>
+#include <memory>
 #include <string>
 
 namespace astfri
@@ -31,6 +32,10 @@ public:
      */
     UserType* mk_user(std::string const& name);
     ClassType *mk_class(const std::string &name, const Scope &scope);
+    ClassType *mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def);
+    InterfaceType *mk_interface(const std::string &name, const Scope &scope);
+    InterfaceType *mk_interface(const std::string &name, const Scope &scope, InterfaceDefStmt *def);
+    LambdaType *mk_lambda(std::string name, LambdaExpr *def);
 
 public:
     TypeFactory(TypeFactory const&)    = delete;
@@ -51,6 +56,8 @@ private:
     // deprecated
     std::map<std::string, UserType> user_;
     std::map<std::string, ClassType> m_classes;
+    std::map<std::string, InterfaceType> m_interfaces;
+    std::vector<std::unique_ptr<Type>> m_types;
 };
 
 } // namespace astfri

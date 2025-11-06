@@ -348,9 +348,9 @@ struct LambdaCallExpr : Expr, details::MkVisitable<LambdaCallExpr>
  */
 struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
 {
+    LambdaType *m_type;
     std::vector<ParamVarDefStmt*> params_;
     Stmt* body_;
-
     LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body);
 };
 

@@ -1,7 +1,9 @@
 #ifndef LIBASTFRI_STATEMENT_HPP
 #define LIBASTFRI_STATEMENT_HPP
 
+#include <libastfri/impl/Scope.hpp>
 #include <libastfri/impl/Utils.hpp>
+#include <libastfri/inc/Type.hpp>
 
 #include <string>
 #include <vector>
@@ -217,6 +219,7 @@ struct UserTypeDefStmt : Stmt
  */
 struct InterfaceDefStmt : UserTypeDefStmt, details::MkVisitable<InterfaceDefStmt>
 {
+    InterfaceType *m_type;
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
     std::vector<InterfaceDefStmt*> bases_;

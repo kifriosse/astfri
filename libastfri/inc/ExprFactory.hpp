@@ -2,6 +2,7 @@
 #define LIBASTFRI_EXPRESSION_FACTORY_HPP
 
 #include <libastfri/inc/Expr.hpp>
+#include <libastfri/inc/TypeFactory.hpp>
 
 #include <map>
 #include <memory>
@@ -57,6 +58,7 @@ public:
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
+    LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name);
 
     ThisExpr* mk_this();
 
@@ -69,11 +71,15 @@ public:
     UnknownExpr* mk_unknown();
 
 private:
-    ExprFactory()                      = default;
-    ExprFactory(ExprFactory const&)    = delete;
-    void operator=(ExprFactory const&) = delete;
+    ExprFactory();
+    ExprFactory(const ExprFactory &) = delete;
+    ExprFactory(ExprFactory &&) = delete;
+    void operator=(const ExprFactory &) = delete;
+    void operator=(ExprFactory &&) = delete;
 
 private:
+    TypeFactory *m_types;
+
     std::vector<std::unique_ptr<Expr>> exprs_;
 
     std::map<int, IntLiteralExpr> ints_;
