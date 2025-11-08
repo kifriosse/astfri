@@ -2,44 +2,26 @@
 
 using namespace astfri::text;
 
-PlainTextBuilder::PlainTextBuilder() :
-    configurator_(&TextConfigurator::get_instance()),
-    rowCount_(1)
+PlainTextBuilder& PlainTextBuilder::get_instance()
 {
-}
-
-//
-// SET_UP
-//
-
-void PlainTextBuilder::reset_builder()
-{
-    rowCount_ = 1;
-    AbstractTextBuilder::reset_builder();
+    static PlainTextBuilder builder;
+    return builder;
 }
 
 //
 // GENERAL_TEXT
 //
 
-void PlainTextBuilder::append_text(std::string const& text)
-{
-    if (isEmptyLine_) {
-        for (int i = 0; i < configurator_->text_margin_left_len(); ++i) {
-            append_space();
-        }
-        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i) {
-            append_space();
-        }
-        isEmptyLine_ = false;
-    }
-    *buildedText_ << text;
-}
-
 void PlainTextBuilder::append_new_line()
 {
-    AbstractTextBuilder::append_new_line();
+    *buildedText_ << "\n";
+    isEmptyLine_ = true;
     ++rowCount_;
+}
+
+void PlainTextBuilder::append_space()
+{
+    *buildedText_ << " ";
 }
 
 //
@@ -57,6 +39,26 @@ void PlainTextBuilder::write_opening_curl_bracket()
     }
     append_new_line();
     ++indentationLevel_;
+}
+
+void PlainTextBuilder::write_right_bracket(std::string const& br)
+{
+    append_text(br);
+}
+
+void PlainTextBuilder::write_left_bracket(std::string const& br)
+{
+    append_text(br);
+}
+
+void PlainTextBuilder::write_separator(std::string const& sep)
+{
+    append_text(sep);
+}
+
+void PlainTextBuilder::write_operator(std::string const& op)
+{
+    append_text(op);
 }
 
 void PlainTextBuilder::write_assign_operator()
@@ -191,9 +193,102 @@ void PlainTextBuilder::write_void_type_word()
     append_text(configurator_->void_type_word()->str());
 }
 
+void PlainTextBuilder::write_class_type(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_interface_type(std::string const& name)
+{
+    append_text(name);
+}
+
+//
+// REFERENCE_NAMES
+//
+
+void PlainTextBuilder::write_scope_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_gen_param_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_class_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_interface_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_method_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_function_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_global_var_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_member_var_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_local_var_name(std::string const& name)
+{
+    append_text(name);
+}
+
+void PlainTextBuilder::write_param_var_name(std::string const& name)
+{
+    append_text(name);
+}
+
 //
 // VALUES
 //
+
+void PlainTextBuilder::write_int_val(int const& val)
+{
+    append_text(std::to_string(val));
+}
+
+void PlainTextBuilder::write_float_val(float const& val)
+{
+    append_text(std::to_string(val) + "f");
+}
+
+void PlainTextBuilder::write_char_val(char const& val)
+{
+    append_text("'" + std::string(1, val) + "'");
+}
+
+void PlainTextBuilder::write_string_val(std::string const& val)
+{
+    append_text("\"" + val + "\"");
+}
+
+void PlainTextBuilder::write_bool_val(bool const& val)
+{
+    if (val) {
+        append_text("true");
+    } else {
+        append_text("false");
+    }
+}
 
 void PlainTextBuilder::write_null_val()
 {

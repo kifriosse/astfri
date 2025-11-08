@@ -2,9 +2,13 @@
 
 using namespace astfri::text;
 
+HtmlTextBuilder& HtmlTextBuilder::get_instance()
+{
+    static HtmlTextBuilder builder;
+    return builder;
+}
+
 HtmlTextBuilder::HtmlTextBuilder() :
-    configurator_(&TextConfigurator::get_instance()),
-    rowCount_(1),
     maxBracketIndex_(configurator_->bracket_colors()->size()),
     currentBrIndex_(0)
 {
@@ -16,7 +20,6 @@ HtmlTextBuilder::HtmlTextBuilder() :
 
 void HtmlTextBuilder::reset_builder()
 {
-    rowCount_ = 1;
     maxBracketIndex_ = configurator_->bracket_colors()->size();
     currentBrIndex_ = 0;
     AbstractTextBuilder::reset_builder();
@@ -25,20 +28,6 @@ void HtmlTextBuilder::reset_builder()
 //
 // GENERAL_TEXT
 //
-
-void HtmlTextBuilder::append_text(std::string const& text)
-{
-    if (isEmptyLine_) {
-        for (int i = 0; i < configurator_->text_margin_left_len(); ++i) {
-            append_space();
-        }
-        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i) {
-            append_space();
-        }
-        isEmptyLine_ = false;
-    }
-    *buildedText_ << text;
-}
 
 void HtmlTextBuilder::append_new_line()
 {

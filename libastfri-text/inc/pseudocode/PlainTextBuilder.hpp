@@ -1,27 +1,31 @@
 #ifndef LIBASTFRI_TEXT_PLAIN_TEXT_BUILDER
 #define LIBASTFRI_TEXT_PLAIN_TEXT_BUILDER
 
-#include <libastfri-text/inc/AbstractTextBuilder.hpp>
-#include <libastfri-text/inc/pseudocode/TextConfigurator.hpp>
+#include <libastfri-text/inc/pseudocode/AbstractTextBuilder.hpp>
 
 namespace astfri::text
 {
     class PlainTextBuilder : public AbstractTextBuilder
     {
-    private:
-        TextConfigurator* configurator_;
-        int rowCount_;
     public:
-        explicit PlainTextBuilder();
+        static PlainTextBuilder& get_instance();
+        PlainTextBuilder(PlainTextBuilder const&) = delete;
+        PlainTextBuilder(PlainTextBuilder&&)      = delete;
+        PlainTextBuilder operator=(PlainTextBuilder const&) = delete;
+        PlainTextBuilder operator=(PlainTextBuilder&&)      = delete;
+    private:
+        PlainTextBuilder() = default;
         ~PlainTextBuilder() = default;
     public:
-        // SET_UP
-        void reset_builder();
         // GENERAL_TEXT
-        void append_text(std::string const& text) override;
         void append_new_line() override;
+        void append_space() override;
         // BRACKETS, SEPARATORS, OPERATORS
         void write_opening_curl_bracket() override;
+        void write_right_bracket(std::string const& br) override;
+        void write_left_bracket(std::string const& br) override;
+        void write_separator(std::string const& sep) override;
+        void write_operator(std::string const& op) override;
         void write_assign_operator() override;
         void write_modulo_operator() override;
         void write_address_operator() override;
@@ -49,7 +53,25 @@ namespace astfri::text
         void write_char_type_word() override;
         void write_bool_type_word() override;
         void write_void_type_word() override;
+        void write_class_type(std::string const& name) override;
+        void write_interface_type(std::string const& name) override;
+        // REFERENCE_NAMES
+        void write_scope_name(std::string const& name) override;
+        void write_gen_param_name(std::string const& name) override;
+        void write_class_name(std::string const& name) override;
+        void write_interface_name(std::string const& name) override;
+        void write_method_name(std::string const& name) override;
+        void write_function_name(std::string const& name) override;
+        void write_global_var_name(std::string const& name) override;
+        void write_member_var_name(std::string const& name) override;
+        void write_local_var_name(std::string const& name) override;
+        void write_param_var_name(std::string const& name) override;
         // VALUES
+        void write_int_val(int const& val) override;
+        void write_float_val(float const& val) override;
+        void write_char_val(char const& val) override;
+        void write_string_val(std::string const& val) override;
+        void write_bool_val(bool const& val) override;
         void write_null_val() override;
         // SYSTEM_EXPRESSIONS
         void write_scope_word() override;

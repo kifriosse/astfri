@@ -1,30 +1,24 @@
 #ifndef LIBASTFRI_TEXT_JAVA_CODE_BUILDER
 #define LIBASTFRI_TEXT_JAVA_CODE_BUILDER
 
-#include <libastfri-text/inc/AbstractTextBuilder.hpp>
+#include <libastfri-text/inc/code/AbstractCodeBuilder.hpp>
 
 namespace astfri::text
 {
-    class JavaCodeBuilder : public AbstractTextBuilder
+    class JavaCodeBuilder : public AbstractCodeBuilder
     {
     public:
-        explicit JavaCodeBuilder() = default;
+        static JavaCodeBuilder& get_instance();
+        JavaCodeBuilder(JavaCodeBuilder const&) = delete;
+        JavaCodeBuilder(JavaCodeBuilder&&)      = delete;
+        JavaCodeBuilder operator=(JavaCodeBuilder const&) = delete;
+        JavaCodeBuilder operator=(JavaCodeBuilder&&)      = delete;
+    private:
+        JavaCodeBuilder() = default;
         ~JavaCodeBuilder() = default;
     public:
         // BRACKETS, SEPARATORS, OPERATORS
         void write_opening_curl_bracket() override;
-        // DATA_TYPES
-        void write_dynamic_type_word() override;
-        void write_float_type_word() override;
-        void write_bool_type_word() override;
-        // VALUES
-        void write_null_val() override;
-        // SYSTEM_EXPRESSIONS
-        void write_scope_word() override;
-        void write_interface_word() override;
-        void write_implement_word() override;
-        void write_extend_word() override;
-        void write_abstract_word() override;
     };
 }
 

@@ -1,26 +1,28 @@
 #ifndef LIBASTFRI_TEXT_HTML_TEXT_BUILDER
 #define LIBASTFRI_TEXT_HTML_TEXT_BUILDER
 
-#include <libastfri-text/inc/AbstractTextBuilder.hpp>
-#include <libastfri-text/inc/pseudocode/TextConfigurator.hpp>
+#include <libastfri-text/inc/pseudocode/AbstractTextBuilder.hpp>
 
 namespace astfri::text
 {
     class HtmlTextBuilder : public AbstractTextBuilder
     {
     private:
-        TextConfigurator* configurator_;
-        int rowCount_;
         int maxBracketIndex_;
         int currentBrIndex_;
     public:
-        explicit HtmlTextBuilder();
+        static HtmlTextBuilder& get_instance();
+        HtmlTextBuilder(HtmlTextBuilder const&) = delete;
+        HtmlTextBuilder(HtmlTextBuilder&&)      = delete;
+        HtmlTextBuilder operator=(HtmlTextBuilder const&) = delete;
+        HtmlTextBuilder operator=(HtmlTextBuilder&&)      = delete;
+    private:
+        HtmlTextBuilder();
         ~HtmlTextBuilder() = default;
     public:
         // SET_UP
-        void reset_builder();
+        void reset_builder() override;
         // GENERAL_TEXT
-        void append_text(std::string const& text) override;
         void append_new_line() override;
         void append_space() override;
         // BRACKETS, SEPARATORS, OPERATORS
