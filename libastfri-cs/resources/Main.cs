@@ -1,3 +1,1 @@
-
-int a = 1;
-string c = $"Hello \n {a} world"; 
+decimal a = 1254.587m;

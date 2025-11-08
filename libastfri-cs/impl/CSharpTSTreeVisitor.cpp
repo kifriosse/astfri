@@ -23,12 +23,12 @@ Expr* CSharpTSTreeVisitor::handle_int_literal(
     TSNode const* node
 )
 {
-    std::string num_str = extract_node_text(*node, self->source_code_);
-    std::erase(num_str, '_');
+    std::string int_str = extract_node_text(*node, self->source_code_);
+    std::erase(int_str, '_');
 
-    size_t string_len = num_str.length();
-    const std::string prefix = num_str.substr(0, std::min<size_t>(2, string_len));
-    const std::string suffix = num_str.substr(
+    size_t string_len = int_str.length();
+    const std::string prefix = int_str.substr(0, std::min<size_t>(2, string_len));
+    const std::string suffix = int_str.substr(
         string_len >= 2 ? string_len - 2 : 0,
         std::min<size_t>(2, string_len)
     );
@@ -50,12 +50,12 @@ Expr* CSharpTSTreeVisitor::handle_int_literal(
         case IntSuffix::U:
         case IntSuffix::L:
         {
-            num_str.pop_back();
+            int_str.pop_back();
             break;
         }
         case IntSuffix::UL:
         {
-            num_str.erase(num_str.end() - 2, num_str.end());
+            int_str.erase(int_str.end() - 2, int_str.end());
             break;
         }
         default: {}
@@ -64,7 +64,7 @@ Expr* CSharpTSTreeVisitor::handle_int_literal(
     if (suffix_type == IntSuffix::None || suffix_type == IntSuffix::U)
     {
         //todo add handeling of unsigned integers
-        return ExprFactory::get_instance().mk_int_literal(std::stoi(num_str, nullptr, base));
+        return ExprFactory::get_instance().mk_int_literal(std::stoi(int_str, nullptr, base));
     }
 
     //todo handeling of long and unsigned long
@@ -76,7 +76,28 @@ Expr* CSharpTSTreeVisitor::handle_float_literal(
     [[maybe_unused]] TSNode const* node
 )
 {
-    throw std::logic_error("Float literal not implemented");
+    std::string float_str = extract_node_text(*node, self->source_code_);
+    const char suffix = static_cast<char>(std::tolower(float_str[float_str.length() - 1]));
+
+    float_str.pop_back();
+    std::erase(float_str, '_');
+
+    if (!std::isalpha(suffix) || suffix == 'd')
+    {
+        //todo handle double
+        throw std::logic_error("Handling of double floating point numbers is not implemented");
+    }
+
+    switch (suffix)
+    {
+    case 'f':
+        return ExprFactory::get_instance().mk_float_literal(std::stof(float_str));
+    case 'm':
+        // decimal - 128-bit precision integer - used base 10, not base 2
+        //todo handle decimal
+        throw std::logic_error("Handling of Decimal literal not implemented");
+    default: throw std::logic_error("Not Implemented");
+    };
 }
 
 Expr* CSharpTSTreeVisitor::handle_bool_literal(
