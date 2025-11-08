@@ -122,7 +122,7 @@ namespace astfri::text
         TextConfigurator& operator=(TextConfigurator const&) = delete;
         TextConfigurator& operator=(TextConfigurator&&)      = delete;
     private:
-        TextConfigurator();
+        explicit TextConfigurator();
         ~TextConfigurator() = default;
     public:
         void update_configuration();

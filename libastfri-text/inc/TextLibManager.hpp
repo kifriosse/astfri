@@ -16,7 +16,7 @@ namespace astfri::text
         TextLibManager& operator=(TextLibManager const&) = delete;
         TextLibManager& operator=(TextLibManager&&)      = delete;
     private:
-        TextLibManager();
+        explicit TextLibManager();
         ~TextLibManager();
     public:
         void export_pseudocode();

@@ -12,7 +12,7 @@ namespace astfri::text
         TextConfigurator* configurator_;
         int rowCount_;
     public:
-        AbstractTextBuilder();
+        explicit AbstractTextBuilder();
         virtual ~AbstractTextBuilder() = default;
     public:
         // SET_UP

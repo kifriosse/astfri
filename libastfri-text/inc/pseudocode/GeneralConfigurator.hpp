@@ -101,7 +101,7 @@ namespace astfri::text
         // -----
         OutputFileManager* fmanager_;
     protected:
-        GeneralConfigurator();
+        explicit GeneralConfigurator();
         virtual ~GeneralConfigurator() = default;
     protected:
         virtual void set_defaults();

@@ -8,6 +8,9 @@ namespace astfri::text
 {
     class AbstractCodeVisitor : public AbstractVisitor
     {
+    public:
+        explicit AbstractCodeVisitor(AbstractCodeBuilder* const& builder);
+        virtual ~AbstractCodeVisitor() = default;
     };
 }
 

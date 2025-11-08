@@ -17,7 +17,7 @@ namespace astfri::text
         OutputFileManager& operator=(OutputFileManager const&) = delete;
         OutputFileManager& operator=(OutputFileManager&&)      = delete;
     private:
-        OutputFileManager();
+        explicit OutputFileManager();
         ~OutputFileManager() = default;
     public:
         void check_and_set_file_name(std::string& filename);

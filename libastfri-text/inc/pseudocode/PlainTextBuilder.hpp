@@ -11,10 +11,10 @@ namespace astfri::text
         static PlainTextBuilder& get_instance();
         PlainTextBuilder(PlainTextBuilder const&) = delete;
         PlainTextBuilder(PlainTextBuilder&&)      = delete;
-        PlainTextBuilder operator=(PlainTextBuilder const&) = delete;
-        PlainTextBuilder operator=(PlainTextBuilder&&)      = delete;
+        PlainTextBuilder& operator=(PlainTextBuilder const&) = delete;
+        PlainTextBuilder& operator=(PlainTextBuilder&&)      = delete;
     private:
-        PlainTextBuilder() = default;
+        explicit PlainTextBuilder() = default;
         ~PlainTextBuilder() = default;
     public:
         // GENERAL_TEXT

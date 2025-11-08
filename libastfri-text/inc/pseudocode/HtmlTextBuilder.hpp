@@ -14,10 +14,10 @@ namespace astfri::text
         static HtmlTextBuilder& get_instance();
         HtmlTextBuilder(HtmlTextBuilder const&) = delete;
         HtmlTextBuilder(HtmlTextBuilder&&)      = delete;
-        HtmlTextBuilder operator=(HtmlTextBuilder const&) = delete;
-        HtmlTextBuilder operator=(HtmlTextBuilder&&)      = delete;
+        HtmlTextBuilder& operator=(HtmlTextBuilder const&) = delete;
+        HtmlTextBuilder& operator=(HtmlTextBuilder&&)      = delete;
     private:
-        HtmlTextBuilder();
+        explicit HtmlTextBuilder();
         ~HtmlTextBuilder() = default;
     public:
         // SET_UP

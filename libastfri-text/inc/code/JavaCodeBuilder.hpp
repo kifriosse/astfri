@@ -11,10 +11,10 @@ namespace astfri::text
         static JavaCodeBuilder& get_instance();
         JavaCodeBuilder(JavaCodeBuilder const&) = delete;
         JavaCodeBuilder(JavaCodeBuilder&&)      = delete;
-        JavaCodeBuilder operator=(JavaCodeBuilder const&) = delete;
-        JavaCodeBuilder operator=(JavaCodeBuilder&&)      = delete;
+        JavaCodeBuilder& operator=(JavaCodeBuilder const&) = delete;
+        JavaCodeBuilder& operator=(JavaCodeBuilder&&)      = delete;
     private:
-        JavaCodeBuilder() = default;
+        explicit JavaCodeBuilder() = default;
         ~JavaCodeBuilder() = default;
     public:
         // BRACKETS, SEPARATORS, OPERATORS

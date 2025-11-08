@@ -13,7 +13,7 @@ namespace astfri::text
         short indentationLevel_;
         bool isEmptyLine_;
     public:
-        AbstractBuilder();
+        explicit AbstractBuilder();
         virtual ~AbstractBuilder() = default;
     public:
         // SET_UP

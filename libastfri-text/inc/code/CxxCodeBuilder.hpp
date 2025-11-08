@@ -11,10 +11,10 @@ namespace astfri::text
         static CxxCodeBuilder& get_instatnce();
         CxxCodeBuilder(CxxCodeBuilder const&) = delete;
         CxxCodeBuilder(CxxCodeBuilder&&)      = delete;
-        CxxCodeBuilder operator=(CxxCodeBuilder const&) = delete;
-        CxxCodeBuilder operator=(CxxCodeBuilder&&)      = delete;
+        CxxCodeBuilder& operator=(CxxCodeBuilder const&) = delete;
+        CxxCodeBuilder& operator=(CxxCodeBuilder&&)      = delete;
     private:
-        CxxCodeBuilder() = default;
+        explicit CxxCodeBuilder() = default;
         ~CxxCodeBuilder() = default;
     public:
         // BRACKETS, SEPARATORS, OPERATORS

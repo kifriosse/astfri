@@ -25,7 +25,8 @@ namespace astfri::text
     protected:
         AbstractBuilder* builder_;
     public:
-        AbstractVisitor(AbstractBuilder*& builder);
+        AbstractVisitor() = delete;
+        explicit AbstractVisitor(AbstractBuilder* const& builder);
         virtual ~AbstractVisitor() = default;
     protected:
         void write_condition(Expr* const& expr);
