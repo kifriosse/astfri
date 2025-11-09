@@ -61,3 +61,36 @@ void AbstractCodeBuilder::write_invalid_stmt()
 {
     append_text("INVALID_STATEMENT");
 }
+
+//
+// VALUES
+//
+
+void AbstractCodeBuilder::write_int_val(int const& val)
+{
+    append_text(std::to_string(val));
+}
+
+void AbstractCodeBuilder::write_float_val(float const& val)
+{
+    append_text(std::to_string(val) + "f");
+}
+
+void AbstractCodeBuilder::write_char_val(char const& val)
+{
+    append_text("'" + std::string(1, val) + "'");
+}
+
+void AbstractCodeBuilder::write_string_val(std::string const& val)
+{
+    append_text("\"" + val + "\"");
+}
+
+void AbstractCodeBuilder::write_bool_val(bool const& val)
+{
+    if (val) {
+        append_text("true");
+    } else {
+        append_text("false");
+    }
+}

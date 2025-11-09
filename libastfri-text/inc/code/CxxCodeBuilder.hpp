@@ -17,8 +17,9 @@ namespace astfri::text
         explicit CxxCodeBuilder() = default;
         ~CxxCodeBuilder() = default;
     public:
-        // BRACKETS, SEPARATORS, OPERATORS
+        // GENERAL_TEXT
         void write_opening_curl_bracket() override;
+        void write_opening_else_word() override;
     };
 }
 

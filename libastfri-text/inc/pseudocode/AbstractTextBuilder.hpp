@@ -19,8 +19,11 @@ namespace astfri::text
         void reset_builder() override;
         // GENERAL_TEXT
         void append_text(std::string const& text) override;
+        void append_new_line() override = 0;
+        void append_space() override = 0;
+        void write_opening_curl_bracket() override;
+        void write_opening_else_word() override;
         // BRACKETS, SEPARATORS, OPERATORS
-        virtual void write_opening_curl_bracket() = 0;
         virtual void write_right_bracket(std::string const& br) = 0;
         virtual void write_left_bracket(std::string const& br) = 0;
         virtual void write_separator(std::string const& sep) = 0;
@@ -30,12 +33,12 @@ namespace astfri::text
         virtual void write_address_operator() = 0;
         virtual void write_deref_operator() = 0;
         // UNKNOWN_PHRASES
-        virtual void write_unknown_type() = 0;
-        virtual void write_unknown_expr() = 0;
-        virtual void write_unknown_stmt() = 0;
-        virtual void write_invalid_type() = 0;
-        virtual void write_invalid_expr() = 0;
-        virtual void write_invalid_stmt() = 0;
+        void write_unknown_type() override = 0;
+        void write_unknown_expr() override = 0;
+        void write_unknown_stmt() override = 0;
+        void write_invalid_type() override = 0;
+        void write_invalid_expr() override = 0;
+        void write_invalid_stmt() override = 0;
         // ACCESS_MODIFIERS
         virtual void write_public_word() = 0;
         virtual void write_protected_word() = 0;
@@ -66,11 +69,11 @@ namespace astfri::text
         virtual void write_local_var_name(std::string const& name) = 0;
         virtual void write_param_var_name(std::string const& name) = 0;
         // VALUES
-        virtual void write_int_val(int const& val) = 0;
-        virtual void write_float_val(float const& val) = 0;
-        virtual void write_char_val(char const& val) = 0;
-        virtual void write_string_val(std::string const& val) = 0;
-        virtual void write_bool_val(bool const& val) = 0;
+        void write_int_val(int const& val) override = 0;
+        void write_float_val(float const& val) override = 0;
+        void write_char_val(char const& val) override = 0;
+        void write_string_val(std::string const& val) override = 0;
+        void write_bool_val(bool const& val) override = 0;
         virtual void write_null_val() = 0;
         // SYSTEM_EXPRESSIONS
         virtual void write_scope_word() = 0;

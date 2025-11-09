@@ -28,19 +28,6 @@ void PlainTextBuilder::append_space()
 // BRACKETS, SEPARATORS, OPERATORS
 //
 
-void PlainTextBuilder::write_opening_curl_bracket()
-{
-    if (configurator_->new_line_curl_bracket()) {
-        append_new_line();
-        write_left_bracket("{");
-    } else {
-        append_space();
-        write_left_bracket("{");
-    }
-    append_new_line();
-    ++indentationLevel_;
-}
-
 void PlainTextBuilder::write_right_bracket(std::string const& br)
 {
     append_text(br);

@@ -45,19 +45,6 @@ void HtmlTextBuilder::append_space()
 // BRACKETS, SEPARATORS, OPERATORS
 //
 
-void HtmlTextBuilder::write_opening_curl_bracket()
-{
-    if (configurator_->new_line_curl_bracket()) {
-        append_new_line();
-        write_left_bracket("{");
-    } else {
-        append_space();
-        write_left_bracket("{");
-    }
-    append_new_line();
-    ++indentationLevel_;
-}
-
 void HtmlTextBuilder::write_right_bracket(std::string const& br)
 {
     if (configurator_->use_bracket_colors() && maxBracketIndex_ > 0)

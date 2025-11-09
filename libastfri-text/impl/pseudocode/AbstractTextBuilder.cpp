@@ -35,3 +35,26 @@ void AbstractTextBuilder::append_text(std::string const& text)
     }
     *buildedText_ << text;
 }
+
+void AbstractTextBuilder::write_opening_curl_bracket()
+{
+    if (configurator_->new_line_curl_bracket()) {
+        append_new_line();
+    } else {
+        append_space();
+    }
+    write_left_bracket("{");
+    append_new_line();
+    ++indentationLevel_;
+}
+
+void AbstractTextBuilder::write_opening_else_word()
+{
+    if (configurator_->new_line_curl_bracket()) {
+        append_new_line();
+    } else {
+        append_space();
+    }
+    write_else_word();
+    write_opening_curl_bracket();
+}

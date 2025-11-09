@@ -17,8 +17,9 @@ namespace astfri::text
         explicit JavaCodeBuilder() = default;
         ~JavaCodeBuilder() = default;
     public:
-        // BRACKETS, SEPARATORS, OPERATORS
+        // GENERAL_TEXT
         void write_opening_curl_bracket() override;
+        void write_opening_else_word() override;
     };
 }
 

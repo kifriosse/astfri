@@ -26,7 +26,6 @@ namespace astfri::text
         void append_new_line() override;
         void append_space() override;
         // BRACKETS, SEPARATORS, OPERATORS
-        void write_opening_curl_bracket() override;
         void write_right_bracket(std::string const& br) override;
         void write_left_bracket(std::string const& br) override;
         void write_separator(std::string const& sep) override;

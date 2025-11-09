@@ -38,7 +38,7 @@ namespace astfri::text
         void check_and_accept_pointer(AstfriNode* const& pointer);
         // -----
         template<typename VectorAstfriNode>
-        void write_params_or_args(VectorAstfriNode const vectorPA, bool isGeneric = false);
+        void write_params_or_args(VectorAstfriNode const vectorPA, bool isGeneric);
         // -----
         template<typename VectorAstfriNode>
         bool has_acc_mod(VectorAstfriNode const& vectorStmts, VectorAstfriNode& vectorStmtsTmp, AccessModifier accmod);
