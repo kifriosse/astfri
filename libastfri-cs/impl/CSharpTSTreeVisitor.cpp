@@ -72,8 +72,8 @@ Expr* CSharpTSTreeVisitor::handle_int_literal(
 }
 
 Expr* CSharpTSTreeVisitor::handle_float_literal(
-    [[maybe_unused]] CSharpTSTreeVisitor* self,
-    [[maybe_unused]] TSNode const* node
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
 )
 {
     std::string float_str = extract_node_text(*node, self->source_code_);
@@ -157,12 +157,17 @@ Expr* CSharpTSTreeVisitor::handle_this_expr(
     return ExprFactory::get_instance().mk_this();
 }
 
-Expr* CSharpTSTreeVisitor::handle_verbatin_string_literal(
-    [[maybe_unused]] CSharpTSTreeVisitor* self,
-    [[maybe_unused]] TSNode const* node
+Expr* CSharpTSTreeVisitor::handle_verbatim_string_literal(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
 )
 {
-    throw std::logic_error("Verbatim string literal not implemented");
+    std::string node_contet = extract_node_text(*node, self->source_code_);
+    node_contet.pop_back();
+    node_contet.erase(node_contet.begin(), node_contet.begin() + 2);
+
+    std::cout << node_contet << std::endl;
+    return ExprFactory::get_instance().mk_string_literal(node_contet);
 }
 
 Expr* CSharpTSTreeVisitor::handle_interpolated_string_literal(
@@ -170,17 +175,7 @@ Expr* CSharpTSTreeVisitor::handle_interpolated_string_literal(
     [[maybe_unused]] TSNode const* node
 )
 {
-    throw std::logic_error("Verbatim string literal not implemented");
-}
-
-std::string CSharpTSTreeVisitor::extract_node_text(
-    const TSNode& node,
-    const std::string& source_code
-)
-{
-    const size_t from = ts_node_start_byte(node);
-    const size_t to = ts_node_end_byte(node);
-    return source_code.substr(from, to - from);
+    throw std::logic_error("Interpolated string literal not implemented");
 }
 
 } // namespace astfri::csharp

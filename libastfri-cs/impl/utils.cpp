@@ -58,4 +58,15 @@ IntSuffix get_suffix_type(std::string const& suffix)
     }
     return IntSuffix::None;
 }
+
+std::string extract_node_text(
+    const TSNode& node,
+    const std::string& source_code
+)
+{
+    const size_t from = ts_node_start_byte(node);
+    const size_t to = ts_node_end_byte(node);
+    return source_code.substr(from, to - from);
+}
+
 } // namespace astfri::csharp

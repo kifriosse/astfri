@@ -30,7 +30,7 @@ private:
         {"character_literal", handle_char_literal},
         {"string_literal", handle_string_literal},
         {"null_literal", handle_null_literal},
-        {"verbatim_string_literal", handle_verbatin_string_literal},
+        {"verbatim_string_literal", handle_verbatim_string_literal},
         {"this_expression", handle_this_expr},
     };
 public:
@@ -46,7 +46,7 @@ public:
     static Expr* handle_string_literal(CSharpTSTreeVisitor *self, const TSNode* node); //todo
     static Expr* handle_null_literal(CSharpTSTreeVisitor* self, TSNode const* node);
     static Expr* handle_this_expr(CSharpTSTreeVisitor* self, TSNode const* node);
-    static Expr* handle_verbatin_string_literal(CSharpTSTreeVisitor* self, TSNode const* node); //todo
+    static Expr* handle_verbatim_string_literal(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     static Expr* handle_interpolated_string_literal(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 
 private:

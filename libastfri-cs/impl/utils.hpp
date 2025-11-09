@@ -38,6 +38,8 @@ inline bool almost_equal(double const a, double const b, double const epsilon = 
     return std::fabs(a - b) < epsilon;
 }
 
+std::string extract_node_text(const TSNode& node, const std::string& source_code);
+
 }
 
 #endif // CSHARP_UTILS_HPP
