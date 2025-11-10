@@ -10,7 +10,7 @@ target_sources(astfri-cs PRIVATE
 )
 
 target_link_libraries(astfri-cs PUBLIC
-    astfri-core
-    tree-sitter
-    tree-sitter-c-sharp
+        astfri-core
+        tree-sitter
+        tree-sitter-c-sharp
 )

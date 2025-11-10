@@ -8,17 +8,20 @@
 
 namespace astfri::csharp
 {
-Expr* CSharpTSTreeVisitor::handler_expr(TSNode const* node)
+CSharpTSTreeVisitor::ExprHandler CSharpTSTreeVisitor::get_expr_handler(TSNode const& node)
 {
-    auto it = this->expr_handlers_.find(ts_node_type(*node));
+    auto const it = this->expr_handlers_.find(ts_node_type(node));
     if (it != this->expr_handlers_.end())
     {
-        return it->second(this, node);
+        return it->second;
     }
-    return ExprFactory::get_instance().mk_unknown();
+    return [](CSharpTSTreeVisitor*, TSNode const*) -> Expr*
+    {
+        return ExprFactory::get_instance().mk_unknown();
+    };
 }
 
-Expr* CSharpTSTreeVisitor::handle_int_literal(
+Expr* CSharpTSTreeVisitor::handle_int_lit(
     CSharpTSTreeVisitor* self,
     TSNode const* node
 )
@@ -26,9 +29,9 @@ Expr* CSharpTSTreeVisitor::handle_int_literal(
     std::string int_str = extract_node_text(*node, self->source_code_);
     std::erase(int_str, '_');
 
-    size_t string_len = int_str.length();
-    const std::string prefix = int_str.substr(0, std::min<size_t>(2, string_len));
-    const std::string suffix = int_str.substr(
+    size_t const string_len = int_str.length();
+    std::string const prefix = int_str.substr(0, std::min<size_t>(2, string_len));
+    std::string const suffix = int_str.substr(
         string_len >= 2 ? string_len - 2 : 0,
         std::min<size_t>(2, string_len)
     );
@@ -71,7 +74,7 @@ Expr* CSharpTSTreeVisitor::handle_int_literal(
     throw std::logic_error("This integer type is not implemented");
 }
 
-Expr* CSharpTSTreeVisitor::handle_float_literal(
+Expr* CSharpTSTreeVisitor::handle_float_lit(
     CSharpTSTreeVisitor* self,
     TSNode const* node
 )
@@ -100,33 +103,31 @@ Expr* CSharpTSTreeVisitor::handle_float_literal(
     };
 }
 
-Expr* CSharpTSTreeVisitor::handle_bool_literal(
+Expr* CSharpTSTreeVisitor::handle_bool_lit(
     CSharpTSTreeVisitor* self,
     TSNode const* node
 )
 {
-    const size_t from = ts_node_start_byte(*node);
-    const size_t to = ts_node_end_byte(*node);
-    const std::string bool_str = self->source_code_.substr(from, to - from);
-
+    const std::string bool_str = extract_node_text(*node, self->source_code_);
     return ExprFactory::get_instance().mk_bool_literal(bool_str == "true");
 }
 
-Expr* CSharpTSTreeVisitor::handle_char_literal(
+Expr* CSharpTSTreeVisitor::handle_char_lit(
     CSharpTSTreeVisitor* self,
     TSNode const* node
 )
 {
-    TSNode content_node = ts_node_child(*node, 1);
-    std::string character_str = extract_node_text(content_node, self->source_code_);
+    TSNode const content_node = ts_node_child(*node, 1);
+    std::string const character_str = extract_node_text(content_node, self->source_code_);
     if (character_str.length() > 1)
     {
+        //todo handle 16-bit unicode characters
         throw std::logic_error("Unicode characters not implemented");
     }
     return ExprFactory::get_instance().mk_char_literal(character_str[0]);
 }
 
-Expr* CSharpTSTreeVisitor::handle_string_literal(
+Expr* CSharpTSTreeVisitor::handle_str_lit(
     CSharpTSTreeVisitor* self,
     TSNode const* node
 )
@@ -157,7 +158,7 @@ Expr* CSharpTSTreeVisitor::handle_this_expr(
     return ExprFactory::get_instance().mk_this();
 }
 
-Expr* CSharpTSTreeVisitor::handle_verbatim_string_literal(
+Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(
     CSharpTSTreeVisitor* self,
     TSNode const* node
 )
@@ -170,12 +171,122 @@ Expr* CSharpTSTreeVisitor::handle_verbatim_string_literal(
     return ExprFactory::get_instance().mk_string_literal(node_contet);
 }
 
-Expr* CSharpTSTreeVisitor::handle_interpolated_string_literal(
+Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
     [[maybe_unused]] CSharpTSTreeVisitor* self,
     [[maybe_unused]] TSNode const* node
 )
 {
     throw std::logic_error("Interpolated string literal not implemented");
+}
+
+Expr* CSharpTSTreeVisitor::handle_param_var_ref_expr(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
+)
+{
+    std::string const var_name = extract_node_text(*node, self->source_code_);
+    return ExprFactory::get_instance().mk_param_var_ref(var_name);
+}
+
+Expr* CSharpTSTreeVisitor::handle_local_var_ref_expr(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
+)
+{
+    std::string const var_name = extract_node_text(*node, self->source_code_);
+    return ExprFactory::get_instance().mk_local_var_ref(var_name);
+}
+
+Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
+)
+{
+    TSNode const right_side_node = ts_node_child(*node, 0);
+    size_t const op_start = ts_node_start_byte(*node);
+    size_t const op_end = ts_node_start_byte(right_side_node) - 1;
+    std::string const op = self->source_code_.substr(op_start, op_end);
+
+    auto const it = self->prefix_unary_operation.find(op);
+    if (it == self->prefix_unary_operation.end())
+    {
+        throw std::runtime_error(R"(Operation ")" + op + R"(" is not implemented)");
+    }
+
+    UnaryOpType const op_type = it->second;
+    ExprHandler const handler = self->get_expr_handler(right_side_node);
+    Expr* right_side = handler(self, &right_side_node);
+    return ExprFactory::get_instance().mk_unary_op(op_type, right_side);
+}
+
+Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
+)
+{
+    TSNode const left_side_node = ts_node_child(*node, 0);
+    size_t const op_start = ts_node_end_byte(left_side_node) + 1;
+    size_t const op_end = ts_node_end_byte(*node);
+    std::string const op = self->source_code_.substr(op_start, op_end);
+
+    ExprHandler const handler = self->get_expr_handler(left_side_node);
+    Expr* left_side = handler(self, &left_side_node);
+
+    UnaryOpType op_type;
+    if (op == "++")
+    {
+        op_type = UnaryOpType::PostIncrement;
+    }
+    else if (op == "--")
+    {
+        op_type = UnaryOpType::PostDecrement;
+    }
+    else if (op == "!")
+    {
+        return left_side;
+    }
+    else
+    {
+        throw std::runtime_error(R"(Operation ")" + op + R"(" is not implemented)");
+    }
+
+    auto const it = self->prefix_unary_operation.find(op);
+    if (it == self->prefix_unary_operation.end())
+    {
+        throw std::runtime_error(R"(Operation ")" + op + R"(" is not implemented)");
+    }
+
+    return ExprFactory::get_instance().mk_unary_op(op_type, left_side);
+}
+
+Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
+)
+{
+
+    //1. ziskat pravu a lavu stranu
+    //2. spracovat pravu a lavu stranu
+    //3. ziskat typ operacie - treba spravit mapu pre mapovanie operacii na jednotlive typy
+    throw std::logic_error("Handling of binary expression is not implemented");
+}
+
+Expr* CSharpTSTreeVisitor::handle_ternary_expr(
+    [[maybe_unused]] CSharpTSTreeVisitor* self,
+    [[maybe_unused]] TSNode const* node
+)
+{
+    throw std::logic_error("Handling of Ternary expression is not impelemented");
+}
+
+Stmt* CSharpTSTreeVisitor::handler_stmt(TSNode const* node)
+{
+    auto const it = this->stmt_handlers_.find(ts_node_type(*node));
+    if (it != this->stmt_handlers_.end())
+    {
+        return it->second(this, node);
+    }
+    return StmtFactory::get_instance().mk_uknown();
 }
 
 } // namespace astfri::csharp
