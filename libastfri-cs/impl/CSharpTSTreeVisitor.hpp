@@ -36,6 +36,8 @@ private:
         {"conditional_expression", handle_ternary_expr},
         {"prefix_unary_expression", handle_prefix_unary_op_expr},
         {"postfix_unary_expression", handle_postfix_unary_op_expr},
+        {"binary_expression", handle_binary_op_expr},
+        {"assignment_expression", handle_binary_op_expr},
 
         {"ERROR", [](CSharpTSTreeVisitor*, TSNode const *node) -> Expr*
             {
@@ -48,7 +50,7 @@ private:
             }
         }
     };
-    std::unordered_map<std::string, UnaryOpType> prefix_unary_operation = {
+    std::unordered_map<std::string, UnaryOpType> prefix_unary_operations = {
         {"+", UnaryOpType::Plus},
         {"-", UnaryOpType::Minus},
         {"++", UnaryOpType::PreIncrement},
@@ -57,6 +59,38 @@ private:
         {"~", UnaryOpType::BitFlip},
         {"*", UnaryOpType::Dereference},
         {"&", UnaryOpType::AddressOf}
+    };
+    std::unordered_map<std::string, BinOpType> bin_operations = {
+        {"=", BinOpType::Assign},
+        {"+", BinOpType::Add},
+        {"-", BinOpType::Subtract},
+        {"*", BinOpType::Multiply},
+        {"/", BinOpType::Divide},
+        {"%", BinOpType::Modulo},
+        {"==", BinOpType::Equal},
+        {"!=", BinOpType::NotEqual},
+        {"<", BinOpType::Less},
+        {"<=", BinOpType::LessEqual},
+        {">", BinOpType::Greater},
+        {">=", BinOpType::GreaterEqual},
+        {"&&", BinOpType::LogicalAnd},
+        {"||", BinOpType::LogicalOr},
+        {"&", BinOpType::BitAnd},
+        {"|", BinOpType::BitOr},
+        {"^", BinOpType::BitXor},
+        {"<<", BinOpType::BitShiftLeft},
+        {">>", BinOpType::BitShiftRight},
+        {"+= ", BinOpType::Add},
+        {"-=", BinOpType::Subtract},
+        {"*=", BinOpType::Multiply},
+        {"/=", BinOpType::Divide},
+        {"%=", BinOpType::Modulo},
+        {">>=", BinOpType::BitShiftRight},
+        {"<<=", BinOpType::BitShiftLeft},
+        {"&=", BinOpType::BitAnd},
+        {"|=", BinOpType::BitOr},
+        {"^=", BinOpType::BitXor}
+        // todo add ?? and ??= operators
     };
 public:
     explicit CSharpTSTreeVisitor(std::string  source_code)
@@ -85,10 +119,11 @@ public:
     static Expr* handle_prefix_unary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node);
     static Expr* handle_postfix_unary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node);
     static Expr* handle_binary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node); // todo
+    // static Expr* handle_assignement_expr(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     static Expr* handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 
-    //Statements
-    Stmt* handler_stmt(const TSNode* node); //todo
+    // Statements
+    StmtHandler get_stmt_handler(TSNode const* node); //todo
 
     // Variable Definitions
     // static Stmt* handle_local_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo

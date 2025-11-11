@@ -99,7 +99,7 @@ Expr* CSharpTSTreeVisitor::handle_float_lit(
         // decimal - 128-bit precision integer - used base 10, not base 2
         //todo handle decimal
         throw std::logic_error("Handling of Decimal literal not implemented");
-    default: throw std::logic_error("Not Implemented");
+    default: throw std::logic_error("Suffix \"" + std::to_string(suffix) + "\" Not Implemented");
     };
 }
 
@@ -202,15 +202,15 @@ Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
     TSNode const* node
 )
 {
-    TSNode const right_side_node = ts_node_child(*node, 0);
-    size_t const op_start = ts_node_start_byte(*node);
-    size_t const op_end = ts_node_start_byte(right_side_node) - 1;
-    std::string const op = self->source_code_.substr(op_start, op_end);
+    TSNode const right_side_node = ts_node_child(*node, 1);
+    TSNode const op_node = ts_node_child(*node, 0);
+    std::string op = extract_node_text(op_node, self->source_code_);
+    std::erase_if(op, isspace);
 
-    auto const it = self->prefix_unary_operation.find(op);
-    if (it == self->prefix_unary_operation.end())
+    auto const it = self->prefix_unary_operations.find(op);
+    if (it == self->prefix_unary_operations.end())
     {
-        throw std::runtime_error(R"(Operation ")" + op + R"(" is not implemented)");
+        throw std::runtime_error("Operation \"" + op + "\" is not implemented");
     }
 
     UnaryOpType const op_type = it->second;
@@ -225,9 +225,8 @@ Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
 )
 {
     TSNode const left_side_node = ts_node_child(*node, 0);
-    size_t const op_start = ts_node_end_byte(left_side_node) + 1;
-    size_t const op_end = ts_node_end_byte(*node);
-    std::string const op = self->source_code_.substr(op_start, op_end);
+    TSNode const op_node = ts_node_child(*node, 1);
+    std::string const op = extract_node_text(op_node, self->source_code_);
 
     ExprHandler const handler = self->get_expr_handler(left_side_node);
     Expr* left_side = handler(self, &left_side_node);
@@ -247,13 +246,7 @@ Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
     }
     else
     {
-        throw std::runtime_error(R"(Operation ")" + op + R"(" is not implemented)");
-    }
-
-    auto const it = self->prefix_unary_operation.find(op);
-    if (it == self->prefix_unary_operation.end())
-    {
-        throw std::runtime_error(R"(Operation ")" + op + R"(" is not implemented)");
+        throw std::runtime_error("Operation \"" + op + "\" is not implemented");
     }
 
     return ExprFactory::get_instance().mk_unary_op(op_type, left_side);
@@ -264,11 +257,25 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
     TSNode const* node
 )
 {
+    TSNode const left = ts_node_child(*node, 0);
+    TSNode const op_node = ts_node_child(*node, 1);
+    TSNode const right = ts_node_child(*node, 2);
+    std::string const op = extract_node_text(op_node, self->source_code_);
 
-    //1. ziskat pravu a lavu stranu
-    //2. spracovat pravu a lavu stranu
-    //3. ziskat typ operacie - treba spravit mapu pre mapovanie operacii na jednotlive typy
-    throw std::logic_error("Handling of binary expression is not implemented");
+    auto const it = self->bin_operations.find(op);
+    if (it == self->bin_operations.end())
+    {
+        throw std::runtime_error("Operation \"" + op + "\" is not implemented");
+    }
+    BinOpType const op_type = it->second;
+    ExprHandler const left_handler = self->get_expr_handler(left);
+    ExprHandler const right_handler = self->get_expr_handler(right);
+
+    return ExprFactory::get_instance().mk_bin_on(
+        left_handler(self, &left),
+        op_type,
+        right_handler(self, &right)
+    );
 }
 
 Expr* CSharpTSTreeVisitor::handle_ternary_expr(
@@ -276,17 +283,20 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(
     [[maybe_unused]] TSNode const* node
 )
 {
-    throw std::logic_error("Handling of Ternary expression is not impelemented");
+    throw std::logic_error("Handling of Ternary expression is not implemented");
 }
 
-Stmt* CSharpTSTreeVisitor::handler_stmt(TSNode const* node)
+CSharpTSTreeVisitor::StmtHandler CSharpTSTreeVisitor::get_stmt_handler(TSNode const* node)
 {
     auto const it = this->stmt_handlers_.find(ts_node_type(*node));
     if (it != this->stmt_handlers_.end())
     {
-        return it->second(this, node);
+        return it->second;
     }
-    return StmtFactory::get_instance().mk_uknown();
+    return [](CSharpTSTreeVisitor*, TSNode const*) -> Stmt*
+    {
+        return StmtFactory::get_instance().mk_uknown();
+    };
 }
 
 } // namespace astfri::csharp
