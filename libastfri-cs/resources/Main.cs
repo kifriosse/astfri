@@ -23,6 +23,7 @@ float c = (float)a;
 int? nullable = null;
 int bar = nullable ?? 5;
 
+int foo = nullable is null ? bar : 6;
 
 // public class Test
 // {

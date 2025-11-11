@@ -257,21 +257,46 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
     TSNode const* node
 )
 {
+    ExprFactory& expr_factory = ExprFactory::get_instance();
+
     TSNode const left = ts_node_child(*node, 0);
     TSNode const op_node = ts_node_child(*node, 1);
     TSNode const right = ts_node_child(*node, 2);
+    ExprHandler const left_handler = self->get_expr_handler(left);
+    ExprHandler const right_handler = self->get_expr_handler(right);
     std::string const op = extract_node_text(op_node, self->source_code_);
 
     auto const it = self->bin_operations.find(op);
     if (it == self->bin_operations.end())
     {
+        // `a ?? b` same as `a != null ? a : b`
+        Expr* left_expr = left_handler(self, &left);
+        BinOpExpr* const condition = expr_factory.mk_bin_on(
+            left_expr,
+            BinOpType::NotEqual,
+            expr_factory.mk_null_literal()
+        );
+        IfExpr* ternary = expr_factory.mk_if(
+            condition,
+            left_expr,
+            right_handler(self, &right)
+        );
+        if (op == "\?\?")
+        {
+            return ternary;
+        }
+        if (op == "\?\?=")
+        {
+            // `a ??= b` same as `a = a ?? b` which is same as `a = a != null ? a : b`
+            return expr_factory.mk_bin_on(left_expr, BinOpType::Assign, ternary);
+        }
+
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
     }
-    BinOpType const op_type = it->second;
-    ExprHandler const left_handler = self->get_expr_handler(left);
-    ExprHandler const right_handler = self->get_expr_handler(right);
 
-    return ExprFactory::get_instance().mk_bin_on(
+    BinOpType const op_type = it->second;
+
+    return expr_factory.mk_bin_on(
         left_handler(self, &left),
         op_type,
         right_handler(self, &right)
@@ -283,7 +308,18 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(
     [[maybe_unused]] TSNode const* node
 )
 {
-    throw std::logic_error("Handling of Ternary expression is not implemented");
+    TSNode const cond_node = ts_node_child(*node, 0);
+    TSNode const if_true = ts_node_child(*node, 2);
+    TSNode const if_false = ts_node_child(*node, 4);
+    ExprHandler const cond_handler = self->get_expr_handler(cond_node);
+    ExprHandler const if_true_handler = self->get_expr_handler(if_true);
+    ExprHandler const if_false_handler = self->get_expr_handler(if_false);
+
+    return ExprFactory::get_instance().mk_if(
+        cond_handler(self, &cond_node),
+        if_true_handler(self, &if_true),
+        if_false_handler(self, &if_false)
+    );
 }
 
 CSharpTSTreeVisitor::StmtHandler CSharpTSTreeVisitor::get_stmt_handler(TSNode const* node)
