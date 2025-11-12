@@ -2,23 +2,36 @@
 #include "CSharpTSTreeVisitor.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 
+#include "NodeRegistry.hpp"
 #include "utils.hpp"
 
 namespace astfri::csharp
 {
-CSharpTSTreeVisitor::ExprHandler CSharpTSTreeVisitor::get_expr_handler(TSNode const& node)
+ExprFactory& CSharpTSTreeVisitor::expr_factory_ = ExprFactory::get_instance();
+StmtFactory& CSharpTSTreeVisitor::stmt_factory_ = StmtFactory::get_instance();
+TypeFactory& CSharpTSTreeVisitor::type_factory_ = TypeFactory::get_instance();
+
+Type* CSharpTSTreeVisitor::make_type(CSharpTSTreeVisitor const* self, TSNode const* node)
 {
-    auto const it = this->expr_handlers_.find(ts_node_type(node));
-    if (it != this->expr_handlers_.end())
+    std::string type_name = extract_node_text(*node, self->source_code_);
+    char const last_char = type_name[type_name.length() - 1];
+    bool const is_indirection_type = last_char == '*' || last_char == '&';
+    if (is_indirection_type)
     {
-        return it->second;
+        type_name.pop_back();
     }
-    return [](CSharpTSTreeVisitor*, TSNode const*) -> Expr*
-    {
-        return ExprFactory::get_instance().mk_unknown();
-    };
+    auto const res = NodeRegistry::get_type(type_name);
+    // todo implement scope
+    Type* type = res.has_value()
+        ? *res
+        : type_factory_.mk_class(type_name, {});
+
+    return is_indirection_type
+        ? type_factory_.mk_indirect(type)
+        : type;
 }
 
 Expr* CSharpTSTreeVisitor::handle_int_lit(
@@ -184,6 +197,7 @@ Expr* CSharpTSTreeVisitor::handle_param_var_ref_expr(
     TSNode const* node
 )
 {
+    // todo this might be not correctly done
     std::string const var_name = extract_node_text(*node, self->source_code_);
     return ExprFactory::get_instance().mk_param_var_ref(var_name);
 }
@@ -207,14 +221,14 @@ Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
     std::string op = extract_node_text(op_node, self->source_code_);
     std::erase_if(op, isspace);
 
-    auto const it = self->prefix_unary_operations.find(op);
-    if (it == self->prefix_unary_operations.end())
+    auto const res = NodeRegistry::get_prefix_unary_op(op);
+    if (!res.has_value())
     {
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
     }
 
-    UnaryOpType const op_type = it->second;
-    ExprHandler const handler = self->get_expr_handler(right_side_node);
+    UnaryOpType const op_type = *res;
+    ExprHandler const handler = NodeRegistry::get_expr_handler(right_side_node);
     Expr* right_side = handler(self, &right_side_node);
     return ExprFactory::get_instance().mk_unary_op(op_type, right_side);
 }
@@ -228,7 +242,7 @@ Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
     TSNode const op_node = ts_node_child(*node, 1);
     std::string const op = extract_node_text(op_node, self->source_code_);
 
-    ExprHandler const handler = self->get_expr_handler(left_side_node);
+    ExprHandler const handler = NodeRegistry::get_expr_handler(left_side_node);
     Expr* left_side = handler(self, &left_side_node);
 
     UnaryOpType op_type;
@@ -262,16 +276,16 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
     TSNode const left = ts_node_child(*node, 0);
     TSNode const op_node = ts_node_child(*node, 1);
     TSNode const right = ts_node_child(*node, 2);
-    ExprHandler const left_handler = self->get_expr_handler(left);
-    ExprHandler const right_handler = self->get_expr_handler(right);
+    ExprHandler const left_handler = NodeRegistry::get_expr_handler(left);
+    ExprHandler const right_handler = NodeRegistry::get_expr_handler(right);
     std::string const op = extract_node_text(op_node, self->source_code_);
 
-    auto const it = self->bin_operations.find(op);
-    if (it == self->bin_operations.end())
+    auto const res = NodeRegistry::get_bin_op(op);
+    if (!res.has_value())
     {
         // `a ?? b` same as `a != null ? a : b`
         Expr* left_expr = left_handler(self, &left);
-        BinOpExpr* const condition = expr_factory.mk_bin_on(
+        BinOpExpr* condition = expr_factory.mk_bin_on(
             left_expr,
             BinOpType::NotEqual,
             expr_factory.mk_null_literal()
@@ -294,7 +308,7 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
     }
 
-    BinOpType const op_type = it->second;
+    BinOpType const op_type = *res;
 
     return expr_factory.mk_bin_on(
         left_handler(self, &left),
@@ -304,16 +318,16 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
 }
 
 Expr* CSharpTSTreeVisitor::handle_ternary_expr(
-    [[maybe_unused]] CSharpTSTreeVisitor* self,
-    [[maybe_unused]] TSNode const* node
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
 )
 {
     TSNode const cond_node = ts_node_child(*node, 0);
     TSNode const if_true = ts_node_child(*node, 2);
     TSNode const if_false = ts_node_child(*node, 4);
-    ExprHandler const cond_handler = self->get_expr_handler(cond_node);
-    ExprHandler const if_true_handler = self->get_expr_handler(if_true);
-    ExprHandler const if_false_handler = self->get_expr_handler(if_false);
+    ExprHandler const cond_handler = NodeRegistry::get_expr_handler(cond_node);
+    ExprHandler const if_true_handler = NodeRegistry::get_expr_handler(if_true);
+    ExprHandler const if_false_handler = NodeRegistry::get_expr_handler(if_false);
 
     return ExprFactory::get_instance().mk_if(
         cond_handler(self, &cond_node),
@@ -322,17 +336,9 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(
     );
 }
 
-CSharpTSTreeVisitor::StmtHandler CSharpTSTreeVisitor::get_stmt_handler(TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_local_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
 {
-    auto const it = this->stmt_handlers_.find(ts_node_type(*node));
-    if (it != this->stmt_handlers_.end())
-    {
-        return it->second;
-    }
-    return [](CSharpTSTreeVisitor*, TSNode const*) -> Stmt*
-    {
-        return StmtFactory::get_instance().mk_uknown();
-    };
+
 }
 
 } // namespace astfri::csharp

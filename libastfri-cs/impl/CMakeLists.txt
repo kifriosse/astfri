@@ -7,6 +7,7 @@ add_library(astfri-cs SHARED)
 target_sources(astfri-cs PRIVATE
         CSharpTSTreeVisitor.cpp
         utils.cpp
+        NodeRegistry.cpp
 )
 
 target_link_libraries(astfri-cs PUBLIC

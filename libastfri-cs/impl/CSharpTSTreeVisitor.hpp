@@ -9,6 +9,7 @@
 
 #include "libastfri/inc/ExprFactory.hpp"
 #include "libastfri/inc/StmtFactory.hpp"
+#include "libastfri/inc/TypeFactory.hpp"
 
 namespace astfri::csharp
 {
@@ -18,88 +19,21 @@ class CSharpTSTreeVisitor
 public:
     using ExprHandler = std::function<Expr*(CSharpTSTreeVisitor *self, TSNode const*)>;
     using StmtHandler = std::function<Stmt*(CSharpTSTreeVisitor *self, TSNode const*)>;
+    using TypeMaker = std::function<Type*()>;
 private:
-    using ExprFactory = astfri::ExprFactory;
-    using StmtFactory = astfri::StmtFactory;
+    static ExprFactory& expr_factory_;
+    static StmtFactory& stmt_factory_;
+    static TypeFactory& type_factory_;
 
     std::string source_code_;
-    std::unordered_map<std::string, StmtHandler> stmt_handlers_;
-    std::unordered_map<std::string, ExprHandler> expr_handlers_ = {
-        {"integer_literal", handle_int_lit},
-        {"real_literal", handle_float_lit},
-        {"boolean_literal", handle_bool_lit},
-        {"character_literal", handle_char_lit},
-        {"string_literal", handle_str_lit},
-        {"null_literal", handle_null_literal},
-        {"verbatim_string_literal", handle_verbatim_str_lit},
-        {"this_expression", handle_this_expr},
-        {"conditional_expression", handle_ternary_expr},
-        {"prefix_unary_expression", handle_prefix_unary_op_expr},
-        {"postfix_unary_expression", handle_postfix_unary_op_expr},
-        {"binary_expression", handle_binary_op_expr},
-        {"assignment_expression", handle_binary_op_expr},
-
-        {"ERROR", [](CSharpTSTreeVisitor*, TSNode const *node) -> Expr*
-            {
-                auto const [row, column] = ts_node_start_point(*node);
-                throw std::runtime_error(
-                    "Invalid C# syntax in source code at: row" +
-                    std::to_string(row) + "and column " +
-                    std::to_string(column)
-                );
-            }
-        }
-    };
-    std::unordered_map<std::string, UnaryOpType> prefix_unary_operations = {
-        {"+", UnaryOpType::Plus},
-        {"-", UnaryOpType::Minus},
-        {"++", UnaryOpType::PreIncrement},
-        {"--", UnaryOpType::PreDecrement},
-        {"!", UnaryOpType::LogicalNot},
-        {"~", UnaryOpType::BitFlip},
-        {"*", UnaryOpType::Dereference},
-        {"&", UnaryOpType::AddressOf}
-    };
-    std::unordered_map<std::string, BinOpType> bin_operations = {
-        {"=", BinOpType::Assign},
-        {"+", BinOpType::Add},
-        {"-", BinOpType::Subtract},
-        {"*", BinOpType::Multiply},
-        {"/", BinOpType::Divide},
-        {"%", BinOpType::Modulo},
-        {"==", BinOpType::Equal},
-        {"!=", BinOpType::NotEqual},
-        {"<", BinOpType::Less},
-        {"<=", BinOpType::LessEqual},
-        {">", BinOpType::Greater},
-        {">=", BinOpType::GreaterEqual},
-        {"&&", BinOpType::LogicalAnd},
-        {"||", BinOpType::LogicalOr},
-        {"&", BinOpType::BitAnd},
-        {"|", BinOpType::BitOr},
-        {"^", BinOpType::BitXor},
-        {"<<", BinOpType::BitShiftLeft},
-        {">>", BinOpType::BitShiftRight},
-        {"+= ", BinOpType::Add},
-        {"-=", BinOpType::Subtract},
-        {"*=", BinOpType::Multiply},
-        {"/=", BinOpType::Divide},
-        {"%=", BinOpType::Modulo},
-        {">>=", BinOpType::BitShiftRight},
-        {"<<=", BinOpType::BitShiftLeft},
-        {"&=", BinOpType::BitAnd},
-        {"|=", BinOpType::BitOr},
-        {"^=", BinOpType::BitXor}
-        // todo add ?? and ??= operators
-    };
 public:
     explicit CSharpTSTreeVisitor(std::string  source_code)
         : source_code_(std::move(source_code))
     { }
 
-    // Expressions
-    ExprHandler get_expr_handler(TSNode const& node);
+    static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const* node);
 
+    // Expressions
     //Literals
     static Expr* handle_int_lit(CSharpTSTreeVisitor *self, const TSNode* node); //todo
     static Expr* handle_float_lit(CSharpTSTreeVisitor *self, const TSNode* node); //todo
@@ -119,14 +53,10 @@ public:
     static Expr* handle_prefix_unary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node);
     static Expr* handle_postfix_unary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node);
     static Expr* handle_binary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node); // todo
-    // static Expr* handle_assignement_expr(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     static Expr* handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 
-    // Statements
-    StmtHandler get_stmt_handler(TSNode const* node); //todo
-
     // Variable Definitions
-    // static Stmt* handle_local_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
+    static Stmt* handle_local_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     // static Stmt* handle_param_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     // static Stmt* handle_member_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 

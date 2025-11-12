@@ -10,14 +10,7 @@ raw";
 int a = 4;
 int b = 5;
 
-a++;
 
-_ = a < b;
-_ = a > b;
-_ = a <= b;
-_ = a >= b;
-_ = a == b;
-_ = a != b;
 float c = (float)a;
 
 int? nullable = null;
@@ -25,6 +18,9 @@ int bar = nullable ?? 5;
 
 int foo = nullable is null ? bar : 6;
 
+int a1;
+const int a2 = 1;
+a1 = a;
 // public class Test
 // {
 //     struct A
