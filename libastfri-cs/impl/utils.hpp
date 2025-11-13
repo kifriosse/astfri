@@ -30,7 +30,17 @@ enum class IntSuffix {
 //     {'\v', "\\v"},
 // };
 
-std::vector<TSNode> find_nodes(TSNode root, TSLanguage const* lang, std::string const& query_str);
+std::vector<TSNode> find_nodes(
+    TSNode const& root,
+    TSLanguage const* lang,
+    std::string const& query_str
+);
+
+TSNode find_first_node(
+    TSNode const& root,
+    TSLanguage const* lang,
+    std::string const& query_str
+);
 
 IntSuffix get_suffix_type(const std::string &suffix);
 

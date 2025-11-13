@@ -26,9 +26,10 @@ private:
     static TypeFactory& type_factory_;
 
     std::string source_code_;
+    TSLanguage const* language_;
 public:
-    explicit CSharpTSTreeVisitor(std::string  source_code)
-        : source_code_(std::move(source_code))
+    CSharpTSTreeVisitor(std::string  source_code, TSLanguage const* language)
+        : source_code_(std::move(source_code)), language_(language)
     { }
 
     static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const* node);
@@ -56,7 +57,7 @@ public:
     static Expr* handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 
     // Variable Definitions
-    static Stmt* handle_local_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
+    static Stmt* handle_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     // static Stmt* handle_param_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     // static Stmt* handle_member_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 

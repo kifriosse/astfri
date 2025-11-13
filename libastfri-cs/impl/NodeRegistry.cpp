@@ -6,7 +6,8 @@ namespace astfri::csharp
 {
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"variable_declaration", CSharpTSTreeVisitor::handle_local_var_def_stmt}
+    {"variable_declaration", CSharpTSTreeVisitor::handle_var_def_stmt},
+    {"field_declaration", CSharpTSTreeVisitor::handle_var_def_stmt},
 };
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler> NodeRegistry::expr_handlers_ = {
@@ -20,6 +21,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler> NodeRegistry::
     {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
     {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
     {"prefix_unary_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
+    {"ref_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
     {"postfix_unary_expression", CSharpTSTreeVisitor::handle_postfix_unary_op_expr},
     {"binary_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
     {"assignment_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
@@ -44,7 +46,8 @@ std::unordered_map<std::string, UnaryOpType> NodeRegistry::prefix_unary_op = {
     {"!", UnaryOpType::LogicalNot},
     {"~", UnaryOpType::BitFlip},
     {"*", UnaryOpType::Dereference},
-    {"&", UnaryOpType::AddressOf}
+    {"&", UnaryOpType::AddressOf},
+    {"ref", UnaryOpType::AddressOf}
 };
 
 std::unordered_map<std::string, BinOpType> NodeRegistry::bin_operations = {
@@ -86,7 +89,8 @@ std::unordered_map<std::string, Type*> NodeRegistry::types_ = {
     {"bool", TypeFactory::get_instance().mk_bool()},
     {"void", TypeFactory::get_instance().mk_void()},
     {"dynamic", TypeFactory::get_instance().mk_dynamic()}
-    // todo how to handle var type
+    // todo handle var type
+    // todo add double, long, unsigned, decimal, short, byte
 };
 
 CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(TSNode const& node)

@@ -7,7 +7,11 @@
 
 namespace astfri::csharp
 {
-std::vector<TSNode> find_nodes(TSNode root, TSLanguage const* lang, std::string const& query_str)
+std::vector<TSNode> find_nodes(
+    TSNode const& root,
+    TSLanguage const* lang,
+    std::string const& query_str
+)
 {
     std::vector<TSNode> results;
     TSQueryError err;
@@ -42,6 +46,44 @@ std::vector<TSNode> find_nodes(TSNode root, TSLanguage const* lang, std::string 
     ts_query_delete(query);
 
     return results;
+}
+
+TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string const& query_str)
+{
+    TSQueryError err;
+    uint32_t offset;
+    TSQuery *query =ts_query_new(
+        lang,
+        query_str.c_str(),
+        query_str.length(),
+        &offset,
+        &err
+    );
+
+    if (!query)
+    {
+        throw std::runtime_error("Error while creating query at offset " + std::to_string(offset)
+            + " Error code: " + std::to_string(err));
+    }
+
+    TSQueryCursor *cursor = ts_query_cursor_new();
+    ts_query_cursor_exec(cursor, query, root);
+
+    TSQueryMatch match;
+    TSNode result = {};
+    while (ts_query_cursor_next_match(cursor, &match))
+    {
+        if (match.capture_count >= 1)
+        {
+            result = match.captures[0].node;
+            break;
+        }
+    }
+
+    ts_query_cursor_delete(cursor);
+    ts_query_delete(query);
+
+    return result;
 }
 
 IntSuffix get_suffix_type(std::string const& suffix)

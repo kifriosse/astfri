@@ -23,6 +23,8 @@ Type* CSharpTSTreeVisitor::make_type(CSharpTSTreeVisitor const* self, TSNode con
     {
         type_name.pop_back();
     }
+
+    std::erase_if(type_name, isspace);
     auto const res = NodeRegistry::get_type(type_name);
     // todo implement scope
     Type* type = res.has_value()
@@ -336,9 +338,71 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(
     );
 }
 
-Stmt* CSharpTSTreeVisitor::handle_local_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
-{
 
+
+Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
+    CSharpTSTreeVisitor* self,
+    TSNode const* node
+)
+{
+    // todo make this so it can handle all var def types
+    static std::string const declarator_query = R"(
+        (variable_declaration
+            (variable_declarator) @var_decl)
+    )";
+    static std::string const modifier_query = R"(
+        (variable_declaration
+            (modifiers) @mods)
+    )";
+
+    TSNode const var_decl_node = ts_node_child(*node, 0);
+    std::string const var_decl_node_type = ts_node_type(var_decl_node);
+    TSNode const type_node = ts_node_child_by_field_name(var_decl_node, "type", 4);
+    // todo handle scoped ref readonly
+
+    Type* type = make_type(self, &type_node);
+    std::vector<TSNode> const var_decl_nodes = find_nodes(var_decl_node, self->language_, declarator_query);
+    // todo handle modifiers - special c# modifiers
+    // rekurzivne prechadzat synovo dokym mame nejakeho syna
+
+    std::vector<TSNode> const modifier_nodes = find_nodes(var_decl_node, self->language_, modifier_query);
+
+    std::vector<VarDefStmt*> var_def_stmts;
+    for (TSNode const& var_decltor_node : var_decl_nodes)
+    {
+        TSNode var_name_node = ts_node_child(var_decltor_node, 0);
+        TSNode initializer_node = ts_node_child(var_decltor_node, 2);
+
+        std::string const var_name = extract_node_text(var_name_node, self->source_code_);
+        ExprHandler initializer_handler = NodeRegistry::get_expr_handler(initializer_node);
+        Expr* initializer = initializer_handler(self, &initializer_node);
+
+        //todo could be optimized
+        if (var_decl_node_type == "variable_declaration") {
+            var_def_stmts.push_back(
+               StmtFactory::get_instance().mk_local_var_def(
+                   var_name, type, initializer
+               )
+           );
+            continue;
+        }
+        if (var_decl_node_type == "field_declaration")
+        {
+            // todo handle access modifiers
+            var_def_stmts.push_back(
+                StmtFactory::get_instance().mk_member_var_def(
+                    var_name, type, initializer, AccessModifier::Private
+                )
+            );
+        }
+    }
+
+    if (var_def_stmts.size() > 1)
+    {
+        return StmtFactory::get_instance().mk_def(var_def_stmts);
+    }
+
+    return var_def_stmts.front();
 }
 
 } // namespace astfri::csharp
