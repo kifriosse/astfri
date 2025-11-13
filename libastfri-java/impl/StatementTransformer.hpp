@@ -11,6 +11,7 @@
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
 #include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
 
 namespace astfri::java
 {
@@ -75,7 +76,13 @@ private:
         std::string const& sourceCode
     );
     
-    astfri::GenericParam* transform_tparam_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::GenericParam* transform_tparam_node(
+        TSNode tsNode, 
+        std::string const& sourceCode);
+
+    astfri::Scope get_scope(
+        TSNode tsNode,
+        std::string const& sourceCode);
 
     astfri::ClassDefStmt* transform_class(
         TSNode tsNode,

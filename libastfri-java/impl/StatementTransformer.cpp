@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
+#include "libastfri/inc/Type.hpp"
 
 namespace astfri::java
 {
@@ -722,6 +723,45 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
     return astfri::ExprFactory::get_instance().mk_lambda_expr(lambdaParams, lambdaBody);
 }
 
+astfri::Scope StatementTransformer::get_scope(TSNode tsNode, std::string const& sourceCode)
+{
+    astfri::Scope scope = mk_scope();
+    TSNode classNodePrevSibling = ts_node_prev_named_sibling(tsNode);
+
+    while (!ts_node_is_null(classNodePrevSibling) && std::string(ts_node_type(classNodePrevSibling)) != "package_declaration")
+    {
+        classNodePrevSibling = ts_node_prev_named_sibling(classNodePrevSibling);
+    }
+
+    if (std::string(ts_node_type(classNodePrevSibling)) == "package_declaration")
+    {
+        std::string scopeIdentifier = ts_node_string(classNodePrevSibling);
+        TSNode child = ts_node_named_child(classNodePrevSibling, 0);
+        std::string childType = ts_node_type(child);
+        const char* fieldName = ts_node_field_name_for_named_child(child, 0);
+
+        while (fieldName != nullptr && std::strcmp(fieldName, "scope") == 0
+                && std::string(ts_node_type(child)) == "scoped_identifier"
+                && !ts_node_is_null(child))
+        {
+            uint32_t childCount = ts_node_named_child_count(child);
+            for (uint32_t j = 0; j < childCount; j++)
+            {
+                if (std::string(ts_node_type(ts_node_named_child(child, j))) == "identifier")
+                {
+                    scope.names_.push_back(
+                        this->exprTransformer->get_node_text(
+                            ts_node_named_child(child, j), sourceCode
+                        )
+                    );
+                }
+            }
+            child = ts_node_named_child(child, 0);
+        }
+        classNodePrevSibling = ts_node_prev_named_sibling(classNodePrevSibling);
+    }
+    return scope;
+}
 
 astfri::ClassDefStmt* StatementTransformer::transform_class(
     TSNode classNode,
@@ -736,6 +776,7 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
     std::vector<astfri::ClassDefStmt*> bases;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     std::vector<astfri::ClassDefStmt*> classes;
+    astfri::Scope scope = this->get_scope(classNode, sourceCode);
 
         uint32_t classChildCount = ts_node_named_child_count(classNode);
         for (uint32_t j = 0; j < classChildCount; j++)
@@ -808,7 +849,7 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
             }
         }
 
-        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, mk_scope());
+        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, scope);
         classDef->name_                = className;
         classDef->vars_                = attributes;
         classDef->methods_             = methods;
@@ -840,6 +881,7 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
     std::vector<astfri::InterfaceDefStmt*> bases;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     bool funcInterface = false;
+    astfri::Scope scope = this->get_scope(interfaceNode, sourceCode);
 
     uint32_t interfaceChildCount = ts_node_named_child_count(interfaceNode);
     for (uint32_t j = 0; j < interfaceChildCount; j++)
@@ -910,7 +952,7 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
         }
     }
 
-    astfri::InterfaceDefStmt* interfaceDef = stmtFactory.mk_interface_def(interfaceName);
+    astfri::InterfaceDefStmt* interfaceDef = stmtFactory.mk_interface_def(interfaceName, scope);
     interfaceDef->name_                    = interfaceName;
     interfaceDef->methods_                 = methods;
     interfaceDef->tparams_                 = tparams;
