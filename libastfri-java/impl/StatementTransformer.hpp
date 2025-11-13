@@ -10,6 +10,7 @@
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 #include <vector>
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::java
 {
@@ -31,7 +32,8 @@ private:
     ExpressionTransformer* exprTransformer;
     NodeMapper* nodeMapper;
     std::vector<astfri::InterfaceDefStmt*> functionalInterfaces;
-    
+    std::vector<astfri::ClassDefStmt*> classes;
+    std::vector<astfri::InterfaceDefStmt*> interfaces;
 
     astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
@@ -75,8 +77,18 @@ private:
     
     astfri::GenericParam* transform_tparam_node(TSNode tsNode, std::string const& sourceCode);
 
+    astfri::ClassDefStmt* transform_class(
+        TSNode tsNode,
+        std::string const& sourceCode
+    );
+
     std::vector<astfri::ClassDefStmt*> transform_classes(
         TSTree* tree,
+        std::string const& sourceCode
+    );
+
+    astfri::InterfaceDefStmt* transform_interface(
+        TSNode tsNode,
         std::string const& sourceCode
     );
     
