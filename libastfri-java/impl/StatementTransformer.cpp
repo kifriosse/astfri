@@ -422,9 +422,12 @@ astfri::ReturnStmt* StatementTransformer::transform_return_stmt_node(
 {
     astfri::Expr* expr    = nullptr;
 
-    TSNode child          = ts_node_named_child(tsNode, 0);
-    std::string childType = ts_node_type(child);
-    expr                  = exprTransformer->get_expr(child, sourceCode);
+    if (!ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        TSNode child          = ts_node_named_child(tsNode, 0);
+        std::string childType = ts_node_type(child);
+        expr                  = exprTransformer->get_expr(child, sourceCode);
+    }
 
     return stmtFactory.mk_return(expr);
 }
