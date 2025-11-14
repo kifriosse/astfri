@@ -4,12 +4,12 @@
 #include <functional>
 #include <string>
 #include <tree_sitter/api.h>
-#include <unordered_map>
 #include <utility>
 
 #include "libastfri/inc/ExprFactory.hpp"
 #include "libastfri/inc/StmtFactory.hpp"
 #include "libastfri/inc/TypeFactory.hpp"
+#include "ScopeContext.hpp"
 
 namespace astfri::csharp
 {
@@ -25,6 +25,7 @@ private:
     static StmtFactory& stmt_factory_;
     static TypeFactory& type_factory_;
 
+    ScopeContext scope_context_;
     std::string source_code_;
     TSLanguage const* language_;
 public:
@@ -56,11 +57,14 @@ public:
     static Expr* handle_binary_op_expr(CSharpTSTreeVisitor* self, TSNode const* node); // todo
     static Expr* handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 
+    //Statements
     // Variable Definitions
     static Stmt* handle_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     // static Stmt* handle_param_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
     // static Stmt* handle_member_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
 
+    static Stmt* handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
+    static Stmt* handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
 };
 
 } // namespace astfri

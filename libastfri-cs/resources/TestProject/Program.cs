@@ -2,7 +2,23 @@
 
 using System.Threading.Tasks;
 
-public class MainClass
+using Zoznam = System.Collections.Generic.List<string>;
+
+namespace Test1;
+
+// namespace CSharp.Test
+// {
+void test2()
+{
+    
+}
+
+public interface Intr : IComparable
+{
+    void Interfacing();
+}
+
+public partial class Program
 {
     public string test = "test";
     static void Main(string[] args)
@@ -57,4 +73,5 @@ public class MainClass
 //         string? a = null;
 //         foo(a!);
 //     }
+// }
 // }
