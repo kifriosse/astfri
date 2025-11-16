@@ -7,14 +7,21 @@
 
 namespace astfri::text
 {
-    template<typename AstfriNode>
+    template<typename Node>
     concept astfri_node =
-        requires(AstfriNode& node)
+        requires(Node& node)
         {
-            {
-                node.accept(std::declval<IVisitor&>())
-            } -> std::same_as<void>;
+            { node.accept(std::declval<IVisitor&>()) } -> std::same_as<void>;
         };
+
+    // -----
+
+    template<typename Vector>
+    concept v_astfri_nodes =
+        requires { typename Vector::value_type; } &&
+        std::same_as<Vector, std::vector<typename Vector::value_type>> &&
+        std::is_pointer_v<typename Vector::value_type> &&
+        astfri_node<std::remove_pointer_t<typename Vector::value_type>>;
 
     //
     // -----
@@ -29,41 +36,83 @@ namespace astfri::text
         explicit AbstractVisitor(AbstractBuilder* const& builder);
         virtual ~AbstractVisitor() = default;
     protected:
-        void write_condition(Expr* const& expr);
+        void process_condition(Expr* const& expr);
         // -----
-        template<astfri_node AstfriNode>
-        void check_and_accept_pointer_w_error(AstfriNode* const& pointer);
+        template<v_astfri_nodes Vector>
+        void process_pargs(Vector const& pargs, bool useGeneric);
         // -----
-        template<astfri_node AstfriNode>
-        void check_and_accept_pointer(AstfriNode* const& pointer);
+        template<astfri_node Node>
+        bool try_accept_node(Node* const& node);
         // -----
-        template<typename VectorAstfriNode>
-        void write_params_or_args(VectorAstfriNode const vectorPA, bool isGeneric);
-        // -----
-        template<typename VectorAstfriNode>
-        bool has_acc_mod(VectorAstfriNode const& vectorStmts, VectorAstfriNode& vectorStmtsTmp, AccessModifier accmod);
+        template<v_astfri_nodes Vector>
+        bool has_access_mod(Vector const& all, Vector& found, AccessModifier& access);
     };
+
+    //
+    // -----
+    //
+
+    template<v_astfri_nodes Vector>
+    void AbstractVisitor::process_pargs(Vector const& pargs, bool useGeneric)
+    {
+        if (useGeneric)
+        {
+            builder_->write_separator("<");
+        }
+        else
+        {
+            builder_->write_separator("(");
+        }
+        for (size_t i = 0; i < pargs.size(); ++i)
+        {
+            if (!try_accept_node(pargs.at(i)))
+            {
+                builder_->write_invalid_expr();
+            }
+            if (i < pargs.size() - 1)
+            {
+                builder_->write_separator(",");
+                builder_->append_space();
+            }
+        }
+        if (useGeneric)
+        {
+            builder_->write_separator(">");
+        }
+        else
+        {
+            builder_->write_separator(")");
+        }
+    }
 
     // -----
 
-    template<astfri_node AstfriNode>
-    void AbstractVisitor::check_and_accept_pointer_w_error(AstfriNode* const&)
+    template<astfri_node Node>
+    bool AbstractVisitor::try_accept_node(Node* const& node)
     {
+        if (node)
+        {
+            node->accept(*this);
+            return true;
+        }
+        return false;
     }
 
-    template<astfri_node AstfriNode>
-    void AbstractVisitor::check_and_accept_pointer(AstfriNode* const&)
-    {
-    }
+    // -----
 
-    template<typename VectorAstfriNode>
-    void AbstractVisitor::write_params_or_args(VectorAstfriNode const, bool)
+    template<v_astfri_nodes Vector>
+    bool AbstractVisitor::has_access_mod(
+        Vector const& all, Vector& found, AccessModifier& access)
     {
-    }
-
-    template<typename VectorAstfriNode>
-    bool AbstractVisitor::has_acc_mod(VectorAstfriNode const&, VectorAstfriNode&, AccessModifier)
-    {
+        found.clear();
+        for (auto* const& node : all)
+        {
+            if (node->access_ == access)
+            {
+                found.push_back(node);
+            }
+        }
+        return !found.empty();
     }
 }
 

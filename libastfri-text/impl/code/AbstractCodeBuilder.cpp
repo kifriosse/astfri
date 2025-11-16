@@ -28,6 +28,21 @@ void AbstractCodeBuilder::append_space()
     *buildedText_ << " ";
 }
 
+void AbstractCodeBuilder::write_separator(std::string const& sep)
+{
+    append_text(sep);
+}
+
+void AbstractCodeBuilder::write_right_bracket(std::string const& br)
+{
+    append_text(br);
+}
+
+void AbstractCodeBuilder::write_left_bracket(std::string const& br)
+{
+    append_text(br);
+}
+
 //
 // UNKNOWN_PHRASES
 //

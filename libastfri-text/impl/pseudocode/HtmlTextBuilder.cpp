@@ -41,9 +41,10 @@ void HtmlTextBuilder::append_space()
     *buildedText_ << "&nbsp;";
 }
 
-//
-// BRACKETS, SEPARATORS, OPERATORS
-//
+void HtmlTextBuilder::write_separator(std::string const& sep)
+{
+    write_separator_style(sep);
+}
 
 void HtmlTextBuilder::write_right_bracket(std::string const& br)
 {
@@ -92,10 +93,9 @@ void HtmlTextBuilder::write_left_bracket(std::string const& br)
     }
 }
 
-void HtmlTextBuilder::write_separator(std::string const& sep)
-{
-    write_separator_style(sep);
-}
+//
+// OPERATORS
+//
 
 void HtmlTextBuilder::write_operator(std::string const& op)
 {

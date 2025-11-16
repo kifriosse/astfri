@@ -7,6 +7,10 @@ AbstractCodeVisitor::AbstractCodeVisitor(AbstractCodeBuilder* const& builder) :
 {
 }
 
+//
+// -----
+//
+
 void AbstractCodeVisitor::visit(IntType const& /*type*/)
 {
     builder_->append_text("int");
@@ -64,11 +68,20 @@ void AbstractCodeVisitor::visit(BoolLiteralExpr const& expr)
 
 void AbstractCodeVisitor::visit(IfExpr const& expr)
 {
-    check_and_accept_pointer_w_error(expr.cond_);
+    if (!try_accept_node(expr.cond_))
+    {
+        builder_->write_invalid_expr();
+    }
     builder_->append_text(" ? ");
-    check_and_accept_pointer_w_error(expr.iftrue_);
+    if (!try_accept_node(expr.iftrue_))
+    {
+        builder_->write_invalid_expr();
+    }
     builder_->append_text(" : ");
-    check_and_accept_pointer_w_error(expr.iffalse_);
+    if (!try_accept_node(expr.iffalse_))
+    {
+        builder_->write_invalid_expr();
+    }
     builder_->append_text(";");
 }
 
@@ -99,7 +112,10 @@ void AbstractCodeVisitor::visit(BinOpExpr const& expr)
     {
         builder_->append_text("(");
     }
-    check_and_accept_pointer_w_error(expr.left_);
+    if (!try_accept_node(expr.left_))
+    {
+        builder_->write_invalid_expr();
+    }
     builder_->append_space();
     switch (expr.op_)
     {
@@ -207,7 +223,10 @@ void AbstractCodeVisitor::visit(BinOpExpr const& expr)
             break;
     }
     builder_->append_space();
-    check_and_accept_pointer_w_error(expr.right_);
+    if (!try_accept_node(expr.right_))
+    {
+        builder_->write_invalid_expr();
+    }
     if (usebr)
     {
         builder_->append_text(")");
@@ -220,48 +239,78 @@ void AbstractCodeVisitor::visit(UnaryOpExpr const& expr)
     {
         case UnaryOpType::LogicalNot:
             builder_->append_text("!");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             break;
         case UnaryOpType::Minus:
             builder_->append_text("(");
             builder_->append_text("-");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             builder_->append_text(")");
             break;
         case UnaryOpType::Plus:
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             break;
         case UnaryOpType::Dereference:
             builder_->append_text("*");
             builder_->append_text("(");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             builder_->append_text(")");
             break;
         case UnaryOpType::AddressOf:
             builder_->append_text("&");
             builder_->append_text("(");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             builder_->append_text(")");
             break;
         case UnaryOpType::PreIncrement:
             builder_->append_text("++");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             break;
         case UnaryOpType::PostIncrement:
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             builder_->append_text("++");
             break;
         case UnaryOpType::PreDecrement:
             builder_->append_text("--");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             break;
         case UnaryOpType::PostDecrement:
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             builder_->append_text("--");
             break;
         case UnaryOpType::BitFlip:
             builder_->append_text("~");
-            check_and_accept_pointer_w_error(expr.arg_);
+            if (!try_accept_node(expr.arg_))
+            {
+                builder_->write_invalid_expr();
+            }
             break;
     }
 }
@@ -276,11 +325,6 @@ void AbstractCodeVisitor::visit(LocalVarRefExpr const& expr)
     builder_->append_text(expr.var_);
 }
 
-void AbstractCodeVisitor::visit(GlobalVarRefExpr const& expr)
-{
-    builder_->append_text(expr.global_);
-}
-
 void AbstractCodeVisitor::visit(ClassRefExpr const& expr)
 {
     builder_->append_text(expr.name_);
@@ -293,14 +337,20 @@ void AbstractCodeVisitor::visit(ThisExpr const& /*expr*/)
 
 void AbstractCodeVisitor::visit(ConstructorCallExpr const& expr)
 {
-    check_and_accept_pointer_w_error(expr.type_);
-    write_params_or_args(expr.args_, false);
+    if (!try_accept_node(expr.type_))
+    {
+        builder_->write_invalid_type();
+    }
+    process_pargs(expr.args_, false);
 }
 
 void AbstractCodeVisitor::visit(NewExpr const& expr)
 {
     builder_->append_text("new ");
-    check_and_accept_pointer_w_error(expr.init_);
+    if (!try_accept_node(expr.init_))
+    {
+        builder_->write_invalid_expr();
+    }
 }
 
 void AbstractCodeVisitor::visit(UnknownExpr const& /*expr*/)
@@ -310,9 +360,14 @@ void AbstractCodeVisitor::visit(UnknownExpr const& /*expr*/)
 
 void AbstractCodeVisitor::visit(CompoundStmt const& stmt)
 {
-    for (size_t i = 0; i < stmt.stmts_.size(); ++i) {
-        check_and_accept_pointer_w_error(stmt.stmts_.at(i));
-        if (i < stmt.stmts_.size() - 1) {
+    for (size_t i = 0; i < stmt.stmts_.size(); ++i)
+    {
+        if (!try_accept_node(stmt.stmts_.at(i)))
+        {
+            builder_->write_invalid_expr();
+        }
+        if (i < stmt.stmts_.size() - 1)
+        {
             builder_->append_new_line();
         }
     }
@@ -321,30 +376,38 @@ void AbstractCodeVisitor::visit(CompoundStmt const& stmt)
 void AbstractCodeVisitor::visit(ReturnStmt const& stmt)
 {
     builder_->append_text("return");
-    if (stmt.val_) {
+    if (stmt.val_)
+    {
         builder_->append_space();
-        check_and_accept_pointer_w_error(stmt.val_);
+        try_accept_node(stmt.val_);
     }
     builder_->append_text(";");
 }
 
 void AbstractCodeVisitor::visit(ExprStmt const& stmt)
 {
-    check_and_accept_pointer_w_error(stmt.expr_);
+    if (!try_accept_node(stmt.expr_))
+    {
+        builder_->write_invalid_expr();
+    }
 }
 
 void AbstractCodeVisitor::visit(IfStmt const& stmt)
 {
     builder_->append_text("if");
-    write_condition(stmt.cond_);
+    process_condition(stmt.cond_);
     builder_->write_opening_curl_bracket();
-    check_and_accept_pointer_w_error(stmt.iftrue_);
+    if (!try_accept_node(stmt.iftrue_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_new_line();
     builder_->decrease_indentation();
     builder_->append_text("}");
-    if (stmt.iffalse_) {
+    if (stmt.iffalse_)
+    {
         builder_->write_opening_else_word();
-        check_and_accept_pointer_w_error(stmt.iffalse_);
+        try_accept_node(stmt.iffalse_);
         builder_->append_new_line();
         builder_->decrease_indentation();
         builder_->append_text("}");
@@ -354,12 +417,20 @@ void AbstractCodeVisitor::visit(IfStmt const& stmt)
 void AbstractCodeVisitor::visit(CaseStmt const& stmt)
 {
     builder_->append_text("case ");
-    if (stmt.exprs_.empty()) {
+    if (stmt.exprs_.empty())
+    {
         builder_->write_invalid_expr();
-    } else {
-        for (size_t i = 0; i < stmt.exprs_.size(); ++i) {
-            check_and_accept_pointer_w_error(stmt.exprs_.at(i));
-            if (i < stmt.exprs_.size() - 1) {
+    }
+    else
+    {
+        for (size_t i = 0; i < stmt.exprs_.size(); ++i)
+        {
+            if (!try_accept_node(stmt.exprs_.at(i)))
+            {
+                builder_->write_invalid_expr();
+            }
+            if (i < stmt.exprs_.size() - 1)
+            {
                 builder_->append_text(", ");
             }
         }
@@ -367,7 +438,10 @@ void AbstractCodeVisitor::visit(CaseStmt const& stmt)
     builder_->append_text(":");
     builder_->append_new_line();
     builder_->increase_indentation();
-    check_and_accept_pointer_w_error(stmt.body_);
+    if (!try_accept_node(stmt.body_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->decrease_indentation();
 }
 
@@ -376,18 +450,26 @@ void AbstractCodeVisitor::visit(DefaultCaseStmt const& stmt)
     builder_->append_text("default:");
     builder_->append_new_line();
     builder_->increase_indentation();
-    check_and_accept_pointer_w_error(stmt.body_);
+    if (!try_accept_node(stmt.body_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->decrease_indentation();
 }
 
 void AbstractCodeVisitor::visit(SwitchStmt const& stmt)
 {
     builder_->append_text("switch");
-    write_condition(stmt.expr_);
+    process_condition(stmt.expr_);
     builder_->write_opening_curl_bracket();
-    for (size_t i = 0; i < stmt.cases_.size(); ++i) {
-        check_and_accept_pointer_w_error(stmt.cases_.at(i));
-        if (i < stmt.cases_.size() - 1) {
+    for (size_t i = 0; i < stmt.cases_.size(); ++i)
+    {
+        if (!try_accept_node(stmt.cases_.at(i)))
+        {
+            builder_->write_invalid_stmt();
+        }
+        if (i < stmt.cases_.size() - 1)
+        {
             builder_->append_new_line();
         }
     }
@@ -399,9 +481,12 @@ void AbstractCodeVisitor::visit(SwitchStmt const& stmt)
 void AbstractCodeVisitor::visit(WhileStmt const& stmt)
 {
     builder_->append_text("while");
-    write_condition(stmt.cond_);
+    process_condition(stmt.cond_);
     builder_->write_opening_curl_bracket();
-    check_and_accept_pointer_w_error(stmt.body_);
+    if (!try_accept_node(stmt.body_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_new_line();
     builder_->decrease_indentation();
     builder_->append_text("}");
@@ -411,24 +496,39 @@ void AbstractCodeVisitor::visit(DoWhileStmt const& stmt)
 {
     builder_->append_text("do");
     builder_->write_opening_curl_bracket();
-    check_and_accept_pointer_w_error(stmt.body_);
+    if (!try_accept_node(stmt.body_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_new_line();
     builder_->decrease_indentation();
     builder_->append_text("} while");
-    write_condition(stmt.cond_);
+    process_condition(stmt.cond_);
 }
 
 void AbstractCodeVisitor::visit(ForStmt const& stmt)
 {
     builder_->append_text("for (");
-    check_and_accept_pointer_w_error(stmt.init_);
+    if (!try_accept_node(stmt.init_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_text("; ");
-    check_and_accept_pointer_w_error(stmt.cond_);
+    if (!try_accept_node(stmt.cond_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_text("; ");
-    check_and_accept_pointer_w_error(stmt.step_);
+    if (!try_accept_node(stmt.step_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_text(")");
     builder_->write_opening_curl_bracket();
-    check_and_accept_pointer_w_error(stmt.body_);
+    if (!try_accept_node(stmt.body_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_new_line();
     builder_->decrease_indentation();
     builder_->append_text("}");
@@ -437,7 +537,10 @@ void AbstractCodeVisitor::visit(ForStmt const& stmt)
 void AbstractCodeVisitor::visit(ThrowStmt const& stmt)
 {
     builder_->append_text("throw ");
-    check_and_accept_pointer_w_error(stmt.val_);
+    if (!try_accept_node(stmt.val_))
+    {
+        builder_->write_invalid_stmt();
+    }
     builder_->append_text(";");
 }
 
@@ -448,37 +551,33 @@ void AbstractCodeVisitor::visit(UnknownStmt const& /*stmt*/)
 
 void AbstractCodeVisitor::visit(LocalVarDefStmt const& stmt)
 {
-    check_and_accept_pointer_w_error(stmt.type_);
+    if (!try_accept_node(stmt.type_))
+    {
+        builder_->write_invalid_type();
+    }
     builder_->append_space();
     builder_->append_text(stmt.name_);
-    if (stmt.initializer_) {
+    if (stmt.initializer_)
+    {
         builder_->append_text(" = ");
-        check_and_accept_pointer_w_error(stmt.initializer_);
+        try_accept_node(stmt.initializer_);
     }
     builder_->append_text(";");
 }
 
 void AbstractCodeVisitor::visit(ParamVarDefStmt const& stmt)
 {
-    check_and_accept_pointer_w_error(stmt.type_);
+    if (!try_accept_node(stmt.type_))
+    {
+        builder_->write_invalid_type();
+    }
     builder_->append_space();
     builder_->append_text(stmt.name_);
-    if (stmt.initializer_) {
+    if (stmt.initializer_)
+    {
         builder_->append_text(" = ");
-        check_and_accept_pointer_w_error(stmt.initializer_);
+        try_accept_node(stmt.initializer_);
     }
-}
-
-void AbstractCodeVisitor::visit(GlobalVarDefStmt const& stmt)
-{
-    check_and_accept_pointer_w_error(stmt.type_);
-    builder_->append_space();
-    builder_->append_text(stmt.name_);
-    if (stmt.initializer_) {
-        builder_->append_text(" = ");
-        check_and_accept_pointer_w_error(stmt.initializer_);
-    }
-    builder_->append_text(";");
 }
 
 void AbstractCodeVisitor::visit(ContinueStmt const& /*stmt*/)

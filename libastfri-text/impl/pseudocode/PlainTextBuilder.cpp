@@ -24,9 +24,10 @@ void PlainTextBuilder::append_space()
     *buildedText_ << " ";
 }
 
-//
-// BRACKETS, SEPARATORS, OPERATORS
-//
+void PlainTextBuilder::write_separator(std::string const& sep)
+{
+    append_text(sep);
+}
 
 void PlainTextBuilder::write_right_bracket(std::string const& br)
 {
@@ -38,10 +39,9 @@ void PlainTextBuilder::write_left_bracket(std::string const& br)
     append_text(br);
 }
 
-void PlainTextBuilder::write_separator(std::string const& sep)
-{
-    append_text(sep);
-}
+//
+// OPERATORS
+//
 
 void PlainTextBuilder::write_operator(std::string const& op)
 {

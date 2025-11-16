@@ -26,6 +26,7 @@ namespace astfri::text
         // -----
         void visit(NullLiteralExpr const& expr) override;
         void visit(MemberVarRefExpr const& expr) override;
+        void visit(GlobalVarRefExpr const& expr) override;
         void visit(FunctionCallExpr const& expr) override;
         void visit(MethodCallExpr const& expr) override;
         void visit(LambdaCallExpr const& expr) override;
@@ -34,6 +35,7 @@ namespace astfri::text
         // -----
         void visit(TranslationUnit const& stmt) override;
         void visit(MemberVarDefStmt const& stmt) override;
+        void visit(GlobalVarDefStmt const& stmt) override;
         void visit(FunctionDefStmt const& stmt) override;
         void visit(DefStmt const& stmt) override;
         void visit(MethodDefStmt const& stmt) override;

@@ -21,12 +21,12 @@ namespace astfri::text
         void append_text(std::string const& text) override;
         void append_new_line() override = 0;
         void append_space() override = 0;
+        void write_separator(std::string const& sep) override = 0;
+        void write_right_bracket(std::string const& br) override = 0;
+        void write_left_bracket(std::string const& br) override = 0;
         void write_opening_curl_bracket() override;
         void write_opening_else_word() override;
-        // BRACKETS, SEPARATORS, OPERATORS
-        virtual void write_right_bracket(std::string const& br) = 0;
-        virtual void write_left_bracket(std::string const& br) = 0;
-        virtual void write_separator(std::string const& sep) = 0;
+        // OPERATORS
         virtual void write_operator(std::string const& op) = 0;
         virtual void write_assign_operator() = 0;
         virtual void write_modulo_operator() = 0;

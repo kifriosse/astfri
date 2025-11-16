@@ -25,10 +25,10 @@ namespace astfri::text
         // GENERAL_TEXT
         void append_new_line() override;
         void append_space() override;
-        // BRACKETS, SEPARATORS, OPERATORS
+        void write_separator(std::string const& sep) override;
         void write_right_bracket(std::string const& br) override;
         void write_left_bracket(std::string const& br) override;
-        void write_separator(std::string const& sep) override;
+        // OPERATORS
         void write_operator(std::string const& op) override;
         void write_assign_operator() override;
         void write_modulo_operator() override;

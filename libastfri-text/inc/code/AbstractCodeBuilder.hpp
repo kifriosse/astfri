@@ -14,6 +14,9 @@ namespace astfri::text
         void append_text(std::string const& text) override;
         void append_new_line() override;
         void append_space() override;
+        void write_separator(std::string const& sep) override;
+        void write_right_bracket(std::string const& br) override;
+        void write_left_bracket(std::string const& br) override;
         void write_opening_curl_bracket() override = 0;
         void write_opening_else_word() override = 0;
         // UNKNOWN_PHRASES

@@ -7,6 +7,17 @@ AbstractVisitor::AbstractVisitor(AbstractBuilder* const& builder) :
 {
 }
 
-void AbstractVisitor::write_condition(Expr* const&)
+//
+// -----
+//
+
+void AbstractVisitor::process_condition(Expr* const& expr)
 {
+    builder_->append_space();
+    builder_->write_left_bracket("(");
+    if (!try_accept_node(expr))
+    {
+        builder_->write_invalid_expr();
+    }
+    builder_->write_right_bracket(")");
 }

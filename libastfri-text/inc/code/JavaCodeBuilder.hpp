@@ -1,6 +1,8 @@
 #ifndef LIBASTFRI_TEXT_JAVA_CODE_BUILDER
 #define LIBASTFRI_TEXT_JAVA_CODE_BUILDER
 
+#include <libastfri/impl/Scope.hpp>
+
 #include <libastfri-text/inc/code/AbstractCodeBuilder.hpp>
 
 namespace astfri::text
@@ -20,6 +22,9 @@ namespace astfri::text
         // GENERAL_TEXT
         void write_opening_curl_bracket() override;
         void write_opening_else_word() override;
+        // EXPORT
+        void create_java_file(std::string const& name, Scope const& scope);
+        void create_java_file(std::string const& name);
     };
 }
 

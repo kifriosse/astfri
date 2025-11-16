@@ -24,6 +24,9 @@ namespace astfri::text
         virtual void append_text(std::string const& text) = 0;
         virtual void append_new_line() = 0;
         virtual void append_space() = 0;
+        virtual void write_separator(std::string const& sep) = 0;
+        virtual void write_right_bracket(std::string const& br) = 0;
+        virtual void write_left_bracket(std::string const& br) = 0;
         virtual void write_opening_curl_bracket() = 0;
         virtual void write_opening_else_word() = 0;
         // UNKNOWN_PHRASES

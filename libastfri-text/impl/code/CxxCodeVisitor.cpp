@@ -43,6 +43,10 @@ void CxxCodeVisitor::visit(MemberVarRefExpr const& /*expr*/)
 {
 }
 
+void CxxCodeVisitor::visit(GlobalVarRefExpr const& /*expr*/)
+{
+}
+
 void CxxCodeVisitor::visit(FunctionCallExpr const& /*expr*/)
 {
 }
@@ -68,6 +72,10 @@ void CxxCodeVisitor::visit(TranslationUnit const& /*stmt*/)
 }
 
 void CxxCodeVisitor::visit(MemberVarDefStmt const& /*stmt*/)
+{
+}
+
+void CxxCodeVisitor::visit(GlobalVarDefStmt const& /*stmt*/)
 {
 }
 
