@@ -5,6 +5,8 @@
 #include <regex>
 #include <stdexcept>
 
+#include "CSharpTSTreeVisitor.hpp"
+
 namespace astfri::csharp
 {
 std::vector<TSNode> find_nodes(
@@ -117,6 +119,25 @@ std::string extract_node_text(
     const size_t from = ts_node_start_byte(node);
     const size_t to = ts_node_end_byte(node);
     return source_code.substr(from, to - from);
+}
+
+void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name)
+{
+    auto const r_begin = std::make_reverse_iterator(namespace_name.end());
+    auto const r_end = std::make_reverse_iterator(namespace_name.begin());
+    auto it = r_begin;
+    auto slice_end = namespace_name.end();
+
+    while (it != r_end)
+    {
+        if (*it == '.')
+        {
+            auto slice_start = it.base();
+            scope_str.emplace(slice_start, slice_end);
+            slice_end = slice_start - 1;
+        }
+        ++it;
+    }
 }
 
 } // namespace astfri::csharp

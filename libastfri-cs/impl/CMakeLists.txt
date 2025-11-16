@@ -9,7 +9,6 @@ target_sources(astfri-cs PRIVATE
         utils.cpp
         NodeRegistry.cpp
         CSharpASTBuilder.cpp
-        ScopeContext.cpp
 )
 
 target_link_libraries(astfri-cs PUBLIC

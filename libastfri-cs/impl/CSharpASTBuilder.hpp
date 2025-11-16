@@ -5,7 +5,6 @@
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
 #include "CSharpTSTreeVisitor.hpp"
-#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::csharp
 {
@@ -22,10 +21,8 @@ public:
         ts_parser_set_language(parser_, lang_);
     };
     ~CSharpASTBuilder();
-    std::vector<TranslationUnit*> make_ast(std::string source_code_dir);
+    std::vector<TranslationUnit*> make_ast(std::string const& source_code_dir) const;
 private:
-    TranslationUnit* make_translation_unit(std::string const& source_code);
-
     static std::vector<std::string> get_source_codes(std::string const& source_code_dir);
 };
 

@@ -1,25 +1,36 @@
-﻿
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Zoznam = System.Collections.Generic.List<string>;
 
-namespace Test1;
+// namespace Test1;
 
-// namespace CSharp.Test
-// {
-void test2()
+namespace CSharp.T.Test
 {
-    
-}
+    namespace Test2
+    {
+    }
 
 public interface Intr : IComparable
 {
-    void Interfacing();
+    static int s = 10;
+    void Interfacing()
+    {
+        
+    }
+    class Test5
+    {
+        int bar;
+        public Test5()
+        {
+            
+        }
+
+    }
 }
 
 public partial class Program
 {
+
     public string test = "test";
     static void Main(string[] args)
     {
@@ -73,5 +84,4 @@ public partial class Program
 //         string? a = null;
 //         foo(a!);
 //     }
-// }
-// }
+}

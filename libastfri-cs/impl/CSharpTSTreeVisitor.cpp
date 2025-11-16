@@ -1,9 +1,13 @@
 
 #include "CSharpTSTreeVisitor.hpp"
 
+#include <libastfri/inc/TypeInfo.hpp>
+
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <iostream>
+#include <stack>
 
 #include "NodeRegistry.hpp"
 #include "utils.hpp"
@@ -309,6 +313,40 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode
     );
 }
 
+Stmt* CSharpTSTreeVisitor::handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+{
+    std::vector<ClassDefStmt*> class_defs;
+    std::vector<InterfaceDefStmt*> interface_defs;
+    static std::string const type_decl_query = R"(
+        (namespace_declaration
+            body: (declaration_list
+                (class_declaration) @class))
+        (namespace_declaration
+            body: (declaration_list
+                (interface_declaration) @interface))
+
+        (compilation_unit
+            (class_declaration) @class)
+
+        (compilation_unit
+            (interface_declaration) @interface)
+    )";
+
+    std::vector<TSNode> const type_nodes = find_nodes(*node, self->language_, type_decl_query);
+
+    for (auto const& type_node : type_nodes)
+    {
+        StmtHandler handler = NodeRegistry::get_stmt_handler(type_node);
+        Stmt* stmt = handler(self, &type_node);
+        if (is_a<ClassDefStmt>(stmt))
+            class_defs.push_back(as_a<ClassDefStmt>(stmt));
+        else if (is_a<InterfaceDefStmt>(stmt))
+            interface_defs.push_back(as_a<InterfaceDefStmt>(stmt));
+    }
+
+    return StmtFactory::get_instance()
+        .mk_translation_unit(class_defs, interface_defs, {}, {});
+}
 
 
 Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
@@ -316,7 +354,6 @@ Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
     TSNode const* node
 )
 {
-    // todo make this so it can handle all var def types
     static std::string const declarator_query = R"(
         (variable_declaration
             (variable_declarator) @var_decl)
@@ -376,35 +413,105 @@ Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
     return var_def_stmts.front();
 }
 
-Stmt* CSharpTSTreeVisitor::handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
 {
-    std::vector<ClassDefStmt*> class_defs;
-    std::vector<InterfaceDefStmt*> interface_defs;
+    Scope const scope = self->create_scope(node);
+    TSNode const class_name_node = ts_node_child_by_field_name(*node, "name", 4);
+    std::string const class_name = extract_node_text(class_name_node, self->source_code_);
 
-    TSTreeCursor cursor = ts_tree_cursor_new(*node);
-
-    std::string class_query = "(class_declaration) @class";
-    std::string interface_query = "(interface_declaration) @interface";
-    std::string const file_scoped_namespace_query = "(file_scoped_namespace_declaration) @file_name_space";
-
-    TSNode const file_scoped_namespace_node = find_first_node(
-        *node,
-        self->language_,
-        file_scoped_namespace_query
+    ClassDefStmt* class_def = StmtFactory::get_instance().mk_class_def(
+        class_name,
+        scope
     );
+    // struct ClassDefStmt : UserTypeDefStmt, details::MkVisitable<ClassDefStmt>
+    // {
+    //     ClassType *type_;
+    //     std::vector<MemberVarDefStmt*> vars_;
+    //     std::vector<ConstructorDefStmt*> constructors_;
+    //     std::vector<DestructorDefStmt*> destructors_;
+    //     std::vector<MethodDefStmt*> methods_;
+    //     std::vector<GenericParam*> tparams_;
+    //     std::vector<InterfaceDefStmt*> interfaces_;
+    //     std::vector<ClassDefStmt*> bases_;
+    // };
+    class_def->name_ = class_name;
 
-    if (!ts_node_is_null(file_scoped_namespace_node))
+    return class_def;
+}
+
+Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
+{
+    enum NodeType
     {
+        Class,
+        Interface,
+        Root,
+        Namespace
+    };
 
+    static std::unordered_map<std::string, NodeType> node_type_map = {
+        {"class_declaration",     Class    },
+        {"interface_declaration", Interface},
+        {"namespace_declaration", Namespace},
+        {"compilation_unit",      Root     },
+    };
+
+    std::stack<std::string> scope_str;
+    Scope scope           = {};
+    TSNode current        = *node;
+    TSNode parent         = ts_node_parent(current);
+
+    bool found_name_space = false;
+    while (!ts_node_is_null(parent))
+    {
+        std::string const parent_type = ts_node_type(parent);
+        auto const res                = node_type_map.find(parent_type);
+        current                       = parent;
+        parent                        = ts_node_parent(current);
+
+        if (res == node_type_map.end())
+            continue;
+
+        switch (res->second)
+        {
+        case Class:
+        case Interface:
+        {
+            TSNode name_node       = ts_node_child_by_field_name(current, "name", 4);
+            std::string const name = extract_node_text(name_node, this->source_code_);
+            scope_str.push(name);
+            break;
+        }
+        case Root:
+        {
+            if (found_name_space)
+                break;
+
+            std::string file_namespace_query = "(file_scoped_namespace_declaration) @namespace";
+            TSNode const namespace_node
+                = find_first_node(current, this->language_, file_namespace_query);
+            TSNode const name_node = ts_node_child_by_field_name(namespace_node, "name", 4);
+            std::string const name = extract_node_text(name_node, this->source_code_);
+            split_namespace(scope_str, name);
+            break;
+        }
+        case Namespace:
+        {
+            found_name_space       = true;
+            TSNode name_node       = ts_node_child_by_field_name(current, "name", 4);
+            std::string const name = extract_node_text(name_node, this->source_code_);
+            split_namespace(scope_str, name);
+            break;
+        }
+        }
     }
 
-
-    return StmtFactory::get_instance().mk_translation_unit(
-        class_defs,
-        interface_defs,
-        {},
-        {}
-    );
+    while (! scope_str.empty())
+    {
+        scope.names_.push_back(scope_str.top());
+        scope_str.pop();
+    }
+    return scope;
 }
 
 } // namespace astfri::csharp

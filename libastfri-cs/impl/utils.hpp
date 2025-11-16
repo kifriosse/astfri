@@ -2,9 +2,9 @@
 #define CSHARP_UTILS_HPP
 
 #include <cmath>
+#include <stack>
 #include <string>
 #include <tree_sitter/api.h>
-#include <unordered_map>
 #include <vector>
 
 namespace astfri::csharp
@@ -49,6 +49,8 @@ inline bool almost_equal(double const a, double const b, double const epsilon = 
 }
 
 std::string extract_node_text(const TSNode& node, const std::string& source_code);
+
+void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name);
 
 }
 

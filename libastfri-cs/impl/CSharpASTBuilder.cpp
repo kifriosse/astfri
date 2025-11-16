@@ -5,28 +5,37 @@
 #include <fstream>
 #include <stack>
 
+#include "libastfri/inc/TypeInfo.hpp"
+
 namespace astfri::csharp
 {
+
 CSharpASTBuilder::~CSharpASTBuilder()
 {
     ts_parser_delete(parser_);
     ts_language_delete(lang_);
 }
 
-std::vector<TranslationUnit*> CSharpASTBuilder::make_ast(std::string source_code_dir)
+std::vector<TranslationUnit*> CSharpASTBuilder::make_ast(std::string const& source_code_dir) const
 {
+    std::vector<TranslationUnit*> ast;
+    std::vector<std::string> const source_codes = get_source_codes(source_code_dir);
+    for (auto & source_code : source_codes)
+    {
+        TSTree const* const tree = ts_parser_parse_string(
+            parser_,
+            nullptr,
+            source_code.c_str(),
+            source_code.length()
+        );
+        TSNode const root = ts_tree_root_node(tree);
 
-}
-
-TranslationUnit* CSharpASTBuilder::make_translation_unit(std::string const& source_code)
-{
-    TSTree* const tree = ts_parser_parse_string(
-        parser_,
-        nullptr,
-        source_code.c_str(),
-        source_code.length()
-    );
-    CSharpTSTreeVisitor cs_ts_tree_visitor(source_code, lang_);
+        CSharpTSTreeVisitor cs_ts_tree_visitor(source_code, lang_);
+        Stmt* translation_unit =
+            CSharpTSTreeVisitor::handle_comp_unit_stmt(&cs_ts_tree_visitor, &root);
+        ast.push_back(as_a<TranslationUnit>(translation_unit));
+    }
+    return ast;
 }
 
 std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& source_code_dir)
@@ -43,7 +52,12 @@ std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& s
         {
             if (dir_entry.is_directory())
             {
-                dirs.push(dir_entry.path());
+                const auto& path = dir_entry.path();
+                if (path == source_code_dir + "/bin" || path == source_code_dir + "/obj")
+                {
+                    continue;
+                }
+                dirs.push(path);
             }
             else if (dir_entry.path().extension() == ".cs")
             {
