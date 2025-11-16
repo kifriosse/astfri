@@ -1,9 +1,19 @@
+# astfri-text
+ - Converts ast into `java` code.
+ - Input astfri element must be `TranslationUnit`.
+ - Source files are generated in folder `build/text_output/src/`.
 
-1) Make build. Library is called "astfri-text".
-2) Include header file: "#include <libastfri-text/inc/TextLibManager.hpp>".
-3) Create TextLibManager object: TextLibManager& man = TextLibManager::get_instance();
-4) Now you can use this library.
+## Library usage
 
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DASTFRI_BUILD_TEXT_OUTPUT=ON ..
-make
-cp compile_commands.json ..
+```cpp
+#include <libastfri-text/inc/TextLibManager.hpp>
+
+using namespace astfri::text;
+
+int main()
+{
+    TextLibManager& manager = TextLibManager::get_instance();
+    TranslationUnit tu; // create ast here
+    manager.visit(tu);
+}
+```

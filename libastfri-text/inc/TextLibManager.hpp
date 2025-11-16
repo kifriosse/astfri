@@ -8,7 +8,6 @@ namespace astfri::text
     class TextLibManager
     {
         AbstractVisitor* visitor_;
-        AbstractBuilder* builder_;
     public:
         static TextLibManager& get_instance();
         TextLibManager(TextLibManager const&) = delete;
@@ -17,34 +16,32 @@ namespace astfri::text
         TextLibManager& operator=(TextLibManager&&)      = delete;
     private:
         explicit TextLibManager();
-        ~TextLibManager();
+        ~TextLibManager() = default;
     public:
-        void export_pseudocode();
-        void reset_builder();
         // -----
-        template<astfri_node AstfriNode>
-        void visit(AstfriNode const& node);
+        template<astfri_node Node>
+        void visit(Node const& node);
         // -----
-        template<astfri_node AstfriNode>
-        void visit_and_export(AstfriNode const& node);
-    private:
-        void create_new_builder();
+        template<astfri_node Node>
+        void visit_and_export(Node const& node);
     };
 
     //
     // -----
     //
 
-    template<astfri_node AstfriNode>
-    void TextLibManager::visit(AstfriNode const& node)
+    template<astfri_node Node>
+    void TextLibManager::visit(Node const& node)
     {
-        const_cast<AstfriNode&>(node).accept(*visitor_);
+        const_cast<Node&>(node).accept(*visitor_);
     }
 
-    template<astfri_node AstfriNode>
-    void TextLibManager::visit_and_export(AstfriNode const& node)
+    // -----
+
+    template<astfri_node Node>
+    void TextLibManager::visit_and_export(Node const& node)
     {
-        const_cast<AstfriNode&>(node).accept(*visitor_);
+        const_cast<Node&>(node).accept(*visitor_);
     }
 }
 

@@ -2,7 +2,6 @@
 #define LIBASTFRI_TEXT_JAVA_CODE_VISITOR
 
 #include <libastfri-text/inc/code/AbstractCodeVisitor.hpp>
-#include "libastfri-text/inc/AbstractVisitor.hpp"
 
 namespace astfri::text
 {
