@@ -18,7 +18,7 @@ namespace astfri::text
         PseudocodeVisitor& operator=(PseudocodeVisitor&&)      = delete;
     private:
         PseudocodeVisitor() = delete;
-        explicit PseudocodeVisitor(AbstractTextBuilder* const& builder);
+        explicit PseudocodeVisitor(AbstractTextBuilder& builder);
         ~PseudocodeVisitor() = default;
     public:
         void export_pseudocode();

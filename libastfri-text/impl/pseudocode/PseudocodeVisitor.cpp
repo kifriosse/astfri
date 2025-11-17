@@ -18,11 +18,11 @@ PseudocodeVisitor& PseudocodeVisitor::get_instance()
         builder = &PlainTextBuilder::get_instance();
     }
     builder->reset_builder();
-    static PseudocodeVisitor visitor(builder);
+    static PseudocodeVisitor visitor(*builder);
     return visitor;
 }
 
-PseudocodeVisitor::PseudocodeVisitor(AbstractTextBuilder* const& builder) :
+PseudocodeVisitor::PseudocodeVisitor(AbstractTextBuilder& builder) :
     AbstractVisitor(builder),
     configurator_(&TextConfigurator::get_instance())
 {
