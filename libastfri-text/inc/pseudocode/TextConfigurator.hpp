@@ -10,9 +10,9 @@ namespace astfri::text
     class TextConfigurator : public GeneralConfigurator
     {
         // TEXT_FORMAT
-        uptr<ss> defaultTextStyle_;
-        uptr<ss> rowNumStyle_;
-        uptr<std::vector<ss>> bracketColors_;
+        std::unique_ptr<std::stringstream> defaultTextStyle_;
+        std::unique_ptr<std::stringstream> rowNumStyle_;
+        std::unique_ptr<std::vector<std::stringstream>> bracketColors_;
         int tabulatorLen_;
         int textMarginLeftLen_;
         int rowNumMarginLeftLen_;
@@ -39,80 +39,80 @@ namespace astfri::text
         bool shFuncDeclar_;
         bool shFuncDefin_;
         // SYSTEM_EXPRESSIONS
-        uptr<ss> scopeWord_;
-        uptr<ss> classWord_;
-        uptr<ss> interfaceWord_;
-        uptr<ss> implementWord_;
-        uptr<ss> extendWord_;
-        uptr<ss> thisWord_;
-        uptr<ss> returnWord_;
-        uptr<ss> continueWord_;
-        uptr<ss> breakWord_;
-        uptr<ss> throwWord_;
-        uptr<ss> ifWord_;
-        uptr<ss> elseWord_;
-        uptr<ss> doWord_;
-        uptr<ss> whileWord_;
-        uptr<ss> forWord_;
-        uptr<ss> repeatWord_;
-        uptr<ss> switchWord_;
-        uptr<ss> caseWord_;
-        uptr<ss> defaultWord_;
-        uptr<ss> newWord_;
-        uptr<ss> deleteWord_;
-        uptr<ss> pointerWord_;
-        uptr<ss> overrideWord_;
-        uptr<ss> virtualWord_;
-        uptr<ss> abstractWord_;
-        uptr<ss> templateWord_;
+        std::unique_ptr<std::stringstream> scopeWord_;
+        std::unique_ptr<std::stringstream> classWord_;
+        std::unique_ptr<std::stringstream> interfaceWord_;
+        std::unique_ptr<std::stringstream> implementWord_;
+        std::unique_ptr<std::stringstream> extendWord_;
+        std::unique_ptr<std::stringstream> thisWord_;
+        std::unique_ptr<std::stringstream> returnWord_;
+        std::unique_ptr<std::stringstream> continueWord_;
+        std::unique_ptr<std::stringstream> breakWord_;
+        std::unique_ptr<std::stringstream> throwWord_;
+        std::unique_ptr<std::stringstream> ifWord_;
+        std::unique_ptr<std::stringstream> elseWord_;
+        std::unique_ptr<std::stringstream> doWord_;
+        std::unique_ptr<std::stringstream> whileWord_;
+        std::unique_ptr<std::stringstream> forWord_;
+        std::unique_ptr<std::stringstream> repeatWord_;
+        std::unique_ptr<std::stringstream> switchWord_;
+        std::unique_ptr<std::stringstream> caseWord_;
+        std::unique_ptr<std::stringstream> defaultWord_;
+        std::unique_ptr<std::stringstream> newWord_;
+        std::unique_ptr<std::stringstream> deleteWord_;
+        std::unique_ptr<std::stringstream> pointerWord_;
+        std::unique_ptr<std::stringstream> overrideWord_;
+        std::unique_ptr<std::stringstream> virtualWord_;
+        std::unique_ptr<std::stringstream> abstractWord_;
+        std::unique_ptr<std::stringstream> templateWord_;
         // STYLE
-        uptr<ss> systExprStyle_;
-        uptr<ss> scopeWordStyle_;
-        uptr<ss> classWordStyle_;
-        uptr<ss> interfaceWordStyle_;
-        uptr<ss> implementWordStyle_;
-        uptr<ss> extendWordStyle_;
-        uptr<ss> thisWordStyle_;
-        uptr<ss> returnWordStyle_;
-        uptr<ss> continueWordStyle_;
-        uptr<ss> breakWordStyle_;
-        uptr<ss> throwWordStyle_;
-        uptr<ss> ifWordStyle_;
-        uptr<ss> elseWordStyle_;
-        uptr<ss> doWordStyle_;
-        uptr<ss> whileWordStyle_;
-        uptr<ss> forWordStyle_;
-        uptr<ss> repeatWordStyle_;
-        uptr<ss> switchWordStyle_;
-        uptr<ss> caseWordStyle_;
-        uptr<ss> defaultWordStyle_;
-        uptr<ss> newWordStyle_;
-        uptr<ss> deleteWordStyle_;
-        uptr<ss> pointerWordStyle_;
-        uptr<ss> overrideWordStyle_;
-        uptr<ss> virtualWordStyle_;
-        uptr<ss> abstractWordStyle_;
-        uptr<ss> templateWordStyle_;
+        std::unique_ptr<std::stringstream> systExprStyle_;
+        std::unique_ptr<std::stringstream> scopeWordStyle_;
+        std::unique_ptr<std::stringstream> classWordStyle_;
+        std::unique_ptr<std::stringstream> interfaceWordStyle_;
+        std::unique_ptr<std::stringstream> implementWordStyle_;
+        std::unique_ptr<std::stringstream> extendWordStyle_;
+        std::unique_ptr<std::stringstream> thisWordStyle_;
+        std::unique_ptr<std::stringstream> returnWordStyle_;
+        std::unique_ptr<std::stringstream> continueWordStyle_;
+        std::unique_ptr<std::stringstream> breakWordStyle_;
+        std::unique_ptr<std::stringstream> throwWordStyle_;
+        std::unique_ptr<std::stringstream> ifWordStyle_;
+        std::unique_ptr<std::stringstream> elseWordStyle_;
+        std::unique_ptr<std::stringstream> doWordStyle_;
+        std::unique_ptr<std::stringstream> whileWordStyle_;
+        std::unique_ptr<std::stringstream> forWordStyle_;
+        std::unique_ptr<std::stringstream> repeatWordStyle_;
+        std::unique_ptr<std::stringstream> switchWordStyle_;
+        std::unique_ptr<std::stringstream> caseWordStyle_;
+        std::unique_ptr<std::stringstream> defaultWordStyle_;
+        std::unique_ptr<std::stringstream> newWordStyle_;
+        std::unique_ptr<std::stringstream> deleteWordStyle_;
+        std::unique_ptr<std::stringstream> pointerWordStyle_;
+        std::unique_ptr<std::stringstream> overrideWordStyle_;
+        std::unique_ptr<std::stringstream> virtualWordStyle_;
+        std::unique_ptr<std::stringstream> abstractWordStyle_;
+        std::unique_ptr<std::stringstream> templateWordStyle_;
         // OTHER_EXPRESSIONS
-        uptr<ss> constructorWord_;
-        uptr<ss> destructorWord_;
-        uptr<ss> methodWord_;
-        uptr<ss> functionWord_;
-        uptr<ss> lambdaWord_;
-        uptr<ss> callWord_;
-        uptr<ss> defineWord_;
-        uptr<ss> returnsWord_;
+        std::unique_ptr<std::stringstream> constructorWord_;
+        std::unique_ptr<std::stringstream> destructorWord_;
+        std::unique_ptr<std::stringstream> methodWord_;
+        std::unique_ptr<std::stringstream> functionWord_;
+        std::unique_ptr<std::stringstream> lambdaWord_;
+        std::unique_ptr<std::stringstream> callWord_;
+        std::unique_ptr<std::stringstream> defineWord_;
+        std::unique_ptr<std::stringstream> returnsWord_;
         // STYLE
-        uptr<ss> otherExprStyle_;
-        uptr<ss> constructorWordStyle_;
-        uptr<ss> destructorWordStyle_;
-        uptr<ss> methodWordStyle_;
-        uptr<ss> functionWordStyle_;
-        uptr<ss> lambdaWordStyle_;
-        uptr<ss> callWordStyle_;
-        uptr<ss> defineWordStyle_;
-        uptr<ss> returnsWordStyle_;
-        // -----
+        std::unique_ptr<std::stringstream> otherExprStyle_;
+        std::unique_ptr<std::stringstream> constructorWordStyle_;
+        std::unique_ptr<std::stringstream> destructorWordStyle_;
+        std::unique_ptr<std::stringstream> methodWordStyle_;
+        std::unique_ptr<std::stringstream> functionWordStyle_;
+        std::unique_ptr<std::stringstream> lambdaWordStyle_;
+        std::unique_ptr<std::stringstream> callWordStyle_;
+        std::unique_ptr<std::stringstream> defineWordStyle_;
+        std::unique_ptr<std::stringstream> returnsWordStyle_;
+    private:
         bool isDefaultState_;
         bool doOnlyUpdate_;
     public:
@@ -137,17 +137,17 @@ namespace astfri::text
         void process_other_expressions(rj::Value const*& expr);
     public:
         // TEXT_FORMAT
-        ss const* default_text_style()
+        std::stringstream const* default_text_style()
         {
             return defaultTextStyle_.get();
         }
 
-        ss const* row_num_style()
+        std::stringstream const* row_num_style()
         {
             return rowNumStyle_.get();
         }
 
-        std::vector<ss> const* bracket_colors()
+        std::vector<std::stringstream> const* bracket_colors()
         {
             return bracketColors_.get();
         }
@@ -274,354 +274,354 @@ namespace astfri::text
         }
 
         // SYSTEM_EXPRESSIONS
-        ss const* scope_word()
+        std::stringstream const* scope_word()
         {
             return scopeWord_.get();
         }
 
-        ss const* class_word()
+        std::stringstream const* class_word()
         {
             return classWord_.get();
         }
 
-        ss const* interface_word()
+        std::stringstream const* interface_word()
         {
             return interfaceWord_.get();
         }
 
-        ss const* implement_word()
+        std::stringstream const* implement_word()
         {
             return implementWord_.get();
         }
 
-        ss const* extend_word()
+        std::stringstream const* extend_word()
         {
             return extendWord_.get();
         }
 
-        ss const* this_word()
+        std::stringstream const* this_word()
         {
             return thisWord_.get();
         }
 
-        ss const* return_word()
+        std::stringstream const* return_word()
         {
             return returnWord_.get();
         }
 
-        ss const* continue_word()
+        std::stringstream const* continue_word()
         {
             return continueWord_.get();
         }
 
-        ss const* break_word()
+        std::stringstream const* break_word()
         {
             return breakWord_.get();
         }
 
-        ss const* throw_word()
+        std::stringstream const* throw_word()
         {
             return throwWord_.get();
         }
 
-        ss const* if_word()
+        std::stringstream const* if_word()
         {
             return ifWord_.get();
         }
 
-        ss const* else_word()
+        std::stringstream const* else_word()
         {
             return elseWord_.get();
         }
 
-        ss const* do_word()
+        std::stringstream const* do_word()
         {
             return doWord_.get();
         }
 
-        ss const* while_word()
+        std::stringstream const* while_word()
         {
             return whileWord_.get();
         }
 
-        ss const* for_word()
+        std::stringstream const* for_word()
         {
             return forWord_.get();
         }
 
-        ss const* repeat_word()
+        std::stringstream const* repeat_word()
         {
             return repeatWord_.get();
         }
 
-        ss const* switch_word()
+        std::stringstream const* switch_word()
         {
             return switchWord_.get();
         }
 
-        ss const* case_word()
+        std::stringstream const* case_word()
         {
             return caseWord_.get();
         }
 
-        ss const* default_word()
+        std::stringstream const* default_word()
         {
             return defaultWord_.get();
         }
 
-        ss const* new_word()
+        std::stringstream const* new_word()
         {
             return newWord_.get();
         }
 
-        ss const* delete_word()
+        std::stringstream const* delete_word()
         {
             return deleteWord_.get();
         }
 
-        ss const* pointer_word()
+        std::stringstream const* pointer_word()
         {
             return pointerWord_.get();
         }
 
-        ss const* override_word()
+        std::stringstream const* override_word()
         {
             return overrideWord_.get();
         }
 
-        ss const* virtual_word()
+        std::stringstream const* virtual_word()
         {
             return virtualWord_.get();
         }
 
-        ss const* abstract_word()
+        std::stringstream const* abstract_word()
         {
             return abstractWord_.get();
         }
 
-        ss const* template_word()
+        std::stringstream const* template_word()
         {
             return templateWord_.get();
         }
 
         // STYLE
-        ss const* system_expr_style()
+        std::stringstream const* system_expr_style()
         {
             return systExprStyle_.get();
         }
 
-        ss const* scope_word_style()
+        std::stringstream const* scope_word_style()
         {
             return scopeWordStyle_.get();
         }
 
-        ss const* class_word_style()
+        std::stringstream const* class_word_style()
         {
             return classWordStyle_.get();
         }
 
-        ss const* interface_word_style()
+        std::stringstream const* interface_word_style()
         {
             return interfaceWordStyle_.get();
         }
 
-        ss const* implement_word_style()
+        std::stringstream const* implement_word_style()
         {
             return implementWordStyle_.get();
         }
 
-        ss const* extend_word_style()
+        std::stringstream const* extend_word_style()
         {
             return extendWordStyle_.get();
         }
 
-        ss const* this_word_style()
+        std::stringstream const* this_word_style()
         {
             return thisWordStyle_.get();
         }
 
-        ss const* return_word_style()
+        std::stringstream const* return_word_style()
         {
             return returnWordStyle_.get();
         }
 
-        ss const* continue_word_style()
+        std::stringstream const* continue_word_style()
         {
             return continueWordStyle_.get();
         }
 
-        ss const* break_word_style()
+        std::stringstream const* break_word_style()
         {
             return breakWordStyle_.get();
         }
 
-        ss const* throw_word_style()
+        std::stringstream const* throw_word_style()
         {
             return throwWordStyle_.get();
         }
 
-        ss const* if_word_style()
+        std::stringstream const* if_word_style()
         {
             return ifWordStyle_.get();
         }
 
-        ss const* else_word_style()
+        std::stringstream const* else_word_style()
         {
             return elseWordStyle_.get();
         }
 
-        ss const* do_word_style()
+        std::stringstream const* do_word_style()
         {
             return doWordStyle_.get();
         }
 
-        ss const* while_word_style()
+        std::stringstream const* while_word_style()
         {
             return whileWordStyle_.get();
         }
 
-        ss const* for_word_style()
+        std::stringstream const* for_word_style()
         {
             return forWordStyle_.get();
         }
 
-        ss const* repeat_word_style()
+        std::stringstream const* repeat_word_style()
         {
             return repeatWordStyle_.get();
         }
 
-        ss const* switch_word_style()
+        std::stringstream const* switch_word_style()
         {
             return switchWordStyle_.get();
         }
 
-        ss const* case_word_style()
+        std::stringstream const* case_word_style()
         {
             return caseWordStyle_.get();
         }
 
-        ss const* default_word_style()
+        std::stringstream const* default_word_style()
         {
             return defaultWordStyle_.get();
         }
 
-        ss const* new_word_style()
+        std::stringstream const* new_word_style()
         {
             return newWordStyle_.get();
         }
 
-        ss const* delete_word_style()
+        std::stringstream const* delete_word_style()
         {
             return deleteWordStyle_.get();
         }
 
-        ss const* pointer_word_style()
+        std::stringstream const* pointer_word_style()
         {
             return pointerWordStyle_.get();
         }
 
-        ss const* override_word_style()
+        std::stringstream const* override_word_style()
         {
             return overrideWordStyle_.get();
         }
 
-        ss const* virtual_word_style()
+        std::stringstream const* virtual_word_style()
         {
             return virtualWordStyle_.get();
         }
 
-        ss const* abstract_word_style()
+        std::stringstream const* abstract_word_style()
         {
             return abstractWordStyle_.get();
         }
 
-        ss const* template_word_style()
+        std::stringstream const* template_word_style()
         {
             return templateWordStyle_.get();
         }
 
         // OTHER_EXPRESSIONS
-        ss const* constructor_word()
+        std::stringstream const* constructor_word()
         {
             return constructorWord_.get();
         }
 
-        ss const* destructor_word()
+        std::stringstream const* destructor_word()
         {
             return destructorWord_.get();
         }
 
-        ss const* method_word()
+        std::stringstream const* method_word()
         {
             return methodWord_.get();
         }
 
-        ss const* function_word()
+        std::stringstream const* function_word()
         {
             return functionWord_.get();
         }
 
-        ss const* lambda_word()
+        std::stringstream const* lambda_word()
         {
             return lambdaWord_.get();
         }
 
-        ss const* call_word()
+        std::stringstream const* call_word()
         {
             return callWord_.get();
         }
 
-        ss const* define_word()
+        std::stringstream const* define_word()
         {
             return defineWord_.get();
         }
 
-        ss const* returns_word()
+        std::stringstream const* returns_word()
         {
             return returnsWord_.get();
         }
 
-        ss const* other_expression_style()
+        std::stringstream const* other_expression_style()
         {
             return otherExprStyle_.get();
         }
 
-        ss const* constructor_word_style()
+        std::stringstream const* constructor_word_style()
         {
             return constructorWordStyle_.get();
         }
 
-        ss const* destructor_word_style()
+        std::stringstream const* destructor_word_style()
         {
             return destructorWordStyle_.get();
         }
 
-        ss const* method_word_style()
+        std::stringstream const* method_word_style()
         {
             return methodWordStyle_.get();
         }
 
-        ss const* function_word_style()
+        std::stringstream const* function_word_style()
         {
             return functionWordStyle_.get();
         }
 
-        ss const* lambda_word_style()
+        std::stringstream const* lambda_word_style()
         {
             return lambdaWordStyle_.get();
         }
 
-        ss const* call_word_style()
+        std::stringstream const* call_word_style()
         {
             return callWordStyle_.get();
         }
 
-        ss const* define_word_style()
+        std::stringstream const* define_word_style()
         {
             return defineWordStyle_.get();
         }
 
-        ss const* returns_word_style()
+        std::stringstream const* returns_word_style()
         {
             return returnsWordStyle_.get();
         }

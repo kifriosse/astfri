@@ -22,6 +22,10 @@ TextConfigurator::TextConfigurator() :
     set_defaults();
 }
 
+//
+// -----
+//
+
 void TextConfigurator::update_configuration()
 {
     doOnlyUpdate_ = true;
@@ -94,9 +98,10 @@ void TextConfigurator::reload_configuration()
 void TextConfigurator::set_defaults()
 {
     // TEXT_FORMAT
-    defaultTextStyle_ = std::make_unique<ss>("font-family:Consolas;font-size:18px");
-    rowNumStyle_ = std::make_unique<ss>();
-    bracketColors_ = std::make_unique<std::vector<ss>>();
+    defaultTextStyle_ = std::make_unique<std::stringstream>(
+        "font-family:Consolas;font-size:18px");
+    rowNumStyle_ = std::make_unique<std::stringstream>();
+    bracketColors_ = std::make_unique<std::vector<std::stringstream>>();
     tabulatorLen_ = 4;
     textMarginLeftLen_ = 3;
     rowNumMarginLeftLen_ = 1;
@@ -123,79 +128,79 @@ void TextConfigurator::set_defaults()
     shFuncDeclar_ = true;
     shFuncDefin_ = true;
     // SYSTEM_EXPRESSIONS
-    scopeWord_     = std::make_unique<ss>("namespace");
-    classWord_     = std::make_unique<ss>("class");
-    interfaceWord_ = std::make_unique<ss>("interface");
-    implementWord_ = std::make_unique<ss>("implements");
-    extendWord_    = std::make_unique<ss>("extends");
-    thisWord_      = std::make_unique<ss>("this");
-    returnWord_    = std::make_unique<ss>("return");
-    continueWord_  = std::make_unique<ss>("continue");
-    breakWord_     = std::make_unique<ss>("break");
-    throwWord_     = std::make_unique<ss>("throw");
-    ifWord_        = std::make_unique<ss>("if");
-    elseWord_      = std::make_unique<ss>("else");
-    doWord_        = std::make_unique<ss>("do");
-    whileWord_     = std::make_unique<ss>("while");
-    forWord_       = std::make_unique<ss>("for");
-    repeatWord_    = std::make_unique<ss>("repeat");
-    switchWord_    = std::make_unique<ss>("switch");
-    caseWord_      = std::make_unique<ss>("case");
-    defaultWord_   = std::make_unique<ss>("default");
-    newWord_       = std::make_unique<ss>("new");
-    deleteWord_    = std::make_unique<ss>("delete");
-    pointerWord_   = std::make_unique<ss>("↑");
-    overrideWord_  = std::make_unique<ss>("override");
-    virtualWord_   = std::make_unique<ss>("is virtual");
-    abstractWord_  = std::make_unique<ss>("is abstract");
-    templateWord_  = std::make_unique<ss>("template");
+    scopeWord_     = std::make_unique<std::stringstream>("namespace");
+    classWord_     = std::make_unique<std::stringstream>("class");
+    interfaceWord_ = std::make_unique<std::stringstream>("interface");
+    implementWord_ = std::make_unique<std::stringstream>("implements");
+    extendWord_    = std::make_unique<std::stringstream>("extends");
+    thisWord_      = std::make_unique<std::stringstream>("this");
+    returnWord_    = std::make_unique<std::stringstream>("return");
+    continueWord_  = std::make_unique<std::stringstream>("continue");
+    breakWord_     = std::make_unique<std::stringstream>("break");
+    throwWord_     = std::make_unique<std::stringstream>("throw");
+    ifWord_        = std::make_unique<std::stringstream>("if");
+    elseWord_      = std::make_unique<std::stringstream>("else");
+    doWord_        = std::make_unique<std::stringstream>("do");
+    whileWord_     = std::make_unique<std::stringstream>("while");
+    forWord_       = std::make_unique<std::stringstream>("for");
+    repeatWord_    = std::make_unique<std::stringstream>("repeat");
+    switchWord_    = std::make_unique<std::stringstream>("switch");
+    caseWord_      = std::make_unique<std::stringstream>("case");
+    defaultWord_   = std::make_unique<std::stringstream>("default");
+    newWord_       = std::make_unique<std::stringstream>("new");
+    deleteWord_    = std::make_unique<std::stringstream>("delete");
+    pointerWord_   = std::make_unique<std::stringstream>("↑");
+    overrideWord_  = std::make_unique<std::stringstream>("override");
+    virtualWord_   = std::make_unique<std::stringstream>("is virtual");
+    abstractWord_  = std::make_unique<std::stringstream>("is abstract");
+    templateWord_  = std::make_unique<std::stringstream>("template");
     // STYLE
-    systExprStyle_      = std::make_unique<ss>();
-    scopeWordStyle_     = std::make_unique<ss>();
-    classWordStyle_     = std::make_unique<ss>();
-    interfaceWordStyle_ = std::make_unique<ss>();
-    implementWordStyle_ = std::make_unique<ss>();
-    extendWordStyle_    = std::make_unique<ss>();
-    thisWordStyle_      = std::make_unique<ss>();
-    returnWordStyle_    = std::make_unique<ss>();
-    continueWordStyle_  = std::make_unique<ss>();
-    breakWordStyle_     = std::make_unique<ss>();
-    throwWordStyle_     = std::make_unique<ss>();
-    ifWordStyle_        = std::make_unique<ss>();
-    elseWordStyle_      = std::make_unique<ss>();
-    doWordStyle_        = std::make_unique<ss>();
-    whileWordStyle_     = std::make_unique<ss>();
-    forWordStyle_       = std::make_unique<ss>();
-    repeatWordStyle_    = std::make_unique<ss>();
-    switchWordStyle_    = std::make_unique<ss>();
-    caseWordStyle_      = std::make_unique<ss>();
-    defaultWordStyle_   = std::make_unique<ss>();
-    newWordStyle_       = std::make_unique<ss>();
-    deleteWordStyle_    = std::make_unique<ss>();
-    pointerWordStyle_   = std::make_unique<ss>();
-    overrideWordStyle_  = std::make_unique<ss>();
-    virtualWordStyle_   = std::make_unique<ss>();
-    abstractWordStyle_  = std::make_unique<ss>();
-    templateWordStyle_  = std::make_unique<ss>();
+    systExprStyle_      = std::make_unique<std::stringstream>();
+    scopeWordStyle_     = std::make_unique<std::stringstream>();
+    classWordStyle_     = std::make_unique<std::stringstream>();
+    interfaceWordStyle_ = std::make_unique<std::stringstream>();
+    implementWordStyle_ = std::make_unique<std::stringstream>();
+    extendWordStyle_    = std::make_unique<std::stringstream>();
+    thisWordStyle_      = std::make_unique<std::stringstream>();
+    returnWordStyle_    = std::make_unique<std::stringstream>();
+    continueWordStyle_  = std::make_unique<std::stringstream>();
+    breakWordStyle_     = std::make_unique<std::stringstream>();
+    throwWordStyle_     = std::make_unique<std::stringstream>();
+    ifWordStyle_        = std::make_unique<std::stringstream>();
+    elseWordStyle_      = std::make_unique<std::stringstream>();
+    doWordStyle_        = std::make_unique<std::stringstream>();
+    whileWordStyle_     = std::make_unique<std::stringstream>();
+    forWordStyle_       = std::make_unique<std::stringstream>();
+    repeatWordStyle_    = std::make_unique<std::stringstream>();
+    switchWordStyle_    = std::make_unique<std::stringstream>();
+    caseWordStyle_      = std::make_unique<std::stringstream>();
+    defaultWordStyle_   = std::make_unique<std::stringstream>();
+    newWordStyle_       = std::make_unique<std::stringstream>();
+    deleteWordStyle_    = std::make_unique<std::stringstream>();
+    pointerWordStyle_   = std::make_unique<std::stringstream>();
+    overrideWordStyle_  = std::make_unique<std::stringstream>();
+    virtualWordStyle_   = std::make_unique<std::stringstream>();
+    abstractWordStyle_  = std::make_unique<std::stringstream>();
+    templateWordStyle_  = std::make_unique<std::stringstream>();
     // OTHER_EXPRESSIONS
-    constructorWord_ = std::make_unique<ss>("constructor");
-    destructorWord_  = std::make_unique<ss>("destructor");
-    methodWord_      = std::make_unique<ss>("method");
-    functionWord_    = std::make_unique<ss>("function");
-    lambdaWord_      = std::make_unique<ss>("λ");
-    callWord_        = std::make_unique<ss>("call");
-    defineWord_      = std::make_unique<ss>("define");
-    returnsWord_     = std::make_unique<ss>("returns");
+    constructorWord_ = std::make_unique<std::stringstream>("constructor");
+    destructorWord_  = std::make_unique<std::stringstream>("destructor");
+    methodWord_      = std::make_unique<std::stringstream>("method");
+    functionWord_    = std::make_unique<std::stringstream>("function");
+    lambdaWord_      = std::make_unique<std::stringstream>("λ");
+    callWord_        = std::make_unique<std::stringstream>("call");
+    defineWord_      = std::make_unique<std::stringstream>("define");
+    returnsWord_     = std::make_unique<std::stringstream>("returns");
     // STYLE
-    otherExprStyle_       = std::make_unique<ss>();
-    constructorWordStyle_ = std::make_unique<ss>();
-    destructorWordStyle_  = std::make_unique<ss>();
-    methodWordStyle_      = std::make_unique<ss>();
-    functionWordStyle_    = std::make_unique<ss>();
-    lambdaWordStyle_      = std::make_unique<ss>();
-    callWordStyle_        = std::make_unique<ss>();
-    defineWordStyle_      = std::make_unique<ss>();
-    returnsWordStyle_     = std::make_unique<ss>();
+    otherExprStyle_       = std::make_unique<std::stringstream>();
+    constructorWordStyle_ = std::make_unique<std::stringstream>();
+    destructorWordStyle_  = std::make_unique<std::stringstream>();
+    methodWordStyle_      = std::make_unique<std::stringstream>();
+    functionWordStyle_    = std::make_unique<std::stringstream>();
+    lambdaWordStyle_      = std::make_unique<std::stringstream>();
+    callWordStyle_        = std::make_unique<std::stringstream>();
+    defineWordStyle_      = std::make_unique<std::stringstream>();
+    returnsWordStyle_     = std::make_unique<std::stringstream>();
 }
 
 void TextConfigurator::process_document(rj::Value const*& doc)
@@ -233,11 +238,11 @@ void TextConfigurator::process_text_format(rj::Value const*& format)
     std::string stringVal;
     if (is_string("default_text_style", format, stringVal, false))
     {
-        defaultTextStyle_ = std::make_unique<ss>(stringVal);
+        defaultTextStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("row_number_style", format, stringVal, false))
     {
-        rowNumStyle_ = std::make_unique<ss>(stringVal);
+        rowNumStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     rj::Value const* array;
     if (is_array("bracket_colors", format, array))
@@ -247,7 +252,7 @@ void TextConfigurator::process_text_format(rj::Value const*& format)
         {
             if (array[i].IsString() && array[i].GetStringLength() > 0)
             {
-                bracketColors_->push_back(ss(array[i].GetString()));
+                bracketColors_->push_back(std::stringstream(array[i].GetString()));
                 if (bracketColors_->size() == 4)
                 {
                     break;
@@ -314,218 +319,218 @@ void TextConfigurator::process_system_expressions(rj::Value const*& expr)
     std::string stringVal;
     if (is_string("scope_word", expr, stringVal, true))
     {
-        scopeWord_ = std::make_unique<ss>(stringVal);
+        scopeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("class_word", expr, stringVal, true))
     {
-        classWord_ = std::make_unique<ss>(stringVal);
+        classWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("interface_word", expr, stringVal, true))
     {
-        interfaceWord_ = std::make_unique<ss>(stringVal);
+        interfaceWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("implement_word", expr, stringVal, true))
     {
-        implementWord_ = std::make_unique<ss>(stringVal);
+        implementWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("extend_word", expr, stringVal, true))
     {
-        extendWord_ = std::make_unique<ss>(stringVal);
+        extendWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("this_word", expr, stringVal, true))
     {
-        thisWord_ = std::make_unique<ss>(stringVal);
+        thisWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("return_word", expr, stringVal, true))
     {
-        returnWord_ = std::make_unique<ss>(stringVal);
+        returnWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("continue_word", expr, stringVal, true))
     {
-        continueWord_ = std::make_unique<ss>(stringVal);
+        continueWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("break_word", expr, stringVal, true))
     {
-        breakWord_ = std::make_unique<ss>(stringVal);
+        breakWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("throw_word", expr, stringVal, true))
     {
-        throwWord_ = std::make_unique<ss>(stringVal);
+        throwWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("if_word", expr, stringVal, true))
     {
-        ifWord_ = std::make_unique<ss>(stringVal);
+        ifWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("else_word", expr, stringVal, true))
     {
-        elseWord_ = std::make_unique<ss>(stringVal);
+        elseWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("do_word", expr, stringVal, true))
     {
-        doWord_ = std::make_unique<ss>(stringVal);
+        doWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("while_word", expr, stringVal, true))
     {
-        whileWord_ = std::make_unique<ss>(stringVal);
+        whileWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("for_word", expr, stringVal, true))
     {
-        forWord_ = std::make_unique<ss>(stringVal);
+        forWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("repeat_word", expr, stringVal, true))
     {
-        repeatWord_ = std::make_unique<ss>(stringVal);
+        repeatWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("switch_word", expr, stringVal, true))
     {
-        switchWord_ = std::make_unique<ss>(stringVal);
+        switchWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("case_word", expr, stringVal, true))
     {
-        caseWord_ = std::make_unique<ss>(stringVal);
+        caseWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("default_word", expr, stringVal, true))
     {
-        defaultWord_ = std::make_unique<ss>(stringVal);
+        defaultWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("new_word", expr, stringVal, true))
     {
-        newWord_ = std::make_unique<ss>(stringVal);
+        newWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("delete_word", expr, stringVal, true))
     {
-        deleteWord_ = std::make_unique<ss>(stringVal);
+        deleteWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("pointer_word", expr, stringVal, false))
     {
-        pointerWord_ = std::make_unique<ss>(stringVal);
+        pointerWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("override_word", expr, stringVal, false))
     {
-        overrideWord_ = std::make_unique<ss>(stringVal);
+        overrideWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("virtual_word", expr, stringVal, true))
     {
-        virtualWord_ = std::make_unique<ss>(stringVal);
+        virtualWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("abstract_word", expr, stringVal, true))
     {
-        abstractWord_ = std::make_unique<ss>(stringVal);
+        abstractWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("template_word", expr, stringVal, true))
     {
-        templateWord_ = std::make_unique<ss>(stringVal);
+        templateWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     rj::Value const* style;
     if (is_object("STYLE", expr, style))
     {
         if (is_string("default_style", style, stringVal, false))
         {
-            systExprStyle_ = std::make_unique<ss>(stringVal);
+            systExprStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("scope_word_style", style, stringVal, false))
         {
-            scopeWordStyle_ = std::make_unique<ss>(stringVal);
+            scopeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("class_word_style", style, stringVal, false))
         {
-            classWordStyle_ = std::make_unique<ss>(stringVal);
+            classWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("interface_word_style", style, stringVal, false))
         {
-            interfaceWordStyle_ = std::make_unique<ss>(stringVal);
+            interfaceWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("implement_word_style", style, stringVal, false))
         {
-            implementWordStyle_ = std::make_unique<ss>(stringVal);
+            implementWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("extend_word_style", style, stringVal, false))
         {
-            extendWordStyle_ = std::make_unique<ss>(stringVal);
+            extendWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("this_word_style", style, stringVal, false))
         {
-            thisWordStyle_ = std::make_unique<ss>(stringVal);
+            thisWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("return_word_style", style, stringVal, false))
         {
-            returnWordStyle_ = std::make_unique<ss>(stringVal);
+            returnWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("continue_word_style", style, stringVal, false))
         {
-            continueWordStyle_ = std::make_unique<ss>(stringVal);
+            continueWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("break_word_style", style, stringVal, false))
         {
-            breakWordStyle_ = std::make_unique<ss>(stringVal);
+            breakWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("throw_word_style", style, stringVal, false))
         {
-            throwWordStyle_ = std::make_unique<ss>(stringVal);
+            throwWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("if_word_style", style, stringVal, false))
         {
-            ifWordStyle_ = std::make_unique<ss>(stringVal);
+            ifWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("else_word_style", style, stringVal, false))
         {
-            elseWordStyle_ = std::make_unique<ss>(stringVal);
+            elseWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("do_word_style", style, stringVal, false))
         {
-            doWordStyle_ = std::make_unique<ss>(stringVal);
+            doWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("while_word_style", style, stringVal, false))
         {
-            whileWordStyle_ = std::make_unique<ss>(stringVal);
+            whileWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("for_word_style", style, stringVal, false))
         {
-            forWordStyle_ = std::make_unique<ss>(stringVal);
+            forWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("repeat_word_style", style, stringVal, false))
         {
-            repeatWordStyle_ = std::make_unique<ss>(stringVal);
+            repeatWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("switch_word_style", style, stringVal, false))
         {
-            switchWordStyle_ = std::make_unique<ss>(stringVal);
+            switchWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("case_word_style", style, stringVal, false))
         {
-            caseWordStyle_ = std::make_unique<ss>(stringVal);
+            caseWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("default_word_style", style, stringVal, false))
         {
-            defaultWordStyle_ = std::make_unique<ss>(stringVal);
+            defaultWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("new_word_style", style, stringVal, false))
         {
-            newWordStyle_ = std::make_unique<ss>(stringVal);
+            newWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("delete_word_style", style, stringVal, false))
         {
-            deleteWordStyle_ = std::make_unique<ss>(stringVal);
+            deleteWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("pointer_word_style", style, stringVal, false))
         {
-            pointerWordStyle_ = std::make_unique<ss>(stringVal);
+            pointerWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("override_word_style", style, stringVal, false))
         {
-            overrideWordStyle_ = std::make_unique<ss>(stringVal);
+            overrideWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("virtual_word_style", style, stringVal, false))
         {
-            virtualWordStyle_ = std::make_unique<ss>(stringVal);
+            virtualWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("abstract_word_style", style, stringVal, false))
         {
-            abstractWordStyle_ = std::make_unique<ss>(stringVal);
+            abstractWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("template_word_style", style, stringVal, false))
         {
-            templateWordStyle_ = std::make_unique<ss>(stringVal);
+            templateWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
     }
 }
@@ -535,74 +540,74 @@ void TextConfigurator::process_other_expressions(rj::Value const*& expr)
     std::string stringVal;
     if (is_string("constructor_word", expr, stringVal, true))
     {
-        constructorWord_ = std::make_unique<ss>(stringVal);
+        constructorWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("destructor_word", expr, stringVal, true))
     {
-        destructorWord_ = std::make_unique<ss>(stringVal);
+        destructorWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("method_word", expr, stringVal, true))
     {
-        methodWord_ = std::make_unique<ss>(stringVal);
+        methodWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("function_word", expr, stringVal, true))
     {
-        functionWord_ = std::make_unique<ss>(stringVal);
+        functionWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("lambda_word", expr, stringVal, false))
     {
-        lambdaWord_ = std::make_unique<ss>(stringVal);
+        lambdaWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("call_word", expr, stringVal, true))
     {
-        callWord_ = std::make_unique<ss>(stringVal);
+        callWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("define_word", expr, stringVal, true))
     {
-        defineWord_ = std::make_unique<ss>(stringVal);
+        defineWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("returns_word", expr, stringVal, true))
     {
-        returnsWord_ = std::make_unique<ss>(stringVal);
+        returnsWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     rj::Value const* style;
     if (is_object("STYLE", expr, style))
     {
         if (is_string("default_style", style, stringVal, false))
         {
-            otherExprStyle_ = std::make_unique<ss>(stringVal);
+            otherExprStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("constructor_word_style", style, stringVal, false))
         {
-            constructorWordStyle_ = std::make_unique<ss>(stringVal);
+            constructorWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("destructor_word_style", style, stringVal, false))
         {
-            destructorWordStyle_ = std::make_unique<ss>(stringVal);
+            destructorWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("method_word_style", style, stringVal, false))
         {
-            methodWordStyle_ = std::make_unique<ss>(stringVal);
+            methodWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("function_word_style", style, stringVal, false))
         {
-            functionWordStyle_ = std::make_unique<ss>(stringVal);
+            functionWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("lambda_word_style", style, stringVal, false))
         {
-            lambdaWordStyle_ = std::make_unique<ss>(stringVal);
+            lambdaWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("call_word_style", style, stringVal, false))
         {
-            callWordStyle_ = std::make_unique<ss>(stringVal);
+            callWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("define_word_style", style, stringVal, false))
         {
-            defineWordStyle_ = std::make_unique<ss>(stringVal);
+            defineWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("returns_word_style", style, stringVal, false))
         {
-            returnsWordStyle_ = std::make_unique<ss>(stringVal);
+            returnsWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
     }
 }

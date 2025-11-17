@@ -8,89 +8,92 @@ GeneralConfigurator::GeneralConfigurator()
     set_defaults();
 }
 
+//
+// -----
+//
+
 void GeneralConfigurator::set_defaults()
 {
     // FILE_SETTINGS
     overwriteFile_ = false;
-    outputFileName_ = std::make_unique<ss>("output");
-    std::string path = "default";
-    fmanager_->check_and_set_file_path(path);
-    outputFilePath_ = std::make_unique<ss>(path);
-    outputFileFormat_ = std::make_unique<ss>("txt");
+    outputFileName_ = std::make_unique<std::stringstream>("output");
+    outputFilePath_ = std::make_unique<std::stringstream>(
+        fmanager_->default_folder_path());
+    outputFileFormat_ = std::make_unique<std::stringstream>("txt");
     // UNKNOWN_PHRASES
-    unknownTypeWord_ = std::make_unique<ss>("UNKNOWN TYPE");
-    unknownExprWord_ = std::make_unique<ss>("UNKNOWN EXPRESSION");
-    unknownStmtWord_ = std::make_unique<ss>("UNKNOWN STATEMENT");
-    invalidTypeWord_ = std::make_unique<ss>("INVALID TYPE");
-    invalidExprWord_ = std::make_unique<ss>("INVALID EXPRESSION");
-    invalidStmtWord_ = std::make_unique<ss>("INVALID STATEMENT");
+    unknownTypeWord_ = std::make_unique<std::stringstream>("UNKNOWN TYPE");
+    unknownExprWord_ = std::make_unique<std::stringstream>("UNKNOWN EXPRESSION");
+    unknownStmtWord_ = std::make_unique<std::stringstream>("UNKNOWN STATEMENT");
+    invalidTypeWord_ = std::make_unique<std::stringstream>("INVALID TYPE");
+    invalidExprWord_ = std::make_unique<std::stringstream>("INVALID EXPRESSION");
+    invalidStmtWord_ = std::make_unique<std::stringstream>("INVALID STATEMENT");
     // STYLE
-    defaultPhraseStyle_ = std::make_unique<ss>();
-    unknownTypeWordStyle_ = std::make_unique<ss>();
-    unknownExprWordStyle_ = std::make_unique<ss>();
-    unknownStmtWordStyle_ = std::make_unique<ss>();
-    invalidTypeWordStyle_ = std::make_unique<ss>();
-    invalidExprWordStyle_ = std::make_unique<ss>();
-    invalidStmtWordStyle_ = std::make_unique<ss>();
+    defaultPhraseStyle_ = std::make_unique<std::stringstream>();
+    unknownTypeWordStyle_ = std::make_unique<std::stringstream>();
+    unknownExprWordStyle_ = std::make_unique<std::stringstream>();
+    unknownStmtWordStyle_ = std::make_unique<std::stringstream>();
+    invalidTypeWordStyle_ = std::make_unique<std::stringstream>();
+    invalidExprWordStyle_ = std::make_unique<std::stringstream>();
+    invalidStmtWordStyle_ = std::make_unique<std::stringstream>();
     // ACCESS_MODIFIERS
     useInnerView_ = true;
-    publicWord_ = std::make_unique<ss>("public");
-    protectedWord_ = std::make_unique<ss>("protected");
-    privateWord_ = std::make_unique<ss>("private");
-    internalWord_ = std::make_unique<ss>("internal");
-    attributesWord_ = std::make_unique<ss>("attributes");
-    constructorsWord_ = std::make_unique<ss>("constructors");
-    destructorsWord_ = std::make_unique<ss>("destructors");
-    methodsWord_ = std::make_unique<ss>("methods");
-    accessModifierStyle_ = std::make_unique<ss>();
+    publicWord_ = std::make_unique<std::stringstream>("public");
+    protectedWord_ = std::make_unique<std::stringstream>("protected");
+    privateWord_ = std::make_unique<std::stringstream>("private");
+    internalWord_ = std::make_unique<std::stringstream>("internal");
+    attributesWord_ = std::make_unique<std::stringstream>("attributes");
+    constructorsWord_ = std::make_unique<std::stringstream>("constructors");
+    destructorsWord_ = std::make_unique<std::stringstream>("destructors");
+    methodsWord_ = std::make_unique<std::stringstream>("methods");
+    accessModifierStyle_ = std::make_unique<std::stringstream>();
     // DATA_TYPES
-    dynamicTypeWord_ = std::make_unique<ss>("auto");
-    intTypeWord_ = std::make_unique<ss>("int");
-    floatTypeWord_ = std::make_unique<ss>("float");
-    charTypeWord_ = std::make_unique<ss>("char");
-    boolTypeWord_ = std::make_unique<ss>("bool");
-    voidTypeWord_ = std::make_unique<ss>("void");
+    dynamicTypeWord_ = std::make_unique<std::stringstream>("auto");
+    intTypeWord_ = std::make_unique<std::stringstream>("int");
+    floatTypeWord_ = std::make_unique<std::stringstream>("float");
+    charTypeWord_ = std::make_unique<std::stringstream>("char");
+    boolTypeWord_ = std::make_unique<std::stringstream>("bool");
+    voidTypeWord_ = std::make_unique<std::stringstream>("void");
     // STYLE
-    defaultTypeWordStyle_ = std::make_unique<ss>();
-    dynamicTypeWordStyle_ = std::make_unique<ss>();
-    intTypeWordStyle_ = std::make_unique<ss>();
-    floatTypeWordStyle_ = std::make_unique<ss>();
-    charTypeWordStyle_ = std::make_unique<ss>();
-    boolTypeWordStyle_ = std::make_unique<ss>();
-    voidTypeWordStyle_ = std::make_unique<ss>();
-    userTypeStyle_ = std::make_unique<ss>();
+    defaultTypeWordStyle_ = std::make_unique<std::stringstream>();
+    dynamicTypeWordStyle_ = std::make_unique<std::stringstream>();
+    intTypeWordStyle_ = std::make_unique<std::stringstream>();
+    floatTypeWordStyle_ = std::make_unique<std::stringstream>();
+    charTypeWordStyle_ = std::make_unique<std::stringstream>();
+    boolTypeWordStyle_ = std::make_unique<std::stringstream>();
+    voidTypeWordStyle_ = std::make_unique<std::stringstream>();
+    userTypeStyle_ = std::make_unique<std::stringstream>();
     // REFERENCE_NAMES
-    defaultRefNameStyle_ = std::make_unique<ss>();
-    genericParamNameStyle_ = std::make_unique<ss>();
-    classNameStyle_ = std::make_unique<ss>();
-    interfaceNameStyle_ = std::make_unique<ss>();
-    methodNameStyle_ = std::make_unique<ss>();
-    functionNameStyle_ = std::make_unique<ss>();
-    defaultVarNameStyle_ = std::make_unique<ss>();
-    globalVarNameStyle_ = std::make_unique<ss>();
-    memberVarNameStyle_ = std::make_unique<ss>();
-    localVarNameStyle_ = std::make_unique<ss>();
-    paramVarNameStyle_ = std::make_unique<ss>();
+    defaultRefNameStyle_ = std::make_unique<std::stringstream>();
+    genericParamNameStyle_ = std::make_unique<std::stringstream>();
+    classNameStyle_ = std::make_unique<std::stringstream>();
+    interfaceNameStyle_ = std::make_unique<std::stringstream>();
+    methodNameStyle_ = std::make_unique<std::stringstream>();
+    functionNameStyle_ = std::make_unique<std::stringstream>();
+    defaultVarNameStyle_ = std::make_unique<std::stringstream>();
+    globalVarNameStyle_ = std::make_unique<std::stringstream>();
+    memberVarNameStyle_ = std::make_unique<std::stringstream>();
+    localVarNameStyle_ = std::make_unique<std::stringstream>();
+    paramVarNameStyle_ = std::make_unique<std::stringstream>();
     // OPERATORS
-    assignOpWord_ = std::make_unique<ss>("=");
-    moduloOpWord_ = std::make_unique<ss>("%");
-    addressOpWord_ = std::make_unique<ss>("&");
-    derefOpWord_ = std::make_unique<ss>("*");
-    operatorStyle_ = std::make_unique<ss>();
+    assignOpWord_ = std::make_unique<std::stringstream>("=");
+    moduloOpWord_ = std::make_unique<std::stringstream>("%");
+    addressOpWord_ = std::make_unique<std::stringstream>("&");
+    derefOpWord_ = std::make_unique<std::stringstream>("*");
+    operatorStyle_ = std::make_unique<std::stringstream>();
     // SEPARATORS
-    separatorStyle_ = std::make_unique<ss>();
+    separatorStyle_ = std::make_unique<std::stringstream>();
     // VALUES
-    trueValWord_ = std::make_unique<ss>("true");
-    falseValWord_ = std::make_unique<ss>("false");
-    nullValWord_ = std::make_unique<ss>("NULL");
+    trueValWord_ = std::make_unique<std::stringstream>("true");
+    falseValWord_ = std::make_unique<std::stringstream>("false");
+    nullValWord_ = std::make_unique<std::stringstream>("NULL");
     // STYLE
-    defaultValStyle_ = std::make_unique<ss>();
-    intValStyle_ = std::make_unique<ss>();
-    floatValStyle_ = std::make_unique<ss>();
-    charValStyle_ = std::make_unique<ss>();
-    stringValStyle_ = std::make_unique<ss>();
-    boolValStyle_ = std::make_unique<ss>();
-    nullValStyle_ = std::make_unique<ss>();
+    defaultValStyle_ = std::make_unique<std::stringstream>();
+    intValStyle_ = std::make_unique<std::stringstream>();
+    floatValStyle_ = std::make_unique<std::stringstream>();
+    charValStyle_ = std::make_unique<std::stringstream>();
+    stringValStyle_ = std::make_unique<std::stringstream>();
+    boolValStyle_ = std::make_unique<std::stringstream>();
+    nullValStyle_ = std::make_unique<std::stringstream>();
 }
 
 void GeneralConfigurator::process_document(rj::Value const*& doc)
@@ -143,7 +146,8 @@ void GeneralConfigurator::process_document(rj::Value const*& doc)
     }
 }
 
-bool GeneralConfigurator::is_string(STRING name, rj::Value const*& rjval, std::string& getString, bool checkStrLen)
+bool GeneralConfigurator::is_string(STRING name, rj::Value const*& rjval,
+    std::string& getString, bool checkStrLen)
 {
     auto const& iter = rjval->FindMember(name);
     if (iter != rjval->MemberEnd() && iter->value.IsString())
@@ -158,7 +162,8 @@ bool GeneralConfigurator::is_string(STRING name, rj::Value const*& rjval, std::s
     return false;
 }
 
-bool GeneralConfigurator::is_object(STRING name, rj::Value const*& rjval, rj::Value const*& getObject)
+bool GeneralConfigurator::is_object(STRING name, rj::Value const*& rjval,
+    rj::Value const*& getObject)
 {
     auto const& iter = rjval->FindMember(name);
     if (iter == rjval->MemberEnd())
@@ -169,7 +174,8 @@ bool GeneralConfigurator::is_object(STRING name, rj::Value const*& rjval, rj::Va
     return getObject->IsObject() && !getObject->ObjectEmpty();
 }
 
-bool GeneralConfigurator::is_array(STRING name, rj::Value const*& rjval, rj::Value const*& getArray)
+bool GeneralConfigurator::is_array(STRING name, rj::Value const*& rjval,
+    rj::Value const*& getArray)
 {
     auto const& iter = rjval->FindMember(name);
     if (iter != rjval->MemberEnd() && iter->value.IsArray())
@@ -210,16 +216,16 @@ void GeneralConfigurator::process_file_settings(rj::Value const*& settings)
     if (is_string("output_file_name", settings, stringVal, true))
     {
         fmanager_->check_and_set_file_name(stringVal);
-        outputFileName_ = std::make_unique<ss>(stringVal);
+        outputFileName_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("output_file_path", settings, stringVal, false))
     {
         fmanager_->check_and_set_file_path(stringVal);
-        outputFilePath_ = std::make_unique<ss>(stringVal);
+        outputFilePath_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("output_file_format", settings, stringVal, false))
     {
-        outputFileFormat_ = std::make_unique<ss>(stringVal);
+        outputFileFormat_ = std::make_unique<std::stringstream>(stringVal);
     }
 }
 
@@ -228,58 +234,58 @@ void GeneralConfigurator::process_unknown_phrases(rj::Value const*& phrases)
     std::string stringVal;
     if (is_string("unknown_type_word", phrases, stringVal, true))
     {
-        unknownTypeWord_ = std::make_unique<ss>(stringVal);
+        unknownTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("unknown_expression_word", phrases, stringVal, true))
     {
-        unknownExprWord_ = std::make_unique<ss>(stringVal);
+        unknownExprWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("unknown_statement_word", phrases, stringVal, true))
     {
-        unknownStmtWord_ = std::make_unique<ss>(stringVal);
+        unknownStmtWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("invalid_type_word", phrases, stringVal, true))
     {
-        invalidTypeWord_ = std::make_unique<ss>(stringVal);
+        invalidTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("invalid_expression_word", phrases, stringVal, true))
     {
-        invalidExprWord_ = std::make_unique<ss>(stringVal);
+        invalidExprWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("invalid_statement_word", phrases, stringVal, true))
     {
-        invalidStmtWord_ = std::make_unique<ss>(stringVal);
+        invalidStmtWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     rj::Value const* style;
     if (is_object("STYLE", phrases, style))
     {
         if (is_string("default_phrase_style", style, stringVal, false))
         {
-            defaultPhraseStyle_ = std::make_unique<ss>(stringVal);
+            defaultPhraseStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("unknown_type_word_style", style, stringVal, false))
         {
-            unknownTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            unknownTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("unknown_expression_word_style", style, stringVal, false))
         {
-            unknownExprWordStyle_ = std::make_unique<ss>(stringVal);
+            unknownExprWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("unknown_statement_word_style", style, stringVal, false))
         {
-            unknownStmtWordStyle_ = std::make_unique<ss>(stringVal);
+            unknownStmtWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("invalid_type_word_style", style, stringVal, false))
         {
-            invalidTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            invalidTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("invalid_expression_word_style", style, stringVal, false))
         {
-            invalidExprWordStyle_ = std::make_unique<ss>(stringVal);
+            invalidExprWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("invalid_statement_word_style", style, stringVal, false))
         {
-            invalidStmtWordStyle_ = std::make_unique<ss>(stringVal);
+            invalidStmtWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
     }
 }
@@ -291,39 +297,39 @@ void GeneralConfigurator::process_access_modifiers(rj::Value const*& modifiers)
     std::string stringVal;
     if (is_string("public_word", modifiers, stringVal, true))
     {
-        publicWord_ = std::make_unique<ss>(stringVal);
+        publicWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("protected_word", modifiers, stringVal, true))
     {
-        protectedWord_ = std::make_unique<ss>(stringVal);
+        protectedWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("private_word", modifiers, stringVal, true))
     {
-        privateWord_ = std::make_unique<ss>(stringVal);
+        privateWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("internal_word", modifiers, stringVal, true))
     {
-        internalWord_ = std::make_unique<ss>(stringVal);
+        internalWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("attributes_word", modifiers, stringVal, true))
     {
-        attributesWord_ = std::make_unique<ss>(stringVal);
+        attributesWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("constructors_word", modifiers, stringVal, true))
     {
-        constructorsWord_ = std::make_unique<ss>(stringVal);
+        constructorsWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("destructors_word", modifiers, stringVal, true))
     {
-        destructorsWord_ = std::make_unique<ss>(stringVal);
+        destructorsWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("methods_word", modifiers, stringVal, true))
     {
-        methodsWord_ = std::make_unique<ss>(stringVal);
+        methodsWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("access_modifier_style", modifiers, stringVal, false))
     {
-        accessModifierStyle_ = std::make_unique<ss>(stringVal);
+        accessModifierStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
 }
 
@@ -332,62 +338,62 @@ void GeneralConfigurator::process_data_types(rj::Value const*& types)
     std::string stringVal;
     if (is_string("dynamic_type_word", types, stringVal, true))
     {
-        dynamicTypeWord_ = std::make_unique<ss>(stringVal);
+        dynamicTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("int_type_word", types, stringVal, true))
     {
-        intTypeWord_ = std::make_unique<ss>(stringVal);
+        intTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("float_type_word", types, stringVal, true))
     {
-        floatTypeWord_ = std::make_unique<ss>(stringVal);
+        floatTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("char_type_word", types, stringVal, true))
     {
-        charTypeWord_ = std::make_unique<ss>(stringVal);
+        charTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("bool_type_word", types, stringVal, true))
     {
-        boolTypeWord_ = std::make_unique<ss>(stringVal);
+        boolTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("void_type_word", types, stringVal, true))
     {
-        voidTypeWord_ = std::make_unique<ss>(stringVal);
+        voidTypeWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     rj::Value const* style;
     if (is_object("STYLE", types, style))
     {
         if (is_string("default_type_word_style", style, stringVal, false))
         {
-            defaultTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            defaultTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("dynamic_type_word_style", style, stringVal, false))
         {
-            dynamicTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            dynamicTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("int_type_word_style", style, stringVal, false))
         {
-            intTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            intTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("float_type_word_style", style, stringVal, false))
         {
-            floatTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            floatTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("char_type_word_style", style, stringVal, false))
         {
-            charTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            charTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("bool_type_word_style", style, stringVal, false))
         {
-            boolTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            boolTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("void_type_word_style", style, stringVal, false))
         {
-            voidTypeWordStyle_ = std::make_unique<ss>(stringVal);
+            voidTypeWordStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("user_type_style", style, stringVal, false))
         {
-            userTypeStyle_ = std::make_unique<ss>(stringVal);
+            userTypeStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
     }
 }
@@ -397,47 +403,47 @@ void GeneralConfigurator::process_reference_names(rj::Value const*& names)
     std::string stringVal;
     if (is_string("default_ref_name_style", names, stringVal, false))
     {
-        defaultRefNameStyle_ = std::make_unique<ss>(stringVal);
+        defaultRefNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("generic_param_name_style", names, stringVal, false))
     {
-        genericParamNameStyle_ = std::make_unique<ss>(stringVal);
+        genericParamNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("class_name_style", names, stringVal, false))
     {
-        classNameStyle_ = std::make_unique<ss>(stringVal);
+        classNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("interface_name_style", names, stringVal, false))
     {
-        interfaceNameStyle_ = std::make_unique<ss>(stringVal);
+        interfaceNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("method_name_style", names, stringVal, false))
     {
-        methodNameStyle_ = std::make_unique<ss>(stringVal);
+        methodNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("function_name_style", names, stringVal, false))
     {
-        functionNameStyle_ = std::make_unique<ss>(stringVal);
+        functionNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("default_var_name_style", names, stringVal, false))
     {
-        defaultVarNameStyle_ = std::make_unique<ss>(stringVal);
+        defaultVarNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("global_var_name_style", names, stringVal, false))
     {
-        globalVarNameStyle_ = std::make_unique<ss>(stringVal);
+        globalVarNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("member_var_name_style", names, stringVal, false))
     {
-        memberVarNameStyle_ = std::make_unique<ss>(stringVal);
+        memberVarNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("local_var_name_style", names, stringVal, false))
     {
-        localVarNameStyle_ = std::make_unique<ss>(stringVal);
+        localVarNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("param_var_name_style", names, stringVal, false))
     {
-        paramVarNameStyle_ = std::make_unique<ss>(stringVal);
+        paramVarNameStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
 }
 
@@ -446,27 +452,27 @@ void GeneralConfigurator::process_ops_and_seps(rj::Value const*& signs)
     std::string stringVal;
     if (is_string("assign_operator_word", signs, stringVal, true))
     {
-        assignOpWord_ = std::make_unique<ss>(stringVal);
+        assignOpWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("modulo_operator_word", signs, stringVal, true))
     {
-        moduloOpWord_ = std::make_unique<ss>(stringVal);
+        moduloOpWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("address_operator_word", signs, stringVal, true))
     {
-        addressOpWord_ = std::make_unique<ss>(stringVal);
+        addressOpWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("dereferencing_operator_word", signs, stringVal, true))
     {
-        derefOpWord_ = std::make_unique<ss>(stringVal);
+        derefOpWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("operator_style", signs, stringVal, false))
     {
-        operatorStyle_ = std::make_unique<ss>(stringVal);
+        operatorStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("separator_style", signs, stringVal, false))
     {
-        separatorStyle_ = std::make_unique<ss>(stringVal);
+        separatorStyle_ = std::make_unique<std::stringstream>(stringVal);
     }
 }
 
@@ -475,46 +481,46 @@ void GeneralConfigurator::process_values(rj::Value const*& values)
     std::string stringVal;
     if (is_string("true_value_word", values, stringVal, true))
     {
-        trueValWord_ = std::make_unique<ss>(stringVal);
+        trueValWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("false_value_word", values, stringVal, true))
     {
-        falseValWord_ = std::make_unique<ss>(stringVal);
+        falseValWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     if (is_string("null_value_word", values, stringVal, true))
     {
-        nullValWord_ = std::make_unique<ss>(stringVal);
+        nullValWord_ = std::make_unique<std::stringstream>(stringVal);
     }
     rj::Value const* style;
     if (is_object("STYLE", values, style))
     {
         if (is_string("default_value_style", style, stringVal, false))
         {
-            defaultValStyle_ = std::make_unique<ss>(stringVal);
+            defaultValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("int_value_style", style, stringVal, false))
         {
-            intValStyle_ = std::make_unique<ss>(stringVal);
+            intValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("float_value_style", style, stringVal, false))
         {
-            floatValStyle_ = std::make_unique<ss>(stringVal);
+            floatValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("char_value_style", style, stringVal, false))
         {
-            charValStyle_ = std::make_unique<ss>(stringVal);
+            charValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("string_value_style", style, stringVal, false))
         {
-            stringValStyle_ = std::make_unique<ss>(stringVal);
+            stringValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("bool_value_style", style, stringVal, false))
         {
-            boolValStyle_ = std::make_unique<ss>(stringVal);
+            boolValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
         if (is_string("null_value_style", style, stringVal, false))
         {
-            nullValStyle_ = std::make_unique<ss>(stringVal);
+            nullValStyle_ = std::make_unique<std::stringstream>(stringVal);
         }
     }
 }
