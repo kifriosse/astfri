@@ -63,8 +63,8 @@ namespace astfri::text
     template<astfri_node Node>
     void TextLibManager::visit(Node const& node)
     {
-        if (dynamic_cast<AbstractCodeVisitor*>(visitor_) &&
-            !dynamic_cast<TranslationUnit const*>(&node))
+        auto* tu = dynamic_cast<TranslationUnit const*>(&node);
+        if (dynamic_cast<AbstractCodeVisitor*>(visitor_) && !tu)
         {
             std::cout << " > Instance of TranslationUnit required to generate code.\n";
             return;
