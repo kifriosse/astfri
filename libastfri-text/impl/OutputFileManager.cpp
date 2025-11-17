@@ -19,6 +19,10 @@ OutputFileManager::OutputFileManager()
     set_build_folder_path();
 }
 
+//
+// -----
+//
+
 void OutputFileManager::check_and_set_file_name(std::string& filename)
 {
     remove_spaces(filename);
@@ -66,6 +70,21 @@ void OutputFileManager::check_and_set_file_path(std::string& filepath)
     filepath = defaultFolderPath_;
 }
 
+std::string OutputFileManager::default_folder_path()
+{
+    return defaultFolderPath_;
+}
+
+std::string OutputFileManager::desktop_folder_path()
+{
+    return desktopFolderPath_;
+}
+
+std::string OutputFileManager::build_folder_path()
+{
+    return buildFolderPath_;
+}
+
 void OutputFileManager::set_default_folder_path()
 {
     defaultFolderPath_ = std::filesystem::current_path().string();
@@ -106,13 +125,19 @@ void OutputFileManager::set_build_folder_path()
 {
     std::filesystem::path cp = std::filesystem::current_path();
     bool foundBuildFolder = false;
-    while (cp.has_filename() || cp.parent_path().has_filename())
+    while (true)
     {
-        if (cp.filename() == "build")
+        std::filesystem::path buildPath = cp / "build";
+        std::error_code ec;
+        if (std::filesystem::is_directory(buildPath, ec) && !ec)
         {
             foundBuildFolder = true;
-            buildFolderPath_ = cp.string();
+            buildFolderPath_ = buildPath;
             buildFolderPath_.append("/text_output/");
+            break;
+        }
+        if (cp == cp.root_path())
+        {
             break;
         }
         cp = cp.parent_path();

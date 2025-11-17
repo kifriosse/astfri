@@ -22,6 +22,9 @@ namespace astfri::text
     public:
         void check_and_set_file_name(std::string& filename);
         void check_and_set_file_path(std::string& filepath);
+        std::string default_folder_path();
+        std::string desktop_folder_path();
+        std::string build_folder_path();
     private:
         void set_default_folder_path();
         void set_desktop_folder_path();
