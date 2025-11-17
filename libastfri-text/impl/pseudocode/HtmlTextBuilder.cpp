@@ -137,37 +137,43 @@ void HtmlTextBuilder::write_deref_operator()
 
 void HtmlTextBuilder::write_unknown_type()
 {
-    std::string s = "<span class=\"unknown-type\">" + configurator_->unknown_type_word()->str() + "</span>";
+    std::string s = "<span class=\"unknown-type\">" +
+        configurator_->unknown_type_word()->str() + "</span>";
     write_unavailable_style(s);
 }
 
 void HtmlTextBuilder::write_unknown_expr()
 {
-    std::string s = "<span class=\"unknown-expr\">" + configurator_->unknown_expr_word()->str() + "</span>";
+    std::string s = "<span class=\"unknown-expr\">" +
+        configurator_->unknown_expr_word()->str() + "</span>";
     write_unavailable_style(s);
 }
 
 void HtmlTextBuilder::write_unknown_stmt()
 {
-    std::string s = "<span class=\"unknown-stmt\">" + configurator_->unknown_stmt_word()->str() + "</span>";
+    std::string s = "<span class=\"unknown-stmt\">" +
+        configurator_->unknown_stmt_word()->str() + "</span>";
     write_unavailable_style(s);
 }
 
 void HtmlTextBuilder::write_invalid_type()
 {
-    std::string s = "<span class=\"invalid-type\">" + configurator_->invalid_type_word()->str() + "</span>";
+    std::string s = "<span class=\"invalid-type\">" +
+        configurator_->invalid_type_word()->str() + "</span>";
     write_unavailable_style(s);
 }
 
 void HtmlTextBuilder::write_invalid_expr()
 {
-    std::string s = "<span class=\"invalid-expr\">" + configurator_->invalid_expr_word()->str() + "</span>";
+    std::string s = "<span class=\"invalid-expr\">" +
+        configurator_->invalid_expr_word()->str() + "</span>";
     write_unavailable_style(s);
 }
 
 void HtmlTextBuilder::write_invalid_stmt()
 {
-    std::string s = "<span class=\"invalid-stmt\">" + configurator_->invalid_stmt_word()->str() + "</span>";
+    std::string s = "<span class=\"invalid-stmt\">" +
+        configurator_->invalid_stmt_word()->str() + "</span>";
     write_unavailable_style(s);
 }
 
@@ -221,37 +227,43 @@ void HtmlTextBuilder::write_methods_word()
 
 void HtmlTextBuilder::write_dynamic_type_word()
 {
-    std::string s = "<span class=\"dynamic-word\">" + configurator_->dynamic_type_word()->str() + "</span>";
+    std::string s = "<span class=\"dynamic-word\">" +
+        configurator_->dynamic_type_word()->str() + "</span>";
     write_data_type_style(s);
 }
 
 void HtmlTextBuilder::write_int_type_word()
 {
-    std::string s = "<span class=\"int-word\">" + configurator_->int_type_word()->str() + "</span>";
+    std::string s = "<span class=\"int-word\">" +
+        configurator_->int_type_word()->str() + "</span>";
     write_data_type_style(s);
 }
 
 void HtmlTextBuilder::write_float_type_word()
 {
-    std::string s = "<span class=\"float-word\">" + configurator_->float_type_word()->str() + "</span>";
+    std::string s = "<span class=\"float-word\">" +
+        configurator_->float_type_word()->str() + "</span>";
     write_data_type_style(s);
 }
 
 void HtmlTextBuilder::write_char_type_word()
 {
-    std::string s = "<span class=\"char-word\">" + configurator_->char_type_word()->str() + "</span>";
+    std::string s = "<span class=\"char-word\">" +
+        configurator_->char_type_word()->str() + "</span>";
     write_data_type_style(s);
 }
 
 void HtmlTextBuilder::write_bool_type_word()
 {
-    std::string s = "<span class=\"bool-word\">" + configurator_->bool_type_word()->str() + "</span>";
+    std::string s = "<span class=\"bool-word\">" +
+        configurator_->bool_type_word()->str() + "</span>";
     write_data_type_style(s);
 }
 
 void HtmlTextBuilder::write_void_type_word()
 {
-    std::string s = "<span class=\"void-word\">" + configurator_->void_type_word()->str() + "</span>";
+    std::string s = "<span class=\"void-word\">" +
+        configurator_->void_type_word()->str() + "</span>";
     write_data_type_style(s);
 }
 
@@ -376,7 +388,8 @@ void HtmlTextBuilder::write_bool_val(bool const& val)
 
 void HtmlTextBuilder::write_null_val()
 {
-    std::string s = "<span class=\"null-value\">" + configurator_->null_val_word()->str() + "</span>";
+    std::string s = "<span class=\"null-value\">" +
+        configurator_->null_val_word()->str() + "</span>";
     write_value_style(s);
 }
 
@@ -386,151 +399,176 @@ void HtmlTextBuilder::write_null_val()
 
 void HtmlTextBuilder::write_scope_word()
 {
-    std::string s = "<span class=\"scope-word\">" + configurator_->scope_word()->str() + "</span>";
+    std::string s = "<span class=\"scope-word\">" +
+        configurator_->scope_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_class_word()
 {
-    std::string s = "<span class=\"class-word\">" + configurator_->class_word()->str() + "</span>";
+    std::string s = "<span class=\"class-word\">" +
+        configurator_->class_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_interface_word()
 {
-    std::string s = "<span class=\"interface-word\">" + configurator_->interface_word()->str() + "</span>";
+    std::string s = "<span class=\"interface-word\">" +
+        configurator_->interface_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_implement_word()
 {
-    std::string s = "<span class=\"implement-word\">" + configurator_->implement_word()->str() + "</span>";
+    std::string s = "<span class=\"implement-word\">" +
+        configurator_->implement_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_extend_word()
 {
-    std::string s = "<span class=\"extend-word\">" + configurator_->extend_word()->str() + "</span>";
+    std::string s = "<span class=\"extend-word\">" +
+        configurator_->extend_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_this_word()
 {
-    std::string s = "<span class=\"this-word\">" + configurator_->this_word()->str() + "</span>";
+    std::string s = "<span class=\"this-word\">" +
+        configurator_->this_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_return_word()
 {
-    std::string s = "<span class=\"return-word\">" + configurator_->return_word()->str() + "</span>";
+    std::string s = "<span class=\"return-word\">" +
+        configurator_->return_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_continue_word()
 {
-    std::string s = "<span class=\"continue-word\">" + configurator_->continue_word()->str() + "</span>";
+    std::string s = "<span class=\"continue-word\">" +
+        configurator_->continue_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_break_word()
 {
-    std::string s = "<span class=\"break-word\">" + configurator_->break_word()->str() + "</span>";
+    std::string s = "<span class=\"break-word\">" +
+        configurator_->break_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_throw_word()
 {
-    std::string s = "<span class=\"throw-word\">" + configurator_->throw_word()->str() + "</span>";
+    std::string s = "<span class=\"throw-word\">" +
+        configurator_->throw_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_if_word()
 {
-    std::string s = "<span class=\"if-word\">" + configurator_->if_word()->str() + "</span>";
+    std::string s = "<span class=\"if-word\">" +
+        configurator_->if_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_else_word()
 {
-    std::string s = "<span class=\"else-word\">" + configurator_->else_word()->str() + "</span>";
+    std::string s = "<span class=\"else-word\">" +
+        configurator_->else_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_do_word()
 {
-    std::string s = "<span class=\"do-word\">" + configurator_->do_word()->str() + "</span>";
+    std::string s = "<span class=\"do-word\">" +
+        configurator_->do_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_while_word()
 {
-    std::string s = "<span class=\"while-word\">" + configurator_->while_word()->str() + "</span>";
+    std::string s = "<span class=\"while-word\">" +
+        configurator_->while_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_for_word()
 {
-    std::string s = "<span class=\"for-word\">" + configurator_->for_word()->str() + "</span>";
+    std::string s = "<span class=\"for-word\">" +
+        configurator_->for_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_switch_word()
 {
-    std::string s = "<span class=\"switch-word\">" + configurator_->switch_word()->str() + "</span>";
+    std::string s = "<span class=\"switch-word\">" +
+        configurator_->switch_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_case_word()
 {
-    std::string s = "<span class=\"case-word\">" + configurator_->case_word()->str() + "</span>";
+    std::string s = "<span class=\"case-word\">" +
+        configurator_->case_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_default_word()
 {
-    std::string s = "<span class=\"default-word\">" + configurator_->default_word()->str() + "</span>";
+    std::string s = "<span class=\"default-word\">" +
+        configurator_->default_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_new_word()
 {
-    std::string s = "<span class=\"new-word\">" + configurator_->new_word()->str() + "</span>";
+    std::string s = "<span class=\"new-word\">" +
+        configurator_->new_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_delete_word()
 {
-    std::string s = "<span class=\"delete-word\">" + configurator_->delete_word()->str() + "</span>";
+    std::string s = "<span class=\"delete-word\">" +
+        configurator_->delete_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_pointer_word()
 {
-    std::string s = "<span class=\"pointer-word\">" + configurator_->pointer_word()->str() + "</span>";
+    std::string s = "<span class=\"pointer-word\">" +
+        configurator_->pointer_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_override_word()
 {
-    std::string s = "<span class=\"override-word\">" + configurator_->override_word()->str() + "</span>";
+    std::string s = "<span class=\"override-word\">" +
+        configurator_->override_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_virtual_word()
 {
-    std::string s = "<span class=\"virtual-word\">" + configurator_->virtual_word()->str() + "</span>";
+    std::string s = "<span class=\"virtual-word\">" +
+        configurator_->virtual_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_abstract_word()
 {
-    std::string s = "<span class=\"abstract-word\">" + configurator_->abstract_word()->str() + "</span>";
+    std::string s = "<span class=\"abstract-word\">" +
+        configurator_->abstract_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
 void HtmlTextBuilder::write_template_word()
 {
-    std::string s = "<span class=\"template-word\">" + configurator_->template_word()->str() + "</span>";
+    std::string s = "<span class=\"template-word\">" +
+        configurator_->template_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 
@@ -540,55 +578,64 @@ void HtmlTextBuilder::write_template_word()
 
 void HtmlTextBuilder::write_constructor_word()
 {
-    std::string s = "<span class=\"constr-word\">" + configurator_->constructor_word()->str() + "</span>";
+    std::string s = "<span class=\"constr-word\">" +
+        configurator_->constructor_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_destructor_word()
 {
-    std::string s = "<span class=\"destr-word\">" + configurator_->destructor_word()->str() + "</span>";
+    std::string s = "<span class=\"destr-word\">" +
+        configurator_->destructor_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_method_word()
 {
-    std::string s = "<span class=\"method-word\">" + configurator_->method_word()->str() + "</span>";
+    std::string s = "<span class=\"method-word\">" +
+        configurator_->method_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_function_word()
 {
-    std::string s = "<span class=\"function-word\">" + configurator_->function_word()->str() + "</span>";
+    std::string s = "<span class=\"function-word\">" +
+        configurator_->function_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_lambda_word()
 {
-    std::string s = "<span class=\"lambda-word\">" + configurator_->lambda_word()->str() + "</span>";
+    std::string s = "<span class=\"lambda-word\">" +
+        configurator_->lambda_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_call_word()
 {
-    std::string s = "<span class=\"call-word\">" + configurator_->call_word()->str() + "</span>";
+    std::string s = "<span class=\"call-word\">" +
+        configurator_->call_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_define_word()
 {
-    std::string s = "<span class=\"define-word\">" + configurator_->define_word()->str() + "</span>";
+    std::string s = "<span class=\"define-word\">" +
+        configurator_->define_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_returns_word()
 {
-    std::string s = "<span class=\"returns-word\">" + configurator_->returns_word()->str() + "</span>";
+    std::string s = "<span class=\"returns-word\">" +
+        configurator_->returns_word()->str() + "</span>";
     write_other_expr_style(s);
 }
 
 void HtmlTextBuilder::write_repeat_word()
 {
-    std::string s = "<span class=\"repeat-word\">" + configurator_->repeat_word()->str() + "</span>";
+    std::string s = "<span class=\"repeat-word\">" +
+        configurator_->repeat_word()->str() + "</span>";
     write_system_expr_style(s);
 }
 

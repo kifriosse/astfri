@@ -279,9 +279,12 @@ void PlainTextBuilder::write_string_val(std::string const& val)
 
 void PlainTextBuilder::write_bool_val(bool const& val)
 {
-    if (val) {
+    if (val)
+    {
         append_text("true");
-    } else {
+    }
+    else
+    {
         append_text("false");
     }
 }
