@@ -37,8 +37,7 @@ void JavaCodeBuilder::write_opening_else_word()
 
 void JavaCodeBuilder::create_java_file(std::string const& name, Scope const& scope)
 {
-    std::string folder = "build";
-    OutputFileManager::get_instance().check_and_set_file_path(folder);
+    std::string folder = OutputFileManager::get_instance().build_folder_path();
     folder.append("src/");
     for (size_t i = 0; i < scope.names_.size(); ++i)
     {
@@ -51,8 +50,7 @@ void JavaCodeBuilder::create_java_file(std::string const& name, Scope const& sco
 
 void JavaCodeBuilder::create_java_file(std::string const& name)
 {
-    std::string folder = "build";
-    OutputFileManager::get_instance().check_and_set_file_path(folder);
+    std::string folder = OutputFileManager::get_instance().build_folder_path();
     folder.append("src/");
     folder.append(name + ".java");
     std::ofstream(folder) << buildedText_->str();

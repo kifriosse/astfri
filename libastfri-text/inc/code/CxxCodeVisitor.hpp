@@ -17,7 +17,6 @@ namespace astfri::text
         explicit CxxCodeVisitor();
         ~CxxCodeVisitor() = default;
     public:
-        // -----
         void visit(DynamicType const& type) override;
         void visit(FloatType const& type) override;
         void visit(BoolType const& type) override;
@@ -45,7 +44,6 @@ namespace astfri::text
         void visit(GenericParam const& stmt) override;
         void visit(InterfaceDefStmt const& stmt) override;
         void visit(ClassDefStmt const& stmt) override;
-        // -----
     };
 }
 

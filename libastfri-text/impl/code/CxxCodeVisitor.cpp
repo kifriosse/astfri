@@ -11,9 +11,13 @@ CxxCodeVisitor& CxxCodeVisitor::get_instance()
 }
 
 CxxCodeVisitor::CxxCodeVisitor() :
-    AbstractCodeVisitor(&CxxCodeBuilder::get_instatnce())
+    AbstractCodeVisitor(CxxCodeBuilder::get_instatnce())
 {
 }
+
+//
+// -----
+//
 
 void CxxCodeVisitor::visit(DynamicType const& /*type*/)
 {

@@ -11,7 +11,7 @@ JavaCodeVisitor& JavaCodeVisitor::get_instance()
 }
 
 JavaCodeVisitor::JavaCodeVisitor() :
-    AbstractCodeVisitor(&JavaCodeBuilder::get_instance())
+    AbstractCodeVisitor(JavaCodeBuilder::get_instance())
 {
 }
 

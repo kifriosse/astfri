@@ -8,8 +8,10 @@ using namespace astfri::text;
 
 void AbstractCodeBuilder::append_text(std::string const& text)
 {
-    if (isEmptyLine_) {
-        for (int i = 0; i < indentationLevel_ * 4; ++i) {
+    if (isEmptyLine_)
+    {
+        for (int i = 0; i < indentationLevel_ * 4; ++i)
+        {
             append_space();
         }
         isEmptyLine_ = false;
@@ -103,9 +105,12 @@ void AbstractCodeBuilder::write_string_val(std::string const& val)
 
 void AbstractCodeBuilder::write_bool_val(bool const& val)
 {
-    if (val) {
+    if (val)
+    {
         append_text("true");
-    } else {
+    }
+    else
+    {
         append_text("false");
     }
 }

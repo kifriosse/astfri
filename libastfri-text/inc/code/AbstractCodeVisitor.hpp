@@ -9,10 +9,9 @@ namespace astfri::text
     class AbstractCodeVisitor : public AbstractVisitor
     {
     public:
-        explicit AbstractCodeVisitor(AbstractCodeBuilder* const& builder);
+        explicit AbstractCodeVisitor(AbstractCodeBuilder& builder);
         virtual ~AbstractCodeVisitor() = default;
     public:
-        // -----
         void visit(DynamicType const& type) override = 0;
         void visit(IntType const& type) override;
         void visit(FloatType const& type) override = 0;
@@ -77,7 +76,6 @@ namespace astfri::text
         void visit(ClassDefStmt const& stmt) override = 0;
         void visit(ContinueStmt const& stmt) override;
         void visit(BreakStmt const& stmt) override;
-        // -----
     };
 }
 
