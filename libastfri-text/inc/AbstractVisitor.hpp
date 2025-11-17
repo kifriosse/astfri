@@ -33,7 +33,7 @@ namespace astfri::text
         AbstractBuilder* builder_;
     public:
         AbstractVisitor() = delete;
-        explicit AbstractVisitor(AbstractBuilder* const& builder);
+        explicit AbstractVisitor(AbstractBuilder& builder);
         virtual ~AbstractVisitor() = default;
     protected:
         void process_condition(Expr* const& expr);
@@ -57,11 +57,11 @@ namespace astfri::text
     {
         if (useGeneric)
         {
-            builder_->write_separator("<");
+            builder_->write_left_bracket("<");
         }
         else
         {
-            builder_->write_separator("(");
+            builder_->write_left_bracket("(");
         }
         for (size_t i = 0; i < pargs.size(); ++i)
         {
@@ -77,11 +77,11 @@ namespace astfri::text
         }
         if (useGeneric)
         {
-            builder_->write_separator(">");
+            builder_->write_right_bracket(">");
         }
         else
         {
-            builder_->write_separator(")");
+            builder_->write_right_bracket(")");
         }
     }
 

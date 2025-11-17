@@ -2,8 +2,8 @@
 
 using namespace astfri::text;
 
-AbstractVisitor::AbstractVisitor(AbstractBuilder* const& builder) :
-    builder_(builder)
+AbstractVisitor::AbstractVisitor(AbstractBuilder& builder) :
+    builder_(&builder)
 {
 }
 
