@@ -24,11 +24,14 @@ void AbstractTextBuilder::reset_builder()
 
 void AbstractTextBuilder::append_text(std::string const& text)
 {
-    if (isEmptyLine_) {
-        for (int i = 0; i < configurator_->text_margin_left_len(); ++i) {
+    if (isEmptyLine_)
+    {
+        for (int i = 0; i < configurator_->text_margin_left_len(); ++i)
+        {
             append_space();
         }
-        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i) {
+        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i)
+        {
             append_space();
         }
         isEmptyLine_ = false;
@@ -38,9 +41,12 @@ void AbstractTextBuilder::append_text(std::string const& text)
 
 void AbstractTextBuilder::write_opening_curl_bracket()
 {
-    if (configurator_->new_line_curl_bracket()) {
+    if (configurator_->new_line_curl_bracket())
+    {
         append_new_line();
-    } else {
+    }
+    else
+    {
         append_space();
     }
     write_left_bracket("{");
@@ -50,9 +56,12 @@ void AbstractTextBuilder::write_opening_curl_bracket()
 
 void AbstractTextBuilder::write_opening_else_word()
 {
-    if (configurator_->new_line_curl_bracket()) {
+    if (configurator_->new_line_curl_bracket())
+    {
         append_new_line();
-    } else {
+    }
+    else
+    {
         append_space();
     }
     write_else_word();
