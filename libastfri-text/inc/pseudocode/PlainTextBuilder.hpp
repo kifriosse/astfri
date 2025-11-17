@@ -17,6 +17,8 @@ namespace astfri::text
         explicit PlainTextBuilder() = default;
         ~PlainTextBuilder() = default;
     public:
+        // EXPORT
+        void export_text() override;
         // GENERAL_TEXT
         void append_new_line() override;
         void append_space() override;

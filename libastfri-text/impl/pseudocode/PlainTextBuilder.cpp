@@ -9,6 +9,15 @@ PlainTextBuilder& PlainTextBuilder::get_instance()
 }
 
 //
+// EXPORT
+//
+
+void PlainTextBuilder::export_text()
+{
+    // TODO: export
+}
+
+//
 // GENERAL_TEXT
 //
 

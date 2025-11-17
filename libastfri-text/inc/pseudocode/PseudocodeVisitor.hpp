@@ -21,6 +21,13 @@ namespace astfri::text
         explicit PseudocodeVisitor(AbstractTextBuilder* const& builder);
         ~PseudocodeVisitor() = default;
     public:
+        void export_pseudocode();
+        void clear_builder();
+        void append_text(std::string const& text);
+        void append_new_line();
+        void append_space();
+        void update_configuration();
+        void reload_configuration();
         // -----
         void visit(DynamicType const& type) override;
         void visit(IntType const& type) override;
@@ -86,7 +93,6 @@ namespace astfri::text
         void visit(ClassDefStmt const& stmt) override;
         void visit(ContinueStmt const& stmt) override;
         void visit(BreakStmt const& stmt) override;
-        // -----
     };
 }
 

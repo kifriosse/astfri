@@ -17,6 +17,8 @@ namespace astfri::text
     public:
         // SET_UP
         void reset_builder() override;
+        // EXPORT
+        virtual void export_text() = 0;
         // GENERAL_TEXT
         void append_text(std::string const& text) override;
         void append_new_line() override = 0;

@@ -26,6 +26,15 @@ void HtmlTextBuilder::reset_builder()
 }
 
 //
+// EXPORT
+//
+
+void HtmlTextBuilder::export_text()
+{
+    // TODO: export
+}
+
+//
 // GENERAL_TEXT
 //
 

@@ -9,11 +9,15 @@ PseudocodeVisitor& PseudocodeVisitor::get_instance()
 {
     AbstractTextBuilder* builder;
     TextConfigurator& tc = TextConfigurator::get_instance();
-    if (tc.output_file_format()->view() == "html") {
+    if (tc.output_file_format()->view() == "html")
+    {
         builder = &HtmlTextBuilder::get_instance();
-    } else {
+    }
+    else
+    {
         builder = &PlainTextBuilder::get_instance();
     }
+    builder->reset_builder();
     static PseudocodeVisitor visitor(builder);
     return visitor;
 }
@@ -23,6 +27,65 @@ PseudocodeVisitor::PseudocodeVisitor(AbstractTextBuilder* const& builder) :
     configurator_(&TextConfigurator::get_instance())
 {
 }
+
+//
+// -----
+//
+
+void PseudocodeVisitor::export_pseudocode()
+{
+    static_cast<AbstractTextBuilder*>(builder_)->export_text();
+}
+
+void PseudocodeVisitor::clear_builder()
+{
+    builder_->reset_builder();
+}
+
+void PseudocodeVisitor::append_text(std::string const& text)
+{
+    builder_->append_text(text);
+}
+
+void PseudocodeVisitor::append_new_line()
+{
+    builder_->append_new_line();
+}
+
+void PseudocodeVisitor::append_space()
+{
+    builder_->append_space();
+}
+
+void PseudocodeVisitor::update_configuration()
+{
+    configurator_->update_configuration();
+    if (configurator_->output_file_format()->view() == "html")
+    {
+        builder_ = &HtmlTextBuilder::get_instance();
+    }
+    else
+    {
+        builder_ = &PlainTextBuilder::get_instance();
+    }
+    builder_->reset_builder();
+}
+
+void PseudocodeVisitor::reload_configuration()
+{
+    configurator_->reload_configuration();
+    if (configurator_->output_file_format()->view() == "html")
+    {
+        builder_ = &HtmlTextBuilder::get_instance();
+    }
+    else
+    {
+        builder_ = &PlainTextBuilder::get_instance();
+    }
+    builder_->reset_builder();
+}
+
+// -----
 
 void PseudocodeVisitor::visit(DynamicType const& /*type*/)
 {

@@ -22,6 +22,8 @@ namespace astfri::text
     public:
         // SET_UP
         void reset_builder() override;
+        // EXPORT
+        void export_text() override;
         // GENERAL_TEXT
         void append_new_line() override;
         void append_space() override;
