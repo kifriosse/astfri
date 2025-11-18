@@ -1,9 +1,17 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
+#include <clang/AST/Decl.h>
+#include <clang/AST/DeclBase.h>
 #include <clang/AST/DeclCXX.h>
+#include <cstdio>
 #include <iostream>
+#include <llvm-18/llvm/Support/Casting.h>
+#include <llvm-18/llvm/Support/Errc.h>
+#include <llvm-18/llvm/Support/raw_ostream.h>
+#include <system_error>
 #include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
 #include <libastfri/inc/Astfri.hpp>
 
 namespace astfri::astfri_cpp
@@ -83,7 +91,7 @@ astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name)
 {
     for (auto cls : this->tu_->classes_)
     {
-        if (cls->name_.compare(name) == 0)
+        if (cls->type_->name_.compare(name) == 0)
         {
             return cls;
         }
@@ -267,11 +275,11 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
     {
         return true;
     }
-
+    
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
-
+    
     // akcia na tomto vrchole
     // ziskanie ownera
     auto owner = this->get_existing_class(Ctor->getParent()->getNameAsString());
@@ -286,7 +294,7 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
             this->getAccessModifier(Ctor)
         );
         owner->constructors_.push_back(new_ctor);
-
+        
         TraverseStmt(Ctor->getBody());
         new_ctor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
 
@@ -483,13 +491,25 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
     if (RD->isLambda()) {
         return true;
     }
-
+    
     // akcia na vrchole
+    // vytvorí sa scope
+    std::vector<std::string> layers = {};
+    clang::DeclContext* context = RD->getDeclContext();
+    while (context) {
+        if (auto named = llvm::dyn_cast<clang::NamedDecl>(context)) {
+            layers.push_back(named->getNameAsString());
+        }
+        context = context->getParent();
+    }
+    layers = {layers.rbegin(), layers.rend()};
+    
+    // vytvorenie triedy
     auto new_class = this->stmt_factory_->mk_class_def(
         RD->getNameAsString(),
-        mk_scope());
+        {{layers.rbegin(), layers.rend()}});
     this->tu_->classes_.push_back(new_class);
-
+    
     // nastavenie bases
     for (auto base : RD->bases())
     {
@@ -497,25 +517,25 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
             this->get_existing_class(base.getType().getBaseTypeIdentifier()->getName().str())
         );
     }
-
+    
     // zapamatanie si predoslich location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
-
+    
     // prepisanie AST location
     this->astfri_location.stmt_ = new_class;
     this->clang_location.decl_  = RD;
-
+    
     for (auto field : RD->fields())
     {
         TraverseDecl(field);
     }
-
+    
     for (auto method : RD->methods())
     {
         TraverseDecl(method);
     }
-
+    
     if (auto tparams = RD->getDescribedTemplateParams())
     {
         // std::cout << "Som v triede ktorá má template\n";
@@ -973,9 +993,9 @@ bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor)
     // akcia na tomto vrchole
     auto new_ctor_expr   = this->expr_factory_->mk_constructor_call(nullptr, std::vector<Expr*>{});
 
-    // auto type            = this->type_factory_->mk_user(Ctor->getType().getAsString().c_str());
-    auto type            = this->type_factory_->mk_class(Ctor->getType().getAsString(), {});
-    new_ctor_expr->type_ = type;
+    // treba nastaviť typ
+    // TODO: je to momentálne len pre ClassDefStmt, mne sa neda použiť is_a (dyn_cast), tak bude treba niećo vymyslieť
+    new_ctor_expr->type_ = ((astfri::ClassDefStmt*)this->astfri_location.stmt_)->type_;
 
     for (auto arg : Ctor->arguments())
     {
