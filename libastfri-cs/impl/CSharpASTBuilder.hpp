@@ -11,21 +11,24 @@ namespace astfri::csharp
 class CSharpASTBuilder
 {
 private:
-    const TSLanguage* lang_;
+    TSLanguage const* lang_;
     TSParser* parser_;
+
 public:
-    CSharpASTBuilder()
-        : lang_(tree_sitter_c_sharp()),
+    CSharpASTBuilder() :
+        lang_(tree_sitter_c_sharp()),
         parser_(ts_parser_new())
     {
         ts_parser_set_language(parser_, lang_);
     };
+
     ~CSharpASTBuilder();
     std::vector<TranslationUnit*> make_ast(std::string const& source_code_dir) const;
+
 private:
     static std::vector<std::string> get_source_codes(std::string const& source_code_dir);
 };
 
-};
+}; // namespace astfri::csharp
 
 #endif // CSHARP_AST_BUILDER_HPP

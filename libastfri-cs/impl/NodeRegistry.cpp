@@ -6,10 +6,10 @@ namespace astfri::csharp
 {
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"compilation_unit", CSharpTSTreeVisitor::handle_comp_unit_stmt},
-    {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
-    {"variable_declaration", CSharpTSTreeVisitor::handle_var_def_stmt},
-    {"field_declaration", CSharpTSTreeVisitor::handle_var_def_stmt},
+    {"compilation_unit",     CSharpTSTreeVisitor::handle_comp_unit_stmt   },
+    {"class_declaration",    CSharpTSTreeVisitor::handle_class_def_stmt   },
+    {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+    // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler> NodeRegistry::expr_handlers_ = {
@@ -28,87 +28,89 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler> NodeRegistry::
     {"binary_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
     {"assignment_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
 
-    {"ERROR", [](CSharpTSTreeVisitor*, TSNode const *node) -> Expr*
-    {
-        auto const [row, column] = ts_node_start_point(*node);
-        throw std::runtime_error(
-            "Invalid C# syntax in source code at: row" +
-            std::to_string(row) + "and column " +
-            std::to_string(column)
-        );
-    }
-    }
+    {"ERROR",
+     [](CSharpTSTreeVisitor*, TSNode const* node) -> Expr*
+     {
+         auto const [row, column] = ts_node_start_point(*node);
+         throw std::runtime_error(
+             "Invalid C# syntax in source code at: row" + std::to_string(row) + "and column "
+             + std::to_string(column)
+         );
+     }}
 };
 
 std::unordered_map<std::string, UnaryOpType> NodeRegistry::prefix_unary_op = {
-    {"+", UnaryOpType::Plus},
-    {"-", UnaryOpType::Minus},
-    {"++", UnaryOpType::PreIncrement},
-    {"--", UnaryOpType::PreDecrement},
-    {"!", UnaryOpType::LogicalNot},
-    {"~", UnaryOpType::BitFlip},
-    {"*", UnaryOpType::Dereference},
-    {"&", UnaryOpType::AddressOf},
-    {"ref", UnaryOpType::AddressOf}
+    {"+",   UnaryOpType::Plus        },
+    {"-",   UnaryOpType::Minus       },
+    {"++",  UnaryOpType::PreIncrement},
+    {"--",  UnaryOpType::PreDecrement},
+    {"!",   UnaryOpType::LogicalNot  },
+    {"~",   UnaryOpType::BitFlip     },
+    {"*",   UnaryOpType::Dereference },
+    {"&",   UnaryOpType::AddressOf   },
+    {"ref", UnaryOpType::AddressOf   }
 };
 
 std::unordered_map<std::string, BinOpType> NodeRegistry::bin_operations = {
-    {"=", BinOpType::Assign},
-    {"+", BinOpType::Add},
-    {"-", BinOpType::Subtract},
-    {"*", BinOpType::Multiply},
-    {"/", BinOpType::Divide},
-    {"%", BinOpType::Modulo},
-    {"==", BinOpType::Equal},
-    {"!=", BinOpType::NotEqual},
-    {"<", BinOpType::Less},
-    {"<=", BinOpType::LessEqual},
-    {">", BinOpType::Greater},
-    {">=", BinOpType::GreaterEqual},
-    {"&&", BinOpType::LogicalAnd},
-    {"||", BinOpType::LogicalOr},
-    {"&", BinOpType::BitAnd},
-    {"|", BinOpType::BitOr},
-    {"^", BinOpType::BitXor},
-    {"<<", BinOpType::BitShiftLeft},
-    {">>", BinOpType::BitShiftRight},
-    {"+= ", BinOpType::Add},
-    {"-=", BinOpType::Subtract},
-    {"*=", BinOpType::Multiply},
-    {"/=", BinOpType::Divide},
-    {"%=", BinOpType::Modulo},
+    {"=",   BinOpType::Assign       },
+    {"+",   BinOpType::Add          },
+    {"-",   BinOpType::Subtract     },
+    {"*",   BinOpType::Multiply     },
+    {"/",   BinOpType::Divide       },
+    {"%",   BinOpType::Modulo       },
+    {"==",  BinOpType::Equal        },
+    {"!=",  BinOpType::NotEqual     },
+    {"<",   BinOpType::Less         },
+    {"<=",  BinOpType::LessEqual    },
+    {">",   BinOpType::Greater      },
+    {">=",  BinOpType::GreaterEqual },
+    {"&&",  BinOpType::LogicalAnd   },
+    {"||",  BinOpType::LogicalOr    },
+    {"&",   BinOpType::BitAnd       },
+    {"|",   BinOpType::BitOr        },
+    {"^",   BinOpType::BitXor       },
+    {"<<",  BinOpType::BitShiftLeft },
+    {">>",  BinOpType::BitShiftRight},
+    {"+= ", BinOpType::Add          },
+    {"-=",  BinOpType::Subtract     },
+    {"*=",  BinOpType::Multiply     },
+    {"/=",  BinOpType::Divide       },
+    {"%=",  BinOpType::Modulo       },
     {">>=", BinOpType::BitShiftRight},
-    {"<<=", BinOpType::BitShiftLeft},
-    {"&=", BinOpType::BitAnd},
-    {"|=", BinOpType::BitOr},
-    {"^=", BinOpType::BitXor}
+    {"<<=", BinOpType::BitShiftLeft },
+    {"&=",  BinOpType::BitAnd       },
+    {"|=",  BinOpType::BitOr        },
+    {"^=",  BinOpType::BitXor       }
 };
 
 std::unordered_map<std::string, Type*> NodeRegistry::types_ = {
-    {"int", TypeFactory::get_instance().mk_int()},
-    {"float", TypeFactory::get_instance().mk_float()},
-    {"char", TypeFactory::get_instance().mk_char()},
-    {"bool", TypeFactory::get_instance().mk_bool()},
-    {"void", TypeFactory::get_instance().mk_void()},
+    {"int",     TypeFactory::get_instance().mk_int()    },
+    {"float",   TypeFactory::get_instance().mk_float()  },
+    {"char",    TypeFactory::get_instance().mk_char()   },
+    {"bool",    TypeFactory::get_instance().mk_bool()   },
+    {"void",    TypeFactory::get_instance().mk_void()   },
     {"dynamic", TypeFactory::get_instance().mk_dynamic()}
     // todo handle var type
     // todo add double, long, unsigned, decimal, short, byte
 };
 
+std::unordered_map<std::string, AccessModifier> NodeRegistry::access_modifiers = {
+    {"private",   AccessModifier::Private  },
+    {"public",    AccessModifier::Public   },
+    {"protected", AccessModifier::Protected},
+    {"internal",  AccessModifier::Internal },
+};
+
 CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(TSNode const& node)
 {
     auto const it = stmt_handlers_.find(ts_node_type(node));
-    return it != stmt_handlers_.end()
-        ? it->second
-        : default_stmt_handler;
+    return it != stmt_handlers_.end() ? it->second : default_stmt_handler;
 }
 
 CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(TSNode const& node)
 {
     auto const it = expr_handlers_.find(ts_node_type(node));
-    return it != expr_handlers_.end()
-        ? it->second
-        : default_expr_handler;
+    return it != expr_handlers_.end() ? it->second : default_expr_handler;
 }
 
 std::optional<UnaryOpType> NodeRegistry::get_prefix_unary_op(std::string const& operation)
@@ -132,6 +134,15 @@ std::optional<BinOpType> NodeRegistry::get_bin_op(std::string const& operation)
 std::optional<Type*> NodeRegistry::get_type(std::string const& type_name)
 {
     if (auto const it = types_.find(type_name); it != types_.end())
+    {
+        return it->second;
+    }
+    return {};
+}
+
+std::optional<AccessModifier> NodeRegistry::get_access_modifier(std::string const& modifier)
+{
+    if (auto const it = access_modifiers.find(modifier); it != access_modifiers.end())
     {
         return it->second;
     }

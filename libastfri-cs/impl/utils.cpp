@@ -18,21 +18,17 @@ std::vector<TSNode> find_nodes(
     std::vector<TSNode> results;
     TSQueryError err;
     uint32_t offset;
-    TSQuery *query =ts_query_new(
-        lang,
-        query_str.c_str(),
-        query_str.length(),
-        &offset,
-        &err
-    );
+    TSQuery* query = ts_query_new(lang, query_str.c_str(), query_str.length(), &offset, &err);
 
-    if (!query)
+    if (! query)
     {
-        throw std::runtime_error("Error while creating query at offset " + std::to_string(offset)
-            + " Error code: " + std::to_string(err));
+        throw std::runtime_error(
+            "Error while creating query at offset " + std::to_string(offset)
+            + " Error code: " + std::to_string(err)
+        );
     }
 
-    TSQueryCursor *cursor = ts_query_cursor_new();
+    TSQueryCursor* cursor = ts_query_cursor_new();
     ts_query_cursor_exec(cursor, query, root);
 
     TSQueryMatch match;
@@ -54,21 +50,17 @@ TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string c
 {
     TSQueryError err;
     uint32_t offset;
-    TSQuery *query =ts_query_new(
-        lang,
-        query_str.c_str(),
-        query_str.length(),
-        &offset,
-        &err
-    );
+    TSQuery* query = ts_query_new(lang, query_str.c_str(), query_str.length(), &offset, &err);
 
-    if (!query)
+    if (! query)
     {
-        throw std::runtime_error("Error while creating query at offset " + std::to_string(offset)
-            + " Error code: " + std::to_string(err));
+        throw std::runtime_error(
+            "Error while creating query at offset " + std::to_string(offset)
+            + " Error code: " + std::to_string(err)
+        );
     }
 
-    TSQueryCursor *cursor = ts_query_cursor_new();
+    TSQueryCursor* cursor = ts_query_cursor_new();
     ts_query_cursor_exec(cursor, query, root);
 
     TSQueryMatch match;
@@ -90,10 +82,11 @@ TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string c
 
 IntSuffix get_suffix_type(std::string const& suffix)
 {
-    if (suffix.empty()) return IntSuffix::None;
+    if (suffix.empty())
+        return IntSuffix::None;
 
-    const char first = static_cast<char>(std::tolower(suffix[0]));
-    const char second = static_cast<char>(std::tolower(suffix.length() == 2 ? suffix[1] : '\0'));
+    char const first  = static_cast<char>(std::tolower(suffix[0]));
+    char const second = static_cast<char>(std::tolower(suffix.length() == 2 ? suffix[1] : '\0'));
 
     // considering that we can't get stuff like UU or LL or L1 or U1
     if ((first == 'u' && second == 'l') || (first == 'l' && second == 'u'))
@@ -111,22 +104,23 @@ IntSuffix get_suffix_type(std::string const& suffix)
     return IntSuffix::None;
 }
 
-std::string extract_node_text(
-    const TSNode& node,
-    const std::string& source_code
-)
+std::string extract_node_text(TSNode const& node, std::string const& source_code)
 {
-    const size_t from = ts_node_start_byte(node);
-    const size_t to = ts_node_end_byte(node);
+    if (ts_node_is_null(node))
+    {
+        throw std::runtime_error("Node is null");
+    }
+    size_t const from = ts_node_start_byte(node);
+    size_t const to   = ts_node_end_byte(node);
     return source_code.substr(from, to - from);
 }
 
 void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name)
 {
     auto const r_begin = std::make_reverse_iterator(namespace_name.end());
-    auto const r_end = std::make_reverse_iterator(namespace_name.begin());
-    auto it = r_begin;
-    auto slice_end = namespace_name.end();
+    auto const r_end   = std::make_reverse_iterator(namespace_name.begin());
+    auto it            = r_begin;
+    auto slice_end     = namespace_name.end();
 
     while (it != r_end)
     {
