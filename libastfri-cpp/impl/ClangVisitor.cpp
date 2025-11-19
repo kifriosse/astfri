@@ -8,7 +8,6 @@
 #include <llvm-18/llvm/Support/Casting.h>
 #include <llvm-18/llvm/Support/Errc.h>
 #include <llvm-18/llvm/Support/raw_ostream.h>
-#include <system_error>
 #include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
@@ -1042,13 +1041,6 @@ bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
     // získam si potrebné veci na lambda uzol
     std::vector<ParamVarDefStmt*> params {};
     astfri::Stmt* body;
-    
-    // ak by bolo treba riešiť captures
-    // std::cout << "Som na lamde, zachytené premenné sú: ";
-    // for (auto zachytena : (LBD->captures())) {
-    //     std::cout << zachytena.getCapturedVar()->getNameAsString() << " ";
-    // }
-    // std::cout << "\n";
 
     // získanie parametrov
     for (auto parameter : (LBD->getCallOperator()->parameters())) {
@@ -1061,7 +1053,8 @@ bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
     body = this->astfri_location.stmt_;
 
     // vytvorenie uzla
-    auto lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body);    
+    std::string lambda_meno = LBD->getLambdaClass()->getQualifiedNameAsString();
+    auto lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body, LBD->getLambdaClass()->getName().str());    
     
     // nastavenie location
     this->astfri_location.expr_ = lambdaExpr;
@@ -1117,6 +1110,21 @@ bool ClangVisitor::TraverseCallExpr(clang::CallExpr* CE)
         }
         this->astfri_location.expr_ = fun;
     }
+
+    // // co sa ma stat ak sa zavola lambda
+    //  if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(CE->getDirectCallee()->getParent())) {
+    //     if (record && record->isLambda()) {
+    //         // Mozem zavolat mk_lambda_call, ked chcem len tu lambdu?
+    //         Expr* lambda = this->expr_factory_->mk_lambda_expr({}, {}, record->getQualifiedNameAsString());
+    //         std::vector<Expr*> args = {};
+    //         for(auto arg : CE->arguments()) {
+    //             TraverseStmt(arg);
+    //             args.push_back(this->astfri_location.expr_);
+    //         }
+    //         LambdaCallExpr* lambdaCall = this->expr_factory_->mk_lambda_call(lambda, args);
+    //         this->astfri_location.expr_ = lambdaCall;
+    //     }
+    // }
     return true;
 }
 
@@ -1218,13 +1226,23 @@ bool ClangVisitor::TraverseCXXThrowExpr(clang::CXXThrowExpr* TE)
     return true;
 }
 
-// bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE) {
-//     if (auto oper = llvm::dyn_cast<clang::BinaryOperatorKind>(COCE->getOperatorLoc())) {
-//         oper
-//         TraverseStmt(oper);
-//     }
-//     return true;
-// }
+bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE) {
+    // co sa ma stat ak sa zavola lambda
+     if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(COCE->getDirectCallee()->getParent())) {
+        if (record && record->isLambda()) {
+            // Mozem zavolat mk_lambda_call, ked chcem len tu lambdu?
+            Expr* lambda = this->expr_factory_->mk_lambda_expr({}, {}, record->getQualifiedNameAsString());
+            std::vector<Expr*> args = {};
+            for(auto arg : COCE->arguments()) {
+                TraverseStmt(arg);
+                args.push_back(this->astfri_location.expr_);
+            }
+            LambdaCallExpr* lambdaCall = this->expr_factory_->mk_lambda_call(lambda, args);
+            this->astfri_location.expr_ = lambdaCall;
+        }
+    }
+    return true;
+}
 
 // literaly
 bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral* IL)
