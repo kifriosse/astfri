@@ -4,7 +4,10 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
+#include <utility>
+#include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
+#include "libastfri/inc/TypeFactory.hpp"
 
 namespace astfri::java
 {
@@ -119,9 +122,34 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string c
     std::string typeNodeType = ts_node_type(tsNode);
     std::string typeNodeText = this->exprTransformer->get_node_text(tsNode, sourceCode);
 
-    type = this->nodeMapper->get_typeMap().contains(typeNodeText)
-        ? this->nodeMapper->get_typeMap().at(typeNodeText)
-        : astfri::TypeFactory::get_instance().mk_class(typeNodeText, {});
+    if (this->nodeMapper->get_typeMap().contains(typeNodeText))
+    {
+        type = this->nodeMapper->get_typeMap().at(typeNodeText);
+    }
+    else 
+    {
+        if (this->classesByName.contains(typeNodeText))
+        {
+            astfri::ClassDefStmt* c = this->classesByName.at(typeNodeText).front();
+            std::string className = c->name_;
+            if (this->classScope.contains(c))
+            {
+                astfri::Scope scope = this->classScope.at(c);
+                type = astfri::TypeFactory::get_instance().mk_class(className, scope);
+            }
+        }
+        else if (this->interfacesByName.contains(typeNodeText))
+        {
+            astfri::InterfaceDefStmt* i = this->interfacesByName.at(typeNodeText).front();
+            std::string interfaceName = i->name_;
+            if (this->interfaceScope.contains(i))
+            {
+                astfri::Scope scope = this->interfaceScope.at(i);
+                type = astfri::TypeFactory::get_instance().mk_class(interfaceName, scope);
+            }
+        }
+    }
+
     return type;
 }
 
@@ -858,6 +886,9 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
         classDef->bases_               = bases;
         classDef->interfaces_          = interfaces;
 
+        this->classScope.emplace(std::move(classDef), scope);
+        this->classesByName[classDef->name_].push_back(classDef);
+
         for (astfri::MethodDefStmt* method : methods)
         {
             method->owner_ = classDef;
@@ -958,6 +989,9 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
     interfaceDef->tparams_                 = tparams;
     interfaceDef->bases_                   = bases;
     interfaces.push_back(interfaceDef);
+
+    this->interfaceScope.emplace(std::move(interfaceDef), scope);
+    this->interfacesByName[interfaceDef->name_].push_back(interfaceDef);
 
     if (funcInterface)
     {
