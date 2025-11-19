@@ -40,6 +40,10 @@ bool Config::parse_json(char const* path)
         return false;
     if (! this->parse_destructor_info(document["DESTRUCTOR"]))
         return false;
+    if (! document.HasMember("NAMESPACE"))
+        return false;
+    if (! this->parse_namespace_info(document["NAMESPACE"]))
+        return false;
     return true;
 }
 
@@ -155,12 +159,21 @@ bool Config::parse_destructor_info(rapidjson::Value const& val)
     return true;
 }
 
+bool Config::parse_namespace_info(rapidjson::Value const& val)
+{
+    if (! val.HasMember("do_namespace"))
+        return false;
+    this->handleNamespaces_ = val["do_namespace"].GetBool();
+    return true;
+}
+
 void Config::use_default_values()
 {
 
     this->innerView_           = true;
     this->writeToFile_         = false;
     this->drawAccessModIcons_  = true;
+    this->handleNamespaces_    = true;
 
     this->indirectIndicator_   = '*';
     this->destructorIndicator_ = '~';

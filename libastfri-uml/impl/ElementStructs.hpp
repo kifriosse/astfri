@@ -27,6 +27,7 @@ enum class UserDefinedType
 struct ClassStruct
 {
     std::string name_;
+    std::string namespace_;
     UserDefinedType type_;
     std::vector<std::string> genericParams_;
 

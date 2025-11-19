@@ -5,6 +5,7 @@ namespace astfri::uml
 void ClassStruct::reset()
 {
     this->name_ = "";
+    this->namespace_ = "";
     this->genericParams_.clear();
     this->type_ = UserDefinedType::CLASS;
 }
