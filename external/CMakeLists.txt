@@ -61,6 +61,19 @@
 # External project installation
 include(ExternalProject)
 
+#############
+# rapidjson #
+#############
+ExternalProject_Add(rapidjson-external
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/rapidjson
+  BINARY_DIR ${PROJECT_SOURCE_DIR}/external/bin/build/rapidjson
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+  BUILD_BYPRODUCTS ${EXTERNAL_INSTALL_DIR}
+)
+
 ###############
 # tree-sitter #
 ###############
