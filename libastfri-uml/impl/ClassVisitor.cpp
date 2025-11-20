@@ -176,6 +176,10 @@ void ClassVisitor::visit(astfri::GenericParam const& stmt)
 void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 {
     this->currentClass_.name_ = stmt.type_->name_;
+    if (this->config_->handleNamespaces_)
+    {
+        this->currentClass_.namespace_ = astfri::mk_fqn(stmt.type_->scope_, this->currentClass_.name_);
+    }
     this->currentClass_.type_ = UserDefinedType::CLASS;
 
     for (astfri::GenericParam* gp : stmt.tparams_)

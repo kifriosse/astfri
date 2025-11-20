@@ -36,5 +36,8 @@
     },
     "DESTRUCTOR":{
         "indicator":"~"
+    },
+    "NAMESPACE":{
+        "do_namespace":true
     }
 }

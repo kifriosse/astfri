@@ -14,6 +14,7 @@ struct Config
     bool innerView_                = true;
     bool writeToFile_              = false;
     bool drawAccessModIcons_       = true;
+    bool handleNamespaces_         = true;
 
     char indirectIndicator_        = '*';
     char destructorIndicator_      = '~';
@@ -45,6 +46,7 @@ private:
     bool parse_colors_info(rapidjson::Value const& val);
     bool parse_relations_info(rapidjson::Value const& val);
     bool parse_destructor_info(rapidjson::Value const& val);
+    bool parse_namespace_info(rapidjson::Value const& val);
 };
 
 } // namespace astfri::uml

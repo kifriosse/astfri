@@ -22,7 +22,14 @@ std::string PlantUMLOutputter::assemble_param(VarStruct p)
 
 void PlantUMLOutputter::open(ClassStruct const& cs)
 {
-    this->outputString_ += cs.name_;
+    if (this->config_->handleNamespaces_ && !cs.namespace_.empty())
+    {
+        this->outputString_ += cs.namespace_;
+    }
+    else
+    {
+        this->outputString_ += cs.name_;
+    }
     if (cs.genericParams_.size() > 0)
     {
         this->outputString_ += "<";
@@ -50,6 +57,8 @@ void PlantUMLOutputter::apply_style_from_config()
     style += "FontColor " + this->config_->fontColor_ + "\n" + "}\n";
     style += "arrow {\nLineColor " + this->config_->arrowColor_ + "\n}\n";
     style += "</style>\n";
+    if (this->config_->handleNamespaces_)
+        style += "set separator ::\n";
     if (! this->config_->drawAccessModIcons_)
         style += "skinparam classAttributeIconSize 0\n";
     this->outputString_ = style + this->outputString_;
