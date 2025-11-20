@@ -1,6 +1,6 @@
-find_package(TreeSitter REQUIRED)
-
-find_package(TreeSitterCSharp REQUIRED)
+# TODO temporary solution
+set(TREE_SITTER_C_SHARP_INCLUDE_DIRS ${EXTERNAL_INSTALL_DIR}/include)
+set(TREE_SITTER_C_SHARP_LIBRARIES ${EXTERNAL_INSTALL_DIR}/lib64/libtree-sitter-c-sharp.so)
 
 add_library(astfri-cs SHARED)
 
@@ -11,8 +11,10 @@ target_sources(astfri-cs PRIVATE
         CSharpASTBuilder.cpp
 )
 
+target_include_directories(astfri-cs PUBLIC ${TREE_SITTER_C_SHARP_INCLUDE_DIRS})
+
 target_link_libraries(astfri-cs PUBLIC
         astfri-core
         tree-sitter
-        tree-sitter-c-sharp
+        ${TREE_SITTER_C_SHARP_LIBRARIES}
 )

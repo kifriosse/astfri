@@ -3,7 +3,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <oneapi/tbb/task_group.h>
 #include <stack>
 
 #include "libastfri/inc/TypeInfo.hpp"
