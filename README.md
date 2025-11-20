@@ -1,6 +1,8 @@
 # astfri
 TODO
 
+# TODO
+submodule commands doc
 
 # Modules and build
 The project requires gcc,g++ in version 12 or higher. On Ubuntu 22, they need to be explicitly installed using `apt install gcc-12 g++-12`.

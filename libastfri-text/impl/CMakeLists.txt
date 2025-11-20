@@ -13,8 +13,9 @@ target_sources(astfri-text PRIVATE
   TextLibManager.cpp
 )
 
-target_include_directories(astfri-text PUBLIC
-    ${PROJECT_SOURCE_DIR}/external
-)
+# TODO tmp solution
+set(RAPIDJSON_INCLUDE_DIRS ${EXTERNAL_INSTALL_DIR}/include)
+
+target_include_directories(astfri-text PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
 
 target_link_libraries(astfri-text PUBLIC astfri-core)

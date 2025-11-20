@@ -7,17 +7,16 @@ project(
     LANGUAGES   C CXX
 )
 
-set(
-    CMAKE_MODULE_PATH
-    ${CMAKE_MODULE_PATH}
-    "${PROJECT_SOURCE_DIR}/cmake/modules"
-)
-
 option(ASTFRI_BUILD_CPP_INPUT "Build module libastri-cpp." OFF)
 option(ASTFRI_BUILD_JAVA_INPUT "Build module libastri-java." OFF)
 option(ASTFRI_BUILD_SERIALIZED_INPUT "Build module libastri-serialize." OFF)
 option(ASTFRI_BUILD_TEXT_OUTPUT "Build module libastri-text." OFF)
 option(ASTFRI_BUILD_UML_OUTPUT "Build module libastri-uml." OFF)
+
+# TODO temporary solution, should be used only in the external cmake
+set(EXTERNAL_INSTALL_DIR ${PROJECT_SOURCE_DIR}/external/bin/lib)
+
+add_subdirectory(external)
 
 add_subdirectory(libastfri)
 

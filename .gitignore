@@ -1,5 +1,6 @@
 .cache/
 .vscode/
 build/
+external/bin/
 .clangd
 compile_commands.json

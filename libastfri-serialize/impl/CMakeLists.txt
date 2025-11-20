@@ -5,8 +5,9 @@ target_sources(astfri-serialize PRIVATE
     JsonFormatChecker.cpp
 )
 
-target_include_directories(astfri-serialize PUBLIC
-    ${PROJECT_SOURCE_DIR}/external
-)
+# TODO tmp solution
+set(RAPIDJSON_INCLUDE_DIRS ${EXTERNAL_INSTALL_DIR}/include)
+
+target_include_directories(astfri-serialize PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
 
 target_link_libraries(astfri-serialize PUBLIC astfri-core)
