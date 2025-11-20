@@ -1,6 +1,8 @@
 #include <libastfri-text/inc/TextLibManager.hpp>
 
-#include <libastfri-text/inc/pseudocode/HtmlExporter.hpp>
+#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
+#include <libastfri-text/inc/code/JavaCodeVisitor.hpp>
+#include <libastfri-text/inc/code/CxxCodeVisitor.hpp>
 
 using namespace astfri::text;
 
@@ -10,66 +12,86 @@ TextLibManager& TextLibManager::get_instance()
     return manager;
 }
 
-TextLibManager::TextLibManager()
+TextLibManager::TextLibManager() :
+    visitor_(&JavaCodeVisitor::get_instance())
 {
-    configurator_ = &TextConfigurator::get_instance();
-    currentOutputFileFormat_ = configurator_->output_file_format()->str();
-    create_new_exporter();
-    visitor_ = &PseudocodeVisitor::get_instance(exporter_);
 }
 
-TextLibManager::~TextLibManager()
-{
-    delete exporter_;
-}
+//
+// -----
+//
 
-void TextLibManager::update_configuration()
+void TextLibManager::change_output(OutputFormat const& format)
 {
-    configurator_->update_configuration();
-    check_current_file_format();
-}
-
-void TextLibManager::reload_configuration()
-{
-    configurator_->reload_configuration();
-    check_current_file_format();
+    switch (format)
+    {
+        case OutputFormat::CxxCode:
+            // TODO: implement cxx visitor
+            //visitor_ = &CxxCodeVisitor::get_instance();
+            break;
+        case OutputFormat::JavaCode:
+            visitor_ = &JavaCodeVisitor::get_instance();
+            break;
+        case OutputFormat::Pseudocode:
+            // TODO: implement pseudocode visitor
+            //visitor_ = &PseudocodeVisitor::get_instance();
+            break;
+    }
+    clear_builder();
 }
 
 void TextLibManager::execute_export()
 {
-    exporter_->execute_export();
-}
-
-void TextLibManager::reset_exporter()
-{
-    exporter_->reset();
-}
-
-void TextLibManager::write_new_line()
-{
-    exporter_->write_new_line();
-}
-
-void TextLibManager::check_current_file_format()
-{
-    std::string format = configurator_->output_file_format()->str();
-    if (format != currentOutputFileFormat_)
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
     {
-        currentOutputFileFormat_ = format;
-        delete exporter_;
-        create_new_exporter();
-        visitor_->set_exporter(exporter_);
+        visitor->export_pseudocode();
     }
 }
 
-void TextLibManager::create_new_exporter()
+void TextLibManager::clear_builder()
 {
-    if (currentOutputFileFormat_ == "html")
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
     {
-        exporter_ = new HtmlExporter();
+        visitor->clear_builder();
     }
-    else
+}
+
+void TextLibManager::append_text(std::string const& text)
+{
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
     {
-        exporter_ = new Exporter();
+        visitor->append_text(text);
+    }
+}
+
+void TextLibManager::append_new_line()
+{
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
+    {
+        visitor->append_new_line();
+    }
+}
+
+void TextLibManager::append_space()
+{
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
+    {
+        visitor->append_space();
+    }
+}
+
+void TextLibManager::update_configuration()
+{
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
+    {
+        visitor->update_configuration();
+    }
+}
+
+void TextLibManager::reload_configuration()
+{
+    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))
+    {
+        visitor->reload_configuration();
     }
 }

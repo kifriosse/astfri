@@ -1,39 +1,46 @@
 #ifndef LIBASTFRI_TEXT_PSEUDOCODE_VISITOR
 #define LIBASTFRI_TEXT_PSEUDOCODE_VISITOR
 
-#include <libastfri-text/inc/AstfriVisitor.hpp>
+#include <libastfri-text/inc/AbstractVisitor.hpp>
+#include <libastfri-text/inc/pseudocode/AbstractTextBuilder.hpp>
 
 namespace astfri::text
 {
-    class PseudocodeVisitor : public AstfriVisitor
+    class PseudocodeVisitor : public AbstractVisitor
     {
+    private:
         TextConfigurator* configurator_;
-        bool isMethodCall_;
-        bool isConstructorCall_;
-        std::unique_ptr<std::stringstream> currClassName_;
-        std::unique_ptr<std::stringstream> currInterfName_;
-        std::unique_ptr<std::vector<std::stringstream>> currGenParams_;
     public:
-        static PseudocodeVisitor& get_instance(Exporter*& exp);
+        static PseudocodeVisitor& get_instance();
         PseudocodeVisitor(PseudocodeVisitor const&) = delete;
         PseudocodeVisitor(PseudocodeVisitor&&)      = delete;
         PseudocodeVisitor& operator=(PseudocodeVisitor const&) = delete;
         PseudocodeVisitor& operator=(PseudocodeVisitor&&)      = delete;
     private:
-        PseudocodeVisitor(Exporter*& exp);
+        PseudocodeVisitor() = delete;
+        explicit PseudocodeVisitor(AbstractTextBuilder& builder);
         ~PseudocodeVisitor() = default;
     public:
+        void export_pseudocode();
+        void clear_builder();
+        void append_text(std::string const& text);
+        void append_new_line();
+        void append_space();
+        void update_configuration();
+        void reload_configuration();
+        // -----
         void visit(DynamicType const& type) override;
         void visit(IntType const& type) override;
         void visit(FloatType const& type) override;
         void visit(CharType const& type) override;
         void visit(BoolType const& type) override;
         void visit(VoidType const& type) override;
+        void visit(IndirectionType const& type) override;
         void visit(ClassType const& type) override;
         void visit(InterfaceType const& type) override;
-        void visit(LambdaType const& type) override {} // MM: TODO
-        void visit(IndirectionType const& type) override;
+        void visit(LambdaType const& type) override;
         void visit(UnknownType const& type) override;
+        // -----
         void visit(IntLiteralExpr const& expr) override;
         void visit(FloatLiteralExpr const& expr) override;
         void visit(CharLiteralExpr const& expr) override;
@@ -57,6 +64,7 @@ namespace astfri::text
         void visit(NewExpr const& expr) override;
         void visit(DeleteExpr const& expr) override;
         void visit(UnknownExpr const& expr) override;
+        // -----
         void visit(TranslationUnit const& stmt) override;
         void visit(CompoundStmt const& stmt) override;
         void visit(ReturnStmt const& stmt) override;
@@ -85,69 +93,7 @@ namespace astfri::text
         void visit(ClassDefStmt const& stmt) override;
         void visit(ContinueStmt const& stmt) override;
         void visit(BreakStmt const& stmt) override;
-    private:
-        void write_open_curl_bracket();
-        void write_arrow();
-        void write_body(Stmt* body);
-        void write_cond(Expr* cond);
-        void write_return_type(Type* type);
-        void write_identifier_from_string(std::string classname);
-        void write_initialization(VarDefStmt const* var);
-        void write_generic_params_decl(std::vector<GenericParam*> const& vgeneric);
-        void write_generic_params(std::vector<GenericParam*> const& vgeneric);
-        void write_var_def(VarDefStmt const& var, int vartype);
-        void write_template_head(std::vector<GenericParam*> const& vgen);
-        void write_member_var_decl(std::vector<MemberVarDefStmt*> const& vmembervars);
-        void write_member_var(std::vector<MemberVarDefStmt*>& vmembervars);
-        void write_constructor_decl(std::vector<ConstructorDefStmt*> const& vconstructors);
-        void write_constructor(std::vector<ConstructorDefStmt*>& vconstructors);
-        void write_destructor_decl(std::vector<DestructorDefStmt*> const& vdestructors);
-        void write_method_decl(std::vector<MethodDefStmt*> const& vmethods);
-        void write_method(std::vector<MethodDefStmt*>& vmethods);
-        //
-        template<typename VectorRelation>
-        void write_relations(VectorRelation const& vrel, bool ispolym);
     };
-
-    // -----
-
-    template<typename VectorRelation>
-    void PseudocodeVisitor::write_relations(VectorRelation const& vrel, bool ispolym)
-    {
-        for (size_t i = 0; i < vrel.size(); ++i)
-        {
-            exporter_->write_new_line();
-            write_arrow();
-            if (ispolym)
-            {
-                exporter_->write_implement_word();
-            }
-            else
-            {
-                exporter_->write_extend_word();
-            }
-            exporter_->write_space();
-            if (vrel.at(i))
-            {
-                if (ispolym)
-                {
-                    exporter_->write_interface_name(vrel.at(i)->name_);
-                }
-                else
-                {
-                    exporter_->write_class_name(vrel.at(i)->name_);
-                }
-                if (!vrel.at(i)->tparams_.empty())
-                {
-                    write_params_or_args(vrel.at(i)->tparams_);
-                }
-            }
-            else
-            {
-                exporter_->write_invalid_expr_word();
-            }
-        }
-    }
 }
 
 #endif
