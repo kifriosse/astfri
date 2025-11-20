@@ -4,6 +4,10 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
+#include <utility>
+#include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
+#include "libastfri/inc/TypeFactory.hpp"
 
 namespace astfri::java
 {
@@ -11,7 +15,9 @@ StatementTransformer::StatementTransformer() :
     stmtFactory(astfri::StmtFactory::get_instance()),
     exprTransformer(new ExpressionTransformer(this)),
     nodeMapper(new NodeMapper()),
-    functionalInterfaces()
+    functionalInterfaces(),
+    classes(),
+    interfaces()
 {
 }
 
@@ -116,9 +122,34 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string c
     std::string typeNodeType = ts_node_type(tsNode);
     std::string typeNodeText = this->exprTransformer->get_node_text(tsNode, sourceCode);
 
-    type = this->nodeMapper->get_typeMap().contains(typeNodeText)
-        ? this->nodeMapper->get_typeMap().at(typeNodeText)
-        : astfri::TypeFactory::get_instance().mk_class(typeNodeText, {});
+    if (this->nodeMapper->get_typeMap().contains(typeNodeText))
+    {
+        type = this->nodeMapper->get_typeMap().at(typeNodeText);
+    }
+    else 
+    {
+        if (this->classesByName.contains(typeNodeText))
+        {
+            astfri::ClassDefStmt* c = this->classesByName.at(typeNodeText).front();
+            std::string className = c->name_;
+            if (this->classScope.contains(c))
+            {
+                astfri::Scope scope = this->classScope.at(c);
+                type = astfri::TypeFactory::get_instance().mk_class(className, scope);
+            }
+        }
+        else if (this->interfacesByName.contains(typeNodeText))
+        {
+            astfri::InterfaceDefStmt* i = this->interfacesByName.at(typeNodeText).front();
+            std::string interfaceName = i->name_;
+            if (this->interfaceScope.contains(i))
+            {
+                astfri::Scope scope = this->interfaceScope.at(i);
+                type = astfri::TypeFactory::get_instance().mk_class(interfaceName, scope);
+            }
+        }
+    }
+
     return type;
 }
 
@@ -422,9 +453,12 @@ astfri::ReturnStmt* StatementTransformer::transform_return_stmt_node(
 {
     astfri::Expr* expr    = nullptr;
 
-    TSNode child          = ts_node_named_child(tsNode, 0);
-    std::string childType = ts_node_type(child);
-    expr                  = exprTransformer->get_expr(child, sourceCode);
+    if (!ts_node_is_null(ts_node_named_child(tsNode, 0)))
+    {
+        TSNode child          = ts_node_named_child(tsNode, 0);
+        std::string childType = ts_node_type(child);
+        expr                  = exprTransformer->get_expr(child, sourceCode);
+    }
 
     return stmtFactory.mk_return(expr);
 }
@@ -612,13 +646,21 @@ astfri::GenericParam* StatementTransformer::transform_tparam_node(
 {
     std::string name;
     std::string constraint;
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
+
+    uint32_t childCount = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < childCount; i++)
     {
-        name = exprTransformer->get_node_text(ts_node_named_child(tsNode, 0), sourceCode);
-    }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
-    {
-        constraint = exprTransformer->get_node_text(ts_node_named_child(tsNode, 1), sourceCode);
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+
+        if (childType.find("identifier") != std::string::npos)
+        {
+            name = exprTransformer->get_node_text(child, sourceCode);
+        }
+        else if (childType == "type_bound")
+        {
+            constraint = exprTransformer->get_node_text(child, sourceCode);
+        }
     }
 
     return stmtFactory.mk_generic_param(constraint, name);
@@ -709,14 +751,51 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
     return astfri::ExprFactory::get_instance().mk_lambda_expr(lambdaParams, lambdaBody);
 }
 
+astfri::Scope StatementTransformer::get_scope(TSNode tsNode, std::string const& sourceCode)
+{
+    astfri::Scope scope = mk_scope();
+    TSNode classNodePrevSibling = ts_node_prev_named_sibling(tsNode);
 
-std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
-    TSTree* tree,
+    while (!ts_node_is_null(classNodePrevSibling) && std::string(ts_node_type(classNodePrevSibling)) != "package_declaration")
+    {
+        classNodePrevSibling = ts_node_prev_named_sibling(classNodePrevSibling);
+    }
+
+    if (std::string(ts_node_type(classNodePrevSibling)) == "package_declaration")
+    {
+        std::string scopeIdentifier = ts_node_string(classNodePrevSibling);
+        TSNode child = ts_node_named_child(classNodePrevSibling, 0);
+        std::string childType = ts_node_type(child);
+        const char* fieldName = ts_node_field_name_for_named_child(child, 0);
+
+        while (fieldName != nullptr && std::strcmp(fieldName, "scope") == 0
+                && std::string(ts_node_type(child)) == "scoped_identifier"
+                && !ts_node_is_null(child))
+        {
+            uint32_t childCount = ts_node_named_child_count(child);
+            for (uint32_t j = 0; j < childCount; j++)
+            {
+                if (std::string(ts_node_type(ts_node_named_child(child, j))) == "identifier")
+                {
+                    scope.names_.push_back(
+                        this->exprTransformer->get_node_text(
+                            ts_node_named_child(child, j), sourceCode
+                        )
+                    );
+                }
+            }
+            child = ts_node_named_child(child, 0);
+        }
+        classNodePrevSibling = ts_node_prev_named_sibling(classNodePrevSibling);
+    }
+    return scope;
+}
+
+astfri::ClassDefStmt* StatementTransformer::transform_class(
+    TSNode classNode,
     std::string const& sourceCode
 )
 {
-    TSNode rootNode = ts_tree_root_node(tree);
-    TSNode classNode;
     std::string className;
     std::vector<astfri::MemberVarDefStmt*> attributes;
     std::vector<astfri::MethodDefStmt*> methods;
@@ -725,23 +804,7 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
     std::vector<astfri::ClassDefStmt*> bases;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     std::vector<astfri::ClassDefStmt*> classes;
-
-    uint32_t childCount = ts_node_named_child_count(rootNode);
-    for (uint32_t i = 0; i < childCount; i++)
-    {
-        if (! ts_node_is_null(ts_node_named_child(rootNode, i)))
-        {
-            TSNode child          = ts_node_named_child(rootNode, i);
-            std::string childType = ts_node_type(child);
-            if (childType == "class_declaration")
-            {
-                classNode = child;
-            }
-            else
-            {
-                continue;
-            }
-        }
+    astfri::Scope scope = this->get_scope(classNode, sourceCode);
 
         uint32_t classChildCount = ts_node_named_child_count(classNode);
         for (uint32_t j = 0; j < classChildCount; j++)
@@ -768,9 +831,12 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
             }
             else if (classChildType == "superclass")
             {
+                std::string baseClassName = exprTransformer->get_node_text(
+                    ts_node_named_child(classChild, 0),
+                    sourceCode
+                );
                 bases.push_back(stmtFactory.mk_class_def(
-                    exprTransformer->get_node_text(ts_node_named_child(classChild, 0), sourceCode),
-                    mk_scope()));
+                    baseClassName, mk_scope()));
             }
             else if (classChildType == "super_interfaces")
             {
@@ -811,14 +877,17 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
             }
         }
 
-        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, mk_scope());
+        astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, scope);
+        classDef->name_                = className;
         classDef->vars_                = attributes;
         classDef->methods_             = methods;
         classDef->constructors_        = constructors;
         classDef->tparams_             = tparams;
         classDef->bases_               = bases;
         classDef->interfaces_          = interfaces;
-        classes.push_back(classDef);
+
+        this->classScope.emplace(std::move(classDef), scope);
+        this->classesByName[classDef->name_].push_back(classDef);
 
         for (astfri::MethodDefStmt* method : methods)
         {
@@ -828,139 +897,150 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
         {
             constructor->owner_ = classDef;
         }
-        attributes.clear();
-        methods.clear();
-        constructors.clear();
-        tparams.clear();
-        bases.clear();
-        interfaces.clear();
-    }
 
-    return classes;
+    return classDef;
 }
 
-std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interfaces(
-    TSTree* tree,
+astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
+    TSNode interfaceNode,
     std::string const& sourceCode
 )
 {
-    TSNode rootNode = ts_tree_root_node(tree);
-    TSNode interfaceNode;
     std::string interfaceName;
     std::vector<astfri::MethodDefStmt*> methods;
     std::vector<astfri::GenericParam*> tparams;
     std::vector<astfri::InterfaceDefStmt*> bases;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     bool funcInterface = false;
+    astfri::Scope scope = this->get_scope(interfaceNode, sourceCode);
 
-    uint32_t childCount = ts_node_named_child_count(rootNode);
-    for (uint32_t i = 0; i < childCount; i++)
+    uint32_t interfaceChildCount = ts_node_named_child_count(interfaceNode);
+    for (uint32_t j = 0; j < interfaceChildCount; j++)
     {
-        if (! ts_node_is_null(ts_node_named_child(rootNode, i)))
+        TSNode interfaceChild          = ts_node_named_child(interfaceNode, j);
+        std::string interfaceChildType = ts_node_type(interfaceChild);
+        
+        if (interfaceChildType == "modifiers")
         {
-            TSNode child          = ts_node_named_child(rootNode, i);
-            std::string childType = ts_node_type(child);
-            if (childType == "interface_declaration")
+            uint32_t modifiersChildrenCount = ts_node_child_count(interfaceChild);
+            if (modifiersChildrenCount > 0)
             {
-                interfaceNode = child;
-            }
-            else
-            {
-                continue;
-            }
-        }
-
-        uint32_t interfaceChildCount = ts_node_named_child_count(interfaceNode);
-        for (uint32_t j = 0; j < interfaceChildCount; j++)
-        {
-            TSNode interfaceChild          = ts_node_named_child(interfaceNode, j);
-            std::string interfaceChildType = ts_node_type(interfaceChild);
-            
-            if (interfaceChildType == "modifiers")
-            {
-                uint32_t modifiersChildrenCount = ts_node_child_count(interfaceChild);
-                if (modifiersChildrenCount > 0)
+                for (uint32_t k = 0; k < modifiersChildrenCount; ++k)
                 {
-                    for (uint32_t k = 0; k < modifiersChildrenCount; ++k)
+                    TSNode modChild = ts_node_child(interfaceChild, k);
+                    std::string modChildType = ts_node_type(modChild);
+                    std::string annotation = exprTransformer->get_node_text(modChild, sourceCode);
+                    if (modChildType == "marker_annotation" && annotation == "@FunctionalInterface")
                     {
-                        TSNode modChild = ts_node_child(interfaceChild, k);
-                        std::string modChildType = ts_node_type(modChild);
-                        std::string annotation = exprTransformer->get_node_text(modChild, sourceCode);
-                        if (modChildType == "marker_annotation" && annotation == "@FunctionalInterface")
-                        {
-                            funcInterface = true;
-                        }
-                    }
-                }
-            }
-            else if (interfaceChildType == "identifier")
-            {
-                interfaceName = exprTransformer->get_node_text(interfaceChild, sourceCode);
-            }
-            else if (interfaceChildType == "type_parameters")
-            {
-                uint32_t parametersCount = ts_node_named_child_count(interfaceChild);
-                for (uint32_t k = 0; k < parametersCount; k++)
-                {
-                    TSNode parameterNode = ts_node_named_child(interfaceChild, k);
-                    tparams.push_back(this->transform_tparam_node(parameterNode, sourceCode));
-                }
-            }
-            else if (interfaceChildType == "extends_interfaces")
-            {
-                uint32_t typeListChildCount = ts_node_named_child_count(interfaceChild);
-                for (uint32_t k = 0; k < typeListChildCount; k++)
-                {
-                    TSNode typeListChild = ts_node_named_child(interfaceChild, k);
-                    bases.push_back(stmtFactory.mk_interface_def(
-                        exprTransformer->get_node_text(typeListChild, sourceCode)
-                    ));
-                }
-            }
-            else if (interfaceChildType == "interface_body")
-            {
-                uint32_t interfaceBodyChildCount = ts_node_named_child_count(interfaceChild);
-                for (uint32_t k = 0; k < interfaceBodyChildCount; k++)
-                {
-                    TSNode interfaceBodyChild          = ts_node_named_child(interfaceChild, k);
-                    std::string interfaceBodyChildType = ts_node_type(interfaceBodyChild);
-
-                    if (interfaceBodyChildType == "method_declaration")
-                    {
-                        methods.push_back(
-                            this->transform_method_node(interfaceBodyChild, sourceCode)
-                        );
-                    }
-                    else
-                    {
-                        continue;
+                        funcInterface = true;
                     }
                 }
             }
         }
-
-        astfri::InterfaceDefStmt* interfaceDef = stmtFactory.mk_interface_def(interfaceName);
-        interfaceDef->methods_                 = methods;
-        interfaceDef->tparams_                 = tparams;
-        interfaceDef->bases_                   = bases;
-        interfaces.push_back(interfaceDef);
-
-        if (funcInterface)
+        else if (interfaceChildType == "identifier")
         {
-            this->functionalInterfaces.push_back(interfaceDef);
-            funcInterface = false;
+            interfaceName = exprTransformer->get_node_text(interfaceChild, sourceCode);
         }
-
-        for (astfri::MethodDefStmt* method : methods)
+        else if (interfaceChildType == "type_parameters")
         {
-            method->owner_ = interfaceDef;
+            uint32_t parametersCount = ts_node_named_child_count(interfaceChild);
+            for (uint32_t k = 0; k < parametersCount; k++)
+            {
+                TSNode parameterNode = ts_node_named_child(interfaceChild, k);
+                tparams.push_back(this->transform_tparam_node(parameterNode, sourceCode));
+            }
         }
-        methods.clear();
-        tparams.clear();
-        bases.clear();
+        else if (interfaceChildType == "extends_interfaces")
+        {
+            uint32_t typeListChildCount = ts_node_named_child_count(interfaceChild);
+            for (uint32_t k = 0; k < typeListChildCount; k++)
+            {
+                TSNode typeListChild = ts_node_named_child(interfaceChild, k);
+                bases.push_back(stmtFactory.mk_interface_def(
+                    exprTransformer->get_node_text(typeListChild, sourceCode)
+                ));
+            }
+        }
+        else if (interfaceChildType == "interface_body")
+        {
+            uint32_t interfaceBodyChildCount = ts_node_named_child_count(interfaceChild);
+            for (uint32_t k = 0; k < interfaceBodyChildCount; k++)
+            {
+                TSNode interfaceBodyChild          = ts_node_named_child(interfaceChild, k);
+                std::string interfaceBodyChildType = ts_node_type(interfaceBodyChild);
+
+                if (interfaceBodyChildType == "method_declaration")
+                {
+                    methods.push_back(
+                        this->transform_method_node(interfaceBodyChild, sourceCode)
+                    );
+                }
+                else
+                {
+                    continue;
+                }
+            }
+        }
     }
 
-    return interfaces;
+    astfri::InterfaceDefStmt* interfaceDef = stmtFactory.mk_interface_def(interfaceName, scope);
+    interfaceDef->name_                    = interfaceName;
+    interfaceDef->methods_                 = methods;
+    interfaceDef->tparams_                 = tparams;
+    interfaceDef->bases_                   = bases;
+    interfaces.push_back(interfaceDef);
+
+    this->interfaceScope.emplace(std::move(interfaceDef), scope);
+    this->interfacesByName[interfaceDef->name_].push_back(interfaceDef);
+
+    if (funcInterface)
+    {
+        this->functionalInterfaces.push_back(interfaceDef);
+        funcInterface = false;
+    }
+
+    for (astfri::MethodDefStmt* method : methods)
+    {
+        method->owner_ = interfaceDef;
+    }
+
+    return interfaceDef;
+}
+
+std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(TSTree* tree, const std::string& sourceCode)
+{
+    TSNode root = ts_tree_root_node(tree);
+    uint32_t childCount = ts_node_named_child_count(root);
+
+    for (uint32_t i = 0; i < childCount; i++)
+    {
+        TSNode child = ts_node_named_child(root, i);
+        std::string childType = ts_node_type(child);
+
+        if (childType == "class_declaration")
+        {
+            this->classes.push_back(std::move(this->transform_class(child, sourceCode)));
+        }
+    }
+    return this->classes;
+}
+
+std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interfaces(TSTree* tree, const std::string& sourceCode)
+{
+    TSNode root = ts_tree_root_node(tree);
+    uint32_t childCount = ts_node_named_child_count(root);
+
+    for (uint32_t i = 0; i < childCount; i++)
+    {
+        TSNode child = ts_node_named_child(root, i);
+        std::string childType = ts_node_type(child);
+
+        if (childType == "interface_declaration")
+        {
+            this->interfaces.push_back(std::move(this->transform_interface(child, sourceCode)));
+        }
+    }
+    return this->interfaces;
 }
 
 astfri::TranslationUnit* StatementTransformer::fill_translation_unit(
