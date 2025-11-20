@@ -64,6 +64,12 @@ rm -rf build/debug
 ok
 echo ""
 
+# Remove external bin files
+heading "Removing external bin files"
+rm -rf external/bin
+ok
+echo ""
+
 # Create build directories
 heading "Creating new build directories"
 mkdir -p build/release

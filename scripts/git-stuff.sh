@@ -48,7 +48,7 @@ possibly_die() {
 }
 
 # Branches
-BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp"
+BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp dev-ab"
 
 if [ "$MODE" = "pull" ]; then    # pull
   heading "# Pulling changes"
@@ -60,6 +60,8 @@ if [ "$MODE" = "pull" ]; then    # pull
     git pull
     possibly_die "Failed to pull ${branch}"
   done
+  git switch main
+  possibly_die "Failed to switch to main"
   ok
 elif [ "$MODE" = "merge" ]; then   # merge
   heading "# Merging to main"

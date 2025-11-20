@@ -5,12 +5,12 @@
 #include <clang/AST/DeclCXX.h>
 #include <cstdio>
 #include <iostream>
-#include <llvm-18/llvm/Support/Casting.h>
-#include <llvm-18/llvm/Support/Errc.h>
-#include <llvm-18/llvm/Support/raw_ostream.h>
-#include "libastfri/inc/Expr.hpp"
-#include "libastfri/inc/Stmt.hpp"
-#include "libastfri/inc/Type.hpp"
+// #include <llvm-18/llvm/Support/Casting.h>
+// #include <llvm-18/llvm/Support/Errc.h>
+// #include <llvm-18/llvm/Support/raw_ostream.h>
+// #include <libastfri/inc/Expr.hpp>
+// #include <libastfri/inc/Stmt.hpp>
+// #include <libastfri/inc/Type.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 namespace astfri::astfri_cpp
