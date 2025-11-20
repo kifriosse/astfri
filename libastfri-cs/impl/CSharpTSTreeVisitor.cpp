@@ -338,27 +338,28 @@ Stmt* CSharpTSTreeVisitor::handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNo
 
 Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
 {
-    static std::string const declarator_query = R"(
+    static std::string const decl_query =
+        R"(
         (variable_declaration
             (variable_declarator) @var_decl)
-    )";
-    static std::string const modifier_query   = R"(
+        )";
+    static std::string const mod_query =
+        R"(
         (field_declaration
             (modifier) @modifier)
-    )";
+        )";
 
-    std::vector<TSNode> const modifier_nodes  = find_nodes(*node, self->language_, modifier_query);
+    std::vector<TSNode> const modifier_nodes = find_nodes(*node, self->language_, mod_query);
 
-    auto access_modifier                      = AccessModifier::Private;
-
-    bool is_private                           = false;
-    bool is_protected                         = false;
-    bool is_internal                          = false;
-    bool is_static                            = false;
-    bool is_readonly                          = false;
-    bool is_const                             = false;
-    bool is_volatile                          = false;
-    bool is_new                               = false;
+    auto access_modifier                     = AccessModifier::Private;
+    bool is_private                          = false;
+    bool is_protected                        = false;
+    bool is_internal                         = false;
+    bool is_static                           = false;
+    bool is_readonly                         = false;
+    bool is_const                            = false;
+    bool is_volatile                         = false;
+    bool is_new                              = false;
 
     for (TSNode modifier_node : modifier_nodes)
     {
@@ -379,8 +380,7 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, T
                 is_internal = true;
                 break;
             default:
-            {
-            }
+                break;
             }
             continue;
         }
@@ -415,7 +415,7 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, T
 
     Type* type                 = make_type(self, &type_node);
     std::vector<TSNode> const var_decl_nodes
-        = find_nodes(var_decl_node, self->language_, declarator_query);
+        = find_nodes(var_decl_node, self->language_, decl_query);
 
     std::vector<VarDefStmt*> var_def_stmts;
     for (TSNode const& var_decltor_node : var_decl_nodes)
