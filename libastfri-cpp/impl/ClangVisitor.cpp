@@ -1,9 +1,16 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
+#include <clang/AST/Decl.h>
+#include <clang/AST/DeclBase.h>
 #include <clang/AST/DeclCXX.h>
+#include <cstdio>
 #include <iostream>
+#include <llvm-18/llvm/Support/Casting.h>
+#include <llvm-18/llvm/Support/Errc.h>
+#include <llvm-18/llvm/Support/raw_ostream.h>
 #include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Stmt.hpp"
+#include "libastfri/inc/Type.hpp"
 #include <libastfri/inc/Astfri.hpp>
 
 namespace astfri::astfri_cpp
@@ -83,7 +90,7 @@ astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name)
 {
     for (auto cls : this->tu_->classes_)
     {
-        if (cls->name_.compare(name) == 0)
+        if (cls->type_->name_.compare(name) == 0)
         {
             return cls;
         }
@@ -267,11 +274,11 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
     {
         return true;
     }
-
+    
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
-
+    
     // akcia na tomto vrchole
     // ziskanie ownera
     auto owner = this->get_existing_class(Ctor->getParent()->getNameAsString());
@@ -286,7 +293,7 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
             this->getAccessModifier(Ctor)
         );
         owner->constructors_.push_back(new_ctor);
-
+        
         TraverseStmt(Ctor->getBody());
         new_ctor->body_ = (CompoundStmt*)this->astfri_location.stmt_;
 
@@ -483,13 +490,25 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
     if (RD->isLambda()) {
         return true;
     }
-
+    
     // akcia na vrchole
+    // vytvorí sa scope
+    std::vector<std::string> layers = {};
+    clang::DeclContext* context = RD->getDeclContext();
+    while (context) {
+        if (auto named = llvm::dyn_cast<clang::NamedDecl>(context)) {
+            layers.push_back(named->getNameAsString());
+        }
+        context = context->getParent();
+    }
+    layers = {layers.rbegin(), layers.rend()};
+    
+    // vytvorenie triedy
     auto new_class = this->stmt_factory_->mk_class_def(
         RD->getNameAsString(),
-        mk_scope());
+        {{layers.rbegin(), layers.rend()}});
     this->tu_->classes_.push_back(new_class);
-
+    
     // nastavenie bases
     for (auto base : RD->bases())
     {
@@ -497,25 +516,25 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
             this->get_existing_class(base.getType().getBaseTypeIdentifier()->getName().str())
         );
     }
-
+    
     // zapamatanie si predoslich location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
-
+    
     // prepisanie AST location
     this->astfri_location.stmt_ = new_class;
     this->clang_location.decl_  = RD;
-
+    
     for (auto field : RD->fields())
     {
         TraverseDecl(field);
     }
-
+    
     for (auto method : RD->methods())
     {
         TraverseDecl(method);
     }
-
+    
     if (auto tparams = RD->getDescribedTemplateParams())
     {
         // std::cout << "Som v triede ktorá má template\n";
@@ -973,9 +992,9 @@ bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor)
     // akcia na tomto vrchole
     auto new_ctor_expr   = this->expr_factory_->mk_constructor_call(nullptr, std::vector<Expr*>{});
 
-    // auto type            = this->type_factory_->mk_user(Ctor->getType().getAsString().c_str());
-    auto type            = this->type_factory_->mk_class(Ctor->getType().getAsString(), {});
-    new_ctor_expr->type_ = type;
+    // treba nastaviť typ
+    // TODO: je to momentálne len pre ClassDefStmt, mne sa neda použiť is_a (dyn_cast), tak bude treba niećo vymyslieť
+    new_ctor_expr->type_ = ((astfri::ClassDefStmt*)this->astfri_location.stmt_)->type_;
 
     for (auto arg : Ctor->arguments())
     {
@@ -1022,13 +1041,6 @@ bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
     // získam si potrebné veci na lambda uzol
     std::vector<ParamVarDefStmt*> params {};
     astfri::Stmt* body;
-    
-    // ak by bolo treba riešiť captures
-    // std::cout << "Som na lamde, zachytené premenné sú: ";
-    // for (auto zachytena : (LBD->captures())) {
-    //     std::cout << zachytena.getCapturedVar()->getNameAsString() << " ";
-    // }
-    // std::cout << "\n";
 
     // získanie parametrov
     for (auto parameter : (LBD->getCallOperator()->parameters())) {
@@ -1041,7 +1053,8 @@ bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
     body = this->astfri_location.stmt_;
 
     // vytvorenie uzla
-    auto lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body);    
+    std::string lambda_meno = LBD->getLambdaClass()->getQualifiedNameAsString();
+    auto lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body, LBD->getLambdaClass()->getName().str());    
     
     // nastavenie location
     this->astfri_location.expr_ = lambdaExpr;
@@ -1097,6 +1110,21 @@ bool ClangVisitor::TraverseCallExpr(clang::CallExpr* CE)
         }
         this->astfri_location.expr_ = fun;
     }
+
+    // // co sa ma stat ak sa zavola lambda
+    //  if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(CE->getDirectCallee()->getParent())) {
+    //     if (record && record->isLambda()) {
+    //         // Mozem zavolat mk_lambda_call, ked chcem len tu lambdu?
+    //         Expr* lambda = this->expr_factory_->mk_lambda_expr({}, {}, record->getQualifiedNameAsString());
+    //         std::vector<Expr*> args = {};
+    //         for(auto arg : CE->arguments()) {
+    //             TraverseStmt(arg);
+    //             args.push_back(this->astfri_location.expr_);
+    //         }
+    //         LambdaCallExpr* lambdaCall = this->expr_factory_->mk_lambda_call(lambda, args);
+    //         this->astfri_location.expr_ = lambdaCall;
+    //     }
+    // }
     return true;
 }
 
@@ -1198,13 +1226,23 @@ bool ClangVisitor::TraverseCXXThrowExpr(clang::CXXThrowExpr* TE)
     return true;
 }
 
-// bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE) {
-//     if (auto oper = llvm::dyn_cast<clang::BinaryOperatorKind>(COCE->getOperatorLoc())) {
-//         oper
-//         TraverseStmt(oper);
-//     }
-//     return true;
-// }
+bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE) {
+    // co sa ma stat ak sa zavola lambda
+     if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(COCE->getDirectCallee()->getParent())) {
+        if (record && record->isLambda()) {
+            // Mozem zavolat mk_lambda_call, ked chcem len tu lambdu?
+            Expr* lambda = this->expr_factory_->mk_lambda_expr({}, {}, record->getQualifiedNameAsString());
+            std::vector<Expr*> args = {};
+            for(auto arg : COCE->arguments()) {
+                TraverseStmt(arg);
+                args.push_back(this->astfri_location.expr_);
+            }
+            LambdaCallExpr* lambdaCall = this->expr_factory_->mk_lambda_call(lambda, args);
+            this->astfri_location.expr_ = lambdaCall;
+        }
+    }
+    return true;
+}
 
 // literaly
 bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral* IL)

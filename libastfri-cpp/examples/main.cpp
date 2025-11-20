@@ -1,11 +1,7 @@
-// astfri headers
-#include <libastfri/inc/Expr.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/Stmt.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
-
 #include <iostream>
+
+// astfri headers
+#include <libastfri/inc/Astfri.hpp>
 
 // ASTFRI visitor
 #include <libastfri-text/inc/TextLibManager.hpp>
@@ -30,8 +26,8 @@ int main(int argc, char const** argv)
     // AST Visitor - nice
     
     // ako toto rozbehať?
-    //astfri::text::TextLibManager& man = astfri::text::TextLibManager::get_instance();
-    //man.visit(tu);
+    astfri::text::TextLibManager& man = astfri::text::TextLibManager::get_instance();
+    man.visit_and_export(tu);
 
     // UML
     astfri::uml::UMLLibWrapper wrapper;
