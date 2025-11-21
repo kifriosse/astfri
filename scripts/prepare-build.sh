@@ -59,8 +59,7 @@ fi
 
 # Remove old build files
 heading "Removing old build files"
-rm -rf build/release
-rm -rf build/debug
+rm -rf build
 ok
 echo ""
 
@@ -72,31 +71,13 @@ echo ""
 
 # Create build directories
 heading "Creating new build directories"
-mkdir -p build/release
-mkdir -p build/debug
-ok
-echo ""
-
-# Generate release Makefile
-heading "Generating realease config"
-cd build/release
-cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
-      -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
-      -DCMAKE_BUILD_TYPE=Release           \
-      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON   \
-      -DASTFRI_BUILD_CPP_INPUT=ON          \
-      -DASTFRI_BUILD_JAVA_INPUT=ON         \
-      -DASTFRI_BUILD_SERIALIZED_INPUT=ON   \
-      -DASTFRI_BUILD_TEXT_OUTPUT=ON        \
-      -DASTFRI_BUILD_UML_OUTPUT=ON         \
-      ../..
-possibly_die "CMake for release config failed"
+mkdir -p build
 ok
 echo ""
 
 # Generate debug Makefile
 heading "Generating debug config"
-cd ../debug
+cd build
 cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
       -DCMAKE_BUILD_TYPE=Debug             \
@@ -106,10 +87,7 @@ cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DASTFRI_BUILD_SERIALIZED_INPUT=ON   \
       -DASTFRI_BUILD_TEXT_OUTPUT=ON        \
       -DASTFRI_BUILD_UML_OUTPUT=ON         \
-      ../..
+      ..
 possibly_die "CMake for debug config failed"
 ok
 echo ""
-
-# Move compile commnads out of the build directory
-mv compile_commands.json ../..
