@@ -85,7 +85,7 @@ namespace CSharp.T.Test
         private static readonly int mf = 8;
         private string _firstName;
         private string _lastName;
-        public String Name { 
+        public string Name { 
             get => _firstName + " " + _lastName;
             set
             {

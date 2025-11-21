@@ -1,7 +1,5 @@
-#include <libastfri-cs/impl/CSharpASTBuilder.hpp>
-#include <libastfri-cs/tests/ExpressionTests.hpp>
-
-#include "libastfri-text/inc/TextLibManager.hpp"
+#include <libastfri-cs/inc/CSharpASTBuilder.hpp>
+#include <libastfri-text/inc/TextLibManager.hpp>
 
 int main()
 {

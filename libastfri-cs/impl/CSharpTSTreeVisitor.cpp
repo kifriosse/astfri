@@ -1,16 +1,10 @@
-
 #include "CSharpTSTreeVisitor.hpp"
 
-#include <libastfri/inc/TypeInfo.hpp>
+#include <libastfri-cs/impl/NodeRegistry.hpp>
+#include <libastfri-cs/impl/utils.hpp>
 
 #include <algorithm>
-#include <chrono>
 #include <cstring>
-#include <iostream>
-#include <stack>
-
-#include "NodeRegistry.hpp"
-#include "utils.hpp"
 
 namespace astfri::csharp
 {
@@ -196,7 +190,6 @@ Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(CSharpTSTreeVisitor* self, TS
     node_contet.pop_back();
     node_contet.erase(node_contet.begin(), node_contet.begin() + 2);
 
-    std::cout << node_contet << std::endl;
     return ExprFactory::get_instance().mk_string_literal(node_contet);
 }
 
@@ -473,6 +466,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     std::string const class_name = extract_node_text(class_name_node, self->source_code_);
 
     ClassDefStmt* class_def      = StmtFactory::get_instance().mk_class_def(class_name, scope);
+    self->type_context_.enter_type(class_def);
 
     class_def->name_             = class_name;
 
@@ -513,7 +507,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
                 class_def->methods_.push_back(as_a<MethodDefStmt>(member_stmt));
         }
     }
-
+    self->type_context_.leave_type();
     return class_def;
 }
 

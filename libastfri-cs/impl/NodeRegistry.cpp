@@ -1,6 +1,6 @@
-#include "NodeRegistry.hpp"
+#include <libastfri-cs/impl/NodeRegistry.hpp>
 
-#include "utils.hpp"
+#include <libastfri-cs/impl/utils.hpp>
 
 namespace astfri::csharp
 {

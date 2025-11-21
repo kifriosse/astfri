@@ -1,5 +1,7 @@
 
-#include "CSharpASTBuilder.hpp"
+#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
+#include <libastfri-cs/inc/CSharpASTBuilder.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -20,10 +22,7 @@ TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) 
     std::vector<std::string> const source_codes = get_source_codes(source_code_dir);
     for (auto& source_code : source_codes)
     {
-        // TSParser* local_parser = ts_parser_new();
-        // ts_parser_set_language(local_parser, lang_);
         TSTree* const tree = ts_parser_parse_string(
-            // local_parser,
             parser_,
             nullptr,
             source_code.c_str(),
@@ -35,7 +34,6 @@ TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) 
         cs_ts_tree_visitor.handle_comp_unit_stmt(*ast, &root);
 
         ts_tree_delete(tree);
-        // ts_parser_delete(local_parser);
         ts_parser_reset(parser_);
     }
     return ast;

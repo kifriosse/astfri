@@ -1,10 +1,12 @@
 #ifndef CSHARP_AST_BUILDER_HPP
 #define CSHARP_AST_BUILDER_HPP
 
+#include <libastfri/inc/Astfri.hpp>
+
+#include <string>
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
-
-#include "CSharpTSTreeVisitor.hpp"
+#include <vector>
 
 namespace astfri::csharp
 {
