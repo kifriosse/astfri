@@ -572,6 +572,9 @@ Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
             std::string file_namespace_query = "(file_scoped_namespace_declaration) @namespace";
             TSNode const namespace_node
                 = find_first_node(current, this->language_, file_namespace_query);
+            if (ts_node_is_null(namespace_node))
+                break;
+
             TSNode const name_node = ts_node_child_by_field_name(namespace_node, "name", 4);
             std::string const name = extract_node_text(name_node, this->source_code_);
             split_namespace(scope_str, name);
