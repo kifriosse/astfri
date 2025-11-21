@@ -1,7 +1,3 @@
-find_package(TreeSitter REQUIRED)
-
-find_package(TreeSitterCSharp REQUIRED)
-
 add_library(astfri-cs SHARED)
 
 target_sources(astfri-cs PRIVATE
@@ -11,8 +7,15 @@ target_sources(astfri-cs PRIVATE
         CSharpASTBuilder.cpp
 )
 
+target_link_directories(astfri-cs PUBLIC
+        ${TREE_SITTER_LIBRARY_DIRS}
+        ${TREE_SITTER_C_SHARP_LIBRARY_DIRS}
+)
+
 target_link_libraries(astfri-cs PUBLIC
         astfri-core
-        tree-sitter
-        tree-sitter-c-sharp
+        ${TREE_SITTER_LIBRARIES}
+        ${TREE_SITTER_C_SHARP_LIBRARIES}
 )
+
+target_include_directories(astfri-cs PUBLIC ${TREE_SITTER_C_SHARP_INCLUDE_DIRS})

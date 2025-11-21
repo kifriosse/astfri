@@ -7,9 +7,14 @@ target_sources(astfri-java PRIVATE
     StatementTransformer.cpp
 )
 
+target_link_directories(astfri-java PUBLIC
+    ${TREE_SITTER_LIBRARY_DIRS}
+    ${TREE_SITTER_JAVA_LIBRARY_DIRS}
+)
+
 target_link_libraries(astfri-java PUBLIC
     astfri-core
-    tree-sitter
+    ${TREE_SITTER_LIBRARIES}
     ${TREE_SITTER_JAVA_LIBRARIES}
 )
 

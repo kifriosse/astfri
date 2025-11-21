@@ -21,7 +21,7 @@ error() {
 
 # Print info
 info() {
-      echo "$1"
+  echo "$1"
 }
 
 # Print heading
@@ -48,10 +48,12 @@ if [ "$#" -eq 0 ]; then
   C_COMPILER=gcc
   CXX_COMPILER=g++
   echo "Using defaults -- gcc and g++."
+  echo ""
 elif [ "$#" -eq 2 ]; then
   C_COMPILER=$1
   CXX_COMPILER=$2
   echo "Using ${C_COMPILER} as C compiler and ${CXX_COMPILER} as C++ compiler."
+  echo ""
 else
   error "Invalid arguments."
   help_and_die
@@ -59,24 +61,31 @@ fi
 
 # Remove old build files
 heading "Removing old build files"
+set -x
 rm -rf build
+{ set +x; } 2>/dev/null
 ok
 echo ""
 
 # Remove external bin files
 heading "Removing external bin files"
+set -x
 rm -rf external/bin
+{ set +x; } 2>/dev/null
 ok
 echo ""
 
 # Create build directories
 heading "Creating new build directories"
+set -x
 mkdir -p build
+{ set +x; } 2>/dev/null
 ok
 echo ""
 
 # Generate debug Makefile
 heading "Generating debug config"
+set -x
 cd build
 cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
@@ -84,10 +93,12 @@ cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON   \
       -DASTFRI_BUILD_CPP_INPUT=ON          \
       -DASTFRI_BUILD_JAVA_INPUT=ON         \
+      -DASTFRI_BUILD_CSHARP_INPUT=ON       \
       -DASTFRI_BUILD_SERIALIZED_INPUT=ON   \
       -DASTFRI_BUILD_TEXT_OUTPUT=ON        \
       -DASTFRI_BUILD_UML_OUTPUT=ON         \
       ..
+{ set +x; } 2>/dev/null
 possibly_die "CMake for debug config failed"
 ok
 echo ""

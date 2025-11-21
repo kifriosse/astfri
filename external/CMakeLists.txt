@@ -1,5 +1,8 @@
 # External project installation
 include(ExternalProject)
+include(GNUInstallDirs)
+
+set(EXTERNAL_INSTALL_DIR ${PROJECT_SOURCE_DIR}/external/bin/lib)
 
 #############
 # rapidjson #
@@ -12,6 +15,9 @@ ExternalProject_Add(rapidjson-external
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     -DRAPIDJSON_BUILD_TESTS=OFF
+    -DRAPIDJSON_BUILD_EXAMPLES=OFF
+    -DRAPIDJSON_BUILD_DOC=OFF
+    -DRAPIDJSON_BUILD_THIRDPARTY_GTEST=OFF
   BUILD_BYPRODUCTS ${EXTERNAL_INSTALL_DIR}
 )
 
@@ -24,9 +30,33 @@ set(
 ###############
 # tree-sitter #
 ###############
+ExternalProject_Add(tree-sitter-external
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/tree-sitter
+  BINARY_DIR ${PROJECT_SOURCE_DIR}/external/bin/build/tree-sitter
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_DIR}
+    -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  BUILD_BYPRODUCTS ${EXTERNAL_INSTALL_DIR}
+)
 
-# TODO also switch this to external project
-add_subdirectory(tree-sitter)
+set(
+  TREE_SITTER_INCLUDE_DIRS
+    ${EXTERNAL_INSTALL_DIR}/include
+  CACHE PATH "tree-sitter include dir"
+)
+
+set(
+  TREE_SITTER_LIBRARY_DIRS
+    ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}
+  CACHE PATH "tree-sitter library dir"
+)
+
+set(
+  TREE_SITTER_LIBRARIES
+    libtree-sitter.so
+  CACHE PATH "tree-sitter library"
+)
 
 ####################
 # tree-sitter-java #
@@ -36,6 +66,7 @@ ExternalProject_Add(tree-sitter-java-external
   BINARY_DIR ${PROJECT_SOURCE_DIR}/external/bin/build/tree-sitter-java
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_DIR}
+    -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   BUILD_BYPRODUCTS ${EXTERNAL_INSTALL_DIR}
 )
@@ -47,8 +78,14 @@ set(
 )
 
 set(
+  TREE_SITTER_JAVA_LIBRARY_DIRS
+    ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}
+  CACHE PATH "tree-sitter-java library dir"
+)
+
+set(
   TREE_SITTER_JAVA_LIBRARIES
-    ${EXTERNAL_INSTALL_DIR}/lib64/libtree-sitter-java.so
+    libtree-sitter-java.so
   CACHE PATH "tree-sitter-java library"
 )
 
@@ -60,6 +97,7 @@ ExternalProject_Add(tree-sitter-c-sharp-external
   BINARY_DIR ${PROJECT_SOURCE_DIR}/external/bin/build/tree-sitter-c-sharp
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_DIR}
+    -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   BUILD_BYPRODUCTS ${EXTERNAL_INSTALL_DIR}
 )
@@ -71,7 +109,13 @@ set(
 )
 
 set(
+  TREE_SITTER_C_SHARP_LIBRARY_DIRS
+    ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}
+  CACHE PATH "tree-sitter-c-sharp library dir"
+)
+
+set(
   TREE_SITTER_C_SHARP_LIBRARIES
-    ${EXTERNAL_INSTALL_DIR}/lib64/libtree-sitter-c-sharp.so
+    libtree-sitter-c-sharp.so
   CACHE PATH "tree-sitter-c-sharp library"
 )
