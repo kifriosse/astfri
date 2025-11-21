@@ -1,14 +1,13 @@
 #ifndef CSHARP_TS_TREE_VISITOR_HPP
 #define CSHARP_TS_TREE_VISITOR_HPP
 
+#include <libastfri-cs/impl/TypeContext.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
 #include <functional>
 #include <string>
 #include <tree_sitter/api.h>
 #include <utility>
-
-#include "libastfri/inc/ExprFactory.hpp"
-#include "libastfri/inc/StmtFactory.hpp"
-#include "libastfri/inc/TypeFactory.hpp"
 
 namespace astfri::csharp
 {
@@ -18,7 +17,6 @@ class CSharpTSTreeVisitor
 public:
     using ExprHandler = std::function<Expr*(CSharpTSTreeVisitor* self, TSNode const*)>;
     using StmtHandler = std::function<Stmt*(CSharpTSTreeVisitor* self, TSNode const*)>;
-    using TypeMaker   = std::function<Type*()>;
 
 private:
     static ExprFactory& expr_factory_;
@@ -27,13 +25,15 @@ private:
 
     std::string source_code_;
     TSLanguage const* language_;
-
+    TypeContext type_context_;
 public:
     CSharpTSTreeVisitor(std::string source_code, TSLanguage const* language) :
         source_code_(std::move(source_code)),
         language_(language)
     {
     }
+
+    void handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node);
 
     static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const* node);
 
@@ -60,7 +60,6 @@ public:
     static Expr* handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode const* node);   // todo
 
     // Statements
-    static Stmt* handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     // Type Definitions
     static Stmt* handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     // Variable Definitions

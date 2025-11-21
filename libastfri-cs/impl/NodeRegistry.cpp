@@ -1,12 +1,11 @@
-#include "NodeRegistry.hpp"
-
-#include "utils.hpp"
+#include <libastfri-cs/impl/NodeRegistry.hpp>
+#include <libastfri-cs/impl/utils.hpp>
 
 namespace astfri::csharp
 {
+TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"compilation_unit",     CSharpTSTreeVisitor::handle_comp_unit_stmt   },
     {"class_declaration",    CSharpTSTreeVisitor::handle_class_def_stmt   },
     {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
     // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
@@ -84,14 +83,46 @@ std::unordered_map<std::string, BinOpType> NodeRegistry::bin_operations = {
 };
 
 std::unordered_map<std::string, Type*> NodeRegistry::types_ = {
-    {"int",     TypeFactory::get_instance().mk_int()    },
-    {"float",   TypeFactory::get_instance().mk_float()  },
-    {"char",    TypeFactory::get_instance().mk_char()   },
-    {"bool",    TypeFactory::get_instance().mk_bool()   },
-    {"void",    TypeFactory::get_instance().mk_void()   },
-    {"dynamic", TypeFactory::get_instance().mk_dynamic()}
-    // todo handle var type
-    // todo add double, long, unsigned, decimal, short, byte
+    {"bool", type_factory_.mk_bool()},
+    {"byte", type_factory_.mk_unknown()}, // TODO: implement `byte` type
+    {"sbyte", type_factory_.mk_unknown()}, // TODO: implement `sbyte` type
+    {"char", type_factory_.mk_char()},
+    {"short", type_factory_.mk_unknown()}, // TODO: implement `short` type
+    {"ushort", type_factory_.mk_unknown()}, // TODO: implement `ushort` type
+    {"int", type_factory_.mk_int()},
+    {"uint", type_factory_.mk_unknown()}, // TODO: implement `uint` type
+    {"long", type_factory_.mk_unknown()}, // TODO: implement `long` type
+    {"ulong", type_factory_.mk_unknown()}, // TODO: implement `ulong` type
+
+    {"float", type_factory_.mk_float()},
+    {"double", type_factory_.mk_unknown()}, // TODO: implement `double` type
+    {"decimal", type_factory_.mk_unknown()}, // TODO: implement `decimal` type
+
+    {"void", type_factory_.mk_void()},
+    {"dynamic", type_factory_.mk_dynamic()},
+
+    {"Boolean", type_factory_.mk_bool()},
+    {"Byte", type_factory_.mk_unknown()}, // TODO: implement `Byte` type
+    {"SByte", type_factory_.mk_unknown()}, // TODO: implement `SByte` type
+    {"Char", type_factory_.mk_char()},
+    {"Int16", type_factory_.mk_unknown()}, // TODO: implement `Int16` type
+    {"Int32", type_factory_.mk_int()},
+    {"Int64", type_factory_.mk_unknown()}, // TODO: implement `Int64` type
+    {"UInt16", type_factory_.mk_unknown()}, // TODO: implement `UInt16` type
+    {"UInt32", type_factory_.mk_unknown()}, // TODO: implement `UInt32` type
+    {"UInt64", type_factory_.mk_unknown()}, // TODO: implement `UInt64` type
+
+    {"Single", type_factory_.mk_float()},
+    {"Double", type_factory_.mk_unknown()}, // TODO: implement `double` type
+    {"Decimal", type_factory_.mk_unknown()}, // TODO: implement `decimal` type
+
+    {"object", type_factory_.mk_class("object", {{"System"}})},
+    {"Object", type_factory_.mk_class("object", {{"System"}})},
+    {"string", type_factory_.mk_class("string", {{"System"}})},
+    {"String", type_factory_.mk_class("string", {{"System"}})},
+
+    {"var", type_factory_.mk_unknown()}, // todo handle var type
+    {"_", type_factory_.mk_unknown()}, // todo handle discard type
 };
 
 std::unordered_map<std::string, AccessModifier> NodeRegistry::access_modifiers = {

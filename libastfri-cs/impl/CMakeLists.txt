@@ -5,6 +5,7 @@ target_sources(astfri-cs PRIVATE
         utils.cpp
         NodeRegistry.cpp
         CSharpASTBuilder.cpp
+        TypeContext.cpp
 )
 
 target_link_directories(astfri-cs PUBLIC

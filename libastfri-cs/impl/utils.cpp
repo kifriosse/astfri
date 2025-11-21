@@ -1,11 +1,8 @@
-#include "utils.hpp"
+#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
+#include <libastfri-cs/impl/utils.hpp>
 
 #include <cstring>
 #include <iostream>
-#include <regex>
-#include <stdexcept>
-
-#include "CSharpTSTreeVisitor.hpp"
 
 namespace astfri::csharp
 {

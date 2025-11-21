@@ -1,10 +1,12 @@
 #ifndef CSHARP_AST_BUILDER_HPP
 #define CSHARP_AST_BUILDER_HPP
 
+#include <libastfri/inc/Astfri.hpp>
+
+#include <string>
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
-
-#include "CSharpTSTreeVisitor.hpp"
+#include <vector>
 
 namespace astfri::csharp
 {
@@ -23,7 +25,7 @@ public:
     };
 
     ~CSharpASTBuilder();
-    std::vector<TranslationUnit*> make_ast(std::string const& source_code_dir) const;
+    TranslationUnit* make_ast(std::string const& source_code_dir) const;
 
 private:
     static std::vector<std::string> get_source_codes(std::string const& source_code_dir);
