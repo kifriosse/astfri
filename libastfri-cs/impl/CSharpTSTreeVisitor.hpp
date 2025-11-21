@@ -35,6 +35,8 @@ public:
     {
     }
 
+    void handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node);
+
     static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const* node);
 
     // Expressions
@@ -60,7 +62,6 @@ public:
     static Expr* handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode const* node);   // todo
 
     // Statements
-    static Stmt* handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     // Type Definitions
     static Stmt* handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     // Variable Definitions

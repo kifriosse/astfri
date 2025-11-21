@@ -19,6 +19,37 @@ ExprFactory& CSharpTSTreeVisitor::expr_factory_ = ExprFactory::get_instance();
 StmtFactory& CSharpTSTreeVisitor::stmt_factory_ = StmtFactory::get_instance();
 TypeFactory& CSharpTSTreeVisitor::type_factory_ = TypeFactory::get_instance();
 
+void CSharpTSTreeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node)
+{
+    static std::string const type_decl_query = R"(
+        (namespace_declaration
+            body: (declaration_list
+                (class_declaration) @class))
+        (namespace_declaration
+            body: (declaration_list
+                (interface_declaration) @interface))
+
+        (compilation_unit
+            (class_declaration) @class)
+
+        (compilation_unit
+            (interface_declaration) @interface)
+    )";
+
+    std::vector<TSNode> const type_nodes     = find_nodes(*node, language_, type_decl_query);
+
+    for (auto const& type_node : type_nodes)
+    {
+        StmtHandler handler = NodeRegistry::get_stmt_handler(type_node);
+        Stmt* stmt          = handler(this, &type_node);
+        // todo handle partial class
+        if (is_a<ClassDefStmt>(stmt))
+            tr_unit.classes_.push_back(as_a<ClassDefStmt>(stmt));
+        else if (is_a<InterfaceDefStmt>(stmt))
+            tr_unit.interfaces_.push_back(as_a<InterfaceDefStmt>(stmt));
+    }
+}
+
 Type* CSharpTSTreeVisitor::make_type(CSharpTSTreeVisitor const* self, TSNode const* node)
 {
     std::string type_name          = extract_node_text(*node, self->source_code_);
@@ -73,8 +104,7 @@ Expr* CSharpTSTreeVisitor::handle_int_lit(CSharpTSTreeVisitor* self, TSNode cons
         break;
     }
     default:
-    {
-    }
+        break;
     }
 
     if (suffix_type == IntSuffix::None || suffix_type == IntSuffix::U)
@@ -300,40 +330,6 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(CSharpTSTreeVisitor* self, TSNode
         if_true_handler(self, &if_true),
         if_false_handler(self, &if_false)
     );
-}
-
-Stmt* CSharpTSTreeVisitor::handle_comp_unit_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
-{
-    std::vector<ClassDefStmt*> class_defs;
-    std::vector<InterfaceDefStmt*> interface_defs;
-    static std::string const type_decl_query = R"(
-        (namespace_declaration
-            body: (declaration_list
-                (class_declaration) @class))
-        (namespace_declaration
-            body: (declaration_list
-                (interface_declaration) @interface))
-
-        (compilation_unit
-            (class_declaration) @class)
-
-        (compilation_unit
-            (interface_declaration) @interface)
-    )";
-
-    std::vector<TSNode> const type_nodes     = find_nodes(*node, self->language_, type_decl_query);
-
-    for (auto const& type_node : type_nodes)
-    {
-        StmtHandler handler = NodeRegistry::get_stmt_handler(type_node);
-        Stmt* stmt          = handler(self, &type_node);
-        if (is_a<ClassDefStmt>(stmt))
-            class_defs.push_back(as_a<ClassDefStmt>(stmt));
-        else if (is_a<InterfaceDefStmt>(stmt))
-            interface_defs.push_back(as_a<InterfaceDefStmt>(stmt));
-    }
-
-    return StmtFactory::get_instance().mk_translation_unit(class_defs, interface_defs, {}, {});
 }
 
 Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)

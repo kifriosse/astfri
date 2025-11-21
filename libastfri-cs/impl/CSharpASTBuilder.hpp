@@ -23,7 +23,7 @@ public:
     };
 
     ~CSharpASTBuilder();
-    std::vector<TranslationUnit*> make_ast(std::string const& source_code_dir) const;
+    TranslationUnit* make_ast(std::string const& source_code_dir) const;
 
 private:
     static std::vector<std::string> get_source_codes(std::string const& source_code_dir);

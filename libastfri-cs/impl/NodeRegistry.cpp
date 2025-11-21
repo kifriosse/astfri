@@ -6,7 +6,6 @@ namespace astfri::csharp
 {
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"compilation_unit",     CSharpTSTreeVisitor::handle_comp_unit_stmt   },
     {"class_declaration",    CSharpTSTreeVisitor::handle_class_def_stmt   },
     {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
     // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},

@@ -5,8 +5,6 @@
 #include <fstream>
 #include <stack>
 
-#include "libastfri/inc/TypeInfo.hpp"
-
 namespace astfri::csharp
 {
 
@@ -16,9 +14,9 @@ CSharpASTBuilder::~CSharpASTBuilder()
     ts_parser_delete(parser_);
 }
 
-std::vector<TranslationUnit*> CSharpASTBuilder::make_ast(std::string const& source_code_dir) const
+TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) const
 {
-    std::vector<TranslationUnit*> ast;
+    TranslationUnit* ast                        = StmtFactory::get_instance().mk_translation_unit();
     std::vector<std::string> const source_codes = get_source_codes(source_code_dir);
     for (auto& source_code : source_codes)
     {
@@ -34,9 +32,7 @@ std::vector<TranslationUnit*> CSharpASTBuilder::make_ast(std::string const& sour
         TSNode const root = ts_tree_root_node(tree);
 
         CSharpTSTreeVisitor cs_ts_tree_visitor(source_code, lang_);
-        Stmt* translation_unit
-            = CSharpTSTreeVisitor::handle_comp_unit_stmt(&cs_ts_tree_visitor, &root);
-        ast.push_back(as_a<TranslationUnit>(translation_unit));
+        cs_ts_tree_visitor.handle_comp_unit_stmt(*ast, &root);
 
         ts_tree_delete(tree);
         // ts_parser_delete(local_parser);

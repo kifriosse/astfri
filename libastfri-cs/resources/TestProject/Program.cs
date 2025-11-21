@@ -1,13 +1,11 @@
-﻿using System.ComponentModel;
-using System.Numerics;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Security.AccessControl;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
+﻿using Zoznam = System.Collections.Generic.List<string>;
 
-using Zoznam = System.Collections.Generic.List<string>;
+public class Program {
+    public static void Main(string[] args) {
+        Console.WriteLine("Hello World");
+        Zoznam z = new();
+    }
+}
 
 namespace CSharp.T.Test
 {
@@ -23,12 +21,14 @@ namespace CSharp.T.Test
         {
             
         }
-        class Test5
+
+
+        private class Test5
         {
             int bar;
             public Test5()
             {
-                
+                Console.WriteLine();
             }
 
         }
@@ -37,11 +37,13 @@ namespace CSharp.T.Test
     public partial class Program
     {
 
-        private const int constant = 6;
-        private static readonly protected string test = "test";
+        private const int constant = 6; // test comment
+        private string test = "test";
+        private unsafe volatile protected string* testPtr;
 
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
+            int[] array = new int[2];
             decimal a_d = 1254.587m;
             string b_s = @"test";
 
@@ -62,9 +64,19 @@ namespace CSharp.T.Test
 
             int foo = nullable is null ? bar : 6;
 
+            int brackets = (a + b) * 10;
+
             int a1;
             const int a2 = 1;
             a1 = a;
+        }
+
+        unsafe public void UnsafeMethod()
+        {
+            fixed(string* testPtr = &test)
+            {
+                this.testPtr = testPtr;
+            }
         }
     }
 
@@ -133,43 +145,5 @@ namespace CSharp.T.Test
 
         public delegate void ChangeDelegate(int something);
         public event ChangeDelegate OnChange;
-    }
-
-    public class Vector2(float x, float y)
-    {
-        // [Obsolete]
-        // public static readonly Vector2 zero = new(0,0);
-        public float X { get; set; } = x;
-        public float Y { get; set; } = y;
-
-        public float this[int i]
-        {
-            get => i switch
-            {
-                0 => X,
-                1 => Y,
-                _ => throw new ArgumentException($"Invalid index : {i}")
-            };
-            set
-            {
-                switch (i)
-                {
-                    case 0:
-                    {
-                        X = value;
-                        break;
-                    }
-                    case 1:
-                        Y = value;
-                        break;
-                    default: throw new ArgumentException($"Invalid index : {i}");
-                }
-            }
-        }
-
-        public static Vector2 operator +(Vector2 first, Vector2 second) =>
-            new(first.X + second.X, first.Y + second.Y);
-
-        public static explicit operator int(Vector2 v) => (int)v.X;
     }
 }
