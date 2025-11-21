@@ -1,7 +1,3 @@
-# TODO temporary solution
-set(TREE_SITTER_JAVA_INCLUDE_DIRS ${EXTERNAL_INSTALL_DIR}/include)
-set(TREE_SITTER_JAVA_LIBRARIES ${EXTERNAL_INSTALL_DIR}/lib64/libtree-sitter-java.so)
-
 add_library(astfri-java SHARED)
 
 target_sources(astfri-java PRIVATE
