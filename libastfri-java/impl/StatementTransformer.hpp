@@ -5,12 +5,14 @@
 #include <libastfri-java/impl/ExpressionTransformer.hpp>
 #include <libastfri-java/impl/NodeMapper.hpp>
 
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 #include <unordered_map>
 #include <vector>
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::java
 {
@@ -31,13 +33,19 @@ private:
     astfri::StmtFactory& stmtFactory;
     ExpressionTransformer* exprTransformer;
     NodeMapper* nodeMapper;
-    std::vector<astfri::InterfaceDefStmt*> functionalInterfaces;
+
     std::vector<astfri::ClassDefStmt*> classes;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
-    std::unordered_map<astfri::ClassDefStmt*, astfri::Scope> classScope;
+    std::vector<astfri::InterfaceDefStmt*> functionalInterfaces;
+
     std::unordered_map<std::string, std::vector<astfri::ClassDefStmt*>> classesByName;
-    std::unordered_map<astfri::InterfaceDefStmt*, astfri::Scope> interfaceScope;
     std::unordered_map<std::string, std::vector<astfri::InterfaceDefStmt*>> interfacesByName;
+    std::unordered_map<astfri::ClassDefStmt*, astfri::Scope> classScope;
+    std::unordered_map<astfri::InterfaceDefStmt*, astfri::Scope> interfaceScope;
+
+    std::unordered_map<std::string, std::vector<astfri::MethodDefStmt*>> methodsByName;
+
+    uint32_t lambdaID{0};
     
     astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
