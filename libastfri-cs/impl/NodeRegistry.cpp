@@ -6,8 +6,10 @@ namespace astfri::csharp
 TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"class_declaration",    CSharpTSTreeVisitor::handle_class_def_stmt   },
-    {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+    {"class_declaration",      CSharpTSTreeVisitor::handle_class_def_stmt},
+    {"variable_declaration",
+     CSharpTSTreeVisitor::handle_memb_var_def_stmt                       }, // todo fix this might not work
+    {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
     // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 

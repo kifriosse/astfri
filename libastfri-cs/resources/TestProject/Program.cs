@@ -23,7 +23,7 @@ namespace CSharp.T.Test
         }
 
 
-        private class Test5
+        public class Test5
         {
             int bar;
             public Test5()
@@ -114,9 +114,7 @@ namespace CSharp.T.Test
             }
         }
 
-        ~Person() {
-            
-        }
+        ~Person() => Print();
 
         private enum Pohlavie
         {

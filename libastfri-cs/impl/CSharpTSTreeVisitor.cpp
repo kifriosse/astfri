@@ -466,9 +466,8 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     std::string const class_name = extract_node_text(class_name_node, self->source_code_);
 
     ClassDefStmt* class_def      = StmtFactory::get_instance().mk_class_def(class_name, scope);
-    self->type_context_.enter_type(class_def);
-
     class_def->name_             = class_name;
+    self->type_context_.enter_type(class_def);
 
     TSNode const class_body_node = ts_node_child_by_field_name(*node, "body", 4);
     TSTreeCursor body_cursor     = ts_tree_cursor_new(class_body_node);
@@ -587,6 +586,38 @@ Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
         scope_str.pop();
     }
     return scope;
+}
+
+Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+{
+    TSNode const body_node         = ts_node_child_by_field_name(*node, "body", 4);
+    StmtHandler const body_handler = NodeRegistry::get_stmt_handler(body_node);
+    Stmt* body                     = body_handler(self, &body_node);
+    auto const owner               = self->type_context_.top();
+
+    if (! owner.has_value())
+    {
+        throw std::logic_error("Owner type not found");
+    }
+    if (! is_a<ClassDefStmt>(owner.value()))
+    {
+        throw std::logic_error("Destructor can only be defined for class type");
+    }
+
+    return StmtFactory::get_instance().mk_destructor_def(
+        as_a<ClassDefStmt>(owner.value()),
+        as_a<CompoundStmt>(body)
+    );
+}
+
+Stmt* CSharpTSTreeVisitor::handle_decl_list_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+{
+    return stmt_factory_.mk_compound({});
+}
+
+Stmt* CSharpTSTreeVisitor::handle_arrow_expr_clause(CSharpTSTreeVisitor* self, TSNode const* node)
+{
+    return stmt_factory_.mk_compound({});
 }
 
 } // namespace astfri::csharp
