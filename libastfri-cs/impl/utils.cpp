@@ -131,4 +131,12 @@ void split_namespace(std::stack<std::string>& scope_str, std::string const& name
     }
 }
 
+bool is_interface_name(std::string const& name)
+{
+    return !name.empty()
+            && name.size() >= 2
+            && name[0] == 'I'
+            && std::isupper(name[1]);
+}
+
 } // namespace astfri::csharp

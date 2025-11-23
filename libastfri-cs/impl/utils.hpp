@@ -49,6 +49,7 @@ inline bool almost_equal(double const a, double const b, double const epsilon = 
 std::string extract_node_text(TSNode const& node, std::string const& source_code);
 
 void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name);
+bool is_interface_name(std::string const& name);
 
 } // namespace astfri::csharp
 

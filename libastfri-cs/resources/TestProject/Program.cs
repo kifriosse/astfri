@@ -104,13 +104,19 @@ namespace CSharp.T.Test
 
         public void Print()
         {
-            
+            Console.WriteLine($"{Name}, {Age}");
         }
 
-        private class Child : Person
+        private class Child<T> : Person, IList
         {
             public Child(string fullName, int age) : base(fullName, age)
             {
+                
+            }
+
+            public Child() : this("", 0)
+            {
+                
             }
         }
 
