@@ -2,7 +2,7 @@
 #define CSHARP_NODE_REGISTRY_HPP
 
 #include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
-#include <libastfri/inc/Expr.hpp>
+#include <libastfri/impl/ExprFwd.hpp>
 
 #include <optional>
 #include <string>
@@ -25,6 +25,8 @@ private:
 public:
     static CSharpTSTreeVisitor::StmtHandler get_stmt_handler(TSNode const& node);
     static CSharpTSTreeVisitor::ExprHandler get_expr_handler(TSNode const& node);
+    static CSharpTSTreeVisitor::StmtHandler get_stmt_handler(std::string const& node_type);
+    static CSharpTSTreeVisitor::ExprHandler get_expr_handler(std::string const& node_type);
     static std::optional<UnaryOpType> get_prefix_unary_op(std::string const& operation);
     static std::optional<BinOpType> get_bin_op(std::string const& operation);
     static std::optional<Type*> get_type(std::string const& type_name);

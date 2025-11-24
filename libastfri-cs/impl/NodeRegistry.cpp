@@ -6,10 +6,12 @@ namespace astfri::csharp
 TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"class_declaration",      CSharpTSTreeVisitor::handle_class_def_stmt},
-    {"variable_declaration",
-     CSharpTSTreeVisitor::handle_memb_var_def_stmt                       }, // todo fix this might not work
-    {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
+    {"class_declaration",       CSharpTSTreeVisitor::handle_class_def_stmt   },
+    {"variable_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+    // todo fix this might not work
+    {"destructor_declaration",  CSharpTSTreeVisitor::handle_destr_def_stmt   },
+    {"parameter",               CSharpTSTreeVisitor::handle_param_def_stmt   },
+    {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt   },
     // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 
@@ -136,13 +138,23 @@ std::unordered_map<std::string, AccessModifier> NodeRegistry::access_modifiers =
 
 CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(TSNode const& node)
 {
-    auto const it = stmt_handlers_.find(ts_node_type(node));
-    return it != stmt_handlers_.end() ? it->second : default_stmt_handler;
+    return get_stmt_handler(ts_node_type(node));
 }
 
 CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(TSNode const& node)
 {
-    auto const it = expr_handlers_.find(ts_node_type(node));
+    return get_expr_handler(ts_node_type(node));
+}
+
+CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(std::string const& node_type)
+{
+    auto const it = stmt_handlers_.find(node_type);
+    return it != stmt_handlers_.end() ? it->second : default_stmt_handler;
+}
+
+CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(std::string const& node_type)
+{
+    auto const it = expr_handlers_.find(node_type);
     return it != expr_handlers_.end() ? it->second : default_expr_handler;
 }
 

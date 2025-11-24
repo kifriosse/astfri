@@ -41,10 +41,7 @@ TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string c
 
 IntSuffix get_suffix_type(std::string const& suffix);
 
-inline bool almost_equal(double const a, double const b, double const epsilon = 1e-9)
-{
-    return std::fabs(a - b) < epsilon;
-}
+bool almost_equal(double const a, double const b, double const epsilon = 1e-9);
 
 std::string extract_node_text(TSNode const& node, std::string const& source_code);
 

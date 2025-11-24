@@ -107,19 +107,6 @@ namespace CSharp.T.Test
             Console.WriteLine($"{Name}, {Age}");
         }
 
-        private class Child<T> : Person, IList
-        {
-            public Child(string fullName, int age) : base(fullName, age)
-            {
-                
-            }
-
-            public Child() : this("", 0)
-            {
-                
-            }
-        }
-
         ~Person() => Print();
 
         private enum Pohlavie
@@ -149,5 +136,22 @@ namespace CSharp.T.Test
 
         public delegate void ChangeDelegate(int something);
         public event ChangeDelegate OnChange;
+    }
+
+    class Child : Person
+    {
+        public bool IsStudent;
+
+        public Child(string name, int age, bool isStudent) 
+            : base(name ?? "Unknown", age > 18 ? 18 : age) // complex base initializer
+        {
+            IsStudent = isStudent;
+        }
+
+        public Child() 
+            : base("DefaultName", 0) // simpler base initializer
+        {
+            IsStudent = true;
+        }
     }
 }
