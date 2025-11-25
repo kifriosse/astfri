@@ -2,10 +2,14 @@ add_library(astfri-cs SHARED)
 
 target_sources(astfri-cs PRIVATE
     CSharpTSTreeVisitor.cpp
-    utils.cpp
-    NodeRegistry.cpp
     CSharpASTBuilder.cpp
+    CSharpTSTreeVisitor_expr.cpp
+    CSharpTSTreeVisitor_stmt.cpp
+    CSharpTSTreeVisitor_def.cpp
+    CSharpTSTreeVisitor_util.cpp
+    NodeRegistry.cpp
     TypeContext.cpp
+    utils.cpp
 )
 
 target_link_directories(astfri-cs PUBLIC

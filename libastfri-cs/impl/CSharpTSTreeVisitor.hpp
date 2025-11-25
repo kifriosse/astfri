@@ -28,7 +28,7 @@ private:
 
 public:
     CSharpTSTreeVisitor(std::string source_code, TSLanguage const* language);
-
+    // compilation unit/translation unit
     void handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node);
 
     static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const& node);
@@ -84,11 +84,7 @@ public:
         CSharpTSTreeVisitor* self,
         TSNode const* node
     );
-    static std::vector<Expr*> handle_argument_list(
-        CSharpTSTreeVisitor* self,
-        TSNode const* node
-    );
-
+    static std::vector<Expr*> handle_argument_list(CSharpTSTreeVisitor* self, TSNode const* node);
 };
 
 } // namespace astfri::csharp
