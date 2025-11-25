@@ -61,8 +61,7 @@ public:
     // Variable Definitions
     static Stmt* handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     static Stmt* handle_param_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
-    // static Stmt* handle_member_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
-    // //todo
+
     static Stmt* handle_constr_def_stmt(
         CSharpTSTreeVisitor* self,
         TSNode const* node
@@ -76,7 +75,8 @@ public:
         TSNode const* node
     ); // destructor def stmt
 
-    static Stmt* handle_decl_list_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
+
+    static Stmt* handle_block_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     static Stmt* handle_arrow_expr_clause(CSharpTSTreeVisitor* self, TSNode const* node);
 
     Scope create_scope(TSNode const* node) const;

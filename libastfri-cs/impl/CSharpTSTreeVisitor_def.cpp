@@ -23,7 +23,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
         "destructor_declaration",
         "indexer_declaration",            // todo
         "operator_declaration",           // todo
-        "conversion_operator_declaration" // todo,
+        "conversion_operator_declaration" // todo
     };
 
     std::unordered_map<std::string, std::vector<TSNode>> class_members_nodes;
@@ -54,11 +54,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
 
         TSNode current   = ts_tree_cursor_current_node(&cursor);
         std::string name = ts_node_type(current);
-        if (name == "type_parameter_list")
-        {
-            // todo handle generic parameters;
-        }
-        else if (name == "base_list")
+        if (name == "base_list") // base list handeling
         {
             ts_tree_cursor_goto_first_child(&cursor);
             TSNode type_node      = ts_tree_cursor_current_node(&cursor);
@@ -81,6 +77,14 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
             }
             ts_tree_cursor_goto_parent(&cursor);
         }
+        else if (name == "type_parameter_list") // generic parameters
+        {
+            // todo handle generic parameters;
+        }
+        else if (name == "type_parameter_constraints_clause") // constraints for generic parameters
+        {
+            // todo handle generic parameter constraints
+        }
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
     if (base)
@@ -95,6 +99,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     TSTreeCursor body_cursor = ts_tree_cursor_new(class_body_node);
     ts_tree_cursor_goto_first_child(&body_cursor);
 
+    // getting of all class member statements
     if (! ts_tree_cursor_goto_first_child(&body_cursor))
     {
         do
@@ -106,15 +111,15 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
 
     ts_tree_cursor_delete(&body_cursor);
 
+    // handling of all member statements
     for (std::string const& name : class_memb_node_types)
     {
         std::vector<TSNode> const& members_nodes = class_members_nodes[name];
         for (TSNode const& member_node : members_nodes)
         {
             if (ts_node_is_null(member_node))
-            {
                 throw std::runtime_error("Node is null");
-            }
+
             StmtHandler handler = NodeRegistry::get_stmt_handler(member_node);
             Stmt* member_stmt   = handler(self, &member_node);
 
@@ -147,70 +152,17 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, T
         )";
 
     std::vector<TSNode> const modifier_nodes = find_nodes(*node, self->language_, mod_query);
-
-    auto access_modifier                     = AccessModifier::Private;
-    bool is_private                          = false;
-    bool is_protected                        = false;
-    bool is_internal                         = false;
-    bool is_static                           = false;
-    bool is_readonly                         = false;
-    bool is_const                            = false;
-    bool is_volatile                         = false;
-    bool is_new                              = false;
-
-    for (TSNode modifier_node : modifier_nodes)
-    {
-        std::string modifier_str = extract_node_text(modifier_node, self->source_code_);
-        auto const res           = NodeRegistry::get_access_modifier(modifier_str);
-        if (res.has_value())
-        {
-            access_modifier = *res;
-            switch (access_modifier)
-            {
-            case AccessModifier::Private:
-                is_private = true;
-                break;
-            case AccessModifier::Protected:
-                is_protected = true;
-                break;
-            case AccessModifier::Internal:
-                is_internal = true;
-                break;
-            default:
-                break;
-            }
-            continue;
-        }
-
-        if (modifier_str == "static")
-            is_static = true;
-        else if (modifier_str == "readonly")
-            is_readonly = true;
-        else if (modifier_str == "const")
-            is_const = true;
-        else if (modifier_str == "volatile")
-            is_volatile = true;
-        else if (modifier_str == "new")
-            is_new = true;
-    }
-
-    if (is_internal && is_protected)
-    {
-        // todo handle protected internal
-    }
-    else if (is_private && is_protected)
-    {
-        // todo handle private protected
-    }
-    // todo handle other modifiers
+    CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
+    AccessModifier const access_modifier
+        = modifiers.get_access_mod().value_or(AccessModifier::Private);
 
     TSNode const var_decl_node = modifier_nodes.empty()
                                    ? ts_node_child(*node, 0)
                                    : ts_node_next_sibling(modifier_nodes.back());
 
     TSNode const type_node     = ts_node_child_by_field_name(var_decl_node, "type", 4);
-
     Type* type                 = make_type(self, type_node);
+
     std::vector<TSNode> const var_decl_nodes
         = find_nodes(var_decl_node, self->language_, decl_query);
 
@@ -272,49 +224,18 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(CSharpTSTreeVisitor* self, TSN
 
     TSNode const param_list_node = ts_node_child_by_field_name(*node, "parameters", 10);
     std::vector<ParamVarDefStmt*> const parameters = handle_param_list(self, &param_list_node);
-    std::vector<TSNode> const modif_nodes = find_nodes(*node, self->language_, "(modifier) @mod");
+    std::vector<TSNode> const modifier_nodes
+        = find_nodes(*node, self->language_, "(modifier) @mod");
 
-    auto modifier                         = AccessModifier::Internal;
-    bool is_private                       = false;
-    bool is_protected                     = false;
-    bool is_internal                      = false;
-    for (auto modif_node : modif_nodes)
-    {
-        std::string modif_str = extract_node_text(modif_node, self->source_code_);
-        auto result_modif     = NodeRegistry::get_access_modifier(modif_str);
-        if (! result.has_value())
-            continue;
-
-        modifier = *result_modif;
-        switch (modifier)
-        {
-        case AccessModifier::Private:
-            is_private = true;
-            break;
-        case AccessModifier::Protected:
-            is_protected = true;
-            break;
-        case AccessModifier::Internal:
-            is_internal = true;
-            break;
-        default:
-            break;
-        }
-    }
-
-    if (is_protected && is_private)
-    {
-        // todo
-    }
-    else if (is_protected && is_internal)
-    {
-        // todo
-    }
+    CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
+    AccessModifier const access_modifier
+        = modifiers.get_access_mod().value_or(AccessModifier::Private);
 
     TSNode const body_node         = ts_node_child_by_field_name(*node, "body", 4);
     StmtHandler const body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
     TSNode const initializer_node  = ts_node_next_sibling(body_node);
+
     std::vector<BaseInitializerStmt*> base_init_stmts;
 
     if (! ts_node_is_null(initializer_node))
@@ -324,8 +245,8 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(CSharpTSTreeVisitor* self, TSN
         if (is_a<BaseInitializerStmt>(base_init_stmt))
         {
             base_init_stmts.emplace_back(as_a<BaseInitializerStmt>(base_init_stmt));
-            // todo handle `this` initializer
         }
+        // todo handle `this` initializer
     }
 
     return stmt_factory_.mk_constructor_def(
@@ -333,7 +254,7 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(CSharpTSTreeVisitor* self, TSN
         parameters,
         base_init_stmts,
         as_a<CompoundStmt>(body),
-        modifier
+        access_modifier
     );
 }
 

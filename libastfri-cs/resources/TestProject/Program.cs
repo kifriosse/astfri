@@ -94,7 +94,7 @@ namespace CSharp.T.Test
                 _lastName = parts[1];
             } 
         }
-        public int Age { get; set; }
+        public int Age { get; init; }
 
         public Person(string fullName, int age)
         {
@@ -105,6 +105,11 @@ namespace CSharp.T.Test
         public void Print()
         {
             Console.WriteLine($"{Name}, {Age}");
+        }
+
+        protected virtual void TestVirtuality()
+        {
+            
         }
 
         ~Person() => Print();
@@ -138,7 +143,7 @@ namespace CSharp.T.Test
         public event ChangeDelegate OnChange;
     }
 
-    class Child : Person
+    class Child<T, U> : Person where U: IEnumerable<T>, IComparable<U>
     {
         public bool IsStudent;
 
@@ -152,6 +157,16 @@ namespace CSharp.T.Test
             : base("DefaultName", 0) // simpler base initializer
         {
             IsStudent = true;
+        }
+
+        public G TestGenericMethod<G>() where G : new()
+        {
+            return new G();
+        }
+
+        protected sealed override void TestVirtuality()
+        {
+            base.TestVirtuality();
         }
     }
 }

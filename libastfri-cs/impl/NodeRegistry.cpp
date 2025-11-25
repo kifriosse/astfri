@@ -10,8 +10,12 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::
     {"variable_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
     // todo fix this might not work
     {"destructor_declaration",  CSharpTSTreeVisitor::handle_destr_def_stmt   },
+    {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt  },
     {"parameter",               CSharpTSTreeVisitor::handle_param_def_stmt   },
     {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt   },
+    {"constructor_declaration", CSharpTSTreeVisitor::handle_method_def_stmt  },
+    {"block",                   CSharpTSTreeVisitor::handle_block_stmt       },
+    {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_expr_clause},
     // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 
@@ -129,11 +133,22 @@ std::unordered_map<std::string, Type*> NodeRegistry::types_ = {
     {"_", type_factory_.mk_unknown()}, // todo handle discard type
 };
 
-std::unordered_map<std::string, AccessModifier> NodeRegistry::access_modifiers = {
-    {"private",   AccessModifier::Private  },
-    {"public",    AccessModifier::Public   },
-    {"protected", AccessModifier::Protected},
-    {"internal",  AccessModifier::Internal },
+std::unordered_map<std::string, CSModifier> NodeRegistry::modifiers = {
+    {"private",   CSModifier::Private  },
+    {"public",    CSModifier::Public   },
+    {"protected", CSModifier::Protected},
+    {"internal",  CSModifier::Internal },
+    {"file",      CSModifier::File     },
+    {"static",    CSModifier::Static   },
+    {"readonly",  CSModifier::Readonly },
+    {"const",     CSModifier::Const    },
+    {"volatile",  CSModifier::Volatile },
+    {"abstract",  CSModifier::Abstract },
+    {"virtual",   CSModifier::Virtual  },
+    {"override",  CSModifier::Override },
+    {"sealed",    CSModifier::Sealed   },
+    {"partial",   CSModifier::Partial  },
+    {"async",     CSModifier::Async    }
 };
 
 CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(TSNode const& node)
@@ -185,9 +200,9 @@ std::optional<Type*> NodeRegistry::get_type(std::string const& type_name)
     return {};
 }
 
-std::optional<AccessModifier> NodeRegistry::get_access_modifier(std::string const& modifier)
+std::optional<CSModifier> NodeRegistry::get_modifier(std::string const& modifier)
 {
-    if (auto const it = access_modifiers.find(modifier); it != access_modifiers.end())
+    if (auto const it = modifiers.find(modifier); it != modifiers.end())
     {
         return it->second;
     }

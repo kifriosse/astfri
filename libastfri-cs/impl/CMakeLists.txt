@@ -9,6 +9,7 @@ target_sources(astfri-cs PRIVATE
     CSharpTSTreeVisitor_util.cpp
     NodeRegistry.cpp
     TypeContext.cpp
+    CSModifiers.cpp
     utils.cpp
 )
 
