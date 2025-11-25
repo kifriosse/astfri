@@ -1,5 +1,4 @@
 #include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
-
 #include <libastfri-cs/impl/NodeRegistry.hpp>
 #include <libastfri-cs/impl/utils.hpp>
 
@@ -32,8 +31,9 @@ void CSharpTSTreeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode
         (compilation_unit
             (interface_declaration) @interface)
     )";
+    // todo add other type declarations
 
-    std::vector<TSNode> const type_nodes     = find_nodes(*node, language_, type_decl_query);
+    std::vector<TSNode> const type_nodes = find_nodes(*node, language_, type_decl_query);
 
     for (auto const& type_node : type_nodes)
     {

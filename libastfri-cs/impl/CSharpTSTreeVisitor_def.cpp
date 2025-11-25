@@ -222,19 +222,18 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(CSharpTSTreeVisitor* self, TSN
     if (! is_a<ClassDefStmt>(*result))
         throw std::logic_error("Constructor can only be defined for class type");
 
-    TSNode const param_list_node = ts_node_child_by_field_name(*node, "parameters", 10);
+    TSNode const param_list_node  = ts_node_child_by_field_name(*node, "parameters", 10);
+    TSNode const body_node        = ts_node_child_by_field_name(*node, "body", 4);
+    TSNode const initializer_node = ts_node_next_sibling(body_node);
+
     std::vector<ParamVarDefStmt*> const parameters = handle_param_list(self, &param_list_node);
     std::vector<TSNode> const modifier_nodes
         = find_nodes(*node, self->language_, "(modifier) @mod");
-
     CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
     AccessModifier const access_modifier
         = modifiers.get_access_mod().value_or(AccessModifier::Private);
-
-    TSNode const body_node         = ts_node_child_by_field_name(*node, "body", 4);
     StmtHandler const body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
-    TSNode const initializer_node  = ts_node_next_sibling(body_node);
 
     std::vector<BaseInitializerStmt*> base_init_stmts;
 
@@ -309,6 +308,45 @@ Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(CSharpTSTreeVisitor* self, TSNo
         as_a<ClassDefStmt>(owner.value()),
         as_a<CompoundStmt>(body)
     );
+}
+
+Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+{
+    MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
+    auto const result              = self->type_context_.top();
+    if (! result.has_value())
+        throw std::logic_error("Owner type not found");
+
+    static std::string const mod_query =
+        R"(
+        (method_declaration
+            (modifier) @modifier)
+        )";
+
+    method_def_stmt->owner_                  = *result;
+    std::vector<TSNode> const modifier_nodes = find_nodes(*node, self->language_, mod_query);
+    CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
+    method_def_stmt->access_    = modifiers.get_access_mod().value_or(AccessModifier::Internal);
+
+    TSNode const name_node      = ts_node_child_by_field_name(*node, "name", 4);
+    TSNode const parameters_node = ts_node_child_by_field_name(*node, "parameters", 10);
+    TSNode const return_node     = ts_node_child_by_field_name(*node, "returns", 7);
+    TSNode const body_node       = ts_node_child_by_field_name(*node, "body", 4);
+
+    // todo handle generic parameters
+
+    std::string const method_name = extract_node_text(name_node, self->source_code_);
+    std::vector<ParamVarDefStmt*> const parameters = handle_param_list(self, &parameters_node);
+    Type* return_type                              = make_type(self, return_node);
+    StmtHandler const body_handler                 = NodeRegistry::get_stmt_handler(body_node);
+    Stmt* body                                     = body_handler(self, &body_node);
+
+    FunctionDefStmt* function_def_stmt
+        = stmt_factory_
+              .mk_function_def(method_name, parameters, return_type, as_a<CompoundStmt>(body));
+
+    method_def_stmt->func_ = function_def_stmt;
+    return method_def_stmt;
 }
 
 } // namespace astfri::csharp

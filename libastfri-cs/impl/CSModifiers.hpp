@@ -38,6 +38,7 @@ class CSModifiers
 {
 private:
     MaskType modifier_mask = 0;
+
 public:
     static CSModifiers handle_modifiers(
         std::vector<TSNode> const& mod_nodes,

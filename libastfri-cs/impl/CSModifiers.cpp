@@ -15,7 +15,7 @@ CSModifiers CSModifiers::handle_modifiers(
     for (TSNode const& node : mod_nodes)
     {
         std::string mod_str = extract_node_text(node, source_code);
-        auto const res = NodeRegistry::get_modifier(mod_str);
+        auto const res      = NodeRegistry::get_modifier(mod_str);
         if (res.has_value())
         {
             modifiers.add_modifier(*res);

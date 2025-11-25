@@ -22,6 +22,7 @@ private:
     static std::unordered_map<std::string, BinOpType> bin_operations;
     static std::unordered_map<std::string, Type*> types_;
     static std::unordered_map<std::string, CSModifier> modifiers;
+
 public:
     static CSharpTSTreeVisitor::StmtHandler get_stmt_handler(TSNode const& node);
     static CSharpTSTreeVisitor::ExprHandler get_expr_handler(TSNode const& node);
@@ -31,6 +32,7 @@ public:
     static std::optional<BinOpType> get_bin_op(std::string const& operation);
     static std::optional<Type*> get_type(std::string const& type_name);
     static std::optional<CSModifier> get_modifier(std::string const& modifier);
+
 private:
     static Expr* default_expr_handler(CSharpTSTreeVisitor*, TSNode const*);
     static Stmt* default_stmt_handler(CSharpTSTreeVisitor*, TSNode const*);

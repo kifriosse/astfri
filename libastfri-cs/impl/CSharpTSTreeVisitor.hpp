@@ -74,7 +74,10 @@ public:
         CSharpTSTreeVisitor* self,
         TSNode const* node
     ); // destructor def stmt
-
+    static Stmt* handle_method_def_stmt(
+        CSharpTSTreeVisitor* self,
+        TSNode const* node
+    ); // method def stmt
 
     static Stmt* handle_block_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     static Stmt* handle_arrow_expr_clause(CSharpTSTreeVisitor* self, TSNode const* node);
