@@ -51,6 +51,12 @@ add_library(astfri-cpp SHARED
     ClangManagement.cpp
     ClangVisitor.cpp
     ClangVisitor_Types.cpp
+    ClangVisitor_Declarations.cpp
+    ClangVisitor_Statements.cpp
+    ClangVisitor_Expressions.cpp
+    ClangVisitor_Helpers.cpp
+    ClangVisitor_Literals.cpp
+    ClangVisitor_Operators.cpp
 )
 
 # Privae compile options.
