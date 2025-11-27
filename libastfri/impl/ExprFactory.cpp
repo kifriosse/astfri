@@ -122,8 +122,14 @@ LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, St
 
 LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name)
 {
-    LambdaExpr *e = details::emplace_get<LambdaExpr>(exprs_, std::move(params), body);
-    e->m_type = m_types->mk_lambda(std::move(name), e);
+    LambdaExpr *e = details::emplace_get<LambdaExpr>(
+        name,
+        m_lambdas,
+        std::move(params),
+        body);
+    if (!e->m_type) {
+        e->m_type = m_types->mk_lambda(std::move(name), e);
+    }
     return e;
 }
 
