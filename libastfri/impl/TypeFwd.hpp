@@ -16,6 +16,7 @@ struct LambdaType;
 struct EnumType;
 struct RecordType;
 struct UnionType;
+struct IncompleteType;
 struct UnknownType;
 
 } // namespace astfri

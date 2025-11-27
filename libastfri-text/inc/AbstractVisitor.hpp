@@ -46,6 +46,8 @@ namespace astfri::text
         // -----
         template<v_astfri_nodes Vector>
         bool has_access_mod(Vector const& all, Vector& found, AccessModifier& access);
+
+        void visit(IncompleteType const& type) override {} // MM: TODO
     };
 
     //

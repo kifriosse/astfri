@@ -137,6 +137,16 @@ struct LambdaType : Type, details::MkVisitable<LambdaType>
 //     std::vector<Type*> types_; // TODO otazka ci by mali mat aj typy
 // };
 
+
+/**
+ * @brief TODO
+ */
+struct IncompleteType : Type, details::MkVisitable<IncompleteType>
+{
+    // TODO flyweight
+    std::string name;
+};
+
 /**
  * @brief TODO
  */

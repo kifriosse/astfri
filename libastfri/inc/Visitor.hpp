@@ -25,6 +25,7 @@ struct IVisitor
     virtual void visit(ClassType const& type)           = 0;
     virtual void visit(InterfaceType const& type)       = 0;
     virtual void visit(LambdaType const& type)          = 0;
+    virtual void visit(IncompleteType const& type)      = 0;
     virtual void visit(UnknownType const& type)         = 0;
 
     virtual void visit(IntLiteralExpr const& expr)      = 0;
@@ -135,6 +136,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(LambdaType const& /*type*/) override
+    {
+    }
+
+    void visit(IncompleteType const& /*type*/) override
     {
     }
 
@@ -403,6 +408,11 @@ struct ThrowingVisitorAdapter : IVisitor
     }
 
     void visit(LambdaType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IncompleteType const& /*type*/) override
     {
         throw std::logic_error("Not Implemented Yet!");
     }

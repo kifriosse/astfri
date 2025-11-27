@@ -60,8 +60,11 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-I.*")
 # Remove standard, it is inherited from astfri-core.
 list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-std=.*")
 
+# TODO
+list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-fno-exceptions")
+
 # Append no rtti option.
-list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
+# list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
 
 # Finally, add our library and set its properties.
 add_library(astfri-cpp SHARED
