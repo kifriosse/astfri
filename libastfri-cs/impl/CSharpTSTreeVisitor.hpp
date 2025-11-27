@@ -31,6 +31,11 @@ public:
     // compilation unit/translation unit
     void handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node);
 
+    /**
+     * @param self instance of CSHarpTSTreeVisitor
+     * @param node name node of the type (for example class or interface name)
+     * @return instance of a Type
+     */
     static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const& node);
 
     // Expressions
@@ -58,6 +63,7 @@ public:
     // Statements
     // Type Definitions
     static Stmt* handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
+    static Stmt* handle_interface_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     // Variable Definitions
     static Stmt* handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     static Stmt* handle_param_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);

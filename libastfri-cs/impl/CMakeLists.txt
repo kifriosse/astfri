@@ -10,6 +10,7 @@ target_sources(astfri-cs PRIVATE
     NodeRegistry.cpp
     TypeContext.cpp
     CSModifiers.cpp
+    TypeResolver.cpp
     utils.cpp
 )
 

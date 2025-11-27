@@ -138,6 +138,34 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     return class_def;
 }
 
+Stmt* CSharpTSTreeVisitor::handle_interface_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+{
+    static std::vector<std::string> const class_memb_node_types = {
+        // "class_declaration",              // todo
+        // "enum_declaration",               // todo
+        // "interface_declaration",          // todo
+        // "struct_declaration",             // todo
+        // "record_declaration",             // todo
+        "field_declaration",              // todo
+        "delegate_declaration",           // todo
+        "event_field_declaration",        // todo
+        "property_declaration",           // todo
+        "method_declaration",             // todo
+        "indexer_declaration",            // todo
+    };
+
+    TSNode const name_node = ts_node_child_by_field_name(*node, "name", 4);
+    std::string const name = extract_node_text(name_node, self->source_code_);
+    Scope const scope = self->create_scope(node);
+
+    InterfaceDefStmt* interface_def_stmt = stmt_factory_.mk_interface_def(name, scope);
+
+    // todo not finished
+    // needs type resolver to work properly
+
+    return interface_def_stmt;
+}
+
 Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
 {
     static std::string const decl_query =
