@@ -47,6 +47,7 @@ struct IVisitor
     virtual void visit(ConstructorCallExpr const& expr) = 0;
     virtual void visit(NewExpr const& expr)             = 0;
     virtual void visit(DeleteExpr const& expr)          = 0;
+    virtual void visit(BracketExpr const& expr)         = 0;
     virtual void visit(UnknownExpr const& expr)         = 0;
 
     virtual void visit(TranslationUnit const& stmt)     = 0;
@@ -224,6 +225,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(DeleteExpr const& /*expr*/) override
+    {
+    }
+
+    void visit(BracketExpr const& /*expr*/) override
     {
     }
 

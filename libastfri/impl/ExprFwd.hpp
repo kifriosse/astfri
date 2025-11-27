@@ -26,6 +26,7 @@ struct ThisExpr;
 struct ConstructorCallExpr;
 struct NewExpr;
 struct DeleteExpr;
+struct BracketExpr;
 struct UnknownExpr;
 } // namespace astfri
 

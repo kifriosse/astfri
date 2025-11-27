@@ -69,6 +69,8 @@ public:
 
     DeleteExpr* mk_delete(Expr* arg);
 
+    BracketExpr* mk_bracket(Expr* expr);
+
     UnknownExpr* mk_unknown();
 
 private:

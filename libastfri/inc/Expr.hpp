@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include "libastfri/inc/Visitor.hpp"
 
 namespace astfri
 {
@@ -389,6 +390,14 @@ struct DeleteExpr : Expr, details::MkVisitable<DeleteExpr>
 {
     Expr* arg_;
     DeleteExpr(Expr* arg);
+};
+
+/**
+ * @brief Brackets prioritizing part of an expression.
+ */
+struct BracketExpr : Expr, details::MkVisitable<BracketExpr> {
+    Expr* expr;
+    BracketExpr(Expr* e);
 };
 
 /**

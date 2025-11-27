@@ -1,5 +1,6 @@
 #include <libastfri/impl/Utils.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
+#include "libastfri/inc/Expr.hpp"
 
 namespace astfri
 {
@@ -144,6 +145,11 @@ NewExpr* ExprFactory::mk_new(ConstructorCallExpr* init)
 DeleteExpr* ExprFactory::mk_delete(Expr* arg)
 {
     return details::emplace_get<DeleteExpr>(exprs_, arg);
+}
+
+BracketExpr* ExprFactory::mk_bracket(Expr* expr)
+{
+    return details::emplace_get<BracketExpr>(exprs_, expr);
 }
 
 UnknownExpr* ExprFactory::mk_unknown()
