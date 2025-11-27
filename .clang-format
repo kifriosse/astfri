@@ -62,7 +62,7 @@ Cpp11BracedListStyle: true
 DeriveLineEnding: true
 DerivePointerAlignment: false
 QualifierAlignment: Custom
-QualifierOrder: ['inline', 'static', 'type', 'constexpr', 'const', 'volatile']
+QualifierOrder: ['inline', 'static', 'constexpr', 'const', 'type', 'volatile']
 DisableFormat: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
