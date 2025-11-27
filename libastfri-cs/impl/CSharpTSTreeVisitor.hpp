@@ -7,7 +7,6 @@
 #include <functional>
 #include <string>
 #include <tree_sitter/api.h>
-#include <utility>
 
 namespace astfri::csharp
 {
@@ -26,16 +25,18 @@ private:
     std::string source_code_;
     TSLanguage const* language_;
     TypeContext type_context_;
-public:
-    CSharpTSTreeVisitor(std::string source_code, TSLanguage const* language) :
-        source_code_(std::move(source_code)),
-        language_(language)
-    {
-    }
 
+public:
+    CSharpTSTreeVisitor(std::string source_code, TSLanguage const* language);
+    // compilation unit/translation unit
     void handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node);
 
-    static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const* node);
+    /**
+     * @param self instance of CSHarpTSTreeVisitor
+     * @param node name node of the type (for example class or interface name)
+     * @return instance of a Type
+     */
+    static Type* make_type(CSharpTSTreeVisitor const* self, TSNode const& node);
 
     // Expressions
     // Literals
@@ -62,14 +63,37 @@ public:
     // Statements
     // Type Definitions
     static Stmt* handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
+    static Stmt* handle_interface_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
     // Variable Definitions
-    static Stmt* handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); // todo
-    // static Stmt* handle_param_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node); //todo
-    // static Stmt* handle_member_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
-    // //todo
+    static Stmt* handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
+    static Stmt* handle_param_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
 
-private:
+    static Stmt* handle_constr_def_stmt(
+        CSharpTSTreeVisitor* self,
+        TSNode const* node
+    ); // constructor def stmt
+    static Stmt* handle_base_init_stmt(
+        CSharpTSTreeVisitor* self,
+        TSNode const* node
+    ); // base initializer
+    static Stmt* handle_destr_def_stmt(
+        CSharpTSTreeVisitor* self,
+        TSNode const* node
+    ); // destructor def stmt
+    static Stmt* handle_method_def_stmt(
+        CSharpTSTreeVisitor* self,
+        TSNode const* node
+    ); // method def stmt
+
+    static Stmt* handle_block_stmt(CSharpTSTreeVisitor* self, TSNode const* node);
+    static Stmt* handle_arrow_expr_clause(CSharpTSTreeVisitor* self, TSNode const* node);
+
     Scope create_scope(TSNode const* node) const;
+    static std::vector<ParamVarDefStmt*> handle_param_list(
+        CSharpTSTreeVisitor* self,
+        TSNode const* node
+    );
+    static std::vector<Expr*> handle_argument_list(CSharpTSTreeVisitor* self, TSNode const* node);
 };
 
 } // namespace astfri::csharp

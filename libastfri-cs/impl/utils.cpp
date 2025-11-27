@@ -101,6 +101,11 @@ IntSuffix get_suffix_type(std::string const& suffix)
     return IntSuffix::None;
 }
 
+bool almost_equal(double const a, double const b, double const epsilon)
+{
+    return std::fabs(a - b) < epsilon;
+}
+
 std::string extract_node_text(TSNode const& node, std::string const& source_code)
 {
     if (ts_node_is_null(node))
@@ -129,6 +134,11 @@ void split_namespace(std::stack<std::string>& scope_str, std::string const& name
         }
         ++it;
     }
+}
+
+bool is_interface_name(std::string const& name)
+{
+    return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
 }
 
 } // namespace astfri::csharp

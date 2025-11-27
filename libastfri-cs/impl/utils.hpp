@@ -41,14 +41,12 @@ TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string c
 
 IntSuffix get_suffix_type(std::string const& suffix);
 
-inline bool almost_equal(double const a, double const b, double const epsilon = 1e-9)
-{
-    return std::fabs(a - b) < epsilon;
-}
+bool almost_equal(double a, double b, double epsilon = 1e-9);
 
 std::string extract_node_text(TSNode const& node, std::string const& source_code);
 
 void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name);
+bool is_interface_name(std::string const& name);
 
 } // namespace astfri::csharp
 

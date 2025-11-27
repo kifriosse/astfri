@@ -1,4 +1,5 @@
-﻿using Zoznam = System.Collections.Generic.List<string>;
+﻿using System.Collections;
+using Zoznam = System.Collections.Generic.List<string>;
 
 public class Program {
     public static void Main(string[] args) {
@@ -14,19 +15,18 @@ namespace CSharp.T.Test
         internal delegate int Pr(int x);
     }
 
-    public interface Intr : IComparable
+    public interface IIntr<G> : IComparable where G : IComparable<int>
     {
-        static int s = 10;
+        private static int s = 10;
         void Interfacing(Test5 t)
         {
             
         }
 
 
-        private class Test5
+        public interface Test5
         {
-            int bar;
-            public Test5()
+            void testIntMethod()
             {
                 Console.WriteLine();
             }
@@ -36,9 +36,9 @@ namespace CSharp.T.Test
 
     public partial class Program
     {
-
         private const int constant = 6; // test comment
         private string test = "test";
+        private IEnumerable enumerable;
         private unsafe volatile protected string* testPtr;
 
         static void Main2(string[] args)
@@ -94,7 +94,7 @@ namespace CSharp.T.Test
                 _lastName = parts[1];
             } 
         }
-        public int Age { get; set; }
+        public int Age { get; init; }
 
         public Person(string fullName, int age)
         {
@@ -104,19 +104,15 @@ namespace CSharp.T.Test
 
         public void Print()
         {
-            
+            Console.WriteLine($"{Name}, {Age}");
         }
 
-        private class Child : Person
+        protected virtual void TestVirtuality()
         {
-            public Child(string fullName, int age) : base(fullName, age)
-            {
-            }
-        }
-
-        ~Person() {
             
         }
+
+        ~Person() => Print();
 
         private enum Pohlavie
         {
@@ -145,5 +141,36 @@ namespace CSharp.T.Test
 
         public delegate void ChangeDelegate(int something);
         public event ChangeDelegate OnChange;
+    }
+
+    class Child<T, U> : Person where U: IEnumerable<T>, IComparable<U>
+    {
+        static Child()
+        {
+
+        }
+        public bool IsStudent;
+
+        public Child(string name, int age, bool isStudent) 
+            : base(name ?? "Unknown", age > 18 ? 18 : age)
+        {
+            IsStudent = isStudent;
+        }
+
+        public Child() 
+            : base("DefaultName", 0)
+        {
+            IsStudent = true;
+        }
+
+        public G TestGenericMethod<G>() where G : new()
+        {
+            return new G();
+        }
+
+        protected sealed override void TestVirtuality()
+        {
+            base.TestVirtuality();
+        }
     }
 }

@@ -1,4 +1,3 @@
-
 #include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/inc/CSharpASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
@@ -39,11 +38,11 @@ TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) 
     return ast;
 }
 
-std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& source_code_dir)
+std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& project_dir)
 {
     std::vector<std::string> source_codes;
     std::stack<std::string> dirs;
-    dirs.push(source_code_dir);
+    dirs.push(project_dir);
 
     while (! dirs.empty())
     {
@@ -54,7 +53,7 @@ std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& s
             if (dir_entry.is_directory())
             {
                 auto const& path = dir_entry.path();
-                if (path == source_code_dir + "/bin" || path == source_code_dir + "/obj")
+                if (path == project_dir + "/bin" || path == project_dir + "/obj")
                 {
                     continue;
                 }
