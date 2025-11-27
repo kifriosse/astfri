@@ -103,6 +103,11 @@ NewExpr::NewExpr(ConstructorCallExpr* init) :
 {
 }
 
+BracketExpr::BracketExpr(Expr* e) :
+    expr(e)
+{
+}
+
 DeleteExpr::DeleteExpr(Expr* arg) :
     arg_(arg)
 {

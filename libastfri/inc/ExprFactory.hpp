@@ -57,7 +57,13 @@ public:
     LambdaCallExpr* mk_lambda_call();
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
+    /**
+     * @deprecated
+     */
     LambdaExpr* mk_lambda_expr();
+    /**
+     * @deprecated
+     */
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name);
 
@@ -68,6 +74,8 @@ public:
     NewExpr* mk_new(ConstructorCallExpr* init);
 
     DeleteExpr* mk_delete(Expr* arg);
+
+    BracketExpr* mk_bracket(Expr* expr);
 
     UnknownExpr* mk_unknown();
 
@@ -86,6 +94,7 @@ private:
     std::map<int, IntLiteralExpr> ints_;
     std::map<char, CharLiteralExpr> chars_;
     std::map<std::string, StringLiteralExpr> strings_;
+    std::map<std::string, LambdaExpr> m_lambdas;
 
     NullLiteralExpr null_;
     BoolLiteralExpr false_{false};

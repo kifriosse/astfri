@@ -10,11 +10,16 @@
 namespace astfri
 {
 
+class ExprFactory;
+
 /**
  * @brief TODO
  */
 class TypeFactory
 {
+public:
+    friend class ExprFactory;
+
 public:
     static TypeFactory& get_instance();
 
@@ -31,7 +36,6 @@ public:
     ClassType *mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def);
     InterfaceType *mk_interface(const std::string &name, const Scope &scope);
     InterfaceType *mk_interface(const std::string &name, const Scope &scope, InterfaceDefStmt *def);
-    LambdaType *mk_lambda(std::string name, LambdaExpr *def);
 
 public:
     TypeFactory(TypeFactory const&)    = delete;
@@ -39,6 +43,12 @@ public:
 
 private:
     TypeFactory() = default;
+
+    /**
+     * @brief LambdaType can only be created internally
+     * when a LambdaExpr is created.
+     */
+    LambdaType *mk_lambda(std::string name, LambdaExpr *def);
 
 private:
     IntType int_;

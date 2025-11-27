@@ -21,6 +21,23 @@ find_package(LLVM REQUIRED CONFIG)
 # Find Clang.
 find_package(Clang REQUIRED CONFIG)
 
+message(STATUS "Clang_FOUND=${Clang_FOUND}")
+message(STATUS "Clang_DIR=${Clang_DIR}")
+message(STATUS "Clang_VERSION=${Clang_VERSION}")
+
+get_property(allTargets GLOBAL PROPERTY TARGETS)
+foreach(t ${allTargets})
+    message(STATUS "=>> Target: ${t}")
+endforeach()
+
+get_cmake_property(vars VARIABLES)
+
+foreach(v ${vars})
+    if(v MATCHES "^CLANG_")
+        message(STATUS "=>> ${v} = ${${v}}")
+    endif()
+endforeach()
+
 # Obtain LLVM options from their config tool.
 execute_process(
     COMMAND llvm-config --cxxflags
