@@ -11,7 +11,7 @@ AbstractVisitor::AbstractVisitor(AbstractBuilder& builder) :
 // -----
 //
 
-void AbstractVisitor::process_condition(Expr* const& expr)
+void AbstractVisitor::process_condition(Expr const& expr)
 {
     builder_->append_space();
     builder_->write_left_bracket("(");
