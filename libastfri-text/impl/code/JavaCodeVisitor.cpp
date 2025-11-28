@@ -48,6 +48,8 @@ void JavaCodeVisitor::visit(LambdaType const& /*type*/)
     builder_->append_text("NOT IMPLEMENTED YET");
 }
 
+// -----
+
 void JavaCodeVisitor::visit(NullLiteralExpr const& /*expr*/)
 {
     builder_->append_text("null");
@@ -91,11 +93,7 @@ void JavaCodeVisitor::visit(LambdaCallExpr const& /*expr*/)
     builder_->append_text("NOT IMPLEMENTED YET");
 }
 
-void JavaCodeVisitor::visit(LambdaExpr const& /*expr*/)
-{
-    // TODO: implement lambda expression
-    builder_->append_text("NOT IMPLEMENTED YET");
-}
+// -----
 
 void JavaCodeVisitor::visit(TranslationUnit const& stmt)
 {
@@ -255,7 +253,7 @@ void JavaCodeVisitor::visit(InterfaceDefStmt const& stmt)
         process_pargs(stmt.tparams_, true);
     }
     builder_->append_space();
-    process_supertypes(stmt.bases_, true);
+    process_supertypes(stmt.bases_, true, false);
     builder_->append_text("{");
     builder_->append_new_line();
     builder_->append_new_line();
@@ -291,8 +289,8 @@ void JavaCodeVisitor::visit(ClassDefStmt const& stmt)
         process_pargs(stmt.tparams_, true);
     }
     builder_->append_space();
-    process_supertypes(stmt.bases_, true);
-    process_supertypes(stmt.interfaces_, false);
+    process_supertypes(stmt.bases_, true, true);
+    process_supertypes(stmt.interfaces_, false, false);
     builder_->append_text("{");
     builder_->append_new_line();
     builder_->append_new_line();

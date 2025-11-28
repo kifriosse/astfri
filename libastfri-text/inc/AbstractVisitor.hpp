@@ -34,6 +34,13 @@ namespace astfri::text
         std::same_as<Vector, std::vector<ConstructorDefStmt*>> ||
         std::same_as<Vector, std::vector<MethodDefStmt*>>;
 
+    // -----
+
+    template<typename Vector>
+    concept v_astfri_supertypes =
+        std::same_as<Vector, std::vector<ClassDefStmt*>> ||
+        std::same_as<Vector, std::vector<InterfaceDefStmt*>>;
+
     //
     // -----
     //
@@ -47,13 +54,13 @@ namespace astfri::text
         explicit AbstractVisitor(AbstractBuilder& builder);
         virtual ~AbstractVisitor() = default;
     protected:
-        void process_condition(Expr const& expr);
+        void process_condition(Expr const* const& expr);
         // -----
         template<v_astfri_nodes Vector>
         void process_pargs(Vector const& pargs, bool useGeneric);
         // -----
         template<astfri_node Node>
-        bool try_accept_node(Node const& node);
+        bool try_accept_node(Node const* const& node);
         // -----
         template<v_astfri_members Vector>
         bool try_find_access_mod(Vector const& all, Vector& found, AccessModifier mod);
@@ -99,11 +106,11 @@ namespace astfri::text
     // -----
 
     template<astfri_node Node>
-    bool AbstractVisitor::try_accept_node(Node const& node)
+    bool AbstractVisitor::try_accept_node(Node const* const& node)
     {
         if (node)
         {
-            node.accept(*this);
+            const_cast<Node*>(node)->accept(*this);
             return true;
         }
         return false;

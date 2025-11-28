@@ -29,7 +29,7 @@ namespace astfri::text
         void visit(FunctionCallExpr const& expr) override;
         void visit(MethodCallExpr const& expr) override;
         void visit(LambdaCallExpr const& expr) override;
-        void visit(LambdaExpr const& expr) override;
+        void visit(LambdaExpr const& /*expr*/) override { }
         void visit(DeleteExpr const& /*expr*/) override { }
         // -----
         void visit(TranslationUnit const& stmt) override;
@@ -52,16 +52,17 @@ namespace astfri::text
         void process_package(Scope const& scope);
         void process_identifier(AccessModifier const& access);
         // -----
-        template<v_astfri_nodes SuperTypes>
-        void process_supertypes(SuperTypes const& types, bool useExtends);
+        template<v_astfri_supertypes Vector>
+        void process_supertypes(Vector const& types, bool useExtends, bool isClass);
     };
 
     //
     // -----
     //
 
-    template<v_astfri_nodes SuperTypes>
-    void JavaCodeVisitor::process_supertypes(SuperTypes const& types, bool useExtends)
+    template<v_astfri_supertypes Vector>
+    void JavaCodeVisitor::process_supertypes(
+        Vector const& types, bool useExtends, bool isClass)
     {
         if (types.empty())
         {
@@ -70,6 +71,11 @@ namespace astfri::text
         if (useExtends)
         {
             builder_->append_text("extends ");
+            if (isClass && types.size() > 1)
+            {
+                builder_->append_text("MULTIPLE INHERITANCE NOT ALLOWED ");
+                return;
+            }
         }
         else
         {
