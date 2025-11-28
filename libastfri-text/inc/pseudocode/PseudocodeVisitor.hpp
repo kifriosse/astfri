@@ -3,7 +3,6 @@
 
 #include <libastfri-text/inc/AbstractVisitor.hpp>
 #include <libastfri-text/inc/pseudocode/AbstractTextBuilder.hpp>
-#include "libastfri/inc/Expr.hpp"
 
 namespace astfri::text
 {
@@ -40,6 +39,7 @@ namespace astfri::text
         void visit(ClassType const& type) override;
         void visit(InterfaceType const& type) override;
         void visit(LambdaType const& type) override;
+        void visit(IncompleteType const& type) override;
         void visit(UnknownType const& type) override;
         // -----
         void visit(IntLiteralExpr const& expr) override;
@@ -64,7 +64,7 @@ namespace astfri::text
         void visit(ConstructorCallExpr const& expr) override;
         void visit(NewExpr const& expr) override;
         void visit(DeleteExpr const& expr) override;
-        void visit(BracketExpr const& expr) override {} // MM: TODO
+        void visit(BracketExpr const& expr) override;
         void visit(UnknownExpr const& expr) override;
         // -----
         void visit(TranslationUnit const& stmt) override;

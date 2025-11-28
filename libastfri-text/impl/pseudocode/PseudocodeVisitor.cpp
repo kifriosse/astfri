@@ -1,7 +1,7 @@
 #include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 
-#include <libastfri-text/inc/pseudocode/HtmlTextBuilder.hpp>
 #include <libastfri-text/inc/pseudocode/PlainTextBuilder.hpp>
+#include <libastfri-text/inc/pseudocode/HtmlTextBuilder.hpp>
 
 using namespace astfri::text;
 
@@ -127,9 +127,15 @@ void PseudocodeVisitor::visit(LambdaType const& /*type*/)
 {
 }
 
+void PseudocodeVisitor::visit(IncompleteType const& /*type*/)
+{
+}
+
 void PseudocodeVisitor::visit(UnknownType const& /*type*/)
 {
 }
+
+// -----
 
 void PseudocodeVisitor::visit(IntLiteralExpr const& /*expr*/)
 {
@@ -219,9 +225,15 @@ void PseudocodeVisitor::visit(DeleteExpr const& /*expr*/)
 {
 }
 
+void PseudocodeVisitor::visit(BracketExpr const& /*expr*/)
+{
+}
+
 void PseudocodeVisitor::visit(UnknownExpr const& /*expr*/)
 {
 }
+
+// -----
 
 void PseudocodeVisitor::visit(TranslationUnit const& /*stmt*/)
 {
