@@ -1,10 +1,10 @@
 #ifndef CSHARP_UTILS_HPP
 #define CSHARP_UTILS_HPP
 
-#include <cmath>
+#include <tree_sitter/api.h>
+
 #include <stack>
 #include <string>
-#include <tree_sitter/api.h>
 #include <vector>
 
 namespace astfri::csharp
@@ -45,8 +45,13 @@ bool almost_equal(double a, double b, double epsilon = 1e-9);
 
 std::string extract_node_text(TSNode const& node, std::string const& source_code);
 
-void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name);
-bool is_interface_name(std::string const& name);
+bool is_interface_name(const std::string& name);
+
+std::string remove_comments(
+    const std::string& source_code,
+    const TSNode& root,
+    const TSLanguage& lang
+);
 
 } // namespace astfri::csharp
 

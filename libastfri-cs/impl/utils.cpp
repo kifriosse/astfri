@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <cmath>
 
 namespace astfri::csharp
 {
@@ -141,4 +142,73 @@ bool is_interface_name(std::string const& name)
     return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
 }
 
-} // namespace astfri::csharp
+std::string remove_comments(
+    const std::string& source_code,
+    const TSNode& root,
+    const TSLanguage& lang
+)
+{
+    std::string new_source;
+
+    static std::string query = R"(
+        (comment) @comment
+        (ERROR) @error
+    )";
+
+    TSQueryError query_error;
+    uint32_t offset;
+    const TSQuery* ts_query = ts_query_new(
+        &lang,
+        query.c_str(),
+        query.length(),
+        &offset,
+        &query_error
+    );
+    if (! ts_query)
+    {
+        throw std::runtime_error(
+            "Error while creating query at offset " + std::to_string(offset)
+            + " Error code: " + std::to_string(query_error)
+        );
+    }
+    TSQueryCursor* cursor = ts_query_cursor_new();
+    ts_query_cursor_exec(cursor, ts_query, root);
+
+    TSQueryMatch match;
+    size_t next_start = 0;
+    std::vector<TSNode> errors;
+    uint32_t capture_index;
+    while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
+    {
+        const TSNode node = match.captures[0].node;
+        if (ts_node_type(node) == std::string("ERROR"))
+        {
+            errors.emplace_back(node);
+            continue;
+        }
+        const size_t start = ts_node_start_byte(node);
+        const size_t n     = start - next_start;
+        new_source += source_code.substr(next_start, n);
+        next_start = ts_node_end_byte(node);
+    }
+    new_source += source_code.substr(next_start);
+
+    if (! errors.empty())
+    {
+        std::cerr << "Source code contains syntax errors:\n\n";
+        for (const auto& error_node : errors)
+        {
+            const auto& [row, column] = ts_node_start_point(error_node);
+            std::cerr << "Warning: Syntax error at line " << row + 1
+                      << ", column " << column + 1 << "\n";
+        }
+
+        std::cerr << std::endl;
+
+        throw std::runtime_error("Source code contains syntax errors.");
+    }
+
+    return new_source;
+}
+
+} // namespace astfri::csharp 2066:2141
