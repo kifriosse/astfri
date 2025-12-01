@@ -150,6 +150,10 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+    static Stmt* handle_expr_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
 
     Scope create_scope(const TSNode* node) const;
     static std::vector<ParamVarDefStmt*> handle_param_list(
