@@ -5,7 +5,7 @@
 namespace astfri::csharp
 {
 
-Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
+Scope CSharpTSTreeVisitor::create_scope(const TSNode* node) const
 {
     enum NodeType
     {
@@ -30,8 +30,8 @@ Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
     bool found_name_space = false;
     while (! ts_node_is_null(parent))
     {
-        std::string const parent_type = ts_node_type(parent);
-        auto const res                = node_type_map.find(parent_type);
+        const std::string parent_type = ts_node_type(parent);
+        const auto res                = node_type_map.find(parent_type);
         current                       = parent;
         parent                        = ts_node_parent(current);
 
@@ -43,8 +43,10 @@ Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
         case Class:
         case Interface:
         {
-            TSNode const name_node = ts_node_child_by_field_name(current, "name", 4);
-            std::string const name = extract_node_text(name_node, this->source_code_);
+            const TSNode name_node
+                = ts_node_child_by_field_name(current, "name", 4);
+            const std::string name
+                = extract_node_text(name_node, this->source_code_);
             scope_str.push(name);
             break;
         }
@@ -53,22 +55,30 @@ Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
             if (found_name_space)
                 break;
 
-            std::string file_namespace_query = "(file_scoped_namespace_declaration) @namespace";
-            TSNode const namespace_node
-                = find_first_node(current, this->language_, file_namespace_query);
+            std::string file_namespace_query
+                = "(file_scoped_namespace_declaration) @namespace";
+            const TSNode namespace_node = find_first_node(
+                current,
+                this->language_,
+                file_namespace_query
+            );
             if (ts_node_is_null(namespace_node))
                 break;
 
-            TSNode const name_node = ts_node_child_by_field_name(namespace_node, "name", 4);
-            std::string const name = extract_node_text(name_node, this->source_code_);
+            const TSNode name_node
+                = ts_node_child_by_field_name(namespace_node, "name", 4);
+            const std::string name
+                = extract_node_text(name_node, this->source_code_);
             split_namespace(scope_str, name);
             break;
         }
         case Namespace:
         {
-            found_name_space       = true;
-            TSNode const name_node = ts_node_child_by_field_name(current, "name", 4);
-            std::string const name = extract_node_text(name_node, this->source_code_);
+            found_name_space = true;
+            const TSNode name_node
+                = ts_node_child_by_field_name(current, "name", 4);
+            const std::string name
+                = extract_node_text(name_node, this->source_code_);
             split_namespace(scope_str, name);
             break;
         }
@@ -85,7 +95,7 @@ Scope CSharpTSTreeVisitor::create_scope(TSNode const* node) const
 
 std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     CSharpTSTreeVisitor* self,
-    TSNode const* node
+    const TSNode* node
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
@@ -93,7 +103,7 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid Node");
 
-    StmtHandler const handler = NodeRegistry::get_stmt_handler("parameter");
+    const StmtHandler handler = NodeRegistry::get_stmt_handler("parameter");
     do
     {
         TSNode current = ts_tree_cursor_current_node(&cursor);
@@ -105,7 +115,7 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
 
 std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
     CSharpTSTreeVisitor* self,
-    TSNode const* node
+    const TSNode* node
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);

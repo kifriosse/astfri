@@ -42,7 +42,7 @@ namespace CSharp.T.Test
         private unsafe volatile protected string* testPtr;
 
         static void Main2(string[] args)
-        {
+        
             int[] array = new int[2];
             decimal a_d = 1254.587m;
             string b_s = @"test";
@@ -80,6 +80,9 @@ namespace CSharp.T.Test
         }
     }
 
+    /// <summary>
+    /// Testing documentation comments
+    /// </summary>
     public class Person
     {
         private static readonly int mf = 8;
@@ -89,12 +92,13 @@ namespace CSharp.T.Test
             get => _firstName + " " + _lastName;
             set
             {
-                string[] parts = value.Split(" ");
+                string[] /* test */ parts = value.Split(" ");
                 _firstName = parts[0];
                 _lastName = parts[1];
             } 
         }
         public int Age { get; init; }
+        private Gender gender = Gender.Male;
 
         public Person(string fullName, int age)
         {
@@ -114,9 +118,9 @@ namespace CSharp.T.Test
 
         ~Person() => Print();
 
-        private enum Pohlavie
+        private enum Gender
         {
-            Zena, Muz, Ine
+            Male, Female, Other
         }
 
         private interface IRunnable

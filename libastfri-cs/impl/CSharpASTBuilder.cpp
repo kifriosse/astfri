@@ -2,6 +2,8 @@
 #include <libastfri-cs/inc/CSharpASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
+#include <tree_sitter/tree-sitter-c-sharp.h>
+
 #include <filesystem>
 #include <fstream>
 #include <stack>
@@ -9,16 +11,26 @@
 namespace astfri::csharp
 {
 
+CSharpASTBuilder::CSharpASTBuilder() :
+    lang_(tree_sitter_c_sharp()),
+    parser_(ts_parser_new())
+{
+    ts_parser_set_language(parser_, lang_);
+}
+
 CSharpASTBuilder::~CSharpASTBuilder()
 {
     ts_language_delete(lang_);
     ts_parser_delete(parser_);
 }
 
-TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) const
+TranslationUnit* CSharpASTBuilder::make_ast(
+    const std::string& source_code_dir
+) const
 {
-    TranslationUnit* ast                        = StmtFactory::get_instance().mk_translation_unit();
-    std::vector<std::string> const source_codes = get_source_codes(source_code_dir);
+    TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
+    const std::vector<std::string> source_codes
+        = get_source_codes(source_code_dir);
     for (auto& source_code : source_codes)
     {
         TSTree* const tree = ts_parser_parse_string(
@@ -27,7 +39,7 @@ TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) 
             source_code.c_str(),
             static_cast<uint32_t>(source_code.size())
         );
-        TSNode const root = ts_tree_root_node(tree);
+        const TSNode root = ts_tree_root_node(tree);
 
         CSharpTSTreeVisitor cs_ts_tree_visitor(source_code, lang_);
         cs_ts_tree_visitor.handle_comp_unit_stmt(*ast, &root);
@@ -38,7 +50,9 @@ TranslationUnit* CSharpASTBuilder::make_ast(std::string const& source_code_dir) 
     return ast;
 }
 
-std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& project_dir)
+std::vector<std::string> CSharpASTBuilder::get_source_codes(
+    const std::string& project_dir
+)
 {
     std::vector<std::string> source_codes;
     std::stack<std::string> dirs;
@@ -48,12 +62,13 @@ std::vector<std::string> CSharpASTBuilder::get_source_codes(std::string const& p
     {
         auto dir_it = std::filesystem::directory_iterator(dirs.top());
         dirs.pop();
-        for (auto const& dir_entry : dir_it)
+        for (const auto& dir_entry : dir_it)
         {
             if (dir_entry.is_directory())
             {
-                auto const& path = dir_entry.path();
-                if (path == project_dir + "/bin" || path == project_dir + "/obj")
+                const auto& path = dir_entry.path();
+                if (path == project_dir + "/bin"
+                    || path == project_dir + "/obj")
                 {
                     continue;
                 }

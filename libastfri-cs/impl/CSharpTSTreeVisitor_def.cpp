@@ -6,9 +6,12 @@
 
 namespace astfri::csharp
 {
-Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    static std::vector<std::string> const class_memb_node_types = {
+    static const std::vector<std::string> class_memb_node_types = {
         // "class_declaration",              // todo
         // "enum_declaration",               // todo
         // "interface_declaration",          // todo
@@ -27,17 +30,20 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     };
 
     std::unordered_map<std::string, std::vector<TSNode>> class_members_nodes;
-    for (std::string const& node_type : class_memb_node_types)
+    for (const std::string& node_type : class_memb_node_types)
     {
         class_members_nodes[node_type];
     }
 
-    Scope const scope            = self->create_scope(node);
-    TSNode const class_name_node = ts_node_child_by_field_name(*node, "name", 4);
-    std::string const class_name = extract_node_text(class_name_node, self->source_code_);
+    const Scope scope = self->create_scope(node);
+    const TSNode class_name_node
+        = ts_node_child_by_field_name(*node, "name", 4);
+    const std::string class_name
+        = extract_node_text(class_name_node, self->source_code_);
 
-    ClassDefStmt* class_def      = StmtFactory::get_instance().mk_class_def(class_name, scope);
-    class_def->name_             = class_name;
+    ClassDefStmt* class_def
+        = StmtFactory::get_instance().mk_class_def(class_name, scope);
+    class_def->name_ = class_name;
     self->type_context_.enter_type(class_def);
 
     TSTreeCursor cursor = ts_tree_cursor_new(class_name_node);
@@ -48,8 +54,9 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     std::vector<InterfaceDefStmt*> interfaces;
     do
     {
-        char const* field_name = ts_tree_cursor_current_field_name(&cursor);
-        if (field_name != nullptr) // body node is named, needs to stop at the body node
+        const char* field_name = ts_tree_cursor_current_field_name(&cursor);
+        if (field_name
+            != nullptr) // body node is named, needs to stop at the body node
             break;
 
         TSNode current   = ts_tree_cursor_current_node(&cursor);
@@ -57,12 +64,15 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
         if (name == "base_list") // base list handeling
         {
             ts_tree_cursor_goto_first_child(&cursor);
-            TSNode type_node      = ts_tree_cursor_current_node(&cursor);
-            std::string type_name = extract_node_text(type_node, self->source_code_);
+            TSNode type_node = ts_tree_cursor_current_node(&cursor);
+            std::string type_name
+                = extract_node_text(type_node, self->source_code_);
             // todo temporary solution
             if (is_interface_name(type_name))
             {
-                interfaces.emplace_back(stmt_factory_.mk_interface_def(type_name));
+                interfaces.emplace_back(
+                    stmt_factory_.mk_interface_def(type_name)
+                );
             }
             else
             {
@@ -73,7 +83,9 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
             {
                 type_node = ts_tree_cursor_current_node(&cursor);
                 type_name = extract_node_text(type_node, self->source_code_);
-                interfaces.emplace_back(stmt_factory_.mk_interface_def(type_name));
+                interfaces.emplace_back(
+                    stmt_factory_.mk_interface_def(type_name)
+                );
             }
             ts_tree_cursor_goto_parent(&cursor);
         }
@@ -81,7 +93,9 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
         {
             // todo handle generic parameters;
         }
-        else if (name == "type_parameter_constraints_clause") // constraints for generic parameters
+        else if (name
+                 == "type_parameter_constraints_clause") // constraints for
+                                                         // generic parameters
         {
             // todo handle generic parameter constraints
         }
@@ -92,7 +106,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
         class_def->bases_.push_back(base);
     }
     class_def->interfaces_       = interfaces;
-    TSNode const class_body_node = ts_tree_cursor_current_node(&cursor);
+    const TSNode class_body_node = ts_tree_cursor_current_node(&cursor);
 
     ts_tree_cursor_delete(&cursor);
 
@@ -112,10 +126,10 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     ts_tree_cursor_delete(&body_cursor);
 
     // handling of all member statements
-    for (std::string const& name : class_memb_node_types)
+    for (const std::string& name : class_memb_node_types)
     {
-        std::vector<TSNode> const& members_nodes = class_members_nodes[name];
-        for (TSNode const& member_node : members_nodes)
+        const std::vector<TSNode>& members_nodes = class_members_nodes[name];
+        for (const TSNode& member_node : members_nodes)
         {
             if (ts_node_is_null(member_node))
                 throw std::runtime_error("Node is null");
@@ -126,9 +140,13 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
             if (is_a<MemberVarDefStmt>(member_stmt))
                 class_def->vars_.push_back(as_a<MemberVarDefStmt>(member_stmt));
             else if (is_a<ConstructorDefStmt>(member_stmt))
-                class_def->constructors_.push_back(as_a<ConstructorDefStmt>(member_stmt));
+                class_def->constructors_.push_back(
+                    as_a<ConstructorDefStmt>(member_stmt)
+                );
             else if (is_a<DestructorDefStmt>(member_stmt))
-                class_def->destructors_.push_back(as_a<DestructorDefStmt>(member_stmt));
+                class_def->destructors_.push_back(
+                    as_a<DestructorDefStmt>(member_stmt)
+                );
             else if (is_a<MethodDefStmt>(member_stmt))
                 class_def->methods_.push_back(as_a<MethodDefStmt>(member_stmt));
         }
@@ -138,27 +156,31 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(CSharpTSTreeVisitor* self, TSNo
     return class_def;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_interface_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_interface_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    static std::vector<std::string> const class_memb_node_types = {
+    static const std::vector<std::string> class_memb_node_types = {
         // "class_declaration",              // todo
         // "enum_declaration",               // todo
         // "interface_declaration",          // todo
         // "struct_declaration",             // todo
         // "record_declaration",             // todo
-        "field_declaration",              // todo
-        "delegate_declaration",           // todo
-        "event_field_declaration",        // todo
-        "property_declaration",           // todo
-        "method_declaration",             // todo
-        "indexer_declaration",            // todo
+        "field_declaration",       // todo
+        "delegate_declaration",    // todo
+        "event_field_declaration", // todo
+        "property_declaration",    // todo
+        "method_declaration",      // todo
+        "indexer_declaration",     // todo
     };
 
-    TSNode const name_node = ts_node_child_by_field_name(*node, "name", 4);
-    std::string const name = extract_node_text(name_node, self->source_code_);
-    Scope const scope = self->create_scope(node);
+    const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
+    const std::string name = extract_node_text(name_node, self->source_code_);
+    const Scope scope      = self->create_scope(node);
 
-    InterfaceDefStmt* interface_def_stmt = stmt_factory_.mk_interface_def(name, scope);
+    InterfaceDefStmt* interface_def_stmt
+        = stmt_factory_.mk_interface_def(name, scope);
 
     // todo not finished
     // needs type resolver to work properly
@@ -166,52 +188,65 @@ Stmt* CSharpTSTreeVisitor::handle_interface_def_stmt(CSharpTSTreeVisitor* self, 
     return interface_def_stmt;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    static std::string const decl_query =
+    static const std::string decl_query =
         R"(
         (variable_declaration
             (variable_declarator) @var_decl)
         )";
-    static std::string const mod_query =
+    static const std::string mod_query =
         R"(
         (field_declaration
             (modifier) @modifier)
         )";
 
-    std::vector<TSNode> const modifier_nodes = find_nodes(*node, self->language_, mod_query);
-    CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
-    AccessModifier const access_modifier
+    const std::vector<TSNode> modifier_nodes
+        = find_nodes(*node, self->language_, mod_query);
+    const CSModifiers modifiers
+        = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
+    const AccessModifier access_modifier
         = modifiers.get_access_mod().value_or(AccessModifier::Private);
 
-    TSNode const var_decl_node = modifier_nodes.empty()
-                                   ? ts_node_child(*node, 0)
-                                   : ts_node_next_sibling(modifier_nodes.back());
+    const TSNode var_decl_node
+        = modifier_nodes.empty() ? ts_node_child(*node, 0)
+                                 : ts_node_next_sibling(modifier_nodes.back());
 
-    TSNode const type_node     = ts_node_child_by_field_name(var_decl_node, "type", 4);
-    Type* type                 = make_type(self, type_node);
+    const TSNode type_node
+        = ts_node_child_by_field_name(var_decl_node, "type", 4);
+    Type* type = make_type(self, type_node);
 
-    std::vector<TSNode> const var_decl_nodes
+    const std::vector<TSNode> var_decl_nodes
         = find_nodes(var_decl_node, self->language_, decl_query);
 
     std::vector<VarDefStmt*> var_def_stmts;
-    for (TSNode const& var_decltor_node : var_decl_nodes)
+    for (const TSNode& var_decltor_node : var_decl_nodes)
     {
         // todo refactor this into extra method
-        TSNode var_name_node       = ts_node_child(var_decltor_node, 0); // left side
-        TSNode initializer_node    = ts_node_child(var_decltor_node, 2); // right side
+        TSNode var_name_node = ts_node_child(var_decltor_node, 0); // left side
+        TSNode initializer_node
+            = ts_node_child(var_decltor_node, 2); // right side
 
-        std::string const var_name = extract_node_text(var_name_node, self->source_code_);
-        Expr* initializer          = nullptr;
+        const std::string var_name
+            = extract_node_text(var_name_node, self->source_code_);
+        Expr* initializer = nullptr;
         if (! ts_node_is_null(initializer_node))
         {
-            ExprHandler initializer_handler = NodeRegistry::get_expr_handler(initializer_node);
-            initializer                     = initializer_handler(self, &initializer_node);
+            ExprHandler initializer_handler
+                = NodeRegistry::get_expr_handler(initializer_node);
+            initializer = initializer_handler(self, &initializer_node);
         }
 
         // todo handle access modifiers
-        MemberVarDefStmt* memb_var_def
-            = stmt_factory_.mk_member_var_def(var_name, type, initializer, access_modifier);
+        MemberVarDefStmt* memb_var_def = stmt_factory_.mk_member_var_def(
+            var_name,
+            type,
+            initializer,
+            access_modifier
+        );
         memb_var_def->name_ = var_name;
         var_def_stmts.push_back(memb_var_def);
     }
@@ -224,54 +259,72 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(CSharpTSTreeVisitor* self, T
     return var_def_stmts.front();
 }
 
-Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    TSNode const var_type_node    = ts_node_child_by_field_name(*node, "type", 4);
-    TSNode const var_name_node    = ts_node_child_by_field_name(*node, "name", 4); // left side
-    TSNode const initializer_node = ts_node_next_sibling(var_name_node);           // right side
-    std::string const var_name    = extract_node_text(var_name_node, self->source_code_);
-    Expr* initializer             = nullptr;
-    Type* var_type                = make_type(self, var_type_node);
+    const TSNode var_type_node = ts_node_child_by_field_name(*node, "type", 4);
+    const TSNode var_name_node
+        = ts_node_child_by_field_name(*node, "name", 4); // left side
+    const TSNode initializer_node
+        = ts_node_next_sibling(var_name_node); // right side
+    const std::string var_name
+        = extract_node_text(var_name_node, self->source_code_);
+    Expr* initializer = nullptr;
+    Type* var_type    = make_type(self, var_type_node);
 
     if (! ts_node_is_null(initializer_node))
     {
-        ExprHandler const initializer_handler = NodeRegistry::get_expr_handler(initializer_node);
-        initializer                           = initializer_handler(self, &initializer_node);
+        const ExprHandler initializer_handler
+            = NodeRegistry::get_expr_handler(initializer_node);
+        initializer = initializer_handler(self, &initializer_node);
     }
     return stmt_factory_.mk_param_var_def(var_name, var_type, initializer);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    auto const result = self->type_context_.top();
+    const auto result = self->type_context_.top();
     if (! result.has_value())
         throw std::logic_error("Owner type not found");
 
     if (! is_a<ClassDefStmt>(*result))
-        throw std::logic_error("Constructor can only be defined for class type");
+        throw std::logic_error(
+            "Constructor can only be defined for class type"
+        );
 
-    TSNode const param_list_node  = ts_node_child_by_field_name(*node, "parameters", 10);
-    TSNode const body_node        = ts_node_child_by_field_name(*node, "body", 4);
-    TSNode const initializer_node = ts_node_next_sibling(body_node);
+    const TSNode param_list_node
+        = ts_node_child_by_field_name(*node, "parameters", 10);
+    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode initializer_node = ts_node_next_sibling(body_node);
 
-    std::vector<ParamVarDefStmt*> const parameters = handle_param_list(self, &param_list_node);
-    std::vector<TSNode> const modifier_nodes
+    const std::vector<ParamVarDefStmt*> parameters
+        = handle_param_list(self, &param_list_node);
+    const std::vector<TSNode> modifier_nodes
         = find_nodes(*node, self->language_, "(modifier) @mod");
-    CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
-    AccessModifier const access_modifier
+    const CSModifiers modifiers
+        = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
+    const AccessModifier access_modifier
         = modifiers.get_access_mod().value_or(AccessModifier::Private);
-    StmtHandler const body_handler = NodeRegistry::get_stmt_handler(body_node);
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
 
     std::vector<BaseInitializerStmt*> base_init_stmts;
 
     if (! ts_node_is_null(initializer_node))
     {
-        StmtHandler const base_init_handler = NodeRegistry::get_stmt_handler(initializer_node);
-        Stmt* base_init_stmt                = base_init_handler(self, &initializer_node);
+        const StmtHandler base_init_handler
+            = NodeRegistry::get_stmt_handler(initializer_node);
+        Stmt* base_init_stmt = base_init_handler(self, &initializer_node);
         if (is_a<BaseInitializerStmt>(base_init_stmt))
         {
-            base_init_stmts.emplace_back(as_a<BaseInitializerStmt>(base_init_stmt));
+            base_init_stmts.emplace_back(
+                as_a<BaseInitializerStmt>(base_init_stmt)
+            );
         }
         // todo handle `this` initializer
     }
@@ -285,43 +338,55 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(CSharpTSTreeVisitor* self, TSN
     );
 }
 
-Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    std::string source_code                 = extract_node_text(*node, self->source_code_);
-    auto const bracket_it                   = std::ranges::find(source_code, '(');
-    std::string_view constexpr this_init_sw = "this";
-    auto const this_it
-        = std::search(source_code.begin(), bracket_it, this_init_sw.begin(), this_init_sw.end());
+    std::string source_code = extract_node_text(*node, self->source_code_);
+    const auto bracket_it   = std::ranges::find(source_code, '(');
+    constexpr std::string_view this_init_sw = "this";
+    const auto this_it                      = std::search(
+        source_code.begin(),
+        bracket_it,
+        this_init_sw.begin(),
+        this_init_sw.end()
+    );
 
     if (this_it != bracket_it)
         return stmt_factory_.mk_uknown(); // todo handle this initializer
 
-    auto const result = self->type_context_.top();
+    const auto result = self->type_context_.top();
     if (result.has_value())
         throw std::logic_error("Owner type not found");
 
     if (! is_a<ClassDefStmt>(result.value()))
         throw std::logic_error("Destructor can only be defined for class type");
 
-    auto const* owner = as_a<ClassDefStmt>(*result);
+    const auto* owner = as_a<ClassDefStmt>(*result);
     if (owner->bases_.empty())
         throw std::logic_error(
-            "Constructor can't have base initializer without having defined base class"
+            "Constructor can't have base initializer without having defined "
+            "base class"
         );
 
-    ClassDefStmt const* base   = owner->bases_.back();
-    TSNode const arg_list_node = ts_node_child(*node, 0);
+    const ClassDefStmt* base   = owner->bases_.back();
+    const TSNode arg_list_node = ts_node_child(*node, 0);
     // todo might be wrong index, needs testing
-    std::vector<Expr*> const arguments = handle_argument_list(self, &arg_list_node);
+    const std::vector<Expr*> arguments
+        = handle_argument_list(self, &arg_list_node);
     return stmt_factory_.mak_base_initializer(base->name_, arguments);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
-    TSNode const body_node         = ts_node_child_by_field_name(*node, "body", 4);
-    StmtHandler const body_handler = NodeRegistry::get_stmt_handler(body_node);
+    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
-    auto const owner               = self->type_context_.top();
+    const auto owner               = self->type_context_.top();
 
     if (! owner.has_value())
     {
@@ -338,40 +403,52 @@ Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(CSharpTSTreeVisitor* self, TSNo
     );
 }
 
-Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(CSharpTSTreeVisitor* self, TSNode const* node)
+Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
 {
     MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
-    auto const result              = self->type_context_.top();
+    const auto result              = self->type_context_.top();
     if (! result.has_value())
         throw std::logic_error("Owner type not found");
 
-    static std::string const mod_query =
+    static const std::string mod_query =
         R"(
         (method_declaration
             (modifier) @modifier)
         )";
 
-    method_def_stmt->owner_                  = *result;
-    std::vector<TSNode> const modifier_nodes = find_nodes(*node, self->language_, mod_query);
-    CSModifiers const modifiers = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
-    method_def_stmt->access_    = modifiers.get_access_mod().value_or(AccessModifier::Internal);
+    method_def_stmt->owner_ = *result;
+    const std::vector<TSNode> modifier_nodes
+        = find_nodes(*node, self->language_, mod_query);
+    const CSModifiers modifiers
+        = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
+    method_def_stmt->access_
+        = modifiers.get_access_mod().value_or(AccessModifier::Internal);
 
-    TSNode const name_node      = ts_node_child_by_field_name(*node, "name", 4);
-    TSNode const parameters_node = ts_node_child_by_field_name(*node, "parameters", 10);
-    TSNode const return_node     = ts_node_child_by_field_name(*node, "returns", 7);
-    TSNode const body_node       = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
+    const TSNode parameters_node
+        = ts_node_child_by_field_name(*node, "parameters", 10);
+    const TSNode return_node = ts_node_child_by_field_name(*node, "returns", 7);
+    const TSNode body_node   = ts_node_child_by_field_name(*node, "body", 4);
 
     // todo handle generic parameters
 
-    std::string const method_name = extract_node_text(name_node, self->source_code_);
-    std::vector<ParamVarDefStmt*> const parameters = handle_param_list(self, &parameters_node);
-    Type* return_type                              = make_type(self, return_node);
-    StmtHandler const body_handler                 = NodeRegistry::get_stmt_handler(body_node);
-    Stmt* body                                     = body_handler(self, &body_node);
+    const std::string method_name
+        = extract_node_text(name_node, self->source_code_);
+    const std::vector<ParamVarDefStmt*> parameters
+        = handle_param_list(self, &parameters_node);
+    Type* return_type              = make_type(self, return_node);
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    Stmt* body                     = body_handler(self, &body_node);
 
-    FunctionDefStmt* function_def_stmt
-        = stmt_factory_
-              .mk_function_def(method_name, parameters, return_type, as_a<CompoundStmt>(body));
+    FunctionDefStmt* function_def_stmt = stmt_factory_.mk_function_def(
+        method_name,
+        parameters,
+        return_type,
+        as_a<CompoundStmt>(body)
+    );
 
     method_def_stmt->func_ = function_def_stmt;
     return method_def_stmt;

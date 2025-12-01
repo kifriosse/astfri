@@ -11,15 +11,21 @@ ExprFactory& CSharpTSTreeVisitor::expr_factory_ = ExprFactory::get_instance();
 StmtFactory& CSharpTSTreeVisitor::stmt_factory_ = StmtFactory::get_instance();
 TypeFactory& CSharpTSTreeVisitor::type_factory_ = TypeFactory::get_instance();
 
-CSharpTSTreeVisitor::CSharpTSTreeVisitor(std::string source_code, TSLanguage const* language) :
+CSharpTSTreeVisitor::CSharpTSTreeVisitor(
+    std::string source_code,
+    const TSLanguage* language
+) :
     source_code_(std::move(source_code)),
     language_(language)
 {
 }
 
-void CSharpTSTreeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode const* node)
+void CSharpTSTreeVisitor::handle_comp_unit_stmt(
+    TranslationUnit& tr_unit,
+    const TSNode* node
+)
 {
-    static std::string const type_decl_query = R"(
+    static const std::string type_decl_query = R"(
         (namespace_declaration
             body: (declaration_list
                 (class_declaration) @class))
@@ -33,9 +39,10 @@ void CSharpTSTreeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode
     )";
     // todo add other type declarations
 
-    std::vector<TSNode> const type_nodes = find_nodes(*node, language_, type_decl_query);
+    const std::vector<TSNode> type_nodes
+        = find_nodes(*node, language_, type_decl_query);
 
-    for (auto const& type_node : type_nodes)
+    for (const auto& type_node : type_nodes)
     {
         StmtHandler handler = NodeRegistry::get_stmt_handler(type_node);
         Stmt* stmt          = handler(this, &type_node);
@@ -47,18 +54,21 @@ void CSharpTSTreeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit, TSNode
     }
 }
 
-Type* CSharpTSTreeVisitor::make_type(CSharpTSTreeVisitor const* self, TSNode const& node)
+Type* CSharpTSTreeVisitor::make_type(
+    const CSharpTSTreeVisitor* self,
+    const TSNode& node
+)
 {
-    std::string type_name          = extract_node_text(node, self->source_code_);
-    char const last_char           = type_name[type_name.length() - 1];
-    bool const is_indirection_type = last_char == '*' || last_char == '&';
+    std::string type_name = extract_node_text(node, self->source_code_);
+    const char last_char  = type_name[type_name.length() - 1];
+    const bool is_indirection_type = last_char == '*' || last_char == '&';
     if (is_indirection_type)
     {
         type_name.pop_back();
     }
 
     std::erase_if(type_name, isspace);
-    auto const res = NodeRegistry::get_type(type_name);
+    const auto res = NodeRegistry::get_type(type_name);
     // todo implement scope
     Type* type = res.has_value() ? *res : type_factory_.mk_class(type_name, {});
 

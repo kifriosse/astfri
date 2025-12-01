@@ -32,18 +32,30 @@ enum class IntSuffix
 // };
 
 std::vector<TSNode> find_nodes(
-    TSNode const& root,
-    TSLanguage const* lang,
-    std::string const& query_str
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
 );
 
-TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string const& query_str);
+TSNode find_first_node(
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
+);
 
-IntSuffix get_suffix_type(std::string const& suffix);
+IntSuffix get_suffix_type(const std::string& suffix);
 
 bool almost_equal(double a, double b, double epsilon = 1e-9);
 
-std::string extract_node_text(TSNode const& node, std::string const& source_code);
+std::string extract_node_text(
+    const TSNode& node,
+    const std::string& source_code
+);
+
+void split_namespace(
+    std::stack<std::string>& scope_str,
+    const std::string& namespace_name
+);
 
 bool is_interface_name(const std::string& name);
 

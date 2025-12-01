@@ -8,15 +8,21 @@
 namespace astfri::csharp
 {
 std::vector<TSNode> find_nodes(
-    TSNode const& root,
-    TSLanguage const* lang,
-    std::string const& query_str
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
 )
 {
     std::vector<TSNode> results;
     TSQueryError err;
     uint32_t offset;
-    TSQuery* query = ts_query_new(lang, query_str.c_str(), query_str.length(), &offset, &err);
+    TSQuery* query = ts_query_new(
+        lang,
+        query_str.c_str(),
+        query_str.length(),
+        &offset,
+        &err
+    );
 
     if (! query)
     {
@@ -44,11 +50,21 @@ std::vector<TSNode> find_nodes(
     return results;
 }
 
-TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string const& query_str)
+TSNode find_first_node(
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
+)
 {
     TSQueryError err;
     uint32_t offset;
-    TSQuery* query = ts_query_new(lang, query_str.c_str(), query_str.length(), &offset, &err);
+    TSQuery* query = ts_query_new(
+        lang,
+        query_str.c_str(),
+        query_str.length(),
+        &offset,
+        &err
+    );
 
     if (! query)
     {
@@ -78,13 +94,15 @@ TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string c
     return result;
 }
 
-IntSuffix get_suffix_type(std::string const& suffix)
+IntSuffix get_suffix_type(const std::string& suffix)
 {
     if (suffix.empty())
         return IntSuffix::None;
 
-    char const first  = static_cast<char>(std::tolower(suffix[0]));
-    char const second = static_cast<char>(std::tolower(suffix.length() == 2 ? suffix[1] : '\0'));
+    const char first  = static_cast<char>(std::tolower(suffix[0]));
+    const char second = static_cast<char>(
+        std::tolower(suffix.length() == 2 ? suffix[1] : '\0')
+    );
 
     // considering that we can't get stuff like UU or LL or L1 or U1
     if ((first == 'u' && second == 'l') || (first == 'l' && second == 'u'))
@@ -102,26 +120,32 @@ IntSuffix get_suffix_type(std::string const& suffix)
     return IntSuffix::None;
 }
 
-bool almost_equal(double const a, double const b, double const epsilon)
+bool almost_equal(const double a, const double b, const double epsilon)
 {
     return std::fabs(a - b) < epsilon;
 }
 
-std::string extract_node_text(TSNode const& node, std::string const& source_code)
+std::string extract_node_text(
+    const TSNode& node,
+    const std::string& source_code
+)
 {
     if (ts_node_is_null(node))
     {
         throw std::runtime_error("Node is null");
     }
-    size_t const from = ts_node_start_byte(node);
-    size_t const to   = ts_node_end_byte(node);
+    const size_t from = ts_node_start_byte(node);
+    const size_t to   = ts_node_end_byte(node);
     return source_code.substr(from, to - from);
 }
 
-void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name)
+void split_namespace(
+    std::stack<std::string>& scope_str,
+    const std::string& namespace_name
+)
 {
-    auto const r_begin = std::make_reverse_iterator(namespace_name.end());
-    auto const r_end   = std::make_reverse_iterator(namespace_name.begin());
+    const auto r_begin = std::make_reverse_iterator(namespace_name.end());
+    const auto r_end   = std::make_reverse_iterator(namespace_name.begin());
     auto it            = r_begin;
     auto slice_end     = namespace_name.end();
 
@@ -137,7 +161,7 @@ void split_namespace(std::stack<std::string>& scope_str, std::string const& name
     }
 }
 
-bool is_interface_name(std::string const& name)
+bool is_interface_name(const std::string& name)
 {
     return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
 }
