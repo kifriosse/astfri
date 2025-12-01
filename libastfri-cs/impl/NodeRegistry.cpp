@@ -18,8 +18,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"constructor_declaration", CSharpTSTreeVisitor::handle_method_def_stmt
         },
         {"block",                   CSharpTSTreeVisitor::handle_block_stmt       },
-        {"arrow_expression_clause",
-         CSharpTSTreeVisitor::handle_arrow_expr_clause                           },
+        {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt       },
         // {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 
@@ -193,8 +192,8 @@ std::optional<UnaryOpType> NodeRegistry::get_prefix_unary_op(
     const std::string& operation
 )
 {
-    if (const auto it = prefix_unary_op.find(operation);
-        it != prefix_unary_op.end())
+    const auto it = prefix_unary_op.find(operation);
+    if (it != prefix_unary_op.end())
     {
         return it->second;
     }
@@ -203,8 +202,8 @@ std::optional<UnaryOpType> NodeRegistry::get_prefix_unary_op(
 
 std::optional<BinOpType> NodeRegistry::get_bin_op(const std::string& operation)
 {
-    if (const auto it = bin_operations.find(operation);
-        it != bin_operations.end())
+    const auto it = bin_operations.find(operation);
+    if (it != bin_operations.end())
     {
         return it->second;
     }
@@ -213,7 +212,8 @@ std::optional<BinOpType> NodeRegistry::get_bin_op(const std::string& operation)
 
 std::optional<Type*> NodeRegistry::get_type(const std::string& type_name)
 {
-    if (const auto it = types_.find(type_name); it != types_.end())
+    const auto it = types_.find(type_name);
+    if (it != types_.end())
     {
         return it->second;
     }
@@ -224,7 +224,8 @@ std::optional<CSModifier> NodeRegistry::get_modifier(
     const std::string& modifier
 )
 {
-    if (const auto it = modifiers.find(modifier); it != modifiers.end())
+    const auto it = modifiers.find(modifier);
+    if (it != modifiers.end())
     {
         return it->second;
     }

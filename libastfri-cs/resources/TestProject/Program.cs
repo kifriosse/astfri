@@ -42,7 +42,7 @@ namespace CSharp.T.Test
         private unsafe volatile protected string* testPtr;
 
         static void Main2(string[] args)
-        
+        {
             int[] array = new int[2];
             decimal a_d = 1254.587m;
             string b_s = @"test";
@@ -98,7 +98,7 @@ namespace CSharp.T.Test
             } 
         }
         public int Age { get; init; }
-        private Gender gender = Gender.Male;
+        private Pohlavie gender = Pohlavie.Muz;
 
         public Person(string fullName, int age)
         {
@@ -113,14 +113,26 @@ namespace CSharp.T.Test
 
         protected virtual void TestVirtuality()
         {
-            
+        
+            if (3 == 2)
+            {
+                Console.WriteLine("3 == 2");
+            }
+            else if (4 == 2)
+            {
+                Console.WriteLine("4 == 2");
+            }
+            else
+            {
+
+            }
         }
 
         ~Person() => Print();
 
-        private enum Gender
+        private enum Pohlavie
         {
-            Male, Female, Other
+            Zena, Muz, Ine
         }
 
         private interface IRunnable

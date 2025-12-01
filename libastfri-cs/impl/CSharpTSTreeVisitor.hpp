@@ -146,7 +146,7 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
-    static Stmt* handle_arrow_expr_clause(
+    static Stmt* handle_arrow_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
