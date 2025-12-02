@@ -93,6 +93,24 @@ Scope CSharpTSTreeVisitor::create_scope(const TSNode* node) const
     return scope;
 }
 
+Stmt* CSharpTSTreeVisitor::make_while_loop(
+    const TSNode* node,
+    const bool is_do_while
+)
+{
+    const TSNode cond_node = ts_node_child_by_field_name(*node, "condition", 9);
+    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
+    const ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    Expr* condition                = cond_handler(this, node);
+    Stmt* body                     = body_handler(this, node);
+
+    if (is_do_while)
+        return stmt_factory_.mk_do_while(condition, body);
+
+    return stmt_factory_.mk_while(condition, body);
+}
+
 std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     CSharpTSTreeVisitor* self,
     const TSNode* node

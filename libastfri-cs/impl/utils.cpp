@@ -1,9 +1,9 @@
 #include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/impl/utils.hpp>
 
+#include <cmath>
 #include <cstring>
 #include <iostream>
-#include <cmath>
 
 namespace astfri::csharp
 {
@@ -235,4 +235,4 @@ std::string remove_comments(
     return new_source;
 }
 
-} // namespace astfri::csharp 2066:2141
+} // namespace astfri::csharp

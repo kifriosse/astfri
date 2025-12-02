@@ -154,8 +154,19 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+    static Stmt* handle_while_loop(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_do_while_loop(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
 
     Scope create_scope(const TSNode* node) const;
+
+    Stmt* make_while_loop(const TSNode* node, bool is_do_while);
+
     static std::vector<ParamVarDefStmt*> handle_param_list(
         CSharpTSTreeVisitor* self,
         const TSNode* node

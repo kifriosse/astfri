@@ -43,32 +43,56 @@ namespace CSharp.T.Test
 
         static void Main2(string[] args)
         {
-            int[] array = new int[2];
-            decimal a_d = 1254.587m;
-            string b_s = @"test";
+            
+            int[] array = { 4, 5, 6, 8, 77, 47, 59 };
+            while (true)
+            {
+                break;
+            }
+            
+            do
+            {
+                break;
+            } while (true);
+            // List<Person> people = [];
+            // for (
+            //     int i = 0, j = 0;
+            //     i < 10;
+            //     ++i, j += 2, people.Add(new Person($"Person {i}", j))
+            // )
+            // {
+            //     //...
+            // }
+            // foreach (Person person in people)
+            // {
+            //     Console.WriteLine($"Name: {person.Name} Age: {person.Age}");
+            // }
 
-            _ = 8;
-            string h = @"Multi
-            line
-            raw";
+            // decimal a_d = 1254.587m;
+            // string b_s = @"test";
 
-            const int constant2 = 1;
+            // _ = 8;
+            // string h = @"Multi
+            // line
+            // raw";
 
-            int a = 4, b = 5;
-            float c = (float)a;
+            // const int constant2 = 1;
 
-            ref readonly int r = ref a;
+            // int a = 4, b = 5;
+            // float c = (float)a;
 
-            int? nullable = null;
-            int bar = nullable ?? 5;
+            // ref readonly int r = ref a;
 
-            int foo = nullable is null ? bar : 6;
+            // int? nullable = null;
+            // int bar = nullable ?? 5;
 
-            int brackets = (a + b) * 10;
+            // int foo = nullable is null ? bar : 6;
 
-            int a1;
-            const int a2 = 1;
-            a1 = a;
+            // int brackets = (a + b) * 10;
+
+            // int a1;
+            // const int a2 = 1;
+            // a1 = a;
         }
 
         unsafe public void UnsafeMethod()
@@ -113,19 +137,6 @@ namespace CSharp.T.Test
 
         protected virtual void TestVirtuality()
         {
-        
-            if (3 == 2)
-            {
-                Console.WriteLine("3 == 2");
-            }
-            else if (4 == 2)
-            {
-                Console.WriteLine("4 == 2");
-            }
-            else
-            {
-
-            }
         }
 
         ~Person() => Print();
@@ -133,26 +144,6 @@ namespace CSharp.T.Test
         private enum Pohlavie
         {
             Zena, Muz, Ine
-        }
-
-        private interface IRunnable
-        {
-            
-        }
-
-        private record class Something
-        {
-            
-        }
-
-        private record struct SomethingStruct
-        {
-            
-        }
-
-        private struct SomethingStruct2
-        {
-            
         }
 
         public delegate void ChangeDelegate(int something);
@@ -190,3 +181,5 @@ namespace CSharp.T.Test
         }
     }
 }
+
+

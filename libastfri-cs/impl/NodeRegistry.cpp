@@ -20,6 +20,8 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"block",                   CSharpTSTreeVisitor::handle_block_stmt       },
         {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt       },
         {"expression_statement",    CSharpTSTreeVisitor::handle_expr_stmt        },
+        {"do_statement",            CSharpTSTreeVisitor::handle_do_while_loop    },
+        {"while_statement",         CSharpTSTreeVisitor::handle_while_loop       },
         // {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 
