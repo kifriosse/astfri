@@ -150,10 +150,8 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
-    static Stmt* handle_expr_stmt(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+
+    // loops
     static Stmt* handle_while_loop(
         CSharpTSTreeVisitor* self,
         const TSNode* node
@@ -162,6 +160,16 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+
+    // other
+    static Stmt* handle_expr_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_continue(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_break(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_return(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_throw(CSharpTSTreeVisitor* self, const TSNode* node);
 
     Scope create_scope(const TSNode* node) const;
 

@@ -36,6 +36,22 @@ Stmt* CSharpTSTreeVisitor::handle_arrow_stmt(
     return stmt_factory_.mk_compound({});
 }
 
+Stmt* CSharpTSTreeVisitor::handle_while_loop(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    return self->make_while_loop(node, false);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_do_while_loop(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    return self->make_while_loop(node, true);
+}
+
 Stmt* CSharpTSTreeVisitor::handle_expr_stmt(
     CSharpTSTreeVisitor* self,
     const TSNode* node
@@ -52,20 +68,40 @@ Stmt* CSharpTSTreeVisitor::handle_expr_stmt(
     return stmt_factory_.mk_expr(handler(self, &expr_node));
 }
 
-Stmt* CSharpTSTreeVisitor::handle_while_loop(
-    CSharpTSTreeVisitor* self,
-    const TSNode* node
+Stmt* CSharpTSTreeVisitor::handle_continue(
+    [[maybe_unused]] CSharpTSTreeVisitor* self,
+    [[maybe_unused]] const TSNode* node
 )
 {
-    return self->make_while_loop(node, false);
+    return stmt_factory_.mk_continue();
 }
 
-Stmt* CSharpTSTreeVisitor::handle_do_while_loop(
+Stmt* CSharpTSTreeVisitor::handle_break(
+    [[maybe_unused]] CSharpTSTreeVisitor* self,
+    [[maybe_unused]] const TSNode* node
+)
+{
+    return stmt_factory_.mk_break();
+}
+
+Stmt* CSharpTSTreeVisitor::handle_return(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    return self->make_while_loop(node, true);
+    const TSNode expr_node         = ts_node_child(*node, 0);
+    const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
+    return stmt_factory_.mk_return(expr_handler(self, &expr_node));
+}
+
+Stmt* CSharpTSTreeVisitor::handle_throw(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode expr_node         = ts_node_child(*node, 0);
+    const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
+    return stmt_factory_.mk_throw(expr_handler(self, &expr_node));
 }
 
 } // namespace astfri::csharp

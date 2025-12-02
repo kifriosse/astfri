@@ -22,6 +22,10 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"expression_statement",    CSharpTSTreeVisitor::handle_expr_stmt        },
         {"do_statement",            CSharpTSTreeVisitor::handle_do_while_loop    },
         {"while_statement",         CSharpTSTreeVisitor::handle_while_loop       },
+        {"break_statement",         CSharpTSTreeVisitor::handle_break            },
+        {"continue_statement",      CSharpTSTreeVisitor::handle_continue         },
+        {"return_statement",        CSharpTSTreeVisitor::handle_return           },
+        {"throw_statement",         CSharpTSTreeVisitor::handle_throw            }
         // {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
 };
 

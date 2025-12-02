@@ -52,7 +52,7 @@ namespace CSharp.T.Test
             
             do
             {
-                break;
+                continue;
             } while (true);
             // List<Person> people = [];
             // for (
@@ -178,6 +178,7 @@ namespace CSharp.T.Test
         protected sealed override void TestVirtuality()
         {
             base.TestVirtuality();
+            throw new NotImplementedException();
         }
     }
 }
