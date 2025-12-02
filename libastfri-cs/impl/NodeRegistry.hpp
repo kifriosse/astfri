@@ -1,8 +1,8 @@
 #ifndef CSHARP_NODE_REGISTRY_HPP
 #define CSHARP_NODE_REGISTRY_HPP
 
-#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/impl/CSModifiers.hpp>
+#include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <optional>

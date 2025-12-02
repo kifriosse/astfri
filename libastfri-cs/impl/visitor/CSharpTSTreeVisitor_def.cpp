@@ -1,6 +1,6 @@
-#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/impl/NodeRegistry.hpp>
 #include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 
 #include <algorithm>
 
@@ -343,10 +343,10 @@ Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
     const TSNode* node
 )
 {
+    constexpr std::string_view this_init_sw = "this";
     std::string source_code = extract_node_text(*node, self->source_code_);
     const auto bracket_it   = std::ranges::find(source_code, '(');
-    constexpr std::string_view this_init_sw = "this";
-    const auto this_it                      = std::search(
+    const auto this_it      = std::search(
         source_code.begin(),
         bracket_it,
         this_init_sw.begin(),

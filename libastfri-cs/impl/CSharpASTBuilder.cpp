@@ -1,4 +1,4 @@
-#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/inc/CSharpASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 

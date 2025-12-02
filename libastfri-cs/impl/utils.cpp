@@ -1,8 +1,6 @@
-#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/impl/utils.hpp>
 
 #include <cmath>
-#include <cstring>
 #include <iostream>
 
 namespace astfri::csharp
