@@ -7,26 +7,35 @@ TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
     NodeRegistry::stmt_handlers_ = {
-        {"class_declaration",       CSharpTSTreeVisitor::handle_class_def_stmt   },
-        {"variable_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+        {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
+        {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         // todo fix this might not work
-        {"destructor_declaration",  CSharpTSTreeVisitor::handle_destr_def_stmt   },
+        {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
         {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt
         },
-        {"parameter",               CSharpTSTreeVisitor::handle_param_def_stmt   },
-        {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt   },
+        {"parameter", CSharpTSTreeVisitor::handle_param_def_stmt},
+        {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt},
         {"constructor_declaration", CSharpTSTreeVisitor::handle_method_def_stmt
         },
-        {"block",                   CSharpTSTreeVisitor::handle_block_stmt       },
-        {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt       },
-        {"expression_statement",    CSharpTSTreeVisitor::handle_expr_stmt        },
-        {"do_statement",            CSharpTSTreeVisitor::handle_do_while_loop    },
-        {"while_statement",         CSharpTSTreeVisitor::handle_while_loop       },
-        {"break_statement",         CSharpTSTreeVisitor::handle_break            },
-        {"continue_statement",      CSharpTSTreeVisitor::handle_continue         },
-        {"return_statement",        CSharpTSTreeVisitor::handle_return           },
-        {"throw_statement",         CSharpTSTreeVisitor::handle_throw            }
+        {"block", CSharpTSTreeVisitor::handle_block_stmt},
+        {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},
+        {"expression_statement", CSharpTSTreeVisitor::handle_expr_stmt},
+        {"do_statement", CSharpTSTreeVisitor::handle_do_while_loop},
+        {"while_statement", CSharpTSTreeVisitor::handle_while_loop},
+        {"break_statement", CSharpTSTreeVisitor::handle_break},
+        {"continue_statement", CSharpTSTreeVisitor::handle_continue},
+        {"return_statement", CSharpTSTreeVisitor::handle_return},
+        {"throw_statement", CSharpTSTreeVisitor::handle_throw},
         // {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+        {"ERROR",
+         [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
+         {
+             const auto [row, column] = ts_node_start_point(*node);
+             throw std::runtime_error(
+                 "Invalid C# syntax in source code at: row"
+                 + std::to_string(row) + "and column " + std::to_string(column)
+             );
+         }}
 };
 
 std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
@@ -48,7 +57,8 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
          CSharpTSTreeVisitor::handle_postfix_unary_op_expr},
         {"binary_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
         {"assignment_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
-
+        {"parenthesized_expression",
+         CSharpTSTreeVisitor::handle_parenthesized_expr},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Expr*
          {

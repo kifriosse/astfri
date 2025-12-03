@@ -105,6 +105,11 @@ public:
         const TSNode* node
     ); // todo
 
+    static Expr* handle_parenthesized_expr(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+
     // Statements
     // Type Definitions
     static Stmt* handle_class_def_stmt(

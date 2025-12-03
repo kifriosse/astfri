@@ -323,4 +323,14 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(
     );
 }
 
+Expr* CSharpTSTreeVisitor::handle_parenthesized_expr(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode expr_node    = ts_node_child(*node, 0);
+    const ExprHandler handler = NodeRegistry::get_expr_handler(expr_node);
+    return expr_factory_.mk_bracket(handler(self, &expr_node));
+}
+
 } // namespace astfri::csharp
