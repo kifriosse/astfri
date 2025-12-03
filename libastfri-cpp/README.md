@@ -17,5 +17,5 @@ xbps-install -Su llvm19-devel
 #### Arch
 
 ```sh
-pacman -S llvm clang
+sudo pacman -S llvm clang
 ```
