@@ -111,7 +111,7 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
     }
     else if (nodeType == "parenthesized_expression")
     {
-        expr = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
+        expr = this->exprFactory.mk_bracket(this->get_expr(ts_node_named_child(tsNode, 0), sourceCode));
     }
     else if (nodeType == "ternary_expression")
     {
