@@ -3,6 +3,7 @@
 
 #include <tree_sitter/api.h>
 
+#include <filesystem>
 #include <stack>
 #include <string>
 #include <vector>
@@ -62,7 +63,8 @@ bool is_interface_name(const std::string& name);
 std::string remove_comments(
     const std::string& source_code,
     const TSNode& root,
-    const TSLanguage& lang
+    const TSLanguage* lang,
+    const std::filesystem::path& path
 );
 
 } // namespace astfri::csharp

@@ -1,6 +1,7 @@
 #include <libastfri-cs/impl/utils.hpp>
 
 #include <cmath>
+#include <filesystem>
 #include <iostream>
 
 namespace astfri::csharp
@@ -167,7 +168,8 @@ bool is_interface_name(const std::string& name)
 std::string remove_comments(
     const std::string& source_code,
     const TSNode& root,
-    const TSLanguage& lang
+    const TSLanguage* lang,
+    const std::filesystem::path& path
 )
 {
     std::string new_source;
@@ -180,7 +182,7 @@ std::string remove_comments(
     TSQueryError query_error;
     uint32_t offset;
     const TSQuery* ts_query = ts_query_new(
-        &lang,
+        lang,
         query.c_str(),
         query.length(),
         &offset,
@@ -200,6 +202,7 @@ std::string remove_comments(
     size_t next_start = 0;
     std::vector<TSNode> errors;
     uint32_t capture_index;
+
     while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
     {
         const TSNode node = match.captures[0].node;
@@ -227,7 +230,10 @@ std::string remove_comments(
 
         std::cerr << std::endl;
 
-        throw std::runtime_error("Source code contains syntax errors.");
+        throw std::runtime_error(
+            "Source code in file \"" + path.string()
+            + "\" contains syntax errors."
+        );
     }
 
     return new_source;

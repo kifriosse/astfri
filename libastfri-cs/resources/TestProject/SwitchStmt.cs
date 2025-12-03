@@ -108,4 +108,24 @@ class Switch
             Console.WriteLine("Adult");
         }
     }
+
+    
+    class TestCases
+    {
+        void Run()
+        {
+            int a = 5;
+            int b = 10;
+            int c = (a + b) * (a - (b - 2));
+
+            // Parenthesized binary expressions
+            int x = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
+
+            // Parenthesized expression inside if-pattern
+            if ((c + 1) > (a * 2))
+            {
+                Console.WriteLine("Pattern matched");
+            }
+        }
+    }
 }

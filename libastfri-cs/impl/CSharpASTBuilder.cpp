@@ -1,3 +1,4 @@
+#include <libastfri-cs/impl/utils.hpp>
 #include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/inc/CSharpASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
@@ -52,7 +53,7 @@ TranslationUnit* CSharpASTBuilder::make_ast(
 
 std::vector<std::string> CSharpASTBuilder::get_source_codes(
     const std::string& project_dir
-)
+) const
 {
     std::vector<std::string> source_codes;
     std::stack<std::string> dirs;
@@ -76,12 +77,25 @@ std::vector<std::string> CSharpASTBuilder::get_source_codes(
             }
             else if (dir_entry.path().extension() == ".cs")
             {
-                std::ifstream file_stream(dir_entry.path());
-                std::string content(
+                const std::filesystem::path& path = dir_entry.path();
+                std::ifstream file_stream(path);
+                std::string source_code(
                     (std::istreambuf_iterator<char>(file_stream)),
                     std::istreambuf_iterator<char>()
                 );
-                source_codes.emplace_back(std::move(content));
+                TSTree* tree = ts_parser_parse_string(
+                    parser_,
+                    nullptr,
+                    source_code.c_str(),
+                    source_code.length()
+                );
+                source_codes.emplace_back(remove_comments(
+                    source_code,
+                    ts_tree_root_node(tree),
+                    lang_,
+                    path
+                ));
+                ts_tree_delete(tree);
             }
         }
     }

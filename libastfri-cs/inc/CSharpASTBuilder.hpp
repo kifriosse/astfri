@@ -23,9 +23,9 @@ public:
     TranslationUnit* make_ast(const std::string& source_code_dir) const;
 
 private:
-    static std::vector<std::string> get_source_codes(
+    std::vector<std::string> get_source_codes(
         const std::string& project_dir
-    );
+    ) const;
 };
 
 }; // namespace astfri::csharp
