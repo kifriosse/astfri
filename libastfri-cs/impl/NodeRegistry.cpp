@@ -249,6 +249,16 @@ std::optional<CSModifier> NodeRegistry::get_modifier(
     return {};
 }
 
+bool NodeRegistry::is_expr(const TSNode& node)
+{
+    return expr_handlers_.contains(ts_node_type(node));
+}
+
+bool NodeRegistry::is_stmt(const TSNode& node)
+{
+    return stmt_handlers_.contains(ts_node_type(node));
+}
+
 Expr* NodeRegistry::default_expr_handler(CSharpTSTreeVisitor*, const TSNode*)
 {
     return ExprFactory::get_instance().mk_unknown();

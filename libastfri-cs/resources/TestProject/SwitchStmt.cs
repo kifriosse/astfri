@@ -112,8 +112,10 @@ class Switch
     
     class TestCases
     {
+
         void Run()
         {
+
             int a = 5;
             int b = 10;
             int c = (a + b) * (a - (b - 2));
@@ -126,6 +128,30 @@ class Switch
             {
                 Console.WriteLine("Pattern matched");
             }
+            // int j;
+            // int i;
+            for (int i = 0, j = 0; i < 10; ++i, j += 2)
+            {
+                // ...
+            }
         }
+
+        public void ArrowBodyExample()
+        {
+            List<string> fruits = new() { "apple", "banana", "cherry", "date" };
+
+            bool hasA = fruits.Any(fruit => fruit.Contains('a'));
+
+            Console.WriteLine($"List contains a fruit with 'a': {hasA}");
+
+            var fruitsWithE = fruits.Where(fruit => fruit.Contains('e')).ToList();
+
+            Console.WriteLine("Fruits with 'e':");
+            fruitsWithE.ForEach(f => Console.WriteLine(f));
+        }
+
+        public void ArrowBodyMethod() => ArrowBodyExample();
+
+        public int Add(int a, int b) => a + b;  
     }
 }

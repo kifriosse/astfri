@@ -165,6 +165,7 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+    static Stmt* handle_for_loop(CSharpTSTreeVisitor* self, const TSNode* node);
 
     // other
     static Stmt* handle_expr_stmt(
@@ -180,6 +181,10 @@ public:
 
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
 
+    Expr* expr_list_to_comma_op(
+        const TSNode& start_node,
+        const TSNode* end_node
+    );
     static std::vector<ParamVarDefStmt*> handle_param_list(
         CSharpTSTreeVisitor* self,
         const TSNode* node

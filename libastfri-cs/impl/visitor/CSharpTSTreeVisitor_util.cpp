@@ -2,6 +2,8 @@
 #include <libastfri-cs/impl/utils.hpp>
 #include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 
+#include <queue>
+
 namespace astfri::csharp
 {
 
@@ -109,6 +111,50 @@ Stmt* CSharpTSTreeVisitor::make_while_loop(
         return stmt_factory_.mk_do_while(condition, body);
 
     return stmt_factory_.mk_while(condition, body);
+}
+
+/**
+ * Turns an expression list into a chained comma operator expression
+ * @param start_node node from which to start
+ * @param end_node node at which to end (exclusive). If nullptr, ends when there
+ * aren't other siblings
+ * @return returns the chained comma operator expression. If there is only one
+ * expression, that expression is returned. If start and end are the same,
+ * nullptr is returned.
+ */
+Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
+    const TSNode& start_node,
+    const TSNode* end_node
+)
+{
+    TSTreeCursor cursor = ts_tree_cursor_new(start_node);
+    std::queue<Expr*> exprs;
+
+    do
+    {
+        const TSNode current_node = ts_tree_cursor_current_node(&cursor);
+        if (end_node && ts_node_eq(current_node, *end_node))
+            break;
+
+        const ExprHandler expr_handler
+            = NodeRegistry::get_expr_handler(current_node);
+        exprs.push(expr_handler(this, &current_node));
+    } while (ts_tree_cursor_goto_next_sibling(&cursor));
+    ts_tree_cursor_delete(&cursor);
+
+    if (exprs.empty())
+        return nullptr;
+
+    Expr* init_expr = exprs.front();
+    exprs.pop();
+
+    while (! exprs.empty())
+    {
+        Expr* right = exprs.front();
+        exprs.pop();
+        init_expr = expr_factory_.mk_bin_on(init_expr, BinOpType::Comma, right);
+    }
+    return init_expr;
 }
 
 std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(

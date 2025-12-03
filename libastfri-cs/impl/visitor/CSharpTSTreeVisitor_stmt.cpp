@@ -10,13 +10,13 @@ Stmt* CSharpTSTreeVisitor::handle_block_stmt(
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
-    std::vector<Stmt*> statements;
 
     if (! ts_tree_cursor_goto_first_child(&cursor))
     {
         return stmt_factory_.mk_compound({});
     }
 
+    std::vector<Stmt*> statements;
     do
     {
         TSNode current_node = ts_tree_cursor_current_node(&cursor);
@@ -50,6 +50,63 @@ Stmt* CSharpTSTreeVisitor::handle_do_while_loop(
 )
 {
     return self->make_while_loop(node, true);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_for_loop(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    Stmt* init      = nullptr;
+    Expr* condition = nullptr;
+    Stmt* updater   = nullptr;
+    const TSNode init_node
+        = ts_node_child_by_field_name(*node, "initializer", 11);
+    const TSNode cond_node = ts_node_child_by_field_name(*node, "condition", 9);
+    const TSNode updater_node = ts_node_child_by_field_name(*node, "update", 6);
+    const TSNode body_node    = ts_node_child_by_field_name(*node, "body", 4);
+    const bool cond_null      = ts_node_is_null(cond_node);
+    const bool updater_null   = ts_node_is_null(updater_node);
+
+    if (! ts_node_is_null(init_node))
+    {
+        if (NodeRegistry::is_stmt(init_node))
+        {
+            const StmtHandler init_handler
+                = NodeRegistry::get_stmt_handler(init_node);
+            init = init_handler(self, &init_node);
+        }
+        else
+        {
+            const TSNode* end_node = &body_node;
+            if (! cond_null)
+                end_node = &cond_node;
+            else if (! updater_null)
+                end_node = &updater_node;
+
+            init = stmt_factory_.mk_expr(
+                self->expr_list_to_comma_op(init_node, end_node)
+            );
+        }
+    }
+
+    if (! cond_null)
+    {
+        const ExprHandler cond_handler
+            = NodeRegistry::get_expr_handler(cond_node);
+        condition = cond_handler(self, &cond_node);
+    }
+
+    if (! updater_null)
+    {
+        updater = stmt_factory_.mk_expr(
+            self->expr_list_to_comma_op(updater_node, &body_node)
+        );
+    }
+
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    Stmt* body                     = body_handler(self, &body_node);
+    return stmt_factory_.mk_for(init, condition, updater, body);
 }
 
 Stmt* CSharpTSTreeVisitor::handle_expr_stmt(

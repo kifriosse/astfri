@@ -44,6 +44,8 @@ public:
     static std::optional<BinOpType> get_bin_op(const std::string& operation);
     static std::optional<Type*> get_type(const std::string& type_name);
     static std::optional<CSModifier> get_modifier(const std::string& modifier);
+    static bool is_expr(const TSNode& node);
+    static bool is_stmt(const TSNode& node);
 
 private:
     static Expr* default_expr_handler(CSharpTSTreeVisitor*, const TSNode*);

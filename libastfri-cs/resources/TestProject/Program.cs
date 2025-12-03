@@ -107,7 +107,7 @@ namespace CSharp.T.Test
     /// <summary>
     /// Testing documentation comments
     /// </summary>
-    public class Person
+    public abstract class Person
     {
         private static readonly int mf = 8;
         private string _firstName;
@@ -121,6 +121,8 @@ namespace CSharp.T.Test
                 _lastName = parts[1];
             } 
         }
+
+        public abstract void TestAbstract();
         public int Age { get; init; }
         private Pohlavie gender = Pohlavie.Muz;
 
@@ -178,7 +180,7 @@ namespace CSharp.T.Test
         protected sealed override void TestVirtuality()
         {
             base.TestVirtuality();
-            throw new NotImplementedException();
+            
         }
     }
 }

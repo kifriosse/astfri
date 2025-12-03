@@ -132,8 +132,6 @@ Expr* CSharpTSTreeVisitor::handle_str_lit(
     if (ts_node_child_count(*node) < 3)
         return ExprFactory::get_instance().mk_string_literal("");
 
-    // todo handle escape sequences
-
     const TSNode str_content = ts_node_child(*node, 1);
     const std::string content
         = extract_node_text(str_content, self->source_code_);
