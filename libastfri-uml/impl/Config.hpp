@@ -3,7 +3,7 @@
 
 #include <libastfri-uml/impl/TypeConvention.hpp>
 
-#include <rapidjson/document.h>
+#include <external/rapidjson/include/rapidjson/document.h>
 
 namespace astfri::uml
 {
