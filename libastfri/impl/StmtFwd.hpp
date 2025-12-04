@@ -30,6 +30,8 @@ struct DoWhileStmt;
 struct ForStmt;
 struct ForEachStmt;
 struct ThrowStmt;
+struct CatchStmt;
+struct TryStmt;
 struct ContinueStmt;
 struct BreakStmt;
 struct UnknownStmt;

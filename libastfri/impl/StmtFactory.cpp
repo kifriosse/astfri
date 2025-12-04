@@ -1,5 +1,6 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri
 {
@@ -236,6 +237,14 @@ ForEachStmt* StmtFactory::mk_for_each(Stmt *var, Expr *container, Stmt *body)
 ThrowStmt* StmtFactory::mk_throw(Expr* val)
 {
     return details::emplace_get<ThrowStmt>(stmts_, val);
+}
+
+CatchStmt *StmtFactory::mk_catch(ParamVarDefStmt *param, Stmt *body) {
+    return details::emplace_get<CatchStmt>(stmts_, param, body);
+}
+
+TryStmt *StmtFactory::mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches) {
+    return details::emplace_get<TryStmt>(stmts_, body, finally, std::move(catches));
 }
 
 ContinueStmt* StmtFactory::mk_continue()

@@ -122,6 +122,10 @@ public:
 
     ThrowStmt* mk_throw(Expr* val);
 
+    CatchStmt *mk_catch(ParamVarDefStmt *param, Stmt *body);
+
+    TryStmt *mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
+
     ContinueStmt* mk_continue();
 
     BreakStmt* mk_break();

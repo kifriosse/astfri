@@ -59,7 +59,7 @@ enum class Virtuality
 /**
  * @brief TODO
  */
-struct VarDefStmt : Stmt
+struct VarDefStmt : Stmt // TODO visitable here?
 {
     std::string name_;
     Type* type_;
@@ -381,6 +381,25 @@ struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
     Expr* val_;
 
     explicit ThrowStmt(Expr* val);
+};
+
+/**
+ * @brief TODO
+ */
+struct CatchStmt : Stmt, details::MkVisitable<CatchStmt> {
+    ParamVarDefStmt *param;
+    Stmt *body;
+    CatchStmt(ParamVarDefStmt *param, Stmt *body);
+};
+
+/**
+ * @brief TODO
+ */
+struct TryStmt :  Stmt, details::MkVisitable<TryStmt> {
+    Stmt *body;
+    Stmt *finally;
+    std::vector<CatchStmt*> catches;
+    TryStmt(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
 };
 
 /**

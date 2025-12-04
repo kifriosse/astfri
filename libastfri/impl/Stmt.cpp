@@ -166,4 +166,17 @@ ThrowStmt::ThrowStmt(Expr* val) :
 {
 }
 
+CatchStmt::CatchStmt(ParamVarDefStmt *param, Stmt *body) :
+    param(param),
+    body(body)
+{
+}
+
+TryStmt::TryStmt(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches) :
+    body(body),
+    finally(finally),
+    catches(std::move(catches))
+{
+}
+
 } // namespace astfri
