@@ -61,6 +61,7 @@ namespace astfri::text
         void visit(WhileStmt const& stmt) override;
         void visit(DoWhileStmt const& stmt) override;
         void visit(ForStmt const& stmt) override;
+        void visit(ForEachStmt const& stmt) override {} // MM: TODO
         void visit(ThrowStmt const& stmt) override;
         void visit(UnknownStmt const& stmt) override;
         void visit(LocalVarDefStmt const& stmt) override;

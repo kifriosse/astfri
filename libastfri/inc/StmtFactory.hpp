@@ -118,6 +118,8 @@ public:
 
     ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
 
+    ForEachStmt* mk_for_each(Stmt *var, Expr *container, Stmt *body);
+
     ThrowStmt* mk_throw(Expr* val);
 
     ContinueStmt* mk_continue();

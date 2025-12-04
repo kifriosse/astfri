@@ -228,6 +228,11 @@ ForStmt* StmtFactory::mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body)
     return details::emplace_get<ForStmt>(stmts_, init, cond, step, body);
 }
 
+ForEachStmt* StmtFactory::mk_for_each(Stmt *var, Expr *container, Stmt *body)
+{
+    return details::emplace_get<ForEachStmt>(stmts_, var, container, body);
+}
+
 ThrowStmt* StmtFactory::mk_throw(Expr* val)
 {
     return details::emplace_get<ThrowStmt>(stmts_, val);

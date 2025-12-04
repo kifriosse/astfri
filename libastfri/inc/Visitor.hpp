@@ -64,6 +64,7 @@ struct IVisitor
     virtual void visit(WhileStmt const& stmt)           = 0;
     virtual void visit(DoWhileStmt const& stmt)         = 0;
     virtual void visit(ForStmt const& stmt)             = 0;
+    virtual void visit(ForEachStmt const& stmt)         = 0;
     virtual void visit(ThrowStmt const& stmt)           = 0;
     virtual void visit(UnknownStmt const& stmt)         = 0;
     virtual void visit(LocalVarDefStmt const& stmt)     = 0;
@@ -284,6 +285,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(ForStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(ForEachStmt const& /*stmt*/) override
     {
     }
 
@@ -593,6 +598,11 @@ struct ThrowingVisitorAdapter : IVisitor
     }
 
     void visit(ForStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ForEachStmt const& /*stmt*/) override
     {
         throw std::logic_error("Not Implemented Yet!");
     }

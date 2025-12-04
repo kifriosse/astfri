@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+#include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Visitor.hpp"
 
 namespace astfri
 {
@@ -359,6 +361,16 @@ struct ForStmt : LoopStmt, details::MkVisitable<ForStmt>
     Stmt* step_;
 
     ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
+};
+
+/**
+ * @brief TODO
+ */
+struct ForEachStmt : Stmt, details::MkVisitable<ForEachStmt> {
+    Stmt *var;
+    Expr *container;
+    Stmt *body;
+    ForEachStmt(Stmt *var, Expr *container, Stmt *body);
 };
 
 /**

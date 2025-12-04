@@ -28,6 +28,7 @@ struct LoopStmt;
 struct WhileStmt;
 struct DoWhileStmt;
 struct ForStmt;
+struct ForEachStmt;
 struct ThrowStmt;
 struct ContinueStmt;
 struct BreakStmt;

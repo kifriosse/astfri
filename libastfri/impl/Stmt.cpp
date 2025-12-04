@@ -154,6 +154,13 @@ ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body) :
 {
 }
 
+ForEachStmt::ForEachStmt(Stmt *var, Expr *container, Stmt *body) :
+    var(var),
+    container(container),
+    body(body)
+{
+}
+
 ThrowStmt::ThrowStmt(Expr* val) :
     val_(val)
 {
