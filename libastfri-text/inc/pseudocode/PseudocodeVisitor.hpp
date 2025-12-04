@@ -9,7 +9,11 @@ namespace astfri::text
     class PseudocodeVisitor : public AbstractVisitor
     {
     private:
+        AbstractTextBuilder* builder_;
         TextConfigurator* configurator_;
+    private:
+        bool isMethodCall_;
+        bool isConstructorCall_;
     public:
         static PseudocodeVisitor& get_instance();
         PseudocodeVisitor(PseudocodeVisitor const&) = delete;
@@ -95,7 +99,65 @@ namespace astfri::text
         void visit(ClassDefStmt const& stmt) override;
         void visit(ContinueStmt const& stmt) override;
         void visit(BreakStmt const& stmt) override;
+    private:
+        void process_var_def(VarDefStmt const& var, int vartype);
+        void process_return_type(Type const* const& type);
+        void process_generic_params_decl(std::vector<GenericParam*> const& vgeneric);
+        void process_member_var_decl(std::vector<MemberVarDefStmt*> const& vmembervars);
+        void process_member_var(std::vector<MemberVarDefStmt*>& vmembervars);
+        void process_constructor_decl(std::vector<ConstructorDefStmt*> const& vconstructors);
+        void process_constructor(std::vector<ConstructorDefStmt*>& constr);
+        void process_destructor_decl(std::vector<DestructorDefStmt*> const& vdestructors);
+        void process_method_decl(std::vector<MethodDefStmt*> const& vmethods);
+        void process_method(std::vector<MethodDefStmt*>& meth);
+        // -----
+        template<typename VectorRelation>
+        void process_relations(VectorRelation const& vrel, bool ispolym);
     };
+
+    //
+    // -----
+    //
+
+    template<typename VectorRelation>
+    void PseudocodeVisitor::process_relations(VectorRelation const& vrel, bool ispolym)
+    {
+        for (size_t i = 0; i < vrel.size(); ++i)
+        {
+            builder_->append_new_line();
+            builder_->append_space();
+            builder_->write_separator("->");
+            builder_->append_space();
+            if (ispolym)
+            {
+                builder_->write_implement_word();
+            }
+            else
+            {
+                builder_->write_extend_word();
+            }
+            builder_->append_space();
+            if (vrel.at(i))
+            {
+                if (ispolym)
+                {
+                    builder_->write_interface_name(vrel.at(i)->name_);
+                }
+                else
+                {
+                    builder_->write_class_name(vrel.at(i)->name_);
+                }
+                if (!vrel.at(i)->tparams_.empty())
+                {
+                    process_pargs(vrel.at(i)->tparams_, false);
+                }
+            }
+            else
+            {
+                builder_->write_invalid_expr();
+            }
+        }
+    }
 }
 
 #endif

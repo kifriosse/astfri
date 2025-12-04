@@ -54,6 +54,7 @@ namespace astfri::text
         explicit AbstractVisitor(AbstractBuilder& builder);
         virtual ~AbstractVisitor() = default;
     protected:
+        void process_body(Stmt const* const& stmt);
         void process_condition(Expr const* const& expr);
         // -----
         template<v_astfri_nodes Vector>
