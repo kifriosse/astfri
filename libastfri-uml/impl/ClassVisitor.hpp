@@ -9,7 +9,7 @@
 
 namespace astfri::uml
 {
-class ClassVisitor : public astfri::VisitorAdapter
+class ClassVisitor : public astfri::ThrowingVisitorAdapter
 {
 private:
     UMLOutputter* outputter_;
@@ -44,6 +44,7 @@ public:
     void visit(astfri::ClassType const& type) override;
     void visit(astfri::InterfaceType const& type) override;
     void visit(astfri::IndirectionType const& type) override;
+    void visit(astfri::IncompleteType const& type) override;
 
     void visit(astfri::ParamVarDefStmt const& stmt) override;
     void visit(astfri::MemberVarDefStmt const& stmt) override;

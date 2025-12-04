@@ -39,6 +39,8 @@ void CxxCodeVisitor::visit(LambdaType const& /*type*/)
 {
 }
 
+// -----
+
 void CxxCodeVisitor::visit(NullLiteralExpr const& /*expr*/)
 {
 }
@@ -70,6 +72,8 @@ void CxxCodeVisitor::visit(LambdaExpr const& /*expr*/)
 void CxxCodeVisitor::visit(DeleteExpr const& /*expr*/)
 {
 }
+
+// -----
 
 void CxxCodeVisitor::visit(TranslationUnit const& /*stmt*/)
 {

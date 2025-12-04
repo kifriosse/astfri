@@ -3,9 +3,11 @@
 
 int main()
 {
-    astfri::csharp::CSharpASTBuilder const ast_builder;
-    astfri::text::TextLibManager& manager = astfri::text::TextLibManager::get_instance();
-    astfri::TranslationUnit const* ast
-        = ast_builder.make_ast("/home/andrew/Coding/astfri/libastfri-cs/resources/TestProject");
+    const astfri::csharp::CSharpASTBuilder ast_builder;
+    astfri::text::TextLibManager& manager
+        = astfri::text::TextLibManager::get_instance();
+    const astfri::TranslationUnit* ast = ast_builder.make_ast(
+        "/home/andrew/Coding/astfri/libastfri-cs/resources/TestProject"
+    );
     manager.visit_and_export(*ast);
 }

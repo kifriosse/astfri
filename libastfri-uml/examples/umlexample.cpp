@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        config_file = "../../libastfri-uml/examples/default_config.json";
+        config_file = "../libastfri-uml/examples/default_config.json";
     }
 
     astfri::uml::Config conf;

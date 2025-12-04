@@ -13,3 +13,9 @@ apt install clang-15 llvm-15-dev libclang-15-dev
 ```sh
 xbps-install -Su llvm19-devel
 ```
+
+#### Arch
+
+```sh
+sudo pacman -S llvm clang
+```

@@ -2,12 +2,10 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
-#include <utility>
-#include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
-#include "libastfri/inc/TypeFactory.hpp"
 
 namespace astfri::java
 {
@@ -15,9 +13,9 @@ StatementTransformer::StatementTransformer() :
     stmtFactory(astfri::StmtFactory::get_instance()),
     exprTransformer(new ExpressionTransformer(this)),
     nodeMapper(new NodeMapper()),
-    functionalInterfaces(),
     classes(),
-    interfaces()
+    interfaces(),
+    functionalInterfaces()
 {
 }
 
@@ -565,9 +563,12 @@ astfri::MethodDefStmt* StatementTransformer::transform_method_node(
     params                        = std::get<std::vector<astfri::ParamVarDefStmt*>>(methodBody);
     body                          = std::get<astfri::CompoundStmt*>(methodBody);
 
-    astfri::FunctionDefStmt* func = stmtFactory.mk_function_def(name, params, type, body);
+    astfri::FunctionDefStmt* func = this->stmtFactory.mk_function_def(name, params, type, body);
+    astfri::MethodDefStmt* method = this->stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual);
 
-    return stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual);
+    this->methodsByName[name].push_back(method);
+
+    return method;
 }
 
 astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
@@ -679,17 +680,52 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
 
     if (! ts_node_is_null(ts_node_parent(tsNode)))
     {
-        TSNode lambdaParent = ts_node_parent(tsNode);
-        TSNode lambdaParentPrevSibling = ts_node_prev_named_sibling(lambdaParent);
-        std::string lambdaParentPrevSiblingType = ts_node_type(lambdaParentPrevSibling);
+        TSNode lambdaGreatParent = ts_node_parent(ts_node_parent(tsNode));
+        std::string lambdaGreatParentType = ts_node_type(lambdaGreatParent);
 
-        for (auto i : this->functionalInterfaces)
+        if (lambdaGreatParentType == "local_variable_declaration")
         {
-            std::string typeName = exprTransformer->get_node_text(lambdaParentPrevSibling, sourceCode);
-            if (i->name_ == typeName)
+            TSNode typeNode = ts_node_named_child(lambdaGreatParent, 0);
+            
+            for (auto i : this->functionalInterfaces)
             {
-                funcInterface = i;
-                break;
+                std::string typeName = exprTransformer->get_node_text(typeNode, sourceCode);
+                if (i->name_ == typeName)
+                {
+                    funcInterface = i;
+                    break;
+                }
+            }
+        }
+        else if (lambdaGreatParentType == "method_invocation")
+        {
+            TSNode child = ts_node_named_child(lambdaGreatParent, 0);
+            while (!ts_node_is_null(child) && std::string(ts_node_type(child)) != "identifier")
+            {
+                child = ts_node_next_named_sibling(child);
+            }
+
+            if (!ts_node_is_null(child))
+            {
+                std::string methodName = this->exprTransformer->get_node_text(child, sourceCode);
+                if (this->methodsByName.contains(methodName))
+                {
+                    astfri::MethodDefStmt* method = this->methodsByName.at(methodName).front();
+                    for (auto p : method->func_->params_)
+                    {
+                        if (astfri::ClassType* ct = dynamic_cast<astfri::ClassType*>(p->type_))
+                        {
+                            for (auto i : this->functionalInterfaces)
+                            {
+                                if (i->name_ == ct->name_)
+                                {
+                                    funcInterface = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -748,7 +784,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
         }
     }
 
-    return astfri::ExprFactory::get_instance().mk_lambda_expr(lambdaParams, lambdaBody);
+    return astfri::ExprFactory::get_instance().mk_lambda_expr(lambdaParams, lambdaBody, std::to_string(this->lambdaID++));
 }
 
 astfri::Scope StatementTransformer::get_scope(TSNode tsNode, std::string const& sourceCode)
@@ -761,7 +797,7 @@ astfri::Scope StatementTransformer::get_scope(TSNode tsNode, std::string const& 
         classNodePrevSibling = ts_node_prev_named_sibling(classNodePrevSibling);
     }
 
-    if (std::string(ts_node_type(classNodePrevSibling)) == "package_declaration")
+    if (!ts_node_is_null(classNodePrevSibling) && std::string(ts_node_type(classNodePrevSibling)) == "package_declaration")
     {
         std::string scopeIdentifier = ts_node_string(classNodePrevSibling);
         TSNode child = ts_node_named_child(classNodePrevSibling, 0);
@@ -886,7 +922,7 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
         classDef->bases_               = bases;
         classDef->interfaces_          = interfaces;
 
-        this->classScope.emplace(std::move(classDef), scope);
+        this->classScope.emplace(classDef, scope);
         this->classesByName[classDef->name_].push_back(classDef);
 
         for (astfri::MethodDefStmt* method : methods)
@@ -990,7 +1026,7 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
     interfaceDef->bases_                   = bases;
     interfaces.push_back(interfaceDef);
 
-    this->interfaceScope.emplace(std::move(interfaceDef), scope);
+    this->interfaceScope.emplace(interfaceDef, scope);
     this->interfacesByName[interfaceDef->name_].push_back(interfaceDef);
 
     if (funcInterface)
@@ -1019,7 +1055,7 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(TSTre
 
         if (childType == "class_declaration")
         {
-            this->classes.push_back(std::move(this->transform_class(child, sourceCode)));
+            this->classes.push_back(this->transform_class(child, sourceCode));
         }
     }
     return this->classes;
@@ -1037,7 +1073,7 @@ std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interface
 
         if (childType == "interface_declaration")
         {
-            this->interfaces.push_back(std::move(this->transform_interface(child, sourceCode)));
+            this->interfaces.push_back(this->transform_interface(child, sourceCode));
         }
     }
     return this->interfaces;

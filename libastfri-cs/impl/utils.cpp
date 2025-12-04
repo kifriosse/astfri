@@ -1,21 +1,27 @@
-#include <libastfri-cs/impl/CSharpTSTreeVisitor.hpp>
 #include <libastfri-cs/impl/utils.hpp>
 
-#include <cstring>
+#include <cmath>
+#include <filesystem>
 #include <iostream>
 
 namespace astfri::csharp
 {
 std::vector<TSNode> find_nodes(
-    TSNode const& root,
-    TSLanguage const* lang,
-    std::string const& query_str
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
 )
 {
     std::vector<TSNode> results;
     TSQueryError err;
     uint32_t offset;
-    TSQuery* query = ts_query_new(lang, query_str.c_str(), query_str.length(), &offset, &err);
+    TSQuery* query = ts_query_new(
+        lang,
+        query_str.c_str(),
+        query_str.length(),
+        &offset,
+        &err
+    );
 
     if (! query)
     {
@@ -43,11 +49,21 @@ std::vector<TSNode> find_nodes(
     return results;
 }
 
-TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string const& query_str)
+TSNode find_first_node(
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
+)
 {
     TSQueryError err;
     uint32_t offset;
-    TSQuery* query = ts_query_new(lang, query_str.c_str(), query_str.length(), &offset, &err);
+    TSQuery* query = ts_query_new(
+        lang,
+        query_str.c_str(),
+        query_str.length(),
+        &offset,
+        &err
+    );
 
     if (! query)
     {
@@ -77,13 +93,15 @@ TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string c
     return result;
 }
 
-IntSuffix get_suffix_type(std::string const& suffix)
+IntSuffix get_suffix_type(const std::string& suffix)
 {
     if (suffix.empty())
         return IntSuffix::None;
 
-    char const first  = static_cast<char>(std::tolower(suffix[0]));
-    char const second = static_cast<char>(std::tolower(suffix.length() == 2 ? suffix[1] : '\0'));
+    const char first  = static_cast<char>(std::tolower(suffix[0]));
+    const char second = static_cast<char>(
+        std::tolower(suffix.length() == 2 ? suffix[1] : '\0')
+    );
 
     // considering that we can't get stuff like UU or LL or L1 or U1
     if ((first == 'u' && second == 'l') || (first == 'l' && second == 'u'))
@@ -101,21 +119,32 @@ IntSuffix get_suffix_type(std::string const& suffix)
     return IntSuffix::None;
 }
 
-std::string extract_node_text(TSNode const& node, std::string const& source_code)
+bool almost_equal(const double a, const double b, const double epsilon)
+{
+    return std::fabs(a - b) < epsilon;
+}
+
+std::string extract_node_text(
+    const TSNode& node,
+    const std::string& source_code
+)
 {
     if (ts_node_is_null(node))
     {
         throw std::runtime_error("Node is null");
     }
-    size_t const from = ts_node_start_byte(node);
-    size_t const to   = ts_node_end_byte(node);
+    const size_t from = ts_node_start_byte(node);
+    const size_t to   = ts_node_end_byte(node);
     return source_code.substr(from, to - from);
 }
 
-void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name)
+void split_namespace(
+    std::stack<std::string>& scope_str,
+    const std::string& namespace_name
+)
 {
-    auto const r_begin = std::make_reverse_iterator(namespace_name.end());
-    auto const r_end   = std::make_reverse_iterator(namespace_name.begin());
+    const auto r_begin = std::make_reverse_iterator(namespace_name.end());
+    const auto r_end   = std::make_reverse_iterator(namespace_name.begin());
     auto it            = r_begin;
     auto slice_end     = namespace_name.end();
 
@@ -129,6 +158,85 @@ void split_namespace(std::stack<std::string>& scope_str, std::string const& name
         }
         ++it;
     }
+}
+
+bool is_interface_name(const std::string& name)
+{
+    return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
+}
+
+std::string remove_comments(
+    const std::string& source_code,
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::filesystem::path& path
+)
+{
+    std::string new_source;
+
+    static std::string query = R"(
+        (comment) @comment
+        (ERROR) @error
+    )";
+
+    TSQueryError query_error;
+    uint32_t offset;
+    const TSQuery* ts_query = ts_query_new(
+        lang,
+        query.c_str(),
+        query.length(),
+        &offset,
+        &query_error
+    );
+    if (! ts_query)
+    {
+        throw std::runtime_error(
+            "Error while creating query at offset " + std::to_string(offset)
+            + " Error code: " + std::to_string(query_error)
+        );
+    }
+    TSQueryCursor* cursor = ts_query_cursor_new();
+    ts_query_cursor_exec(cursor, ts_query, root);
+
+    TSQueryMatch match;
+    size_t next_start = 0;
+    std::vector<TSNode> errors;
+    uint32_t capture_index;
+
+    while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
+    {
+        const TSNode node = match.captures[0].node;
+        if (ts_node_type(node) == std::string("ERROR"))
+        {
+            errors.emplace_back(node);
+            continue;
+        }
+        const size_t start = ts_node_start_byte(node);
+        const size_t n     = start - next_start;
+        new_source += source_code.substr(next_start, n);
+        next_start = ts_node_end_byte(node);
+    }
+    new_source += source_code.substr(next_start);
+
+    if (! errors.empty())
+    {
+        std::cerr << "Source code contains syntax errors:\n\n";
+        for (const auto& error_node : errors)
+        {
+            const auto& [row, column] = ts_node_start_point(error_node);
+            std::cerr << "Warning: Syntax error at line " << row + 1
+                      << ", column " << column + 1 << "\n";
+        }
+
+        std::cerr << std::endl;
+
+        throw std::runtime_error(
+            "Source code in file \"" + path.string()
+            + "\" contains syntax errors."
+        );
+    }
+
+    return new_source;
 }
 
 } // namespace astfri::csharp

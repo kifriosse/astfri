@@ -1,5 +1,6 @@
 #include <libastfri/impl/Utils.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
+#include "libastfri/inc/Expr.hpp"
 
 namespace astfri
 {
@@ -119,9 +120,18 @@ LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, St
     return mk_lambda_expr(std::move(params), body, "");
 }
 
+LambdaExpr* ExprFactory::get_lambda_expr(std::string_view name) {
+    const auto it = m_lambdas.find(name);
+    return it != m_lambdas.end() ? &it->second : nullptr;
+}
+
 LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name)
 {
-    LambdaExpr *e = details::emplace_get<LambdaExpr>(exprs_, std::move(params), body);
+    LambdaExpr *e = details::emplace_get<LambdaExpr>(
+        name,
+        m_lambdas,
+        std::move(params),
+        body);
     e->m_type = m_types->mk_lambda(std::move(name), e);
     return e;
 }
@@ -144,6 +154,11 @@ NewExpr* ExprFactory::mk_new(ConstructorCallExpr* init)
 DeleteExpr* ExprFactory::mk_delete(Expr* arg)
 {
     return details::emplace_get<DeleteExpr>(exprs_, arg);
+}
+
+BracketExpr* ExprFactory::mk_bracket(Expr* expr)
+{
+    return details::emplace_get<BracketExpr>(exprs_, expr);
 }
 
 UnknownExpr* ExprFactory::mk_unknown()

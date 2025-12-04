@@ -1,5 +1,7 @@
 #include <libastfri-text/inc/pseudocode/PlainTextBuilder.hpp>
 
+#include <libastfri-text/inc/pseudocode/PlainTextExporter.hpp>
+
 using namespace astfri::text;
 
 PlainTextBuilder& PlainTextBuilder::get_instance()
@@ -14,7 +16,8 @@ PlainTextBuilder& PlainTextBuilder::get_instance()
 
 void PlainTextBuilder::export_text()
 {
-    // TODO: export
+    PlainTextExporter(rowCount_, buildedText_.get());
+    reset_builder();
 }
 
 //

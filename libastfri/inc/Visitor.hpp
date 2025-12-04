@@ -5,6 +5,8 @@
 #include <libastfri/impl/StmtFwd.hpp>
 #include <libastfri/impl/TypeFwd.hpp>
 
+#include <stdexcept>
+
 namespace astfri
 {
 
@@ -23,6 +25,7 @@ struct IVisitor
     virtual void visit(ClassType const& type)           = 0;
     virtual void visit(InterfaceType const& type)       = 0;
     virtual void visit(LambdaType const& type)          = 0;
+    virtual void visit(IncompleteType const& type)      = 0;
     virtual void visit(UnknownType const& type)         = 0;
 
     virtual void visit(IntLiteralExpr const& expr)      = 0;
@@ -47,6 +50,7 @@ struct IVisitor
     virtual void visit(ConstructorCallExpr const& expr) = 0;
     virtual void visit(NewExpr const& expr)             = 0;
     virtual void visit(DeleteExpr const& expr)          = 0;
+    virtual void visit(BracketExpr const& expr)         = 0;
     virtual void visit(UnknownExpr const& expr)         = 0;
 
     virtual void visit(TranslationUnit const& stmt)     = 0;
@@ -60,7 +64,10 @@ struct IVisitor
     virtual void visit(WhileStmt const& stmt)           = 0;
     virtual void visit(DoWhileStmt const& stmt)         = 0;
     virtual void visit(ForStmt const& stmt)             = 0;
+    virtual void visit(ForEachStmt const& stmt)         = 0;
     virtual void visit(ThrowStmt const& stmt)           = 0;
+    virtual void visit(CatchStmt const& stmt)           = 0;
+    virtual void visit(TryStmt const& stmt)             = 0;
     virtual void visit(UnknownStmt const& stmt)         = 0;
     virtual void visit(LocalVarDefStmt const& stmt)     = 0;
     virtual void visit(ParamVarDefStmt const& stmt)     = 0;
@@ -132,6 +139,10 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(LambdaType const& /*type*/) override
+    {
+    }
+
+    void visit(IncompleteType const& /*type*/) override
     {
     }
 
@@ -227,6 +238,10 @@ struct VisitorAdapter : IVisitor
     {
     }
 
+    void visit(BracketExpr const& /*expr*/) override
+    {
+    }
+
     void visit(UnknownExpr const& /*expr*/) override
     {
     }
@@ -275,7 +290,19 @@ struct VisitorAdapter : IVisitor
     {
     }
 
+    void visit(ForEachStmt const& /*stmt*/) override
+    {
+    }
+
     void visit(ThrowStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(CatchStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(TryStmt const& /*stmt*/) override
     {
     }
 
@@ -341,6 +368,348 @@ struct VisitorAdapter : IVisitor
 
     void visit(BreakStmt const& /*stmt*/) override
     {
+    }
+};
+
+
+/**
+ * @brief TODO
+ */
+struct ThrowingVisitorAdapter : IVisitor
+{
+    void visit(DynamicType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IntType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(FloatType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(CharType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(BoolType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(VoidType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IndirectionType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ClassType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(InterfaceType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(LambdaType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IncompleteType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(UnknownType const& /*type*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IntLiteralExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(FloatLiteralExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(CharLiteralExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(StringLiteralExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(BoolLiteralExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(NullLiteralExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IfExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(BinOpExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(UnaryOpExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ParamVarRefExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(LocalVarRefExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(MemberVarRefExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(GlobalVarRefExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ClassRefExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(FunctionCallExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(MethodCallExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(LambdaCallExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(LambdaExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ThisExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ConstructorCallExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(NewExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(DeleteExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(BracketExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(UnknownExpr const& /*expr*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(TranslationUnit const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(CompoundStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ReturnStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ExprStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(IfStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(CaseStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(DefaultCaseStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(SwitchStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(WhileStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(DoWhileStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ForStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ForEachStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ThrowStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(CatchStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(TryStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(UnknownStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(LocalVarDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ParamVarDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(MemberVarDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(GlobalVarDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(FunctionDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(DefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(MethodDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(BaseInitializerStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ConstructorDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(DestructorDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(GenericParam const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(InterfaceDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ClassDefStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(ContinueStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(BreakStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
     }
 };
 

@@ -1,10 +1,11 @@
 #ifndef CSHARP_UTILS_HPP
 #define CSHARP_UTILS_HPP
 
-#include <cmath>
+#include <tree_sitter/api.h>
+
+#include <filesystem>
 #include <stack>
 #include <string>
-#include <tree_sitter/api.h>
 #include <vector>
 
 namespace astfri::csharp
@@ -32,23 +33,39 @@ enum class IntSuffix
 // };
 
 std::vector<TSNode> find_nodes(
-    TSNode const& root,
-    TSLanguage const* lang,
-    std::string const& query_str
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
 );
 
-TSNode find_first_node(TSNode const& root, TSLanguage const* lang, std::string const& query_str);
+TSNode find_first_node(
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::string& query_str
+);
 
-IntSuffix get_suffix_type(std::string const& suffix);
+IntSuffix get_suffix_type(const std::string& suffix);
 
-inline bool almost_equal(double const a, double const b, double const epsilon = 1e-9)
-{
-    return std::fabs(a - b) < epsilon;
-}
+bool almost_equal(double a, double b, double epsilon = 1e-9);
 
-std::string extract_node_text(TSNode const& node, std::string const& source_code);
+std::string extract_node_text(
+    const TSNode& node,
+    const std::string& source_code
+);
 
-void split_namespace(std::stack<std::string>& scope_str, std::string const& namespace_name);
+void split_namespace(
+    std::stack<std::string>& scope_str,
+    const std::string& namespace_name
+);
+
+bool is_interface_name(const std::string& name);
+
+std::string remove_comments(
+    const std::string& source_code,
+    const TSNode& root,
+    const TSLanguage* lang,
+    const std::filesystem::path& path
+);
 
 } // namespace astfri::csharp
 

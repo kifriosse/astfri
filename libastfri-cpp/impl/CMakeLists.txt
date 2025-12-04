@@ -43,8 +43,11 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-I.*")
 # Remove standard, it is inherited from astfri-core.
 list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-std=.*")
 
+# TODO
+list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-fno-exceptions")
+
 # Append no rtti option.
-list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
+# list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
 
 # Finally, add our library and set its properties.
 add_library(astfri-cpp SHARED
@@ -59,7 +62,7 @@ add_library(astfri-cpp SHARED
     ClangVisitor_Operators.cpp
 )
 
-# Privae compile options.
+# Private compile options.
 target_compile_options(astfri-cpp PRIVATE ${ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE})
 
 # Set LLVM include as system to avoid warnings from their code.
@@ -68,10 +71,6 @@ target_include_directories(astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS})
 # Link the core module and clang libraries.
 target_link_libraries(astfri-cpp PUBLIC
     astfri-core
-    clang
-    clangAST
-    clangASTMatchers
-    clangBasic
-    clangFrontend
-    clangTooling
+    clang-cpp
+    LLVM
 )

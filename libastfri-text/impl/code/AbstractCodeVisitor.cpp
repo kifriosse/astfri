@@ -36,10 +36,17 @@ void AbstractCodeVisitor::visit(InterfaceType const& type)
     builder_->append_text(type.name_);
 }
 
+void AbstractCodeVisitor::visit(IncompleteType const& type)
+{
+    builder_->append_text(type.name);
+}
+
 void AbstractCodeVisitor::visit(UnknownType const& /*type*/)
 {
     builder_->write_unknown_type();
 }
+
+// -----
 
 void AbstractCodeVisitor::visit(IntLiteralExpr const& expr)
 {
@@ -87,31 +94,6 @@ void AbstractCodeVisitor::visit(IfExpr const& expr)
 
 void AbstractCodeVisitor::visit(BinOpExpr const& expr)
 {
-    bool usebr = false;
-    switch (expr.op_)
-    {
-        case BinOpType::Add:
-        case BinOpType::Subtract:
-        case BinOpType::Multiply:
-        case BinOpType::Divide:
-        case BinOpType::FloorDivide:
-        case BinOpType::Modulo:
-        case BinOpType::Exponentiation:
-        case BinOpType::LogicalAnd:
-        case BinOpType::LogicalOr:
-        case BinOpType::BitShiftRight:
-        case BinOpType::BitShiftLeft:
-        case BinOpType::BitAnd:
-        case BinOpType::BitOr:
-        case BinOpType::BitXor:
-            usebr = true;
-        default:
-            break;
-    }
-    if (usebr)
-    {
-        builder_->append_text("(");
-    }
     if (!try_accept_node(expr.left_))
     {
         builder_->write_invalid_expr();
@@ -227,10 +209,6 @@ void AbstractCodeVisitor::visit(BinOpExpr const& expr)
     {
         builder_->write_invalid_expr();
     }
-    if (usebr)
-    {
-        builder_->append_text(")");
-    }
 }
 
 void AbstractCodeVisitor::visit(UnaryOpExpr const& expr)
@@ -245,13 +223,11 @@ void AbstractCodeVisitor::visit(UnaryOpExpr const& expr)
             }
             break;
         case UnaryOpType::Minus:
-            builder_->append_text("(");
             builder_->append_text("-");
             if (!try_accept_node(expr.arg_))
             {
                 builder_->write_invalid_expr();
             }
-            builder_->append_text(")");
             break;
         case UnaryOpType::Plus:
             if (!try_accept_node(expr.arg_))
@@ -261,21 +237,17 @@ void AbstractCodeVisitor::visit(UnaryOpExpr const& expr)
             break;
         case UnaryOpType::Dereference:
             builder_->append_text("*");
-            builder_->append_text("(");
             if (!try_accept_node(expr.arg_))
             {
                 builder_->write_invalid_expr();
             }
-            builder_->append_text(")");
             break;
         case UnaryOpType::AddressOf:
             builder_->append_text("&");
-            builder_->append_text("(");
             if (!try_accept_node(expr.arg_))
             {
                 builder_->write_invalid_expr();
             }
-            builder_->append_text(")");
             break;
         case UnaryOpType::PreIncrement:
             builder_->append_text("++");
@@ -353,10 +325,22 @@ void AbstractCodeVisitor::visit(NewExpr const& expr)
     }
 }
 
+void AbstractCodeVisitor::visit(BracketExpr const& expr)
+{
+    builder_->write_left_bracket("(");
+    if (!try_accept_node(expr.expr))
+    {
+        builder_->write_invalid_expr();
+    }
+    builder_->write_right_bracket(")");
+}
+
 void AbstractCodeVisitor::visit(UnknownExpr const& /*expr*/)
 {
     builder_->write_unknown_expr();
 }
+
+// -----
 
 void AbstractCodeVisitor::visit(CompoundStmt const& stmt)
 {

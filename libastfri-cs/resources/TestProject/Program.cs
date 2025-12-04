@@ -1,4 +1,5 @@
-﻿using Zoznam = System.Collections.Generic.List<string>;
+﻿using System.Collections;
+using Zoznam = System.Collections.Generic.List<string>;
 
 public class Program {
     public static void Main(string[] args) {
@@ -14,19 +15,18 @@ namespace CSharp.T.Test
         internal delegate int Pr(int x);
     }
 
-    public interface Intr : IComparable
+    public interface IIntr<G> : IComparable where G : IComparable<int>
     {
-        static int s = 10;
+        private static int s = 10;
         void Interfacing(Test5 t)
         {
             
         }
 
 
-        private class Test5
+        public interface Test5
         {
-            int bar;
-            public Test5()
+            void testIntMethod()
             {
                 Console.WriteLine();
             }
@@ -36,39 +36,63 @@ namespace CSharp.T.Test
 
     public partial class Program
     {
-
         private const int constant = 6; // test comment
         private string test = "test";
+        private IEnumerable enumerable;
         private unsafe volatile protected string* testPtr;
 
         static void Main2(string[] args)
         {
-            int[] array = new int[2];
-            decimal a_d = 1254.587m;
-            string b_s = @"test";
+            
+            int[] array = { 4, 5, 6, 8, 77, 47, 59 };
+            while (true)
+            {
+                break;
+            }
+            
+            do
+            {
+                continue;
+            } while (true);
+            // List<Person> people = [];
+            // for (
+            //     int i = 0, j = 0;
+            //     i < 10;
+            //     ++i, j += 2, people.Add(new Person($"Person {i}", j))
+            // )
+            // {
+            //     //...
+            // }
+            // foreach (Person person in people)
+            // {
+            //     Console.WriteLine($"Name: {person.Name} Age: {person.Age}");
+            // }
 
-            _ = 8;
-            string h = @"Multi
-            line
-            raw";
+            // decimal a_d = 1254.587m;
+            // string b_s = @"test";
 
-            const int constant2 = 1;
+            // _ = 8;
+            // string h = @"Multi
+            // line
+            // raw";
 
-            int a = 4, b = 5;
-            float c = (float)a;
+            // const int constant2 = 1;
 
-            ref readonly int r = ref a;
+            // int a = 4, b = 5;
+            // float c = (float)a;
 
-            int? nullable = null;
-            int bar = nullable ?? 5;
+            // ref readonly int r = ref a;
 
-            int foo = nullable is null ? bar : 6;
+            // int? nullable = null;
+            // int bar = nullable ?? 5;
 
-            int brackets = (a + b) * 10;
+            // int foo = nullable is null ? bar : 6;
 
-            int a1;
-            const int a2 = 1;
-            a1 = a;
+            // int brackets = (a + b) * 10;
+
+            // int a1;
+            // const int a2 = 1;
+            // a1 = a;
         }
 
         unsafe public void UnsafeMethod()
@@ -80,7 +104,10 @@ namespace CSharp.T.Test
         }
     }
 
-    public class Person
+    /// <summary>
+    /// Testing documentation comments
+    /// </summary>
+    public abstract class Person
     {
         private static readonly int mf = 8;
         private string _firstName;
@@ -89,12 +116,15 @@ namespace CSharp.T.Test
             get => _firstName + " " + _lastName;
             set
             {
-                string[] parts = value.Split(" ");
+                string[] /* test */ parts = value.Split(" ");
                 _firstName = parts[0];
                 _lastName = parts[1];
             } 
         }
-        public int Age { get; set; }
+
+        public abstract void TestAbstract();
+        public int Age { get; init; }
+        private Pohlavie gender = Pohlavie.Muz;
 
         public Person(string fullName, int age)
         {
@@ -104,46 +134,55 @@ namespace CSharp.T.Test
 
         public void Print()
         {
-            
+            Console.WriteLine($"{Name}, {Age}");
         }
 
-        private class Child : Person
+        protected virtual void TestVirtuality()
         {
-            public Child(string fullName, int age) : base(fullName, age)
-            {
-            }
         }
 
-        ~Person() {
-            
-        }
+        ~Person() => Print();
 
         private enum Pohlavie
         {
             Zena, Muz, Ine
         }
 
-        private interface IRunnable
-        {
-            
-        }
-
-        private record class Something
-        {
-            
-        }
-
-        private record struct SomethingStruct
-        {
-            
-        }
-
-        private struct SomethingStruct2
-        {
-            
-        }
-
         public delegate void ChangeDelegate(int something);
         public event ChangeDelegate OnChange;
     }
+
+    class Child<T, U> : Person where U: IEnumerable<T>, IComparable<U>
+    {
+        static Child()
+        {
+
+        }
+        public bool IsStudent;
+
+        public Child(string name, int age, bool isStudent) 
+            : base(name ?? "Unknown", age > 18 ? 18 : age)
+        {
+            IsStudent = isStudent;
+        }
+
+        public Child() 
+            : base("DefaultName", 0)
+        {
+            IsStudent = true;
+        }
+
+        public G TestGenericMethod<G>() where G : new()
+        {
+            return new G();
+        }
+
+        protected sealed override void TestVirtuality()
+        {
+            base.TestVirtuality();
+            
+        }
+    }
 }
+
+
