@@ -50,7 +50,7 @@ namespace astfri::text
             std::vector<GlobalVarDefStmt*> const& vars
         );
         void process_package(Scope const& scope);
-        void process_identifier(AccessModifier const& access);
+        void process_access_mod(AccessModifier const& mod);
         // -----
         template<v_astfri_supertypes Vector>
         void process_supertypes(Vector const& types, bool useExtends, bool isClass);

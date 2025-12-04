@@ -42,10 +42,9 @@ void JavaCodeVisitor::visit(IndirectionType const& type)
     }
 }
 
-void JavaCodeVisitor::visit(LambdaType const& /*type*/)
+void JavaCodeVisitor::visit(LambdaType const& type)
 {
-    // TODO: lambda type text
-    builder_->append_text("NOT IMPLEMENTED YET");
+    builder_->append_text(type.m_name);
 }
 
 // -----
@@ -87,10 +86,18 @@ void JavaCodeVisitor::visit(MethodCallExpr const& expr)
     process_pargs(expr.args_, false);
 }
 
-void JavaCodeVisitor::visit(LambdaCallExpr const& /*expr*/)
+void JavaCodeVisitor::visit(LambdaCallExpr const& expr)
 {
-    // TODO: implement lambda call
-    builder_->append_text("NOT IMPLEMENTED YET");
+    process_pargs(expr.args_, false);
+    builder_->append_text(" ->");
+    builder_->write_opening_curl_bracket();
+    if (!try_accept_node(expr.lambda_))
+    {
+        builder_->write_invalid_expr();
+    }
+    builder_->append_new_line();
+    builder_->decrease_indentation();
+    builder_->write_right_bracket("}");
 }
 
 // -----
@@ -116,7 +123,7 @@ void JavaCodeVisitor::visit(TranslationUnit const& stmt)
 
 void JavaCodeVisitor::visit(MemberVarDefStmt const& stmt)
 {
-    process_identifier(stmt.access_);
+    process_access_mod(stmt.access_);
     if (!try_accept_node(stmt.type_))
     {
         builder_->write_invalid_type();
@@ -192,7 +199,7 @@ void JavaCodeVisitor::visit(DefStmt const& stmt)
 
 void JavaCodeVisitor::visit(MethodDefStmt const& stmt)
 {
-    process_identifier(stmt.access_);
+    process_access_mod(stmt.access_);
     if (!try_accept_node(stmt.func_))
     {
         builder_->write_invalid_stmt();
@@ -209,7 +216,7 @@ void JavaCodeVisitor::visit(BaseInitializerStmt const& stmt)
 
 void JavaCodeVisitor::visit(ConstructorDefStmt const& stmt)
 {
-    process_identifier(stmt.access_);
+    process_access_mod(stmt.access_);
     builder_->append_text(stmt.owner_->name_);
     process_pargs(stmt.params_, false);
     builder_->write_opening_curl_bracket();
@@ -417,9 +424,9 @@ void JavaCodeVisitor::process_package(Scope const& scope)
     builder_->append_new_line();
 }
 
-void JavaCodeVisitor::process_identifier(AccessModifier const& access)
+void JavaCodeVisitor::process_access_mod(AccessModifier const& mod)
 {
-    switch (access)
+    switch (mod)
     {
         case AccessModifier::Public:
             builder_->append_text("public ");

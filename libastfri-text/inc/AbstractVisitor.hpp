@@ -125,7 +125,7 @@ namespace astfri::text
         found.clear();
         for (size_t i = 0; i < all.size(); ++i)
         {
-            if (all.at(i)->access_ == mod)
+            if (all.at(i) && all.at(i)->access_ == mod)
             {
                 found.push_back(all.at(i));
             }
