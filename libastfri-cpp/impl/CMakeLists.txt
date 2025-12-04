@@ -21,23 +21,6 @@ find_package(LLVM REQUIRED CONFIG)
 # Find Clang.
 find_package(Clang REQUIRED CONFIG)
 
-message(STATUS "Clang_FOUND=${Clang_FOUND}")
-message(STATUS "Clang_DIR=${Clang_DIR}")
-message(STATUS "Clang_VERSION=${Clang_VERSION}")
-
-get_property(allTargets GLOBAL PROPERTY TARGETS)
-foreach(t ${allTargets})
-    message(STATUS "=>> Target: ${t}")
-endforeach()
-
-get_cmake_property(vars VARIABLES)
-
-foreach(v ${vars})
-    if(v MATCHES "^CLANG_")
-        message(STATUS "=>> ${v} = ${${v}}")
-    endif()
-endforeach()
-
 # Obtain LLVM options from their config tool.
 execute_process(
     COMMAND llvm-config --cxxflags
@@ -79,7 +62,7 @@ add_library(astfri-cpp SHARED
     ClangVisitor_Operators.cpp
 )
 
-# Privae compile options.
+# Private compile options.
 target_compile_options(astfri-cpp PRIVATE ${ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE})
 
 # Set LLVM include as system to avoid warnings from their code.
@@ -88,10 +71,6 @@ target_include_directories(astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS})
 # Link the core module and clang libraries.
 target_link_libraries(astfri-cpp PUBLIC
     astfri-core
-    clang
-    clangAST
-    clangASTMatchers
-    clangBasic
-    clangFrontend
-    clangTooling
+    clang-cpp
+    LLVM
 )

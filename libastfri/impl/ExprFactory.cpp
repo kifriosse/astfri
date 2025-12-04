@@ -120,6 +120,11 @@ LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, St
     return mk_lambda_expr(std::move(params), body, "");
 }
 
+LambdaExpr* ExprFactory::get_lambda_expr(std::string_view name) {
+    const auto it = m_lambdas.find(name);
+    return it != m_lambdas.end() ? &it->second : nullptr;
+}
+
 LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name)
 {
     LambdaExpr *e = details::emplace_get<LambdaExpr>(
@@ -127,9 +132,7 @@ LambdaExpr* ExprFactory::mk_lambda_expr(std::vector<ParamVarDefStmt*> params, St
         m_lambdas,
         std::move(params),
         body);
-    if (!e->m_type) {
-        e->m_type = m_types->mk_lambda(std::move(name), e);
-    }
+    e->m_type = m_types->mk_lambda(std::move(name), e);
     return e;
 }
 

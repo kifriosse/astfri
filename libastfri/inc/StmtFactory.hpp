@@ -6,6 +6,7 @@
 
 #include <map>
 #include <memory>
+#include <functional>
 #include <vector>
 
 namespace astfri
@@ -87,10 +88,14 @@ public:
      */
     InterfaceDefStmt* mk_interface_def(std::string name);
 
+    // TODO getter for interface, function and global var
+
     /**
      * @brief TODO
      */
     InterfaceDefStmt* mk_interface_def(std::string name, Scope scope);
+
+    ClassDefStmt *get_class_def(std::string_view name, const Scope &scope);
 
     /**
      * @brief TODO
@@ -118,7 +123,13 @@ public:
 
     ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
 
+    ForEachStmt* mk_for_each(Stmt *var, Expr *container, Stmt *body);
+
     ThrowStmt* mk_throw(Expr* val);
+
+    CatchStmt *mk_catch(ParamVarDefStmt *param, Stmt *body);
+
+    TryStmt *mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
 
     ContinueStmt* mk_continue();
 
@@ -148,8 +159,8 @@ private:
 private:
     TypeFactory *m_types;
     std::vector<std::unique_ptr<Stmt>> stmts_;
-    std::map<std::string, InterfaceDefStmt> m_interfaces;
-    std::map<std::string, ClassDefStmt> m_classes;
+    std::map<std::string, InterfaceDefStmt, std::less<>> m_interfaces;
+    std::map<std::string, ClassDefStmt, std::less<>> m_classes;
     ContinueStmt continue_;
     BreakStmt break_;
     UnknownStmt unknown_;

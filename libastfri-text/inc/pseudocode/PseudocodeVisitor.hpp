@@ -4,6 +4,7 @@
 #include <libastfri-text/inc/AbstractVisitor.hpp>
 #include <libastfri-text/inc/pseudocode/AbstractTextBuilder.hpp>
 #include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::text
 {
@@ -78,7 +79,10 @@ namespace astfri::text
         void visit(WhileStmt const& stmt) override;
         void visit(DoWhileStmt const& stmt) override;
         void visit(ForStmt const& stmt) override;
+        void visit(ForEachStmt const& stmt) override {} // MM: TODO
         void visit(ThrowStmt const& stmt) override;
+        void visit(CatchStmt const& stmt) override {} // MM: TODO
+        void visit(TryStmt const& stmt) override {} // MM: TODO
         void visit(UnknownStmt const& stmt) override;
         void visit(LocalVarDefStmt const& stmt) override;
         void visit(ParamVarDefStmt const& stmt) override;

@@ -64,7 +64,10 @@ struct IVisitor
     virtual void visit(WhileStmt const& stmt)           = 0;
     virtual void visit(DoWhileStmt const& stmt)         = 0;
     virtual void visit(ForStmt const& stmt)             = 0;
+    virtual void visit(ForEachStmt const& stmt)         = 0;
     virtual void visit(ThrowStmt const& stmt)           = 0;
+    virtual void visit(CatchStmt const& stmt)           = 0;
+    virtual void visit(TryStmt const& stmt)             = 0;
     virtual void visit(UnknownStmt const& stmt)         = 0;
     virtual void visit(LocalVarDefStmt const& stmt)     = 0;
     virtual void visit(ParamVarDefStmt const& stmt)     = 0;
@@ -287,7 +290,19 @@ struct VisitorAdapter : IVisitor
     {
     }
 
+    void visit(ForEachStmt const& /*stmt*/) override
+    {
+    }
+
     void visit(ThrowStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(CatchStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(TryStmt const& /*stmt*/) override
     {
     }
 
@@ -597,12 +612,22 @@ struct ThrowingVisitorAdapter : IVisitor
         throw std::logic_error("Not Implemented Yet!");
     }
 
+    void visit(ForEachStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
     void visit(ThrowStmt const& /*stmt*/) override
     {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(UnknownStmt const& /*stmt*/) override
+    void visit(CatchStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(TryStmt const& /*stmt*/) override
     {
         throw std::logic_error("Not Implemented Yet!");
     }

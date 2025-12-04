@@ -154,8 +154,28 @@ ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body) :
 {
 }
 
+ForEachStmt::ForEachStmt(Stmt *var, Expr *container, Stmt *body) :
+    var(var),
+    container(container),
+    body(body)
+{
+}
+
 ThrowStmt::ThrowStmt(Expr* val) :
     val_(val)
+{
+}
+
+CatchStmt::CatchStmt(ParamVarDefStmt *param, Stmt *body) :
+    param(param),
+    body(body)
+{
+}
+
+TryStmt::TryStmt(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches) :
+    body(body),
+    finally(finally),
+    catches(std::move(catches))
 {
 }
 

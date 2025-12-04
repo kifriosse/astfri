@@ -1,5 +1,7 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include "libastfri/impl/Scope.hpp"
+#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri
 {
@@ -120,6 +122,11 @@ InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name, Scope scope) {
     return i;
 }
 
+ClassDefStmt *StmtFactory::get_class_def(std::string_view name, const Scope &scope) {
+    const auto it = m_classes.find(mk_fqn(scope, name));
+    return it != m_classes.end() ? &it->second : nullptr;
+}
+
 ClassDefStmt* StmtFactory::mk_class_def(std::string name, Scope scope)
 {
     ClassDefStmt *c = details::emplace_get<ClassDefStmt>(mk_fqn(scope, name), m_classes);
@@ -228,9 +235,22 @@ ForStmt* StmtFactory::mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body)
     return details::emplace_get<ForStmt>(stmts_, init, cond, step, body);
 }
 
+ForEachStmt* StmtFactory::mk_for_each(Stmt *var, Expr *container, Stmt *body)
+{
+    return details::emplace_get<ForEachStmt>(stmts_, var, container, body);
+}
+
 ThrowStmt* StmtFactory::mk_throw(Expr* val)
 {
     return details::emplace_get<ThrowStmt>(stmts_, val);
+}
+
+CatchStmt *StmtFactory::mk_catch(ParamVarDefStmt *param, Stmt *body) {
+    return details::emplace_get<CatchStmt>(stmts_, param, body);
+}
+
+TryStmt *StmtFactory::mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches) {
+    return details::emplace_get<TryStmt>(stmts_, body, finally, std::move(catches));
 }
 
 ContinueStmt* StmtFactory::mk_continue()
