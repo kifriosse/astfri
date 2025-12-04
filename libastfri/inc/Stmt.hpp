@@ -159,9 +159,28 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
 {
     std::string base_; // TODO type
+    ClassType *type;
     std::vector<Expr*> args_;
 
-    BaseInitializerStmt(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt(std::string base, std::vector<Expr*> args);
+    BaseInitializerStmt(ClassType *type, std::vector<Expr*> args);
+};
+
+/**
+ * @brief TODO
+ */
+struct SelfInitializerStmt : Stmt, details::MkVisitable<SelfInitializerStmt> {
+    std::vector<Expr*> args;
+    SelfInitializerStmt(std::vector<Expr*> args);
+};
+
+/**
+ * @brief TODO
+ */
+struct MemberInitializerStmt : Stmt, details::MkVisitable<MemberInitializerStmt> {
+    MemberVarDefStmt *member;
+    Expr *arg;
+    MemberInitializerStmt(MemberVarDefStmt *member, Expr *arg); // TODO
 };
 
 /**
@@ -172,10 +191,12 @@ struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
     ClassDefStmt* owner_;
     std::vector<ParamVarDefStmt*> params_;
     std::vector<BaseInitializerStmt*> baseInit_;
-    // TODO delegating constructor
+    std::vector<SelfInitializerStmt*> selfInitializers;
+    std::vector<MemberInitializerStmt*> memberInitializers; // TODO
     CompoundStmt* body_;
     AccessModifier access_;
 
+    ConstructorDefStmt();
     ConstructorDefStmt(
         ClassDefStmt* owner,
         std::vector<ParamVarDefStmt*> params,
@@ -367,10 +388,10 @@ struct ForStmt : LoopStmt, details::MkVisitable<ForStmt>
  * @brief TODO
  */
 struct ForEachStmt : Stmt, details::MkVisitable<ForEachStmt> {
-    Stmt *var;
+    LocalVarDefStmt *var;
     Expr *container;
     Stmt *body;
-    ForEachStmt(Stmt *var, Expr *container, Stmt *body);
+    ForEachStmt(LocalVarDefStmt *var, Expr *container, Stmt *body);
 };
 
 /**
@@ -387,9 +408,9 @@ struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
  * @brief TODO
  */
 struct CatchStmt : Stmt, details::MkVisitable<CatchStmt> {
-    ParamVarDefStmt *param;
+    LocalVarDefStmt *param;
     Stmt *body;
-    CatchStmt(ParamVarDefStmt *param, Stmt *body);
+    CatchStmt(LocalVarDefStmt *param, Stmt *body);
 };
 
 /**

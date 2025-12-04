@@ -64,29 +64,21 @@ public:
         AccessModifier access
     );
 
-    /**
-     * @deprecated
-     */
-    BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
 
     /**
      * TODO ako so scopom base? nemal by tu byť pointer na base class type alebo def?
      */
-    BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
+    BaseInitializerStmt* mk_base_initializer(ClassType *type, std::vector<Expr*> args);
 
     DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
     GenericParam* mk_generic_param(std::string constraint, std::string name);
 
-    /**
-     * @deprecated
-     */
-    InterfaceDefStmt* mk_interface_def();
+    [[deprecated]] InterfaceDefStmt* mk_interface_def();
 
-    /**
-     * @deprecated
-     */
-    InterfaceDefStmt* mk_interface_def(std::string name);
+    [[deprecated]] InterfaceDefStmt* mk_interface_def(std::string name);
 
     // TODO getter for interface, function and global var
 
@@ -123,11 +115,11 @@ public:
 
     ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
 
-    ForEachStmt* mk_for_each(Stmt *var, Expr *container, Stmt *body);
+    ForEachStmt* mk_for_each(LocalVarDefStmt *var, Expr *container, Stmt *body);
 
     ThrowStmt* mk_throw(Expr* val);
 
-    CatchStmt *mk_catch(ParamVarDefStmt *param, Stmt *body);
+    CatchStmt *mk_catch(LocalVarDefStmt *param, Stmt *body);
 
     TryStmt *mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
 
@@ -139,10 +131,7 @@ public:
 
     TranslationUnit* mk_translation_unit();
 
-    /**
-     * @deprecated
-     */
-    TranslationUnit* mk_translation_unit(
+    [[deprecated]] TranslationUnit* mk_translation_unit(
         std::vector<ClassDefStmt*> classes,
         std::vector<InterfaceDefStmt*> interfaces,
         std::vector<FunctionDefStmt*> functions,

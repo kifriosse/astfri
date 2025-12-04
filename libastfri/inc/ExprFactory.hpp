@@ -58,14 +58,9 @@ public:
     LambdaCallExpr* mk_lambda_call();
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
-    /**
-     * @deprecated
-     */
-    LambdaExpr* mk_lambda_expr();
-    /**
-     * @deprecated
-     */
-    LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
+    [[deprecated]] LambdaExpr* mk_lambda_expr();
+    [[deprecated]] LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
+
     LambdaExpr* get_lambda_expr(std::string_view name);
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name);
 

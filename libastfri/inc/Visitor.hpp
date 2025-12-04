@@ -632,6 +632,11 @@ struct ThrowingVisitorAdapter : IVisitor
         throw std::logic_error("Not Implemented Yet!");
     }
 
+    void visit(UnknownStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
     void visit(LocalVarDefStmt const& /*stmt*/) override
     {
         throw std::logic_error("Not Implemented Yet!");

@@ -60,6 +60,22 @@ BaseInitializerStmt::BaseInitializerStmt(std::string base, std::vector<Expr*> ar
 {
 }
 
+BaseInitializerStmt::BaseInitializerStmt(ClassType *type, std::vector<Expr*> args) :
+    base_(""),
+    type(type),
+    args_(std::move(args))
+{
+}
+
+ConstructorDefStmt::ConstructorDefStmt() :
+    owner_(nullptr),
+    params_({}),
+    baseInit_({}),
+    body_(nullptr),
+    access_(AccessModifier::Public)
+{
+}
+
 ConstructorDefStmt::ConstructorDefStmt(
     ClassDefStmt* owner,
     std::vector<ParamVarDefStmt*> params,
@@ -69,7 +85,7 @@ ConstructorDefStmt::ConstructorDefStmt(
 ) :
     owner_(owner),
     params_(std::move(params)),
-    baseInit_(std::move(baseInit)),
+    baseInit_(std::move(baseInit)), // TODO
     body_(body),
     access_(access)
 {
@@ -154,7 +170,7 @@ ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body) :
 {
 }
 
-ForEachStmt::ForEachStmt(Stmt *var, Expr *container, Stmt *body) :
+ForEachStmt::ForEachStmt(LocalVarDefStmt *var, Expr *container, Stmt *body) :
     var(var),
     container(container),
     body(body)
@@ -166,7 +182,7 @@ ThrowStmt::ThrowStmt(Expr* val) :
 {
 }
 
-CatchStmt::CatchStmt(ParamVarDefStmt *param, Stmt *body) :
+CatchStmt::CatchStmt(LocalVarDefStmt *param, Stmt *body) :
     param(param),
     body(body)
 {
