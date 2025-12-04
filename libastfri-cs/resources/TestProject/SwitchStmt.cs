@@ -113,9 +113,12 @@ class Switch
     class TestCases
     {
 
+        public int Property { get; set; }
+
         void Run()
         {
-
+            Property = 1;
+            Console.WriteLine(Property);
             int a = 5;
             int b = 10;
             int c = (a + b) * (a - (b - 2));
