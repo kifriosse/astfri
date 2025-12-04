@@ -43,32 +43,56 @@ namespace CSharp.T.Test
 
         static void Main2(string[] args)
         {
-            int[] array = new int[2];
-            decimal a_d = 1254.587m;
-            string b_s = @"test";
+            
+            int[] array = { 4, 5, 6, 8, 77, 47, 59 };
+            while (true)
+            {
+                break;
+            }
+            
+            do
+            {
+                continue;
+            } while (true);
+            // List<Person> people = [];
+            // for (
+            //     int i = 0, j = 0;
+            //     i < 10;
+            //     ++i, j += 2, people.Add(new Person($"Person {i}", j))
+            // )
+            // {
+            //     //...
+            // }
+            // foreach (Person person in people)
+            // {
+            //     Console.WriteLine($"Name: {person.Name} Age: {person.Age}");
+            // }
 
-            _ = 8;
-            string h = @"Multi
-            line
-            raw";
+            // decimal a_d = 1254.587m;
+            // string b_s = @"test";
 
-            const int constant2 = 1;
+            // _ = 8;
+            // string h = @"Multi
+            // line
+            // raw";
 
-            int a = 4, b = 5;
-            float c = (float)a;
+            // const int constant2 = 1;
 
-            ref readonly int r = ref a;
+            // int a = 4, b = 5;
+            // float c = (float)a;
 
-            int? nullable = null;
-            int bar = nullable ?? 5;
+            // ref readonly int r = ref a;
 
-            int foo = nullable is null ? bar : 6;
+            // int? nullable = null;
+            // int bar = nullable ?? 5;
 
-            int brackets = (a + b) * 10;
+            // int foo = nullable is null ? bar : 6;
 
-            int a1;
-            const int a2 = 1;
-            a1 = a;
+            // int brackets = (a + b) * 10;
+
+            // int a1;
+            // const int a2 = 1;
+            // a1 = a;
         }
 
         unsafe public void UnsafeMethod()
@@ -80,7 +104,10 @@ namespace CSharp.T.Test
         }
     }
 
-    public class Person
+    /// <summary>
+    /// Testing documentation comments
+    /// </summary>
+    public abstract class Person
     {
         private static readonly int mf = 8;
         private string _firstName;
@@ -89,12 +116,15 @@ namespace CSharp.T.Test
             get => _firstName + " " + _lastName;
             set
             {
-                string[] parts = value.Split(" ");
+                string[] /* test */ parts = value.Split(" ");
                 _firstName = parts[0];
                 _lastName = parts[1];
             } 
         }
+
+        public abstract void TestAbstract();
         public int Age { get; init; }
+        private Pohlavie gender = Pohlavie.Muz;
 
         public Person(string fullName, int age)
         {
@@ -109,7 +139,6 @@ namespace CSharp.T.Test
 
         protected virtual void TestVirtuality()
         {
-            
         }
 
         ~Person() => Print();
@@ -117,26 +146,6 @@ namespace CSharp.T.Test
         private enum Pohlavie
         {
             Zena, Muz, Ine
-        }
-
-        private interface IRunnable
-        {
-            
-        }
-
-        private record class Something
-        {
-            
-        }
-
-        private record struct SomethingStruct
-        {
-            
-        }
-
-        private struct SomethingStruct2
-        {
-            
         }
 
         public delegate void ChangeDelegate(int something);
@@ -171,6 +180,9 @@ namespace CSharp.T.Test
         protected sealed override void TestVirtuality()
         {
             base.TestVirtuality();
+            
         }
     }
 }
+
+

@@ -5,45 +5,69 @@ namespace astfri::csharp
 {
 TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 
-std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler> NodeRegistry::stmt_handlers_ = {
-    {"class_declaration",       CSharpTSTreeVisitor::handle_class_def_stmt   },
-    {"variable_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
-    // todo fix this might not work
-    {"destructor_declaration",  CSharpTSTreeVisitor::handle_destr_def_stmt   },
-    {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt  },
-    {"parameter",               CSharpTSTreeVisitor::handle_param_def_stmt   },
-    {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt   },
-    {"constructor_declaration", CSharpTSTreeVisitor::handle_method_def_stmt  },
-    {"block",                   CSharpTSTreeVisitor::handle_block_stmt       },
-    {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_expr_clause},
-    // {"field_declaration",    CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
+    NodeRegistry::stmt_handlers_ = {
+        {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
+        {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+        // todo fix this might not work
+        {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
+        {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt
+        },
+        {"parameter", CSharpTSTreeVisitor::handle_param_def_stmt},
+        {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt},
+        {"constructor_declaration", CSharpTSTreeVisitor::handle_method_def_stmt
+        },
+        {"block", CSharpTSTreeVisitor::handle_block_stmt},
+        {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},
+        {"expression_statement", CSharpTSTreeVisitor::handle_expr_stmt},
+        {"do_statement", CSharpTSTreeVisitor::handle_do_while_loop},
+        {"while_statement", CSharpTSTreeVisitor::handle_while_loop},
+        {"break_statement", CSharpTSTreeVisitor::handle_break},
+        {"continue_statement", CSharpTSTreeVisitor::handle_continue},
+        {"return_statement", CSharpTSTreeVisitor::handle_return},
+        {"throw_statement", CSharpTSTreeVisitor::handle_throw},
+        // {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
+        {"ERROR",
+         [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
+         {
+             const auto [row, column] = ts_node_start_point(*node);
+             throw std::runtime_error(
+                 "Invalid C# syntax in source code at: row"
+                 + std::to_string(row) + "and column " + std::to_string(column)
+             );
+         }}
 };
 
-std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler> NodeRegistry::expr_handlers_ = {
-    {"integer_literal", CSharpTSTreeVisitor::handle_int_lit},
-    {"real_literal", CSharpTSTreeVisitor::handle_float_lit},
-    {"boolean_literal", CSharpTSTreeVisitor::handle_bool_lit},
-    {"character_literal", CSharpTSTreeVisitor::handle_char_lit},
-    {"string_literal", CSharpTSTreeVisitor::handle_str_lit},
-    {"null_literal", CSharpTSTreeVisitor::handle_null_literal},
-    {"verbatim_string_literal", CSharpTSTreeVisitor::handle_verbatim_str_lit},
-    {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
-    {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
-    {"prefix_unary_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
-    {"ref_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
-    {"postfix_unary_expression", CSharpTSTreeVisitor::handle_postfix_unary_op_expr},
-    {"binary_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
-    {"assignment_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
-
-    {"ERROR",
-     [](CSharpTSTreeVisitor*, TSNode const* node) -> Expr*
-     {
-         auto const [row, column] = ts_node_start_point(*node);
-         throw std::runtime_error(
-             "Invalid C# syntax in source code at: row" + std::to_string(row) + "and column "
-             + std::to_string(column)
-         );
-     }}
+std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
+    NodeRegistry::expr_handlers_ = {
+        {"integer_literal", CSharpTSTreeVisitor::handle_int_lit},
+        {"real_literal", CSharpTSTreeVisitor::handle_float_lit},
+        {"boolean_literal", CSharpTSTreeVisitor::handle_bool_lit},
+        {"character_literal", CSharpTSTreeVisitor::handle_char_lit},
+        {"string_literal", CSharpTSTreeVisitor::handle_str_lit},
+        {"null_literal", CSharpTSTreeVisitor::handle_null_literal},
+        {"verbatim_string_literal", CSharpTSTreeVisitor::handle_verbatim_str_lit
+        },
+        {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
+        {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
+        {"prefix_unary_expression",
+         CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
+        {"ref_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
+        {"postfix_unary_expression",
+         CSharpTSTreeVisitor::handle_postfix_unary_op_expr},
+        {"binary_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
+        {"assignment_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
+        {"parenthesized_expression",
+         CSharpTSTreeVisitor::handle_parenthesized_expr},
+        {"ERROR",
+         [](CSharpTSTreeVisitor*, const TSNode* node) -> Expr*
+         {
+             const auto [row, column] = ts_node_start_point(*node);
+             throw std::runtime_error(
+                 "Invalid C# syntax in source code at: row"
+                 + std::to_string(row) + "and column " + std::to_string(column)
+             );
+         }}
 };
 
 std::unordered_map<std::string, UnaryOpType> NodeRegistry::prefix_unary_op = {
@@ -151,70 +175,96 @@ std::unordered_map<std::string, CSModifier> NodeRegistry::modifiers = {
     {"async",     CSModifier::Async    }
 };
 
-CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(TSNode const& node)
+CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(
+    const TSNode& node
+)
 {
     return get_stmt_handler(ts_node_type(node));
 }
 
-CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(TSNode const& node)
+CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(
+    const TSNode& node
+)
 {
     return get_expr_handler(ts_node_type(node));
 }
 
-CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(std::string const& node_type)
+CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(
+    const std::string& node_type
+)
 {
-    auto const it = stmt_handlers_.find(node_type);
+    const auto it = stmt_handlers_.find(node_type);
     return it != stmt_handlers_.end() ? it->second : default_stmt_handler;
 }
 
-CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(std::string const& node_type)
+CSharpTSTreeVisitor::ExprHandler NodeRegistry::get_expr_handler(
+    const std::string& node_type
+)
 {
-    auto const it = expr_handlers_.find(node_type);
+    const auto it = expr_handlers_.find(node_type);
     return it != expr_handlers_.end() ? it->second : default_expr_handler;
 }
 
-std::optional<UnaryOpType> NodeRegistry::get_prefix_unary_op(std::string const& operation)
+std::optional<UnaryOpType> NodeRegistry::get_prefix_unary_op(
+    const std::string& operation
+)
 {
-    if (auto const it = prefix_unary_op.find(operation); it != prefix_unary_op.end())
+    const auto it = prefix_unary_op.find(operation);
+    if (it != prefix_unary_op.end())
     {
         return it->second;
     }
     return {};
 }
 
-std::optional<BinOpType> NodeRegistry::get_bin_op(std::string const& operation)
+std::optional<BinOpType> NodeRegistry::get_bin_op(const std::string& operation)
 {
-    if (auto const it = bin_operations.find(operation); it != bin_operations.end())
+    const auto it = bin_operations.find(operation);
+    if (it != bin_operations.end())
     {
         return it->second;
     }
     return {};
 }
 
-std::optional<Type*> NodeRegistry::get_type(std::string const& type_name)
+std::optional<Type*> NodeRegistry::get_type(const std::string& type_name)
 {
-    if (auto const it = types_.find(type_name); it != types_.end())
+    const auto it = types_.find(type_name);
+    if (it != types_.end())
     {
         return it->second;
     }
     return {};
 }
 
-std::optional<CSModifier> NodeRegistry::get_modifier(std::string const& modifier)
+std::optional<CSModifier> NodeRegistry::get_modifier(
+    const std::string& modifier
+)
 {
-    if (auto const it = modifiers.find(modifier); it != modifiers.end())
+    const auto it = modifiers.find(modifier);
+    if (it != modifiers.end())
     {
         return it->second;
     }
     return {};
 }
 
-Expr* NodeRegistry::default_expr_handler(CSharpTSTreeVisitor*, TSNode const*)
+bool NodeRegistry::is_expr(const TSNode& node)
+{
+    return expr_handlers_.contains(ts_node_type(node));
+}
+
+bool NodeRegistry::is_stmt(const TSNode& node)
+{
+    return stmt_handlers_.contains(ts_node_type(node));
+}
+
+Expr* NodeRegistry::default_expr_handler(CSharpTSTreeVisitor*, const TSNode*)
 {
     return ExprFactory::get_instance().mk_unknown();
 }
 
-Stmt* NodeRegistry::default_stmt_handler(CSharpTSTreeVisitor*, TSNode const*)
+Stmt* NodeRegistry::default_stmt_handler(CSharpTSTreeVisitor*, const TSNode*)
 {
     return StmtFactory::get_instance().mk_uknown();
 }

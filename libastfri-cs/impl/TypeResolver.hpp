@@ -1,10 +1,10 @@
 #ifndef CSHARP_TYPE_RESOLVER_HPP
 #define CSHARP_TYPE_RESOLVER_HPP
 
+#include <libastfri/inc/Stmt.hpp>
+
 #include <string>
 #include <unordered_map>
-
-#include <libastfri/inc/Stmt.hpp>
 
 namespace astfri::csharp
 {
@@ -27,17 +27,17 @@ struct TypeInfo
 
 struct NamespaceNode
 {
-    std::unordered_map<std::string, NamespaceNode> namespaces_;//
+    std::unordered_map<std::string, NamespaceNode> namespaces_; //
     std::unordered_map<std::string, TypeInfo> types_;
 };
-
 
 class TypeRegistry
 {
 private:
     NamespaceNode global_namespace_;
+
 public:
-    void add_type(TypeInfo const& info);
+    void add_type(const TypeInfo& info);
     NamespaceNode& root();
 };
 
@@ -54,30 +54,31 @@ private:
     FileContext file_context_;
     TypeRegistry type_registry_;
     Scope current_namespace;
+
 public:
     /**
      * Finds all defined types inside a source file;
      * @param file path to file with source code
      */
-    void find_types_file(std::string const& file);
+    void find_types_file(const std::string& file);
     /**
      * Finds all defined types inside a source code;
      * @param source_code source code
      */
-    void find_types_src(std::string const& source_code);
+    void find_types_src(const std::string& source_code);
     /**
      * Finds all defined types inside C# project
      * @param project_dir path to directory with C# project
      */
-    void find_types_project(std::string const& project_dir);
+    void find_types_project(const std::string& project_dir);
     /**
      * Used for importing .NET/C# types or types from Nuget packages
      * (types that don't have definitions inside the project)
      * @param json_file path to the json file
      */
-    void load_external_types(std::string const& json_file);
+    void load_external_types(const std::string& json_file);
 };
 
-}
+} // namespace astfri::csharp
 
 #endif // CSHARP_TYPE_RESOLVER_HPP
