@@ -13,7 +13,7 @@ TextLibManager& TextLibManager::get_instance()
 }
 
 TextLibManager::TextLibManager() :
-    visitor_(&JavaCodeVisitor::get_instance())
+    visitor_(&PseudocodeVisitor::get_instance())
 {
 }
 
@@ -33,8 +33,7 @@ void TextLibManager::change_output(OutputFormat const& format)
             visitor_ = &JavaCodeVisitor::get_instance();
             break;
         case OutputFormat::Pseudocode:
-            // TODO: implement pseudocode visitor
-            //visitor_ = &PseudocodeVisitor::get_instance();
+            visitor_ = &PseudocodeVisitor::get_instance();
             break;
     }
     clear_builder();

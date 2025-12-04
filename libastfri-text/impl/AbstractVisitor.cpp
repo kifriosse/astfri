@@ -11,7 +11,19 @@ AbstractVisitor::AbstractVisitor(AbstractBuilder& builder) :
 // -----
 //
 
-void AbstractVisitor::process_condition(Expr* const& expr)
+void AbstractVisitor::process_body(Stmt const* const& stmt)
+{
+    builder_->write_opening_curl_bracket();
+    if (!try_accept_node(stmt))
+    {
+        builder_->write_invalid_stmt();
+    }
+    builder_->append_new_line();
+    builder_->decrease_indentation();
+    builder_->write_right_bracket("}");
+}
+
+void AbstractVisitor::process_condition(Expr const* const& expr)
 {
     builder_->append_space();
     builder_->write_left_bracket("(");
