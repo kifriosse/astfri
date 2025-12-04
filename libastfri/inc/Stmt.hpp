@@ -156,7 +156,7 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
  */
 struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
 {
-    std::string base_;
+    std::string base_; // TODO type
     std::vector<Expr*> args_;
 
     BaseInitializerStmt(std::string base, std::vector<Expr*> args);
@@ -170,6 +170,7 @@ struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
     ClassDefStmt* owner_;
     std::vector<ParamVarDefStmt*> params_;
     std::vector<BaseInitializerStmt*> baseInit_;
+    // TODO delegating constructor
     CompoundStmt* body_;
     AccessModifier access_;
 
@@ -236,8 +237,9 @@ struct ClassDefStmt : UserTypeDefStmt, details::MkVisitable<ClassDefStmt>
     std::vector<DestructorDefStmt*> destructors_;
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
-    std::vector<InterfaceDefStmt*> interfaces_;
-    std::vector<ClassDefStmt*> bases_;
+    std::vector<InterfaceDefStmt*> interfaces_; // TODO IntefaceType
+    std::vector<ClassDefStmt*> bases_; // TODO ClassType
+    // TODO incomplete bases
 };
 
 /**

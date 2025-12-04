@@ -88,10 +88,6 @@ target_include_directories(astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS})
 # Link the core module and clang libraries.
 target_link_libraries(astfri-cpp PUBLIC
     astfri-core
-    clang
-    clangAST
-    clangASTMatchers
-    clangBasic
-    clangFrontend
-    clangTooling
+    clang-cpp
+    LLVM
 )
