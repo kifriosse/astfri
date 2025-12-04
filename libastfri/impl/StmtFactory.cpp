@@ -1,5 +1,6 @@
 #include <libastfri/inc/StmtFactory.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
+#include "libastfri/impl/Scope.hpp"
 #include "libastfri/inc/Stmt.hpp"
 
 namespace astfri
@@ -119,6 +120,11 @@ InterfaceDefStmt* StmtFactory::mk_interface_def(std::string name, Scope scope) {
     InterfaceDefStmt*i = details::emplace_get<InterfaceDefStmt>(mk_fqn(scope, name), m_interfaces);
     i->m_type = m_types->mk_interface(name, scope, i);
     return i;
+}
+
+ClassDefStmt *StmtFactory::get_class_def(std::string_view name, const Scope &scope) {
+    const auto it = m_classes.find(mk_fqn(scope, name));
+    return it != m_classes.end() ? &it->second : nullptr;
 }
 
 ClassDefStmt* StmtFactory::mk_class_def(std::string name, Scope scope)
