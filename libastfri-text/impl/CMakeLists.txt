@@ -11,6 +11,7 @@ target_sources(astfri-text PRIVATE
   pseudocode/GeneralConfigurator.cpp
   pseudocode/HtmlTextBuilder.cpp
   pseudocode/PlainTextBuilder.cpp
+  pseudocode/PlainTextExporter.cpp
   pseudocode/PseudocodeVisitor.cpp
   pseudocode/TextConfigurator.cpp
   AbstractBuilder.cpp
