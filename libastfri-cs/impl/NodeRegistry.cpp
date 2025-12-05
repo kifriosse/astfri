@@ -8,14 +8,14 @@ TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
     NodeRegistry::stmt_handlers_ = {
         {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
-        {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
-        // todo fix this might not work
+        // {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
         {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt
         },
         {"parameter", CSharpTSTreeVisitor::handle_param_def_stmt},
+        {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt},
-        {"constructor_declaration", CSharpTSTreeVisitor::handle_method_def_stmt
+        {"method_declaration", CSharpTSTreeVisitor::handle_method_def_stmt
         },
         {"block", CSharpTSTreeVisitor::handle_block_stmt},
         {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},
@@ -26,7 +26,6 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"continue_statement", CSharpTSTreeVisitor::handle_continue},
         {"return_statement", CSharpTSTreeVisitor::handle_return},
         {"throw_statement", CSharpTSTreeVisitor::handle_throw},
-        // {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
          {
@@ -52,7 +51,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
         {"prefix_unary_expression",
          CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
-        {"ref_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
+        // {"ref_expression", CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
         {"postfix_unary_expression",
          CSharpTSTreeVisitor::handle_postfix_unary_op_expr},
         {"binary_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
@@ -102,7 +101,7 @@ std::unordered_map<std::string, BinOpType> NodeRegistry::bin_operations = {
     {"^",   BinOpType::BitXor       },
     {"<<",  BinOpType::BitShiftLeft },
     {">>",  BinOpType::BitShiftRight},
-    {"+= ", BinOpType::Add          },
+    {"+=",  BinOpType::Add          },
     {"-=",  BinOpType::Subtract     },
     {"*=",  BinOpType::Multiply     },
     {"/=",  BinOpType::Divide       },
@@ -173,6 +172,10 @@ std::unordered_map<std::string, CSModifier> NodeRegistry::modifiers = {
     {"sealed",    CSModifier::Sealed   },
     {"partial",   CSModifier::Partial  },
     {"async",     CSModifier::Async    }
+};
+
+std::unordered_set<std::string> NodeRegistry::structural_nodes_ = {
+    "{", "}", "(", ")", "[", "]", ";", ",", "=>", ":"
 };
 
 CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(
@@ -257,6 +260,17 @@ bool NodeRegistry::is_expr(const TSNode& node)
 bool NodeRegistry::is_stmt(const TSNode& node)
 {
     return stmt_handlers_.contains(ts_node_type(node));
+}
+
+bool NodeRegistry::is_structural_or_null_node(const TSNode& node)
+{
+    return ts_node_is_null(node) ? true
+                                 : is_structural_node(ts_node_type(node));
+}
+
+bool NodeRegistry::is_structural_node(const std::string& node_type)
+{
+    return structural_nodes_.contains(node_type);
 }
 
 Expr* NodeRegistry::default_expr_handler(CSharpTSTreeVisitor*, const TSNode*)

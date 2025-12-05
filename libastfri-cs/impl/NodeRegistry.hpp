@@ -8,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace astfri::csharp
 {
@@ -24,7 +25,7 @@ private:
     static std::unordered_map<std::string, BinOpType> bin_operations;
     static std::unordered_map<std::string, Type*> types_;
     static std::unordered_map<std::string, CSModifier> modifiers;
-
+    static std::unordered_set<std::string> structural_nodes_;
 public:
     static CSharpTSTreeVisitor::StmtHandler get_stmt_handler(
         const TSNode& node
@@ -46,6 +47,8 @@ public:
     static std::optional<CSModifier> get_modifier(const std::string& modifier);
     static bool is_expr(const TSNode& node);
     static bool is_stmt(const TSNode& node);
+    static bool is_structural_or_null_node(const TSNode& node);
+    static bool is_structural_node(const std::string& node_type);
 
 private:
     static Expr* default_expr_handler(CSharpTSTreeVisitor*, const TSNode*);
