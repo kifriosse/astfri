@@ -171,6 +171,9 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     do
     {
         TSNode current = ts_tree_cursor_current_node(&cursor);
+        if (NodeRegistry::is_structural_node(ts_node_type(current)))
+            continue;
+
         parameters.emplace_back(as_a<ParamVarDefStmt>(handler(self, &current)));
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
