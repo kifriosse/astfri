@@ -18,15 +18,15 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         // "struct_declaration",             // todo
         // "record_declaration",             // todo
         "field_declaration",
-        "delegate_declaration",    // todo
-        "event_field_declaration", // todo
-        "constructor_declaration",
-        "property_declaration", // todo
-        "method_declaration",   // todo
+        // "delegate_declaration",    // todo
+        // "event_field_declaration", // todo
+        // "constructor_declaration",
+        // "property_declaration", // todo
+        "method_declaration",
         "destructor_declaration",
-        "indexer_declaration",            // todo
-        "operator_declaration",           // todo
-        "conversion_operator_declaration" // todo
+        // "indexer_declaration",            // todo
+        // "operator_declaration",           // todo
+        // "conversion_operator_declaration" // todo
     };
 
     std::unordered_map<std::string, std::vector<TSNode>> class_members_nodes;
@@ -101,14 +101,15 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         }
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
+    ts_tree_cursor_delete(&cursor);
+
     if (base)
     {
         class_def->bases_.push_back(base);
     }
     class_def->interfaces_       = interfaces;
-    const TSNode class_body_node = ts_tree_cursor_current_node(&cursor);
+    const TSNode class_body_node = ts_node_child_by_field_name(*node, "body", 4);
 
-    ts_tree_cursor_delete(&cursor);
 
     TSTreeCursor body_cursor = ts_tree_cursor_new(class_body_node);
     ts_tree_cursor_goto_first_child(&body_cursor);
@@ -119,7 +120,10 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         do
         {
             TSNode current = ts_tree_cursor_current_node(&body_cursor);
-            class_members_nodes[ts_node_type(current)].push_back(current);
+            std::string type = ts_node_type(current);
+            if (! class_members_nodes.contains(type))
+                continue;
+            class_members_nodes[type].push_back(current);
         } while (ts_tree_cursor_goto_next_sibling(&body_cursor));
     }
 
