@@ -104,8 +104,8 @@ Stmt* CSharpTSTreeVisitor::make_while_loop(
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
     const ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
-    Expr* condition                = cond_handler(this, node);
-    Stmt* body                     = body_handler(this, node);
+    Expr* condition                = cond_handler(this, &cond_node);
+    Stmt* body                     = body_handler(this, &body_node);
 
     if (is_do_while)
         return stmt_factory_.mk_do_while(condition, body);
