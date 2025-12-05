@@ -71,7 +71,8 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
             if (is_interface_name(type_name))
             {
                 interfaces.emplace_back(
-                    stmt_factory_.mk_interface_def(type_name)
+                    // todo temporary solution
+                    stmt_factory_.mk_interface_def(type_name, {})
                 );
             }
             else
@@ -83,8 +84,9 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
             {
                 type_node = ts_tree_cursor_current_node(&cursor);
                 type_name = extract_node_text(type_node, self->source_code_);
+                // todo temporary solution
                 interfaces.emplace_back(
-                    stmt_factory_.mk_interface_def(type_name)
+                    stmt_factory_.mk_interface_def(type_name, {})
                 );
             }
             ts_tree_cursor_goto_parent(&cursor);
@@ -424,7 +426,7 @@ Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
     // todo might be wrong index, needs testing
     const std::vector<Expr*> arguments
         = handle_argument_list(self, &arg_list_node);
-    return stmt_factory_.mak_base_initializer(base->name_, arguments);
+    return stmt_factory_.mk_base_initializer(base->type_, arguments);
 }
 
 Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
