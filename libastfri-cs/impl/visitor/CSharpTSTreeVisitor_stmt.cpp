@@ -10,18 +10,19 @@ Stmt* CSharpTSTreeVisitor::handle_block_stmt(
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    std::vector<Stmt*> statements;
 
     if (! ts_tree_cursor_goto_first_child(&cursor))
-    {
-        return stmt_factory_.mk_compound({});
-    }
+        return nullptr;
 
-    std::vector<Stmt*> statements;
     do
     {
         TSNode current_node = ts_tree_cursor_current_node(&cursor);
-        StmtHandler handler = NodeRegistry::get_stmt_handler(current_node);
-        statements.push_back(handler(self, &current_node));
+        if (!NodeRegistry::is_structural_or_null_node(current_node))
+        {
+            StmtHandler handler = NodeRegistry::get_stmt_handler(current_node);
+            statements.push_back(handler(self, &current_node));
+        }
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
     return stmt_factory_.mk_compound(statements);
