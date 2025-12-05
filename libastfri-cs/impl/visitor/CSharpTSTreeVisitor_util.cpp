@@ -127,20 +127,22 @@ Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
     const TSNode* end_node
 )
 {
-    TSTreeCursor cursor = ts_tree_cursor_new(start_node);
     std::queue<Expr*> exprs;
-
-    do
+    TSNode next = start_node;
+    while (!ts_node_is_null(next))
     {
-        const TSNode current_node = ts_tree_cursor_current_node(&cursor);
+        TSNode current_node = next;
+        next = ts_node_next_sibling(current_node);
         if (end_node && ts_node_eq(current_node, *end_node))
             break;
+
+        if (NodeRegistry::is_structural_node(ts_node_type(current_node)))
+            continue;
 
         const ExprHandler expr_handler
             = NodeRegistry::get_expr_handler(current_node);
         exprs.push(expr_handler(this, &current_node));
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
-    ts_tree_cursor_delete(&cursor);
+    }
 
     if (exprs.empty())
         return nullptr;

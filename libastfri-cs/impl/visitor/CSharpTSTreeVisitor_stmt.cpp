@@ -77,7 +77,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
                 = NodeRegistry::get_stmt_handler(init_node);
             init = init_handler(self, &init_node);
         }
-        else
+        else if (NodeRegistry::is_expr(init_node))
         {
             const TSNode* end_node = &body_node;
             if (! cond_null)
