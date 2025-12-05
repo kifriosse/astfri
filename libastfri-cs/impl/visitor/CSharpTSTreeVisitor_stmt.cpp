@@ -18,7 +18,7 @@ Stmt* CSharpTSTreeVisitor::handle_block_stmt(
     do
     {
         TSNode current_node = ts_tree_cursor_current_node(&cursor);
-        if (!NodeRegistry::is_structural_or_null_node(current_node))
+        if (! NodeRegistry::is_structural_or_null_node(current_node))
         {
             StmtHandler handler = NodeRegistry::get_stmt_handler(current_node);
             statements.push_back(handler(self, &current_node));
@@ -150,9 +150,10 @@ Stmt* CSharpTSTreeVisitor::handle_return(
     Expr* expr = nullptr;
     if (ts_node_child_count(*node) > 2)
     {
-        const TSNode expr_node         = ts_node_child(*node, 1);
-        const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
-        expr                           = expr_handler(self, &expr_node);
+        const TSNode expr_node = ts_node_child(*node, 1);
+        const ExprHandler expr_handler
+            = NodeRegistry::get_expr_handler(expr_node);
+        expr = expr_handler(self, &expr_node);
     }
     return stmt_factory_.mk_return(expr);
 }

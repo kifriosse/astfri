@@ -129,10 +129,10 @@ Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
 {
     std::queue<Expr*> exprs;
     TSNode next = start_node;
-    while (!ts_node_is_null(next))
+    while (! ts_node_is_null(next))
     {
         TSNode current_node = next;
-        next = ts_node_next_sibling(current_node);
+        next                = ts_node_next_sibling(current_node);
         if (end_node && ts_node_eq(current_node, *end_node))
             break;
 

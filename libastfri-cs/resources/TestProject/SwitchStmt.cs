@@ -1,5 +1,8 @@
 // using System;
 //
+
+int testGlobalVar = 1;
+
 // class Switch
 // {
 //     record Person(string Name, int Age);
@@ -143,15 +146,16 @@ file class TestCases
 
         c = d == null ? 1 : a;
 
-//
-//         // Parenthesized binary expressions
-//         int x = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
-//
-//         // Parenthesized expression inside if-pattern
-//         if ((c + 1) > (a * 2))
-//         {
-//             Console.WriteLine("Pattern matched");
-//         }
+        // Parenthesized binary expressions
+        int x, y = 1;
+        const int c_1 = 1, c_2 = 2;
+        x = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
+
+        // Parenthesized expression inside if-pattern
+        if ((c + 1) > (a * 2))
+        {
+            Console.WriteLine("Pattern matched");
+        }
 //         // int j;
 //         // int i;
         for (int i = 0, j = 0; i < 10; ++i, j += 2)

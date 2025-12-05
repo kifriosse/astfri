@@ -26,6 +26,7 @@ private:
     static std::unordered_map<std::string, Type*> types_;
     static std::unordered_map<std::string, CSModifier> modifiers;
     static std::unordered_set<std::string> structural_nodes_;
+
 public:
     static CSharpTSTreeVisitor::StmtHandler get_stmt_handler(
         const TSNode& node

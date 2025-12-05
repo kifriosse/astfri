@@ -2,6 +2,7 @@
 #define CSHARP_TS_TREE_VISITOR_HPP
 
 #include <libastfri-cs/impl/TypeContext.hpp>
+#include <libastfri-cs/impl/utils.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -125,6 +126,19 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+    static Stmt* handle_local_var_def_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_global_var_def_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_var_def_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node,
+        VarDefType def_type
+    ); // general var def stmt handler
     static Stmt* handle_param_def_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node

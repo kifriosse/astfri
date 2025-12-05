@@ -107,9 +107,9 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
     {
         class_def->bases_.push_back(base);
     }
-    class_def->interfaces_       = interfaces;
-    const TSNode class_body_node = ts_node_child_by_field_name(*node, "body", 4);
-
+    class_def->interfaces_ = interfaces;
+    const TSNode class_body_node
+        = ts_node_child_by_field_name(*node, "body", 4);
 
     TSTreeCursor body_cursor = ts_tree_cursor_new(class_body_node);
     ts_tree_cursor_goto_first_child(&body_cursor);
@@ -119,7 +119,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
     {
         do
         {
-            TSNode current = ts_tree_cursor_current_node(&body_cursor);
+            TSNode current   = ts_tree_cursor_current_node(&body_cursor);
             std::string type = ts_node_type(current);
             if (! class_members_nodes.contains(type))
                 continue;
@@ -197,23 +197,46 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(
     const TSNode* node
 )
 {
+    return handle_var_def_stmt(self, node, VarDefType::Member);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_local_var_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    return handle_var_def_stmt(self, node, VarDefType::Local);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_global_var_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode local_var_def_node = ts_node_child(*node, 0);
+    return handle_var_def_stmt(self, &local_var_def_node, VarDefType::Global);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node,
+    const VarDefType def_type
+)
+{
     static const std::string decl_query =
         R"(
         (variable_declaration
             (variable_declarator) @var_decl)
         )";
-    static const std::string mod_query =
-        R"(
-        (field_declaration
-            (modifier) @modifier)
-        )";
+    std::string mod_query = def_type == VarDefType::Member
+                              ? "(field_declaration"
+                              : "(local_declaration_statement";
+    mod_query.append("\n(modifier) @modifier)");
 
     const std::vector<TSNode> modifier_nodes
         = find_nodes(*node, self->language_, mod_query);
     const CSModifiers modifiers
         = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
-    const AccessModifier access_modifier
-        = modifiers.get_access_mod().value_or(AccessModifier::Private);
 
     const TSNode var_decl_node
         = modifier_nodes.empty() ? ts_node_child(*node, 0)
@@ -223,11 +246,11 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(
         = ts_node_child_by_field_name(var_decl_node, "type", 4);
     Type* type = make_type(self, type_node);
 
-    const std::vector<TSNode> var_decl_nodes
+    const std::vector<TSNode> var_decltor_nodes
         = find_nodes(var_decl_node, self->language_, decl_query);
 
     std::vector<VarDefStmt*> var_def_stmts;
-    for (const TSNode& var_decltor_node : var_decl_nodes)
+    for (const TSNode& var_decltor_node : var_decltor_nodes)
     {
         // todo refactor this into extra method
         TSNode var_name_node = ts_node_child(var_decltor_node, 0); // left side
@@ -244,21 +267,43 @@ Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(
             initializer = initializer_handler(self, &initializer_node);
         }
 
-        // todo handle access modifiers
-        MemberVarDefStmt* memb_var_def = stmt_factory_.mk_member_var_def(
-            var_name,
-            type,
-            initializer,
-            access_modifier
-        );
-        memb_var_def->name_ = var_name;
-        var_def_stmts.push_back(memb_var_def);
+        VarDefStmt* var_def_stmt = nullptr;
+        switch (def_type)
+        {
+        case VarDefType::Member:
+        {
+            // todo handle other modifiers
+            const AccessModifier access_modifier
+                = modifiers.get_access_mod().value_or(AccessModifier::Private);
+            var_def_stmt = stmt_factory_.mk_member_var_def(
+                var_name,
+                type,
+                initializer,
+                access_modifier
+            );
+            break;
+        }
+        case VarDefType::Local:
+            // todo handle const
+            var_def_stmt
+                = stmt_factory_.mk_local_var_def(var_name, type, initializer);
+            break;
+        case VarDefType::Global:
+            // todo handle const
+            var_def_stmt
+                = stmt_factory_.mk_global_var_def(var_name, type, initializer);
+            break;
+        }
+        // todo this might not be necessary in future
+        if (var_def_stmt)
+        {
+            var_def_stmt->name_ = var_name;
+            var_def_stmts.push_back(var_def_stmt);
+        }
     }
 
     if (var_def_stmts.size() > 1)
-    {
         return StmtFactory::get_instance().mk_def(var_def_stmts);
-    }
 
     return var_def_stmts.front();
 }

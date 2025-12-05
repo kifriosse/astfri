@@ -8,17 +8,17 @@ TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
     NodeRegistry::stmt_handlers_ = {
         {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
-        // {"variable_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
         {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt
         },
         {"parameter", CSharpTSTreeVisitor::handle_param_def_stmt},
         {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt},
-        {"method_declaration", CSharpTSTreeVisitor::handle_method_def_stmt
-        },
+        {"method_declaration", CSharpTSTreeVisitor::handle_method_def_stmt},
         {"block", CSharpTSTreeVisitor::handle_block_stmt},
         {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},
+        {"local_declaration_statement",
+         CSharpTSTreeVisitor::handle_local_var_def_stmt},
         {"expression_statement", CSharpTSTreeVisitor::handle_expr_stmt},
         {"do_statement", CSharpTSTreeVisitor::handle_do_while_loop},
         {"while_statement", CSharpTSTreeVisitor::handle_while_loop},
@@ -175,9 +175,8 @@ std::unordered_map<std::string, CSModifier> NodeRegistry::modifiers = {
     {"async",     CSModifier::Async    }
 };
 
-std::unordered_set<std::string> NodeRegistry::structural_nodes_ = {
-    "{", "}", "(", ")", "[", "]", ";", ",", "=>", ":"
-};
+std::unordered_set<std::string> NodeRegistry::structural_nodes_
+    = {"{", "}", "(", ")", "[", "]", ";", ",", "=>", ":"};
 
 CSharpTSTreeVisitor::StmtHandler NodeRegistry::get_stmt_handler(
     const TSNode& node

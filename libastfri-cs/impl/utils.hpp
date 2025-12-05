@@ -18,6 +18,13 @@ enum class IntSuffix
     UL, // unsigned long
 };
 
+enum class VarDefType
+{
+    Global,
+    Member,
+    Local,
+};
+
 // const std::unordered_map<char, std::string> csharp_escape_map = {
 //     {'\'', "\\\'"},
 //     {'\"', "\\\""},
