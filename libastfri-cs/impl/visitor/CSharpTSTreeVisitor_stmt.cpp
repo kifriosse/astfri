@@ -147,9 +147,14 @@ Stmt* CSharpTSTreeVisitor::handle_return(
     const TSNode* node
 )
 {
-    const TSNode expr_node         = ts_node_child(*node, 0);
-    const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
-    return stmt_factory_.mk_return(expr_handler(self, &expr_node));
+    Expr* expr = nullptr;
+    if (ts_node_child_count(*node) > 2)
+    {
+        const TSNode expr_node         = ts_node_child(*node, 1);
+        const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
+        expr                           = expr_handler(self, &expr_node);
+    }
+    return stmt_factory_.mk_return(expr);
 }
 
 Stmt* CSharpTSTreeVisitor::handle_throw(
@@ -157,7 +162,7 @@ Stmt* CSharpTSTreeVisitor::handle_throw(
     const TSNode* node
 )
 {
-    const TSNode expr_node         = ts_node_child(*node, 0);
+    const TSNode expr_node         = ts_node_child(*node, 1);
     const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
     return stmt_factory_.mk_throw(expr_handler(self, &expr_node));
 }
