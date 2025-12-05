@@ -110,17 +110,42 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
     return stmt_factory_.mk_for(init, condition, updater, body);
 }
 
+Stmt* CSharpTSTreeVisitor::handle_for_each_loop(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode type_node  = ts_node_child_by_field_name(*node, "type", 4);
+    const TSNode left_node  = ts_node_child_by_field_name(*node, "left", 4);
+    const TSNode right_node = ts_node_child_by_field_name(*node, "right", 5);
+    const TSNode body_node  = ts_node_child_by_field_name(*node, "body", 4);
+
+    if (ts_node_is_null(type_node))
+    {
+        // todo handle deconstruction syntax
+        throw std::logic_error(
+            "Foreach loop with deconstruction syntax is not supported yet"
+        );
+    }
+
+    const std::string var_name
+        = extract_node_text(left_node, self->source_code_);
+    const ExprHandler right_handler
+        = NodeRegistry::get_expr_handler(right_node);
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    Type* type                     = make_type(self, type_node);
+    Expr* right                    = right_handler(self, &right_node);
+    Stmt* body                     = body_handler(self, &body_node);
+    LocalVarDefStmt* left
+        = stmt_factory_.mk_local_var_def(var_name, type, nullptr);
+    return stmt_factory_.mk_for_each(left, right, body);
+}
+
 Stmt* CSharpTSTreeVisitor::handle_expr_stmt(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    if (ts_node_child_count(*node) == 0)
-    {
-        throw std::logic_error(
-            "Invalid node. Node isn't expression statement node"
-        );
-    }
     const TSNode expr_node    = ts_node_child(*node, 0);
     const ExprHandler handler = NodeRegistry::get_expr_handler(expr_node);
     return stmt_factory_.mk_expr(handler(self, &expr_node));

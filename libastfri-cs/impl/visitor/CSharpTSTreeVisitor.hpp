@@ -180,6 +180,10 @@ public:
         const TSNode* node
     );
     static Stmt* handle_for_loop(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_for_each_loop(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
 
     // other
     static Stmt* handle_expr_stmt(

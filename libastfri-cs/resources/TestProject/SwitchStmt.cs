@@ -1,7 +1,40 @@
 // using System;
 //
 
-int testGlobalVar = 1;
+using CSharp.T.Test;
+
+const int testGlobalVar = 1;
+
+/*
+    (local_declaration_statement [147, 8] - [147, 35]
+        (modifier [147, 8] - [147, 13])
+        (variable_declaration [147, 14] - [147, 34]
+            type: (predefined_type [147, 14] - [147, 17])
+            (variable_declarator [147, 18] - [147, 25]
+                name: (identifier [147, 18] - [147, 21])
+                (integer_literal [147, 24] - [147, 25]))
+            (variable_declarator [147, 27] - [147, 34]
+                name: (identifier [147, 27] - [147, 30])
+                (integer_literal [147, 33] - [147, 34]))))
+
+    (local_declaration_statement [146, 8] - [146, 21]
+        (variable_declaration [146, 8] - [146, 20]
+            type: (predefined_type [146, 8] - [146, 11])
+            (variable_declarator [146, 12] - [146, 13]
+                name: (identifier [146, 12] - [146, 13]))
+            (variable_declarator [146, 15] - [146, 20]
+                name: (identifier [146, 15] - [146, 16])
+                (integer_literal [146, 19] - [146, 20]))))
+
+    (field_declaration [118, 4] - [118, 22]
+        (modifier [118, 4] - [118, 10])
+        (variable_declaration [118, 11] - [118, 21]
+            type: (predefined_type [118, 11] - [118, 14])
+            (variable_declarator [118, 15] - [118, 21]
+                name: (identifier [118, 15] - [118, 17])
+                (integer_literal [118, 20] - [118, 21]))))
+*/
+
 
 // class Switch
 // {
@@ -131,25 +164,31 @@ file class TestCases
         int? d = null; 
         c = (a + b) * (1 - (b - 2));
 
+        string verbatinString = @"""Hello from verbatin string""";
+        string multilineString = @"Hello
+                                this
+                                is
+                                multiline
+                                string";
+
         while(c < 10)
         {
             ++c;
-            return;
         }
+
 
         do 
         {
             ++a;
-            throw new NotImplementedException("");
         }
         while(a < 10);
 
         c = d == null ? 1 : a;
 
         // Parenthesized binary expressions
-        int x, y = 1;
+        int x_1, y_1 = 1;
         const int c_1 = 1, c_2 = 2;
-        x = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
+        x_1 = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
 
         // Parenthesized expression inside if-pattern
         if ((c + 1) > (a * 2))
@@ -162,11 +201,17 @@ file class TestCases
         {
             // ...
         }
-//
-//         foreach (int i in new int[] {1,2,a,4})
-//         {
-//             // ...
-//         }
+//      
+        (int age, string name) tuple = (1, "");
+        _ = tuple.name;
+        _ = tuple.Item1;
+        (int, string name, char) tuple1 = (1, "", 'c');
+        _ = tuple1.Item2;
+        List<Person> people = [];
+        foreach (Person p in people)
+        {
+            // ...
+        }
     }
 
     ~TestCases() {
