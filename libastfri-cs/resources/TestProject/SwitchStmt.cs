@@ -158,7 +158,7 @@ file class TestCases
         }
 //         // int j;
 //         // int i;
-        for (int i = 0, j = 0; i < 10; ++i, j += 2)
+        for (int i = 0, j = 0; i < 10; i++, j += 2)
         {
             // ...
         }
