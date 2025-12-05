@@ -326,7 +326,7 @@ Expr* CSharpTSTreeVisitor::handle_parenthesized_expr(
     const TSNode* node
 )
 {
-    const TSNode expr_node    = ts_node_child(*node, 0);
+    const TSNode expr_node    = ts_node_child(*node, 1);
     const ExprHandler handler = NodeRegistry::get_expr_handler(expr_node);
     return expr_factory_.mk_bracket(handler(self, &expr_node));
 }
