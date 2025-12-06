@@ -130,9 +130,8 @@ std::string extract_node_text(
 )
 {
     if (ts_node_is_null(node))
-    {
         throw std::runtime_error("Node is null");
-    }
+
     const size_t from = ts_node_start_byte(node);
     const size_t to   = ts_node_end_byte(node);
     return source_code.substr(from, to - from);
@@ -303,6 +302,28 @@ std::string escape_string(
         }
     }
     return escaped_str;
+}
+
+void print_child_nodes_types(const TSNode& node)
+{
+    for (size_t i = 0; i < ts_node_child_count(node); ++i)
+    {
+        const TSNode child = ts_node_child(node, i);
+        std::string type   = ts_node_type(child);
+        std::cout << "Child " << i << " type: " << type << '\n';
+    }
+}
+
+void print_child_nodes_types(const TSNode& node, const std::string& source)
+{
+    for (size_t i = 0; i < ts_node_child_count(node); ++i)
+    {
+        const TSNode child = ts_node_child(node, i);
+        std::string type   = ts_node_type(child);
+        std::string text   = extract_node_text(child, source);
+        std::cout << "Child " << i << " type: " << type
+                  << " text: \"" << text << "\"" << '\n';
+    }
 }
 
 } // namespace astfri::csharp

@@ -62,6 +62,9 @@ std::string remove_comments(
 
 std::string escape_string(std::string_view str_view, bool is_verbatim);
 
+void print_child_nodes_types(const TSNode& node);
+void print_child_nodes_types(const TSNode& node, const std::string& source);
+
 } // namespace astfri::csharp
 
 #endif // CSHARP_UTILS_HPP
