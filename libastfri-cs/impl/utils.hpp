@@ -60,7 +60,7 @@ std::string remove_comments(
     const std::filesystem::path& path
 );
 
-std::string escape_string(const std::string_view& str_view, bool is_verbatim);
+std::string escape_string(std::string_view str_view, bool is_verbatim);
 
 } // namespace astfri::csharp
 

@@ -179,6 +179,7 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
         parameters.emplace_back(as_a<ParamVarDefStmt>(handler(self, &current)));
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
+    ts_tree_cursor_delete(&cursor);
     return parameters;
 }
 

@@ -181,7 +181,7 @@ std::string remove_comments(
 
     TSQueryError query_error;
     uint32_t offset;
-    const TSQuery* ts_query = ts_query_new(
+    TSQuery* ts_query = ts_query_new(
         lang,
         query.c_str(),
         query.length(),
@@ -236,11 +236,13 @@ std::string remove_comments(
         );
     }
 
+    ts_query_cursor_delete(cursor);
+    ts_query_delete(ts_query);
     return new_source;
 }
 
 std::string escape_string(
-    const std::string_view& str_view,
+    const std::string_view str_view,
     const bool is_verbatim
 )
 {

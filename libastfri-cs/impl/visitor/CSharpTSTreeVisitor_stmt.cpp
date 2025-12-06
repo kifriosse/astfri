@@ -25,6 +25,7 @@ Stmt* CSharpTSTreeVisitor::handle_block_stmt(
         }
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
+    ts_tree_cursor_delete(&cursor);
     return stmt_factory_.mk_compound(statements);
 }
 
