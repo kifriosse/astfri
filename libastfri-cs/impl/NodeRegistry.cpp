@@ -49,6 +49,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"null_literal", CSharpTSTreeVisitor::handle_null_literal},
         {"verbatim_string_literal", CSharpTSTreeVisitor::handle_verbatim_str_lit
         },
+        {"raw_string_literal", CSharpTSTreeVisitor::handle_raw_str_lit},
         {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
         {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
         {"prefix_unary_expression",

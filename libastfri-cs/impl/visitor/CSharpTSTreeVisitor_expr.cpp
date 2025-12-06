@@ -167,6 +167,17 @@ Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(
     return ExprFactory::get_instance().mk_string_literal(node_contet);
 }
 
+Expr* CSharpTSTreeVisitor::handle_raw_str_lit(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode content_node = ts_node_child(*node, 1);
+    std::string content = extract_node_text(content_node, self->source_code_);
+    content = escape_string(content, false);
+    return expr_factory_.mk_string_literal(content);
+}
+
 Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
     [[maybe_unused]] CSharpTSTreeVisitor* self,
     [[maybe_unused]] const TSNode* node

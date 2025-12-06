@@ -72,7 +72,11 @@ public:
     static Expr* handle_verbatim_str_lit(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
+    static Expr* handle_raw_str_lit(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
     static Expr* handle_interpolated_str_lit(
         CSharpTSTreeVisitor* self,
         const TSNode* node
