@@ -162,6 +162,7 @@ Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(
     std::string node_contet = extract_node_text(*node, self->source_code_);
     node_contet.pop_back();
     node_contet.erase(node_contet.begin(), node_contet.begin() + 2);
+    node_contet = escape_string(node_contet, true);
 
     return ExprFactory::get_instance().mk_string_literal(node_contet);
 }

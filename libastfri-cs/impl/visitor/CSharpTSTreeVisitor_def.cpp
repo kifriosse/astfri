@@ -18,15 +18,15 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         // "struct_declaration",             // todo
         // "record_declaration",             // todo
         "field_declaration",
+        // "property_declaration", // todo
         // "delegate_declaration",    // todo
         // "event_field_declaration", // todo
-        // "constructor_declaration",
-        // "property_declaration", // todo
+        "constructor_declaration",
         "method_declaration",
-        "destructor_declaration",
         // "indexer_declaration",            // todo
         // "operator_declaration",           // todo
         // "conversion_operator_declaration" // todo
+        "destructor_declaration",
     };
 
     std::unordered_map<std::string, std::vector<TSNode>> class_members_nodes;
@@ -404,9 +404,6 @@ Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
         this_init_sw.end()
     );
 
-    if (this_it != bracket_it)
-        return stmt_factory_.mk_uknown(); // todo handle this initializer
-
     const auto result = self->type_context_.top();
     if (result.has_value())
         throw std::logic_error("Owner type not found");
@@ -421,11 +418,16 @@ Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
             "base class"
         );
 
-    const ClassDefStmt* base   = owner->bases_.back();
     const TSNode arg_list_node = ts_node_child(*node, 0);
     // todo might be wrong index, needs testing
     const std::vector<Expr*> arguments
         = handle_argument_list(self, &arg_list_node);
+    if (this_it != bracket_it)
+    {
+        // todo handle self initialization
+        throw std::logic_error("Calling constructor overload isn't implemented");
+    }
+    const ClassDefStmt* base   = owner->bases_.back();
     return stmt_factory_.mk_base_initializer(base->type_, arguments);
 }
 

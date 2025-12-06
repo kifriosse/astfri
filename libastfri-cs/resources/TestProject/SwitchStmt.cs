@@ -164,12 +164,25 @@ file class TestCases
         int? d = null; 
         c = (a + b) * (1 - (b - 2));
 
-        string verbatinString = @"""Hello from verbatin string""";
-        string multilineString = @"Hello
-                                this
-                                is
+        string verbatimString = @"""Hello from verbatin string""";
+        string multilineString = @"Hello '
+                                this \
+                                is \n
                                 multiline
                                 string";
+
+        string interpolatedVerbatim = $@"{verbatimString}
+            {verbatimString}
+        ";
+
+        string rawString = """
+            {}
+        """;
+
+
+        string rawStringInterpolated = $"""
+            {verbatimString}
+        """;
 
         while(c < 10)
         {

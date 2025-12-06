@@ -239,4 +239,68 @@ std::string remove_comments(
     return new_source;
 }
 
+std::string escape_string(
+    const std::string_view& str_view,
+    const bool is_verbatim
+)
+{
+    std::string escaped_str;
+    for (size_t i = 0; i < str_view.length(); ++i)
+    {
+        switch (const char c = str_view[i])
+        {
+        case '\n':
+            escaped_str += "\\n";
+            break;
+        case '\t':
+            escaped_str += "\\t";
+            break;
+        case '\r':
+            escaped_str += "\\r";
+            break;
+        case '\"':
+        {
+            if (! is_verbatim)
+            {
+                escaped_str += "\\\"";
+                break;
+            }
+
+            const size_t next = i + 1;
+            if (next < str_view.length() && str_view.at(next) == '\"')
+            {
+                escaped_str += "\\\"";
+                i += 1;
+            }
+            break;
+        }
+        case '\'':
+            escaped_str += "\\\'";
+            break;
+        case '\\':
+            escaped_str += "\\\\";
+            break;
+        case '\0':
+            escaped_str += "\\0";
+            break;
+        case '\a':
+            escaped_str += "\\a";
+            break;
+        case '\b':
+            escaped_str += "\\b";
+            break;
+        case '\f':
+            escaped_str += "\\f";
+            break;
+        case '\v':
+            escaped_str += "\\v";
+            break;
+        default:
+            escaped_str += c;
+            break;
+        }
+    }
+    return escaped_str;
+}
+
 } // namespace astfri::csharp
