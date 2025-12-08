@@ -71,17 +71,20 @@ Expr* CSharpTSTreeVisitor::handle_float_lit(
     const char suffix
         = static_cast<char>(std::tolower(float_str[float_str.length() - 1]));
 
-    float_str.pop_back();
     std::erase(float_str, '_');
-
-    if (! std::isalpha(suffix) || suffix == 'd')
+    const bool has_double_suffix = suffix == 'd';
+    if (! std::isalpha(suffix) || has_double_suffix)
     {
+        if (has_double_suffix)
+            float_str.pop_back();
+
         // todo handle double
         throw std::logic_error(
             "Handling of double floating point numbers is not implemented"
         );
     }
 
+    float_str.pop_back();
     switch (suffix)
     {
     case 'f':
