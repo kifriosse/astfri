@@ -36,8 +36,18 @@ Stmt* CSharpTSTreeVisitor::handle_arrow_stmt(
     const TSNode* node
 )
 {
-    // todo not implemented
-    return stmt_factory_.mk_compound({});
+    const TSNode body_node = ts_node_child(*node, 1);
+    const ExprHandler body_handler = NodeRegistry::get_expr_handler(body_node);
+
+    Type* return_type = self->semantic_context_.current_return_type();
+    Expr* body_expr = body_handler(self, &body_node);
+    Stmt* body_stmt = nullptr;
+    if (is_a<VoidType>(return_type) || ! return_type)
+        body_stmt = stmt_factory_.mk_expr(body_expr);
+    else
+        body_stmt = stmt_factory_.mk_return(body_expr);
+
+    return stmt_factory_.mk_compound({body_stmt});
 }
 
 Stmt* CSharpTSTreeVisitor::handle_while_loop(
