@@ -186,23 +186,35 @@ Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
     throw std::logic_error("Interpolated string literal not implemented");
 }
 
-Expr* CSharpTSTreeVisitor::handle_param_var_ref_expr(
+Expr* CSharpTSTreeVisitor::handle_indetifier(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    // todo this might be not correctly done
-    const std::string var_name = extract_node_text(*node, self->source_code_);
-    return ExprFactory::get_instance().mk_param_var_ref(var_name);
+    const std::string identifier = extract_node_text(*node, self->source_code_);
+    Stmt* def_stmt = self->semantic_context_.find_var(identifier);
+    if (! def_stmt)
+        return expr_factory_.mk_unknown();
+
+    if (is_a<MemberVarDefStmt>(def_stmt))
+        return expr_factory_.mk_member_var_ref(
+            expr_factory_.mk_this(),
+            identifier
+        );
+    if (is_a<ParamVarDefStmt>(def_stmt))
+        return expr_factory_.mk_param_var_ref(identifier);
+    if (is_a<LocalVarDefStmt>(def_stmt))
+        return expr_factory_.mk_local_var_ref(identifier);
+
+    return expr_factory_.mk_unknown();
 }
 
-Expr* CSharpTSTreeVisitor::handle_local_var_ref_expr(
+Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    const std::string var_name = extract_node_text(*node, self->source_code_);
-    return ExprFactory::get_instance().mk_local_var_ref(var_name);
+    return expr_factory_.mk_unknown();
 }
 
 Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
