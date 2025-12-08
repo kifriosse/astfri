@@ -201,8 +201,8 @@ public:
 
     Scope create_scope(const TSNode* node) const;
 
+private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
-
     Expr* expr_list_to_comma_op(
         const TSNode& start_node,
         const TSNode* end_node
@@ -212,6 +212,10 @@ public:
         const TSNode* node
     );
     static std::vector<Expr*> handle_argument_list(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_for_init_var_def(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );

@@ -208,8 +208,8 @@ file class TestCases
         {
             Console.WriteLine("Pattern matched");
         }
-//         // int j;
-//         // int i;
+        // int j;
+        // int i;
         for (int i = 0, j = 0; i < 10; i++, j += 2)
         {
             // ...

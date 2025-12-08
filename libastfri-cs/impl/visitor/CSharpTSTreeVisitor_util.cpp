@@ -206,4 +206,40 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
 
     return exprs;
 }
+
+Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    static const std::string decl_query =
+        R"(
+        (variable_declaration
+            (variable_declarator) @var_decl)
+        )";
+    std::vector<VarDefStmt*> var_defs;
+    const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
+    Type* type = make_type(self, type_node);
+    std::vector<TSNode> decltr_nodes = find_nodes(*node, self->language_, decl_query);
+    for (const auto declarator_node : decltr_nodes)
+    {
+        TSNode var_name_node = ts_node_child(declarator_node, 0);
+        TSNode right_node = ts_node_child(declarator_node, 2);
+        ExprHandler right_side_handler = NodeRegistry::get_expr_handler(right_node);
+        LocalVarDefStmt* var_def = stmt_factory_.mk_local_var_def(
+            extract_node_text(var_name_node, self->source_code_),
+            type,
+            right_side_handler(self, &right_node)
+        );
+        var_defs.push_back(var_def);
+        self->semantic_context_.add_local_var(var_def);
+    }
+
+    if (var_defs.size() > 1)
+    {
+        return stmt_factory_.mk_def(var_defs);
+    }
+    return var_defs.front();
+
+}
 } // namespace astfri::csharp

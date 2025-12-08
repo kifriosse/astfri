@@ -61,6 +61,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
     const TSNode* node
 )
 {
+    self->semantic_context_.enter_scope();
     Stmt* init      = nullptr;
     Expr* condition = nullptr;
     Stmt* updater   = nullptr;
@@ -74,14 +75,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
 
     if (! ts_node_is_null(init_node))
     {
-        if (NodeRegistry::is_stmt(init_node))
-        {
-            const StmtHandler init_handler
-                = NodeRegistry::get_stmt_handler(init_node);
-            init = init_handler(self, &init_node);
-            // todo fix this
-        }
-        else if (NodeRegistry::is_expr(init_node))
+        if (NodeRegistry::is_expr(init_node))
         {
             const TSNode* end_node = &body_node;
             if (! cond_null)
@@ -92,6 +86,10 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
             init = stmt_factory_.mk_expr(
                 self->expr_list_to_comma_op(init_node, end_node)
             );
+        }
+        else
+        {
+            init = handle_for_init_var_def(self, &init_node);
         }
     }
 
@@ -111,6 +109,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
 
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
+    self->semantic_context_.leave_scope();
     return stmt_factory_.mk_for(init, condition, updater, body);
 }
 
@@ -119,6 +118,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_each_loop(
     const TSNode* node
 )
 {
+    self->semantic_context_.enter_scope();
     const TSNode type_node  = ts_node_child_by_field_name(*node, "type", 4);
     const TSNode left_node  = ts_node_child_by_field_name(*node, "left", 4);
     const TSNode right_node = ts_node_child_by_field_name(*node, "right", 5);
@@ -138,10 +138,12 @@ Stmt* CSharpTSTreeVisitor::handle_for_each_loop(
         = NodeRegistry::get_expr_handler(right_node);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Type* type                     = make_type(self, type_node);
-    Expr* right                    = right_handler(self, &right_node);
-    Stmt* body                     = body_handler(self, &body_node);
     LocalVarDefStmt* left
         = stmt_factory_.mk_local_var_def(var_name, type, nullptr);
+    self->semantic_context_.add_local_var(left);
+    Expr* right                    = right_handler(self, &right_node);
+    Stmt* body                     = body_handler(self, &body_node);
+    self->semantic_context_.leave_scope();
     return stmt_factory_.mk_for_each(left, right, body);
 }
 
