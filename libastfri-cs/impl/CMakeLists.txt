@@ -3,7 +3,7 @@ add_library(astfri-cs SHARED)
 target_sources(astfri-cs PRIVATE
     CSharpASTBuilder.cpp
     NodeRegistry.cpp
-    TypeContext.cpp
+    SemanticContext.cpp
     CSModifiers.cpp
     TypeResolver.cpp
     utils.cpp

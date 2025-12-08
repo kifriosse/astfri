@@ -1,7 +1,7 @@
 #ifndef CSHARP_TS_TREE_VISITOR_HPP
 #define CSHARP_TS_TREE_VISITOR_HPP
 
-#include <libastfri-cs/impl/TypeContext.hpp>
+#include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/utils.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -28,7 +28,7 @@ private:
 
     std::string source_code_;
     const TSLanguage* language_;
-    TypeContext type_context_;
+    SemanticContext semantic_context_;
 
 public:
     CSharpTSTreeVisitor(std::string source_code, const TSLanguage* language);

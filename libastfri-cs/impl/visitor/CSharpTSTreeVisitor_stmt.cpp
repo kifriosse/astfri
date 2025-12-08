@@ -9,6 +9,7 @@ Stmt* CSharpTSTreeVisitor::handle_block_stmt(
     const TSNode* node
 )
 {
+    self->semantic_context_.enter_scope();
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
     std::vector<Stmt*> statements;
 
@@ -26,6 +27,7 @@ Stmt* CSharpTSTreeVisitor::handle_block_stmt(
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
     ts_tree_cursor_delete(&cursor);
+    self->semantic_context_.leave_scope();
     return stmt_factory_.mk_compound(statements);
 }
 
@@ -77,6 +79,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_loop(
             const StmtHandler init_handler
                 = NodeRegistry::get_stmt_handler(init_node);
             init = init_handler(self, &init_node);
+            // todo fix this
         }
         else if (NodeRegistry::is_expr(init_node))
         {

@@ -107,7 +107,7 @@ namespace CSharp.T.Test
     /// <summary>
     /// Testing documentation comments
     /// </summary>
-    public abstract class Person
+    public class Person
     {
         private static readonly int mf = 8;
         private string _firstName;
@@ -158,6 +158,11 @@ namespace CSharp.T.Test
             age = Age;
             name = Name;
             position = Position;
+        }
+
+        public Vector2 GetPossition()
+        {
+            return Position;
         }
     }
 

@@ -166,8 +166,8 @@ file class TestCases
 
         string verbatimString = @"""Hello from verbatin string""";
         string multilineString = @"Hello '
-                                this \
-                                is \n
+                                this
+                                is
                                 multiline
                                 string";
 
@@ -220,19 +220,25 @@ file class TestCases
         _ = tuple.Item1;
         (int, string name, char) tuple1 = (1, "", 'c');
         _ = tuple1.Item2;
-        List<Person> people = [];
-        foreach (Person p in people)
-        {
-            // ...
-        }
+        Person person = new ("Jozko Mrkvicka", 18);
+        float x1 = person.GetPossition().X;
+        Person person_ref = person;
+        int _d = 1;
+        int d_local = _d;
+
+        // List<Person> people = [];
+        // foreach ((int age_f, string name_f, (float x, float y)) in people)
+        // {
+        // }
     }
 
     ~TestCases() {
-
+        int d_local = _d;
     }
 
     public void ArrowBodyExample()
     {
+        int d_local = _d;
 //         List<string> fruits = new() { "apple", "banana", "cherry", "date" };
 //
 //         bool hasA = fruits.Any(fruit => fruit.Contains('a'));

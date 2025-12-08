@@ -41,10 +41,10 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
     const std::string class_name
         = extract_node_text(class_name_node, self->source_code_);
 
-    ClassDefStmt* class_def
-        = StmtFactory::get_instance().mk_class_def(class_name, scope);
+    ClassDefStmt* class_def = stmt_factory_.mk_class_def(class_name, scope);
     class_def->name_ = class_name;
-    self->type_context_.enter_type(class_def);
+
+    self->semantic_context_.enter_type(class_def);
 
     TSTreeCursor cursor = ts_tree_cursor_new(class_name_node);
     ts_tree_cursor_goto_next_sibling(&cursor);
@@ -158,7 +158,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         }
     }
 
-    self->type_context_.leave_type();
+    self->semantic_context_.leave_type();
     return class_def;
 }
 
@@ -283,12 +283,18 @@ Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
                 initializer,
                 access_modifier
             );
+            self->semantic_context_.add_member_var(
+                as_a<MemberVarDefStmt>(var_def_stmt)
+            );
             break;
         }
         case VarDefType::Local:
             // todo handle const
             var_def_stmt
                 = stmt_factory_.mk_local_var_def(var_name, type, initializer);
+            self->semantic_context_.add_local_var(
+                as_a<LocalVarDefStmt>(var_def_stmt)
+            );
             break;
         case VarDefType::Global:
             // todo handle const
@@ -331,7 +337,10 @@ Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(
             = NodeRegistry::get_expr_handler(initializer_node);
         initializer = initializer_handler(self, &initializer_node);
     }
-    return stmt_factory_.mk_param_var_def(var_name, var_type, initializer);
+    ParamVarDefStmt* parameter =
+        stmt_factory_.mk_param_var_def(var_name, var_type, initializer);
+    self->semantic_context_.add_param_var(parameter);
+    return parameter;
 }
 
 Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
@@ -339,11 +348,13 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     const TSNode* node
 )
 {
-    const auto result = self->type_context_.top();
-    if (! result.has_value())
+    self->semantic_context_.enter_scope();
+    self->semantic_context_.register_return_type(type_factory_.mk_void());
+    const auto result = self->semantic_context_.current_user_type();
+    if (! result)
         throw std::logic_error("Owner type not found");
 
-    if (! is_a<ClassDefStmt>(*result))
+    if (! is_a<ClassDefStmt>(result))
         throw std::logic_error(
             "Constructor can only be defined for class type"
         );
@@ -380,8 +391,10 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
         // todo handle `this` initializer
     }
 
+    self->semantic_context_.leave_scope();
+    self->semantic_context_.unregister_return_type();
     return stmt_factory_.mk_constructor_def(
-        as_a<ClassDefStmt>(*result),
+        as_a<ClassDefStmt>(result),
         parameters,
         base_init_stmts,
         as_a<CompoundStmt>(body),
@@ -404,14 +417,14 @@ Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
         this_init_sw.end()
     );
 
-    const auto result = self->type_context_.top();
-    if (result.has_value())
+    const auto result = self->semantic_context_.current_user_type();
+    if (! result)
         throw std::logic_error("Owner type not found");
 
-    if (! is_a<ClassDefStmt>(result.value()))
+    if (! is_a<ClassDefStmt>(result))
         throw std::logic_error("Destructor can only be defined for class type");
 
-    const auto* owner = as_a<ClassDefStmt>(*result);
+    const auto* owner = as_a<ClassDefStmt>(result);
     if (owner->bases_.empty())
         throw std::logic_error(
             "Constructor can't have base initializer without having defined "
@@ -436,22 +449,26 @@ Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
     const TSNode* node
 )
 {
+    // self->semantic_context_.enter_scope();
+    self->semantic_context_.register_return_type(type_factory_.mk_void());
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
-    const auto owner               = self->type_context_.top();
+    const auto owner               = self->semantic_context_.current_user_type();
 
-    if (! owner.has_value())
+    if (! owner)
     {
         throw std::logic_error("Owner type not found");
     }
-    if (! is_a<ClassDefStmt>(owner.value()))
+    if (! is_a<ClassDefStmt>(owner))
     {
         throw std::logic_error("Destructor can only be defined for class type");
     }
 
+    // self->semantic_context_.leave_scope();
+    self->semantic_context_.unregister_return_type();
     return StmtFactory::get_instance().mk_destructor_def(
-        as_a<ClassDefStmt>(owner.value()),
+        as_a<ClassDefStmt>(owner),
         as_a<CompoundStmt>(body)
     );
 }
@@ -461,9 +478,10 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
     const TSNode* node
 )
 {
+    self->semantic_context_.enter_scope();
     MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
-    const auto result              = self->type_context_.top();
-    if (! result.has_value())
+    const auto result              = self->semantic_context_.current_user_type();
+    if (! result)
         throw std::logic_error("Owner type not found");
 
     static const std::string mod_query =
@@ -472,7 +490,7 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
             (modifier) @modifier)
         )";
 
-    method_def_stmt->owner_ = *result;
+    method_def_stmt->owner_ = result;
     const std::vector<TSNode> modifier_nodes
         = find_nodes(*node, self->language_, mod_query);
     const CSModifiers modifiers
@@ -492,18 +510,20 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
         = extract_node_text(name_node, self->source_code_);
     const std::vector<ParamVarDefStmt*> parameters
         = handle_param_list(self, &parameters_node);
-    Type* return_type              = make_type(self, return_node);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    Type* return_type              = make_type(self, return_node);
+    self->semantic_context_.register_return_type(return_type);
     Stmt* body                     = body_handler(self, &body_node);
 
-    FunctionDefStmt* function_def_stmt = stmt_factory_.mk_function_def(
+    method_def_stmt->func_ = stmt_factory_.mk_function_def(
         method_name,
         parameters,
         return_type,
         as_a<CompoundStmt>(body)
     );
 
-    method_def_stmt->func_ = function_def_stmt;
+    self->semantic_context_.leave_scope();
+    self->semantic_context_.unregister_return_type();
     return method_def_stmt;
 }
 
