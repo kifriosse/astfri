@@ -29,6 +29,7 @@ private:
     std::unordered_map<std::string, MemberVarDefStmt*> member_var_map_;
     std::unordered_map<std::string, ParamVarDefStmt*> param_var_map_;
     std::unordered_map<std::string, LocalVarDefStmt*> local_var_map_;
+
 public:
     void enter_scope();
     void add_member_var(MemberVarDefStmt* var_def);
@@ -44,6 +45,7 @@ private:
     ScopeContext scope_context_;
     std::stack<UserTypeDefStmt*> type_context_;
     std::stack<Type*> return_type_context_;
+
 public:
     void enter_type(UserTypeDefStmt* def_stmt);
     void enter_scope();

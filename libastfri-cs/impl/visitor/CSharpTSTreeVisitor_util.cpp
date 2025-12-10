@@ -189,15 +189,20 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    TSNode current      = ts_tree_cursor_current_node(&cursor);
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid node");
 
     std::vector<Expr*> exprs;
     do
     {
+        current = ts_tree_cursor_current_node(&cursor);
+        if (NodeRegistry::is_structural_node(ts_node_type(current)))
+            continue;
+
         ts_tree_cursor_goto_first_child(&cursor);
 
-        TSNode current           = ts_tree_cursor_current_node(&cursor);
+        current                  = ts_tree_cursor_current_node(&cursor);
         ExprHandler expr_handler = NodeRegistry::get_expr_handler(current);
         exprs.emplace_back(expr_handler(self, &current));
 
@@ -219,13 +224,15 @@ Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
         )";
     std::vector<VarDefStmt*> var_defs;
     const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
-    Type* type = make_type(self, type_node);
-    std::vector<TSNode> decltr_nodes = find_nodes(*node, self->language_, decl_query);
+    Type* type             = make_type(self, type_node);
+    std::vector<TSNode> decltr_nodes
+        = find_nodes(*node, self->language_, decl_query);
     for (const auto declarator_node : decltr_nodes)
     {
         TSNode var_name_node = ts_node_child(declarator_node, 0);
-        TSNode right_node = ts_node_child(declarator_node, 2);
-        ExprHandler right_side_handler = NodeRegistry::get_expr_handler(right_node);
+        TSNode right_node    = ts_node_child(declarator_node, 2);
+        ExprHandler right_side_handler
+            = NodeRegistry::get_expr_handler(right_node);
         LocalVarDefStmt* var_def = stmt_factory_.mk_local_var_def(
             extract_node_text(var_name_node, self->source_code_),
             type,
@@ -240,6 +247,5 @@ Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
         return stmt_factory_.mk_def(var_defs);
     }
     return var_defs.front();
-
 }
 } // namespace astfri::csharp

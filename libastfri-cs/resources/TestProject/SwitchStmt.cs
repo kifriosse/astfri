@@ -152,7 +152,7 @@ public static class OperatorProcessor
 {
     public static double? ProcessOperation(double operand1, double operand2, string operatorSymbol)
     {
-        string op = operatorSymbol?.Trim().ToLower(); 
+        string op = operatorSymbol.Trim().ToLower(); 
 
         if (op == "+" || op == "add")
         {
@@ -185,7 +185,7 @@ public static class OperatorProcessor
         }
         else if (op == ">")
         {
-            Console.WriteLine($"Result is a boolean, not a number.");
+            Console.WriteLine("Result is a boolean, not a number.");
             return operand1 > operand2 ? 1 : 0; 
         }
         else if (op == "or")

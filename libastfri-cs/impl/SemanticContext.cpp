@@ -95,7 +95,7 @@ void SemanticContext::register_return_type(Type* func_def)
 
 void SemanticContext::leave_type()
 {
-    if (!type_context_.empty())
+    if (! type_context_.empty())
         type_context_.pop();
     scope_context_.leave_scope();
 }

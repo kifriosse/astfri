@@ -83,7 +83,7 @@ public:
     ); // todo
 
     // Reference Expersions
-    static Expr* handle_indetifier(
+    static Expr* handle_identifier(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
@@ -152,7 +152,7 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // constructor def stmt
-    static Stmt* handle_base_init_stmt(
+    static Stmt* handle_construct_init_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // base initializer

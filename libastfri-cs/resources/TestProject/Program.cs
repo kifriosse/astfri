@@ -179,10 +179,10 @@ namespace CSharp.T.Test
             
         }
 
-        public Child() 
-            : this("DefaultName", 0)
-        {
-        }
+        // public Child() 
+        //     : this("DefaultName", 0)
+        // {
+        // }
 
         public G TestGenericMethod<G>() where G : new()
         {

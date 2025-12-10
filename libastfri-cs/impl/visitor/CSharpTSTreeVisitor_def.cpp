@@ -42,54 +42,53 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         = extract_node_text(class_name_node, self->source_code_);
 
     ClassDefStmt* class_def = stmt_factory_.mk_class_def(class_name, scope);
-    class_def->name_ = class_name;
+    class_def->name_        = class_name;
 
     self->semantic_context_.enter_type(class_def);
 
-    TSTreeCursor cursor = ts_tree_cursor_new(class_name_node);
-    ts_tree_cursor_goto_next_sibling(&cursor);
-
+    TSNode current_node = ts_node_next_sibling(class_name_node);
+    const TSNode class_body_node
+        = ts_node_child_by_field_name(*node, "body", 4);
     // handling of base class and interface implementations
     ClassDefStmt* base = nullptr;
     std::vector<InterfaceDefStmt*> interfaces;
     do
     {
-        const char* field_name = ts_tree_cursor_current_field_name(&cursor);
-        if (field_name
-            != nullptr) // body node is named, needs to stop at the body node
+        std::string name = ts_node_type(current_node);
+        if (ts_node_eq(current_node, class_body_node))
             break;
 
-        TSNode current   = ts_tree_cursor_current_node(&cursor);
-        std::string name = ts_node_type(current);
+        // todo redo this into using a TSSymbol
         if (name == "base_list") // base list handeling
         {
-            ts_tree_cursor_goto_first_child(&cursor);
-            TSNode type_node = ts_tree_cursor_current_node(&cursor);
+            print_child_nodes_types(current_node);
+            TSNode type_node = ts_node_child(current_node, 1);
             std::string type_name
                 = extract_node_text(type_node, self->source_code_);
             // todo temporary solution
             if (is_interface_name(type_name))
             {
                 interfaces.emplace_back(
-                    // todo temporary solution
+                    // todo temporary solution - needs proper scope resolving
                     stmt_factory_.mk_interface_def(type_name, {})
                 );
             }
             else
             {
+                // todo temporary solution - needs proper scope resolving
                 base = stmt_factory_.mk_class_def(type_name, {});
             }
 
-            while (ts_tree_cursor_goto_next_sibling(&cursor))
+            type_node = ts_node_next_sibling(current_node);
+            while (! ts_node_is_null(type_node))
             {
-                type_node = ts_tree_cursor_current_node(&cursor);
                 type_name = extract_node_text(type_node, self->source_code_);
                 // todo temporary solution
                 interfaces.emplace_back(
                     stmt_factory_.mk_interface_def(type_name, {})
                 );
+                type_node = ts_node_next_sibling(type_node);
             }
-            ts_tree_cursor_goto_parent(&cursor);
         }
         else if (name == "type_parameter_list") // generic parameters
         {
@@ -101,17 +100,14 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         {
             // todo handle generic parameter constraints
         }
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
-
-    ts_tree_cursor_delete(&cursor);
+        current_node = ts_node_next_sibling(current_node);
+    } while (! ts_node_is_null(current_node));
 
     if (base)
     {
         class_def->bases_.push_back(base);
     }
-    class_def->interfaces_ = interfaces;
-    const TSNode class_body_node
-        = ts_node_child_by_field_name(*node, "body", 4);
+    class_def->interfaces_   = interfaces;
 
     TSTreeCursor body_cursor = ts_tree_cursor_new(class_body_node);
     ts_tree_cursor_goto_first_child(&body_cursor);
@@ -337,8 +333,8 @@ Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(
             = NodeRegistry::get_expr_handler(initializer_node);
         initializer = initializer_handler(self, &initializer_node);
     }
-    ParamVarDefStmt* parameter =
-        stmt_factory_.mk_param_var_def(var_name, var_type, initializer);
+    ParamVarDefStmt* parameter
+        = stmt_factory_.mk_param_var_def(var_name, var_type, initializer);
     self->semantic_context_.add_param_var(parameter);
     return parameter;
 }
@@ -362,7 +358,7 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     const TSNode param_list_node
         = ts_node_child_by_field_name(*node, "parameters", 10);
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
-    const TSNode initializer_node = ts_node_next_sibling(body_node);
+    const TSNode initializer_node = ts_node_next_sibling(param_list_node);
 
     const std::vector<ParamVarDefStmt*> parameters
         = handle_param_list(self, &param_list_node);
@@ -402,7 +398,7 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     );
 }
 
-Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
+Stmt* CSharpTSTreeVisitor::handle_construct_init_stmt(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
@@ -431,16 +427,18 @@ Stmt* CSharpTSTreeVisitor::handle_base_init_stmt(
             "base class"
         );
 
-    const TSNode arg_list_node = ts_node_child(*node, 0);
+    const TSNode arg_list_node = ts_node_child(*node, 2);
     // todo might be wrong index, needs testing
     const std::vector<Expr*> arguments
         = handle_argument_list(self, &arg_list_node);
     if (this_it != bracket_it)
     {
         // todo handle self initialization
-        throw std::logic_error("Calling constructor overload isn't implemented");
+        throw std::logic_error(
+            "Calling constructor overload isn't implemented"
+        );
     }
-    const ClassDefStmt* base   = owner->bases_.back();
+    const ClassDefStmt* base = owner->bases_.back();
     return stmt_factory_.mk_base_initializer(base->type_, arguments);
 }
 
@@ -454,16 +452,12 @@ Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
-    const auto owner               = self->semantic_context_.current_user_type();
+    const auto owner = self->semantic_context_.current_user_type();
 
     if (! owner)
-    {
         throw std::logic_error("Owner type not found");
-    }
     if (! is_a<ClassDefStmt>(owner))
-    {
         throw std::logic_error("Destructor can only be defined for class type");
-    }
 
     // self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();
@@ -480,7 +474,7 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
 {
     self->semantic_context_.enter_scope();
     MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
-    const auto result              = self->semantic_context_.current_user_type();
+    const auto result = self->semantic_context_.current_user_type();
     if (! result)
         throw std::logic_error("Owner type not found");
 
@@ -513,7 +507,7 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Type* return_type              = make_type(self, return_node);
     self->semantic_context_.register_return_type(return_type);
-    Stmt* body                     = body_handler(self, &body_node);
+    Stmt* body             = body_handler(self, &body_node);
 
     method_def_stmt->func_ = stmt_factory_.mk_function_def(
         method_name,

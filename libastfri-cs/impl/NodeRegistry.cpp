@@ -9,11 +9,12 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
     NodeRegistry::stmt_handlers_ = {
         {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
         {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
-        {"constructor_declaration", CSharpTSTreeVisitor::handle_constr_def_stmt
-        },
+        {"constructor_declaration",
+         CSharpTSTreeVisitor::handle_constr_def_stmt},
         {"parameter", CSharpTSTreeVisitor::handle_param_def_stmt},
         {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
-        {"constructor_initializer", CSharpTSTreeVisitor::handle_base_init_stmt},
+        {"constructor_initializer",
+         CSharpTSTreeVisitor::handle_construct_init_stmt},
         {"method_declaration", CSharpTSTreeVisitor::handle_method_def_stmt},
         {"block", CSharpTSTreeVisitor::handle_block_stmt},
         {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},
@@ -48,8 +49,8 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"character_literal", CSharpTSTreeVisitor::handle_char_lit},
         {"string_literal", CSharpTSTreeVisitor::handle_str_lit},
         {"null_literal", CSharpTSTreeVisitor::handle_null_literal},
-        {"verbatim_string_literal", CSharpTSTreeVisitor::handle_verbatim_str_lit
-        },
+        {"verbatim_string_literal",
+         CSharpTSTreeVisitor::handle_verbatim_str_lit},
         {"raw_string_literal", CSharpTSTreeVisitor::handle_raw_str_lit},
         {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
         {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
@@ -62,7 +63,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"assignment_expression", CSharpTSTreeVisitor::handle_binary_op_expr},
         {"parenthesized_expression",
          CSharpTSTreeVisitor::handle_parenthesized_expr},
-        {"identifier", CSharpTSTreeVisitor::handle_indetifier},
+        {"identifier", CSharpTSTreeVisitor::handle_identifier},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Expr*
          {

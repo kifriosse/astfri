@@ -321,8 +321,8 @@ void print_child_nodes_types(const TSNode& node, const std::string& source)
         const TSNode child = ts_node_child(node, i);
         std::string type   = ts_node_type(child);
         std::string text   = extract_node_text(child, source);
-        std::cout << "Child " << i << " type: " << type
-                  << " text: \"" << text << "\"" << '\n';
+        std::cout << "Child " << i << " type: " << type << " text: \"" << text
+                  << "\"" << '\n';
     }
 }
 

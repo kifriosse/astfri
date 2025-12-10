@@ -177,7 +177,7 @@ Expr* CSharpTSTreeVisitor::handle_raw_str_lit(
 {
     const TSNode content_node = ts_node_child(*node, 1);
     std::string content = extract_node_text(content_node, self->source_code_);
-    content = escape_string(content, false);
+    content             = escape_string(content, false);
     return expr_factory_.mk_string_literal(content);
 }
 
@@ -189,13 +189,13 @@ Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
     throw std::logic_error("Interpolated string literal not implemented");
 }
 
-Expr* CSharpTSTreeVisitor::handle_indetifier(
+Expr* CSharpTSTreeVisitor::handle_identifier(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
     const std::string identifier = extract_node_text(*node, self->source_code_);
-    Stmt* def_stmt = self->semantic_context_.find_var(identifier);
+    Stmt* def_stmt               = self->semantic_context_.find_var(identifier);
     if (! def_stmt)
         return expr_factory_.mk_unknown();
 
