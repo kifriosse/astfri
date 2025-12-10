@@ -3,6 +3,7 @@
 #include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 
 #include <algorithm>
+#include <cstring>
 
 namespace astfri::csharp
 {
@@ -28,6 +29,24 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         // "conversion_operator_declaration" // todo
         "destructor_declaration",
     };
+    static const TSSymbol base_list_symb = ts_language_symbol_for_name(
+        self->language_,
+        "base_list",
+        std::strlen("base_list"),
+        true
+    );
+    static const TSSymbol type_param_list_sym = ts_language_symbol_for_name(
+        self->language_,
+        "type_parameter_list",
+        std::strlen("type_parameter_list"),
+        true
+    );
+    static const TSSymbol type_param_constr_sym = ts_language_symbol_for_name(
+        self->language_,
+        "type_parameter_constraints_clause",
+        std::strlen("type_parameter_constraints_clause"),
+        true
+    );
 
     std::unordered_map<std::string, std::vector<TSNode>> class_members_nodes;
     for (const std::string& node_type : class_memb_node_types)
@@ -58,10 +77,9 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         if (ts_node_eq(current_node, class_body_node))
             break;
 
-        // todo redo this into using a TSSymbol
-        if (name == "base_list") // base list handeling
+        TSSymbol current_symb = ts_node_symbol(current_node);
+        if (current_symb == base_list_symb) // base list handeling
         {
-            print_child_nodes_types(current_node);
             TSNode type_node = ts_node_child(current_node, 1);
             std::string type_name
                 = extract_node_text(type_node, self->source_code_);
@@ -90,12 +108,11 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
                 type_node = ts_node_next_sibling(type_node);
             }
         }
-        else if (name == "type_parameter_list") // generic parameters
+        else if (current_symb == type_param_list_sym) // generic parameters
         {
             // todo handle generic parameters;
         }
-        else if (name
-                 == "type_parameter_constraints_clause") // constraints for
+        else if (current_symb == type_param_constr_sym) // constraints for
                                                          // generic parameters
         {
             // todo handle generic parameter constraints

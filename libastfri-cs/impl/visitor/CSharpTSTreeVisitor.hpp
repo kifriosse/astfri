@@ -104,11 +104,11 @@ public:
     static Expr* handle_binary_op_expr(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
     static Expr* handle_ternary_expr(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
 
     static Expr* handle_parenthesized_expr(
         CSharpTSTreeVisitor* self,
