@@ -303,7 +303,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD)
     VarDefStmt* new_var = nullptr;
     if (this->astfri_location.stmt_)
     {
-        // premenna v compounde premenna
+        // premenna v compounde
         new_var = this->stmt_factory_->mk_local_var_def(VD->getNameAsString(), type, nullptr);
         ((DefStmt*)this->astfri_location.stmt_)->defs_.push_back(new_var);
     }
