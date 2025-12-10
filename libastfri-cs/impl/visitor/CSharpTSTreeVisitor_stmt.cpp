@@ -157,6 +157,68 @@ Stmt* CSharpTSTreeVisitor::handle_for_each_loop(
     return stmt_factory_.mk_for_each(left, right, body);
 }
 
+Stmt* CSharpTSTreeVisitor::handle_if_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const static std::string if_node_type = "if_statement";
+    static const std::string if_false = "alternative";
+    std::stack<TSNode> if_nodes;
+    if_nodes.push(*node);
+    TSNode current_node = ts_node_child_by_field_name(*node, if_false.c_str(), if_false.length());
+    const uint32_t if_symbol = ts_node_symbol(*node);
+    TSSymbol current_symbol = ts_node_is_null(current_node) ? 0 :  ts_node_symbol(current_node);
+    while (current_symbol == if_symbol)
+    {
+        if_nodes.push(current_node);
+        current_node = ts_node_child_by_field_name(current_node, if_false.c_str(), if_false.length());
+        if (ts_node_is_null(current_node))
+            break;
+
+        current_symbol = ts_node_symbol(current_node);
+    }
+
+    // handling of else in last node
+    static const std::string if_true = "consequence";
+    static const std::string condition = "condition";
+    const TSNode else_node = ts_node_child_by_field_name(if_nodes.top(), if_false.c_str(), if_false.length());
+    if (ts_node_is_null(else_node))
+    {
+        const TSNode if_node = if_nodes.top();
+        const TSNode if_true_node = ts_node_child_by_field_name(if_node, if_true.c_str(), if_true.length());
+        const TSNode cond_node = ts_node_child_by_field_name(if_node, condition.c_str(), condition.length());
+        const StmtHandler if_true_handler = NodeRegistry::get_stmt_handler(if_true_node);
+        const ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
+
+        return stmt_factory_.mk_if(
+            cond_handler(self, &cond_node),
+            if_true_handler(self, &if_true_node),
+            nullptr
+        );
+    }
+
+    const StmtHandler else_handler = NodeRegistry::get_stmt_handler(else_node);
+    Stmt* current_else = else_handler(self, &else_node);
+
+    while (! if_nodes.empty())
+    {
+        const TSNode if_node = if_nodes.top();
+        if_nodes.pop();
+        const TSNode if_true_node = ts_node_child_by_field_name(if_node, if_true.c_str(), if_true.length());
+        const TSNode cond_node = ts_node_child_by_field_name(if_node, condition.c_str(), condition.length());
+        StmtHandler if_true_handler = NodeRegistry::get_stmt_handler(if_true_node);
+        ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
+
+        Stmt* if_true_stmt = if_true_handler(self, &if_true_node);
+        Expr* cond_expr = cond_handler(self, &cond_node);
+        IfStmt* if_stmt = stmt_factory_.mk_if(cond_expr, if_true_stmt, current_else);
+        current_else = if_stmt;
+    }
+
+    return current_else;
+}
+
 Stmt* CSharpTSTreeVisitor::handle_expr_stmt(
     CSharpTSTreeVisitor* self,
     const TSNode* node

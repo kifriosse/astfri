@@ -189,6 +189,9 @@ public:
         const TSNode* node
     );
 
+    // branching statements
+    static Stmt* handle_if_stmt(CSharpTSTreeVisitor* self, const TSNode* node);
+
     // other
     static Stmt* handle_expr_stmt(
         CSharpTSTreeVisitor* self,

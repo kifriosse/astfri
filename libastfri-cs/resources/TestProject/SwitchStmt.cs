@@ -148,6 +148,58 @@ const int testGlobalVar = 1;
 // }
 //
 
+public static class OperatorProcessor
+{
+    public static double? ProcessOperation(double operand1, double operand2, string operatorSymbol)
+    {
+        string op = operatorSymbol?.Trim().ToLower(); 
+
+        if (op == "+" || op == "add")
+        {
+            return operand1 + operand2;
+        }
+        else if (op == "-" || op == "minus")
+        {
+            return operand1 - operand2;
+        }
+        else if (op == "*" || op == "multiply")
+        {
+            return operand1 * operand2;
+        }
+        else if (op == "/" || op == "divide")
+        {
+            if (operand2 == 0)
+            {
+                Console.WriteLine("Error: Division by zero is not allowed.");
+                return null;
+            }
+            return operand1 / operand2;
+        }
+        else if (op == "%" || op == "modulus")
+        {
+            return operand1 % operand2;
+        }
+        else if (op == "^" || op == "power")
+        {
+            return Math.Pow(operand1, operand2);
+        }
+        else if (op == ">")
+        {
+            Console.WriteLine($"Result is a boolean, not a number.");
+            return operand1 > operand2 ? 1 : 0; 
+        }
+        else if (op == "or")
+        {
+            return (operand1 != 0 || operand2 != 0) ? 1 : 0;
+        }
+        else
+        {
+            Console.WriteLine($"Error: Unknown operator '{operatorSymbol}'.");
+            return null;
+        }
+    }
+}
+
 file class TestCases
 {
 

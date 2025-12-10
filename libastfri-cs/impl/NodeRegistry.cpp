@@ -28,6 +28,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"return_statement", CSharpTSTreeVisitor::handle_return},
         {"throw_statement", CSharpTSTreeVisitor::handle_throw},
         {"foreach_statement", CSharpTSTreeVisitor::handle_for_each_loop},
+        {"if_statement", CSharpTSTreeVisitor::handle_if_stmt},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
          {
