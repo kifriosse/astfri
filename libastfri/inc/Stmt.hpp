@@ -236,7 +236,7 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
  */
 struct UserTypeDefStmt : Stmt
 {
-    std::string name_;
+    [[deprecated]] std::string name_;
 };
 
 /**
