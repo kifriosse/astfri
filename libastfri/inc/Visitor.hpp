@@ -77,6 +77,8 @@ struct IVisitor
     virtual void visit(DefStmt const& stmt)             = 0;
     virtual void visit(MethodDefStmt const& stmt)       = 0;
     virtual void visit(BaseInitializerStmt const& stmt) = 0;
+    virtual void visit(SelfInitializerStmt const& stmt) = 0;
+    virtual void visit(MemberInitializerStmt const& stmt) = 0;
     virtual void visit(ConstructorDefStmt const& stmt)  = 0;
     virtual void visit(DestructorDefStmt const& stmt)   = 0;
     virtual void visit(GenericParam const& stmt)        = 0;
@@ -339,6 +341,14 @@ struct VisitorAdapter : IVisitor
     }
 
     void visit(BaseInitializerStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(SelfInitializerStmt const& /*stmt*/) override
+    {
+    }
+
+    void visit(MemberInitializerStmt const& /*stmt*/) override
     {
     }
 
@@ -673,6 +683,16 @@ struct ThrowingVisitorAdapter : IVisitor
     }
 
     void visit(BaseInitializerStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(SelfInitializerStmt const& /*stmt*/) override
+    {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(MemberInitializerStmt const& /*stmt*/) override
     {
         throw std::logic_error("Not Implemented Yet!");
     }

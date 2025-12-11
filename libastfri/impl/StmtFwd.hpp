@@ -11,6 +11,8 @@ struct DefStmt;
 struct FunctionDefStmt;
 struct MethodDefStmt;
 struct BaseInitializerStmt;
+struct SelfInitializerStmt;
+struct MemberInitializerStmt;
 struct ConstructorDefStmt;
 struct DestructorDefStmt;
 struct GenericParam;

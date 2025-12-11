@@ -72,6 +72,10 @@ public:
     [[deprecated]] BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
     BaseInitializerStmt* mk_base_initializer(ClassType *type, std::vector<Expr*> args);
 
+    SelfInitializerStmt *mk_self_initializer(std::vector<Expr*> args);
+
+    MemberInitializerStmt *mk_member_initializer(MemberVarDefStmt *member, Expr *arg);
+
     DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
     GenericParam* mk_generic_param(std::string constraint, std::string name);

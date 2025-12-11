@@ -179,6 +179,16 @@ BaseInitializerStmt* StmtFactory::mk_base_initializer(ClassType *type, std::vect
     return details::emplace_get<BaseInitializerStmt>(stmts_, type, std::move(args));
 }
 
+SelfInitializerStmt* StmtFactory::mk_self_initializer(std::vector<Expr*> args)
+{
+    return details::emplace_get<SelfInitializerStmt>(stmts_, std::move(args));
+}
+
+MemberInitializerStmt* StmtFactory::mk_member_initializer(MemberVarDefStmt *member, Expr *arg)
+{
+    return details::emplace_get<MemberInitializerStmt>(stmts_, member, arg);
+}
+
 DestructorDefStmt* StmtFactory::mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body)
 {
 
