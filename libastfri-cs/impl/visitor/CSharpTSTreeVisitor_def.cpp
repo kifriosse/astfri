@@ -445,7 +445,6 @@ Stmt* CSharpTSTreeVisitor::handle_construct_init_stmt(
         );
 
     const TSNode arg_list_node = ts_node_child(*node, 2);
-    // todo might be wrong index, needs testing
     const std::vector<Expr*> arguments
         = handle_argument_list(self, &arg_list_node);
     if (this_it != bracket_it)
@@ -526,15 +525,14 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
     self->semantic_context_.register_return_type(return_type);
     Stmt* body             = body_handler(self, &body_node);
 
+    self->semantic_context_.leave_scope();
+    self->semantic_context_.unregister_return_type();
     method_def_stmt->func_ = stmt_factory_.mk_function_def(
         method_name,
         parameters,
         return_type,
         as_a<CompoundStmt>(body)
     );
-
-    self->semantic_context_.leave_scope();
-    self->semantic_context_.unregister_return_type();
     return method_def_stmt;
 }
 
