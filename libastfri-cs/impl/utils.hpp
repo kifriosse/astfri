@@ -18,19 +18,12 @@ enum class IntSuffix
     UL, // unsigned long
 };
 
-// const std::unordered_map<char, std::string> csharp_escape_map = {
-//     {'\'', "\\\'"},
-//     {'\"', "\\\""},
-//     {'\\', "\\\\"},
-//     {'\0', "\\0"},
-//     {'\a', "\\a"},
-//     {'\b', "\\b"},
-//     {'\f', "\\f"},
-//     {'\n', "\\n"},
-//     {'\r', "\\r"},
-//     {'\t', "\\t"},
-//     {'\v', "\\v"},
-// };
+enum class VarDefType
+{
+    Global,
+    Member,
+    Local,
+};
 
 std::vector<TSNode> find_nodes(
     const TSNode& root,
@@ -66,6 +59,11 @@ std::string remove_comments(
     const TSLanguage* lang,
     const std::filesystem::path& path
 );
+
+std::string escape_string(std::string_view str_view, bool is_verbatim);
+
+void print_child_nodes_types(const TSNode& node);
+void print_child_nodes_types(const TSNode& node, const std::string& source);
 
 } // namespace astfri::csharp
 

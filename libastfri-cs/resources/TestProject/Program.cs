@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using Zoznam = System.Collections.Generic.List<string>;
 
-public class Program {
-    public static void Main(string[] args) {
-        Console.WriteLine("Hello World");
-        Zoznam z = new();
-    }
-}
+// public class Program {
+//     public static void Main(string[] args) {
+//         Console.WriteLine("Hello World");
+//         Zoznam z = new();
+//     }
+// }
 
 namespace CSharp.T.Test
 {
@@ -107,11 +107,12 @@ namespace CSharp.T.Test
     /// <summary>
     /// Testing documentation comments
     /// </summary>
-    public abstract class Person
+    public class Person
     {
         private static readonly int mf = 8;
         private string _firstName;
         private string _lastName;
+    
         public string Name { 
             get => _firstName + " " + _lastName;
             set
@@ -122,7 +123,8 @@ namespace CSharp.T.Test
             } 
         }
 
-        public abstract void TestAbstract();
+        public Vector2 Position { get; set; }
+
         public int Age { get; init; }
         private Pohlavie gender = Pohlavie.Muz;
 
@@ -150,6 +152,18 @@ namespace CSharp.T.Test
 
         public delegate void ChangeDelegate(int something);
         public event ChangeDelegate OnChange;
+
+        public void Deconstruct(out int age, out string name, out Vector2 position)
+        {
+            age = Age;
+            name = Name;
+            position = Position;
+        }
+
+        public Vector2 GetPossition()
+        {
+            return Position;
+        }
     }
 
     class Child<T, U> : Person where U: IEnumerable<T>, IComparable<U>
@@ -158,19 +172,17 @@ namespace CSharp.T.Test
         {
 
         }
-        public bool IsStudent;
 
-        public Child(string name, int age, bool isStudent) 
+        public Child(string name, int age) 
             : base(name ?? "Unknown", age > 18 ? 18 : age)
         {
-            IsStudent = isStudent;
+            
         }
 
-        public Child() 
-            : base("DefaultName", 0)
-        {
-            IsStudent = true;
-        }
+        // public Child() 
+        //     : this("DefaultName", 0)
+        // {
+        // }
 
         public G TestGenericMethod<G>() where G : new()
         {

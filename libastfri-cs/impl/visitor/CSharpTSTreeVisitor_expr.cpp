@@ -71,17 +71,20 @@ Expr* CSharpTSTreeVisitor::handle_float_lit(
     const char suffix
         = static_cast<char>(std::tolower(float_str[float_str.length() - 1]));
 
-    float_str.pop_back();
     std::erase(float_str, '_');
-
-    if (! std::isalpha(suffix) || suffix == 'd')
+    const bool has_double_suffix = suffix == 'd';
+    if (! std::isalpha(suffix) || has_double_suffix)
     {
+        if (has_double_suffix)
+            float_str.pop_back();
+
         // todo handle double
         throw std::logic_error(
             "Handling of double floating point numbers is not implemented"
         );
     }
 
+    float_str.pop_back();
     switch (suffix)
     {
     case 'f':
@@ -162,8 +165,20 @@ Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(
     std::string node_contet = extract_node_text(*node, self->source_code_);
     node_contet.pop_back();
     node_contet.erase(node_contet.begin(), node_contet.begin() + 2);
+    node_contet = escape_string(node_contet, true);
 
     return ExprFactory::get_instance().mk_string_literal(node_contet);
+}
+
+Expr* CSharpTSTreeVisitor::handle_raw_str_lit(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode content_node = ts_node_child(*node, 1);
+    std::string content = extract_node_text(content_node, self->source_code_);
+    content             = escape_string(content, false);
+    return expr_factory_.mk_string_literal(content);
 }
 
 Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
@@ -174,23 +189,35 @@ Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
     throw std::logic_error("Interpolated string literal not implemented");
 }
 
-Expr* CSharpTSTreeVisitor::handle_param_var_ref_expr(
+Expr* CSharpTSTreeVisitor::handle_identifier(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    // todo this might be not correctly done
-    const std::string var_name = extract_node_text(*node, self->source_code_);
-    return ExprFactory::get_instance().mk_param_var_ref(var_name);
+    const std::string identifier = extract_node_text(*node, self->source_code_);
+    Stmt* def_stmt               = self->semantic_context_.find_var(identifier);
+    if (! def_stmt)
+        return expr_factory_.mk_unknown();
+
+    if (is_a<MemberVarDefStmt>(def_stmt))
+        return expr_factory_.mk_member_var_ref(
+            expr_factory_.mk_this(),
+            identifier
+        );
+    if (is_a<ParamVarDefStmt>(def_stmt))
+        return expr_factory_.mk_param_var_ref(identifier);
+    if (is_a<LocalVarDefStmt>(def_stmt))
+        return expr_factory_.mk_local_var_ref(identifier);
+
+    return expr_factory_.mk_unknown();
 }
 
-Expr* CSharpTSTreeVisitor::handle_local_var_ref_expr(
+Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    const std::string var_name = extract_node_text(*node, self->source_code_);
-    return ExprFactory::get_instance().mk_local_var_ref(var_name);
+    return expr_factory_.mk_unknown();
 }
 
 Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
@@ -326,7 +353,7 @@ Expr* CSharpTSTreeVisitor::handle_parenthesized_expr(
     const TSNode* node
 )
 {
-    const TSNode expr_node    = ts_node_child(*node, 0);
+    const TSNode expr_node    = ts_node_child(*node, 1);
     const ExprHandler handler = NodeRegistry::get_expr_handler(expr_node);
     return expr_factory_.mk_bracket(handler(self, &expr_node));
 }

@@ -130,9 +130,8 @@ std::string extract_node_text(
 )
 {
     if (ts_node_is_null(node))
-    {
         throw std::runtime_error("Node is null");
-    }
+
     const size_t from = ts_node_start_byte(node);
     const size_t to   = ts_node_end_byte(node);
     return source_code.substr(from, to - from);
@@ -181,7 +180,7 @@ std::string remove_comments(
 
     TSQueryError query_error;
     uint32_t offset;
-    const TSQuery* ts_query = ts_query_new(
+    TSQuery* ts_query = ts_query_new(
         lang,
         query.c_str(),
         query.length(),
@@ -236,7 +235,95 @@ std::string remove_comments(
         );
     }
 
+    ts_query_cursor_delete(cursor);
+    ts_query_delete(ts_query);
     return new_source;
+}
+
+std::string escape_string(
+    const std::string_view str_view,
+    const bool is_verbatim
+)
+{
+    std::string escaped_str;
+    for (size_t i = 0; i < str_view.length(); ++i)
+    {
+        switch (const char c = str_view[i])
+        {
+        case '\n':
+            escaped_str += "\\n";
+            break;
+        case '\t':
+            escaped_str += "\\t";
+            break;
+        case '\r':
+            escaped_str += "\\r";
+            break;
+        case '\"':
+        {
+            if (! is_verbatim)
+            {
+                escaped_str += "\\\"";
+                break;
+            }
+
+            const size_t next = i + 1;
+            if (next < str_view.length() && str_view.at(next) == '\"')
+            {
+                escaped_str += "\\\"";
+                i += 1;
+            }
+            break;
+        }
+        case '\'':
+            escaped_str += "\\\'";
+            break;
+        case '\\':
+            escaped_str += "\\\\";
+            break;
+        case '\0':
+            escaped_str += "\\0";
+            break;
+        case '\a':
+            escaped_str += "\\a";
+            break;
+        case '\b':
+            escaped_str += "\\b";
+            break;
+        case '\f':
+            escaped_str += "\\f";
+            break;
+        case '\v':
+            escaped_str += "\\v";
+            break;
+        default:
+            escaped_str += c;
+            break;
+        }
+    }
+    return escaped_str;
+}
+
+void print_child_nodes_types(const TSNode& node)
+{
+    for (size_t i = 0; i < ts_node_child_count(node); ++i)
+    {
+        const TSNode child = ts_node_child(node, i);
+        std::string type   = ts_node_type(child);
+        std::cout << "Child " << i << " type: " << type << '\n';
+    }
+}
+
+void print_child_nodes_types(const TSNode& node, const std::string& source)
+{
+    for (size_t i = 0; i < ts_node_child_count(node); ++i)
+    {
+        const TSNode child = ts_node_child(node, i);
+        std::string type   = ts_node_type(child);
+        std::string text   = extract_node_text(child, source);
+        std::cout << "Child " << i << " type: " << type << " text: \"" << text
+                  << "\"" << '\n';
+    }
 }
 
 } // namespace astfri::csharp
