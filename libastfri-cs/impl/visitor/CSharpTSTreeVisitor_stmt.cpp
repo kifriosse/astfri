@@ -252,6 +252,103 @@ Stmt* CSharpTSTreeVisitor::handle_if_stmt(
     return current_else;
 }
 
+Stmt* CSharpTSTreeVisitor::handle_try_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+
+    TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    if (ts_node_child_count(*node) < 2)
+        throw std::logic_error("Not a try-catch node");
+
+    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    ts_tree_cursor_goto_descendant(&cursor, 2);
+
+    Stmt* finally_stmt = nullptr;
+    std::vector<CatchStmt*> catch_stmts;
+    do
+    {
+        TSNode current = ts_tree_cursor_current_node(&cursor);
+        StmtHandler current_handler = NodeRegistry::get_stmt_handler(current);
+        Stmt* current_stmt = current_handler(self, &current);
+        if (is_a<CompoundStmt>(current_stmt))
+            finally_stmt = current_stmt;
+        else if (auto* catch_stmt = as_a<CatchStmt>(current_stmt))
+            catch_stmts.push_back(catch_stmt);
+    }
+    while (ts_tree_cursor_goto_next_sibling(&cursor));
+
+    self->semantic_context_.leave_scope();
+    ts_tree_cursor_delete(&cursor);
+
+    return stmt_factory_.mk_try(
+        body_handler(self, &body_node),
+        finally_stmt,
+        catch_stmts
+    );
+}
+
+Stmt* CSharpTSTreeVisitor::handle_catch_clause(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    self->semantic_context_.enter_scope();
+    TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    ts_tree_cursor_goto_first_child(&cursor);
+
+    LocalVarDefStmt* expr_var_def = nullptr;
+    Stmt* body = nullptr;
+    do
+    {
+        TSNode current_node = ts_tree_cursor_current_node(&cursor);
+        StmtHandler current_handler = NodeRegistry::get_stmt_handler(current_node);
+        Stmt* current_stmt = current_handler(self, &current_node);
+        if (const auto expr = as_a<LocalVarDefStmt>(current_stmt))
+        {
+            expr_var_def = expr;
+            self->semantic_context_.add_local_var(expr_var_def);
+        }
+        else if (is_a<CompoundStmt>(current_stmt))
+        {
+            body = current_stmt;
+        }
+        // todo add exception filter
+    }
+    while (ts_tree_cursor_goto_next_sibling(&cursor));
+
+    ts_tree_cursor_delete(&cursor);
+
+    self->semantic_context_.leave_scope();
+    return stmt_factory_.mk_catch(
+        expr_var_def,
+        body
+    );
+}
+
+Stmt* CSharpTSTreeVisitor::handle_finally_clause(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode body_node = ts_node_child(*node, 1);
+    return NodeRegistry::get_stmt_handler(body_node)(self, &body_node);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_catch_declaration(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
+    const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
+    Type* type = make_type(self, type_node);
+    const std::string name = extract_node_text(name_node, self->source_code_);
+    return stmt_factory_.mk_local_var_def(name, type, nullptr);
+}
+
 Stmt* CSharpTSTreeVisitor::handle_expr_stmt(
     CSharpTSTreeVisitor* self,
     const TSNode* node
@@ -299,6 +396,7 @@ Stmt* CSharpTSTreeVisitor::handle_throw(
     const TSNode* node
 )
 {
+    // todo handle throw without expression
     const TSNode expr_node         = ts_node_child(*node, 1);
     const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
     return stmt_factory_.mk_throw(expr_handler(self, &expr_node));

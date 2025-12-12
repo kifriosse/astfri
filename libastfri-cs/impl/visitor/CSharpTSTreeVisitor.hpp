@@ -192,6 +192,23 @@ public:
     // branching statements
     static Stmt* handle_if_stmt(CSharpTSTreeVisitor* self, const TSNode* node);
 
+    static Stmt* handle_try_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_catch_clause(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_finally_clause(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_catch_declaration(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+
     // other
     static Stmt* handle_expr_stmt(
         CSharpTSTreeVisitor* self,

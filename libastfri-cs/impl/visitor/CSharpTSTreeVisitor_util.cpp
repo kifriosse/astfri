@@ -209,6 +209,7 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
         ts_tree_cursor_goto_parent(&cursor);
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
+    ts_tree_cursor_delete(&cursor);
     return exprs;
 }
 

@@ -30,6 +30,10 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"throw_statement", CSharpTSTreeVisitor::handle_throw},
         {"foreach_statement", CSharpTSTreeVisitor::handle_for_each_loop},
         {"if_statement", CSharpTSTreeVisitor::handle_if_stmt},
+        {"try_statement", CSharpTSTreeVisitor::handle_try_stmt},
+        {"catch_clause", CSharpTSTreeVisitor::handle_catch_clause},
+        {"finally_clause", CSharpTSTreeVisitor::handle_finally_clause},
+        {"catch_declaration", CSharpTSTreeVisitor::handle_catch_declaration},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
          {

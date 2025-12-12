@@ -1,40 +1,5 @@
-// using System;
-//
-
+using System;
 using CSharp.T.Test;
-
-const int testGlobalVar = 1;
-
-/*
-    (local_declaration_statement [147, 8] - [147, 35]
-        (modifier [147, 8] - [147, 13])
-        (variable_declaration [147, 14] - [147, 34]
-            type: (predefined_type [147, 14] - [147, 17])
-            (variable_declarator [147, 18] - [147, 25]
-                name: (identifier [147, 18] - [147, 21])
-                (integer_literal [147, 24] - [147, 25]))
-            (variable_declarator [147, 27] - [147, 34]
-                name: (identifier [147, 27] - [147, 30])
-                (integer_literal [147, 33] - [147, 34]))))
-
-    (local_declaration_statement [146, 8] - [146, 21]
-        (variable_declaration [146, 8] - [146, 20]
-            type: (predefined_type [146, 8] - [146, 11])
-            (variable_declarator [146, 12] - [146, 13]
-                name: (identifier [146, 12] - [146, 13]))
-            (variable_declarator [146, 15] - [146, 20]
-                name: (identifier [146, 15] - [146, 16])
-                (integer_literal [146, 19] - [146, 20]))))
-
-    (field_declaration [118, 4] - [118, 22]
-        (modifier [118, 4] - [118, 10])
-        (variable_declaration [118, 11] - [118, 21]
-            type: (predefined_type [118, 11] - [118, 14])
-            (variable_declarator [118, 15] - [118, 21]
-                name: (identifier [118, 15] - [118, 17])
-                (integer_literal [118, 20] - [118, 21]))))
-*/
-
 
 // class Switch
 // {
@@ -42,7 +7,7 @@ const int testGlobalVar = 1;
 //     record Address(string City, string Country);
 //     record User(string Name, Address Address);
 //
-//     static void Main()
+//     static void SwitchStmt()
 //     {
 //         // 1. Basic type pattern matching
 //         object value = 42;
@@ -208,8 +173,6 @@ file class TestCases
 
     public void Run()
     {
-//         Property = 1;
-//         Console.WriteLine(Property);
         int a = 5;
         int b = 10;
         int c;
@@ -222,7 +185,7 @@ file class TestCases
                                 is
                                 multiline
                                 string";
-
+    
         string interpolatedVerbatim = $@"{verbatimString}
             {verbatimString}
         ";
@@ -266,7 +229,7 @@ file class TestCases
         {
             // ...
         }
-//      
+     
         (int age, string name) tuple = (1, "");
         _ = tuple.name;
         _ = tuple.Item1;
@@ -291,16 +254,16 @@ file class TestCases
     public void ArrowBodyExample()
     {
         int d_local = _d;
-//         List<string> fruits = new() { "apple", "banana", "cherry", "date" };
-//
-//         bool hasA = fruits.Any(fruit => fruit.Contains('a'));
-//
-//         Console.WriteLine($"List contains a fruit with 'a': {hasA}");
-//
-//         var fruitsWithE = fruits.Where(fruit => fruit.Contains('e')).ToList();
-//
-//         Console.WriteLine("Fruits with 'e':");
-//         fruitsWithE.ForEach(f => Console.WriteLine(f));
+        List<string> fruits = new() { "apple", "banana", "cherry", "date" };
+
+        bool hasA = fruits.Any(fruit => fruit.Contains('a'));
+
+        Console.WriteLine($"List contains a fruit with 'a': {hasA}");
+
+        var fruitsWithE = fruits.Where(fruit => fruit.Contains('e')).ToList();
+
+        Console.WriteLine("Fruits with 'e':");
+        fruitsWithE.ForEach(f => Console.WriteLine(f));
     }
 
 
