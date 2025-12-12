@@ -157,11 +157,7 @@ public static class OperatorProcessor
         {
             return (operand1 != 0 || operand2 != 0) ? 1 : 0;
         }
-        else
-        {
-            Console.WriteLine($"Error: Unknown operator '{operatorSymbol}'.");
-            return null;
-        }
+        return null;
     }
 }
 

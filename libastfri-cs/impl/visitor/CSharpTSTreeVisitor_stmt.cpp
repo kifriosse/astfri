@@ -191,38 +191,22 @@ Stmt* CSharpTSTreeVisitor::handle_if_stmt(
     // handling of else in last node
     static const std::string if_true   = "consequence";
     static const std::string condition = "condition";
-    const TSNode else_node             = ts_node_child_by_field_name(
+    TSNode top_node = if_nodes.top();
+
+    const TSNode else_node             =  ts_node_child_by_field_name(
         if_nodes.top(),
         if_false.c_str(),
         if_false.length()
     );
-    if (ts_node_is_null(else_node))
+
+
+
+    Stmt* current_else = nullptr;
+    if (! ts_node_is_null(else_node))
     {
-        const TSNode if_node      = if_nodes.top();
-        const TSNode if_true_node = ts_node_child_by_field_name(
-            if_node,
-            if_true.c_str(),
-            if_true.length()
-        );
-        const TSNode cond_node = ts_node_child_by_field_name(
-            if_node,
-            condition.c_str(),
-            condition.length()
-        );
-        const StmtHandler if_true_handler
-            = NodeRegistry::get_stmt_handler(if_true_node);
-        const ExprHandler cond_handler
-            = NodeRegistry::get_expr_handler(cond_node);
-
-        return stmt_factory_.mk_if(
-            cond_handler(self, &cond_node),
-            if_true_handler(self, &if_true_node),
-            nullptr
-        );
+        const StmtHandler else_handler = NodeRegistry::get_stmt_handler(else_node);
+        current_else = else_handler(self, &else_node);
     }
-
-    const StmtHandler else_handler = NodeRegistry::get_stmt_handler(else_node);
-    Stmt* current_else             = else_handler(self, &else_node);
 
     while (! if_nodes.empty())
     {
