@@ -70,6 +70,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"parenthesized_expression",
          CSharpTSTreeVisitor::handle_parenthesized_expr},
         {"identifier", CSharpTSTreeVisitor::handle_identifier},
+        {"constant_pattern", CSharpTSTreeVisitor::handle_const_pattern},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Expr*
          {

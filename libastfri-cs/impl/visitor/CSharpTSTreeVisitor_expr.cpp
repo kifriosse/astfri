@@ -358,4 +358,13 @@ Expr* CSharpTSTreeVisitor::handle_parenthesized_expr(
     return expr_factory_.mk_bracket(handler(self, &expr_node));
 }
 
+Expr* CSharpTSTreeVisitor::handle_const_pattern(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode inside_node = ts_node_child(*node, 0);
+    return NodeRegistry::get_expr_handler(inside_node)(self, &inside_node);
+}
+
 } // namespace astfri::csharp

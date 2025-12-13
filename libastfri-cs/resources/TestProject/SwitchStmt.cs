@@ -51,15 +51,30 @@ class Switch
 //         Console.WriteLine(Describe("Hello"));
 //
 //         // 3. Relational + logical patterns (C# 9+)
-//         int temp = 23;
-//         string category = temp switch
-//         {
-//             < 0              => "Freezing",
-//             >= 0 and < 18    => "Cold",
-//             >= 18 and < 25   => "Warm",
-//             >= 25 and < 35   => "Hot",
-//             _                => "Extreme"
-//         };
+        int temp = 23;
+        string category;
+        switch (temp)
+        {
+            case var t when t < 0:
+                category = "Freezing";
+                break;
+
+            case var t when t >= 0 && t < 18:
+                category = "Cold";
+                break;
+                
+            case var t when t >= 18 && t < 25:
+                category = "Warm";
+                break;
+
+            case var t when t >= 25 && t < 35:
+                category = "Hot";
+                break;
+
+            default:
+                category = "Extreme";
+                break;
+        }
 //         Console.WriteLine(category);
 //
 //         // 4. Property pattern matching

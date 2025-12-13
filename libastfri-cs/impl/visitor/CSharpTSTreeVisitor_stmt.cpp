@@ -1,6 +1,9 @@
 #include <libastfri-cs/impl/NodeRegistry.hpp>
 #include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 
+#include <cstring>
+#include <iostream>
+
 namespace astfri::csharp
 {
 
@@ -373,24 +376,28 @@ Stmt* CSharpTSTreeVisitor::handle_case_stmt(
     const TSNode* node
 )
 {
-    print_child_nodes_types(*node);
     std::vector<Stmt*> body_stmts;
     Expr* pattern = nullptr;
-    const TSNode pattern_node = ts_node_child(*node, 1);
-
-    if (ts_node_is_named(pattern_node))
-    {
-        ExprHandler pattern_handler = NodeRegistry::get_expr_handler(pattern_node);
-        pattern = pattern_handler(self, &pattern_node);
-    }
-
+    TSNode current = {};
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
-    ts_tree_cursor_goto_descendant(&cursor, 1);
+    if (! ts_tree_cursor_goto_first_child(&cursor))
+        throw std::logic_error("Invalid case node");
+
+    do
+    {
+        current = ts_tree_cursor_current_node(&cursor);
+        if (strcmp(ts_node_type(current), ":") == 0)
+            break;
+        // todo handle more complex patterns
+        const ExprHandler pattern_handler
+            = NodeRegistry::get_expr_handler(current);
+        pattern = pattern_handler(self, &current);
+    } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
     while (ts_tree_cursor_goto_next_sibling(&cursor))
     {
-        TSNode current = ts_tree_cursor_current_node(&cursor);
-        if (ts_node_is_named(current))
+        current = ts_tree_cursor_current_node(&cursor);
+        if (! ts_node_is_named(current))
             continue;
 
         StmtHandler handler = NodeRegistry::get_stmt_handler(current);

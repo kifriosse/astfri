@@ -115,6 +115,12 @@ public:
         const TSNode* node
     );
 
+    // switch patterns
+    static Expr* handle_const_pattern(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+
     // Statements
     // Type Definitions
     static Stmt* handle_class_def_stmt(
