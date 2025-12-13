@@ -171,6 +171,7 @@ Stmt* CSharpTSTreeVisitor::handle_if_stmt(
         if_false.c_str(),
         if_false.length()
     );
+
     const uint32_t if_symbol = ts_node_symbol(*node);
     TSSymbol current_symbol
         = ts_node_is_null(current_node) ? 0 : ts_node_symbol(current_node);
@@ -321,7 +322,7 @@ Stmt* CSharpTSTreeVisitor::handle_finally_clause(
     return NodeRegistry::get_stmt_handler(body_node)(self, &body_node);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_catch_declaration(
+Stmt* CSharpTSTreeVisitor::handle_catch_decl(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
@@ -331,6 +332,80 @@ Stmt* CSharpTSTreeVisitor::handle_catch_declaration(
     Type* type = make_type(self, type_node);
     const std::string name = extract_node_text(name_node, self->source_code_);
     return stmt_factory_.mk_local_var_def(name, type, nullptr);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_switch_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    const TSNode value_node = ts_node_child_by_field_name(*node, "value", 5);
+    const TSNode switch_body = ts_node_child_by_field_name(*node, "body", 4);
+    const ExprHandler val_handler = NodeRegistry::get_expr_handler(value_node);
+    Expr* value = val_handler(self, &value_node);
+
+    std::vector<CaseBaseStmt*> cases;
+    TSTreeCursor cursor = ts_tree_cursor_new(switch_body);
+    if (ts_tree_cursor_goto_first_child(&cursor))
+    {
+        do
+        {
+            TSNode current = ts_tree_cursor_current_node(&cursor);
+            if (NodeRegistry::is_structural_node(ts_node_type(current)))
+                continue;
+
+            StmtHandler handler = NodeRegistry::get_stmt_handler(current);
+            Stmt* stmt = handler(self, &current);
+            if (auto* case_stmt = as_a<CaseBaseStmt>(stmt))
+            {
+                cases.push_back(case_stmt);
+            }
+        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+    }
+
+    ts_tree_cursor_delete(&cursor);
+
+    return stmt_factory_.mk_switch(value, cases);
+}
+
+Stmt* CSharpTSTreeVisitor::handle_case_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    print_child_nodes_types(*node);
+    std::vector<Stmt*> body_stmts;
+    Expr* pattern = nullptr;
+    const TSNode pattern_node = ts_node_child(*node, 1);
+
+    if (ts_node_is_named(pattern_node))
+    {
+        ExprHandler pattern_handler = NodeRegistry::get_expr_handler(pattern_node);
+        pattern = pattern_handler(self, &pattern_node);
+    }
+
+    TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    ts_tree_cursor_goto_descendant(&cursor, 1);
+
+    while (ts_tree_cursor_goto_next_sibling(&cursor))
+    {
+        TSNode current = ts_tree_cursor_current_node(&cursor);
+        if (ts_node_is_named(current))
+            continue;
+
+        StmtHandler handler = NodeRegistry::get_stmt_handler(current);
+        Stmt* stmt = handler(self, &current);
+        body_stmts.push_back(stmt);
+    }
+
+    Stmt* body = body_stmts.size() == 1 && is_a<CompoundStmt>(body_stmts.back())
+                ? body_stmts.back()
+                : stmt_factory_.mk_compound(body_stmts);
+
+    if (pattern)
+        return stmt_factory_.mk_case(pattern, body);
+
+    return stmt_factory_.mk_default_case(body);
 }
 
 Stmt* CSharpTSTreeVisitor::handle_expr_stmt(

@@ -33,7 +33,9 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"try_statement", CSharpTSTreeVisitor::handle_try_stmt},
         {"catch_clause", CSharpTSTreeVisitor::handle_catch_clause},
         {"finally_clause", CSharpTSTreeVisitor::handle_finally_clause},
-        {"catch_declaration", CSharpTSTreeVisitor::handle_catch_declaration},
+        {"catch_declaration", CSharpTSTreeVisitor::handle_catch_decl},
+        {"switch_statement", CSharpTSTreeVisitor::handle_switch_stmt},
+        {"switch_section", CSharpTSTreeVisitor::handle_case_stmt},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
          {

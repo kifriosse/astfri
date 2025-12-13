@@ -1,31 +1,43 @@
 using System;
 using CSharp.T.Test;
 
-// class Switch
-// {
-//     record Person(string Name, int Age);
-//     record Address(string City, string Country);
-//     record User(string Name, Address Address);
-//
-//     static void SwitchStmt()
-//     {
-//         // 1. Basic type pattern matching
-//         object value = 42;
-//         switch (value)
-//         {
-//             case int i:
-//                 Console.WriteLine($"Integer: {i}");
-//                 break;
-//             case string s:
-//                 Console.WriteLine($"String: {s}");
-//                 break;
-//             case null:
-//                 Console.WriteLine("Null");
-//                 break;
-//             default:
-//                 Console.WriteLine("Unknown type");
-//                 break;
-//         }
+class Switch
+{
+    // record Person(string Name, int Age);
+    // record Address(string City, string Country);
+    // record User(string Name, Address Address);
+
+    static void SwitchStmt()
+    {
+        object value = 42;
+        switch (value)
+        {
+            default:
+                Console.WriteLine("Unknown type");
+                break;
+            case int i:
+            {
+                Console.WriteLine($"Integer: {i}");
+            }
+            break;
+            case string s:
+                Console.WriteLine($"String: {s}");
+                break;
+            case null:
+                Console.WriteLine("Null");
+                break;
+        }
+
+        switch (value)
+        {
+            case 1:
+            case 2:
+                break;
+        }
+
+        {
+            Console.WriteLine();
+        }
 //
 //         // 2. Switch expression with type patterns
 //         string Describe(object o) =>
@@ -108,9 +120,9 @@ using CSharp.T.Test;
 //         {
 //             Console.WriteLine("Adult");
 //         }
-//     }
+    }
 //
-// }
+}
 //
 
 public static class OperatorProcessor

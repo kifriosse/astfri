@@ -204,7 +204,16 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
-    static Stmt* handle_catch_declaration(
+    static Stmt* handle_catch_decl(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+
+    static Stmt* handle_switch_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_case_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
