@@ -32,10 +32,15 @@ void CSharpTSTreeVisitor::handle_comp_unit_stmt(
         (namespace_declaration
             body: (declaration_list
                 (interface_declaration) @interface))
+        (namespace_declaration
+            body: (declaration_list
+                (struct_declaration) @struct))
         (compilation_unit
             (class_declaration) @class)
         (compilation_unit
             (interface_declaration) @interface)
+        (compilation_unit
+            (struct_declaration) @struct)
     )";
     // todo add other type declarations
 

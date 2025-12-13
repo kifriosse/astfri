@@ -8,6 +8,7 @@ TypeFactory& NodeRegistry::type_factory_ = TypeFactory::get_instance();
 std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
     NodeRegistry::stmt_handlers_ = {
         {"class_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
+        {"struct_declaration", CSharpTSTreeVisitor::handle_class_def_stmt},
         {"destructor_declaration", CSharpTSTreeVisitor::handle_destr_def_stmt},
         {"constructor_declaration",
          CSharpTSTreeVisitor::handle_constr_def_stmt},
