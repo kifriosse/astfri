@@ -453,7 +453,9 @@ Stmt* CSharpTSTreeVisitor::handle_throw(
     const TSNode* node
 )
 {
-    // todo handle throw without expression
+    if (ts_node_child_count(*node) <= 2)
+        return stmt_factory_.mk_throw(nullptr);
+
     const TSNode expr_node         = ts_node_child(*node, 1);
     const ExprHandler expr_handler = NodeRegistry::get_expr_handler(expr_node);
     return stmt_factory_.mk_throw(expr_handler(self, &expr_node));

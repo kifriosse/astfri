@@ -61,7 +61,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
         = extract_node_text(class_name_node, self->source_code_);
 
     ClassDefStmt* class_def = stmt_factory_.mk_class_def(class_name, scope);
-    class_def->name_        = class_name;
+    class_def->name_        = class_name; // todo remove this
 
     self->semantic_context_.enter_type(class_def);
 
