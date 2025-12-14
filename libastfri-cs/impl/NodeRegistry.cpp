@@ -15,7 +15,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"parameter", CSharpTSTreeVisitor::handle_param_def_stmt},
         {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"constructor_initializer",
-         CSharpTSTreeVisitor::handle_construct_init_stmt},
+         CSharpTSTreeVisitor::handle_construct_init},
         {"method_declaration", CSharpTSTreeVisitor::handle_method_def_stmt},
         {"block", CSharpTSTreeVisitor::handle_block_stmt},
         {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},

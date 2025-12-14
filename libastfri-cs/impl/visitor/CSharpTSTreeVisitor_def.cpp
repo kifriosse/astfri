@@ -363,6 +363,8 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
 {
     self->semantic_context_.enter_scope();
     self->semantic_context_.register_return_type(type_factory_.mk_void());
+    ConstructorDefStmt* constructor_def = stmt_factory_.mk_constructor_def();
+
     const auto result = self->semantic_context_.current_user_type();
     if (! result)
         throw std::logic_error("Owner type not found");
@@ -377,57 +379,48 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
     const TSNode initializer_node = ts_node_next_sibling(param_list_node);
 
-    const std::vector<ParamVarDefStmt*> parameters
-        = handle_param_list(self, &param_list_node);
+    constructor_def->owner_ = as_a<ClassDefStmt>(result);
+    constructor_def->params_ = handle_param_list(self, &param_list_node);
+
     const std::vector<TSNode> modifier_nodes
         = find_nodes(*node, self->language_, "(modifier) @mod");
     const CSModifiers modifiers
         = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
-    const AccessModifier access_modifier
+    constructor_def->access_
         = modifiers.get_access_mod().value_or(AccessModifier::Private);
-    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
-    Stmt* body                     = body_handler(self, &body_node);
 
-    std::vector<BaseInitializerStmt*> base_init_stmts;
+    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    constructor_def->body_ = as_a<CompoundStmt>(body_handler(self, &body_node));
 
     if (! ts_node_is_null(initializer_node))
     {
         const StmtHandler base_init_handler
             = NodeRegistry::get_stmt_handler(initializer_node);
-        Stmt* base_init_stmt = base_init_handler(self, &initializer_node);
-        if (is_a<BaseInitializerStmt>(base_init_stmt))
-        {
-            base_init_stmts.emplace_back(
-                as_a<BaseInitializerStmt>(base_init_stmt)
-            );
-        }
-        // todo handle `this` initializer
+        Stmt* init_stmt = base_init_handler(self, &initializer_node);
+        if (const auto base_init = as_a<BaseInitializerStmt>(init_stmt))
+            constructor_def->baseInit_.push_back(base_init);
+        else if (const auto self_init = as_a<SelfInitializerStmt>(init_stmt))
+            constructor_def->selfInitializers.push_back(self_init);
     }
 
     self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();
-    return stmt_factory_.mk_constructor_def(
-        as_a<ClassDefStmt>(result),
-        parameters,
-        base_init_stmts,
-        as_a<CompoundStmt>(body),
-        access_modifier
-    );
+    return constructor_def;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_construct_init_stmt(
+Stmt* CSharpTSTreeVisitor::handle_construct_init(
     CSharpTSTreeVisitor* self,
     const TSNode* node
 )
 {
-    constexpr std::string_view this_init_sw = "this";
+    constexpr std::string_view this_init_sv = "this";
     std::string source_code = extract_node_text(*node, self->source_code_);
     const auto bracket_it   = std::ranges::find(source_code, '(');
     const auto this_it      = std::search(
         source_code.begin(),
         bracket_it,
-        this_init_sw.begin(),
-        this_init_sw.end()
+        this_init_sv.begin(),
+        this_init_sv.end()
     );
 
     const auto result = self->semantic_context_.current_user_type();
@@ -437,23 +430,18 @@ Stmt* CSharpTSTreeVisitor::handle_construct_init_stmt(
     if (! is_a<ClassDefStmt>(result))
         throw std::logic_error("Destructor can only be defined for class type");
 
+    const TSNode arg_list_node = ts_node_child(*node, 2);
+    const std::vector<Expr*> arguments
+        = handle_argument_list(self, &arg_list_node);
+    if (this_it != bracket_it)
+        return stmt_factory_.mk_self_initializer(arguments);
+
     const auto* owner = as_a<ClassDefStmt>(result);
     if (owner->bases_.empty())
         throw std::logic_error(
             "Constructor can't have base initializer without having defined "
             "base class"
         );
-
-    const TSNode arg_list_node = ts_node_child(*node, 2);
-    const std::vector<Expr*> arguments
-        = handle_argument_list(self, &arg_list_node);
-    if (this_it != bracket_it)
-    {
-        // todo handle self initialization
-        throw std::logic_error(
-            "Calling constructor overload isn't implemented"
-        );
-    }
     const ClassDefStmt* base = owner->bases_.back();
     return stmt_factory_.mk_base_initializer(base->type_, arguments);
 }

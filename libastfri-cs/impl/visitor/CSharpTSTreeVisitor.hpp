@@ -158,7 +158,7 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // constructor def stmt
-    static Stmt* handle_construct_init_stmt(
+    static Stmt* handle_construct_init(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // base initializer
