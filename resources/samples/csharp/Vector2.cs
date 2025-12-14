@@ -7,8 +7,8 @@ public struct Vector2
 
     public Vector2(float x, float y)
     {
-        X = x;
-        Y = y;
+        this.X = x;
+        this.Y = y;
     }
 
     public Vector2() : this(0, 0)
@@ -48,7 +48,7 @@ public struct Vector2
 
     public void Deconstruct(out float x, out float y)
     {
-        x = X;
-        y = Y;
+        x = this.X;
+        y = this.Y;
     }
 }

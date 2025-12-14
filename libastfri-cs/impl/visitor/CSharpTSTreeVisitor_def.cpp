@@ -324,7 +324,7 @@ Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
     }
 
     if (var_def_stmts.size() > 1)
-        return StmtFactory::get_instance().mk_def(var_def_stmts);
+        return stmt_factory_.mk_def(var_def_stmts);
 
     return var_def_stmts.front();
 }
@@ -465,7 +465,7 @@ Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
 
     // self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();
-    return StmtFactory::get_instance().mk_destructor_def(
+    return stmt_factory_.mk_destructor_def(
         as_a<ClassDefStmt>(owner),
         as_a<CompoundStmt>(body)
     );

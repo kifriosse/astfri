@@ -58,7 +58,9 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"verbatim_string_literal",
          CSharpTSTreeVisitor::handle_verbatim_str_lit},
         {"raw_string_literal", CSharpTSTreeVisitor::handle_raw_str_lit},
+        // todo this might be useless
         {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
+        {"this", CSharpTSTreeVisitor::handle_this_expr},
         {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},
         {"prefix_unary_expression",
          CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
@@ -70,6 +72,8 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"parenthesized_expression",
          CSharpTSTreeVisitor::handle_parenthesized_expr},
         {"identifier", CSharpTSTreeVisitor::handle_identifier},
+        {"member_access_expression",
+         CSharpTSTreeVisitor::handle_memb_access_expr},
         {"constant_pattern", CSharpTSTreeVisitor::handle_const_pattern},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Expr*
