@@ -1,3 +1,5 @@
+using System.Numerics;
+
 public struct Vector2
 {
     public float X { get; set; }
@@ -7,6 +9,10 @@ public struct Vector2
     {
         X = x;
         Y = y;
+    }
+
+    public Vector2() : this(0, 0)
+    {
     }
 
     public float this[int i]

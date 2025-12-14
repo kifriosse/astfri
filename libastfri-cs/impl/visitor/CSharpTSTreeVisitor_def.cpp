@@ -113,7 +113,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
             // todo handle generic parameters;
         }
         else if (current_symb == type_param_constr_sym) // constraints for
-                                                         // generic parameters
+                                                        // generic parameters
         {
             // todo handle generic parameter constraints
         }
@@ -379,8 +379,8 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
     const TSNode initializer_node = ts_node_next_sibling(param_list_node);
 
-    constructor_def->owner_ = as_a<ClassDefStmt>(result);
-    constructor_def->params_ = handle_param_list(self, &param_list_node);
+    constructor_def->owner_       = as_a<ClassDefStmt>(result);
+    constructor_def->params_      = handle_param_list(self, &param_list_node);
 
     const std::vector<TSNode> modifier_nodes
         = find_nodes(*node, self->language_, "(modifier) @mod");
@@ -511,7 +511,7 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
     Type* return_type              = make_type(self, return_node);
     self->semantic_context_.register_return_type(return_type);
-    Stmt* body             = body_handler(self, &body_node);
+    Stmt* body = body_handler(self, &body_node);
 
     self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();
