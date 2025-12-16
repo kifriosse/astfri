@@ -153,7 +153,6 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
-
     static Stmt* handle_constr_def_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
@@ -178,6 +177,15 @@ public:
     static Stmt* handle_arrow_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
+    );
+    static Stmt* handle_local_func_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static FunctionDefStmt* handle_function_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node,
+        bool is_method
     );
 
     // loops

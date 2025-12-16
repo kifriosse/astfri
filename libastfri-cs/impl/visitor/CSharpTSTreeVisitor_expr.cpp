@@ -259,21 +259,13 @@ Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
 
     UnaryOpType op_type;
     if (op == "++")
-    {
         op_type = UnaryOpType::PostIncrement;
-    }
     else if (op == "--")
-    {
         op_type = UnaryOpType::PostDecrement;
-    }
     else if (op == "!")
-    {
         return left_side;
-    }
     else
-    {
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
-    }
 
     return expr_factory_.mk_unary_op(op_type, left_side);
 }

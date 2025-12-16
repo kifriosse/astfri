@@ -16,11 +16,11 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"field_declaration", CSharpTSTreeVisitor::handle_memb_var_def_stmt},
         {"constructor_initializer", CSharpTSTreeVisitor::handle_construct_init},
         {"method_declaration", CSharpTSTreeVisitor::handle_method_def_stmt},
+        {"local_function_statement", CSharpTSTreeVisitor::handle_local_func_stmt},
         {"block", CSharpTSTreeVisitor::handle_block_stmt},
         {"arrow_expression_clause", CSharpTSTreeVisitor::handle_arrow_stmt},
         {"local_declaration_statement",
          CSharpTSTreeVisitor::handle_local_var_def_stmt},
-        {"expression_statement", CSharpTSTreeVisitor::handle_expr_stmt},
         {"do_statement", CSharpTSTreeVisitor::handle_do_while_loop},
         {"while_statement", CSharpTSTreeVisitor::handle_while_loop},
         {"for_statement", CSharpTSTreeVisitor::handle_for_loop},
@@ -36,6 +36,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::StmtHandler>
         {"catch_declaration", CSharpTSTreeVisitor::handle_catch_decl},
         {"switch_statement", CSharpTSTreeVisitor::handle_switch_stmt},
         {"switch_section", CSharpTSTreeVisitor::handle_case_stmt},
+        {"expression_statement", CSharpTSTreeVisitor::handle_expr_stmt},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Stmt*
          {
@@ -58,7 +59,6 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"verbatim_string_literal",
          CSharpTSTreeVisitor::handle_verbatim_str_lit},
         {"raw_string_literal", CSharpTSTreeVisitor::handle_raw_str_lit},
-        // todo this might be useless
         {"this_expression", CSharpTSTreeVisitor::handle_this_expr},
         {"this", CSharpTSTreeVisitor::handle_this_expr},
         {"conditional_expression", CSharpTSTreeVisitor::handle_ternary_expr},

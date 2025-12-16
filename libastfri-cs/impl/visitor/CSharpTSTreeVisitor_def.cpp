@@ -476,52 +476,67 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
     const TSNode* node
 )
 {
-    self->semantic_context_.enter_scope();
-    MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
-    const auto result = self->semantic_context_.current_user_type();
-    if (! result)
-        throw std::logic_error("Owner type not found");
-
     static const std::string mod_query =
         R"(
         (method_declaration
             (modifier) @modifier)
         )";
 
+    self->semantic_context_.enter_scope();
+    MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
+    const auto result = self->semantic_context_.current_user_type();
+    if (! result)
+        throw std::logic_error("Owner type not found");
+
     method_def_stmt->owner_ = result;
+
     const std::vector<TSNode> modifier_nodes
         = find_nodes(*node, self->language_, mod_query);
     const CSModifiers modifiers
         = CSModifiers::handle_modifiers(modifier_nodes, self->source_code_);
     method_def_stmt->access_
         = modifiers.get_access_mod().value_or(AccessModifier::Internal);
+    method_def_stmt->func_ = handle_function_stmt(self, node, true);
+    self->semantic_context_.unregister_return_type();
+    return method_def_stmt;
+}
 
+Stmt* CSharpTSTreeVisitor::handle_local_func_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    return handle_function_stmt(self, node, false);
+}
+
+FunctionDefStmt* CSharpTSTreeVisitor::handle_function_stmt(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node,
+    const bool is_method
+)
+{
+    FunctionDefStmt* func_def = stmt_factory_.mk_function_def();
+    std::string node_name = is_method ? "returns" : "type";
+    const TSNode ret_type_node
+        = ts_node_child_by_field_name(*node, node_name.c_str(), node_name.length());
     const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
-    const TSNode parameters_node
+    const TSNode param_node
         = ts_node_child_by_field_name(*node, "parameters", 10);
-    const TSNode return_node = ts_node_child_by_field_name(*node, "returns", 7);
-    const TSNode body_node   = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
 
     // todo handle generic parameters
-
-    const std::string method_name
-        = extract_node_text(name_node, self->source_code_);
-    const std::vector<ParamVarDefStmt*> parameters
-        = handle_param_list(self, &parameters_node);
+    Type* ret_type = make_type(self, ret_type_node);
+    self->semantic_context_.register_return_type(ret_type);
+    func_def->retType_ = ret_type;
+    func_def->name_    = extract_node_text(name_node, self->source_code_);
+    func_def->params_  = handle_param_list(self, &param_node);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
-    Type* return_type              = make_type(self, return_node);
-    self->semantic_context_.register_return_type(return_type);
-    Stmt* body = body_handler(self, &body_node);
+    if (const auto body = as_a<CompoundStmt>(body_handler(self, &body_node)))
+        func_def->body_ = body;
 
     self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();
-    method_def_stmt->func_ = stmt_factory_.mk_function_def(
-        method_name,
-        parameters,
-        return_type,
-        as_a<CompoundStmt>(body)
-    );
-    return method_def_stmt;
+    return func_def;
 }
 
 } // namespace astfri::csharp
