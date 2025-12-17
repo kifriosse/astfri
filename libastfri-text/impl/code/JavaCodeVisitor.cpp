@@ -217,7 +217,8 @@ void JavaCodeVisitor::visit(BaseInitializerStmt const& stmt)
 void JavaCodeVisitor::visit(ConstructorDefStmt const& stmt)
 {
     process_access_mod(stmt.access_);
-    builder_->append_text(stmt.owner_->name_);
+    //builder_->append_text(stmt.owner_->name_);
+    builder_->append_text(stmt.owner_->type_->name_); // TODO check
     process_pargs(stmt.params_, false);
     builder_->write_opening_curl_bracket();
     if (!stmt.baseInit_.empty())
@@ -254,7 +255,8 @@ void JavaCodeVisitor::visit(InterfaceDefStmt const& stmt)
 {
     Scope const& scope = stmt.m_type->scope_;
     process_package(scope);
-    builder_->append_text("public interface " + stmt.name_);
+    //builder_->append_text("public interface " + stmt.name_);
+    builder_->append_text("public interface " + stmt.m_type->name_); // TODO check
     if (!stmt.tparams_.empty())
     {
         process_pargs(stmt.tparams_, true);
@@ -283,14 +285,16 @@ void JavaCodeVisitor::visit(InterfaceDefStmt const& stmt)
     }
     builder_->decrease_indentation();
     builder_->append_text("}");
-    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.name_, scope);
+    //static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.name_, scope);
+    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.m_type->name_, scope); // TODO check
 }
 
 void JavaCodeVisitor::visit(ClassDefStmt const& stmt)
 {
     Scope const& scope = stmt.type_->scope_;
     process_package(scope);
-    builder_->append_text("public class " + stmt.name_);
+    //builder_->append_text("public class " + stmt.name_);
+    builder_->append_text("public class " + stmt.type_->name_); // TODO check
     if (!stmt.tparams_.empty())
     {
         process_pargs(stmt.tparams_, true);
@@ -352,7 +356,8 @@ void JavaCodeVisitor::visit(ClassDefStmt const& stmt)
     }
     builder_->decrease_indentation();
     builder_->append_text("}");
-    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.name_, scope);
+    //static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.name_, scope);
+    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.type_->name_, scope); // TODO check
 }
 
 // --------------------------------------------------------------------------------------------- //
