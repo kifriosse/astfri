@@ -6,6 +6,7 @@
 
 #include <map>
 #include <memory>
+#include <functional>
 #include <vector>
 
 namespace astfri
@@ -63,34 +64,34 @@ public:
         AccessModifier access
     );
 
-    /**
-     * @deprecated
-     */
-    BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
 
     /**
      * TODO ako so scopom base? nemal by tu byť pointer na base class type alebo def?
      */
-    BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
+    BaseInitializerStmt* mk_base_initializer(ClassType *type, std::vector<Expr*> args);
+
+    SelfInitializerStmt *mk_self_initializer(std::vector<Expr*> args);
+
+    MemberInitializerStmt *mk_member_initializer(MemberVarDefStmt *member, Expr *arg);
 
     DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
     GenericParam* mk_generic_param(std::string constraint, std::string name);
 
-    /**
-     * @deprecated
-     */
-    InterfaceDefStmt* mk_interface_def();
+    [[deprecated]] InterfaceDefStmt* mk_interface_def();
 
-    /**
-     * @deprecated
-     */
-    InterfaceDefStmt* mk_interface_def(std::string name);
+    [[deprecated]] InterfaceDefStmt* mk_interface_def(std::string name);
+
+    // TODO getter for interface, function and global var
 
     /**
      * @brief TODO
      */
     InterfaceDefStmt* mk_interface_def(std::string name, Scope scope);
+
+    ClassDefStmt *get_class_def(std::string_view name, const Scope &scope);
 
     /**
      * @brief TODO
@@ -118,7 +119,13 @@ public:
 
     ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
 
+    ForEachStmt* mk_for_each(LocalVarDefStmt *var, Expr *container, Stmt *body);
+
     ThrowStmt* mk_throw(Expr* val);
+
+    CatchStmt *mk_catch(LocalVarDefStmt *param, Stmt *body);
+
+    TryStmt *mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
 
     ContinueStmt* mk_continue();
 
@@ -128,10 +135,7 @@ public:
 
     TranslationUnit* mk_translation_unit();
 
-    /**
-     * @deprecated
-     */
-    TranslationUnit* mk_translation_unit(
+    [[deprecated]] TranslationUnit* mk_translation_unit(
         std::vector<ClassDefStmt*> classes,
         std::vector<InterfaceDefStmt*> interfaces,
         std::vector<FunctionDefStmt*> functions,
@@ -148,8 +152,8 @@ private:
 private:
     TypeFactory *m_types;
     std::vector<std::unique_ptr<Stmt>> stmts_;
-    std::map<std::string, InterfaceDefStmt> m_interfaces;
-    std::map<std::string, ClassDefStmt> m_classes;
+    std::map<std::string, InterfaceDefStmt, std::less<>> m_interfaces;
+    std::map<std::string, ClassDefStmt, std::less<>> m_classes;
     ContinueStmt continue_;
     BreakStmt break_;
     UnknownStmt unknown_;

@@ -1,4 +1,5 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include "libastfri/inc/Expr.hpp"
 
 namespace astfri::astfri_cpp
 {
@@ -69,8 +70,8 @@ bool ClangVisitor::TraverseLambdaExpr(clang::LambdaExpr* LBD)
     body = this->astfri_location.stmt_;
 
     // vytvorenie uzla
-    std::string lambda_meno = LBD->getLambdaClass()->getQualifiedNameAsString();
-    auto lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body, LBD->getLambdaClass()->getName().str());    
+    std::string name = LBD->getLambdaClass()->getQualifiedNameAsString();
+    LambdaExpr* lambdaExpr = this->expr_factory_->mk_lambda_expr(params, body, name);
     
     // nastavenie location
     this->astfri_location.expr_ = lambdaExpr;
@@ -126,21 +127,6 @@ bool ClangVisitor::TraverseCallExpr(clang::CallExpr* CE)
         }
         this->astfri_location.expr_ = fun;
     }
-
-    // // co sa ma stat ak sa zavola lambda
-    //  if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(CE->getDirectCallee()->getParent())) {
-    //     if (record && record->isLambda()) {
-    //         // Mozem zavolat mk_lambda_call, ked chcem len tu lambdu?
-    //         Expr* lambda = this->expr_factory_->mk_lambda_expr({}, {}, record->getQualifiedNameAsString());
-    //         std::vector<Expr*> args = {};
-    //         for(auto arg : CE->arguments()) {
-    //             TraverseStmt(arg);
-    //             args.push_back(this->astfri_location.expr_);
-    //         }
-    //         LambdaCallExpr* lambdaCall = this->expr_factory_->mk_lambda_call(lambda, args);
-    //         this->astfri_location.expr_ = lambdaCall;
-    //     }
-    // }
     return true;
 }
 
@@ -246,12 +232,14 @@ bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE)
     // co sa ma stat ak sa zavola lambda
      if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(COCE->getDirectCallee()->getParent())) {
         if (record && record->isLambda()) {
-            // Mozem zavolat mk_lambda_call, ked chcem len tu lambdu?
-            Expr* lambda = this->expr_factory_->mk_lambda_expr({}, {}, record->getQualifiedNameAsString());
+            std::string name = record->getQualifiedNameAsString();
+            Expr* lambda = this->expr_factory_->get_lambda_expr(name);
             std::vector<Expr*> args = {};
-            for(auto arg : COCE->arguments()) {
-                TraverseStmt(arg);
-                args.push_back(this->astfri_location.expr_);
+            // z nejakého dôvodu sa ako prvý argument berie samotná inštancia lambdy
+            // takýto foreach jednoducho preskočí prvý element
+            for (auto *arg : llvm::drop_begin(COCE->arguments(), 1)) {
+               TraverseStmt(arg);
+               args.push_back(this->astfri_location.expr_);
             }
             LambdaCallExpr* lambdaCall = this->expr_factory_->mk_lambda_call(lambda, args);
             this->astfri_location.expr_ = lambdaCall;

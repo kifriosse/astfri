@@ -1,18 +1,15 @@
 add_library(astfri-cs SHARED)
 
 target_sources(astfri-cs PRIVATE
-    CSharpTSTreeVisitor.cpp
     CSharpASTBuilder.cpp
-    CSharpTSTreeVisitor_expr.cpp
-    CSharpTSTreeVisitor_stmt.cpp
-    CSharpTSTreeVisitor_def.cpp
-    CSharpTSTreeVisitor_util.cpp
     NodeRegistry.cpp
-    TypeContext.cpp
+    SemanticContext.cpp
     CSModifiers.cpp
     TypeResolver.cpp
     utils.cpp
 )
+
+add_subdirectory(visitor)
 
 target_link_directories(astfri-cs PUBLIC
     ${TREE_SITTER_LIBRARY_DIRS}

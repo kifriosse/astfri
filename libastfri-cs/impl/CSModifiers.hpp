@@ -3,8 +3,9 @@
 
 #include <libastfri/inc/Stmt.hpp>
 
-#include <optional>
 #include <tree_sitter/api.h>
+
+#include <optional>
 
 namespace astfri::csharp
 {
@@ -41,8 +42,8 @@ private:
 
 public:
     static CSModifiers handle_modifiers(
-        std::vector<TSNode> const& mod_nodes,
-        std::string const& source_code
+        const std::vector<TSNode>& mod_nodes,
+        const std::string& source_code
     );
 
     bool has_modifier(CSModifier mod) const;

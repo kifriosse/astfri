@@ -104,6 +104,11 @@ void ClassVisitor::visit(astfri::IndirectionType const& type)
     type.indirect_->accept(*this);
 }
 
+void ClassVisitor::visit(astfri::IncompleteType const& type)
+{
+    this->currentVariable_.type_ = type.name;
+}
+
 void ClassVisitor::visit(astfri::ParamVarDefStmt const& stmt)
 {
     stmt.type_->accept(*this);

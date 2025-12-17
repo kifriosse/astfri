@@ -7,15 +7,15 @@
 namespace astfri::csharp
 {
 CSModifiers CSModifiers::handle_modifiers(
-    std::vector<TSNode> const& mod_nodes,
-    std::string const& source_code
+    const std::vector<TSNode>& mod_nodes,
+    const std::string& source_code
 )
 {
     CSModifiers modifiers;
-    for (TSNode const& node : mod_nodes)
+    for (const TSNode& node : mod_nodes)
     {
         std::string mod_str = extract_node_text(node, source_code);
-        auto const res      = NodeRegistry::get_modifier(mod_str);
+        const auto res      = NodeRegistry::get_modifier(mod_str);
         if (res.has_value())
         {
             modifiers.add_modifier(*res);
@@ -41,12 +41,12 @@ void CSModifiers::remove_modifier(CSModifier mod)
 
 std::optional<AccessModifier> CSModifiers::get_access_mod() const
 {
-    if (has_modifier(CSModifier::Internal) && has_modifier(CSModifier::Protected))
-        // todo handle protected internal
-        return {};
-    if (has_modifier(CSModifier::Private) && has_modifier(CSModifier::Protected))
-        // todo handle private protected
-        return {};
+    if (has_modifier(CSModifier::Internal)
+        && has_modifier(CSModifier::Protected))
+        return AccessModifier::Internal;
+    if (has_modifier(CSModifier::Private)
+        && has_modifier(CSModifier::Protected))
+        return AccessModifier::Protected;
     if (has_modifier(CSModifier::Public))
         return AccessModifier::Public;
     if (has_modifier(CSModifier::Private))
@@ -56,16 +56,17 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
     if (has_modifier(CSModifier::Protected))
         return AccessModifier::Protected;
     if (has_modifier(CSModifier::File))
-        // todo handle file
-        return {};
+        return AccessModifier::Internal;
 
     return {};
 }
 
 bool CSModifiers::is_virtual() const
 {
-    return has_modifier(CSModifier::Virtual) || has_modifier(CSModifier::Abstract)
-        || (has_modifier(CSModifier::Override) && ! has_modifier(CSModifier::Sealed));
+    return has_modifier(CSModifier::Virtual)
+        || has_modifier(CSModifier::Abstract)
+        || (has_modifier(CSModifier::Override)
+            && ! has_modifier(CSModifier::Sealed));
 }
 
 } // namespace astfri::csharp

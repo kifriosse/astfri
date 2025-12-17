@@ -1,24 +1,25 @@
 
 #include "TypeResolver.hpp"
 
+#include <tree_sitter/api.h>
+#include <tree_sitter/tree-sitter-c-sharp.h>
+
 #include <filesystem>
 #include <fstream>
 #include <stack>
-#include <tree_sitter/api.h>
-#include <tree_sitter/tree-sitter-c-sharp.h>
 
 #include "utils.hpp"
 
 namespace astfri::csharp
 {
 
-void TypeRegistry::add_type(TypeInfo const& info)
+void TypeRegistry::add_type(const TypeInfo& info)
 {
-    auto const& [names_] = info.type_->scope_;
+    const auto& [names_]   = info.type_->scope_;
     NamespaceNode* current = &global_namespace_;
     for (auto& namespace_name : names_)
     {
-        auto const it = current->namespaces_.find(namespace_name);
+        const auto it = current->namespaces_.find(namespace_name);
         if (it != current->namespaces_.end())
         {
             current = &it->second;
@@ -35,28 +36,29 @@ NamespaceNode& TypeRegistry::root()
     return global_namespace_;
 }
 
-std::unordered_map<std::string, DeclarationType> TypeResolver::decl_type_map_ = {
-    {"class_declaration",      DeclarationType::Class},
-    { "interface_declaration", DeclarationType::Interface},
-    { "struct_declaration",    DeclarationType::Struct},
-    { "enum_declaration",      DeclarationType::Enum},
-    { "delegate_declaration",  DeclarationType::Delegate}
+std::unordered_map<std::string, DeclarationType> TypeResolver::decl_type_map_
+    = {
+        {"class_declaration",     DeclarationType::Class    },
+        {"interface_declaration", DeclarationType::Interface},
+        {"struct_declaration",    DeclarationType::Struct   },
+        {"enum_declaration",      DeclarationType::Enum     },
+        {"delegate_declaration",  DeclarationType::Delegate }
 };
 
-void TypeResolver::find_types_file(std::string const& file)
+void TypeResolver::find_types_file(const std::string& file)
 {
     std::ifstream file_stream(file);
-    std::string const content(
+    const std::string content(
         (std::istreambuf_iterator<char>(file_stream)),
         std::istreambuf_iterator<char>()
     );
     find_types_src(content);
 }
 
-void TypeResolver::find_types_src(std::string const& source_code)
+void TypeResolver::find_types_src(const std::string& source_code)
 {
-    TSLanguage const* language = tree_sitter_c_sharp();
-    TSParser* parser = ts_parser_new();
+    const TSLanguage* language = tree_sitter_c_sharp();
+    TSParser* parser           = ts_parser_new();
     ts_parser_set_language(parser, language);
     TSTree* tree = ts_parser_parse_string(
         parser,
@@ -64,9 +66,9 @@ void TypeResolver::find_types_src(std::string const& source_code)
         source_code.c_str(),
         source_code.length()
     );
-    TSNode const root = ts_tree_root_node(tree);
+    const TSNode root                        = ts_tree_root_node(tree);
 
-    static std::string const type_decl_query = R"(
+    static const std::string type_decl_query = R"(
         (namespace_declaration
             body: (declaration_list
                 (class_declaration) @class))
@@ -79,11 +81,8 @@ void TypeResolver::find_types_src(std::string const& source_code)
             (interface_declaration) @interface)
     )";
 
-    std::vector<TSNode> decl_nodes = find_nodes(
-        root,
-        language,
-        type_decl_query
-    );
+    std::vector<TSNode> decl_nodes
+        = find_nodes(root, language, type_decl_query);
     // todo not finished
     // for (TSNode& decl_node : decl_nodes)
     // {
@@ -91,7 +90,7 @@ void TypeResolver::find_types_src(std::string const& source_code)
     // }
 }
 
-void TypeResolver::find_types_project(std::string const& project_dir)
+void TypeResolver::find_types_project(const std::string& project_dir)
 {
     std::stack<std::string> dirs;
     dirs.push(project_dir);
@@ -100,12 +99,13 @@ void TypeResolver::find_types_project(std::string const& project_dir)
     {
         auto dir_it = std::filesystem::directory_iterator(dirs.top());
         dirs.pop();
-        for (auto const& dir_entry : dir_it)
+        for (const auto& dir_entry : dir_it)
         {
             if (dir_entry.is_directory())
             {
-                auto const& path = dir_entry.path();
-                if (path == project_dir + "/bin" || path == project_dir + "/obj")
+                const auto& path = dir_entry.path();
+                if (path == project_dir + "/bin"
+                    || path == project_dir + "/obj")
                 {
                     continue;
                 }
@@ -119,9 +119,8 @@ void TypeResolver::find_types_project(std::string const& project_dir)
     }
 }
 
-void TypeResolver::load_external_types(std::string const& json_file)
+void TypeResolver::load_external_types(const std::string& json_file)
 {
-
 }
 
 } // namespace astfri::csharp

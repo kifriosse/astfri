@@ -3,13 +3,13 @@
 
 #include <libastfri-text/inc/AbstractVisitor.hpp>
 #include <libastfri-text/inc/code/AbstractCodeBuilder.hpp>
-#include "libastfri/inc/Expr.hpp"
 
 namespace astfri::text
 {
     class AbstractCodeVisitor : public AbstractVisitor
     {
-    public:
+    protected:
+        AbstractCodeVisitor() = delete;
         explicit AbstractCodeVisitor(AbstractCodeBuilder& builder);
         virtual ~AbstractCodeVisitor() = default;
     public:
@@ -23,6 +23,7 @@ namespace astfri::text
         void visit(ClassType const& type) override;
         void visit(InterfaceType const& type) override;
         void visit(LambdaType const& type) override = 0;
+        void visit(IncompleteType const& type) override;
         void visit(UnknownType const& type) override;
         // -----
         void visit(IntLiteralExpr const& expr) override;
@@ -47,7 +48,7 @@ namespace astfri::text
         void visit(ConstructorCallExpr const& expr) override;
         void visit(NewExpr const& expr) override;
         void visit(DeleteExpr const& expr) override = 0;
-        void visit(BracketExpr const& expr) override {} // MM: TODO
+        void visit(BracketExpr const& expr) override;
         void visit(UnknownExpr const& expr) override;
         // -----
         void visit(TranslationUnit const& stmt) override = 0;
@@ -61,7 +62,10 @@ namespace astfri::text
         void visit(WhileStmt const& stmt) override;
         void visit(DoWhileStmt const& stmt) override;
         void visit(ForStmt const& stmt) override;
+        void visit(ForEachStmt const& stmt) override {} // MM: TODO
         void visit(ThrowStmt const& stmt) override;
+        void visit(CatchStmt const& stmt) override {} // MM: TODO
+        void visit(TryStmt const& stmt) override {} // MM: TODO
         void visit(UnknownStmt const& stmt) override;
         void visit(LocalVarDefStmt const& stmt) override;
         void visit(ParamVarDefStmt const& stmt) override;

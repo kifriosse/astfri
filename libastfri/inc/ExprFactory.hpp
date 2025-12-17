@@ -6,6 +6,7 @@
 
 #include <map>
 #include <memory>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -57,14 +58,10 @@ public:
     LambdaCallExpr* mk_lambda_call();
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
-    /**
-     * @deprecated
-     */
-    LambdaExpr* mk_lambda_expr();
-    /**
-     * @deprecated
-     */
-    LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
+    [[deprecated]] LambdaExpr* mk_lambda_expr();
+    [[deprecated]] LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
+
+    LambdaExpr* get_lambda_expr(std::string_view name);
     LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body, std::string name);
 
     ThisExpr* mk_this();
@@ -93,8 +90,8 @@ private:
 
     std::map<int, IntLiteralExpr> ints_;
     std::map<char, CharLiteralExpr> chars_;
-    std::map<std::string, StringLiteralExpr> strings_;
-    std::map<std::string, LambdaExpr> m_lambdas;
+    std::map<std::string, StringLiteralExpr, std::less<>> strings_;
+    std::map<std::string, LambdaExpr, std::less<>> m_lambdas;
 
     NullLiteralExpr null_;
     BoolLiteralExpr false_{false};

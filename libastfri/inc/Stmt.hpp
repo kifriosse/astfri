@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+#include "libastfri/inc/Expr.hpp"
+#include "libastfri/inc/Visitor.hpp"
 
 namespace astfri
 {
@@ -51,13 +53,14 @@ enum class AccessModifier
 enum class Virtuality
 {
     NotVirtual,
-    Virtual
+    Virtual,
+    PureVirtual
 };
 
 /**
  * @brief TODO
  */
-struct VarDefStmt : Stmt
+struct VarDefStmt : Stmt // TODO visitable here?
 {
     std::string name_;
     Type* type_;
@@ -109,9 +112,9 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
  * In this case, you would use:
  * @code
    DefStmt
-   |-VarDefStmt
+   |-LocalVarDefStmt
    | `-IntLiteralExpr(10)
-   `-VarDefStmt
+   `-LocalVarDefStmt
      `-IntLiteralExpr(10)
  * @endcode
  */
@@ -145,7 +148,7 @@ struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
  */
 struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
-    UserTypeDefStmt* owner_{nullptr}; // TODO ClassType?
+    UserTypeDefStmt* owner_{nullptr}; // TODO ClassType or Interface, variant?
     FunctionDefStmt* func_{nullptr};
     AccessModifier access_{AccessModifier::Public};
     Virtuality virtuality_{Virtuality::NotVirtual};
@@ -156,10 +159,29 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
  */
 struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
 {
-    std::string base_;
+    [[deprecated]] std::string base_; // TODO type
+    ClassType *type;
     std::vector<Expr*> args_;
 
-    BaseInitializerStmt(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt(std::string base, std::vector<Expr*> args);
+    BaseInitializerStmt(ClassType *type, std::vector<Expr*> args);
+};
+
+/**
+ * @brief TODO
+ */
+struct SelfInitializerStmt : Stmt, details::MkVisitable<SelfInitializerStmt> {
+    std::vector<Expr*> args;
+    SelfInitializerStmt(std::vector<Expr*> args);
+};
+
+/**
+ * @brief TODO
+ */
+struct MemberInitializerStmt : Stmt, details::MkVisitable<MemberInitializerStmt> {
+    MemberVarDefStmt *member;
+    Expr *arg;
+    MemberInitializerStmt(MemberVarDefStmt *member, Expr *arg);
 };
 
 /**
@@ -170,10 +192,13 @@ struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
     ClassDefStmt* owner_;
     std::vector<ParamVarDefStmt*> params_;
     std::vector<BaseInitializerStmt*> baseInit_;
+    std::vector<SelfInitializerStmt*> selfInitializers;
+    std::vector<MemberInitializerStmt*> memberInitializers;
     CompoundStmt* body_;
     AccessModifier access_;
 
-    ConstructorDefStmt(
+    ConstructorDefStmt();
+    [[deprecated]] ConstructorDefStmt(
         ClassDefStmt* owner,
         std::vector<ParamVarDefStmt*> params,
         std::vector<BaseInitializerStmt*> baseInit,
@@ -211,7 +236,7 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
  */
 struct UserTypeDefStmt : Stmt
 {
-    std::string name_;
+    [[deprecated]] std::string name_;
 };
 
 /**
@@ -236,8 +261,9 @@ struct ClassDefStmt : UserTypeDefStmt, details::MkVisitable<ClassDefStmt>
     std::vector<DestructorDefStmt*> destructors_;
     std::vector<MethodDefStmt*> methods_;
     std::vector<GenericParam*> tparams_;
-    std::vector<InterfaceDefStmt*> interfaces_;
-    std::vector<ClassDefStmt*> bases_;
+    std::vector<InterfaceDefStmt*> interfaces_; // TODO IntefaceType
+    std::vector<ClassDefStmt*> bases_; // TODO ClassType
+    // TODO incomplete bases
 };
 
 /**
@@ -285,7 +311,7 @@ struct IfStmt : Stmt, details::MkVisitable<IfStmt>
 /**
  * @brief Base for case options in switch statement
  */
-struct CaseBaseStmt : Stmt
+struct CaseBaseStmt : Stmt // variant alebo common base? rovnako pri method ownerovi
 {
     Stmt* body_;
 
@@ -362,11 +388,40 @@ struct ForStmt : LoopStmt, details::MkVisitable<ForStmt>
 /**
  * @brief TODO
  */
+struct ForEachStmt : Stmt, details::MkVisitable<ForEachStmt> {
+    LocalVarDefStmt *var;
+    Expr *container;
+    Stmt *body;
+    ForEachStmt(LocalVarDefStmt *var, Expr *container, Stmt *body);
+};
+
+/**
+ * @brief TODO
+ */
 struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt>
 {
     Expr* val_;
 
     explicit ThrowStmt(Expr* val);
+};
+
+/**
+ * @brief TODO
+ */
+struct CatchStmt : Stmt, details::MkVisitable<CatchStmt> {
+    LocalVarDefStmt *param;
+    Stmt *body;
+    CatchStmt(LocalVarDefStmt *param, Stmt *body);
+};
+
+/**
+ * @brief TODO
+ */
+struct TryStmt :  Stmt, details::MkVisitable<TryStmt> {
+    Stmt *body;
+    Stmt *finally;
+    std::vector<CatchStmt*> catches;
+    TryStmt(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
 };
 
 /**

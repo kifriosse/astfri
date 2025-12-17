@@ -2,15 +2,6 @@
 #define CLANGVISITOR_HPP
 
 // astfri
-// #include <libastfri/impl/ExprFwd.hpp>
-// #include <libastfri/impl/StmtFwd.hpp>
-// #include <libastfri/impl/TypeFwd.hpp>
-// #include <libastfri/inc/Expr.hpp>
-// #include <libastfri/inc/ExprFactory.hpp>
-// #include <libastfri/inc/Stmt.hpp>
-// #include <libastfri/inc/StmtFactory.hpp>
-// #include <libastfri/inc/Type.hpp>
-// #include <libastfri/inc/TypeFactory.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 // clang a llvm
@@ -42,13 +33,6 @@
 // std knižnica (asi)
 #include <cstdio>
 #include <iostream> // používa sa v impl súboroch
-
-// #include <llvm-18/llvm/Support/Casting.h>
-// #include <llvm-18/llvm/Support/Errc.h>
-// #include <llvm-18/llvm/Support/raw_ostream.h>
-// #include <libastfri/inc/Expr.hpp>
-// #include <libastfri/inc/Stmt.hpp>
-// #include <libastfri/inc/Type.hpp>
 
 
 // #include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
