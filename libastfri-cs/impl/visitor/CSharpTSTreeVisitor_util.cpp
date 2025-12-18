@@ -226,7 +226,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
     std::vector<VarDefStmt*> var_defs;
     const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
     Type* type             = make_type(self, type_node);
-    std::vector<TSNode> decltr_nodes
+    const std::vector<TSNode> decltr_nodes
         = find_nodes(*node, self->language_, decl_query);
     for (const auto declarator_node : decltr_nodes)
     {

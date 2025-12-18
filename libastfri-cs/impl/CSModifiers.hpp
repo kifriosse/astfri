@@ -46,11 +46,11 @@ public:
         const std::string& source_code
     );
 
-    bool has_modifier(CSModifier mod) const;
+    [[nodiscard]] bool has_modifier(CSModifier mod) const;
     void add_modifier(CSModifier mod);
     void remove_modifier(CSModifier mod);
-    std::optional<AccessModifier> get_access_mod() const;
-    bool is_virtual() const;
+    [[nodiscard]] std::optional<AccessModifier> get_access_mod() const;
+    [[nodiscard]] bool is_virtual() const;
 };
 
 } // namespace astfri::csharp

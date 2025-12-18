@@ -49,7 +49,7 @@ void TypeResolver::find_types_file(const std::string& file)
 {
     std::ifstream file_stream(file);
     const std::string content(
-        (std::istreambuf_iterator<char>(file_stream)),
+        (std::istreambuf_iterator(file_stream)),
         std::istreambuf_iterator<char>()
     );
     find_types_src(content);
@@ -60,7 +60,7 @@ void TypeResolver::find_types_src(const std::string& source_code)
     const TSLanguage* language = tree_sitter_c_sharp();
     TSParser* parser           = ts_parser_new();
     ts_parser_set_language(parser, language);
-    TSTree* tree = ts_parser_parse_string(
+    const TSTree* tree = ts_parser_parse_string(
         parser,
         nullptr,
         source_code.c_str(),

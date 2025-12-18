@@ -80,7 +80,7 @@ std::vector<std::string> CSharpASTBuilder::get_source_codes(
                 const std::filesystem::path& path = dir_entry.path();
                 std::ifstream file_stream(path);
                 std::string source_code(
-                    (std::istreambuf_iterator<char>(file_stream)),
+                    (std::istreambuf_iterator(file_stream)),
                     std::istreambuf_iterator<char>()
                 );
                 TSTree* tree = ts_parser_parse_string(

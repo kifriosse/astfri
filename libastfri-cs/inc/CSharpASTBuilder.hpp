@@ -20,14 +20,14 @@ public:
     CSharpASTBuilder();
 
     ~CSharpASTBuilder();
-    TranslationUnit* make_ast(const std::string& source_code_dir) const;
+    [[nodiscard]] TranslationUnit* make_ast(const std::string& source_code_dir) const;
 
 private:
-    std::vector<std::string> get_source_codes(
+    [[nodiscard]] std::vector<std::string> get_source_codes(
         const std::string& project_dir
     ) const;
 };
 
-}; // namespace astfri::csharp
+} // namespace astfri::csharp
 
 #endif // CSHARP_AST_BUILDER_HPP

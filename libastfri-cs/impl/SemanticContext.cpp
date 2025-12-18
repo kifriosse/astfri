@@ -8,19 +8,19 @@ void ScopeContext::enter_scope()
     scope_stack_.emplace();
 }
 
-void ScopeContext::add_member_var(MemberVarDefStmt* var_def)
+void ScopeContext::register_member_var(MemberVarDefStmt* var_def)
 {
     scope_stack_.top().push_back(var_def);
     member_var_map_.emplace(var_def->name_, var_def);
 }
 
-void ScopeContext::add_local_var(LocalVarDefStmt* var_def)
+void ScopeContext::register_local_var(LocalVarDefStmt* var_def)
 {
     scope_stack_.top().push_back(var_def);
     local_var_map_.emplace(var_def->name_, var_def);
 }
 
-void ScopeContext::add_param_var(ParamVarDefStmt* var_def)
+void ScopeContext::register_param_var(ParamVarDefStmt* var_def)
 {
     scope_stack_.top().push_back(var_def);
     param_var_map_.emplace(var_def->name_, var_def);
@@ -31,15 +31,15 @@ void ScopeContext::leave_scope()
     if (scope_stack_.empty())
         return;
 
-    const std::vector<VarDefStmt*> var_scope = scope_stack_.top();
-    for (const auto variable : var_scope)
+    const std::vector<Stmt*> scope = scope_stack_.top();
+    for (const auto scope_memb : scope)
     {
-        if (is_a<MemberVarDefStmt>(variable))
-            member_var_map_.erase(variable->name_);
-        else if (is_a<ParamVarDefStmt>(variable))
-            param_var_map_.erase(variable->name_);
-        else if (is_a<LocalVarDefStmt>(variable))
-            local_var_map_.erase(variable->name_);
+        if (const auto memb_var = as_a<MemberVarDefStmt>(scope_memb))
+            member_var_map_.erase(memb_var->name_);
+        else if (const auto param = as_a<ParamVarDefStmt>(scope_memb))
+            param_var_map_.erase(param->name_);
+        else if (const auto var = as_a<LocalVarDefStmt>(scope_memb))
+            local_var_map_.erase(var->name_);
     }
     scope_stack_.pop();
 }
@@ -75,22 +75,22 @@ void SemanticContext::enter_scope()
 
 void SemanticContext::add_member_var(MemberVarDefStmt* var_def)
 {
-    scope_context_.add_member_var(var_def);
+    scope_context_.register_member_var(var_def);
 }
 
 void SemanticContext::add_local_var(LocalVarDefStmt* var_def)
 {
-    scope_context_.add_local_var(var_def);
+    scope_context_.register_local_var(var_def);
 }
 
 void SemanticContext::add_param_var(ParamVarDefStmt* var_def)
 {
-    scope_context_.add_param_var(var_def);
+    scope_context_.register_param_var(var_def);
 }
 
-void SemanticContext::register_return_type(Type* func_def)
+void SemanticContext::register_return_type(Type* return_type)
 {
-    return_type_context_.push(func_def);
+    return_type_context_.push(return_type);
 }
 
 void SemanticContext::leave_type()
@@ -124,6 +124,13 @@ Type* SemanticContext::current_return_type() const
 VarDefStmt* SemanticContext::find_var(const std::string& name) const
 {
     return scope_context_.get_var_type(name);
+}
+
+MemberVarDefStmt* SemanticContext::find_member_var(
+    const std::string& name
+) const
+{
+    return as_a<MemberVarDefStmt>(scope_context_.get_var_type(name));
 }
 
 } // namespace astfri::csharp

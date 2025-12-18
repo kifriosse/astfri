@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using Zoznam = System.Collections.Generic.List<string>;
+using System.Collections.Generic;
+
 
 public class Program
 {
@@ -16,42 +18,48 @@ public class Program
 
     static void Main(string[] args)
     {
-        // try
-        // {
-    
-        //     RecursiveFunc(1);   
-        // }
-        // catch (IOException ex) when (condition1)
-        // {
-
-        // }
-        // catch (IOException ex) when (condition2)
-        // {
-        //     // ...
-        // }
-        // catch (IOException ex)
-        // {
-        //     // ...
-        // }
-        int[] array = { 4, 5, 6, 8, 77, 47, 59 };
-        while (true)
-        {
-            break;
-        }
         
+        var rand = new Random();
+        int num = unchecked((int)rand.NextInt64()) % 100;
+        int guess;
+        Console.WriteLine("Guess the number from 0 to 99");
         do
         {
-            break;
-        } while (true);
-        // List<Person> people = [];
-        // for (
-        //     int i = 0, j = 0;
-        //     i < 10;
-        //     ++i, j += 2, people.Add(new Person($"Person {i}", j))
-        // )
-        // {
-        //     //...
-        // }
+            Console.WriteLine("Enter the guess");
+            string? strGuess = Console.ReadLine();
+            if (! int.TryParse(strGuess, out guess))
+            {
+                Console.WriteLine("Input a number");
+                continue;
+            }
+            if (guess != num)
+            {
+                Console.WriteLine("Incorrect guess");
+            }
+            else
+            {
+                Console.WriteLine("Correct guess");        
+            }
+        }
+        while (guess != num);
+
+        int[] array = { 4, 5, 6, 8, 77, 47, 59 };
+        IEnumerator<int> enumerator = array.AsEnumerable().GetEnumerator();
+
+        while (enumerator.MoveNext())
+        {
+            Console.WriteLine($"{enumerator.Current}");
+        }
+
+        List<Person> people = [];
+        for (
+            int i = 0, j = 0;
+            i < 10;
+            ++i, j += 2, people.Add(new Person($"Person {i}", j))
+        )
+        {
+            //...
+        }
         // foreach (Person person in people)
         // {
         //     Console.WriteLine($"Name: {person.Name} Age: {person.Age}");

@@ -2,6 +2,9 @@
 #include <libastfri-cs/impl/utils.hpp>
 #include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
 
+#include <cstring>
+#include <iostream>
+
 namespace astfri::csharp
 {
 
@@ -95,7 +98,7 @@ Expr* CSharpTSTreeVisitor::handle_float_lit(
         throw std::logic_error(
             "Suffix \"" + std::to_string(suffix) + "\" Not Implemented"
         );
-    };
+    }
 }
 
 Expr* CSharpTSTreeVisitor::handle_bool_lit(
@@ -213,14 +216,23 @@ Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
     const TSNode* node
 )
 {
-    const TSNode left_side
+    const TSNode left_side_node
         = ts_node_child_by_field_name(*node, "expression", 10);
-    const TSNode right_side = ts_node_child_by_field_name(*node, "name", 4);
-    const ExprHandler left_handler = NodeRegistry::get_expr_handler(left_side);
-    return expr_factory_.mk_member_var_ref(
-        left_handler(self, &left_side),
-        extract_node_text(right_side, self->source_code_)
-    );
+    const TSNode right_node = ts_node_child_by_field_name(*node, "name", 4);
+    const ExprHandler left_handler
+        = NodeRegistry::get_expr_handler(left_side_node);
+    const std::string name = extract_node_text(right_node, self->source_code_);
+    Expr* left_side        = left_handler(self, &left_side_node);
+    if (is_a<ThisExpr>(left_side))
+    {
+        if (const auto* member_var_def = // todo for future use
+            self->semantic_context_.find_member_var(name))
+        {
+            return expr_factory_.mk_member_var_ref(left_side, name);
+        }
+    }
+    return expr_factory_.mk_member_var_ref(left_side,name);
+
 }
 
 Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
