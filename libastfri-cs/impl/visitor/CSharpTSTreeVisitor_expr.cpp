@@ -235,6 +235,88 @@ Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
 
 }
 
+
+Expr* CSharpTSTreeVisitor::handle_invocation_expr(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    static const TSSymbol identifier_node_symb = ts_language_symbol_for_name(
+        self->language_,
+        "identifier",
+        std::strlen("identifier"),
+        true);
+    static const TSSymbol memb_access_node_symb = ts_language_symbol_for_name(
+        self->language_,
+        "member_access_expression",
+        std::strlen("member_access_expression"),
+        true);
+    std::cout << "Invocation Expression :" << std::endl;
+    print_child_nodes_types(*node, self->source_code_);
+    const TSNode function_node
+        = ts_node_child_by_field_name(*node, "function", 8);
+    const TSNode arg_list_node
+        = ts_node_child_by_field_name(*node, "arguments", strlen("arguments"));
+    const std::vector<Expr*> arg_list
+        = handle_argument_list(self, &arg_list_node);
+    // if it doesn't have a left side - it not a member access node in tree
+    // sitter
+    if (ts_node_symbol(function_node) == identifier_node_symb)
+    {
+        // todo add handling of local functions
+        const std::string name
+            = extract_node_text(function_node, self->source_code_);
+        ThisExpr* this_expr = expr_factory_.mk_this();
+        if (self->semantic_context_.find_var(name))
+        {
+            const ExprHandler var_def_handler
+                = NodeRegistry::get_expr_handler(function_node);
+            Expr* left = var_def_handler(self, &function_node);
+            return expr_factory_.mk_lambda_call(left, arg_list);
+        }
+        // todo add static invocation handling
+        return expr_factory_.mk_method_call(this_expr, name, arg_list);
+    }
+    // accessing a member of some variable - also includes `this`
+    if (ts_node_symbol(function_node) == memb_access_node_symb)
+    {
+        // todo fix function call, method call, and lambda call distinction
+        const TSNode name_node
+            = ts_node_child_by_field_name(function_node, "name", 4);
+        const TSNode left_node
+            = ts_node_child_by_field_name(function_node, "expression", 10);
+        const ExprHandler left_handler
+            = NodeRegistry::get_expr_handler(left_node);
+        Expr* left_side = left_handler(self, &left_node);
+        const std::string name
+            = extract_node_text(name_node, self->source_code_);
+        // it's a member of an instance - method or delegate type attribute
+        if (is_a<ThisExpr>(left_side))
+        {
+            if (const auto* var_def // todo for future use
+                = self->semantic_context_.find_member_var(name))
+            {
+                return expr_factory_.mk_lambda_call(
+                    expr_factory_.mk_member_var_ref(left_side, name),
+                    arg_list
+                );
+            }
+            return expr_factory_.mk_method_call(left_side, name, arg_list);
+        }
+        // todo here will go accessing of static members
+        // left side is a Usertype Reference
+        return expr_factory_.mk_unknown();
+    }
+    // todo add anonymous lambda call
+    // left side is a anonymous lambda
+    // if (is_anonymou_lambda(function_node))
+    // {
+    //
+    // }
+
+    return expr_factory_.mk_unknown();
+}
+
 Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
     CSharpTSTreeVisitor* self,
     const TSNode* node

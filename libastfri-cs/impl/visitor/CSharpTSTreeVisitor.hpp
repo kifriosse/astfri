@@ -91,6 +91,10 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+    static Expr* handle_invocation_expr(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
 
     // Operations
     static Expr* handle_prefix_unary_op_expr(

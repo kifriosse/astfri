@@ -74,6 +74,7 @@ std::unordered_map<std::string, CSharpTSTreeVisitor::ExprHandler>
         {"identifier", CSharpTSTreeVisitor::handle_identifier},
         {"member_access_expression",
          CSharpTSTreeVisitor::handle_memb_access_expr},
+        {"invocation_expression", CSharpTSTreeVisitor::handle_invocation_expr},
         {"constant_pattern", CSharpTSTreeVisitor::handle_const_pattern},
         {"ERROR",
          [](CSharpTSTreeVisitor*, const TSNode* node) -> Expr*

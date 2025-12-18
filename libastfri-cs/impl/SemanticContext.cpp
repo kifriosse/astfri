@@ -26,6 +26,27 @@ void ScopeContext::register_param_var(ParamVarDefStmt* var_def)
     param_var_map_.emplace(var_def->name_, var_def);
 }
 
+void ScopeContext::register_method(MethodDefStmt* method_def)
+{
+    scope_stack_.top().push_back(method_def);
+    const std::string name = method_def->func_->name_;
+    method_map[name].push_back(method_def);
+}
+
+void ScopeContext::register_static_method(MethodDefStmt* method_def)
+{
+    scope_stack_.top().push_back(method_def);
+    const std::string name = method_def->func_->name_;
+    static_method_map[name].push_back(method_def);
+}
+
+void ScopeContext::register_local_func(FunctionDefStmt* func_def)
+{
+    scope_stack_.top().push_back(func_def);
+    const std::string name = func_def->name_;
+    function_map[name].push_back(func_def);
+}
+
 void ScopeContext::leave_scope()
 {
     if (scope_stack_.empty())
@@ -40,6 +61,10 @@ void ScopeContext::leave_scope()
             param_var_map_.erase(param->name_);
         else if (const auto var = as_a<LocalVarDefStmt>(scope_memb))
             local_var_map_.erase(var->name_);
+        else if (const auto method = as_a<MethodDefStmt>(scope_memb))
+            method_map.erase(method->func_->name_);
+        else if (const auto func = as_a<FunctionDefStmt>(scope_memb))
+            function_map.erase(func->name_);
     }
     scope_stack_.pop();
 }

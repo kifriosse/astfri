@@ -16,6 +16,13 @@ enum class VarType
     Local,
 };
 
+enum class MemberBinding
+{
+    None,
+    Instance,
+    Static
+};
+
 // struct VarScope
 // {
 //     VarType type;
@@ -29,7 +36,9 @@ private:
     std::unordered_map<std::string, MemberVarDefStmt*> member_var_map_;
     std::unordered_map<std::string, ParamVarDefStmt*> param_var_map_;
     std::unordered_map<std::string, LocalVarDefStmt*> local_var_map_;
-
+    std::unordered_map<std::string, std::vector<MethodDefStmt*>> method_map;
+    std::unordered_map<std::string, std::vector<MethodDefStmt*>> static_method_map;
+    std::unordered_map<std::string, std::vector<FunctionDefStmt*>> function_map;
 public:
     void enter_scope();
     void register_member_var(MemberVarDefStmt* var_def);
