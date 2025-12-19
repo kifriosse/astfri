@@ -1,9 +1,10 @@
 add_library(astfri-cs SHARED)
 
 target_sources(astfri-cs PRIVATE
-    CSharpASTBuilder.cpp
-    NodeRegistry.cpp
+    ASTBuilder.cpp
+    Registries.cpp
     SemanticContext.cpp
+    SymbolTableBuilder.cpp
     CSModifiers.cpp
     TypeResolver.cpp
     utils.cpp

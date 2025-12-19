@@ -1,9 +1,9 @@
-#include <libastfri-cs/inc/CSharpASTBuilder.hpp>
+#include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri-text/inc/TextLibManager.hpp>
 
 int main()
 {
-    const astfri::csharp::CSharpASTBuilder ast_builder;
+    astfri::csharp::ASTBuilder ast_builder;
     astfri::text::TextLibManager& manager
         = astfri::text::TextLibManager::get_instance();
     const astfri::TranslationUnit* ast = ast_builder.make_ast(

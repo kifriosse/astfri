@@ -1,5 +1,5 @@
-#ifndef CSHARP_TS_TREE_VISITOR_HPP
-#define CSHARP_TS_TREE_VISITOR_HPP
+#ifndef CSHARP_SOURCE_CODE_VISITOR_HPP
+#define CSHARP_SOURCE_CODE_VISITOR_HPP
 
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/utils.hpp>
@@ -13,13 +13,13 @@
 namespace astfri::csharp
 {
 
-class CSharpTSTreeVisitor
+class SourceCodeVisitor
 {
 public:
     using ExprHandler
-        = std::function<Expr*(CSharpTSTreeVisitor* self, const TSNode*)>;
+        = std::function<Expr*(SourceCodeVisitor* self, const TSNode*)>;
     using StmtHandler
-        = std::function<Stmt*(CSharpTSTreeVisitor* self, const TSNode*)>;
+        = std::function<Stmt*(SourceCodeVisitor* self, const TSNode*)>;
 
 private:
     static ExprFactory& expr_factory_;
@@ -31,7 +31,7 @@ private:
     SemanticContext semantic_context_;
 
 public:
-    CSharpTSTreeVisitor(std::string source_code, const TSLanguage* language);
+    SourceCodeVisitor(std::string source_code, const TSLanguage* language);
     // compilation unit/translation unit
     void handle_comp_unit_stmt(TranslationUnit& tr_unit, const TSNode* node);
 
@@ -40,208 +40,184 @@ public:
      * @param node name node of the type (for example class or interface name)
      * @return instance of a Type
      */
-    static Type* make_type(const CSharpTSTreeVisitor* self, const TSNode& node);
+    static Type* make_type(const SourceCodeVisitor* self, const TSNode& node);
 
     // Expressions
     // Literals
     static Expr* handle_int_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // todo
     static Expr* handle_float_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // todo
-    static Expr* handle_bool_lit(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Expr* handle_bool_lit(SourceCodeVisitor* self, const TSNode* node);
     static Expr* handle_char_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // todo
     static Expr* handle_str_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // todo
     static Expr* handle_null_literal(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
-    static Expr* handle_this_expr(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+    static Expr* handle_this_expr(SourceCodeVisitor* self, const TSNode* node);
     static Expr* handle_verbatim_str_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_raw_str_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_interpolated_str_lit(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // todo
 
     // Reference Expersions
-    static Expr* handle_identifier(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+    static Expr* handle_identifier(SourceCodeVisitor* self, const TSNode* node);
     static Expr* handle_memb_access_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_invocation_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
 
     // Operations
     static Expr* handle_prefix_unary_op_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_postfix_unary_op_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_binary_op_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_ternary_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
 
     static Expr* handle_parenthesized_expr(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
 
     // switch patterns
     static Expr* handle_const_pattern(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
 
     // Statements
     // Type Definitions
     static Stmt* handle_class_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_interface_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     // Variable Definitions
     static Stmt* handle_memb_var_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_local_var_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_global_var_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_var_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node,
         VarDefType def_type
     ); // general var def stmt handler
     static Stmt* handle_param_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_constr_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // constructor def stmt
     static Stmt* handle_construct_init(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // base initializer
     static Stmt* handle_destr_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // destructor def stmt
     static Stmt* handle_method_def_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     ); // method def stmt
 
-    static Stmt* handle_block_stmt(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
-    static Stmt* handle_arrow_stmt(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+    static Stmt* handle_block_stmt(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_arrow_stmt(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_local_func_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static FunctionDefStmt* handle_function_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node,
         bool is_method
     );
 
     // loops
-    static Stmt* handle_while_loop(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+    static Stmt* handle_while_loop(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_do_while_loop(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
-    static Stmt* handle_for_loop(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_for_loop(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_for_each_loop(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
 
     // branching statements
-    static Stmt* handle_if_stmt(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_if_stmt(SourceCodeVisitor* self, const TSNode* node);
 
-    static Stmt* handle_try_stmt(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_try_stmt(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_catch_clause(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_finally_clause(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
-    static Stmt* handle_catch_decl(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+    static Stmt* handle_catch_decl(SourceCodeVisitor* self, const TSNode* node);
 
     static Stmt* handle_switch_stmt(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
-    static Stmt* handle_case_stmt(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
+    static Stmt* handle_case_stmt(SourceCodeVisitor* self, const TSNode* node);
 
     // other
-    static Stmt* handle_expr_stmt(
-        CSharpTSTreeVisitor* self,
-        const TSNode* node
-    );
-    static Stmt* handle_continue(CSharpTSTreeVisitor* self, const TSNode* node);
-    static Stmt* handle_break(CSharpTSTreeVisitor* self, const TSNode* node);
-    static Stmt* handle_return(CSharpTSTreeVisitor* self, const TSNode* node);
-    static Stmt* handle_throw(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_expr_stmt(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_continue(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_break(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_return(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_throw(SourceCodeVisitor* self, const TSNode* node);
 
     Scope create_scope(const TSNode* node) const;
 
@@ -252,19 +228,19 @@ private:
         const TSNode* end_node
     );
     static std::vector<ParamVarDefStmt*> handle_param_list(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static std::vector<Expr*> handle_argument_list(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_for_init_var_def(
-        CSharpTSTreeVisitor* self,
+        SourceCodeVisitor* self,
         const TSNode* node
     );
 };
 
 } // namespace astfri::csharp
 
-#endif // CSHARP_TS_TREE_VISITOR_HPP
+#endif // CSHARP_SOURCE_CODE_VISITOR_HPP

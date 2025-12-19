@@ -3,7 +3,10 @@
 
 #include <libastfri/inc/Astfri.hpp>
 
+#include <tree_sitter/api.h>
+
 #include <stack>
+#include <unordered_set>
 
 namespace astfri::csharp
 {
@@ -23,6 +26,24 @@ enum class MemberBinding
     Static
 };
 
+struct PropertyNode
+{
+    MemberVarDefStmt* backing_field{nullptr};
+    MethodDefStmt* getter{nullptr};
+    MethodDefStmt* setter{nullptr};
+};
+
+struct TypeMetadata
+{
+    UserTypeDefStmt* user_type_{nullptr};
+    std::string base_fqn; // fully qualified name
+    std::unordered_map<std::string, MemberVarDefStmt*> member_variables;
+    std::unordered_map<std::string, PropertyNode> properties;
+    std::unordered_set<std::string> method_names;
+    TSNode class_node;
+    bool processed{false};
+};
+
 // struct VarScope
 // {
 //     VarType type;
@@ -33,12 +54,17 @@ class ScopeContext
 {
 private:
     std::stack<std::vector<Stmt*>> scope_stack_;
-    std::unordered_map<std::string, MemberVarDefStmt*> member_var_map_;
+    std::unordered_map<std::string, MemberVarDefStmt*>
+        member_var_map_; // todo remove this
     std::unordered_map<std::string, ParamVarDefStmt*> param_var_map_;
     std::unordered_map<std::string, LocalVarDefStmt*> local_var_map_;
-    std::unordered_map<std::string, std::vector<MethodDefStmt*>> method_map;
-    std::unordered_map<std::string, std::vector<MethodDefStmt*>> static_method_map;
+    std::unordered_map<std::string, std::vector<MethodDefStmt*>>
+        method_map; // todo remove this
+    std::unordered_map<std::string, std::vector<MethodDefStmt*>>
+        static_method_map; // todo remove this
     std::unordered_map<std::string, std::vector<FunctionDefStmt*>> function_map;
+    // todo refactor the function map to store count of functions with the same
+    // name
 public:
     void enter_scope();
     void register_member_var(MemberVarDefStmt* var_def);

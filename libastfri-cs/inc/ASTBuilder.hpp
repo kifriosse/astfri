@@ -5,25 +5,33 @@
 
 #include <tree_sitter/api.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
 namespace astfri::csharp
 {
-class CSharpASTBuilder
+
+struct SourceFile
+{
+    std::filesystem::path file_path;
+    std::string content;
+};
+
+class ASTBuilder
 {
 private:
     const TSLanguage* lang_;
     TSParser* parser_;
+    std::unordered_map<std::string, TSTree*> source_trees_;
 
 public:
-    CSharpASTBuilder();
-
-    ~CSharpASTBuilder();
-    [[nodiscard]] TranslationUnit* make_ast(const std::string& source_code_dir) const;
+    ASTBuilder();
+    ~ASTBuilder();
+    [[nodiscard]] TranslationUnit* make_ast(const std::string& source_code_dir);
 
 private:
-    [[nodiscard]] std::vector<std::string> get_source_codes(
+    [[nodiscard]] std::vector<SourceFile> get_source_codes(
         const std::string& project_dir
     ) const;
 };

@@ -1,7 +1,7 @@
 target_sources(astfri-cs PRIVATE
-    CSharpTSTreeVisitor.cpp
-    CSharpTSTreeVisitor_expr.cpp
-    CSharpTSTreeVisitor_stmt.cpp
-    CSharpTSTreeVisitor_def.cpp
-    CSharpTSTreeVisitor_util.cpp
+    SourceCodeVisitor.cpp
+    SourceCodeVisitor_expr.cpp
+    SourceCodeVisitor_stmt.cpp
+    SourceCodeVisitor_def.cpp
+    SourceCodeVisitor_util.cpp
 )

@@ -1,14 +1,15 @@
-#include <libastfri-cs/impl/NodeRegistry.hpp>
 #include <libastfri-cs/impl/utils.hpp>
-#include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <algorithm>
 #include <cstring>
 
+#include "libastfri-cs/impl/Registries.hpp"
+
 namespace astfri::csharp
 {
-Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_class_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -153,7 +154,7 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
             if (ts_node_is_null(member_node))
                 throw std::runtime_error("Node is null");
 
-            StmtHandler handler = NodeRegistry::get_stmt_handler(member_node);
+            StmtHandler handler = RegManager::get_stmt_handler(member_node);
             Stmt* member_stmt   = handler(self, &member_node);
 
             if (is_a<MemberVarDefStmt>(member_stmt))
@@ -175,8 +176,8 @@ Stmt* CSharpTSTreeVisitor::handle_class_def_stmt(
     return class_def;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_interface_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_interface_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -207,24 +208,24 @@ Stmt* CSharpTSTreeVisitor::handle_interface_def_stmt(
     return interface_def_stmt;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_memb_var_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_memb_var_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
     return handle_var_def_stmt(self, node, VarDefType::Member);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_local_var_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_local_var_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
     return handle_var_def_stmt(self, node, VarDefType::Local);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_global_var_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_global_var_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -232,8 +233,8 @@ Stmt* CSharpTSTreeVisitor::handle_global_var_def_stmt(
     return handle_var_def_stmt(self, &local_var_def_node, VarDefType::Global);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_var_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node,
     const VarDefType def_type
 )
@@ -278,7 +279,7 @@ Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
         if (! ts_node_is_null(initializer_node))
         {
             ExprHandler initializer_handler
-                = NodeRegistry::get_expr_handler(initializer_node);
+                = RegManager::get_expr_handler(initializer_node);
             initializer = initializer_handler(self, &initializer_node);
         }
 
@@ -329,8 +330,8 @@ Stmt* CSharpTSTreeVisitor::handle_var_def_stmt(
     return var_def_stmts.front();
 }
 
-Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_param_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -347,7 +348,7 @@ Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(
     if (! ts_node_is_null(initializer_node))
     {
         const ExprHandler initializer_handler
-            = NodeRegistry::get_expr_handler(initializer_node);
+            = RegManager::get_expr_handler(initializer_node);
         initializer = initializer_handler(self, &initializer_node);
     }
     ParamVarDefStmt* parameter
@@ -356,8 +357,8 @@ Stmt* CSharpTSTreeVisitor::handle_param_def_stmt(
     return parameter;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_constr_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -389,13 +390,13 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     constructor_def->access_
         = modifiers.get_access_mod().value_or(AccessModifier::Private);
 
-    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
     constructor_def->body_ = as_a<CompoundStmt>(body_handler(self, &body_node));
 
     if (! ts_node_is_null(initializer_node))
     {
         const StmtHandler base_init_handler
-            = NodeRegistry::get_stmt_handler(initializer_node);
+            = RegManager::get_stmt_handler(initializer_node);
         Stmt* init_stmt = base_init_handler(self, &initializer_node);
         if (const auto base_init = as_a<BaseInitializerStmt>(init_stmt))
             constructor_def->baseInit_.push_back(base_init);
@@ -408,8 +409,8 @@ Stmt* CSharpTSTreeVisitor::handle_constr_def_stmt(
     return constructor_def;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_construct_init(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_construct_init(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -446,15 +447,15 @@ Stmt* CSharpTSTreeVisitor::handle_construct_init(
     return stmt_factory_.mk_base_initializer(base->type_, arguments);
 }
 
-Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_destr_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
     // self->semantic_context_.enter_scope();
     self->semantic_context_.register_return_type(type_factory_.mk_void());
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
-    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
     Stmt* body                     = body_handler(self, &body_node);
     const auto owner = self->semantic_context_.current_user_type();
 
@@ -471,8 +472,8 @@ Stmt* CSharpTSTreeVisitor::handle_destr_def_stmt(
     );
 }
 
-Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_method_def_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -501,24 +502,27 @@ Stmt* CSharpTSTreeVisitor::handle_method_def_stmt(
     return method_def_stmt;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_local_func_stmt(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_local_func_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
     return handle_function_stmt(self, node, false);
 }
 
-FunctionDefStmt* CSharpTSTreeVisitor::handle_function_stmt(
-    CSharpTSTreeVisitor* self,
+FunctionDefStmt* SourceCodeVisitor::handle_function_stmt(
+    SourceCodeVisitor* self,
     const TSNode* node,
     const bool is_method
 )
 {
-    FunctionDefStmt* func_def = stmt_factory_.mk_function_def();
-    std::string node_name = is_method ? "returns" : "type";
-    const TSNode ret_type_node
-        = ts_node_child_by_field_name(*node, node_name.c_str(), node_name.length());
+    FunctionDefStmt* func_def  = stmt_factory_.mk_function_def();
+    std::string node_name      = is_method ? "returns" : "type";
+    const TSNode ret_type_node = ts_node_child_by_field_name(
+        *node,
+        node_name.c_str(),
+        node_name.length()
+    );
     const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
     const TSNode param_node
         = ts_node_child_by_field_name(*node, "parameters", 10);
@@ -530,7 +534,7 @@ FunctionDefStmt* CSharpTSTreeVisitor::handle_function_stmt(
     func_def->retType_ = ret_type;
     func_def->name_    = extract_node_text(name_node, self->source_code_);
     func_def->params_  = handle_param_list(self, &param_node);
-    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
     if (const auto body = as_a<CompoundStmt>(body_handler(self, &body_node)))
         func_def->body_ = body;
 

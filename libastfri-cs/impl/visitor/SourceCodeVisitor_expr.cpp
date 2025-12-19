@@ -1,6 +1,6 @@
-#include <libastfri-cs/impl/NodeRegistry.hpp>
+#include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/utils.hpp>
-#include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <cstring>
 #include <iostream>
@@ -8,8 +8,8 @@
 namespace astfri::csharp
 {
 
-Expr* CSharpTSTreeVisitor::handle_int_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_int_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -63,8 +63,8 @@ Expr* CSharpTSTreeVisitor::handle_int_lit(
     throw std::logic_error("This integer type is not implemented");
 }
 
-Expr* CSharpTSTreeVisitor::handle_float_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_float_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -101,8 +101,8 @@ Expr* CSharpTSTreeVisitor::handle_float_lit(
     }
 }
 
-Expr* CSharpTSTreeVisitor::handle_bool_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_bool_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -110,8 +110,8 @@ Expr* CSharpTSTreeVisitor::handle_bool_lit(
     return expr_factory_.mk_bool_literal(bool_str == "true");
 }
 
-Expr* CSharpTSTreeVisitor::handle_char_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_char_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -126,8 +126,8 @@ Expr* CSharpTSTreeVisitor::handle_char_lit(
     return expr_factory_.mk_char_literal(character_str[0]);
 }
 
-Expr* CSharpTSTreeVisitor::handle_str_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_str_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -140,24 +140,24 @@ Expr* CSharpTSTreeVisitor::handle_str_lit(
     return expr_factory_.mk_string_literal(content);
 }
 
-Expr* CSharpTSTreeVisitor::handle_null_literal(
-    [[maybe_unused]] CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_null_literal(
+    [[maybe_unused]] SourceCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     return expr_factory_.mk_null_literal();
 }
 
-Expr* CSharpTSTreeVisitor::handle_this_expr(
-    [[maybe_unused]] CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_this_expr(
+    [[maybe_unused]] SourceCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     return expr_factory_.mk_this();
 }
 
-Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_verbatim_str_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -169,8 +169,8 @@ Expr* CSharpTSTreeVisitor::handle_verbatim_str_lit(
     return expr_factory_.mk_string_literal(node_contet);
 }
 
-Expr* CSharpTSTreeVisitor::handle_raw_str_lit(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_raw_str_lit(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -180,16 +180,16 @@ Expr* CSharpTSTreeVisitor::handle_raw_str_lit(
     return expr_factory_.mk_string_literal(content);
 }
 
-Expr* CSharpTSTreeVisitor::handle_interpolated_str_lit(
-    [[maybe_unused]] CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_interpolated_str_lit(
+    [[maybe_unused]] SourceCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     throw std::logic_error("Interpolated string literal not implemented");
 }
 
-Expr* CSharpTSTreeVisitor::handle_identifier(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_identifier(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -211,8 +211,8 @@ Expr* CSharpTSTreeVisitor::handle_identifier(
     return expr_factory_.mk_unknown();
 }
 
-Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_memb_access_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -220,7 +220,7 @@ Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
         = ts_node_child_by_field_name(*node, "expression", 10);
     const TSNode right_node = ts_node_child_by_field_name(*node, "name", 4);
     const ExprHandler left_handler
-        = NodeRegistry::get_expr_handler(left_side_node);
+        = RegManager::get_expr_handler(left_side_node);
     const std::string name = extract_node_text(right_node, self->source_code_);
     Expr* left_side        = left_handler(self, &left_side_node);
     if (is_a<ThisExpr>(left_side))
@@ -231,13 +231,11 @@ Expr* CSharpTSTreeVisitor::handle_memb_access_expr(
             return expr_factory_.mk_member_var_ref(left_side, name);
         }
     }
-    return expr_factory_.mk_member_var_ref(left_side,name);
-
+    return expr_factory_.mk_member_var_ref(left_side, name);
 }
 
-
-Expr* CSharpTSTreeVisitor::handle_invocation_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_invocation_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -245,12 +243,14 @@ Expr* CSharpTSTreeVisitor::handle_invocation_expr(
         self->language_,
         "identifier",
         std::strlen("identifier"),
-        true);
+        true
+    );
     static const TSSymbol memb_access_node_symb = ts_language_symbol_for_name(
         self->language_,
         "member_access_expression",
         std::strlen("member_access_expression"),
-        true);
+        true
+    );
     std::cout << "Invocation Expression :" << std::endl;
     print_child_nodes_types(*node, self->source_code_);
     const TSNode function_node
@@ -270,7 +270,7 @@ Expr* CSharpTSTreeVisitor::handle_invocation_expr(
         if (self->semantic_context_.find_var(name))
         {
             const ExprHandler var_def_handler
-                = NodeRegistry::get_expr_handler(function_node);
+                = RegManager::get_expr_handler(function_node);
             Expr* left = var_def_handler(self, &function_node);
             return expr_factory_.mk_lambda_call(left, arg_list);
         }
@@ -286,7 +286,7 @@ Expr* CSharpTSTreeVisitor::handle_invocation_expr(
         const TSNode left_node
             = ts_node_child_by_field_name(function_node, "expression", 10);
         const ExprHandler left_handler
-            = NodeRegistry::get_expr_handler(left_node);
+            = RegManager::get_expr_handler(left_node);
         Expr* left_side = left_handler(self, &left_node);
         const std::string name
             = extract_node_text(name_node, self->source_code_);
@@ -317,8 +317,8 @@ Expr* CSharpTSTreeVisitor::handle_invocation_expr(
     return expr_factory_.mk_unknown();
 }
 
-Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_prefix_unary_op_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -327,20 +327,20 @@ Expr* CSharpTSTreeVisitor::handle_prefix_unary_op_expr(
     std::string op = extract_node_text(op_node, self->source_code_);
     std::erase_if(op, isspace);
 
-    const auto res = NodeRegistry::get_prefix_unary_op(op);
+    const auto res = RegManager::get_prefix_unary_op(op);
     if (! res.has_value())
     {
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
     }
 
     const UnaryOpType op_type = *res;
-    const ExprHandler handler = NodeRegistry::get_expr_handler(right_side_node);
+    const ExprHandler handler = RegManager::get_expr_handler(right_side_node);
     Expr* right_side          = handler(self, &right_side_node);
     return expr_factory_.mk_unary_op(op_type, right_side);
 }
 
-Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_postfix_unary_op_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -348,7 +348,7 @@ Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
     const TSNode op_node        = ts_node_child(*node, 1);
     const std::string op      = extract_node_text(op_node, self->source_code_);
 
-    const ExprHandler handler = NodeRegistry::get_expr_handler(left_side_node);
+    const ExprHandler handler = RegManager::get_expr_handler(left_side_node);
     Expr* left_side           = handler(self, &left_side_node);
 
     UnaryOpType op_type;
@@ -364,8 +364,8 @@ Expr* CSharpTSTreeVisitor::handle_postfix_unary_op_expr(
     return expr_factory_.mk_unary_op(op_type, left_side);
 }
 
-Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_binary_op_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -374,11 +374,11 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
     const TSNode left               = ts_node_child(*node, 0);
     const TSNode op_node            = ts_node_child(*node, 1);
     const TSNode right              = ts_node_child(*node, 2);
-    const ExprHandler left_handler  = NodeRegistry::get_expr_handler(left);
-    const ExprHandler right_handler = NodeRegistry::get_expr_handler(right);
+    const ExprHandler left_handler  = RegManager::get_expr_handler(left);
+    const ExprHandler right_handler = RegManager::get_expr_handler(right);
     const std::string op = extract_node_text(op_node, self->source_code_);
 
-    const auto res       = NodeRegistry::get_bin_op(op);
+    const auto res       = RegManager::get_bin_op(op);
     if (! res.has_value())
     {
         // `a ?? b` same as `a != null ? a : b`
@@ -417,18 +417,17 @@ Expr* CSharpTSTreeVisitor::handle_binary_op_expr(
     );
 }
 
-Expr* CSharpTSTreeVisitor::handle_ternary_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_ternary_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
-    const TSNode cond_node         = ts_node_child(*node, 0);
-    const TSNode if_true           = ts_node_child(*node, 2);
-    const TSNode if_false          = ts_node_child(*node, 4);
-    const ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
-    const ExprHandler if_true_handler = NodeRegistry::get_expr_handler(if_true);
-    const ExprHandler if_false_handler
-        = NodeRegistry::get_expr_handler(if_false);
+    const TSNode cond_node            = ts_node_child(*node, 0);
+    const TSNode if_true              = ts_node_child(*node, 2);
+    const TSNode if_false             = ts_node_child(*node, 4);
+    const ExprHandler cond_handler    = RegManager::get_expr_handler(cond_node);
+    const ExprHandler if_true_handler = RegManager::get_expr_handler(if_true);
+    const ExprHandler if_false_handler = RegManager::get_expr_handler(if_false);
 
     return expr_factory_.mk_if(
         cond_handler(self, &cond_node),
@@ -437,23 +436,23 @@ Expr* CSharpTSTreeVisitor::handle_ternary_expr(
     );
 }
 
-Expr* CSharpTSTreeVisitor::handle_parenthesized_expr(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_parenthesized_expr(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
     const TSNode expr_node    = ts_node_child(*node, 1);
-    const ExprHandler handler = NodeRegistry::get_expr_handler(expr_node);
+    const ExprHandler handler = RegManager::get_expr_handler(expr_node);
     return expr_factory_.mk_bracket(handler(self, &expr_node));
 }
 
-Expr* CSharpTSTreeVisitor::handle_const_pattern(
-    CSharpTSTreeVisitor* self,
+Expr* SourceCodeVisitor::handle_const_pattern(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
     const TSNode inside_node = ts_node_child(*node, 0);
-    return NodeRegistry::get_expr_handler(inside_node)(self, &inside_node);
+    return RegManager::get_expr_handler(inside_node)(self, &inside_node);
 }
 
 } // namespace astfri::csharp

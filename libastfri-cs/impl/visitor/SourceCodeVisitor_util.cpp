@@ -1,13 +1,13 @@
-#include <libastfri-cs/impl/NodeRegistry.hpp>
+#include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/utils.hpp>
-#include <libastfri-cs/impl/visitor/CSharpTSTreeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <queue>
 
 namespace astfri::csharp
 {
 
-Scope CSharpTSTreeVisitor::create_scope(const TSNode* node) const
+Scope SourceCodeVisitor::create_scope(const TSNode* node) const
 {
     enum NodeType
     {
@@ -95,15 +95,15 @@ Scope CSharpTSTreeVisitor::create_scope(const TSNode* node) const
     return scope;
 }
 
-Stmt* CSharpTSTreeVisitor::make_while_loop(
+Stmt* SourceCodeVisitor::make_while_loop(
     const TSNode* node,
     const bool is_do_while
 )
 {
     const TSNode cond_node = ts_node_child_by_field_name(*node, "condition", 9);
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
-    const ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
-    const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
+    const ExprHandler cond_handler = RegManager::get_expr_handler(cond_node);
+    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
     Expr* condition                = cond_handler(this, &cond_node);
     Stmt* body                     = body_handler(this, &body_node);
 
@@ -122,7 +122,7 @@ Stmt* CSharpTSTreeVisitor::make_while_loop(
  * expression, that expression is returned. If start and end are the same,
  * nullptr is returned.
  */
-Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
+Expr* SourceCodeVisitor::expr_list_to_comma_op(
     const TSNode& start_node,
     const TSNode* end_node
 )
@@ -136,11 +136,11 @@ Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
         if (end_node && ts_node_eq(current_node, *end_node))
             break;
 
-        if (NodeRegistry::is_structural_node(ts_node_type(current_node)))
+        if (! ts_node_is_named(current_node))
             continue;
 
         const ExprHandler expr_handler
-            = NodeRegistry::get_expr_handler(current_node);
+            = RegManager::get_expr_handler(current_node);
         exprs.push(expr_handler(this, &current_node));
     }
 
@@ -159,8 +159,8 @@ Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
     return init_expr;
 }
 
-std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
-    CSharpTSTreeVisitor* self,
+std::vector<ParamVarDefStmt*> SourceCodeVisitor::handle_param_list(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -169,11 +169,11 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid Node");
 
-    const StmtHandler handler = NodeRegistry::get_stmt_handler("parameter");
+    const StmtHandler handler = RegManager::get_stmt_handler("parameter");
     do
     {
         TSNode current = ts_tree_cursor_current_node(&cursor);
-        if (NodeRegistry::is_structural_node(ts_node_type(current)))
+        if (! ts_node_is_named(current))
             continue;
 
         parameters.emplace_back(as_a<ParamVarDefStmt>(handler(self, &current)));
@@ -183,8 +183,8 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     return parameters;
 }
 
-std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
-    CSharpTSTreeVisitor* self,
+std::vector<Expr*> SourceCodeVisitor::handle_argument_list(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -197,13 +197,13 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
     do
     {
         current = ts_tree_cursor_current_node(&cursor);
-        if (NodeRegistry::is_structural_node(ts_node_type(current)))
+        if (! ts_node_is_named(current))
             continue;
 
         ts_tree_cursor_goto_first_child(&cursor);
 
         current                  = ts_tree_cursor_current_node(&cursor);
-        ExprHandler expr_handler = NodeRegistry::get_expr_handler(current);
+        ExprHandler expr_handler = RegManager::get_expr_handler(current);
         exprs.emplace_back(expr_handler(self, &current));
 
         ts_tree_cursor_goto_parent(&cursor);
@@ -213,8 +213,8 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
     return exprs;
 }
 
-Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
-    CSharpTSTreeVisitor* self,
+Stmt* SourceCodeVisitor::handle_for_init_var_def(
+    SourceCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -233,7 +233,7 @@ Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
         TSNode var_name_node = ts_node_child(declarator_node, 0);
         TSNode right_node    = ts_node_child(declarator_node, 2);
         ExprHandler right_side_handler
-            = NodeRegistry::get_expr_handler(right_node);
+            = RegManager::get_expr_handler(right_node);
         LocalVarDefStmt* var_def = stmt_factory_.mk_local_var_def(
             extract_node_text(var_name_node, self->source_code_),
             type,
