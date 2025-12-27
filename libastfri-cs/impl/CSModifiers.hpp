@@ -31,6 +31,9 @@ enum class CSModifier : MaskType
     Sealed    = BIT(12),
     Partial   = BIT(13),
     Async     = BIT(15),
+    In        = BIT(16),
+    Out       = BIT(17),
+    Ref       = BIT(18),
 };
 
 #undef BIT
@@ -46,7 +49,7 @@ public:
         const std::string& source_code
     );
 
-    [[nodiscard]] bool has_modifier(CSModifier mod) const;
+    [[nodiscard]] bool has(CSModifier mod) const;
     void add_modifier(CSModifier mod);
     void remove_modifier(CSModifier mod);
     [[nodiscard]] std::optional<AccessModifier> get_access_mod() const;

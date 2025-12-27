@@ -15,8 +15,7 @@ CSModifiers CSModifiers::handle_modifiers(
     for (const TSNode& node : mod_nodes)
     {
         std::string mod_str = util::extract_node_text(node, source_code);
-        const auto res      = RegManager::get_modifier(mod_str);
-        if (res.has_value())
+        if (const auto res = RegManager::get_modifier(mod_str))
         {
             modifiers.add_modifier(*res);
         }
@@ -24,7 +23,7 @@ CSModifiers CSModifiers::handle_modifiers(
     return modifiers;
 }
 
-bool CSModifiers::has_modifier(CSModifier mod) const
+bool CSModifiers::has(CSModifier mod) const
 {
     return (static_cast<MaskType>(mod) & modifier_mask) != 0;
 }
@@ -41,21 +40,21 @@ void CSModifiers::remove_modifier(CSModifier mod)
 
 std::optional<AccessModifier> CSModifiers::get_access_mod() const
 {
-    if (has_modifier(CSModifier::Internal)
-        && has_modifier(CSModifier::Protected))
+    if (has(CSModifier::Internal)
+        && has(CSModifier::Protected))
         return AccessModifier::Internal;
-    if (has_modifier(CSModifier::Private)
-        && has_modifier(CSModifier::Protected))
+    if (has(CSModifier::Private)
+        && has(CSModifier::Protected))
         return AccessModifier::Protected;
-    if (has_modifier(CSModifier::Public))
+    if (has(CSModifier::Public))
         return AccessModifier::Public;
-    if (has_modifier(CSModifier::Private))
+    if (has(CSModifier::Private))
         return AccessModifier::Private;
-    if (has_modifier(CSModifier::Internal))
+    if (has(CSModifier::Internal))
         return AccessModifier::Internal;
-    if (has_modifier(CSModifier::Protected))
+    if (has(CSModifier::Protected))
         return AccessModifier::Protected;
-    if (has_modifier(CSModifier::File))
+    if (has(CSModifier::File))
         return AccessModifier::Internal;
 
     return {};
@@ -63,9 +62,9 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
 
 Virtuality CSModifiers::get_virtuality() const
 {
-    if (has_modifier(CSModifier::Abstract))
+    if (has(CSModifier::Abstract))
         return Virtuality::PureVirtual;
-    if (has_modifier(CSModifier::Virtual) || has_modifier(CSModifier::Override))
+    if (has(CSModifier::Virtual) || has(CSModifier::Override))
         return Virtuality::Virtual;
     return Virtuality::NotVirtual;
 }

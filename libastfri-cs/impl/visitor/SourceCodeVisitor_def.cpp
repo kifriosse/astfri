@@ -335,15 +335,36 @@ Stmt* SourceCodeVisitor::handle_param_def_stmt(
 )
 {
     const TSNode var_type_node = ts_node_child_by_field_name(*node, "type", 4);
+
+    const std::vector<TSNode> modifier_nodes = util::find_nodes(
+        *node,
+        self->get_lang(),
+        regs::Queries::var_modif_query
+    );
+    const CSModifiers modifiers = CSModifiers::handle_modifiers(
+        modifier_nodes,
+        self->get_src_code()
+    );
     // left side
     const TSNode var_name_node = ts_node_child_by_field_name(*node, "name", 4);
     // right side
     const TSNode initializer_node = ts_node_next_named_sibling(var_name_node);
     const std::string var_name
         = util::extract_node_text(var_name_node, self->get_src_code());
-    Expr* initializer = nullptr;
     Type* var_type    = util::make_type(var_type_node, self->get_src_code());
+    if (modifiers.has(CSModifier::Out) || modifiers.has(CSModifier::Ref))
+    {
+        var_type = type_factory_.mk_indirect(var_type);
+    }
+    else if (modifiers.has(CSModifier::In) ||
+        (modifiers.has(CSModifier::Readonly) && !modifiers.has(CSModifier::Ref)))
+    {
+        // todo should be a constat reference
+        // for now, just make it indirect
+        var_type = type_factory_.mk_indirect(var_type);
+    }
 
+    Expr* initializer = nullptr;
     if (! ts_node_is_null(initializer_node))
     {
         const ExprHandler initializer_handler
@@ -508,7 +529,7 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
     const MethodIdentifier method_id{
         .func_id
         = FunctionIdentifier{.name = util::extract_node_text(name_node, self->get_src_code()), .param_count = param_count},
-        .is_static = modifiers.has_modifier(CSModifier::Static)
+        .is_static = modifiers.has(CSModifier::Static)
     };
 
     MethodMetadata* method_data
@@ -535,15 +556,13 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
                 = ts_node_child_by_field_name(param_node, "name", 4);
             const TSNode init_node
                 = ts_node_next_named_sibling(param_name_node);
-            Expr* init = nullptr;
             if (! ts_node_is_null(init_node))
             {
                 ExprHandler init_hanlder
                     = RegManager::get_expr_handler(init_node);
-                init = init_hanlder(self, &init_node);
+                param_def->initializer_ = init_hanlder(self, &init_node);
             }
             self->semantic_context_.reg_param(param_def);
-            param_def->initializer_ = init;
             processed               = true;
             util::print_child_nodes_types(param_node, self->get_src_code());
         }

@@ -218,7 +218,7 @@ void SymbolTableBuilder::register_method(
         self->language_,
         regs::Queries::method_modif_query
     );
-    const CSModifiers modifiers
+    const CSModifiers method_modif
         = CSModifiers::handle_modifiers(modifier_nodes, source_code);
     const TSNode return_type_node
         = ts_node_child_by_field_name(node, "returns", 7);
@@ -258,13 +258,36 @@ void SymbolTableBuilder::register_method(
                 continue;
             }
 
+            CSModifiers param_mod = CSModifiers::handle_modifiers(
+                util::find_nodes(
+                    current,
+                    self->language_,
+                    regs::Queries::var_modif_query
+                ),
+                source_code
+            );
+
             const TSNode type_node
                 = ts_node_child_by_field_name(current, "type", 4);
             const TSNode param_name_node
                 = ts_node_child_by_field_name(current, "name", 4);
+            Type* param_type = util::make_type(type_node, source_code);
+            TypeFactory& type_factory = TypeFactory::get_instance();
+            if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
+            {
+                param_type = type_factory.mk_indirect(param_type);
+            }
+            else if (param_mod.has(CSModifier::In) ||
+                (param_mod.has(CSModifier::Readonly) && !param_mod.has(CSModifier::Ref)))
+            {
+                // todo should be a constat reference
+                // for now, just make it indirect
+                param_type = type_factory.mk_indirect(param_type);
+            }
+
             ParamVarDefStmt* param = stmt_factory_.mk_param_var_def(
                 util::extract_node_text(param_name_node, source_code),
-                util::make_type(type_node, source_code),
+                param_type,
                 nullptr
             );
             params.push_back(param);
@@ -308,7 +331,7 @@ void SymbolTableBuilder::register_method(
     MethodIdentifier method_id{
         .func_id
         = FunctionIdentifier{.name = name, .param_count = params.size()},
-        .is_static = modifiers.has_modifier(CSModifier::Static),
+        .is_static = method_modif.has(CSModifier::Static),
     };
 
     auto& methods                  = it_type_metadata->second.methods;
@@ -319,8 +342,8 @@ void SymbolTableBuilder::register_method(
         method_def_stmt = stmt_factory_.mk_method_def(
             current_type,
             stmt_factory_.mk_function_def(name, params, return_type, nullptr),
-            modifiers.get_access_mod().value_or(AccessModifier::Internal),
-            modifiers.get_virtuality()
+            method_modif.get_access_mod().value_or(AccessModifier::Internal),
+            method_modif.get_virtuality()
         );
     }
 

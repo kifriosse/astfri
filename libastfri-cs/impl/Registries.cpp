@@ -41,6 +41,7 @@ const std::string Queries::var_modif_query =
     [
         (field_declaration (modifier) @modifier)
         (local_declaration_statement (modifier) @modifier)
+        (parameter (modifier) @modifier)
     ]
     )";
 
@@ -206,7 +207,10 @@ Modifiers::Modifiers() :
         {"override",  CSModifier::Override },
         {"sealed",    CSModifier::Sealed   },
         {"partial",   CSModifier::Partial  },
-        {"async",     CSModifier::Async    }
+        {"async",     CSModifier::Async    },
+        {"out",       CSModifier::Out      },
+        {"in",        CSModifier::In       },
+        {"ref",       CSModifier::Ref      },
 })
 {
 }
