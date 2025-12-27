@@ -40,11 +40,9 @@ void CSModifiers::remove_modifier(CSModifier mod)
 
 std::optional<AccessModifier> CSModifiers::get_access_mod() const
 {
-    if (has(CSModifier::Internal)
-        && has(CSModifier::Protected))
+    if (has(CSModifier::Internal) && has(CSModifier::Protected))
         return AccessModifier::Internal;
-    if (has(CSModifier::Private)
-        && has(CSModifier::Protected))
+    if (has(CSModifier::Private) && has(CSModifier::Protected))
         return AccessModifier::Protected;
     if (has(CSModifier::Public))
         return AccessModifier::Public;

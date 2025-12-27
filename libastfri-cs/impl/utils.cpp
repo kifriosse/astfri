@@ -372,8 +372,7 @@ Scope create_scope(
         case Class:
         case Interface:
         {
-            const TSNode name_node
-                = ts_node_child_by_field_name(current, "name", 4);
+            const TSNode name_node = child_by_field_name(current, "name");
             const std::string name = extract_node_text(name_node, source);
             scope_str.push(name);
             break;
@@ -383,6 +382,7 @@ Scope create_scope(
             if (found_name_space)
                 break;
 
+            // todo move to query registry
             std::string file_namespace_query
                 = "(file_scoped_namespace_declaration) @namespace";
             const TSNode namespace_node
@@ -391,16 +391,15 @@ Scope create_scope(
                 break;
 
             const TSNode name_node
-                = ts_node_child_by_field_name(namespace_node, "name", 4);
+                = child_by_field_name(namespace_node, "name");
             const std::string name = extract_node_text(name_node, source);
             split_namespace(scope_str, name);
             break;
         }
         case Namespace:
         {
-            found_name_space = true;
-            const TSNode name_node
-                = ts_node_child_by_field_name(current, "name", 4);
+            found_name_space       = true;
+            const TSNode name_node = child_by_field_name(current, "name");
             const std::string name = extract_node_text(name_node, source);
             split_namespace(scope_str, name);
             break;
@@ -433,6 +432,11 @@ Type* make_type(const TSNode& node, const std::string& source_code)
     Type* type = res.has_value() ? *res : type_factory.mk_class(type_name, {});
 
     return is_indirection_type ? type_factory.mk_indirect(type) : type;
+}
+
+TSNode child_by_field_name(const TSNode& node, const std::string_view name)
+{
+    return ts_node_child_by_field_name(node, name.data(), name.length());
 }
 
 } // namespace astfri::csharp::util

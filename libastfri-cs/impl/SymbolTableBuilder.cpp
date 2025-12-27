@@ -52,10 +52,9 @@ void SymbolTableBuilder::register_members(SymbolTable& symbol_table)
     {
         for (auto& [node, src] : metadata.defs)
         {
-            current_src = src;
-            const TSNode class_body
-                = ts_node_child_by_field_name(node, "body", 4);
-            TSTreeCursor cursor = ts_tree_cursor_new(class_body);
+            current_src             = src;
+            const TSNode class_body = util::child_by_field_name(node, "body");
+            TSTreeCursor cursor     = ts_tree_cursor_new(class_body);
             type_context_.type_stack.push(metadata.user_type);
 
             if (! ts_tree_cursor_goto_first_child(&cursor))

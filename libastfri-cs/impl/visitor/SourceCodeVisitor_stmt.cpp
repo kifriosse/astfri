@@ -77,14 +77,13 @@ Stmt* SourceCodeVisitor::handle_for_loop(
 )
 {
     self->semantic_context_.enter_scope();
-    Stmt* init      = nullptr;
-    Expr* condition = nullptr;
-    Stmt* updater   = nullptr;
-    const TSNode init_node
-        = ts_node_child_by_field_name(*node, "initializer", 11);
-    const TSNode cond_node = ts_node_child_by_field_name(*node, "condition", 9);
-    const TSNode updater_node = ts_node_child_by_field_name(*node, "update", 6);
-    const TSNode body_node    = ts_node_child_by_field_name(*node, "body", 4);
+    Stmt* init                = nullptr;
+    Expr* condition           = nullptr;
+    Stmt* updater             = nullptr;
+    const TSNode init_node    = util::child_by_field_name(*node, "initializer");
+    const TSNode cond_node    = util::child_by_field_name(*node, "condition");
+    const TSNode updater_node = util::child_by_field_name(*node, "update");
+    const TSNode body_node    = util::child_by_field_name(*node, "body");
     const bool cond_null      = ts_node_is_null(cond_node);
     const bool updater_null   = ts_node_is_null(updater_node);
 
@@ -134,10 +133,10 @@ Stmt* SourceCodeVisitor::handle_for_each_loop(
 )
 {
     self->semantic_context_.enter_scope();
-    const TSNode type_node  = ts_node_child_by_field_name(*node, "type", 4);
-    const TSNode left_node  = ts_node_child_by_field_name(*node, "left", 4);
-    const TSNode right_node = ts_node_child_by_field_name(*node, "right", 5);
-    const TSNode body_node  = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode type_node  = util::child_by_field_name(*node, "type");
+    const TSNode left_node  = util::child_by_field_name(*node, "left");
+    const TSNode right_node = util::child_by_field_name(*node, "right");
+    const TSNode body_node  = util::child_by_field_name(*node, "body");
 
     if (ts_node_is_null(type_node))
     {
@@ -167,14 +166,13 @@ Stmt* SourceCodeVisitor::handle_if_stmt(
 )
 {
     // static const std::string if_node_type = "if_statement";
-    static const std::string if_false = "alternative";
+    static constexpr std::string_view if_false  = "alternative";
+    static constexpr std::string_view if_true   = "consequence";
+    static constexpr std::string_view condition = "condition";
+
     std::stack<TSNode> if_nodes;
     if_nodes.push(*node);
-    TSNode current_node = ts_node_child_by_field_name(
-        *node,
-        if_false.c_str(),
-        if_false.length()
-    );
+    TSNode current_node      = util::child_by_field_name(*node, if_false);
 
     const uint32_t if_symbol = ts_node_symbol(*node);
     TSSymbol current_symbol
@@ -182,11 +180,7 @@ Stmt* SourceCodeVisitor::handle_if_stmt(
     while (current_symbol == if_symbol)
     {
         if_nodes.push(current_node);
-        current_node = ts_node_child_by_field_name(
-            current_node,
-            if_false.c_str(),
-            if_false.length()
-        );
+        current_node = util::child_by_field_name(current_node, if_false);
         if (ts_node_is_null(current_node))
             break;
 
@@ -194,14 +188,8 @@ Stmt* SourceCodeVisitor::handle_if_stmt(
     }
 
     // handling of else in last node
-    static const std::string if_true   = "consequence";
-    static const std::string condition = "condition";
-
-    const TSNode else_node             = ts_node_child_by_field_name(
-        if_nodes.top(),
-        if_false.c_str(),
-        if_false.length()
-    );
+    const TSNode else_node
+        = util::child_by_field_name(if_nodes.top(), if_false);
 
     Stmt* current_else = nullptr;
     if (! ts_node_is_null(else_node))
@@ -215,16 +203,8 @@ Stmt* SourceCodeVisitor::handle_if_stmt(
     {
         const TSNode if_node = if_nodes.top();
         if_nodes.pop();
-        const TSNode if_true_node = ts_node_child_by_field_name(
-            if_node,
-            if_true.c_str(),
-            if_true.length()
-        );
-        const TSNode cond_node = ts_node_child_by_field_name(
-            if_node,
-            condition.c_str(),
-            condition.length()
-        );
+        const TSNode if_true_node = util::child_by_field_name(if_node, if_true);
+        const TSNode cond_node = util::child_by_field_name(if_node, condition);
         StmtHandler if_true_handler
             = RegManager::get_stmt_handler(if_true_node);
         ExprHandler cond_handler = RegManager::get_expr_handler(cond_node);
@@ -249,7 +229,7 @@ Stmt* SourceCodeVisitor::handle_try_stmt(
     if (ts_node_child_count(*node) < 2)
         throw std::logic_error("Not a try-catch node");
 
-    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode body_node         = util::child_by_field_name(*node, "body");
     const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
     ts_tree_cursor_goto_descendant(&cursor, 2);
 
@@ -322,8 +302,8 @@ Stmt* SourceCodeVisitor::handle_catch_decl(
     const TSNode* node
 )
 {
-    const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
-    const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
+    const TSNode type_node = util::child_by_field_name(*node, "type");
+    const TSNode name_node = util::child_by_field_name(*node, "name");
     Type* type             = util::make_type(type_node, self->get_src_code());
     const std::string name
         = util::extract_node_text(name_node, self->get_src_code());
@@ -335,8 +315,8 @@ Stmt* SourceCodeVisitor::handle_switch_stmt(
     const TSNode* node
 )
 {
-    const TSNode value_node  = ts_node_child_by_field_name(*node, "value", 5);
-    const TSNode switch_body = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode value_node       = util::child_by_field_name(*node, "value");
+    const TSNode switch_body      = util::child_by_field_name(*node, "body");
     const ExprHandler val_handler = RegManager::get_expr_handler(value_node);
     Expr* value                   = val_handler(self, &value_node);
 

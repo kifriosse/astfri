@@ -223,14 +223,12 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     const TSNode* node
 )
 {
-    const TSNode left_side_node
-        = ts_node_child_by_field_name(*node, "expression", 10);
-    const TSNode right_node = ts_node_child_by_field_name(*node, "name", 4);
-    const ExprHandler left_handler
-        = RegManager::get_expr_handler(left_side_node);
+    const TSNode left_node  = util::child_by_field_name(*node, "expression");
+    const TSNode right_node = util::child_by_field_name(*node, "name");
+    const ExprHandler left_handler = RegManager::get_expr_handler(left_node);
     const std::string name
         = util::extract_node_text(right_node, self->get_src_code());
-    Expr* left_side = left_handler(self, &left_side_node);
+    Expr* left_side = left_handler(self, &left_node);
     if (is_a<ThisExpr>(left_side))
     {
         UserTypeDefStmt* owner = self->semantic_context_.current_type();
@@ -262,10 +260,8 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
     );
     // std::cout << "Invocation Expression: " << std::endl;
     // print_child_nodes_types(*node, self->get_src_code());
-    const TSNode function_node
-        = ts_node_child_by_field_name(*node, "function", 8);
-    const TSNode arg_list_node
-        = ts_node_child_by_field_name(*node, "arguments", strlen("arguments"));
+    const TSNode function_node = util::child_by_field_name(*node, "function");
+    const TSNode arg_list_node = util::child_by_field_name(*node, "arguments");
     const std::vector<Expr*> arg_list
         = handle_argument_list(self, &arg_list_node);
     // if it doesn't have a left side - it not a member access node in tree
@@ -291,9 +287,9 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
     {
         // todo fix function call, method call, and lambda call distinction
         const TSNode name_node
-            = ts_node_child_by_field_name(function_node, "name", 4);
+            = util::child_by_field_name(function_node, "name");
         const TSNode left_node
-            = ts_node_child_by_field_name(function_node, "expression", 10);
+            = util::child_by_field_name(function_node, "expression");
         const ExprHandler left_handler
             = RegManager::get_expr_handler(left_node);
         Expr* left_side = left_handler(self, &left_node);
@@ -384,7 +380,6 @@ Expr* SourceCodeVisitor::handle_binary_op_expr(
 )
 {
     ExprFactory& expr_factory       = ExprFactory::get_instance();
-
     const TSNode left               = ts_node_child(*node, 0);
     const TSNode op_node            = ts_node_child(*node, 1);
     const TSNode right              = ts_node_child(*node, 2);

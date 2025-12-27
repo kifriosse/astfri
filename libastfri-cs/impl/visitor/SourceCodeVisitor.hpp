@@ -216,6 +216,15 @@ public:
 
 private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
+    /**
+     * Turns an expression list into a chained comma operator expression
+     * @param start_node node from which to start
+     * @param end_node node at which to end (exclusive). If nullptr, ends when
+     * there aren't other siblings
+     * @return returns the chained comma operator expression. If there is only
+     * one expression, that expression is returned. If start and end are the
+     * same, nullptr is returned.
+     */
     Expr* expr_list_to_comma_op(
         const TSNode& start_node,
         const TSNode* end_node

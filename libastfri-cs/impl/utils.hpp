@@ -131,6 +131,16 @@ Scope create_scope(
  */
 Type* make_type(const TSNode& node, const std::string& source_code);
 
+
+/**
+ * @brief Gets the child node of the given node by field name.
+ * @param node parent TSNode
+ * @param name field name to search for
+ * @return child TSNode with the given field name, or a null TSNode if not
+ * found
+ */
+TSNode child_by_field_name(const TSNode& node, std::string_view name);
+
 /**
  * @brief Combines the hash of a value into an existing hash seed.
  * @param seed The existing hash seed to combine into.

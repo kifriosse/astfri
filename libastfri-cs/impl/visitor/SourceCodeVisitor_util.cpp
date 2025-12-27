@@ -13,8 +13,8 @@ Stmt* SourceCodeVisitor::make_while_loop(
     const bool is_do_while
 )
 {
-    const TSNode cond_node = ts_node_child_by_field_name(*node, "condition", 9);
-    const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
+    const TSNode cond_node = util::child_by_field_name(*node, "condition");
+    const TSNode body_node = util::child_by_field_name(*node, "body");
     const ExprHandler cond_handler = RegManager::get_expr_handler(cond_node);
     const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
     Expr* condition                = cond_handler(this, &cond_node);
@@ -26,15 +26,6 @@ Stmt* SourceCodeVisitor::make_while_loop(
     return stmt_factory_.mk_while(condition, body);
 }
 
-/**
- * Turns an expression list into a chained comma operator expression
- * @param start_node node from which to start
- * @param end_node node at which to end (exclusive). If nullptr, ends when there
- * aren't other siblings
- * @return returns the chained comma operator expression. If there is only one
- * expression, that expression is returned. If start and end are the same,
- * nullptr is returned.
- */
 Expr* SourceCodeVisitor::expr_list_to_comma_op(
     const TSNode& start_node,
     const TSNode* end_node
@@ -109,8 +100,8 @@ std::vector<ParamVarDefStmt*> SourceCodeVisitor::handle_param_list(
         {
             // todo redo this when we add variadic parameters
             // temporary solution
-            TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
-            TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
+            const TSNode type_node = util::child_by_field_name(*node, "type");
+            const TSNode name_node = util::child_by_field_name(*node, "name");
             ParamVarDefStmt* param = stmt_factory_.mk_param_var_def(
                 util::extract_node_text(name_node, self->get_src_code()),
                 util::make_type(type_node, self->get_src_code()),
@@ -160,7 +151,7 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
 )
 {
     std::vector<VarDefStmt*> var_defs;
-    const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
+    const TSNode type_node = util::child_by_field_name(*node, "type");
     Type* type             = util::make_type(type_node, self->get_src_code());
     const std::vector<TSNode> decltr_nodes
         = util::find_nodes(*node, self->get_lang(), regs::Queries::decl_query);
