@@ -2,14 +2,13 @@
 #define CSHARP_REGISTRIES_HPP
 
 #include <libastfri-cs/impl/CSModifiers.hpp>
+#include <libastfri-cs/impl/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <optional>
 #include <string>
 #include <unordered_map>
-
-#include "SymbolTableBuilder.hpp"
-#include "visitor/SourceCodeVisitor.hpp"
 
 namespace astfri::csharp
 {
@@ -23,6 +22,8 @@ struct Queries
     static const std::string decl_query;
     static const std::string var_modif_query;
     static const std::string method_modif_query;
+    static const std::string file_namespace_query;
+    static const std::string comment_error_query;
 };
 
 struct Handlers

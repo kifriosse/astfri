@@ -52,6 +52,15 @@ const std::string Queries::method_modif_query =
         )
     )";
 
+const std::string Queries::file_namespace_query =
+    "(file_scoped_namespace_declaration) @namespace";
+
+const std::string Queries::comment_error_query =
+    R"(
+        (comment) @comment
+        (ERROR) @error
+    )";
+
 Handlers::Handlers() :
     stmts({
         {"class_declaration", SourceCodeVisitor::handle_class_def_stmt},

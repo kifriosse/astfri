@@ -177,17 +177,12 @@ std::string remove_comments(
 {
     std::string new_source;
 
-    static std::string query = R"(
-        (comment) @comment
-        (ERROR) @error
-    )";
-
     TSQueryError query_error;
     uint32_t offset;
     TSQuery* ts_query = ts_query_new(
         lang,
-        query.c_str(),
-        query.length(),
+        regs::Queries::comment_error_query.c_str(),
+        regs::Queries::comment_error_query.length(),
         &offset,
         &query_error
     );
@@ -382,11 +377,11 @@ Scope create_scope(
             if (found_name_space)
                 break;
 
-            // todo move to query registry
-            std::string file_namespace_query
-                = "(file_scoped_namespace_declaration) @namespace";
-            const TSNode namespace_node
-                = find_first_node(current, lang, file_namespace_query);
+            const TSNode namespace_node = find_first_node(
+                current,
+                lang,
+                regs::Queries::file_namespace_query
+            );
             if (ts_node_is_null(namespace_node))
                 break;
 
