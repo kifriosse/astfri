@@ -100,14 +100,11 @@ std::vector<ParamVarDefStmt*> SourceCodeVisitor::handle_param_list(
         {
             // todo redo this when we add variadic parameters
             // temporary solution
-            const TSNode type_node = util::child_by_field_name(*node, "type");
-            const TSNode name_node = util::child_by_field_name(*node, "name");
-            ParamVarDefStmt* param = stmt_factory_.mk_param_var_def(
-                util::extract_node_text(name_node, self->get_src_code()),
-                util::make_type(type_node, self->get_src_code()),
-                nullptr
-            );
-            parameters.emplace_back(param);
+            parameters.emplace_back(util::make_param_def(
+                *node,
+                self->get_lang(),
+                self->get_src_code()
+            ));
         }
     }
 

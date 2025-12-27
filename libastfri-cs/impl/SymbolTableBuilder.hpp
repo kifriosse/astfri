@@ -28,7 +28,7 @@ private:
     TypeContext type_context_;
     std::vector<SourceCode>& src_codes;
     SourceCode* current_src{nullptr};
-    const TSLanguage* language_;
+    const TSLanguage* lang_;
 
 public:
     /**

@@ -17,7 +17,7 @@ StmtFactory& SymbolTableBuilder::stmt_factory_ = StmtFactory::get_instance();
 
 SymbolTableBuilder::SymbolTableBuilder(std::vector<SourceCode>& source_codes) :
     src_codes(source_codes),
-    language_(tree_sitter_c_sharp())
+    lang_(tree_sitter_c_sharp())
 {
 }
 
@@ -86,11 +86,11 @@ void SymbolTableBuilder::register_class(
         throw std::logic_error("Current source code is not set");
 
     const std::string& source_code_ = self->current_src->file.content;
-    const TSNode name_node = ts_node_child_by_field_name(node, "name", 4);
+    const TSNode name_node          = util::child_by_field_name(node, "name");
     // todo handle generic parameters
     ClassDefStmt* class_def = stmt_factory_.mk_class_def(
         util::extract_node_text(name_node, source_code_),
-        util::create_scope(node, self->language_, source_code_)
+        util::create_scope(node, self->lang_, source_code_)
     );
 
     // todo handle partial classes
@@ -142,12 +142,9 @@ void SymbolTableBuilder::register_memb_var(
     SymbolTable& type_table
 )
 {
-    const std::string& source_code           = self->current_src->file.content;
-    const std::vector<TSNode> modifier_nodes = util::find_nodes(
-        node,
-        self->language_,
-        regs::Queries::var_modif_query
-    );
+    const std::string& source_code = self->current_src->file.content;
+    const std::vector<TSNode> modifier_nodes
+        = util::find_nodes(node, self->lang_, regs::Queries::var_modif_query);
     const CSModifiers modifiers
         = CSModifiers::handle_modifiers(modifier_nodes, source_code);
 
@@ -155,13 +152,12 @@ void SymbolTableBuilder::register_memb_var(
         = modifier_nodes.empty() ? ts_node_child(node, 0)
                                  : ts_node_next_sibling(modifier_nodes.back());
 
-    const TSNode type_node
-        = ts_node_child_by_field_name(var_decl_node, "type", 4);
-    Type* type = util::make_type(type_node, source_code);
+    const TSNode type_node = util::child_by_field_name(var_decl_node, "type");
+    Type* type             = util::make_type(type_node, source_code);
 
     const std::vector<TSNode> var_decltor_nodes = util::find_nodes(
         var_decl_node,
-        self->language_,
+        self->lang_,
         regs::Queries::decl_query
     );
 
@@ -211,23 +207,22 @@ void SymbolTableBuilder::register_method(
     if (! current_type)
         throw std::logic_error("Owner type not found");
 
-    const std::string& source_code           = self->current_src->file.content;
+    const std::string& src_code              = self->current_src->file.content;
     const std::vector<TSNode> modifier_nodes = util::find_nodes(
         node,
-        self->language_,
+        self->lang_,
         regs::Queries::method_modif_query
     );
     const CSModifiers method_modif
-        = CSModifiers::handle_modifiers(modifier_nodes, source_code);
-    const TSNode return_type_node
-        = ts_node_child_by_field_name(node, "returns", 7);
-    const TSNode func_name_node = ts_node_child_by_field_name(node, "name", 4);
+        = CSModifiers::handle_modifiers(modifier_nodes, src_code);
+    const TSNode return_type_node = util::child_by_field_name(node, "returns");
+    const TSNode func_name_node   = util::child_by_field_name(node, "name");
     const TSNode param_list_node
-        = ts_node_child_by_field_name(node, "parameters", 10);
+        = util::child_by_field_name(node, "parameters");
     TSTreeCursor param_cursor = ts_tree_cursor_new(param_list_node);
     std::vector<ParamVarDefStmt*> params;
     std::vector<ParamMetadata> param_metadata;
-    Type* return_type = util::make_type(return_type_node, source_code);
+    Type* return_type = util::make_type(return_type_node, src_code);
 
     const auto it_type_metadata
         = type_table.user_types_metadata.find(current_type);
@@ -239,7 +234,7 @@ void SymbolTableBuilder::register_method(
     if (ts_tree_cursor_goto_first_child(&param_cursor))
     {
         static const TSSymbol param_keyword = ts_language_symbol_for_name(
-            self->language_,
+            self->lang_,
             "params",
             std::strlen("params"),
             false
@@ -257,38 +252,8 @@ void SymbolTableBuilder::register_method(
                 continue;
             }
 
-            CSModifiers param_mod = CSModifiers::handle_modifiers(
-                util::find_nodes(
-                    current,
-                    self->language_,
-                    regs::Queries::var_modif_query
-                ),
-                source_code
-            );
-
-            const TSNode type_node
-                = ts_node_child_by_field_name(current, "type", 4);
-            const TSNode param_name_node
-                = ts_node_child_by_field_name(current, "name", 4);
-            Type* param_type = util::make_type(type_node, source_code);
-            TypeFactory& type_factory = TypeFactory::get_instance();
-            if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
-            {
-                param_type = type_factory.mk_indirect(param_type);
-            }
-            else if (param_mod.has(CSModifier::In) ||
-                (param_mod.has(CSModifier::Readonly) && !param_mod.has(CSModifier::Ref)))
-            {
-                // todo should be a constat reference
-                // for now, just make it indirect
-                param_type = type_factory.mk_indirect(param_type);
-            }
-
-            ParamVarDefStmt* param = stmt_factory_.mk_param_var_def(
-                util::extract_node_text(param_name_node, source_code),
-                param_type,
-                nullptr
-            );
+            ParamVarDefStmt* param
+                = util::make_param_def(current, self->lang_, src_code);
             params.push_back(param);
             param_metadata.emplace_back(
                 ParamMetadata{
@@ -303,15 +268,7 @@ void SymbolTableBuilder::register_method(
         {
             // todo redo this when we add variadic parameters
             // temporary solution
-            TSNode type_node
-                = ts_node_child_by_field_name(param_list_node, "type", 4);
-            TSNode name_node
-                = ts_node_child_by_field_name(param_list_node, "name", 4);
-            ParamVarDefStmt* param = stmt_factory_.mk_param_var_def(
-                util::extract_node_text(name_node, source_code),
-                util::make_type(type_node, source_code),
-                nullptr
-            );
+            ParamVarDefStmt* param = util::make_param_def(param_list_node, self->lang_, src_code);
             params.emplace_back(param);
             param_metadata.emplace_back(
                 ParamMetadata{
@@ -325,8 +282,7 @@ void SymbolTableBuilder::register_method(
 
     ts_tree_cursor_delete(&param_cursor);
 
-    const std::string name
-        = util::extract_node_text(func_name_node, source_code);
+    const std::string name = util::extract_node_text(func_name_node, src_code);
     MethodIdentifier method_id{
         .func_id
         = FunctionIdentifier{.name = name, .param_count = params.size()},

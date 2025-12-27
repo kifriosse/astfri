@@ -59,7 +59,7 @@ enum class AccessType
      */
     Base,
     /**
-     * @brief When member access is on expression (can't resolve the type)
+     * @brief When member access is on expression of unknown type
      */
     Unknown
 };

@@ -131,6 +131,20 @@ Scope create_scope(
  */
 Type* make_type(const TSNode& node, const std::string& source_code);
 
+/**
+ * @brief Creates a ParamVarDefStmt from the given TSNode.
+ * @param node TSNode representing the parameter definition
+ * @param lang Tree-sitter language
+ * @param source_code original source code string
+ * @return pointer to the created ParamVarDefStmt
+ * @note Creates a ParamVarDefStmt but without initialization expression -
+ * needs to be handled by the caller
+ */
+ParamVarDefStmt* make_param_def(
+    const TSNode& node,
+    const TSLanguage* lang,
+    const std::string& source_code
+);
 
 /**
  * @brief Gets the child node of the given node by field name.

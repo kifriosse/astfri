@@ -434,6 +434,43 @@ Type* make_type(const TSNode& node, const std::string& source_code)
     return is_indirection_type ? type_factory.mk_indirect(type) : type;
 }
 
+ParamVarDefStmt* make_param_def(
+    const TSNode& node,
+    const TSLanguage* lang,
+    const std::string& source_code
+)
+{
+    StmtFactory& stmt_factory   = StmtFactory::get_instance();
+    TypeFactory& type_factory   = TypeFactory::get_instance();
+    const CSModifiers param_mod = CSModifiers::handle_modifiers(
+        find_nodes(node, lang, regs::Queries::var_modif_query),
+        source_code
+    );
+
+    const TSNode type_node       = child_by_field_name(node, "type");
+    const TSNode param_name_node = child_by_field_name(node, "name");
+    Type* param_type             = make_type(type_node, source_code);
+
+    if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
+    {
+        param_type = type_factory.mk_indirect(param_type);
+    }
+    else if (param_mod.has(CSModifier::In)
+             || (param_mod.has(CSModifier::Readonly)
+                 && param_mod.has(CSModifier::Ref)))
+    {
+        // todo should be a constat reference
+        // for now, just make it indirect
+        param_type = type_factory.mk_indirect(param_type);
+    }
+
+    return stmt_factory.mk_param_var_def(
+        extract_node_text(param_name_node, source_code),
+        param_type,
+        nullptr
+    );
+}
+
 TSNode child_by_field_name(const TSNode& node, const std::string_view name)
 {
     return ts_node_child_by_field_name(node, name.data(), name.length());

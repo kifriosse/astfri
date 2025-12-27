@@ -331,44 +331,17 @@ Stmt* SourceCodeVisitor::handle_param_def_stmt(
     const TSNode* node
 )
 {
-    const TSNode var_type_node = util::child_by_field_name(*node, "type");
-
-    const std::vector<TSNode> modifier_nodes = util::find_nodes(
-        *node,
-        self->get_lang(),
-        regs::Queries::var_modif_query
-    );
-    const CSModifiers modifiers
-        = CSModifiers::handle_modifiers(modifier_nodes, self->get_src_code());
-    // left side
     const TSNode var_name_node = util::child_by_field_name(*node, "name");
-    // right side
-    const TSNode initializer_node = ts_node_next_named_sibling(var_name_node);
-    const std::string var_name
-        = util::extract_node_text(var_name_node, self->get_src_code());
-    Type* var_type = util::make_type(var_type_node, self->get_src_code());
-    if (modifiers.has(CSModifier::Out) || modifiers.has(CSModifier::Ref))
-    {
-        var_type = type_factory_.mk_indirect(var_type);
-    }
-    else if (modifiers.has(CSModifier::In)
-             || (modifiers.has(CSModifier::Readonly)
-                 && ! modifiers.has(CSModifier::Ref)))
-    {
-        // todo should be a constat reference
-        // for now, just make it indirect
-        var_type = type_factory_.mk_indirect(var_type);
-    }
+    const TSNode init_node     = ts_node_next_named_sibling(var_name_node);
 
-    Expr* initializer = nullptr;
-    if (! ts_node_is_null(initializer_node))
-    {
-        const ExprHandler initializer_handler
-            = RegManager::get_expr_handler(initializer_node);
-        initializer = initializer_handler(self, &initializer_node);
-    }
     ParamVarDefStmt* parameter
-        = stmt_factory_.mk_param_var_def(var_name, var_type, initializer);
+        = util::make_param_def(*node, self->get_lang(), self->get_src_code());
+    if (! ts_node_is_null(init_node))
+    {
+        const ExprHandler init_handler
+            = RegManager::get_expr_handler(init_node);
+        parameter->initializer_ = init_handler(self, &init_node);
+    }
     self->semantic_context_.reg_param(parameter);
     return parameter;
 }
