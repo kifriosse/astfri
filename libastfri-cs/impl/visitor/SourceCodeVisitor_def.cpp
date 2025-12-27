@@ -335,10 +335,10 @@ Stmt* SourceCodeVisitor::handle_param_def_stmt(
 )
 {
     const TSNode var_type_node = ts_node_child_by_field_name(*node, "type", 4);
-    const TSNode var_name_node
-        = ts_node_child_by_field_name(*node, "name", 4); // left side
-    const TSNode initializer_node
-        = ts_node_next_sibling(var_name_node); // right side
+    // left side
+    const TSNode var_name_node = ts_node_child_by_field_name(*node, "name", 4);
+    // right side
+    const TSNode initializer_node = ts_node_next_named_sibling(var_name_node);
     const std::string var_name
         = util::extract_node_text(var_name_node, self->get_src_code());
     Expr* initializer = nullptr;
@@ -513,7 +513,12 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
 
     MethodMetadata* method_data
         = self->semantic_context_.find_method(method_id, current_type);
-    if (method_data)
+    if (! method_data)
+        throw std::logic_error(
+            "Method \'" + method_id.func_id.name + "\' not found"
+        );
+
+    if (method_data->method_def)
     {
         auto& method_def = method_data->method_def;
         if (method_data->processed)
@@ -521,15 +526,26 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
 
         self->semantic_context_.enter_scope();
         self->semantic_context_.reg_return(method_def->func_->retType_);
-        // todo processing of parameter - the expression part
         for (auto& [param_def, param_node, processed] : method_data->params)
         {
             if (processed)
                 continue;
-            // todo handle default values for parameters
+
+            const TSNode param_name_node
+                = ts_node_child_by_field_name(param_node, "name", 4);
+            const TSNode init_node
+                = ts_node_next_named_sibling(param_name_node);
+            Expr* init = nullptr;
+            if (! ts_node_is_null(init_node))
+            {
+                ExprHandler init_hanlder
+                    = RegManager::get_expr_handler(init_node);
+                init = init_hanlder(self, &init_node);
+            }
             self->semantic_context_.reg_param(param_def);
-            processed = true;
-            // util::print_child_nodes_types(param_node, self->get_src_code());
+            param_def->initializer_ = init;
+            processed               = true;
+            util::print_child_nodes_types(param_node, self->get_src_code());
         }
 
         const TSNode body_node

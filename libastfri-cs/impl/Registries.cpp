@@ -305,7 +305,8 @@ SymbolTableBuilder::RegHandler RegManager::get_reg_handler(
 {
     auto& reg_handlers = handlers_.symbol_reg_handlers;
     const auto it      = reg_handlers.find(node_type);
-    return it != reg_handlers.end() ? it->second : [](auto, const auto&, auto&){ };
+    return it != reg_handlers.end() ? it->second
+                                    : [](auto, const auto&, auto&) { };
 }
 
 std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
