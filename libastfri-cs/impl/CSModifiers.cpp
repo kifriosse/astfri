@@ -14,7 +14,7 @@ CSModifiers CSModifiers::handle_modifiers(
     CSModifiers modifiers;
     for (const TSNode& node : mod_nodes)
     {
-        std::string mod_str = extract_node_text(node, source_code);
+        std::string mod_str = util::extract_node_text(node, source_code);
         const auto res      = RegManager::get_modifier(mod_str);
         if (res.has_value())
         {
@@ -61,12 +61,13 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
     return {};
 }
 
-bool CSModifiers::is_virtual() const
+Virtuality CSModifiers::get_virtuality() const
 {
-    return has_modifier(CSModifier::Virtual)
-        || has_modifier(CSModifier::Abstract)
-        || (has_modifier(CSModifier::Override)
-            && ! has_modifier(CSModifier::Sealed));
+    if (has_modifier(CSModifier::Abstract))
+        return Virtuality::PureVirtual;
+    if (has_modifier(CSModifier::Virtual) || has_modifier(CSModifier::Override))
+        return Virtuality::Virtual;
+    return Virtuality::NotVirtual;
 }
 
 } // namespace astfri::csharp

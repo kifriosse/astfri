@@ -1,6 +1,7 @@
 #ifndef CSHARP_AST_BUILDER_HPP
 #define CSHARP_AST_BUILDER_HPP
 
+#include <libastfri-cs/impl/Source.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -12,23 +13,23 @@
 namespace astfri::csharp
 {
 
-struct SourceFile
-{
-    std::filesystem::path file_path;
-    std::string content;
-};
-
 class ASTBuilder
 {
 private:
     const TSLanguage* lang_;
     TSParser* parser_;
-    std::unordered_map<std::string, TSTree*> source_trees_;
 
 public:
     ASTBuilder();
     ~ASTBuilder();
-    [[nodiscard]] TranslationUnit* make_ast(const std::string& source_code_dir);
+    [[nodiscard]] TranslationUnit* make_ast(
+        const std::string& source_code_dir
+    ) const;
+
+    ASTBuilder(ASTBuilder&)             = delete;
+    ASTBuilder(ASTBuilder&&)            = delete;
+    ASTBuilder& operator=(ASTBuilder&)  = delete;
+    ASTBuilder& operator=(ASTBuilder&&) = delete;
 
 private:
     [[nodiscard]] std::vector<SourceFile> get_source_codes(

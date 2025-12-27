@@ -5,6 +5,52 @@ namespace astfri::csharp
 {
 namespace regs
 {
+
+const std::string Queries::top_level_stmt_query =
+    R"(
+    (namespace_declaration
+        body: (declaration_list
+        [
+            (class_declaration)     @class
+            (interface_declaration) @interface
+            (struct_declaration)    @struct
+            (enum_declaration)      @enum
+            (delegate_declaration)  @delegate
+            (record_declaration)    @record
+        ])
+    )
+    (compilation_unit
+    [
+        (class_declaration)     @class
+        (interface_declaration) @interface
+        (struct_declaration)    @struct
+        (enum_declaration)      @enum
+        (delegate_declaration)  @delegate
+        (record_declaration)    @record
+    ])
+    )";
+
+const std::string Queries::decl_query =
+    R"(
+    (variable_declaration
+        (variable_declarator) @var_decl)
+    )";
+
+const std::string Queries::var_modif_query =
+    R"(
+    [
+        (field_declaration (modifier) @modifier)
+        (local_declaration_statement (modifier) @modifier)
+    ]
+    )";
+
+const std::string Queries::method_modif_query =
+    R"(
+        (method_declaration
+            (modifier) @modifier
+        )
+    )";
+
 Handlers::Handlers() :
     stmts({
         {"class_declaration", SourceCodeVisitor::handle_class_def_stmt},
@@ -86,12 +132,12 @@ Handlers::Handlers() :
     ),
     symbol_reg_handlers({
         {"class_declaration", SymbolTableBuilder::register_class},
-        {"struct_declaration", SymbolTableBuilder::register_struct},
+        {"struct_declaration", SymbolTableBuilder::register_class},
         {"interface_declaration", SymbolTableBuilder::register_interface},
         {"enum_declaration", SymbolTableBuilder::register_enum},
         {"delegate_declaration", SymbolTableBuilder::register_delegate},
         {"record_declaration", SymbolTableBuilder::register_record},
-        {"field_declaration", SymbolTableBuilder::register_field},
+        {"field_declaration", SymbolTableBuilder::register_memb_var},
         {"property_declaration", SymbolTableBuilder::register_property},
         {"method_declaration", SymbolTableBuilder::register_method},
     })
@@ -259,7 +305,7 @@ SymbolTableBuilder::RegHandler RegManager::get_reg_handler(
 {
     auto& reg_handlers = handlers_.symbol_reg_handlers;
     const auto it      = reg_handlers.find(node_type);
-    return it != reg_handlers.end() ? it->second : [](auto&, auto&) { };
+    return it != reg_handlers.end() ? it->second : [](auto, const auto&, auto&){ };
 }
 
 std::optional<UnaryOpType> RegManager::get_prefix_unary_op(

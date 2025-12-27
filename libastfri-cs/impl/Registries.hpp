@@ -17,56 +17,40 @@ namespace astfri::csharp
 namespace regs
 {
 
-inline static const std::string top_level_stmt_query =
-    R"(
-    (namespace_declaration
-        body: (declaration_list
-        [
-            (class_declaration)
-            (interface_declaration)
-            (struct_declaration)
-            (enum_declaration)
-            (delegate_declaration)
-            (record_declaration)
-        ] @top_level)
-    )
-    (compilation_unit
-    [
-        (class_declaration)     @class
-        (interface_declaration) @interface
-        (struct_declaration)    @struct
-        (enum_declaration)      @enum
-        (delegate_declaration)  @delegate
-        (record_declaration)    @record
-    ])
-    )";
+struct Queries
+{
+    static const std::string top_level_stmt_query;
+    static const std::string decl_query;
+    static const std::string var_modif_query;
+    static const std::string method_modif_query;
+};
 
 struct Handlers
 {
-    std::unordered_map<std::string, SourceCodeVisitor::StmtHandler> stmts;
-    std::unordered_map<std::string, SourceCodeVisitor::ExprHandler> exprs;
-    std::unordered_map<std::string, SymbolTableBuilder::RegHandler>
+    const std::unordered_map<std::string, SourceCodeVisitor::StmtHandler> stmts;
+    const std::unordered_map<std::string, SourceCodeVisitor::ExprHandler> exprs;
+    const std::unordered_map<std::string, SymbolTableBuilder::RegHandler>
         symbol_reg_handlers;
     Handlers();
 };
 
 struct Operations
 {
-    std::unordered_map<std::string, UnaryOpType> prefix_unary_op;
-    std::unordered_map<std::string, BinOpType> bin_operations;
+    const std::unordered_map<std::string, UnaryOpType> prefix_unary_op;
+    const std::unordered_map<std::string, BinOpType> bin_operations;
     Operations();
 };
 
 struct Types
 {
     TypeFactory& type_factory;
-    std::unordered_map<std::string, Type*> types;
+    const std::unordered_map<std::string, Type*> types;
     Types();
 };
 
 struct Modifiers
 {
-    std::unordered_map<std::string, CSModifier> modifiers;
+    const std::unordered_map<std::string, CSModifier> modifiers;
     Modifiers();
 };
 } // namespace regs

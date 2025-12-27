@@ -2,98 +2,11 @@
 #include <libastfri-cs/impl/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
+#include <cstring>
 #include <queue>
 
 namespace astfri::csharp
 {
-
-Scope SourceCodeVisitor::create_scope(const TSNode* node) const
-{
-    enum NodeType
-    {
-        Class,
-        Interface,
-        Namespace,
-        Root,
-    };
-
-    static std::unordered_map<std::string, NodeType> node_type_map = {
-        {"class_declaration",     Class    },
-        {"interface_declaration", Interface},
-        {"namespace_declaration", Namespace},
-        {"compilation_unit",      Root     },
-    };
-
-    std::stack<std::string> scope_str;
-    Scope scope           = {};
-    TSNode current        = *node;
-    TSNode parent         = ts_node_parent(current);
-
-    bool found_name_space = false;
-    while (! ts_node_is_null(parent))
-    {
-        const std::string parent_type = ts_node_type(parent);
-        const auto res                = node_type_map.find(parent_type);
-        current                       = parent;
-        parent                        = ts_node_parent(current);
-
-        if (res == node_type_map.end())
-            continue;
-
-        switch (res->second)
-        {
-        case Class:
-        case Interface:
-        {
-            const TSNode name_node
-                = ts_node_child_by_field_name(current, "name", 4);
-            const std::string name
-                = extract_node_text(name_node, this->source_code_);
-            scope_str.push(name);
-            break;
-        }
-        case Root:
-        {
-            if (found_name_space)
-                break;
-
-            std::string file_namespace_query
-                = "(file_scoped_namespace_declaration) @namespace";
-            const TSNode namespace_node = find_first_node(
-                current,
-                this->language_,
-                file_namespace_query
-            );
-            if (ts_node_is_null(namespace_node))
-                break;
-
-            const TSNode name_node
-                = ts_node_child_by_field_name(namespace_node, "name", 4);
-            const std::string name
-                = extract_node_text(name_node, this->source_code_);
-            split_namespace(scope_str, name);
-            break;
-        }
-        case Namespace:
-        {
-            found_name_space = true;
-            const TSNode name_node
-                = ts_node_child_by_field_name(current, "name", 4);
-            const std::string name
-                = extract_node_text(name_node, this->source_code_);
-            split_namespace(scope_str, name);
-            break;
-        }
-        }
-    }
-
-    while (! scope_str.empty())
-    {
-        scope.names_.push_back(scope_str.top());
-        scope_str.pop();
-    }
-    return scope;
-}
 
 Stmt* SourceCodeVisitor::make_while_loop(
     const TSNode* node,
@@ -166,18 +79,46 @@ std::vector<ParamVarDefStmt*> SourceCodeVisitor::handle_param_list(
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
     std::vector<ParamVarDefStmt*> parameters;
-    if (! ts_tree_cursor_goto_first_child(&cursor))
-        throw std::logic_error("Invalid Node");
-
-    const StmtHandler handler = RegManager::get_stmt_handler("parameter");
-    do
+    if (ts_tree_cursor_goto_first_child(&cursor))
     {
-        TSNode current = ts_tree_cursor_current_node(&cursor);
-        if (! ts_node_is_named(current))
-            continue;
+        static const TSSymbol param_keyword = ts_language_symbol_for_name(
+            self->get_lang(),
+            "params",
+            strlen("params"),
+            false
+        );
+        const StmtHandler handler = RegManager::get_stmt_handler("parameter");
+        bool is_variadic          = false;
+        do
+        {
+            TSNode current = ts_tree_cursor_current_node(&cursor);
+            if (! ts_node_is_named(current))
+            {
+                is_variadic = ts_node_symbol(current) == param_keyword;
+                if (is_variadic)
+                    break;
+                continue;
+            }
 
-        parameters.emplace_back(as_a<ParamVarDefStmt>(handler(self, &current)));
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
+            parameters.emplace_back(
+                as_a<ParamVarDefStmt>(handler(self, &current))
+            );
+        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+
+        if (is_variadic && parameters.empty())
+        {
+            // todo redo this when we add variadic parameters
+            // temporary solution
+            TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
+            TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
+            ParamVarDefStmt* param = stmt_factory_.mk_param_var_def(
+                util::extract_node_text(name_node, self->get_src_code()),
+                util::make_type(type_node, self->get_src_code()),
+                nullptr
+            );
+            parameters.emplace_back(param);
+        }
+    }
 
     ts_tree_cursor_delete(&cursor);
     return parameters;
@@ -218,16 +159,11 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
     const TSNode* node
 )
 {
-    static const std::string decl_query =
-        R"(
-        (variable_declaration
-            (variable_declarator) @var_decl)
-        )";
     std::vector<VarDefStmt*> var_defs;
     const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
-    Type* type             = make_type(self, type_node);
+    Type* type             = util::make_type(type_node, self->get_src_code());
     const std::vector<TSNode> decltr_nodes
-        = find_nodes(*node, self->language_, decl_query);
+        = util::find_nodes(*node, self->get_lang(), regs::Queries::decl_query);
     for (const auto declarator_node : decltr_nodes)
     {
         TSNode var_name_node = ts_node_child(declarator_node, 0);
@@ -235,12 +171,12 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
         ExprHandler right_side_handler
             = RegManager::get_expr_handler(right_node);
         LocalVarDefStmt* var_def = stmt_factory_.mk_local_var_def(
-            extract_node_text(var_name_node, self->source_code_),
+            util::extract_node_text(var_name_node, self->get_src_code()),
             type,
             right_side_handler(self, &right_node)
         );
         var_defs.push_back(var_def);
-        self->semantic_context_.add_local_var(var_def);
+        self->semantic_context_.reg_local_var(var_def);
     }
 
     if (var_defs.size() > 1)
@@ -249,4 +185,19 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
     }
     return var_defs.front();
 }
+
+std::string& SourceCodeVisitor::get_src_code() const
+{
+    if (! current_src)
+        throw std::logic_error("Current source code is not set");
+    return current_src->file.content;
+}
+
+const TSLanguage* SourceCodeVisitor::get_lang() const
+{
+    if (! current_src)
+        throw std::logic_error("Current source code is not set");
+    return ts_tree_language(current_src->tree);
+}
+
 } // namespace astfri::csharp

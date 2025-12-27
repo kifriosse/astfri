@@ -13,7 +13,7 @@ Expr* SourceCodeVisitor::handle_int_lit(
     const TSNode* node
 )
 {
-    std::string int_str = extract_node_text(*node, self->source_code_);
+    std::string int_str = util::extract_node_text(*node, self->get_src_code());
     std::erase(int_str, '_');
 
     const size_t string_len = int_str.length();
@@ -34,17 +34,17 @@ Expr* SourceCodeVisitor::handle_int_lit(
         base = 2;
     }
 
-    const IntSuffix suffix_type = get_suffix_type(suffix);
+    const util::IntSuffix suffix_type = util::get_suffix_type(suffix);
 
     switch (suffix_type)
     {
-    case IntSuffix::U:
-    case IntSuffix::L:
+    case util::IntSuffix::U:
+    case util::IntSuffix::L:
     {
         int_str.pop_back();
         break;
     }
-    case IntSuffix::UL:
+    case util::IntSuffix::UL:
     {
         int_str.erase(int_str.end() - 2, int_str.end());
         break;
@@ -53,7 +53,8 @@ Expr* SourceCodeVisitor::handle_int_lit(
         break;
     }
 
-    if (suffix_type == IntSuffix::None || suffix_type == IntSuffix::U)
+    if (suffix_type == util::IntSuffix::None
+        || suffix_type == util::IntSuffix::U)
     {
         // todo add handeling of unsigned integers
         return expr_factory_.mk_int_literal(std::stoi(int_str, nullptr, base));
@@ -68,7 +69,8 @@ Expr* SourceCodeVisitor::handle_float_lit(
     const TSNode* node
 )
 {
-    std::string float_str = extract_node_text(*node, self->source_code_);
+    std::string float_str
+        = util::extract_node_text(*node, self->get_src_code());
     const char suffix
         = static_cast<char>(std::tolower(float_str[float_str.length() - 1]));
 
@@ -106,7 +108,8 @@ Expr* SourceCodeVisitor::handle_bool_lit(
     const TSNode* node
 )
 {
-    const std::string bool_str = extract_node_text(*node, self->source_code_);
+    const std::string bool_str
+        = util::extract_node_text(*node, self->get_src_code());
     return expr_factory_.mk_bool_literal(bool_str == "true");
 }
 
@@ -117,7 +120,7 @@ Expr* SourceCodeVisitor::handle_char_lit(
 {
     const TSNode content_node = ts_node_child(*node, 1);
     const std::string character_str
-        = extract_node_text(content_node, self->source_code_);
+        = util::extract_node_text(content_node, self->get_src_code());
     if (character_str.length() > 1)
     {
         // todo handle 16-bit unicode characters
@@ -136,7 +139,7 @@ Expr* SourceCodeVisitor::handle_str_lit(
 
     const TSNode str_content = ts_node_child(*node, 1);
     const std::string content
-        = extract_node_text(str_content, self->source_code_);
+        = util::extract_node_text(str_content, self->get_src_code());
     return expr_factory_.mk_string_literal(content);
 }
 
@@ -161,10 +164,11 @@ Expr* SourceCodeVisitor::handle_verbatim_str_lit(
     const TSNode* node
 )
 {
-    std::string node_contet = extract_node_text(*node, self->source_code_);
+    std::string node_contet
+        = util::extract_node_text(*node, self->get_src_code());
     node_contet.pop_back();
     node_contet.erase(node_contet.begin(), node_contet.begin() + 2);
-    node_contet = escape_string(node_contet, true);
+    node_contet = util::escape_string(node_contet, true);
 
     return expr_factory_.mk_string_literal(node_contet);
 }
@@ -175,8 +179,9 @@ Expr* SourceCodeVisitor::handle_raw_str_lit(
 )
 {
     const TSNode content_node = ts_node_child(*node, 1);
-    std::string content = extract_node_text(content_node, self->source_code_);
-    content             = escape_string(content, false);
+    std::string content
+        = util::extract_node_text(content_node, self->get_src_code());
+    content = util::escape_string(content, false);
     return expr_factory_.mk_string_literal(content);
 }
 
@@ -193,8 +198,10 @@ Expr* SourceCodeVisitor::handle_identifier(
     const TSNode* node
 )
 {
-    const std::string identifier = extract_node_text(*node, self->source_code_);
-    Stmt* def_stmt               = self->semantic_context_.find_var(identifier);
+    const std::string identifier
+        = util::extract_node_text(*node, self->get_src_code());
+    Stmt* def_stmt
+        = self->semantic_context_.find_var(identifier, AccessType::None);
     if (! def_stmt)
         return expr_factory_.mk_unknown();
 
@@ -221,12 +228,14 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     const TSNode right_node = ts_node_child_by_field_name(*node, "name", 4);
     const ExprHandler left_handler
         = RegManager::get_expr_handler(left_side_node);
-    const std::string name = extract_node_text(right_node, self->source_code_);
-    Expr* left_side        = left_handler(self, &left_side_node);
+    const std::string name
+        = util::extract_node_text(right_node, self->get_src_code());
+    Expr* left_side = left_handler(self, &left_side_node);
     if (is_a<ThisExpr>(left_side))
     {
-        if (const auto* member_var_def = // todo for future use
-            self->semantic_context_.find_member_var(name))
+        UserTypeDefStmt* owner = self->semantic_context_.current_type();
+        if (const auto member_var_data = // todo for future use
+            self->semantic_context_.get_memb_var_data(name, owner))
         {
             return expr_factory_.mk_member_var_ref(left_side, name);
         }
@@ -240,19 +249,19 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
 )
 {
     static const TSSymbol identifier_node_symb = ts_language_symbol_for_name(
-        self->language_,
+        self->get_lang(),
         "identifier",
         std::strlen("identifier"),
         true
     );
     static const TSSymbol memb_access_node_symb = ts_language_symbol_for_name(
-        self->language_,
+        self->get_lang(),
         "member_access_expression",
         std::strlen("member_access_expression"),
         true
     );
-    std::cout << "Invocation Expression :" << std::endl;
-    print_child_nodes_types(*node, self->source_code_);
+    // std::cout << "Invocation Expression: " << std::endl;
+    // print_child_nodes_types(*node, self->get_src_code());
     const TSNode function_node
         = ts_node_child_by_field_name(*node, "function", 8);
     const TSNode arg_list_node
@@ -265,9 +274,9 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
     {
         // todo add handling of local functions
         const std::string name
-            = extract_node_text(function_node, self->source_code_);
+            = util::extract_node_text(function_node, self->get_src_code());
         ThisExpr* this_expr = expr_factory_.mk_this();
-        if (self->semantic_context_.find_var(name))
+        if (self->semantic_context_.find_var(name, AccessType::None))
         {
             const ExprHandler var_def_handler
                 = RegManager::get_expr_handler(function_node);
@@ -289,23 +298,27 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
             = RegManager::get_expr_handler(left_node);
         Expr* left_side = left_handler(self, &left_node);
         const std::string name
-            = extract_node_text(name_node, self->source_code_);
+            = util::extract_node_text(name_node, self->get_src_code());
         // it's a member of an instance - method or delegate type attribute
         if (is_a<ThisExpr>(left_side))
         {
-            if (const auto* var_def // todo for future use
-                = self->semantic_context_.find_member_var(name))
+            UserTypeDefStmt* owner = self->semantic_context_.current_type();
+            // todo for future use
+            if (const auto* var_def_data
+                = self->semantic_context_.get_memb_var_data(name, owner))
             {
                 return expr_factory_.mk_lambda_call(
                     expr_factory_.mk_member_var_ref(left_side, name),
                     arg_list
                 );
             }
+            // todo when references to methods are going to be added into method
+            // calls
             return expr_factory_.mk_method_call(left_side, name, arg_list);
         }
-        // todo here will go accessing of static members
-        // left side is a Usertype Reference
-        return expr_factory_.mk_unknown();
+
+        // todo accessing of static members left side is a Usertype Reference
+        return expr_factory_.mk_method_call(left_side, name, arg_list);
     }
     // todo add anonymous lambda call
     // left side is a anonymous lambda
@@ -324,7 +337,7 @@ Expr* SourceCodeVisitor::handle_prefix_unary_op_expr(
 {
     const TSNode right_side_node = ts_node_child(*node, 1);
     const TSNode op_node         = ts_node_child(*node, 0);
-    std::string op = extract_node_text(op_node, self->source_code_);
+    std::string op = util::extract_node_text(op_node, self->get_src_code());
     std::erase_if(op, isspace);
 
     const auto res = RegManager::get_prefix_unary_op(op);
@@ -346,7 +359,8 @@ Expr* SourceCodeVisitor::handle_postfix_unary_op_expr(
 {
     const TSNode left_side_node = ts_node_child(*node, 0);
     const TSNode op_node        = ts_node_child(*node, 1);
-    const std::string op      = extract_node_text(op_node, self->source_code_);
+    const std::string op
+        = util::extract_node_text(op_node, self->get_src_code());
 
     const ExprHandler handler = RegManager::get_expr_handler(left_side_node);
     Expr* left_side           = handler(self, &left_side_node);
@@ -376,9 +390,10 @@ Expr* SourceCodeVisitor::handle_binary_op_expr(
     const TSNode right              = ts_node_child(*node, 2);
     const ExprHandler left_handler  = RegManager::get_expr_handler(left);
     const ExprHandler right_handler = RegManager::get_expr_handler(right);
-    const std::string op = extract_node_text(op_node, self->source_code_);
+    const std::string op
+        = util::extract_node_text(op_node, self->get_src_code());
 
-    const auto res       = RegManager::get_bin_op(op);
+    const auto res = RegManager::get_bin_op(op);
     if (! res.has_value())
     {
         // `a ?? b` same as `a != null ? a : b`

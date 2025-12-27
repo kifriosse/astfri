@@ -8,7 +8,6 @@
 #include <tree_sitter/api.h>
 
 #include <functional>
-#include <string>
 
 namespace astfri::csharp
 {
@@ -26,21 +25,17 @@ private:
     static StmtFactory& stmt_factory_;
     static TypeFactory& type_factory_;
 
-    std::string source_code_;
-    const TSLanguage* language_;
-    SemanticContext semantic_context_;
+    std::vector<SourceCode>& src_codes;
+    SemanticContext& semantic_context_;
+    SourceCode* current_src{nullptr};
 
 public:
-    SourceCodeVisitor(std::string source_code, const TSLanguage* language);
+    SourceCodeVisitor(
+        std::vector<SourceCode>& source_codes,
+        SemanticContext& semantic_context
+    );
     // compilation unit/translation unit
-    void handle_comp_unit_stmt(TranslationUnit& tr_unit, const TSNode* node);
-
-    /**
-     * @param self instance of CSharpTSTreeVisitor
-     * @param node name node of the type (for example class or interface name)
-     * @return instance of a Type
-     */
-    static Type* make_type(const SourceCodeVisitor* self, const TSNode& node);
+    void handle_comp_unit_stmt(TranslationUnit& tr_unit);
 
     // Expressions
     // Literals
@@ -145,7 +140,7 @@ public:
     static Stmt* handle_var_def_stmt(
         SourceCodeVisitor* self,
         const TSNode* node,
-        VarDefType def_type
+        util::VarDefType def_type
     ); // general var def stmt handler
     static Stmt* handle_param_def_stmt(
         SourceCodeVisitor* self,
@@ -219,8 +214,6 @@ public:
     static Stmt* handle_return(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_throw(SourceCodeVisitor* self, const TSNode* node);
 
-    Scope create_scope(const TSNode* node) const;
-
 private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
     Expr* expr_list_to_comma_op(
@@ -239,6 +232,10 @@ private:
         SourceCodeVisitor* self,
         const TSNode* node
     );
+
+private:
+    [[nodiscard]] std::string& get_src_code() const;
+    [[nodiscard]] const TSLanguage* get_lang() const;
 };
 
 } // namespace astfri::csharp

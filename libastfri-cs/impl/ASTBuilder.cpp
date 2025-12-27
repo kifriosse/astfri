@@ -1,7 +1,7 @@
+#include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
-#include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
@@ -22,35 +22,36 @@ ASTBuilder::ASTBuilder() :
 
 ASTBuilder::~ASTBuilder()
 {
-    for (const auto& tree : source_trees_ | std::views::values)
-    {
-        ts_tree_delete(tree);
-    }
     ts_language_delete(lang_);
     ts_parser_delete(parser_);
 }
 
-TranslationUnit* ASTBuilder::make_ast(const std::string& source_code_dir)
+TranslationUnit* ASTBuilder::make_ast(const std::string& source_code_dir) const
 {
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
-    const std::vector<SourceFile> source_files
-        = get_source_codes(source_code_dir);
-    for (auto& [file_path, source_code] : source_files)
+    std::vector<SourceCode> source_codes;
+
+    for (auto& source_file : get_source_codes(source_code_dir))
     {
         TSTree* tree = ts_parser_parse_string(
             parser_,
             nullptr,
-            source_code.c_str(),
-            static_cast<uint32_t>(source_code.size())
+            source_file.content.c_str(),
+            static_cast<uint32_t>(source_file.content.size())
         );
-        const TSNode root = ts_tree_root_node(tree);
-
-        source_trees_.emplace(file_path, tree);
-        SourceCodeVisitor cs_ts_tree_visitor(source_code, lang_);
-        cs_ts_tree_visitor.handle_comp_unit_stmt(*ast, &root);
-
+        source_codes.emplace_back(source_file, tree);
         ts_parser_reset(parser_);
     }
+
+    SymbolTableBuilder symbol_table_builder(source_codes);
+    SymbolTable symbol_table;
+    symbol_table_builder.register_user_types(symbol_table);
+    symbol_table_builder.register_members(symbol_table);
+    SemanticContext global_semantic_context(symbol_table);
+
+    SourceCodeVisitor source_visitor(source_codes, global_semantic_context);
+    source_visitor.handle_comp_unit_stmt(*ast);
+
     return ast;
 }
 
@@ -95,7 +96,7 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                 );
                 source_files.emplace_back(
                     current_path,
-                    remove_comments(
+                    util::remove_comments(
                         source_code,
                         ts_tree_root_node(tree),
                         lang_,

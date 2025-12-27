@@ -12,6 +12,8 @@ Stmt* SourceCodeVisitor::handle_block_stmt(
     const TSNode* node
 )
 {
+    // todo add finding of local functions before handling the body - 2 pass
+    // approach
     self->semantic_context_.enter_scope();
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
     std::vector<Stmt*> statements;
@@ -22,7 +24,7 @@ Stmt* SourceCodeVisitor::handle_block_stmt(
     do
     {
         TSNode current_node = ts_tree_cursor_current_node(&cursor);
-        if (! ts_node_is_named(current_node))
+        if (ts_node_is_named(current_node))
         {
             StmtHandler handler = RegManager::get_stmt_handler(current_node);
             statements.push_back(handler(self, &current_node));
@@ -146,13 +148,13 @@ Stmt* SourceCodeVisitor::handle_for_each_loop(
     }
 
     const std::string var_name
-        = extract_node_text(left_node, self->source_code_);
+        = util::extract_node_text(left_node, self->get_src_code());
     const ExprHandler right_handler = RegManager::get_expr_handler(right_node);
     const StmtHandler body_handler  = RegManager::get_stmt_handler(body_node);
-    Type* type                      = make_type(self, type_node);
+    Type* type = util::make_type(type_node, self->get_src_code());
     LocalVarDefStmt* left
         = stmt_factory_.mk_local_var_def(var_name, type, nullptr);
-    self->semantic_context_.add_local_var(left);
+    self->semantic_context_.reg_local_var(left);
     Expr* right = right_handler(self, &right_node);
     Stmt* body  = body_handler(self, &body_node);
     self->semantic_context_.leave_scope();
@@ -164,8 +166,8 @@ Stmt* SourceCodeVisitor::handle_if_stmt(
     const TSNode* node
 )
 {
-    static const std::string if_node_type = "if_statement";
-    static const std::string if_false     = "alternative";
+    // static const std::string if_node_type = "if_statement";
+    static const std::string if_false = "alternative";
     std::stack<TSNode> if_nodes;
     if_nodes.push(*node);
     TSNode current_node = ts_node_child_by_field_name(
@@ -291,7 +293,7 @@ Stmt* SourceCodeVisitor::handle_catch_clause(
         if (const auto expr = as_a<LocalVarDefStmt>(current_stmt))
         {
             expr_var_def = expr;
-            self->semantic_context_.add_local_var(expr_var_def);
+            self->semantic_context_.reg_local_var(expr_var_def);
         }
         else if (is_a<CompoundStmt>(current_stmt))
         {
@@ -322,8 +324,9 @@ Stmt* SourceCodeVisitor::handle_catch_decl(
 {
     const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
     const TSNode name_node = ts_node_child_by_field_name(*node, "name", 4);
-    Type* type             = make_type(self, type_node);
-    const std::string name = extract_node_text(name_node, self->source_code_);
+    Type* type             = util::make_type(type_node, self->get_src_code());
+    const std::string name
+        = util::extract_node_text(name_node, self->get_src_code());
     return stmt_factory_.mk_local_var_def(name, type, nullptr);
 }
 
@@ -402,6 +405,7 @@ Stmt* SourceCodeVisitor::handle_case_stmt(
     if (pattern)
         return stmt_factory_.mk_case(pattern, body);
 
+    ts_tree_cursor_delete(&cursor);
     return stmt_factory_.mk_default_case(body);
 }
 

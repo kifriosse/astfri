@@ -6,7 +6,7 @@ target_sources(astfri-cs PRIVATE
     SemanticContext.cpp
     SymbolTableBuilder.cpp
     CSModifiers.cpp
-    TypeResolver.cpp
+    Source.cpp
     utils.cpp
 )
 

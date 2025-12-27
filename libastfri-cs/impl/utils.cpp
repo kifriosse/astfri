@@ -1,10 +1,14 @@
+#include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <unordered_map>
 
-namespace astfri::csharp
+namespace astfri::csharp::util
 {
 std::vector<TSNode> find_nodes(
     const TSNode& root,
@@ -326,4 +330,109 @@ void print_child_nodes_types(const TSNode& node, const std::string& source)
     }
 }
 
-} // namespace astfri::csharp
+Scope create_scope(
+    const TSNode& node,
+    const TSLanguage* lang,
+    const std::string& source
+)
+{
+    enum NodeType
+    {
+        Class,
+        Interface,
+        Namespace,
+        Root,
+    };
+
+    static std::unordered_map<std::string, NodeType> node_type_map = {
+        {"class_declaration",     Class    },
+        {"interface_declaration", Interface},
+        {"namespace_declaration", Namespace},
+        {"compilation_unit",      Root     },
+    };
+
+    std::stack<std::string> scope_str;
+    Scope scope           = {};
+    TSNode current        = node;
+    TSNode parent         = ts_node_parent(current);
+
+    bool found_name_space = false;
+    while (! ts_node_is_null(parent))
+    {
+        const std::string parent_type = ts_node_type(parent);
+        const auto res                = node_type_map.find(parent_type);
+        current                       = parent;
+        parent                        = ts_node_parent(current);
+
+        if (res == node_type_map.end())
+            continue;
+
+        switch (res->second)
+        {
+        case Class:
+        case Interface:
+        {
+            const TSNode name_node
+                = ts_node_child_by_field_name(current, "name", 4);
+            const std::string name = extract_node_text(name_node, source);
+            scope_str.push(name);
+            break;
+        }
+        case Root:
+        {
+            if (found_name_space)
+                break;
+
+            std::string file_namespace_query
+                = "(file_scoped_namespace_declaration) @namespace";
+            const TSNode namespace_node
+                = find_first_node(current, lang, file_namespace_query);
+            if (ts_node_is_null(namespace_node))
+                break;
+
+            const TSNode name_node
+                = ts_node_child_by_field_name(namespace_node, "name", 4);
+            const std::string name = extract_node_text(name_node, source);
+            split_namespace(scope_str, name);
+            break;
+        }
+        case Namespace:
+        {
+            found_name_space = true;
+            const TSNode name_node
+                = ts_node_child_by_field_name(current, "name", 4);
+            const std::string name = extract_node_text(name_node, source);
+            split_namespace(scope_str, name);
+            break;
+        }
+        }
+    }
+
+    while (! scope_str.empty())
+    {
+        scope.names_.push_back(scope_str.top());
+        scope_str.pop();
+    }
+    return scope;
+}
+
+Type* make_type(const TSNode& node, const std::string& source_code)
+{
+    TypeFactory& type_factory      = TypeFactory::get_instance();
+    std::string type_name          = extract_node_text(node, source_code);
+    const char last_char           = type_name[type_name.length() - 1];
+    const bool is_indirection_type = last_char == '*' || last_char == '&';
+    if (is_indirection_type)
+    {
+        type_name.pop_back();
+    }
+
+    std::erase_if(type_name, isspace);
+    const auto res = RegManager::get_type(type_name);
+    // todo implement scope
+    Type* type = res.has_value() ? *res : type_factory.mk_class(type_name, {});
+
+    return is_indirection_type ? type_factory.mk_indirect(type) : type;
+}
+
+} // namespace astfri::csharp::util

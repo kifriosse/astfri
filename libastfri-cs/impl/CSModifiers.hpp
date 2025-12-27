@@ -50,7 +50,7 @@ public:
     void add_modifier(CSModifier mod);
     void remove_modifier(CSModifier mod);
     [[nodiscard]] std::optional<AccessModifier> get_access_mod() const;
-    [[nodiscard]] bool is_virtual() const;
+    [[nodiscard]] Virtuality get_virtuality() const;
 };
 
 } // namespace astfri::csharp
