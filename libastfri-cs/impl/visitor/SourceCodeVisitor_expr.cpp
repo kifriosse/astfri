@@ -200,12 +200,11 @@ Expr* SourceCodeVisitor::handle_identifier(
 {
     const std::string identifier
         = util::extract_node_text(*node, self->get_src_code());
-    Stmt* def_stmt
-        = self->semantic_context_.find_var(identifier, AccessType::None);
+    Stmt* def_stmt = self->semantic_context_.find_var(identifier, None{});
     if (! def_stmt)
         return expr_factory_.mk_unknown();
 
-    if (is_a<MemberVarDefStmt>(def_stmt))
+    if (is_a<MemberVarDefStmt>(def_stmt)) // todo static handling
         return expr_factory_.mk_member_var_ref(
             expr_factory_.mk_this(),
             identifier
@@ -232,11 +231,15 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     if (is_a<ThisExpr>(left_side))
     {
         UserTypeDefStmt* owner = self->semantic_context_.current_type();
-        if (const auto member_var_data = // todo for future use
-            self->semantic_context_.get_memb_var_data(name, owner))
+        if (const auto var_def = // todo for future use
+            self->semantic_context_.find_var(name, Instance{}))
         {
             return expr_factory_.mk_member_var_ref(left_side, name);
         }
+    }
+    else if (auto class_ref = as_a<ClassRefExpr>(left_side))
+    {
+        // todo static member access handling
     }
     return expr_factory_.mk_member_var_ref(left_side, name);
 }
@@ -271,16 +274,34 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
         // todo add handling of local functions
         const std::string name
             = util::extract_node_text(function_node, self->get_src_code());
+        const FunctionIdentifier func_id{
+            .name        = name,
+            .param_count = arg_list.size(),
+        };
+
+        const InvocationType invoc_type
+            = self->semantic_context_.find_invoc_type(func_id, None{});
         ThisExpr* this_expr = expr_factory_.mk_this();
-        if (self->semantic_context_.find_var(name, AccessType::None))
+        switch (invoc_type)
+        {
+        case InvocationType::LocalFunc:
+            return expr_factory_.mk_function_call(name, arg_list);
+        case InvocationType::Delegate:
         {
             const ExprHandler var_def_handler
                 = RegManager::get_expr_handler(function_node);
+            // makes var ref expr
             Expr* left = var_def_handler(self, &function_node);
             return expr_factory_.mk_lambda_call(left, arg_list);
         }
-        // todo add static invocation handling
-        return expr_factory_.mk_method_call(this_expr, name, arg_list);
+        case InvocationType::Method:
+            return expr_factory_.mk_method_call(this_expr, name, arg_list);
+        case InvocationType::StaticMethod:
+            // todo add static method call handling
+            return expr_factory_.mk_method_call(this_expr, name, arg_list);
+        default:
+            return expr_factory_.mk_unknown();
+        }
     }
     // accessing a member of some variable - also includes `this`
     if (ts_node_symbol(function_node) == memb_access_node_symb)
@@ -298,20 +319,30 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
         // it's a member of an instance - method or delegate type attribute
         if (is_a<ThisExpr>(left_side))
         {
-            UserTypeDefStmt* owner = self->semantic_context_.current_type();
-            // todo for future use
-            if (const auto* var_def_data
-                = self->semantic_context_.get_memb_var_data(name, owner))
+            const FunctionIdentifier func_id{
+                .name        = name,
+                .param_count = arg_list.size(),
+            };
+
+            const InvocationType invoc_type
+                = self->semantic_context_.find_invoc_type(func_id, Instance{});
+            switch (invoc_type)
+            {
+            case InvocationType::Delegate:
             {
                 return expr_factory_.mk_lambda_call(
                     expr_factory_.mk_member_var_ref(left_side, name),
                     arg_list
                 );
             }
-            // todo when references to methods are going to be added into method
-            // calls
-            return expr_factory_.mk_method_call(left_side, name, arg_list);
+            case InvocationType::Method:
+                return expr_factory_.mk_method_call(left_side, name, arg_list);
+            default:
+                // todo placeholder
+                return expr_factory_.mk_method_call(left_side, name, arg_list);
+            }
         }
+        // todo accessing of base members
 
         // todo accessing of static members left side is a Usertype Reference
         return expr_factory_.mk_method_call(left_side, name, arg_list);

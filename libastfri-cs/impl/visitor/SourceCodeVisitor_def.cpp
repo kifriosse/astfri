@@ -13,7 +13,7 @@ Stmt* SourceCodeVisitor::handle_class_def_stmt(
     const TSNode* node
 )
 {
-    static const std::vector<std::string> class_memb_node_types = {
+    static const std::vector<std::string_view> class_memb_node_types = {
         // "class_declaration",              // todo
         // "enum_declaration",               // todo
         // "interface_declaration",          // todo
@@ -49,8 +49,9 @@ Stmt* SourceCodeVisitor::handle_class_def_stmt(
         true
     );
 
-    std::unordered_map<std::string, std::vector<TSNode>> class_members_nodes;
-    for (const std::string& node_type : class_memb_node_types)
+    std::unordered_map<std::string_view, std::vector<TSNode>>
+        class_members_nodes;
+    for (const std::string_view node_type : class_memb_node_types)
     {
         class_members_nodes[node_type];
     }
@@ -145,7 +146,7 @@ Stmt* SourceCodeVisitor::handle_class_def_stmt(
     ts_tree_cursor_delete(&body_cursor);
 
     // handling of all member statements
-    for (const std::string& name : class_memb_node_types)
+    for (const std::string_view name : class_memb_node_types)
     {
         const std::vector<TSNode>& members_nodes = class_members_nodes[name];
         for (const TSNode& member_node : members_nodes)
@@ -180,7 +181,7 @@ Stmt* SourceCodeVisitor::handle_interface_def_stmt(
     const TSNode* node
 )
 {
-    static const std::vector<std::string> class_memb_node_types = {
+    static const std::vector<std::string_view> class_memb_node_types = {
         // "class_declaration",              // todo
         // "enum_declaration",               // todo
         // "interface_declaration",          // todo
@@ -286,11 +287,10 @@ Stmt* SourceCodeVisitor::handle_var_def_stmt(
         case util::VarDefType::Member:
         {
             // todo handle other modifiers
-            MemberVarMetadata* var_data
-                = self->semantic_context_.get_memb_var_data(
-                    var_name,
-                    self->semantic_context_.current_type()
-                );
+            MemberVarMetadata* var_data = self->semantic_context_.find_memb_var(
+                var_name,
+                self->semantic_context_.current_type()
+            );
             var_def_stmt               = var_data->var_def;
             var_def_stmt->initializer_ = init;
             var_data->processed        = true;
@@ -370,7 +370,7 @@ Stmt* SourceCodeVisitor::handle_constr_def_stmt(
     const TSNode initializer_node = ts_node_next_sibling(param_list_node);
 
     constructor_def->owner_       = as_a<ClassDefStmt>(result);
-    constructor_def->params_      = handle_param_list(self, &param_list_node);
+    constructor_def->params_ = make_param_list(self, &param_list_node, false);
 
     const std::vector<TSNode> modifier_nodes
         = util::find_nodes(*node, self->get_lang(), "(modifier) @mod");
@@ -467,12 +467,6 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
     const TSNode* node
 )
 {
-    static const TSSymbol param_symb = ts_language_symbol_for_name(
-        self->get_lang(),
-        "parameter",
-        std::strlen("parameter"),
-        true
-    );
     const auto current_type = self->semantic_context_.current_type();
     if (! current_type)
         throw std::logic_error("Owner type not found");
@@ -485,14 +479,11 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
     );
     const CSModifiers modifiers
         = CSModifiers::handle_modifiers(modif_node, self->get_src_code());
-    const TSNode name_node         = util::child_by_field_name(*node, "name");
-    const TSNode first_named_child = ts_node_named_child(params_node, 0);
-    bool is_variadic               = false;
-    if (! ts_node_is_null(first_named_child))
-        is_variadic = ts_node_symbol(first_named_child) != param_symb;
-
+    const TSNode name_node = util::child_by_field_name(*node, "name");
+    const bool is_variadic = util::has_variadic_param(params_node, nullptr);
+    const size_t named_child_count = ts_node_named_child_count(params_node);
     const size_t param_count
-        = is_variadic ? 1 : ts_node_named_child_count(params_node);
+        = is_variadic ? named_child_count - 1 : named_child_count;
 
     const MethodIdentifier method_id{
         .func_id
@@ -500,39 +491,29 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
         .is_static = modifiers.has(CSModifier::Static)
     };
 
-    MethodMetadata* method_data
+    const MethodMetadata* method_data
         = self->semantic_context_.find_method(method_id, current_type);
     if (! method_data)
         throw std::logic_error(
             "Method \'" + method_id.func_id.name + "\' not found"
         );
 
+    // if method could be resolved
     if (method_data->method_def)
     {
         auto& method_def = method_data->method_def;
-        if (method_data->processed)
-            return method_data->method_def;
-
         self->semantic_context_.enter_scope();
         self->semantic_context_.reg_return(method_def->func_->retType_);
-        for (auto& [param_def, param_node, processed] : method_data->params)
-        {
-            if (processed)
-                continue;
 
-            const TSNode param_name_node
-                = util::child_by_field_name(param_node, "name");
-            const TSNode init_node
-                = ts_node_next_named_sibling(param_name_node);
-            if (! ts_node_is_null(init_node))
+        for (auto& [param_def, param_node, init] : method_data->params)
+        {
+            if (! ts_node_is_null(init))
             {
-                ExprHandler init_hanlder
-                    = RegManager::get_expr_handler(init_node);
-                param_def->initializer_ = init_hanlder(self, &init_node);
+                ExprHandler init_handler = RegManager::get_expr_handler(init);
+                param_def->initializer_  = init_handler(self, &init);
             }
             self->semantic_context_.reg_param(param_def);
-            processed = true;
-            util::print_child_nodes_types(param_node, self->get_src_code());
+            // util::print_child_nodes_types(param_node, self->get_src_code());
         }
 
         const TSNode body_node
@@ -542,10 +523,11 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
             = as_a<CompoundStmt>(handler(self, &body_node));
 
         self->semantic_context_.leave_scope();
-        method_data->processed = true;
+
         return method_def;
     }
 
+    // if it wansn't able to resolve method
     MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
     method_def_stmt->owner_        = current_type;
     method_def_stmt->func_         = handle_function_stmt(self, node, true);
@@ -559,7 +541,43 @@ Stmt* SourceCodeVisitor::handle_local_func_stmt(
     const TSNode* node
 )
 {
-    return handle_function_stmt(self, node, false);
+    const TSNode name_node    = util::child_by_field_name(*node, "name");
+    const TSNode paramas_node = util::child_by_field_name(*node, "parameters");
+    const bool is_variadic    = util::has_variadic_param(paramas_node, nullptr);
+    const size_t named_count  = ts_node_named_child_count(paramas_node);
+
+    FunctionIdentifier func_id{
+        .name        = util::extract_node_text(name_node, self->get_src_code()),
+        .param_count = is_variadic ? named_count - 1 : named_count
+    };
+    const FunctionMetadata* func = self->semantic_context_.find_func(func_id);
+    if (! func)
+        throw std::logic_error(
+            "Local function \'" + func_id.name + "\' not found"
+        );
+
+    if (! func->func_def)
+        return handle_function_stmt(self, node, false);
+
+    self->semantic_context_.enter_scope();
+    self->semantic_context_.reg_return(func->func_def->retType_);
+    for (const auto& param_data : func->params)
+    {
+        const TSNode init_node = param_data.initializer;
+        if (! ts_node_is_null(init_node))
+        {
+            ExprHandler init_hanlder = RegManager::get_expr_handler(init_node);
+            param_data.param_def->initializer_ = init_hanlder(self, &init_node);
+        }
+        self->semantic_context_.reg_param(param_data.param_def);
+    }
+
+    const TSNode body              = util::child_by_field_name(*node, "body");
+    const StmtHandler body_handler = RegManager::get_stmt_handler(body);
+    func->func_def->body_ = as_a<CompoundStmt>(body_handler(self, &body));
+    self->semantic_context_.leave_scope();
+    self->semantic_context_.unregister_return_type();
+    return func->func_def;
 }
 
 FunctionDefStmt* SourceCodeVisitor::handle_function_stmt(
@@ -583,10 +601,9 @@ FunctionDefStmt* SourceCodeVisitor::handle_function_stmt(
 
     func_def->retType_ = ret_type;
     func_def->name_ = util::extract_node_text(name_node, self->get_src_code());
-    func_def->params_              = handle_param_list(self, &param_node);
+    func_def->params_              = make_param_list(self, &param_node, false);
     const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
-    if (const auto body = as_a<CompoundStmt>(body_handler(self, &body_node)))
-        func_def->body_ = body;
+    func_def->body_ = as_a<CompoundStmt>(body_handler(self, &body_node));
 
     self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();

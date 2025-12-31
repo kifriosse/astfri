@@ -214,6 +214,12 @@ public:
     static Stmt* handle_return(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_throw(SourceCodeVisitor* self, const TSNode* node);
 
+    // todo temp move this into utils
+    [[nodiscard]] static FunctionMetadata make_func_metadata(
+        const TSNode& node,
+        std::string_view src_code
+    );
+
 private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
     /**
@@ -229,9 +235,20 @@ private:
         const TSNode& start_node,
         const TSNode* end_node
     );
-    static std::vector<ParamVarDefStmt*> handle_param_list(
+
+    /**
+     * Makes a list of parameter variable definition statements from the given
+     * parameter list node
+     * @param self instance of SourceCodeVisitor
+     * @param node parameter list node
+     * @param make_shallow if true, makes shallow parameter definitions (without
+     * default values), if false, makes full parameter definitions
+     * @return vector of parameter variable definition statements
+     */
+    static std::vector<ParamVarDefStmt*> make_param_list(
         SourceCodeVisitor* self,
-        const TSNode* node
+        const TSNode* node,
+        bool make_shallow
     );
     static std::vector<Expr*> handle_argument_list(
         SourceCodeVisitor* self,
@@ -243,7 +260,7 @@ private:
     );
 
 private:
-    [[nodiscard]] std::string& get_src_code() const;
+    [[nodiscard]] std::string_view get_src_code() const;
     [[nodiscard]] const TSLanguage* get_lang() const;
 };
 

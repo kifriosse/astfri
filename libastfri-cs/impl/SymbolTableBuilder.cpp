@@ -27,10 +27,9 @@ void SymbolTableBuilder::register_user_types(SymbolTable& symbol_table)
     for (auto& src : src_codes)
     {
         auto& [file, tree] = src;
+        current_src        = &src;
         if (! tree)
             continue;
-
-        current_src                               = &src;
 
         const std::vector<TSNode> top_level_nodes = util::find_nodes(
             ts_tree_root_node(tree),
@@ -207,88 +206,37 @@ void SymbolTableBuilder::register_method(
     if (! current_type)
         throw std::logic_error("Owner type not found");
 
-    const std::string& src_code              = self->current_src->file.content;
-    const std::vector<TSNode> modifier_nodes = util::find_nodes(
-        node,
-        self->lang_,
-        regs::Queries::method_modif_query
-    );
-    const CSModifiers method_modif
-        = CSModifiers::handle_modifiers(modifier_nodes, src_code);
-    const TSNode return_type_node = util::child_by_field_name(node, "returns");
-    const TSNode func_name_node   = util::child_by_field_name(node, "name");
-    const TSNode param_list_node
-        = util::child_by_field_name(node, "parameters");
-    TSTreeCursor param_cursor = ts_tree_cursor_new(param_list_node);
-    std::vector<ParamVarDefStmt*> params;
-    std::vector<ParamMetadata> param_metadata;
-    Type* return_type = util::make_type(return_type_node, src_code);
-
     const auto it_type_metadata
         = type_table.user_types_metadata.find(current_type);
     if (! type_table.user_types_metadata.contains(current_type))
         throw std::logic_error("Type wasn't discovered yet");
 
-    // util::print_child_nodes_types(param_list_node);
+    const std::vector<TSNode> modif_nodes = util::find_nodes(
+        node,
+        self->lang_,
+        regs::Queries::method_modif_query
+    );
+    const CSModifiers method_modif
+        = CSModifiers::handle_modifiers(modif_nodes, self->get_src());
+    const TSNode ret_type_node  = util::child_by_field_name(node, "returns");
+    const TSNode func_name_node = util::child_by_field_name(node, "name");
+    const TSNode params_node    = util::child_by_field_name(node, "parameters");
+    Type* return_type      = util::make_type(ret_type_node, self->get_src());
 
-    if (ts_tree_cursor_goto_first_child(&param_cursor))
-    {
-        static const TSSymbol param_keyword = ts_language_symbol_for_name(
-            self->lang_,
-            "params",
-            std::strlen("params"),
-            false
-        );
-        bool is_variadic = false;
-        do
-        {
-            const TSNode current = ts_tree_cursor_current_node(&param_cursor);
-            if (! ts_node_is_named(current))
-            {
-                is_variadic = ts_node_symbol(current) == param_keyword;
-                if (is_variadic)
-                    break;
-
-                continue;
-            }
-
-            ParamVarDefStmt* param
-                = util::make_param_def(current, self->lang_, src_code);
-            params.push_back(param);
-            param_metadata.emplace_back(
-                ParamMetadata{
-                    .param_def  = param,
-                    .param_node = current,
-                    .processed  = false
-                }
-            );
-        } while (ts_tree_cursor_goto_next_sibling(&param_cursor));
-
-        if (is_variadic && params.empty())
-        {
-            // todo redo this when we add variadic parameters
-            // temporary solution
-            ParamVarDefStmt* param = util::make_param_def(param_list_node, self->lang_, src_code);
-            params.emplace_back(param);
-            param_metadata.emplace_back(
-                ParamMetadata{
-                    .param_def  = param,
-                    .param_node = param_list_node,
-                    .processed  = false
-                }
-            );
-        }
-    }
-
-    ts_tree_cursor_delete(&param_cursor);
-
-    const std::string name = util::extract_node_text(func_name_node, src_code);
+    const bool is_variadic = util::has_variadic_param(params_node, nullptr);
+    const size_t named_child_count = ts_node_named_child_count(params_node);
+    const size_t param_count
+        = is_variadic ? named_child_count - 1 : named_child_count;
+    const std::string name
+        = util::extract_node_text(func_name_node, self->get_src());
     MethodIdentifier method_id{
-        .func_id
-        = FunctionIdentifier{.name = name, .param_count = params.size()},
+        .func_id   = {name, param_count},
         .is_static = method_modif.has(CSModifier::Static),
     };
+    // util::print_child_nodes_types(param_list_node);
 
+    auto [params, params_metadata]
+        = util::discover_params(params_node, self->get_src());
     auto& methods                  = it_type_metadata->second.methods;
     const auto it_method           = methods.find(method_id);
     MethodDefStmt* method_def_stmt = nullptr;
@@ -303,12 +251,25 @@ void SymbolTableBuilder::register_method(
     }
 
     MethodMetadata method_metadata{
-        .params      = std::move(param_metadata),
+        .params      = std::move(params_metadata),
         .method_def  = method_def_stmt,
         .method_node = node,
-        .processed   = false,
     };
 
     it_type_metadata->second.methods.emplace(method_id, method_metadata);
+}
+
+std::string_view SymbolTableBuilder::get_src() const
+{
+    if (! current_src)
+        throw std::logic_error("Current source code is not set");
+    return current_src->file.content;
+}
+
+const TSLanguage* SymbolTableBuilder::get_lang() const
+{
+    if (! lang_)
+        throw std::logic_error("Language is not set");
+    return lang_;
 }
 } // namespace astfri::csharp

@@ -8,7 +8,7 @@ namespace astfri::csharp
 {
 CSModifiers CSModifiers::handle_modifiers(
     const std::vector<TSNode>& mod_nodes,
-    const std::string& source_code
+    const std::string_view source_code
 )
 {
     CSModifiers modifiers;

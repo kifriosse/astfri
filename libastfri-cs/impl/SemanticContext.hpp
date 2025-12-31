@@ -9,6 +9,7 @@
 
 #include <optional>
 #include <stack>
+#include <variant>
 
 namespace astfri::csharp
 {
@@ -37,39 +38,54 @@ namespace astfri::csharp
 {
 
 /**
- * @brief Type of member access
+ * @brief When member access doesn't have \c this, \c base or \c ClassRef prefix
  */
-enum class AccessType
+struct None
 {
-    /**
-     * @brief When member access doesn't have \c this, \c base or \c ClassRef
-     * prefix
-     */
-    None,
-    /**
-     * @brief When member access has \c this prefix
-     */
-    Instance,
-    /**
-     * @brief When member access has \c ClassRef prefix
-     */
-    Static,
-    /**
-     * @brief When member access has \c base prefix
-     */
-    Base,
-    /**
-     * @brief When member access is on expression of unknown type
-     */
-    Unknown
 };
 
+/**
+ * @brief When member access has \c this prefix
+ */
+struct Instance
+{
+};
+
+/**
+ * @brief When member access has \c ClassRef prefix
+ */
+struct Static
+{
+    UserTypeDefStmt* owner{nullptr};
+};
+
+/**
+ * @brief When member access has \c base prefix
+ */
+struct Base
+{
+    UserTypeDefStmt* parent_type{nullptr};
+};
+
+/**
+ * @brief When member access is on expression of unknown type
+ */
+struct Unknown
+{
+    Expr* left_side{nullptr}; // todo might be useless
+};
+
+using MemberAccessType // todo rename this to MemberAccessType
+    = std::variant<None, Instance, Static, Base, Unknown>;
+
+// todo redo this into a std::variant like MemberAccessType
 enum class InvocationType
 {
     Unknown,
     Method,
     LocalFunc,
-    Lambda
+    Delegate,
+    StaticMethod
 };
 
 /**
@@ -91,7 +107,17 @@ struct ParamMetadata
 {
     ParamVarDefStmt* param_def{nullptr};
     TSNode param_node{};
-    bool processed{false};
+    TSNode initializer{}; // right side of assignment
+};
+
+/**
+ * @brief Metadata about function
+ */
+struct FunctionMetadata
+{
+    std::vector<ParamMetadata> params{};
+    FunctionDefStmt* func_def{nullptr};
+    TSNode function_node{};
 };
 
 /**
@@ -102,7 +128,6 @@ struct MethodMetadata
     std::vector<ParamMetadata> params{};
     MethodDefStmt* method_def{nullptr};
     TSNode method_node{};
-    bool processed{false};
 };
 
 /**
@@ -162,7 +187,7 @@ struct ScopeContext
     std::stack<std::vector<Stmt*>> scope_stack{};
     std::unordered_map<std::string, ParamVarDefStmt*> params{};
     std::unordered_map<std::string, LocalVarDefStmt*> local_vars{};
-    std::unordered_map<FunctionIdentifier, FunctionDefStmt*> function_map{};
+    std::unordered_map<FunctionIdentifier, FunctionMetadata> function_map{};
 };
 
 /**
@@ -210,7 +235,7 @@ public:
     void reg_return(Type* return_type);
     void reg_local_var(LocalVarDefStmt* var_def);
     void reg_param(ParamVarDefStmt* var_def);
-    void reg_local_func(FunctionDefStmt* func_def);
+    void reg_local_func(FunctionMetadata func_data);
 
     void leave_type();
     void leave_scope();
@@ -218,19 +243,23 @@ public:
 
     UserTypeDefStmt* current_type() const;
     Type* current_return_type() const;
-    VarDefStmt* find_var(const std::string& name, AccessType type) const;
-    FunctionDefStmt* find_func(const FunctionIdentifier& func_id) const;
-    InvocationType find_invocation_type(
-        const FunctionIdentifier& func_id,
-        AccessType access_type
-    ) const;
-
-    MemberVarMetadata* get_memb_var_data(
+    VarDefStmt* find_var(
         const std::string& name,
+        MemberAccessType type
+    ) const;
+    const FunctionMetadata* find_func(const FuncId& func_id) const;
+    const MethodMetadata* find_method(
+        const MethodId& method_id,
         UserTypeDefStmt* owner
     ) const;
-    MethodMetadata* find_method(
-        const MethodIdentifier& method_id,
+
+    InvocationType find_invoc_type(
+        const FuncId& func_id,
+        MemberAccessType access_type
+    ) const;
+
+    MemberVarMetadata* find_memb_var(
+        const std::string& name,
         UserTypeDefStmt* owner
     ) const;
 };

@@ -2,8 +2,8 @@
 #include <libastfri-cs/impl/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
-#include <cstring>
 #include <queue>
+#include <ranges>
 
 namespace astfri::csharp
 {
@@ -63,53 +63,56 @@ Expr* SourceCodeVisitor::expr_list_to_comma_op(
     return init_expr;
 }
 
-std::vector<ParamVarDefStmt*> SourceCodeVisitor::handle_param_list(
-    SourceCodeVisitor* self,
-    const TSNode* node
+FunctionMetadata SourceCodeVisitor::make_func_metadata(
+    const TSNode& node,
+    const std::string_view src_code
 )
 {
-    TSTreeCursor cursor = ts_tree_cursor_new(*node);
-    std::vector<ParamVarDefStmt*> parameters;
-    if (ts_tree_cursor_goto_first_child(&cursor))
+    const TSNode name_node     = util::child_by_field_name(node, "name");
+    const TSNode return_node   = util::child_by_field_name(node, "type");
+    const TSNode params_node   = util::child_by_field_name(node, "parameters");
+    std::string name           = util::extract_node_text(name_node, src_code);
+    Type* ret_type             = util::make_type(return_node, src_code);
+    auto [params, params_data] = util::discover_params(params_node, src_code);
+    return FunctionMetadata{
+        .params   = std::move(params_data),
+        .func_def = stmt_factory_.mk_function_def(
+            std::move(name),
+            std::move(params),
+            ret_type,
+            nullptr
+        ),
+        .function_node = node,
+    };
+}
+
+std::vector<ParamVarDefStmt*> SourceCodeVisitor::make_param_list(
+    SourceCodeVisitor* self,
+    const TSNode* node,
+    const bool make_shallow // todo this might be useless
+)
+{
+    std::vector<ParamVarDefStmt*> params;
+    auto collector = [&](const TSNode& current)
     {
-        static const TSSymbol param_keyword = ts_language_symbol_for_name(
-            self->get_lang(),
-            "params",
-            strlen("params"),
-            false
-        );
-        const StmtHandler handler = RegManager::get_stmt_handler("parameter");
-        bool is_variadic          = false;
-        do
+        const TSNode name_node = util::child_by_field_name(current, "name");
+        const TSNode type_node = util::child_by_field_name(current, "type");
+        std::string name
+            = util::extract_node_text(name_node, self->get_src_code());
+        Type* type = util::make_type(type_node, self->get_src_code());
+        Expr* init = nullptr;
+        const TSNode init_node = ts_node_next_named_sibling(name_node);
+        if (! make_shallow && ! ts_node_is_null(init_node))
         {
-            TSNode current = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(current))
-            {
-                is_variadic = ts_node_symbol(current) == param_keyword;
-                if (is_variadic)
-                    break;
-                continue;
-            }
-
-            parameters.emplace_back(
-                as_a<ParamVarDefStmt>(handler(self, &current))
-            );
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-
-        if (is_variadic && parameters.empty())
-        {
-            // todo redo this when we add variadic parameters
-            // temporary solution
-            parameters.emplace_back(util::make_param_def(
-                *node,
-                self->get_lang(),
-                self->get_src_code()
-            ));
+            const ExprHandler handler = RegManager::get_expr_handler(init_node);
+            init                      = handler(self, &init_node);
         }
-    }
-
-    ts_tree_cursor_delete(&cursor);
-    return parameters;
+        ParamVarDefStmt* param_def
+            = stmt_factory_.mk_param_var_def(std::move(name), type, init);
+        params.push_back(param_def);
+    };
+    util::process_param_list(*node, collector);
+    return params;
 }
 
 std::vector<Expr*> SourceCodeVisitor::handle_argument_list(
@@ -118,10 +121,10 @@ std::vector<Expr*> SourceCodeVisitor::handle_argument_list(
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
-    TSNode current      = ts_tree_cursor_current_node(&cursor);
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid node");
 
+    TSNode current = ts_tree_cursor_current_node(&cursor);
     std::vector<Expr*> exprs;
     do
     {
@@ -174,7 +177,7 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
     return var_defs.front();
 }
 
-std::string& SourceCodeVisitor::get_src_code() const
+std::string_view SourceCodeVisitor::get_src_code() const
 {
     if (! current_src)
         throw std::logic_error("Current source code is not set");

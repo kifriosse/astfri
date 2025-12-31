@@ -130,7 +130,7 @@ bool almost_equal(const double a, const double b, const double epsilon)
 
 std::string extract_node_text(
     const TSNode& node,
-    const std::string& source_code
+    const std::string_view src_code
 )
 {
     if (ts_node_is_null(node))
@@ -138,7 +138,7 @@ std::string extract_node_text(
 
     const size_t from = ts_node_start_byte(node);
     const size_t to   = ts_node_end_byte(node);
-    return source_code.substr(from, to - from);
+    return {src_code.data() + from, to - from};
 }
 
 void split_namespace(
@@ -313,7 +313,7 @@ void print_child_nodes_types(const TSNode& node)
     }
 }
 
-void print_child_nodes_types(const TSNode& node, const std::string& source)
+void print_child_nodes_types(const TSNode& node, const std::string_view source)
 {
     for (size_t i = 0; i < ts_node_child_count(node); ++i)
     {
@@ -328,7 +328,7 @@ void print_child_nodes_types(const TSNode& node, const std::string& source)
 Scope create_scope(
     const TSNode& node,
     const TSLanguage* lang,
-    const std::string& source
+    const std::string_view source
 )
 {
     enum NodeType
@@ -339,7 +339,7 @@ Scope create_scope(
         Root,
     };
 
-    static std::unordered_map<std::string, NodeType> node_type_map = {
+    static std::unordered_map<std::string_view, NodeType> node_type_map = {
         {"class_declaration",     Class    },
         {"interface_declaration", Interface},
         {"namespace_declaration", Namespace},
@@ -354,10 +354,9 @@ Scope create_scope(
     bool found_name_space = false;
     while (! ts_node_is_null(parent))
     {
-        const std::string parent_type = ts_node_type(parent);
-        const auto res                = node_type_map.find(parent_type);
-        current                       = parent;
-        parent                        = ts_node_parent(current);
+        const auto res = node_type_map.find(ts_node_type(parent));
+        current        = parent;
+        parent         = ts_node_parent(current);
 
         if (res == node_type_map.end())
             continue;
@@ -410,10 +409,10 @@ Scope create_scope(
     return scope;
 }
 
-Type* make_type(const TSNode& node, const std::string& source_code)
+Type* make_type(const TSNode& node, const std::string_view src_code)
 {
     TypeFactory& type_factory      = TypeFactory::get_instance();
-    std::string type_name          = extract_node_text(node, source_code);
+    std::string type_name          = extract_node_text(node, src_code);
     const char last_char           = type_name[type_name.length() - 1];
     const bool is_indirection_type = last_char == '*' || last_char == '&';
     if (is_indirection_type)
@@ -432,7 +431,7 @@ Type* make_type(const TSNode& node, const std::string& source_code)
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
     const TSLanguage* lang,
-    const std::string& source_code
+    const std::string_view source_code
 )
 {
     StmtFactory& stmt_factory   = StmtFactory::get_instance();
@@ -454,8 +453,7 @@ ParamVarDefStmt* make_param_def(
              || (param_mod.has(CSModifier::Readonly)
                  && param_mod.has(CSModifier::Ref)))
     {
-        // todo should be a constat reference
-        // for now, just make it indirect
+        // todo should be a constat reference for now, it will be just indirect
         param_type = type_factory.mk_indirect(param_type);
     }
 
@@ -469,6 +467,73 @@ ParamVarDefStmt* make_param_def(
 TSNode child_by_field_name(const TSNode& node, const std::string_view name)
 {
     return ts_node_child_by_field_name(node, name.data(), name.length());
+}
+
+ParamSignature discover_params(const TSNode& node, std::string_view src_code)
+{
+    static StmtFactory& stmt_factory = StmtFactory::get_instance();
+    std::vector<ParamVarDefStmt*> params;
+    std::vector<ParamMetadata> params_data;
+
+    auto collector = [&](const TSNode& current)
+    {
+        const TSNode param_name_node = child_by_field_name(current, "name");
+        const TSNode type_node       = child_by_field_name(current, "type");
+        std::string param_name = extract_node_text(param_name_node, src_code);
+        Type* type             = make_type(type_node, src_code);
+        ParamVarDefStmt* param_def = stmt_factory.mk_param_var_def(
+            std::move(param_name),
+            type,
+            nullptr
+        );
+        params.push_back(param_def);
+        params_data.emplace_back(
+            param_def,
+            current,
+            ts_node_next_named_sibling(param_name_node)
+        );
+    };
+    process_param_list(node, collector);
+    return {std::move(params), std::move(params_data)};
+}
+
+void process_param_list(
+    const TSNode& node,
+    const std::function<void(const TSNode&)>& collector
+)
+{
+    TSNode type_node{};
+    const bool is_variadic = has_variadic_param(node, &type_node);
+    TSTreeCursor cursor    = ts_tree_cursor_new(node);
+    if (ts_tree_cursor_goto_first_child(&cursor))
+    {
+        do
+        {
+            TSNode current = ts_tree_cursor_current_node(&cursor);
+            if (is_variadic && ts_node_eq(current, type_node))
+            {
+                collector(node);
+                break;
+            }
+
+            if (! ts_node_is_named(current))
+                continue;
+
+            collector(current);
+        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+    }
+
+    ts_tree_cursor_delete(&cursor);
+}
+
+bool has_variadic_param(const TSNode& node, TSNode* type_node)
+{
+    const TSNode found_type = child_by_field_name(node, "type");
+    if (type_node && ! ts_node_is_null(found_type))
+        *type_node = found_type;
+
+    const TSNode name_node = child_by_field_name(node, "name");
+    return ! ts_node_is_null(found_type) && ! ts_node_is_null(name_node);
 }
 
 } // namespace astfri::csharp::util

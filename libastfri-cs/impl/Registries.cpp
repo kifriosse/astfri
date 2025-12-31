@@ -52,8 +52,8 @@ const std::string Queries::method_modif_query =
         )
     )";
 
-const std::string Queries::file_namespace_query =
-    "(file_scoped_namespace_declaration) @namespace";
+const std::string Queries::file_namespace_query
+    = "(file_scoped_namespace_declaration) @namespace";
 
 const std::string Queries::comment_error_query =
     R"(

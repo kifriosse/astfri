@@ -82,6 +82,10 @@ public:
         const TSNode& node,
         SymbolTable& type_table
     );
+
+private:
+    [[nodiscard]] std::string_view get_src() const;
+    [[nodiscard]] const TSLanguage* get_lang() const;
 };
 
 } // namespace astfri::csharp

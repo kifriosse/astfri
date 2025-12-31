@@ -46,7 +46,7 @@ private:
 public:
     static CSModifiers handle_modifiers(
         const std::vector<TSNode>& mod_nodes,
-        const std::string& source_code
+        std::string_view source_code
     );
 
     [[nodiscard]] bool has(CSModifier mod) const;

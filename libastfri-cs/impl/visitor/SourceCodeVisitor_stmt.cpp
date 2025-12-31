@@ -14,25 +14,50 @@ Stmt* SourceCodeVisitor::handle_block_stmt(
 {
     // todo add finding of local functions before handling the body - 2 pass
     // approach
-    self->semantic_context_.enter_scope();
-    TSTreeCursor cursor = ts_tree_cursor_new(*node);
     std::vector<Stmt*> statements;
+    static constexpr std::string_view local_func_type
+        = "local_function_statement";
+    static const TSSymbol local_func_symb = ts_language_symbol_for_name(
+        self->get_lang(),
+        local_func_type.data(),
+        local_func_type.size(),
+        true
+    );
 
-    if (! ts_tree_cursor_goto_first_child(&cursor))
-        return nullptr;
-
-    do
+    if (ts_node_named_child_count(*node) != 0)
     {
-        TSNode current_node = ts_tree_cursor_current_node(&cursor);
-        if (ts_node_is_named(current_node))
+        TSTreeCursor cursor = ts_tree_cursor_new(*node);
+        ts_tree_cursor_goto_first_child(&cursor);
+        self->semantic_context_.enter_scope();
+        do
         {
-            StmtHandler handler = RegManager::get_stmt_handler(current_node);
-            statements.push_back(handler(self, &current_node));
-        }
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
+            TSNode current_node = ts_tree_cursor_current_node(&cursor);
+            if (! ts_node_is_named(current_node)
+                || ts_node_symbol(current_node) != local_func_symb)
+                continue;
 
-    ts_tree_cursor_delete(&cursor);
-    self->semantic_context_.leave_scope();
+            self->semantic_context_.reg_local_func(
+                make_func_metadata(current_node, self->get_src_code())
+            );
+        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+
+        ts_tree_cursor_reset(&cursor, *node);
+
+        ts_tree_cursor_goto_first_child(&cursor);
+        do
+        {
+            TSNode current_node = ts_tree_cursor_current_node(&cursor);
+            if (ts_node_is_named(current_node))
+            {
+                StmtHandler handler
+                    = RegManager::get_stmt_handler(current_node);
+                statements.push_back(handler(self, &current_node));
+            }
+        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+        self->semantic_context_.leave_scope();
+        ts_tree_cursor_delete(&cursor);
+    }
+
     return stmt_factory_.mk_compound(statements);
 }
 

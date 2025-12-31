@@ -10,12 +10,15 @@
 #include <string>
 #include <vector>
 
+namespace astfri::csharp
+{
+struct ParamMetadata;
+
+}
+
 namespace astfri::csharp::util
 {
 
-/**
- * @brief Suffix type of integer literal
- */
 enum class VarDefType
 {
     Local,
@@ -23,6 +26,9 @@ enum class VarDefType
     Global
 };
 
+/**
+ * @brief Suffix type of integer literal
+ */
 enum class IntSuffix
 {
     /**
@@ -76,13 +82,10 @@ bool almost_equal(double a, double b, double epsilon = 1e-9);
  * @brief Extracts the text corresponding to the given TSNode from the source
  * code
  * @param node TSNode to extract text from
- * @param source_code original source code string
+ * @param src_code original source code string
  * @return extracted text from node
  */
-std::string extract_node_text(
-    const TSNode& node,
-    const std::string& source_code
-);
+std::string extract_node_text(const TSNode& node, std::string_view src_code);
 
 void split_namespace(
     std::stack<std::string>& scope_str,
@@ -116,20 +119,20 @@ std::string remove_comments(
 std::string escape_string(std::string_view str_view, bool is_verbatim);
 
 void print_child_nodes_types(const TSNode& node);
-void print_child_nodes_types(const TSNode& node, const std::string& source);
+void print_child_nodes_types(const TSNode& node, std::string_view source);
 
 Scope create_scope(
     const TSNode& node,
     const TSLanguage* lang,
-    const std::string& source
+    std::string_view source
 );
 
 /**
  * @param node name node of the type (for example class or interface name)
- * @param source_code instance of CSharpTSTreeVisitor
+ * @param src_code instance of CSharpTSTreeVisitor
  * @return instance of a Type
  */
-Type* make_type(const TSNode& node, const std::string& source_code);
+Type* make_type(const TSNode& node, std::string_view src_code);
 
 /**
  * @brief Creates a ParamVarDefStmt from the given TSNode.
@@ -143,7 +146,7 @@ Type* make_type(const TSNode& node, const std::string& source_code);
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
     const TSLanguage* lang,
-    const std::string& source_code
+    std::string_view source_code
 );
 
 /**
@@ -155,6 +158,33 @@ ParamVarDefStmt* make_param_def(
  */
 TSNode child_by_field_name(const TSNode& node, std::string_view name);
 
+struct ParamSignature
+{
+    std::vector<ParamVarDefStmt*> defs;
+    std::vector<ParamMetadata> metadata;
+};
+
+ParamSignature discover_params(const TSNode& node, std::string_view src_code);
+
+/**
+ * @brief Processes each parameter node in the parameter list node by invoking
+ * the provided collector function.
+ * @param node parameter list TSNode
+ * @param collector function to be called for each parameter TSNode
+ */
+void process_param_list(
+    const TSNode& node,
+    const std::function<void(const TSNode&)>& collector
+);
+
+/**
+ *
+ * @param node parameter list node
+ * @param type_node
+ * @return true if the parameter list contains a variadic parameter
+ */
+bool has_variadic_param(const TSNode& node, TSNode* type_node);
+
 /**
  * @brief Combines the hash of a value into an existing hash seed.
  * @param seed The existing hash seed to combine into.
@@ -165,6 +195,26 @@ TSNode child_by_field_name(const TSNode& node, std::string_view name);
  */
 template<typename T>
 void hash_combine(size_t& seed, const T& v);
+
+/**
+ * @brief Helper struct to create overloaded function objects from multiple
+ * lambdas, functions or functors. Mostly used for \c std::visit with
+ * \c std::variant .
+ * @code{.cpp}
+auto visitor = astfri::csharp::util::overloaded{
+   [](int i) { //... },
+   [](double d) { //... },
+   [](const std::string& s) { //... }
+};
+   @endcode
+ * @tparam Ts Types of callables (lambdas, functions, functors) to combine.
+ * @note Source: https://en.cppreference.com/w/cpp/utility/variant/visit2.html
+ */
+template<class... Ts>
+struct Overloaded : Ts...
+{
+    using Ts::operator()...;
+};
 
 } // namespace astfri::csharp::util
 
