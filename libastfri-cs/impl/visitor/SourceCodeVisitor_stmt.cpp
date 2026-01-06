@@ -1,10 +1,17 @@
+#include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
 
 #include <cstring>
-#include <iostream>
+#include <stack>
+#include <stdexcept>
+#include <string_view>
+#include <vector>
 
 namespace astfri::csharp
 {
@@ -386,7 +393,7 @@ Stmt* SourceCodeVisitor::handle_case_stmt(
     do
     {
         current = ts_tree_cursor_current_node(&cursor);
-        if (strcmp(ts_node_type(current), ":") == 0)
+        if (std::strcmp(ts_node_type(current), ":") == 0)
             break;
         // todo handle more complex patterns
         const ExprHandler pattern_handler

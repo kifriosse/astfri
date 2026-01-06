@@ -6,7 +6,7 @@
 
 #include <tree_sitter/api.h>
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace astfri::csharp
@@ -22,7 +22,7 @@ public:
     ASTBuilder();
     ~ASTBuilder();
     [[nodiscard]] TranslationUnit* make_ast(
-        std::string_view source_code_dir
+        const std::filesystem::path& source_code_dir
     ) const;
 
     ASTBuilder(ASTBuilder&)             = delete;
@@ -32,7 +32,7 @@ public:
 
 private:
     [[nodiscard]] std::vector<SourceFile> get_source_codes(
-        std::string_view project_dir
+        const std::filesystem::path& project_dir
     ) const;
 };
 

@@ -1,11 +1,22 @@
+
+#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
 
 #include <algorithm>
 #include <cstring>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
 
 namespace astfri::csharp
 {

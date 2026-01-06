@@ -1,5 +1,5 @@
 /**
- * @file astfri_util.h
+ * @file astfri_util.hpp
  * @brief Header for helper functions and structs used for creating FRI AST
  * nodes from C# syntax.
  */
@@ -11,6 +11,10 @@
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
+
+#include <functional>
+#include <string_view>
+#include <vector>
 
 namespace astfri::csharp::util
 {
@@ -43,6 +47,10 @@ ParamVarDefStmt* make_param_def(
     std::string_view source_code
 );
 
+/**
+ * @brief Helper struct to hold discovered parameter definitions and their
+ * metadata.
+ */
 struct ParamSignature
 {
     std::vector<ParamVarDefStmt*> defs;

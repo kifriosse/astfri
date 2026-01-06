@@ -5,25 +5,25 @@
 
 #ifndef CSHARP_TS_UTIL_HPP
 #define CSHARP_TS_UTIL_HPP
-
 #include <tree_sitter/api.h>
 
 #include <filesystem>
+#include <string>
 #include <string_view>
 #include <vector>
 
 namespace astfri::csharp::regs
 {
-    // todo redo this into constexpr std::string_view
-    struct Queries
-    {
-        static const std::string top_level_stmt_query;
-        static const std::string decl_query;
-        static const std::string var_modif_query;
-        static const std::string method_modif_query;
-        static const std::string file_namespace_query;
-        static const std::string comment_error_query;
-    };
+// todo redo this into constexpr std::string_view
+struct Queries
+{
+    static const std::string top_level_stmt_query;
+    static const std::string decl_query;
+    static const std::string var_modif_query;
+    static const std::string method_modif_query;
+    static const std::string file_namespace_query;
+    static const std::string comment_error_query;
+};
 } // namespace astfri::csharp::regs
 
 namespace astfri::csharp::util

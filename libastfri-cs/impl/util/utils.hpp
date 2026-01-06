@@ -5,6 +5,7 @@
 
 #include <stack>
 #include <string>
+#include <string_view>
 
 namespace astfri::csharp::util
 {

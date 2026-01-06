@@ -3,6 +3,15 @@
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
+
+#include <functional>
+#include <stack>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 
 namespace astfri::csharp::util
 {

@@ -1,6 +1,12 @@
+#include <libastfri-cs/impl/data/AccessType.hpp>
+#include <libastfri-cs/impl/data/Identifiers.hpp>
+#include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/util/common.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <optional>
+#include <string>
 
 namespace astfri::csharp
 {
@@ -125,7 +131,7 @@ Type* SemanticContext::current_return_type() const
 }
 
 VarDefStmt* SemanticContext::find_var(
-    const std::string& name,
+    const std::string& name, // todo change to std::string_view
     const access::Qualifier type
 ) const
 {

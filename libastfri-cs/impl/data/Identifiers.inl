@@ -1,9 +1,6 @@
 #ifndef CSHARP_IDENTIFIERS_INL
 #define CSHARP_IDENTIFIERS_INL
 
-#include <libastfri-cs/impl/data/Identifiers.hpp>
-#include <libastfri-cs/impl/util/common.hpp>
-
 template<>
 struct std::hash<astfri::csharp::FuncId>
 {

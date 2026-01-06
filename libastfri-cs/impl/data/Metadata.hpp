@@ -3,11 +3,22 @@
 
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/Source.hpp>
-#include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <unordered_map>
+
+namespace astfri
+{
+
+// forward declarations
+struct MemberVarDefStmt;
+struct ParamVarDefStmt;
+struct FunctionDefStmt;
+struct MethodDefStmt;
+struct UserTypeDefStmt;
+
+} // namespace astfri
 
 namespace astfri::csharp
 {

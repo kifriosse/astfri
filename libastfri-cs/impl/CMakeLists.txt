@@ -1,4 +1,5 @@
-add_library(astfri-cs SHARED)
+add_library(astfri-cs SHARED
+    CSAliases.hpp)
 
 target_sources(astfri-cs PRIVATE
     ASTBuilder.cpp

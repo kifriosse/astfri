@@ -1,8 +1,14 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri/inc/Stmt.hpp>
+
+#include <tree_sitter/api.h>
 
 #include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace astfri::csharp
 {

@@ -1,6 +1,9 @@
 #ifndef CSHARP_IDENTIFIERS_HPP
 #define CSHARP_IDENTIFIERS_HPP
 
+#include <libastfri-cs/impl/util/common.hpp>
+
+#include <functional>
 #include <string>
 
 namespace astfri::csharp

@@ -1,7 +1,12 @@
-#include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 
+#include <tree_sitter/api.h>
+
+#include <filesystem>
 #include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace astfri::csharp::regs
 {

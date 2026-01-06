@@ -2,12 +2,22 @@
 #define CSHARP_SEMANTIC_CONTEXT_HPP
 
 #include <libastfri-cs/impl/data/AccessType.hpp>
-#include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
-#include <libastfri/inc/Astfri.hpp>
 
 #include <optional>
 #include <stack>
+#include <unordered_map>
+#include <vector>
+
+namespace astfri
+{
+// Forward declarations
+struct VarDefStmt;
+struct Type;
+struct LocalVarDefStmt;
+struct Stmt;
+struct UserTypeDefStmt;
+} // namespace astfri
 
 namespace astfri::csharp
 {

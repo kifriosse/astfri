@@ -2,7 +2,13 @@
 #define CSHARP_SYMBOL_TABLE_BUILDER_HPP
 
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/data/Source.hpp>
+
+namespace astfri
+{
+// Forward declarations
+class StmtFactory;
+
+} // namespace astfri
 
 namespace astfri::csharp
 {
@@ -15,12 +21,6 @@ namespace astfri::csharp
  */
 class SymbolTableBuilder
 {
-public:
-    using RegHandler = std::function<void(
-        SymbolTableBuilder* self,
-        const TSNode& node,
-        SymbolTable& type_table
-    )>;
 
 private:
     static StmtFactory& stmt_factory_;

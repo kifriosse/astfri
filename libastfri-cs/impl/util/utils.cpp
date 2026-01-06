@@ -1,8 +1,11 @@
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/util/common.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
 
+#include <cctype>
 #include <cmath>
-#include <filesystem>
+#include <stack>
+#include <string>
+#include <string_view>
 
 namespace astfri::csharp::util
 {

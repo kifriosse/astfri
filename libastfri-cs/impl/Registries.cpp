@@ -1,7 +1,17 @@
+#include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
+
+#include <optional>
+#include <string>
 
 namespace astfri::csharp
 {
+
 namespace regs
 {
 
@@ -52,7 +62,7 @@ Handlers::Handlers() :
          {"boolean_literal", SourceCodeVisitor::handle_bool_lit},
          {"character_literal", SourceCodeVisitor::handle_char_lit},
          {"string_literal", SourceCodeVisitor::handle_str_lit},
-         {"null_literal", SourceCodeVisitor::handle_null_literal},
+         {"null_literal", SourceCodeVisitor::handle_null_lit},
          {"verbatim_string_literal",
           SourceCodeVisitor::handle_verbatim_str_lit},
          {"raw_string_literal", SourceCodeVisitor::handle_raw_str_lit},
@@ -72,7 +82,7 @@ Handlers::Handlers() :
          {"identifier", SourceCodeVisitor::handle_identifier},
          {"member_access_expression",
           SourceCodeVisitor::handle_memb_access_expr},
-         {"invocation_expression", SourceCodeVisitor::handle_invocation_expr},
+         {"invocation_expression", SourceCodeVisitor::handle_invoc_expr},
          {"constant_pattern", SourceCodeVisitor::handle_const_pattern},
          {"ERROR",
           [](SourceCodeVisitor*, const TSNode* node) -> Expr*
@@ -223,42 +233,36 @@ regs::Operations RegManager::operations_;
 regs::Types RegManager::types_;
 regs::Modifiers RegManager::modifiers_;
 
-SourceCodeVisitor::StmtHandler RegManager::get_stmt_handler(const TSNode& node)
+StmtHandler RegManager::get_stmt_handler(const TSNode& node)
 {
     return get_stmt_handler(ts_node_type(node));
 }
 
-SourceCodeVisitor::ExprHandler RegManager::get_expr_handler(const TSNode& node)
+ExprHandler RegManager::get_expr_handler(const TSNode& node)
 {
     return get_expr_handler(ts_node_type(node));
 }
 
-SymbolTableBuilder::RegHandler RegManager::get_reg_handler(const TSNode& node)
+RegHandler RegManager::get_reg_handler(const TSNode& node)
 {
     return get_reg_handler(ts_node_type(node));
 }
 
-SourceCodeVisitor::StmtHandler RegManager::get_stmt_handler(
-    const std::string& node_type
-)
+StmtHandler RegManager::get_stmt_handler(std::string_view node_type)
 {
     auto& stmts   = handlers_.stmts;
     const auto it = stmts.find(node_type);
     return it != stmts.end() ? it->second : default_stmt_handler;
 }
 
-SourceCodeVisitor::ExprHandler RegManager::get_expr_handler(
-    const std::string& node_type
-)
+ExprHandler RegManager::get_expr_handler(std::string_view node_type)
 {
     auto& exprs   = handlers_.exprs;
     const auto it = exprs.find(node_type);
     return it != exprs.end() ? it->second : default_expr_handler;
 }
 
-SymbolTableBuilder::RegHandler RegManager::get_reg_handler(
-    const std::string& node_type
-)
+RegHandler RegManager::get_reg_handler(std::string_view node_type)
 {
     auto& reg_handlers = handlers_.symbol_reg_handlers;
     const auto it      = reg_handlers.find(node_type);
@@ -266,12 +270,10 @@ SymbolTableBuilder::RegHandler RegManager::get_reg_handler(
                                     : [](auto, const auto&, auto&) { };
 }
 
-std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
-    const std::string& operation
-)
+std::optional<UnaryOpType> RegManager::get_prefix_unary_op(std::string_view op)
 {
     auto& prefix_unary_ops = operations_.prefix_unary_op;
-    const auto it          = prefix_unary_ops.find(operation);
+    const auto it          = prefix_unary_ops.find(op);
     if (it != prefix_unary_ops.end())
     {
         return it->second;
@@ -279,7 +281,7 @@ std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
     return {};
 }
 
-std::optional<BinOpType> RegManager::get_bin_op(const std::string& operation)
+std::optional<BinOpType> RegManager::get_bin_op(std::string_view operation)
 {
     auto& bin_ops = operations_.bin_operations;
     const auto it = bin_ops.find(operation);
@@ -290,7 +292,7 @@ std::optional<BinOpType> RegManager::get_bin_op(const std::string& operation)
     return {};
 }
 
-std::optional<Type*> RegManager::get_type(const std::string& type_name)
+std::optional<Type*> RegManager::get_type(std::string_view type_name)
 {
     auto& types   = types_.types;
     const auto it = types.find(type_name);
@@ -301,7 +303,7 @@ std::optional<Type*> RegManager::get_type(const std::string& type_name)
     return {};
 }
 
-std::optional<CSModifier> RegManager::get_modifier(const std::string& modifier)
+std::optional<CSModifier> RegManager::get_modifier(std::string_view modifier)
 {
     auto& modifs  = modifiers_.modifiers;
     const auto it = modifs.find(modifier);

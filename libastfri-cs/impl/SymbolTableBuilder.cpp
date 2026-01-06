@@ -1,17 +1,21 @@
-
-#include <libastfri-cs/impl/data/Source.hpp>
+#include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
+#include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
 #include <ranges>
-#include <utility>
+#include <string>
+#include <vector>
 
 namespace astfri::csharp
 {
+struct SourceCode;
 
 StmtFactory& SymbolTableBuilder::stmt_factory_ = StmtFactory::get_instance();
 

@@ -1,10 +1,18 @@
+#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/data/AccessType.hpp>
+#include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/util/common.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
 
 #include <cstring>
-#include <iostream>
+#include <stdexcept>
+#include <string>
 
 namespace astfri::csharp
 {
@@ -144,7 +152,7 @@ Expr* SourceCodeVisitor::handle_str_lit(
     return expr_factory_.mk_string_literal(content);
 }
 
-Expr* SourceCodeVisitor::handle_null_literal(
+Expr* SourceCodeVisitor::handle_null_lit(
     [[maybe_unused]] SourceCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
@@ -246,7 +254,7 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     return expr_factory_.mk_member_var_ref(left_side, name);
 }
 
-Expr* SourceCodeVisitor::handle_invocation_expr(
+Expr* SourceCodeVisitor::handle_invoc_expr(
     SourceCodeVisitor* self,
     const TSNode* node
 )
@@ -467,17 +475,17 @@ Expr* SourceCodeVisitor::handle_ternary_expr(
     const TSNode* node
 )
 {
-    const TSNode cond_node            = ts_node_child(*node, 0);
-    const TSNode if_true              = ts_node_child(*node, 2);
-    const TSNode if_false             = ts_node_child(*node, 4);
-    const ExprHandler cond_handler    = RegManager::get_expr_handler(cond_node);
-    const ExprHandler if_true_handler = RegManager::get_expr_handler(if_true);
-    const ExprHandler if_false_handler = RegManager::get_expr_handler(if_false);
+    const TSNode cond_node          = ts_node_child(*node, 0);
+    const TSNode if_true            = ts_node_child(*node, 2);
+    const TSNode if_false           = ts_node_child(*node, 4);
+    const ExprHandler cond_handler  = RegManager::get_expr_handler(cond_node);
+    const ExprHandler true_handler  = RegManager::get_expr_handler(if_true);
+    const ExprHandler false_handler = RegManager::get_expr_handler(if_false);
 
     return expr_factory_.mk_if(
         cond_handler(self, &cond_node),
-        if_true_handler(self, &if_true),
-        if_false_handler(self, &if_false)
+        true_handler(self, &if_true),
+        false_handler(self, &if_false)
     );
 }
 

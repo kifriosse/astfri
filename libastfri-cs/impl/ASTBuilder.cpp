@@ -1,14 +1,17 @@
+#include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
+#include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
 #include <filesystem>
 #include <fstream>
-#include <ranges>
-#include <stack>
+#include <string>
+#include <vector>
 
 namespace astfri::csharp
 {
@@ -27,7 +30,7 @@ ASTBuilder::~ASTBuilder()
 }
 
 TranslationUnit* ASTBuilder::make_ast(
-    const std::string_view source_code_dir
+    const std::filesystem::path& source_code_dir
 ) const
 {
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
@@ -58,7 +61,7 @@ TranslationUnit* ASTBuilder::make_ast(
 }
 
 std::vector<SourceFile> ASTBuilder::get_source_codes(
-    const std::string_view project_dir
+    const std::filesystem::path& project_dir
 ) const
 {
     std::vector<SourceFile> source_files;

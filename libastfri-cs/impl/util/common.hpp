@@ -6,6 +6,9 @@
 #ifndef CSHARP_COMMON_HPP
 #define CSHARP_COMMON_HPP
 
+#include <cstddef>
+#include <functional>
+
 namespace astfri::csharp::util
 {
 

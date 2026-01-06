@@ -1,47 +1,60 @@
 #ifndef CSHARP_REGISTRIES_HPP
 #define CSHARP_REGISTRIES_HPP
 
-#include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/SymbolTableBuilder.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <libastfri-cs/impl/CSAliases.hpp>
+
+#include <tree_sitter/api.h>
 
 #include <optional>
 #include <string>
 #include <unordered_map>
 
+namespace astfri
+{
+
+enum class BinOpType;
+enum class UnaryOpType;
+struct Type;
+struct Stmt;
+struct Expr;
+
+class TypeFactory;
+
+} // namespace astfri
+
 namespace astfri::csharp
 {
+enum class CSModifier : MaskType;
+class SourceCodeVisitor;
 
 namespace regs
 {
 
 struct Handlers
 {
-    const std::unordered_map<std::string, SourceCodeVisitor::StmtHandler> stmts;
-    const std::unordered_map<std::string, SourceCodeVisitor::ExprHandler> exprs;
-    const std::unordered_map<std::string, SymbolTableBuilder::RegHandler>
-        symbol_reg_handlers;
+    const RegMap<StmtHandler> stmts;
+    const RegMap<ExprHandler> exprs;
+    const RegMap<RegHandler> symbol_reg_handlers;
     Handlers();
 };
 
 struct Operations
 {
-    const std::unordered_map<std::string, UnaryOpType> prefix_unary_op;
-    const std::unordered_map<std::string, BinOpType> bin_operations;
+    const RegMap<UnaryOpType> prefix_unary_op;
+    const RegMap<BinOpType> bin_operations;
     Operations();
 };
 
 struct Types
 {
     TypeFactory& type_factory;
-    const std::unordered_map<std::string, Type*> types;
+    const RegMap<Type*> types;
     Types();
 };
 
 struct Modifiers
 {
-    const std::unordered_map<std::string, CSModifier> modifiers;
+    const RegMap<CSModifier> modifiers;
     Modifiers();
 };
 } // namespace regs
@@ -55,24 +68,16 @@ private:
     static regs::Modifiers modifiers_;
 
 public:
-    static SourceCodeVisitor::StmtHandler get_stmt_handler(const TSNode& node);
-    static SourceCodeVisitor::ExprHandler get_expr_handler(const TSNode& node);
-    static SymbolTableBuilder::RegHandler get_reg_handler(const TSNode& node);
-    static SourceCodeVisitor::StmtHandler get_stmt_handler(
-        const std::string& node_type
-    );
-    static SourceCodeVisitor::ExprHandler get_expr_handler(
-        const std::string& node_type
-    );
-    static SymbolTableBuilder::RegHandler get_reg_handler(
-        const std::string& node_type
-    );
-    static std::optional<UnaryOpType> get_prefix_unary_op(
-        const std::string& operation
-    );
-    static std::optional<BinOpType> get_bin_op(const std::string& operation);
-    static std::optional<Type*> get_type(const std::string& type_name);
-    static std::optional<CSModifier> get_modifier(const std::string& modifier);
+    static StmtHandler get_stmt_handler(const TSNode& node);
+    static ExprHandler get_expr_handler(const TSNode& node);
+    static RegHandler get_reg_handler(const TSNode& node);
+    static StmtHandler get_stmt_handler(std::string_view node_type);
+    static ExprHandler get_expr_handler(std::string_view node_type);
+    static RegHandler get_reg_handler(std::string_view node_type);
+    static std::optional<UnaryOpType> get_prefix_unary_op(std::string_view op);
+    static std::optional<BinOpType> get_bin_op(std::string_view operation);
+    static std::optional<Type*> get_type(std::string_view type_name);
+    static std::optional<CSModifier> get_modifier(std::string_view modifier);
     static bool is_expr(const TSNode& node);
     static bool is_stmt(const TSNode& node);
 

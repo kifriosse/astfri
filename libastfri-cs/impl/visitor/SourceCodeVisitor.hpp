@@ -1,24 +1,20 @@
 #ifndef CSHARP_SOURCE_CODE_VISITOR_HPP
 #define CSHARP_SOURCE_CODE_VISITOR_HPP
 
+#include <libastfri-cs/impl/data/Source.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
-#include <functional>
+#include <string_view>
+#include <vector>
 
 namespace astfri::csharp
 {
 
 class SourceCodeVisitor
 {
-public:
-    using ExprHandler
-        = std::function<Expr*(SourceCodeVisitor* self, const TSNode*)>;
-    using StmtHandler
-        = std::function<Stmt*(SourceCodeVisitor* self, const TSNode*)>;
-
 private:
     static ExprFactory& expr_factory_;
     static StmtFactory& stmt_factory_;
@@ -47,18 +43,11 @@ public:
         const TSNode* node
     ); // todo
     static Expr* handle_bool_lit(SourceCodeVisitor* self, const TSNode* node);
-    static Expr* handle_char_lit(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    ); // todo
-    static Expr* handle_str_lit(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    ); // todo
-    static Expr* handle_null_literal(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
+    // todo
+    static Expr* handle_char_lit(SourceCodeVisitor* self, const TSNode* node);
+    // todo
+    static Expr* handle_str_lit(SourceCodeVisitor* self, const TSNode* node);
+    static Expr* handle_null_lit(SourceCodeVisitor* self, const TSNode* node);
     static Expr* handle_this_expr(SourceCodeVisitor* self, const TSNode* node);
     static Expr* handle_verbatim_str_lit(
         SourceCodeVisitor* self,
@@ -79,10 +68,7 @@ public:
         SourceCodeVisitor* self,
         const TSNode* node
     );
-    static Expr* handle_invocation_expr(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
+    static Expr* handle_invoc_expr(SourceCodeVisitor* self, const TSNode* node);
 
     // Operations
     static Expr* handle_prefix_unary_op_expr(

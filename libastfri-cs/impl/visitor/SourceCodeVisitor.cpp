@@ -1,5 +1,13 @@
+#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/data/Metadata.hpp>
+#include <libastfri-cs/impl/data/Source.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <optional>
+#include <vector>
 
 namespace astfri::csharp
 {
