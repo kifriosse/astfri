@@ -1,10 +1,11 @@
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/util/astfri_util.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <algorithm>
 #include <cstring>
-
-#include "libastfri-cs/impl/Registries.hpp"
 
 namespace astfri::csharp
 {
@@ -485,9 +486,9 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
     const size_t param_count
         = is_variadic ? named_child_count - 1 : named_child_count;
 
-    const MethodIdentifier method_id{
+    const MethodId method_id{
         .func_id
-        = FunctionIdentifier{.name = util::extract_node_text(name_node, self->get_src_code()), .param_count = param_count},
+        = FuncId{.name = util::extract_node_text(name_node, self->get_src_code()), .param_count = param_count},
         .is_static = modifiers.has(CSModifier::Static)
     };
 
@@ -546,7 +547,7 @@ Stmt* SourceCodeVisitor::handle_local_func_stmt(
     const bool is_variadic    = util::has_variadic_param(paramas_node, nullptr);
     const size_t named_count  = ts_node_named_child_count(paramas_node);
 
-    FunctionIdentifier func_id{
+    const FuncId func_id{
         .name        = util::extract_node_text(name_node, self->get_src_code()),
         .param_count = is_variadic ? named_count - 1 : named_count
     };

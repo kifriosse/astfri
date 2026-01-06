@@ -1,12 +1,12 @@
 
+#include <libastfri-cs/impl/data/Source.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
-#include <libastfri-cs/impl/Source.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/util/astfri_util.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
 
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
-#include <cstring>
 #include <ranges>
 #include <utility>
 
@@ -229,7 +229,7 @@ void SymbolTableBuilder::register_method(
         = is_variadic ? named_child_count - 1 : named_child_count;
     const std::string name
         = util::extract_node_text(func_name_node, self->get_src());
-    MethodIdentifier method_id{
+    MethodId method_id{
         .func_id   = {name, param_count},
         .is_static = method_modif.has(CSModifier::Static),
     };

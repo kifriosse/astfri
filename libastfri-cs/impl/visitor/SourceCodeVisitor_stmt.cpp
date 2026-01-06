@@ -1,4 +1,6 @@
 #include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/util/astfri_util.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <cstring>
@@ -37,7 +39,7 @@ Stmt* SourceCodeVisitor::handle_block_stmt(
                 continue;
 
             self->semantic_context_.reg_local_func(
-                make_func_metadata(current_node, self->get_src_code())
+                util::make_func_metadata(current_node, self->get_src_code())
             );
         } while (ts_tree_cursor_goto_next_sibling(&cursor));
 

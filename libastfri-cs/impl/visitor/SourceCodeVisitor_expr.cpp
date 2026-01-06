@@ -1,5 +1,6 @@
 #include <libastfri-cs/impl/Registries.hpp>
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/utils.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <cstring>
@@ -200,7 +201,8 @@ Expr* SourceCodeVisitor::handle_identifier(
 {
     const std::string identifier
         = util::extract_node_text(*node, self->get_src_code());
-    Stmt* def_stmt = self->semantic_context_.find_var(identifier, None{});
+    Stmt* def_stmt
+        = self->semantic_context_.find_var(identifier, access::None{});
     if (! def_stmt)
         return expr_factory_.mk_unknown();
 
@@ -232,7 +234,7 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     {
         UserTypeDefStmt* owner = self->semantic_context_.current_type();
         if (const auto var_def = // todo for future use
-            self->semantic_context_.find_var(name, Instance{}))
+            self->semantic_context_.find_var(name, access::Instance{}))
         {
             return expr_factory_.mk_member_var_ref(left_side, name);
         }
@@ -274,19 +276,19 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
         // todo add handling of local functions
         const std::string name
             = util::extract_node_text(function_node, self->get_src_code());
-        const FunctionIdentifier func_id{
+        const FuncId func_id{
             .name        = name,
             .param_count = arg_list.size(),
         };
 
-        const InvocationType invoc_type
-            = self->semantic_context_.find_invoc_type(func_id, None{});
+        const CallType invoc_type
+            = self->semantic_context_.find_invoc_type(func_id, access::None{});
         ThisExpr* this_expr = expr_factory_.mk_this();
         switch (invoc_type)
         {
-        case InvocationType::LocalFunc:
+        case CallType::LocalFunc:
             return expr_factory_.mk_function_call(name, arg_list);
-        case InvocationType::Delegate:
+        case CallType::Delegate:
         {
             const ExprHandler var_def_handler
                 = RegManager::get_expr_handler(function_node);
@@ -294,9 +296,9 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
             Expr* left = var_def_handler(self, &function_node);
             return expr_factory_.mk_lambda_call(left, arg_list);
         }
-        case InvocationType::Method:
+        case CallType::Method:
             return expr_factory_.mk_method_call(this_expr, name, arg_list);
-        case InvocationType::StaticMethod:
+        case CallType::StaticMethod:
             // todo add static method call handling
             return expr_factory_.mk_method_call(this_expr, name, arg_list);
         default:
@@ -319,23 +321,25 @@ Expr* SourceCodeVisitor::handle_invocation_expr(
         // it's a member of an instance - method or delegate type attribute
         if (is_a<ThisExpr>(left_side))
         {
-            const FunctionIdentifier func_id{
+            const FuncId func_id{
                 .name        = name,
                 .param_count = arg_list.size(),
             };
 
-            const InvocationType invoc_type
-                = self->semantic_context_.find_invoc_type(func_id, Instance{});
+            const CallType invoc_type = self->semantic_context_.find_invoc_type(
+                func_id,
+                access::Instance{}
+            );
             switch (invoc_type)
             {
-            case InvocationType::Delegate:
+            case CallType::Delegate:
             {
                 return expr_factory_.mk_lambda_call(
                     expr_factory_.mk_member_var_ref(left_side, name),
                     arg_list
                 );
             }
-            case InvocationType::Method:
+            case CallType::Method:
                 return expr_factory_.mk_method_call(left_side, name, arg_list);
             default:
                 // todo placeholder

@@ -1,5 +1,6 @@
 #include <libastfri-cs/impl/Registries.hpp>
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/util/astfri_util.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 
 #include <queue>
@@ -63,33 +64,10 @@ Expr* SourceCodeVisitor::expr_list_to_comma_op(
     return init_expr;
 }
 
-FunctionMetadata SourceCodeVisitor::make_func_metadata(
-    const TSNode& node,
-    const std::string_view src_code
-)
-{
-    const TSNode name_node     = util::child_by_field_name(node, "name");
-    const TSNode return_node   = util::child_by_field_name(node, "type");
-    const TSNode params_node   = util::child_by_field_name(node, "parameters");
-    std::string name           = util::extract_node_text(name_node, src_code);
-    Type* ret_type             = util::make_type(return_node, src_code);
-    auto [params, params_data] = util::discover_params(params_node, src_code);
-    return FunctionMetadata{
-        .params   = std::move(params_data),
-        .func_def = stmt_factory_.mk_function_def(
-            std::move(name),
-            std::move(params),
-            ret_type,
-            nullptr
-        ),
-        .function_node = node,
-    };
-}
-
 std::vector<ParamVarDefStmt*> SourceCodeVisitor::make_param_list(
     SourceCodeVisitor* self,
     const TSNode* node,
-    const bool make_shallow // todo this might be useless
+    const bool make_shallow
 )
 {
     std::vector<ParamVarDefStmt*> params;
@@ -179,16 +157,16 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
 
 std::string_view SourceCodeVisitor::get_src_code() const
 {
-    if (! current_src)
-        throw std::logic_error("Current source code is not set");
-    return current_src->file.content;
+    return current_src
+             ? current_src->file.content
+             : throw std::logic_error("Current source code is not set");
 }
 
 const TSLanguage* SourceCodeVisitor::get_lang() const
 {
-    if (! current_src)
-        throw std::logic_error("Current source code is not set");
-    return ts_tree_language(current_src->tree);
+    return current_src
+             ? ts_tree_language(current_src->tree)
+             : throw std::logic_error("Current source code is not set");
 }
 
 } // namespace astfri::csharp

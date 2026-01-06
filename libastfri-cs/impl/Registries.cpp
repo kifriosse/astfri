@@ -1,65 +1,9 @@
 #include <libastfri-cs/impl/Registries.hpp>
-#include <libastfri-cs/impl/utils.hpp>
 
 namespace astfri::csharp
 {
 namespace regs
 {
-
-const std::string Queries::top_level_stmt_query =
-    R"(
-    (namespace_declaration
-        body: (declaration_list
-        [
-            (class_declaration)     @class
-            (interface_declaration) @interface
-            (struct_declaration)    @struct
-            (enum_declaration)      @enum
-            (delegate_declaration)  @delegate
-            (record_declaration)    @record
-        ])
-    )
-    (compilation_unit
-    [
-        (class_declaration)     @class
-        (interface_declaration) @interface
-        (struct_declaration)    @struct
-        (enum_declaration)      @enum
-        (delegate_declaration)  @delegate
-        (record_declaration)    @record
-    ])
-    )";
-
-const std::string Queries::decl_query =
-    R"(
-    (variable_declaration
-        (variable_declarator) @var_decl)
-    )";
-
-const std::string Queries::var_modif_query =
-    R"(
-    [
-        (field_declaration (modifier) @modifier)
-        (local_declaration_statement (modifier) @modifier)
-        (parameter (modifier) @modifier)
-    ]
-    )";
-
-const std::string Queries::method_modif_query =
-    R"(
-        (method_declaration
-            (modifier) @modifier
-        )
-    )";
-
-const std::string Queries::file_namespace_query
-    = "(file_scoped_namespace_declaration) @namespace";
-
-const std::string Queries::comment_error_query =
-    R"(
-        (comment) @comment
-        (ERROR) @error
-    )";
 
 Handlers::Handlers() :
     stmts({
@@ -337,9 +281,9 @@ std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
 
 std::optional<BinOpType> RegManager::get_bin_op(const std::string& operation)
 {
-    auto& bin_operations = operations_.bin_operations;
-    const auto it        = bin_operations.find(operation);
-    if (it != bin_operations.end())
+    auto& bin_ops = operations_.bin_operations;
+    const auto it = bin_ops.find(operation);
+    if (it != bin_ops.end())
     {
         return it->second;
     }
@@ -359,12 +303,10 @@ std::optional<Type*> RegManager::get_type(const std::string& type_name)
 
 std::optional<CSModifier> RegManager::get_modifier(const std::string& modifier)
 {
-    auto& modifiers = modifiers_.modifiers;
-    const auto it   = modifiers.find(modifier);
-    if (it != modifiers.end())
-    {
+    auto& modifs  = modifiers_.modifiers;
+    const auto it = modifs.find(modifier);
+    if (it != modifs.end())
         return it->second;
-    }
     return {};
 }
 

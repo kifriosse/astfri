@@ -1,5 +1,5 @@
-#ifndef CSHARP_UTILS_INL
-#define CSHARP_UTILS_INL
+#ifndef CSHARP_COMMON_INL
+#define CSHARP_COMMON_INL
 
 namespace astfri::csharp::util
 {
@@ -12,4 +12,4 @@ void hash_combine(size_t& seed, const T& v)
 
 } // namespace astfri::csharp::util
 
-#endif // CSHARP_UTILS_INL
+#endif // CSHARP_COMMON_INL

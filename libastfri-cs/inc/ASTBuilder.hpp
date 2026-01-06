@@ -1,12 +1,11 @@
 #ifndef CSHARP_AST_BUILDER_HPP
 #define CSHARP_AST_BUILDER_HPP
 
-#include <libastfri-cs/impl/Source.hpp>
+#include <libastfri-cs/impl/data/Source.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -23,7 +22,7 @@ public:
     ASTBuilder();
     ~ASTBuilder();
     [[nodiscard]] TranslationUnit* make_ast(
-        const std::string& source_code_dir
+        std::string_view source_code_dir
     ) const;
 
     ASTBuilder(ASTBuilder&)             = delete;
@@ -33,7 +32,7 @@ public:
 
 private:
     [[nodiscard]] std::vector<SourceFile> get_source_codes(
-        const std::string& project_dir
+        std::string_view project_dir
     ) const;
 };
 

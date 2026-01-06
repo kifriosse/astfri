@@ -1,5 +1,5 @@
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 
@@ -26,7 +26,9 @@ ASTBuilder::~ASTBuilder()
     ts_parser_delete(parser_);
 }
 
-TranslationUnit* ASTBuilder::make_ast(const std::string& source_code_dir) const
+TranslationUnit* ASTBuilder::make_ast(
+    const std::string_view source_code_dir
+) const
 {
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     std::vector<SourceCode> source_codes;
@@ -56,12 +58,13 @@ TranslationUnit* ASTBuilder::make_ast(const std::string& source_code_dir) const
 }
 
 std::vector<SourceFile> ASTBuilder::get_source_codes(
-    const std::string& project_dir
+    const std::string_view project_dir
 ) const
 {
     std::vector<SourceFile> source_files;
-    std::stack<std::string> dirs;
-    dirs.push(project_dir);
+    std::stack<std::filesystem::path> dirs;
+    const std::filesystem::path root_path{project_dir};
+    dirs.emplace(root_path);
 
     while (! dirs.empty())
     {
@@ -69,24 +72,32 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
         dirs.pop();
         for (const auto& dir_entry : dir_it)
         {
-            std::filesystem::path current_path = dir_entry.path();
+            std::filesystem::path entry_path = dir_entry.path();
+            const auto file_name             = entry_path.filename().string();
+
             if (dir_entry.is_directory())
             {
-                const auto& path = dir_entry.path();
-                if (path == project_dir + "/bin"
-                    || path == project_dir + "/obj")
+                if (file_name == "bin" || file_name == "obj"
+                    || file_name == ".git")
                 {
                     continue;
                 }
-                dirs.push(path);
+                dirs.push(entry_path);
             }
-            else if (current_path.extension() == ".cs")
+            else if (entry_path.extension() == ".cs")
             {
-                const std::filesystem::path& path = dir_entry.path();
-                std::ifstream file_stream(path);
-                std::string source_code(
-                    (std::istreambuf_iterator(file_stream)),
-                    std::istreambuf_iterator<char>()
+                if (file_name.ends_with(".g.cs") || file_name.ends_with(".i.cs")
+                    || file_name.ends_with(".AssemblyInfo.cs"))
+                {
+                    continue;
+                }
+                std::string source_code;
+                std::ifstream file_stream(entry_path, std::ios::binary);
+                const auto file_size = std::filesystem::file_size(entry_path);
+                source_code.resize(file_size);
+                file_stream.read(
+                    source_code.data(),
+                    static_cast<std::streamsize>(file_size)
                 );
                 TSTree* tree = ts_parser_parse_string(
                     parser_,
@@ -95,12 +106,12 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                     source_code.length()
                 );
                 source_files.emplace_back(
-                    current_path,
+                    entry_path,
                     util::remove_comments(
                         source_code,
                         ts_tree_root_node(tree),
                         lang_,
-                        path
+                        entry_path
                     )
                 );
                 ts_tree_delete(tree);

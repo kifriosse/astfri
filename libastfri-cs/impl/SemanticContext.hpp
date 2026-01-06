@@ -1,166 +1,16 @@
 #ifndef CSHARP_SEMANTIC_CONTEXT_HPP
 #define CSHARP_SEMANTIC_CONTEXT_HPP
 
-#include <libastfri-cs/impl/Source.hpp>
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/data/AccessType.hpp>
+#include <libastfri-cs/impl/data/Identifiers.hpp>
+#include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri/inc/Astfri.hpp>
-
-#include <tree_sitter/api.h>
 
 #include <optional>
 #include <stack>
-#include <variant>
 
 namespace astfri::csharp
 {
-
-struct FunctionIdentifier
-{
-    std::string name;
-    size_t param_count{0};
-
-    bool operator==(const FunctionIdentifier& other) const;
-};
-
-struct MethodIdentifier
-{
-    FunctionIdentifier func_id;
-    bool is_static{false};
-
-    bool operator==(const MethodIdentifier& other) const;
-};
-
-} // namespace astfri::csharp
-
-#include <libastfri-cs/impl/SemanticContext.inl>
-
-namespace astfri::csharp
-{
-
-/**
- * @brief When member access doesn't have \c this, \c base or \c ClassRef prefix
- */
-struct None
-{
-};
-
-/**
- * @brief When member access has \c this prefix
- */
-struct Instance
-{
-};
-
-/**
- * @brief When member access has \c ClassRef prefix
- */
-struct Static
-{
-    UserTypeDefStmt* owner{nullptr};
-};
-
-/**
- * @brief When member access has \c base prefix
- */
-struct Base
-{
-    UserTypeDefStmt* parent_type{nullptr};
-};
-
-/**
- * @brief When member access is on expression of unknown type
- */
-struct Unknown
-{
-    Expr* left_side{nullptr}; // todo might be useless
-};
-
-using MemberAccessType // todo rename this to MemberAccessType
-    = std::variant<None, Instance, Static, Base, Unknown>;
-
-// todo redo this into a std::variant like MemberAccessType
-enum class InvocationType
-{
-    Unknown,
-    Method,
-    LocalFunc,
-    Delegate,
-    StaticMethod
-};
-
-/**
- * @brief Metadata about member variable
- */
-struct MemberVarMetadata
-{
-    MemberVarDefStmt* var_def{nullptr};
-    TSNode var_node{};
-    TSNode initializer{}; // right side of assignment
-    // todo maybe add flag for static variable
-    bool processed{false};
-};
-
-/**
- * @brief Metadata about method parameter
- */
-struct ParamMetadata
-{
-    ParamVarDefStmt* param_def{nullptr};
-    TSNode param_node{};
-    TSNode initializer{}; // right side of assignment
-};
-
-/**
- * @brief Metadata about function
- */
-struct FunctionMetadata
-{
-    std::vector<ParamMetadata> params{};
-    FunctionDefStmt* func_def{nullptr};
-    TSNode function_node{};
-};
-
-/**
- * @brief Metadata about method
- */
-struct MethodMetadata
-{
-    std::vector<ParamMetadata> params{};
-    MethodDefStmt* method_def{nullptr};
-    TSNode method_node{};
-};
-
-/**
- * @brief Metadata about property
- */
-struct PropertyNode
-{
-    MemberVarMetadata backing_field;
-    MethodMetadata getter;
-    MethodMetadata setter;
-};
-
-/**
- * @brief Location of type definition in source code
- */
-struct TypeDefLoc
-{
-    TSNode type_node{};
-    SourceCode* src_code{nullptr};
-};
-
-/**
- * @brief Metadata about user defined type
- */
-struct TypeMetadata
-{
-    UserTypeDefStmt* user_type{nullptr};
-    std::unordered_map<MethodIdentifier, MethodMetadata> methods{};
-    std::unordered_map<std::string, MemberVarMetadata> member_vars{};
-    std::unordered_map<std::string, PropertyNode> properties{};
-    std::vector<TypeDefLoc> defs{};
-    bool processed{false};
-};
 
 /**
  * @brief Symbol table containing metadata about user defined types
@@ -187,7 +37,7 @@ struct ScopeContext
     std::stack<std::vector<Stmt*>> scope_stack{};
     std::unordered_map<std::string, ParamVarDefStmt*> params{};
     std::unordered_map<std::string, LocalVarDefStmt*> local_vars{};
-    std::unordered_map<FunctionIdentifier, FunctionMetadata> function_map{};
+    std::unordered_map<FuncId, FunctionMetadata> function_map{};
 };
 
 /**
@@ -243,19 +93,16 @@ public:
 
     UserTypeDefStmt* current_type() const;
     Type* current_return_type() const;
-    VarDefStmt* find_var(
-        const std::string& name,
-        MemberAccessType type
-    ) const;
+    VarDefStmt* find_var(const std::string& name, access::Qualifier type) const;
     const FunctionMetadata* find_func(const FuncId& func_id) const;
     const MethodMetadata* find_method(
         const MethodId& method_id,
         UserTypeDefStmt* owner
     ) const;
 
-    InvocationType find_invoc_type(
+    CallType find_invoc_type(
         const FuncId& func_id,
-        MemberAccessType access_type
+        access::Qualifier quelifier
     ) const;
 
     MemberVarMetadata* find_memb_var(

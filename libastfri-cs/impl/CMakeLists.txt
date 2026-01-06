@@ -5,11 +5,10 @@ target_sources(astfri-cs PRIVATE
     Registries.cpp
     SemanticContext.cpp
     SymbolTableBuilder.cpp
-    CSModifiers.cpp
-    Source.cpp
-    utils.cpp
 )
 
+add_subdirectory(data)
+add_subdirectory(util)
 add_subdirectory(visitor)
 
 target_link_directories(astfri-cs PUBLIC

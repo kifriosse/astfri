@@ -2,7 +2,7 @@
 #define CSHARP_SYMBOL_TABLE_BUILDER_HPP
 
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/Source.hpp>
+#include <libastfri-cs/impl/data/Source.hpp>
 
 namespace astfri::csharp
 {

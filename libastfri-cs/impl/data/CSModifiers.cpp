@@ -1,6 +1,6 @@
-#include <libastfri-cs/impl/CSModifiers.hpp>
+#include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
-#include <libastfri-cs/impl/utils.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
 
 #include <optional>
 

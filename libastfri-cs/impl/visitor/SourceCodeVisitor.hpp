@@ -2,7 +2,6 @@
 #define CSHARP_SOURCE_CODE_VISITOR_HPP
 
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/utils.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -214,14 +213,9 @@ public:
     static Stmt* handle_return(SourceCodeVisitor* self, const TSNode* node);
     static Stmt* handle_throw(SourceCodeVisitor* self, const TSNode* node);
 
-    // todo temp move this into utils
-    [[nodiscard]] static FunctionMetadata make_func_metadata(
-        const TSNode& node,
-        std::string_view src_code
-    );
-
 private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
+
     /**
      * Turns an expression list into a chained comma operator expression
      * @param start_node node from which to start

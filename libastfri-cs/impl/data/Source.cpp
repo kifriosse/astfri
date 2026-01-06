@@ -1,4 +1,4 @@
-#include <libastfri-cs/impl/Source.hpp>
+#include <libastfri-cs/impl/data/Source.hpp>
 
 namespace astfri::csharp
 {
