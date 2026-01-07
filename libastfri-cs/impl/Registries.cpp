@@ -248,21 +248,21 @@ RegHandler RegManager::get_reg_handler(const TSNode& node)
     return get_reg_handler(ts_node_type(node));
 }
 
-StmtHandler RegManager::get_stmt_handler(std::string_view node_type)
+StmtHandler RegManager::get_stmt_handler(const std::string_view node_type)
 {
     auto& stmts   = handlers_.stmts;
     const auto it = stmts.find(node_type);
     return it != stmts.end() ? it->second : default_stmt_handler;
 }
 
-ExprHandler RegManager::get_expr_handler(std::string_view node_type)
+ExprHandler RegManager::get_expr_handler(const std::string_view node_type)
 {
     auto& exprs   = handlers_.exprs;
     const auto it = exprs.find(node_type);
     return it != exprs.end() ? it->second : default_expr_handler;
 }
 
-RegHandler RegManager::get_reg_handler(std::string_view node_type)
+RegHandler RegManager::get_reg_handler(const std::string_view node_type)
 {
     auto& reg_handlers = handlers_.symbol_reg_handlers;
     const auto it      = reg_handlers.find(node_type);
@@ -270,7 +270,9 @@ RegHandler RegManager::get_reg_handler(std::string_view node_type)
                                     : [](auto, const auto&, auto&) { };
 }
 
-std::optional<UnaryOpType> RegManager::get_prefix_unary_op(std::string_view op)
+std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
+    const std::string_view op
+)
 {
     auto& prefix_unary_ops = operations_.prefix_unary_op;
     const auto it          = prefix_unary_ops.find(op);
@@ -281,7 +283,9 @@ std::optional<UnaryOpType> RegManager::get_prefix_unary_op(std::string_view op)
     return {};
 }
 
-std::optional<BinOpType> RegManager::get_bin_op(std::string_view operation)
+std::optional<BinOpType> RegManager::get_bin_op(
+    const std::string_view operation
+)
 {
     auto& bin_ops = operations_.bin_operations;
     const auto it = bin_ops.find(operation);
@@ -292,7 +296,7 @@ std::optional<BinOpType> RegManager::get_bin_op(std::string_view operation)
     return {};
 }
 
-std::optional<Type*> RegManager::get_type(std::string_view type_name)
+std::optional<Type*> RegManager::get_type(const std::string_view type_name)
 {
     auto& types   = types_.types;
     const auto it = types.find(type_name);
@@ -303,7 +307,9 @@ std::optional<Type*> RegManager::get_type(std::string_view type_name)
     return {};
 }
 
-std::optional<CSModifier> RegManager::get_modifier(std::string_view modifier)
+std::optional<CSModifier> RegManager::get_modifier(
+    const std::string_view modifier
+)
 {
     auto& modifs  = modifiers_.modifiers;
     const auto it = modifs.find(modifier);

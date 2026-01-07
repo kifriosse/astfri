@@ -10,6 +10,16 @@
 namespace astfri::csharp::util
 {
 
+size_t StringHash::operator()(const std::string_view str) const noexcept
+{
+    return std::hash<std::string_view>()(str);
+}
+
+size_t StringHash::operator()(const std::string& str) const noexcept
+{
+    return std::hash<std::string>()(str);
+}
+
 IntSuffix get_suffix_type(const std::string_view suffix)
 {
     if (suffix.empty())
@@ -63,7 +73,7 @@ void split_namespace(
     }
 }
 
-bool is_interface_name(const std::string& name)
+bool is_interface_name(const std::string_view name)
 {
     return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
 }

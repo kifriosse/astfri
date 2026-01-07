@@ -1,6 +1,7 @@
 #ifndef CSHARP_SEMANTIC_CONTEXT_HPP
 #define CSHARP_SEMANTIC_CONTEXT_HPP
 
+#include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 
@@ -45,8 +46,8 @@ struct TypeContext
 struct ScopeContext
 {
     std::stack<std::vector<Stmt*>> scope_stack{};
-    std::unordered_map<std::string, ParamVarDefStmt*> params{};
-    std::unordered_map<std::string, LocalVarDefStmt*> local_vars{};
+    IdentifierMap<ParamVarDefStmt*> params{};
+    IdentifierMap<LocalVarDefStmt*> local_vars{};
     std::unordered_map<FuncId, FunctionMetadata> function_map{};
 };
 
@@ -103,7 +104,7 @@ public:
 
     UserTypeDefStmt* current_type() const;
     Type* current_return_type() const;
-    VarDefStmt* find_var(const std::string& name, access::Qualifier type) const;
+    VarDefStmt* find_var(std::string_view name, access::Qualifier qualifier) const;
     const FunctionMetadata* find_func(const FuncId& func_id) const;
     const MethodMetadata* find_method(
         const MethodId& method_id,
@@ -116,7 +117,7 @@ public:
     ) const;
 
     MemberVarMetadata* find_memb_var(
-        const std::string& name,
+        std::string_view name,
         UserTypeDefStmt* owner
     ) const;
 };

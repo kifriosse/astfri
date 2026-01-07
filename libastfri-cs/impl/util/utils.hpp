@@ -11,6 +11,17 @@ namespace astfri::csharp::util
 {
 
 /**
+ * @brief Hash struct that allows hashing both std::string and std::string_view
+ * @note Source: https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
+ */
+struct StringHash
+{
+    using is_transparent = void;
+    size_t operator()(std::string_view str) const noexcept;
+    size_t operator()(const std::string& str) const noexcept;
+};
+
+/**
  * @brief Gets the C# integer suffix type from the given suffix string
  * @param suffix suffix string to analyze
  * @return corresponding IntSuffix enum value
@@ -24,7 +35,7 @@ void split_namespace(
     std::string_view namespace_name
 );
 
-bool is_interface_name(const std::string& name);
+bool is_interface_name(std::string_view name);
 
 /**
  * @brief Escapes special characters in verbatim and raw C# strings.

@@ -111,10 +111,10 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                 source_files.emplace_back(
                     entry_path,
                     util::remove_comments(
-                        source_code,
                         ts_tree_root_node(tree),
-                        lang_,
-                        entry_path
+                        source_code,
+                        entry_path,
+                        lang_
                     )
                 );
                 ts_tree_delete(tree);

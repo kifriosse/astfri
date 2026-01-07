@@ -131,8 +131,8 @@ Type* SemanticContext::current_return_type() const
 }
 
 VarDefStmt* SemanticContext::find_var(
-    const std::string& name, // todo change to std::string_view
-    const access::Qualifier type
+    const std::string_view name,
+    const access::Qualifier qualifier
 ) const
 {
     util::Overloaded overloaded{
@@ -187,7 +187,7 @@ VarDefStmt* SemanticContext::find_var(
         },
         [&](const access::Unknown&) -> VarDefStmt* { return nullptr; }
     };
-    return std::visit(overloaded, type);
+    return std::visit(overloaded, qualifier);
 }
 
 const FunctionMetadata* SemanticContext::find_func(const FuncId& func_id) const
@@ -214,11 +214,11 @@ const MethodMetadata* SemanticContext::find_method(
 
 CallType SemanticContext::find_invoc_type(
     const FuncId& func_id,
-    access::Qualifier access_type
+    access::Qualifier quelifier
 ) const
 {
     // todo static variables
-    if (VarDefStmt* var_def = find_var(func_id.name, access_type))
+    if ([[maybe_unused]] VarDefStmt* var_def = find_var(func_id.name, quelifier))
     {
         // todo this should probably be something else like a delegate
         // invocation since delegate variables dont have to be only
@@ -227,25 +227,25 @@ CallType SemanticContext::find_invoc_type(
     }
     MethodId method_id{
         .func_id   = func_id,
-        .is_static = std::holds_alternative<access::Static>(access_type),
+        .is_static = std::holds_alternative<access::Static>(quelifier),
     };
 
     util::Overloaded overloaded{
         [&](const access::None&) -> CallType
         {
-            if (const FunctionMetadata* metadata = find_func(func_id))
+            if ([[maybe_unused]] const FunctionMetadata* metadata = find_func(func_id))
                 return CallType::LocalFunc;
 
             const auto current_type = this->current_type();
             // todo check parent classes for methods
-            if (const MethodMetadata* metadata
+            if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, current_type))
             {
                 return CallType::Method;
             }
 
             method_id.is_static = true;
-            if (const MethodMetadata* metadata
+            if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, current_type))
             {
                 return CallType::StaticMethod;
@@ -258,7 +258,7 @@ CallType SemanticContext::find_invoc_type(
             const auto current_type = this->current_type();
 
             // todo check parent classes for methods
-            if (const MethodMetadata* metadata
+            if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, current_type))
             {
                 return CallType::Method;
@@ -268,7 +268,7 @@ CallType SemanticContext::find_invoc_type(
         },
         [&](const access::Static& static_memb) -> CallType
         {
-            if (const MethodMetadata* metadata
+            if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, static_memb.owner))
                 return CallType::StaticMethod;
 
@@ -276,7 +276,7 @@ CallType SemanticContext::find_invoc_type(
         },
         [&](const access::Base& base) -> CallType
         {
-            if (const MethodMetadata* metadata
+            if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, base.parent_type))
             {
                 return CallType::Method;
@@ -289,11 +289,11 @@ CallType SemanticContext::find_invoc_type(
                                       // invocation expression
         }
     };
-    return std::visit(overloaded, access_type);
+    return std::visit(overloaded, quelifier);
 }
 
 MemberVarMetadata* SemanticContext::find_memb_var(
-    const std::string& name,
+    const std::string_view name,
     UserTypeDefStmt* owner
 ) const
 {

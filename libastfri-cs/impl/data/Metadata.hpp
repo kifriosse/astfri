@@ -1,6 +1,7 @@
 #ifndef CSHARP_METADATA_HPP
 #define CSHARP_METADATA_HPP
 
+#include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/Source.hpp>
 
@@ -91,8 +92,8 @@ struct TypeMetadata
 {
     UserTypeDefStmt* user_type{nullptr};
     std::unordered_map<MethodId, MethodMetadata> methods{};
-    std::unordered_map<std::string, MemberVarMetadata> member_vars{};
-    std::unordered_map<std::string, PropertyNode> properties{};
+    IdentifierMap<MemberVarMetadata> member_vars{};
+    IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
     bool processed{false};
 };

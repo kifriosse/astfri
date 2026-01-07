@@ -241,13 +241,13 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     if (is_a<ThisExpr>(left_side))
     {
         UserTypeDefStmt* owner = self->semantic_context_.current_type();
-        if (const auto var_def = // todo for future use
+        if ([[maybe_unused]] const auto var_def = // todo for future use
             self->semantic_context_.find_var(name, access::Instance{}))
         {
             return expr_factory_.mk_member_var_ref(left_side, name);
         }
     }
-    else if (auto class_ref = as_a<ClassRefExpr>(left_side))
+    else if ([[maybe_unused]] auto class_ref = as_a<ClassRefExpr>(left_side))
     {
         // todo static member access handling
     }

@@ -58,13 +58,13 @@ std::string extract_node_text(const TSNode& node, std::string_view src_code);
 std::vector<TSNode> find_nodes(
     const TSNode& root,
     const TSLanguage* lang,
-    const std::string& query_str
+    std::string_view query_str
 );
 
 TSNode find_first_node(
     const TSNode& root,
     const TSLanguage* lang,
-    const std::string& query_str
+    std::string_view query_str
 );
 
 void print_child_nodes_types(const TSNode& node);
@@ -72,18 +72,18 @@ void print_child_nodes_types(const TSNode& node, std::string_view source);
 
 /**
  * @brief Removes comments from the given source code using the syntax tree.
- * @param source_code original source code with comments
  * @param root starting node of the syntax tree (usually the root node of the
  * TSTree)
- * @param lang Tree-sitter language
+ * @param source_code original source code with comments
  * @param path file path of the source code file
+ * @param lang Tree-sitter language
  * @return source code with comments removed
  */
 std::string remove_comments(
-    const std::string& source_code,
     const TSNode& root,
-    const TSLanguage* lang,
-    const std::filesystem::path& path
+    std::string_view source_code,
+    const std::filesystem::path& path,
+    const TSLanguage* lang
 );
 
 /**

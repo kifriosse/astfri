@@ -1,8 +1,10 @@
 #ifndef CSHARP_IDENTIFIERS_HPP
 #define CSHARP_IDENTIFIERS_HPP
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <libastfri-cs/impl/util/common.hpp>
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <functional>
 #include <string>
 

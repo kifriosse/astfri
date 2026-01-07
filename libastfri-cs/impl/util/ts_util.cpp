@@ -89,7 +89,7 @@ std::string extract_node_text(
 std::vector<TSNode> find_nodes(
     const TSNode& root,
     const TSLanguage* lang,
-    const std::string& query_str
+    const std::string_view query_str
 )
 {
     std::vector<TSNode> results;
@@ -97,7 +97,7 @@ std::vector<TSNode> find_nodes(
     uint32_t offset;
     TSQuery* query = ts_query_new(
         lang,
-        query_str.c_str(),
+        query_str.data(),
         query_str.length(),
         &offset,
         &err
@@ -132,14 +132,14 @@ std::vector<TSNode> find_nodes(
 TSNode find_first_node(
     const TSNode& root,
     const TSLanguage* lang,
-    const std::string& query_str
+    const std::string_view query_str
 )
 {
     TSQueryError err;
     uint32_t offset;
     TSQuery* query = ts_query_new(
         lang,
-        query_str.c_str(),
+        query_str.data(),
         query_str.length(),
         &offset,
         &err
@@ -196,10 +196,10 @@ void print_child_nodes_types(const TSNode& node, const std::string_view source)
 }
 
 std::string remove_comments(
-    const std::string& source_code,
     const TSNode& root,
-    const TSLanguage* lang,
-    const std::filesystem::path& path
+    const std::string_view source_code,
+    const std::filesystem::path& path,
+    const TSLanguage* lang
 )
 {
     std::string new_source;
@@ -231,7 +231,7 @@ std::string remove_comments(
     while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
     {
         const TSNode node = match.captures[0].node;
-        if (ts_node_type(node) == std::string("ERROR"))
+        if (ts_node_is_error(node))
         {
             errors.emplace_back(node);
             continue;
@@ -242,6 +242,9 @@ std::string remove_comments(
         next_start = ts_node_end_byte(node);
     }
     new_source += source_code.substr(next_start);
+
+    ts_query_cursor_delete(cursor);
+    ts_query_delete(ts_query);
 
     if (! errors.empty())
     {
@@ -261,8 +264,6 @@ std::string remove_comments(
         );
     }
 
-    ts_query_cursor_delete(cursor);
-    ts_query_delete(ts_query);
     return new_source;
 }
 

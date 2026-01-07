@@ -32,29 +32,29 @@ namespace regs
 
 struct Handlers
 {
-    const RegMap<StmtHandler> stmts;
-    const RegMap<ExprHandler> exprs;
-    const RegMap<RegHandler> symbol_reg_handlers;
+    const RegistryMap<StmtHandler> stmts;
+    const RegistryMap<ExprHandler> exprs;
+    const RegistryMap<RegHandler> symbol_reg_handlers;
     Handlers();
 };
 
 struct Operations
 {
-    const RegMap<UnaryOpType> prefix_unary_op;
-    const RegMap<BinOpType> bin_operations;
+    const RegistryMap<UnaryOpType> prefix_unary_op;
+    const RegistryMap<BinOpType> bin_operations;
     Operations();
 };
 
 struct Types
 {
     TypeFactory& type_factory;
-    const RegMap<Type*> types;
+    const RegistryMap<Type*> types;
     Types();
 };
 
 struct Modifiers
 {
-    const RegMap<CSModifier> modifiers;
+    const RegistryMap<CSModifier> modifiers;
     Modifiers();
 };
 } // namespace regs
