@@ -32,8 +32,8 @@ class SourceCodeVisitor;
 using MaskType    = uint32_t;
 
 using ExprHandler = std::function<Expr*(SourceCodeVisitor*, const TSNode*)>;
-using StmtHandler = std::function<
-    Stmt*(SourceCodeVisitor*, const TSNode*)>; // todo change this to TSNode&
+using StmtHandler = std::function<Stmt*(SourceCodeVisitor*, const TSNode*)>;
+
 using RegHandler
     = std::function<void(SymbolTableBuilder*, const TSNode&, SymbolTable&)>;
 
@@ -42,14 +42,12 @@ using RegistryMap = std::unordered_map<std::string_view, Value>;
 /**
  * @brief Map with string identifiers as keys, using custom string hash for
  * better performance - this map can also use string_view for lookups
- * @note Source: https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
+ * @note Source:
+ * https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
  */
 template<class Value>
-using IdentifierMap = std::unordered_map<
-    std::string,
-    Value,
-    util::StringHash,
-    std::equal_to<>>;
+using IdentifierMap
+    = std::unordered_map<std::string, Value, util::StringHash, std::equal_to<>>;
 
 } // namespace astfri::csharp
 

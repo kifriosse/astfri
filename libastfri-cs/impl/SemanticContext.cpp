@@ -169,7 +169,6 @@ VarDefStmt* SemanticContext::find_var(
         {
             auto current_type = as_a<ClassDefStmt>(this->current_type());
 
-            // todo add search in parent classes
             while (current_type)
             {
                 if (const auto metadata = find_memb_var(name, current_type))
@@ -211,7 +210,7 @@ const MethodMetadata* SemanticContext::find_method(
 ) const
 {
 
-    auto& user_types            = symbol_table_.user_types_metadata;
+    auto& user_types = symbol_table_.user_types_metadata;
     if (auto* current = as_a<ClassDefStmt>(owner))
     {
         while (current)
@@ -225,7 +224,8 @@ const MethodMetadata* SemanticContext::find_method(
             if (it_method != methods.end())
                 return &it_method->second;
 
-            current = ! current->bases_.empty() ? current->bases_.front() : nullptr;
+            current
+                = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }
     }
     else if (is_a<InterfaceDefStmt>(owner))
@@ -264,7 +264,8 @@ MemberVarMetadata* SemanticContext::find_memb_var(
             if (it_var != member_vars.end())
                 return &it_var->second;
 
-            current = ! current->bases_.empty() ? current->bases_.front() : nullptr;
+            current
+                = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }
     }
     else if (is_a<InterfaceDefStmt>(owner))
@@ -292,9 +293,10 @@ CallType SemanticContext::find_invoc_type(
     if ([[maybe_unused]] VarDefStmt* var_def
         = find_var(func_id.name, quelifier))
     {
-        // todo this should probably be something else like a delegate
-        // invocation since delegate variables dont have to be only
-        // lambdas
+        /* todo
+         * this should probably be something else like a delegate invocation
+         * since delegate variables dont have to be only lambdas
+         */
         return CallType::Delegate;
     }
     MethodId method_id{
@@ -310,7 +312,6 @@ CallType SemanticContext::find_invoc_type(
                 return CallType::LocalFunc;
 
             const auto current_type = this->current_type();
-            // todo check parent classes for methods
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, current_type))
             {
@@ -329,8 +330,6 @@ CallType SemanticContext::find_invoc_type(
         [&](const access::Instance&) -> CallType
         {
             const auto current_type = this->current_type();
-
-            // todo check parent classes for methods
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, current_type))
             {

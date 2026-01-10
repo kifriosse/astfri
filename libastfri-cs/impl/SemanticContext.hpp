@@ -104,7 +104,10 @@ public:
 
     UserTypeDefStmt* current_type() const;
     Type* current_return_type() const;
-    VarDefStmt* find_var(std::string_view name, access::Qualifier qualifier) const;
+    VarDefStmt* find_var(
+        std::string_view name,
+        access::Qualifier qualifier
+    ) const;
     const FunctionMetadata* find_func(const FuncId& func_id) const;
     const MethodMetadata* find_method(
         const MethodId& method_id,

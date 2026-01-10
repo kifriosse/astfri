@@ -8,9 +8,22 @@ public class Program {
     }
 }
 
+public partial class TestClass
+{
+    public int MethodWithLocalFunction(int x)
+    {
+        int LocalFunction(int y)
+        {
+            return y * y;
+        }
+
+        test("example", 42);
+        return LocalFunction(x);
+    }
+}
+
 public class Person
 {
-    private static readonly int mf = 8;
     private string _firstName;
     private string _lastName;
 

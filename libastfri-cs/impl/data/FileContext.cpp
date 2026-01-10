@@ -50,10 +50,12 @@ void FileContext::add_using_directive(
         // todo aliases not implemented
         // const TSNode qualif_name_node = ts_node_named_child(node, 1);
         // std::cout << ts_node_type(qualif_name_node) << std::endl;
-        // const std::string alias_name = util::extract_node_text(name_node, src_code);
-        // if (ts_node_symbol(qualif_name_node) == qualified_name_symb)
+        // const std::string alias_name = util::extract_node_text(name_node,
+        // src_code); if (ts_node_symbol(qualif_name_node) ==
+        // qualified_name_symb)
         // {
-        //     Scope scope = mk_scope(util::extract_node_text(qualif_name_node));
+        //     Scope scope =
+        //     mk_scope(util::extract_node_text(qualif_name_node));
         // } else
         // {
         //
@@ -63,10 +65,8 @@ void FileContext::add_using_directive(
         // util::print_child_nodes_types(qualif_name_node, src_code);
         // util::split_namespace(scope_stack, qualifier);
 
-
         // if (ClassDefStmt* class_def = stmt_factory_.get_class_def(, ))
     }
-
 }
 
 Type* FileContext::make_type(const TSNode& node, Scope current_scope)

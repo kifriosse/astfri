@@ -25,9 +25,7 @@ Scope create_scope(
     std::string_view source
 );
 
-Scope create_scope(
-    std::string_view qualifier
-);
+Scope create_scope(std::string_view qualifier);
 
 /**
  * @param node name node of the type (for example class or interface name)

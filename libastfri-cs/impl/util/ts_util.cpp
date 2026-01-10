@@ -206,12 +206,11 @@ void print_child_nodes_types(
     for (size_t i = 0; i < ts_node_child_count(node); ++i)
     {
         const TSNode child = ts_node_child(node, i);
-        if (named && !ts_node_is_named(child))
-        {
+        if (named && ! ts_node_is_named(child))
             continue;
-        }
-        std::string type   = ts_node_type(child);
-        std::string text   = extract_node_text(child, source);
+
+        std::string type = ts_node_type(child);
+        std::string text = extract_node_text(child, source);
         std::cout << "Child " << i << " type: \'" << type << "\' text: \""
                   << text << "\"" << '\n';
     }

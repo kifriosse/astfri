@@ -27,14 +27,13 @@ SymbolTableBuilder::SymbolTableBuilder(std::vector<SourceCode>& source_codes) :
 
 void SymbolTableBuilder::register_user_types(SymbolTable& symbol_table)
 {
-    // todo add loading of using directives
     for (auto& src : src_codes)
     {
-        auto& [file_context, file, tree] = src;
-        current_src        = &src;
+        auto& [context, file, tree] = src;
         if (! tree)
             continue;
 
+        current_src                               = &src;
         const std::vector<TSNode> top_level_nodes = util::find_nodes(
             ts_tree_root_node(tree),
             ts_tree_language(tree),
@@ -83,8 +82,8 @@ void SymbolTableBuilder::load_using_directives()
 {
     for (auto& src : src_codes)
     {
-        FileContext& file_context = src.file_context;
-        TSNode root = ts_tree_root_node(src.tree);
+        FileContext& file_context      = src.file_context;
+        TSNode root                    = ts_tree_root_node(src.tree);
         std::vector<TSNode> directives = util::find_nodes(
             root,
             lang_,
@@ -92,9 +91,9 @@ void SymbolTableBuilder::load_using_directives()
         );
         for (auto directive : directives)
         {
-            file_context.add_using_directive(directive, lang_, src.file.content);
+            file_context
+                .add_using_directive(directive, lang_, src.file.content);
         }
-
     }
 }
 
@@ -115,15 +114,23 @@ void SymbolTableBuilder::register_class(
         util::create_scope(node, self->lang_, source_code_)
     );
 
-    // todo handle partial classes
-    type_table.user_type_keys.push_back(class_def);
-    type_table.user_types_metadata.emplace(
-        class_def,
-        TypeMetadata{
-            .user_type = class_def,
-            .defs      = {{node, self->current_src}}
-        }
-    );
+    auto it_metadata = type_table.user_types_metadata.find(class_def);
+    // partial class handling
+    if (it_metadata == type_table.user_types_metadata.end())
+    {
+        type_table.user_type_keys.push_back(class_def);
+        type_table.user_types_metadata.emplace(
+            class_def,
+            TypeMetadata{
+                .user_type = class_def,
+                .defs      = {{node, self->current_src}}
+            }
+        );
+    }
+    else
+    {
+        it_metadata->second.defs.emplace_back(node, self->current_src);
+    }
 }
 
 void SymbolTableBuilder::register_interface(

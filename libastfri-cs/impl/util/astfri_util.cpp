@@ -105,9 +105,9 @@ Scope create_scope(
 Scope create_scope(const std::string_view qualifier)
 {
     Scope scope;
-    auto current = qualifier.begin();
-    auto slice_begin = current;
-    const auto it_end  = qualifier.end();
+    auto current      = qualifier.begin();
+    auto slice_begin  = current;
+    const auto it_end = qualifier.end();
 
     while (current != it_end)
     {

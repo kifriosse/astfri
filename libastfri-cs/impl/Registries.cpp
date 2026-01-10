@@ -182,12 +182,12 @@ Types::Types() :
     type_factory(TypeFactory::get_instance()),
     types({
         {"bool", type_factory.mk_bool()},
-        {"byte", type_factory.mk_unknown()}, // TODO: implement `byte` type
+        {"byte", type_factory.mk_int()}, // TODO: implement `byte` type
         {"char", type_factory.mk_char()},
-        {"short", type_factory.mk_unknown()}, // TODO: implement `short` type
-        {"ushort", type_factory.mk_unknown()}, // TODO: implement `ushort` type
+        {"short", type_factory.mk_int()}, // TODO: implement `short` type
+        {"ushort", type_factory.mk_int()}, // TODO: implement `ushort` type
         {"int", type_factory.mk_int()},
-        {"uint", type_factory.mk_unknown()}, // TODO: implement `uint` type
+        {"uint", type_factory.mk_int()}, // TODO: implement `uint` type
         {"long", type_factory.mk_unknown()}, // TODO: implement `long` type
         {"ulong", type_factory.mk_unknown()}, // TODO: implement `ulong` type
 
@@ -200,14 +200,14 @@ Types::Types() :
         {"dynamic", type_factory.mk_dynamic()},
 
         {"Boolean", type_factory.mk_bool()},
-        {"Byte", type_factory.mk_unknown()}, // TODO: implement `Byte` type
-        {"SByte", type_factory.mk_unknown()}, // TODO: implement `SByte` type
+        {"Byte", type_factory.mk_int()}, // TODO: implement `Byte` type
+        {"SByte", type_factory.mk_int()}, // TODO: implement `SByte` type
         {"Char", type_factory.mk_char()},
-        {"Int16", type_factory.mk_unknown()}, // TODO: implement `Int16` type
+        {"Int16", type_factory.mk_int()}, // TODO: implement `Int16` type
         {"Int32", type_factory.mk_int()},
         {"Int64", type_factory.mk_unknown()}, // TODO: implement `Int64` type
-        {"UInt16", type_factory.mk_unknown()}, // TODO: implement `UInt16` type
-        {"UInt32", type_factory.mk_unknown()}, // TODO: implement `UInt32` type
+        {"UInt16", type_factory.mk_int()}, // TODO: implement `UInt16` type
+        {"UInt32", type_factory.mk_int()}, // TODO: implement `UInt32` type
         {"UInt64", type_factory.mk_unknown()}, // TODO: implement `UInt64` type
 
         {"Single", type_factory.mk_float()},

@@ -12,7 +12,8 @@ namespace astfri::csharp::util
 
 /**
  * @brief Hash struct that allows hashing both std::string and std::string_view
- * @note Source: https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
+ * @note Source:
+ * https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
  */
 struct StringHash
 {

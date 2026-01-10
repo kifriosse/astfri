@@ -21,6 +21,7 @@ private:
     std::vector<Scope> namespaces_{};
     // todo redo this into namespace aware
     IdentifierMap<std::variant<Type*, std::string>> aliases_{};
+
 public:
     void add_using_directive(
         const TSNode& node,
