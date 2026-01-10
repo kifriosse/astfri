@@ -51,6 +51,7 @@ TranslationUnit* ASTBuilder::make_ast(
     SymbolTableBuilder symbol_table_builder(source_codes);
     SymbolTable symbol_table;
     symbol_table_builder.register_user_types(symbol_table);
+    symbol_table_builder.load_using_directives();
     symbol_table_builder.register_members(symbol_table);
     SemanticContext global_semantic_context(symbol_table);
 
@@ -66,7 +67,7 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
 {
     std::vector<SourceFile> source_files;
     std::stack<std::filesystem::path> dirs;
-    const std::filesystem::path root_path{project_dir};
+    const std::filesystem::path& root_path{project_dir};
     dirs.emplace(root_path);
 
     while (! dirs.empty())
@@ -113,8 +114,8 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                     util::remove_comments(
                         ts_tree_root_node(tree),
                         source_code,
-                        entry_path,
-                        lang_
+                        lang_,
+                        entry_path
                     )
                 );
                 ts_tree_delete(tree);

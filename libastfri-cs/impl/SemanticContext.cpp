@@ -138,14 +138,17 @@ VarDefStmt* SemanticContext::find_var(
     util::Overloaded overloaded{
         [&](const access::None&) -> VarDefStmt*
         {
+            // local variables
             const auto it_local = scope_context_.local_vars.find(name);
             if (it_local != scope_context_.local_vars.end())
                 return it_local->second;
 
+            // parameters
             const auto it_param = scope_context_.params.find(name);
             if (it_param != scope_context_.params.end())
                 return it_param->second;
 
+            // member variables - includes both static and instance members
             UserTypeDefStmt* current_type = this->current_type();
 
             if (! current_type)
@@ -164,13 +167,18 @@ VarDefStmt* SemanticContext::find_var(
         },
         [&](const access::Instance&) -> VarDefStmt*
         {
-            const auto current_type = this->current_type();
+            auto current_type = as_a<ClassDefStmt>(this->current_type());
 
             // todo add search in parent classes
-            const auto metadata = find_memb_var(name, current_type);
-            if (metadata)
+            while (current_type)
             {
-                return metadata->var_def;
+                if (const auto metadata = find_memb_var(name, current_type))
+                {
+                    return metadata->var_def;
+                }
+                current_type = ! current_type->bases_.empty()
+                                 ? current_type->bases_.front()
+                                 : nullptr;
             }
             // todo handle properties
             return nullptr;
@@ -202,14 +210,77 @@ const MethodMetadata* SemanticContext::find_method(
     UserTypeDefStmt* owner
 ) const
 {
-    auto& user_types            = symbol_table_.user_types_metadata;
-    const auto it_type_metadata = user_types.find(owner);
-    if (it_type_metadata == user_types.end())
-        return nullptr;
 
-    auto& methods        = it_type_metadata->second.methods;
-    const auto it_method = methods.find(method_id);
-    return it_method == methods.end() ? nullptr : &it_method->second;
+    auto& user_types            = symbol_table_.user_types_metadata;
+    if (auto* current = as_a<ClassDefStmt>(owner))
+    {
+        while (current)
+        {
+            const auto it_type_metadata = user_types.find(current);
+            if (it_type_metadata == user_types.end())
+                return nullptr;
+
+            auto& methods        = it_type_metadata->second.methods;
+            const auto it_method = methods.find(method_id);
+            if (it_method != methods.end())
+                return &it_method->second;
+
+            current = ! current->bases_.empty() ? current->bases_.front() : nullptr;
+        }
+    }
+    else if (is_a<InterfaceDefStmt>(owner))
+    {
+        const auto it_type_metadata = user_types.find(owner);
+        if (it_type_metadata == user_types.end())
+            return nullptr;
+
+        auto& methods        = it_type_metadata->second.methods;
+        const auto it_method = methods.find(method_id);
+        if (it_method != methods.end())
+            return &it_method->second;
+    }
+
+    return nullptr;
+}
+
+MemberVarMetadata* SemanticContext::find_memb_var(
+    const std::string_view name,
+    UserTypeDefStmt* owner
+) const
+{
+    auto& user_types = symbol_table_.user_types_metadata;
+    // todo add handling of records
+    if (auto* current = as_a<ClassDefStmt>(owner))
+    {
+        while (current)
+        {
+            const auto& it_type_metadata = user_types.find(current);
+            if (it_type_metadata == user_types.end())
+                continue;
+
+            auto& member_vars  = it_type_metadata->second.member_vars;
+
+            const auto& it_var = member_vars.find(name);
+            if (it_var != member_vars.end())
+                return &it_var->second;
+
+            current = ! current->bases_.empty() ? current->bases_.front() : nullptr;
+        }
+    }
+    else if (is_a<InterfaceDefStmt>(owner))
+    {
+        const auto& it_type_metadata = user_types.find(owner);
+        if (it_type_metadata == user_types.end())
+            return nullptr;
+
+        auto& member_vars  = it_type_metadata->second.member_vars;
+
+        const auto& it_var = member_vars.find(name);
+        if (it_var != member_vars.end())
+            return &it_var->second;
+    }
+
+    return nullptr;
 }
 
 CallType SemanticContext::find_invoc_type(
@@ -218,7 +289,8 @@ CallType SemanticContext::find_invoc_type(
 ) const
 {
     // todo static variables
-    if ([[maybe_unused]] VarDefStmt* var_def = find_var(func_id.name, quelifier))
+    if ([[maybe_unused]] VarDefStmt* var_def
+        = find_var(func_id.name, quelifier))
     {
         // todo this should probably be something else like a delegate
         // invocation since delegate variables dont have to be only
@@ -233,7 +305,8 @@ CallType SemanticContext::find_invoc_type(
     util::Overloaded overloaded{
         [&](const access::None&) -> CallType
         {
-            if ([[maybe_unused]] const FunctionMetadata* metadata = find_func(func_id))
+            if ([[maybe_unused]] const FunctionMetadata* metadata
+                = find_func(func_id))
                 return CallType::LocalFunc;
 
             const auto current_type = this->current_type();
@@ -290,21 +363,6 @@ CallType SemanticContext::find_invoc_type(
         }
     };
     return std::visit(overloaded, quelifier);
-}
-
-MemberVarMetadata* SemanticContext::find_memb_var(
-    const std::string_view name,
-    UserTypeDefStmt* owner
-) const
-{
-    auto& user_types             = symbol_table_.user_types_metadata;
-    const auto& it_type_metadata = user_types.find(owner);
-    if (it_type_metadata == user_types.end())
-        return nullptr;
-
-    auto& member_vars  = it_type_metadata->second.member_vars;
-    const auto& it_var = member_vars.find(name);
-    return it_var == member_vars.end() ? nullptr : &it_var->second;
 }
 
 } // namespace astfri::csharp

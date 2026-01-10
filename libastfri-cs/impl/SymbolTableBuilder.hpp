@@ -42,6 +42,8 @@ public:
     void register_user_types(SymbolTable& symbol_table);
     void register_members(SymbolTable& symbol_table);
 
+    void load_using_directives();
+
     static void register_class(
         SymbolTableBuilder* self,
         const TSNode& node,

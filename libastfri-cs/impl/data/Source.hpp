@@ -1,6 +1,8 @@
 #ifndef CSHARP_SOURCE_HPP
 #define CSHARP_SOURCE_HPP
 
+#include <libastfri-cs/impl/data/FileContext.hpp>
+
 #include <tree_sitter/api.h>
 
 #include <filesystem>
@@ -16,6 +18,7 @@ struct SourceFile
 
 struct SourceCode
 {
+    FileContext file_context{};
     SourceFile file{};
     TSTree* tree{nullptr};
 

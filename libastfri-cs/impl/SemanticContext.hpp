@@ -110,15 +110,13 @@ public:
         const MethodId& method_id,
         UserTypeDefStmt* owner
     ) const;
-
-    CallType find_invoc_type(
-        const FuncId& func_id,
-        access::Qualifier quelifier
-    ) const;
-
     MemberVarMetadata* find_memb_var(
         std::string_view name,
         UserTypeDefStmt* owner
+    ) const;
+    CallType find_invoc_type(
+        const FuncId& func_id,
+        access::Qualifier quelifier
     ) const;
 };
 } // namespace astfri::csharp

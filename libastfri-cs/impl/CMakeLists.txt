@@ -1,11 +1,11 @@
-add_library(astfri-cs SHARED
-    CSAliases.hpp)
+add_library(astfri-cs SHARED)
 
 target_sources(astfri-cs PRIVATE
     ASTBuilder.cpp
     Registries.cpp
     SemanticContext.cpp
     SymbolTableBuilder.cpp
+    CSAliases.hpp
 )
 
 add_subdirectory(data)

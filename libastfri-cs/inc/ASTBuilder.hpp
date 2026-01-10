@@ -6,7 +6,6 @@
 
 #include <tree_sitter/api.h>
 
-#include <string_view>
 #include <vector>
 
 namespace astfri::csharp

@@ -1,5 +1,7 @@
 #include <libastfri-cs/impl/data/Source.hpp>
 
+#include <tree_sitter/api.h>
+
 namespace astfri::csharp
 {
 SourceCode::SourceCode(SourceFile file, TSTree* tree) :

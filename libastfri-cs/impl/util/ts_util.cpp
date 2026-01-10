@@ -63,6 +63,11 @@ const std::string Queries::comment_error_query =
         (ERROR) @error
     )";
 
+const std::string Queries::using_directives_query =
+    R"(
+        (using_directive) @directive
+    )";
+
 } // namespace astfri::csharp::regs
 
 namespace astfri::csharp::util
@@ -71,6 +76,15 @@ namespace astfri::csharp::util
 TSNode child_by_field_name(const TSNode& node, const std::string_view name)
 {
     return ts_node_child_by_field_name(node, name.data(), name.length());
+}
+
+TSSymbol symbol_for_name(
+    const TSLanguage* lang,
+    const std::string_view name,
+    const bool named
+)
+{
+    return ts_language_symbol_for_name(lang, name.data(), name.length(), named);
 }
 
 std::string extract_node_text(
@@ -183,11 +197,19 @@ void print_child_nodes_types(const TSNode& node)
     }
 }
 
-void print_child_nodes_types(const TSNode& node, const std::string_view source)
+void print_child_nodes_types(
+    const TSNode& node,
+    const std::string_view source,
+    bool named
+)
 {
     for (size_t i = 0; i < ts_node_child_count(node); ++i)
     {
         const TSNode child = ts_node_child(node, i);
+        if (named && !ts_node_is_named(child))
+        {
+            continue;
+        }
         std::string type   = ts_node_type(child);
         std::string text   = extract_node_text(child, source);
         std::cout << "Child " << i << " type: \'" << type << "\' text: \""
@@ -198,8 +220,8 @@ void print_child_nodes_types(const TSNode& node, const std::string_view source)
 std::string remove_comments(
     const TSNode& root,
     const std::string_view source_code,
-    const std::filesystem::path& path,
-    const TSLanguage* lang
+    const TSLanguage* lang,
+    const std::filesystem::path& path
 )
 {
     std::string new_source;

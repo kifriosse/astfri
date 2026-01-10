@@ -33,6 +33,7 @@ Scope create_scope(
     // todo add other type like struct and record
     static std::unordered_map<std::string_view, NodeType> node_type_map = {
         {"class_declaration",     Class    },
+        {"record_declaration",    Class    },
         {"interface_declaration", Interface},
         {"namespace_declaration", Namespace},
         {"compilation_unit",      Root     },
@@ -98,6 +99,31 @@ Scope create_scope(
         scope.names_.push_back(scope_str.top());
         scope_str.pop();
     }
+    return scope;
+}
+
+Scope create_scope(const std::string_view qualifier)
+{
+    Scope scope;
+    auto current = qualifier.begin();
+    auto slice_begin = current;
+    const auto it_end  = qualifier.end();
+
+    while (current != it_end)
+    {
+        if (*current == '.')
+        {
+            scope.names_.emplace_back(slice_begin, current);
+            slice_begin = current + 1;
+        }
+        ++current;
+    }
+
+    if (slice_begin != it_end)
+    {
+        scope.names_.emplace_back(slice_begin, current);
+    }
+
     return scope;
 }
 

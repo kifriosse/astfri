@@ -5,6 +5,7 @@
 
 #ifndef CSHARP_TS_UTIL_HPP
 #define CSHARP_TS_UTIL_HPP
+
 #include <tree_sitter/api.h>
 
 #include <filesystem>
@@ -23,6 +24,7 @@ struct Queries
     static const std::string method_modif_query;
     static const std::string file_namespace_query;
     static const std::string comment_error_query;
+    static const std::string using_directives_query;
 };
 } // namespace astfri::csharp::regs
 
@@ -37,6 +39,12 @@ namespace astfri::csharp::util
  * found
  */
 TSNode child_by_field_name(const TSNode& node, std::string_view name);
+
+TSSymbol symbol_for_name(
+    const TSLanguage* lang,
+    std::string_view name,
+    bool named
+);
 
 /**
  * @brief Extracts the text corresponding to the given TSNode from the source
@@ -68,22 +76,26 @@ TSNode find_first_node(
 );
 
 void print_child_nodes_types(const TSNode& node);
-void print_child_nodes_types(const TSNode& node, std::string_view source);
+void print_child_nodes_types(
+    const TSNode& node,
+    std::string_view source,
+    bool named = false
+);
 
 /**
  * @brief Removes comments from the given source code using the syntax tree.
  * @param root starting node of the syntax tree (usually the root node of the
  * TSTree)
  * @param source_code original source code with comments
- * @param path file path of the source code file
  * @param lang Tree-sitter language
+ * @param path file path of the source code file
  * @return source code with comments removed
  */
 std::string remove_comments(
     const TSNode& root,
     std::string_view source_code,
-    const std::filesystem::path& path,
-    const TSLanguage* lang
+    const TSLanguage* lang,
+    const std::filesystem::path& path = {}
 );
 
 /**

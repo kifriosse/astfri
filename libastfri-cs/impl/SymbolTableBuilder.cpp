@@ -30,7 +30,7 @@ void SymbolTableBuilder::register_user_types(SymbolTable& symbol_table)
     // todo add loading of using directives
     for (auto& src : src_codes)
     {
-        auto& [file, tree] = src;
+        auto& [file_context, file, tree] = src;
         current_src        = &src;
         if (! tree)
             continue;
@@ -76,6 +76,25 @@ void SymbolTableBuilder::register_members(SymbolTable& symbol_table)
             type_context_.type_stack.pop();
             ts_tree_cursor_delete(&cursor);
         }
+    }
+}
+
+void SymbolTableBuilder::load_using_directives()
+{
+    for (auto& src : src_codes)
+    {
+        FileContext& file_context = src.file_context;
+        TSNode root = ts_tree_root_node(src.tree);
+        std::vector<TSNode> directives = util::find_nodes(
+            root,
+            lang_,
+            regs::Queries::using_directives_query
+        );
+        for (auto directive : directives)
+        {
+            file_context.add_using_directive(directive, lang_, src.file.content);
+        }
+
     }
 }
 
