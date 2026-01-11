@@ -15,6 +15,7 @@ namespace astfri::csharp
 
 class SrcCodeVisitor
 {
+    // todo renam methods from handle to visit
 private:
     static ExprFactory& expr_factory_;
     static StmtFactory& stmt_factory_;
@@ -49,10 +50,7 @@ public:
         SrcCodeVisitor* self,
         const TSNode* node
     );
-    static Expr* handle_raw_str_lit(
-        SrcCodeVisitor* self,
-        const TSNode* node
-    );
+    static Expr* handle_raw_str_lit(SrcCodeVisitor* self, const TSNode* node);
     static Expr* handle_interpolated_str_lit(
         SrcCodeVisitor* self,
         const TSNode* node
@@ -75,6 +73,7 @@ public:
         SrcCodeVisitor* self,
         const TSNode* node
     );
+    static Expr* handle_ref_expr(SrcCodeVisitor* self, const TSNode* node);
     static Expr* handle_binary_op_expr(
         SrcCodeVisitor* self,
         const TSNode* node
@@ -160,8 +159,6 @@ public:
     static Stmt* handle_catch_clause(SrcCodeVisitor* self, const TSNode* node);
     static Stmt* handle_finally(SrcCodeVisitor* self, const TSNode* node);
     static Stmt* handle_catch_decl(SrcCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_catch_when(SrcCodeVisitor* self, const TSNode* node);
-
     static Stmt* handle_switch_stmt(SrcCodeVisitor* self, const TSNode* node);
     static Stmt* handle_case_stmt(SrcCodeVisitor* self, const TSNode* node);
 

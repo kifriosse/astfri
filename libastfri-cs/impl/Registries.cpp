@@ -1,6 +1,7 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/TypeTranslator.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -47,14 +48,14 @@ Handlers::Handlers() :
         {"switch_section", SrcCodeVisitor::handle_case_stmt},
         {"expression_statement", SrcCodeVisitor::handle_expr_stmt},
         {"ERROR",
-         [](SrcCodeVisitor*, const TSNode* node) -> Stmt*
+         [](auto, const TSNode* node) -> Stmt*
          {
              const auto [row, column] = ts_node_start_point(*node);
              throw std::runtime_error(
                  "Invalid C# syntax in source code at: row"
                  + std::to_string(row) + "and column " + std::to_string(column)
              );
-         }}
+         }}  // todo redo this into a universal function
 }),
     exprs(
         {{"integer_literal", SrcCodeVisitor::handle_int_lit},
@@ -63,16 +64,14 @@ Handlers::Handlers() :
          {"character_literal", SrcCodeVisitor::handle_char_lit},
          {"string_literal", SrcCodeVisitor::handle_str_lit},
          {"null_literal", SrcCodeVisitor::handle_null_lit},
-         {"verbatim_string_literal",
-          SrcCodeVisitor::handle_verbatim_str_lit},
+         {"verbatim_string_literal", SrcCodeVisitor::handle_verbatim_str_lit},
          {"raw_string_literal", SrcCodeVisitor::handle_raw_str_lit},
          {"this_expression", SrcCodeVisitor::handle_this_expr},
          {"this", SrcCodeVisitor::handle_this_expr},
          {"conditional_expression", SrcCodeVisitor::handle_ternary_expr},
          {"prefix_unary_expression",
           SrcCodeVisitor::handle_prefix_unary_op_expr},
-         // {"ref_expression",
-         // CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
+         {"ref_expression", SrcCodeVisitor::handle_ref_expr},
          {"postfix_unary_expression",
           SrcCodeVisitor::handle_postfix_unary_op_expr},
          {"binary_expression", SrcCodeVisitor::handle_binary_op_expr},
@@ -80,12 +79,11 @@ Handlers::Handlers() :
          {"parenthesized_expression",
           SrcCodeVisitor::handle_parenthesized_expr},
          {"identifier", SrcCodeVisitor::handle_identifier},
-         {"member_access_expression",
-          SrcCodeVisitor::handle_memb_access_expr},
+         {"member_access_expression", SrcCodeVisitor::handle_memb_access_expr},
          {"invocation_expression", SrcCodeVisitor::handle_invoc_expr},
          {"constant_pattern", SrcCodeVisitor::handle_const_pattern},
          {"ERROR",
-          [](SrcCodeVisitor*, const TSNode* node) -> Expr*
+          [](auto, const TSNode* node) -> Expr*
           {
               const auto [row, column] = ts_node_start_point(*node);
               throw std::runtime_error(
@@ -94,31 +92,65 @@ Handlers::Handlers() :
               );
           }}}
     ),
-    symbol_reg_handlers({
-        {"class_declaration", SymbolTableBuilder::register_class},
-        {"struct_declaration", SymbolTableBuilder::register_class},
-        {"interface_declaration", SymbolTableBuilder::register_interface},
-        {"enum_declaration", SymbolTableBuilder::register_enum},
-        {"delegate_declaration", SymbolTableBuilder::register_delegate},
-        {"record_declaration", SymbolTableBuilder::register_record},
-        {"field_declaration", SymbolTableBuilder::register_memb_var},
-        {"property_declaration", SymbolTableBuilder::register_property},
-        {"method_declaration", SymbolTableBuilder::register_method},
-    })
+    types(
+        {{"predefined_type", TypeTranslator::visit_predefined},
+         {"identifier", TypeTranslator::visit_identitifier},
+         {"qualified_name",
+          TypeTranslator::visit_qualified_name}, // type with namespace
+         {"implicit_type", TypeTranslator::visit_qualified_name}, // var
+         {"nullable_type", TypeTranslator::visit_nullable},
+         {"pointer_type", TypeTranslator::visit_pointer},
+         {"ref_type", TypeTranslator::visit_ref},
+         {"array_type", TypeTranslator::visit_array},
+         {"generic_name", TypeTranslator::visit_generic_name},
+         {"tuple_type", TypeTranslator::visit_tuple},
+         {"function_pointer_type",
+          TypeTranslator::visit_func_pointer}, // function pointer - not
+                                               // delegate
+         {"scoped_type", TypeTranslator::visit_scoped_type},
+         {"ERROR",
+          [](auto, const TSNode& node) -> Type*
+          {
+              const auto [row, column] = ts_node_start_point(node);
+              throw std::runtime_error(
+                  "Invalid C# syntax in source code at: row"
+                  + std::to_string(row) + "and column " + std::to_string(column)
+              );
+          }}}
+    ),
+    symbol_regs(
+        {{"class_declaration", SymbolTableBuilder::register_class},
+         {"struct_declaration", SymbolTableBuilder::register_class},
+         {"interface_declaration", SymbolTableBuilder::register_interface},
+         {"enum_declaration", SymbolTableBuilder::register_enum},
+         {"delegate_declaration", SymbolTableBuilder::register_delegate},
+         {"record_declaration", SymbolTableBuilder::register_record},
+         {"field_declaration", SymbolTableBuilder::register_memb_var},
+         {"property_declaration", SymbolTableBuilder::register_property},
+         {"method_declaration", SymbolTableBuilder::register_method},
+         {"ERROR",
+          [](auto, const TSNode& node, auto&) -> void
+          {
+              const auto [row, column] = ts_node_start_point(node);
+              throw std::runtime_error(
+                  "Invalid C# syntax in source code at: row"
+                  + std::to_string(row) + "and column " + std::to_string(column)
+              );
+          }}}
+    )
 {
 }
 
 Operations::Operations() :
     prefix_unary_op({
-        {"+",   UnaryOpType::Plus        },
-        {"-",   UnaryOpType::Minus       },
-        {"++",  UnaryOpType::PreIncrement},
-        {"--",  UnaryOpType::PreDecrement},
-        {"!",   UnaryOpType::LogicalNot  },
-        {"~",   UnaryOpType::BitFlip     },
-        {"*",   UnaryOpType::Dereference },
-        {"&",   UnaryOpType::AddressOf   },
-        {"ref", UnaryOpType::AddressOf   }
+        {"+",  UnaryOpType::Plus        },
+        {"-",  UnaryOpType::Minus       },
+        {"++", UnaryOpType::PreIncrement},
+        {"--", UnaryOpType::PreDecrement},
+        {"!",  UnaryOpType::LogicalNot  },
+        {"~",  UnaryOpType::BitFlip     },
+        {"*",  UnaryOpType::Dereference },
+        {"&",  UnaryOpType::AddressOf   },
 }),
     bin_operations(
         {{"=", BinOpType::Assign},
@@ -174,6 +206,7 @@ Modifiers::Modifiers() :
         {"out",       CSModifier::Out      },
         {"in",        CSModifier::In       },
         {"ref",       CSModifier::Ref      },
+        // todo add scoped - probably useless
 })
 {
 }
@@ -243,6 +276,11 @@ ExprHandler RegManager::get_expr_handler(const TSNode& node)
     return get_expr_handler(ts_node_type(node));
 }
 
+TypeHandler RegManager::get_type_handler(const TSNode& node)
+{
+    return get_type_handler(ts_node_type(node));
+}
+
 RegHandler RegManager::get_reg_handler(const TSNode& node)
 {
     return get_reg_handler(ts_node_type(node));
@@ -262,9 +300,16 @@ ExprHandler RegManager::get_expr_handler(const std::string_view node_type)
     return it != exprs.end() ? it->second : default_expr_handler;
 }
 
+TypeHandler RegManager::get_type_handler(std::string_view node_type)
+{
+    auto& exprs   = handlers_.types;
+    const auto it = exprs.find(node_type);
+    return it != exprs.end() ? it->second : default_type_handler;
+}
+
 RegHandler RegManager::get_reg_handler(const std::string_view node_type)
 {
-    auto& reg_handlers = handlers_.symbol_reg_handlers;
+    auto& reg_handlers = handlers_.symbol_regs;
     const auto it      = reg_handlers.find(node_type);
     return it != reg_handlers.end() ? it->second
                                     : [](auto, const auto&, auto&) { };
@@ -336,5 +381,10 @@ Expr* RegManager::default_expr_handler(SrcCodeVisitor*, const TSNode*)
 Stmt* RegManager::default_stmt_handler(SrcCodeVisitor*, const TSNode*)
 {
     return StmtFactory::get_instance().mk_uknown();
+}
+
+Type* RegManager::default_type_handler(TypeTranslator*, const TSNode&)
+{
+    return TypeFactory::get_instance().mk_unknown();
 }
 } // namespace astfri::csharp

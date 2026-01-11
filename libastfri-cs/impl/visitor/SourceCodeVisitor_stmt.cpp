@@ -24,10 +24,9 @@ Stmt* SrcCodeVisitor::handle_block_stmt(
     std::vector<Stmt*> statements;
     static constexpr std::string_view local_func_type
         = "local_function_statement";
-    static const TSSymbol local_func_symb = ts_language_symbol_for_name(
+    static const TSSymbol local_func_symb = util::symbol_for_name(
         self->get_lang(),
-        local_func_type.data(),
-        local_func_type.size(),
+        "local_function_statement",
         true
     );
 
@@ -103,10 +102,7 @@ Stmt* SrcCodeVisitor::handle_do_while_loop(
     return self->make_while_loop(node, true);
 }
 
-Stmt* SrcCodeVisitor::handle_for_loop(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_for_loop(SrcCodeVisitor* self, const TSNode* node)
 {
     self->semantic_context_.enter_scope();
     Stmt* init                = nullptr;
@@ -192,10 +188,7 @@ Stmt* SrcCodeVisitor::handle_for_each_loop(
     return stmt_factory_.mk_for_each(left, right, body);
 }
 
-Stmt* SrcCodeVisitor::handle_if_stmt(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_if_stmt(SrcCodeVisitor* self, const TSNode* node)
 {
     // static const std::string if_node_type = "if_statement";
     static constexpr std::string_view if_false  = "alternative";
@@ -251,10 +244,7 @@ Stmt* SrcCodeVisitor::handle_if_stmt(
     return current_else;
 }
 
-Stmt* SrcCodeVisitor::handle_try_stmt(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_try_stmt(SrcCodeVisitor* self, const TSNode* node)
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
     if (ts_node_child_count(*node) < 2)
@@ -319,10 +309,7 @@ Stmt* SrcCodeVisitor::handle_catch_clause(
     return stmt_factory_.mk_catch(expr_var_def, body);
 }
 
-Stmt* SrcCodeVisitor::handle_finally(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_finally(SrcCodeVisitor* self, const TSNode* node)
 {
     const TSNode body_node = ts_node_child(*node, 1);
     return RegManager::get_stmt_handler(body_node)(self, &body_node);
@@ -336,9 +323,10 @@ Stmt* SrcCodeVisitor::handle_catch_decl(
     const TSNode type_node = util::child_by_field_name(*node, "type");
     const TSNode name_node = util::child_by_field_name(*node, "name");
     Type* type             = util::make_type(type_node, self->get_src_code());
-    const std::string name = ts_node_is_null(name_node)
-        ? std::string{}
-        : util::extract_node_text(name_node, self->get_src_code());
+    const std::string name
+        = ts_node_is_null(name_node)
+            ? std::string{}
+            : util::extract_node_text(name_node, self->get_src_code());
     return stmt_factory_.mk_local_var_def(name, type, nullptr);
 }
 
@@ -376,10 +364,7 @@ Stmt* SrcCodeVisitor::handle_switch_stmt(
     return stmt_factory_.mk_switch(value, cases);
 }
 
-Stmt* SrcCodeVisitor::handle_case_stmt(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_case_stmt(SrcCodeVisitor* self, const TSNode* node)
 {
     std::vector<Stmt*> body_stmts;
     Expr* pattern       = nullptr;
@@ -421,10 +406,7 @@ Stmt* SrcCodeVisitor::handle_case_stmt(
     return stmt_factory_.mk_default_case(body);
 }
 
-Stmt* SrcCodeVisitor::handle_expr_stmt(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_expr_stmt(SrcCodeVisitor* self, const TSNode* node)
 {
     const TSNode expr_node    = ts_node_child(*node, 0);
     const ExprHandler handler = RegManager::get_expr_handler(expr_node);
@@ -447,10 +429,7 @@ Stmt* SrcCodeVisitor::handle_break(
     return stmt_factory_.mk_break();
 }
 
-Stmt* SrcCodeVisitor::handle_return(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_return(SrcCodeVisitor* self, const TSNode* node)
 {
     Expr* expr = nullptr;
     if (ts_node_child_count(*node) > 2)
@@ -463,10 +442,7 @@ Stmt* SrcCodeVisitor::handle_return(
     return stmt_factory_.mk_return(expr);
 }
 
-Stmt* SrcCodeVisitor::handle_throw(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_throw(SrcCodeVisitor* self, const TSNode* node)
 {
     if (ts_node_child_count(*node) <= 2)
         return stmt_factory_.mk_throw(nullptr);

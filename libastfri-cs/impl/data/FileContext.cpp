@@ -32,7 +32,7 @@ void FileContext::add_using_directive(
     {
         const TSNode qualifier_node = ts_node_named_child(node, 0);
         std::cout << ts_node_type(qualifier_node) << std::endl;
-        util::print_child_nodes_types(qualifier_node, src_code);
+        // util::print_child_nodes_types(qualifier_node, src_code);
         const std::string namespace_str
             = util::extract_node_text(qualifier_node, src_code);
         Scope current_scope;

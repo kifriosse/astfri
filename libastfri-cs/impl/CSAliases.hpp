@@ -17,6 +17,7 @@
 namespace astfri
 {
 // Forward declarations
+struct Type;
 struct Stmt;
 struct Expr;
 
@@ -25,14 +26,21 @@ struct Expr;
 namespace astfri::csharp
 {
 // Forward declarations
-struct SymbolTable;
-class SymbolTableBuilder;
+class TypeTranslator;
 class SrcCodeVisitor;
+class SymbolTableBuilder;
+struct SymbolTable;
 
-using MaskType    = uint32_t;
+using MaskType = uint32_t;
 
-using ExprHandler = std::function<Expr*(SrcCodeVisitor*, const TSNode*)>;
-using StmtHandler = std::function<Stmt*(SrcCodeVisitor*, const TSNode*)>;
+template<class ReturnType, class Owner>
+using Handler
+    = std::function<ReturnType(Owner*, const TSNode*)>; // todo redo this into
+                                                        // reference
+
+using ExprHandler = Handler<Expr*, SrcCodeVisitor>;
+using StmtHandler = Handler<Stmt*, SrcCodeVisitor>;
+using TypeHandler = std::function<Type*(TypeTranslator*, const TSNode&)>;
 
 using RegHandler
     = std::function<void(SymbolTableBuilder*, const TSNode&, SymbolTable&)>;

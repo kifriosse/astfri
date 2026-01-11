@@ -34,7 +34,8 @@ struct Handlers
 {
     const RegistryMap<StmtHandler> stmts;
     const RegistryMap<ExprHandler> exprs;
-    const RegistryMap<RegHandler> symbol_reg_handlers;
+    const RegistryMap<TypeHandler> types;
+    const RegistryMap<RegHandler> symbol_regs;
     Handlers();
 };
 
@@ -70,9 +71,12 @@ private:
 public:
     static StmtHandler get_stmt_handler(const TSNode& node);
     static ExprHandler get_expr_handler(const TSNode& node);
+    static TypeHandler get_type_handler(const TSNode& node);
     static RegHandler get_reg_handler(const TSNode& node);
     static StmtHandler get_stmt_handler(std::string_view node_type);
     static ExprHandler get_expr_handler(std::string_view node_type);
+    static TypeHandler get_type_handler(std::string_view node_type);
+    // todo refactor this into template functions
     static RegHandler get_reg_handler(std::string_view node_type);
     static std::optional<UnaryOpType> get_prefix_unary_op(std::string_view op);
     static std::optional<BinOpType> get_bin_op(std::string_view operation);
@@ -84,6 +88,8 @@ public:
 private:
     static Expr* default_expr_handler(SrcCodeVisitor*, const TSNode*);
     static Stmt* default_stmt_handler(SrcCodeVisitor*, const TSNode*);
+    static Type* default_type_handler(TypeTranslator*, const TSNode&);
 };
+
 } // namespace astfri::csharp
 #endif // CSHARP_REGISTRIES_HPP

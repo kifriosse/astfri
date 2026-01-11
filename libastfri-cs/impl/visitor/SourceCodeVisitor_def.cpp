@@ -32,7 +32,7 @@ Stmt* SrcCodeVisitor::handle_class_def_stmt(
         // "struct_declaration",             // todo
         // "record_declaration",             // todo
         "field_declaration",
-        // "property_declaration", // todo
+        // "property_declaration",    // todo
         // "delegate_declaration",    // todo
         // "event_field_declaration", // todo
         "constructor_declaration",
@@ -42,22 +42,13 @@ Stmt* SrcCodeVisitor::handle_class_def_stmt(
         // "conversion_operator_declaration" // todo
         "destructor_declaration",
     };
-    static const TSSymbol base_list_symb = ts_language_symbol_for_name(
-        self->get_lang(),
-        "base_list",
-        std::strlen("base_list"),
-        true
-    );
-    static const TSSymbol type_param_list_sym = ts_language_symbol_for_name(
-        self->get_lang(),
-        "type_parameter_list",
-        std::strlen("type_parameter_list"),
-        true
-    );
-    static const TSSymbol type_param_constr_sym = ts_language_symbol_for_name(
+    static const TSSymbol base_list_symb
+        = util::symbol_for_name(self->get_lang(), "base_list", true);
+    static const TSSymbol type_param_list_sym
+        = util::symbol_for_name(self->get_lang(), "type_parameter_list", true);
+    static const TSSymbol type_param_constr_sym = util::symbol_for_name(
         self->get_lang(),
         "type_parameter_constraints_clause",
-        std::strlen("type_parameter_constraints_clause"),
         true
     );
 
@@ -140,7 +131,7 @@ Stmt* SrcCodeVisitor::handle_class_def_stmt(
 
     if (class_def->interfaces_.empty())
     {
-        class_def->interfaces_   = std::move(interfaces);
+        class_def->interfaces_ = std::move(interfaces);
     }
 
     // if its partial class doesn't have a body
@@ -556,10 +547,7 @@ Stmt* SrcCodeVisitor::handle_method_def_stmt(
     return method_def_stmt;
 }
 
-Stmt* SrcCodeVisitor::handle_func_stmt(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Stmt* SrcCodeVisitor::handle_func_stmt(SrcCodeVisitor* self, const TSNode* node)
 {
     const TSNode name_node    = util::child_by_field_name(*node, "name");
     const TSNode paramas_node = util::child_by_field_name(*node, "parameters");

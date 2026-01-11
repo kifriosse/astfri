@@ -17,10 +17,7 @@
 namespace astfri::csharp
 {
 
-Expr* SrcCodeVisitor::handle_int_lit(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Expr* SrcCodeVisitor::handle_int_lit(SrcCodeVisitor* self, const TSNode* node)
 {
     std::string int_str = util::extract_node_text(*node, self->get_src_code());
     std::erase(int_str, '_');
@@ -35,13 +32,9 @@ Expr* SrcCodeVisitor::handle_int_lit(
 
     int base = 10;
     if (prefix == "0x")
-    {
         base = 16;
-    }
     else if (prefix == "0b")
-    {
         base = 2;
-    }
 
     const util::IntSuffix suffix_type = util::get_suffix_type(suffix);
 
@@ -73,10 +66,7 @@ Expr* SrcCodeVisitor::handle_int_lit(
     throw std::logic_error("This integer type is not implemented");
 }
 
-Expr* SrcCodeVisitor::handle_float_lit(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Expr* SrcCodeVisitor::handle_float_lit(SrcCodeVisitor* self, const TSNode* node)
 {
     std::string float_str
         = util::extract_node_text(*node, self->get_src_code());
@@ -112,20 +102,14 @@ Expr* SrcCodeVisitor::handle_float_lit(
     }
 }
 
-Expr* SrcCodeVisitor::handle_bool_lit(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Expr* SrcCodeVisitor::handle_bool_lit(SrcCodeVisitor* self, const TSNode* node)
 {
     const std::string bool_str
         = util::extract_node_text(*node, self->get_src_code());
     return expr_factory_.mk_bool_literal(bool_str == "true");
 }
 
-Expr* SrcCodeVisitor::handle_char_lit(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Expr* SrcCodeVisitor::handle_char_lit(SrcCodeVisitor* self, const TSNode* node)
 {
     const TSNode content_node = ts_node_child(*node, 1);
     const std::string character_str
@@ -138,10 +122,7 @@ Expr* SrcCodeVisitor::handle_char_lit(
     return expr_factory_.mk_char_literal(character_str[0]);
 }
 
-Expr* SrcCodeVisitor::handle_str_lit(
-    SrcCodeVisitor* self,
-    const TSNode* node
-)
+Expr* SrcCodeVisitor::handle_str_lit(SrcCodeVisitor* self, const TSNode* node)
 {
     if (ts_node_child_count(*node) < 3)
         return expr_factory_.mk_string_literal("");
@@ -259,16 +240,11 @@ Expr* SrcCodeVisitor::handle_invoc_expr(
     const TSNode* node
 )
 {
-    static const TSSymbol identifier_node_symb = ts_language_symbol_for_name(
-        self->get_lang(),
-        "identifier",
-        std::strlen("identifier"),
-        true
-    );
-    static const TSSymbol memb_access_node_symb = ts_language_symbol_for_name(
+    static const TSSymbol identifier_node_symb
+        = util::symbol_for_name(self->get_lang(), "identifier", true);
+    static const TSSymbol memb_access_node_symb = util::symbol_for_name(
         self->get_lang(),
         "member_access_expression",
-        std::strlen("member_access_expression"),
         true
     );
     // std::cout << "Invocation Expression: " << std::endl;
@@ -415,6 +391,13 @@ Expr* SrcCodeVisitor::handle_postfix_unary_op_expr(
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
 
     return expr_factory_.mk_unary_op(op_type, left_side);
+}
+
+Expr* SrcCodeVisitor::handle_ref_expr(SrcCodeVisitor* self, const TSNode* node)
+{
+    const TSNode expr_node = ts_node_named_child(*node, 0);
+    Expr* expr = RegManager::get_expr_handler(expr_node)(self, &expr_node);
+    return expr_factory_.mk_unary_op(UnaryOpType::AddressOf, expr);
 }
 
 Expr* SrcCodeVisitor::handle_binary_op_expr(

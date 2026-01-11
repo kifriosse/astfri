@@ -5,6 +5,7 @@ target_sources(astfri-cs PRIVATE
     Registries.cpp
     SemanticContext.cpp
     SymbolTableBuilder.cpp
+    TypeTranslator.cpp
     CSAliases.hpp
 )
 
