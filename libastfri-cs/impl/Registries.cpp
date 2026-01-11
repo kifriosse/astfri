@@ -1,7 +1,7 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -17,37 +17,37 @@ namespace regs
 
 Handlers::Handlers() :
     stmts({
-        {"class_declaration", SourceCodeVisitor::handle_class_def_stmt},
-        {"struct_declaration", SourceCodeVisitor::handle_class_def_stmt},
-        {"destructor_declaration", SourceCodeVisitor::handle_destr_def_stmt},
-        {"constructor_declaration", SourceCodeVisitor::handle_constr_def_stmt},
-        {"parameter", SourceCodeVisitor::handle_param_def_stmt},
-        {"field_declaration", SourceCodeVisitor::handle_memb_var_def_stmt},
-        {"constructor_initializer", SourceCodeVisitor::handle_construct_init},
-        {"method_declaration", SourceCodeVisitor::handle_method_def_stmt},
-        {"local_function_statement", SourceCodeVisitor::handle_local_func_stmt},
-        {"block", SourceCodeVisitor::handle_block_stmt},
-        {"arrow_expression_clause", SourceCodeVisitor::handle_arrow_stmt},
+        {"class_declaration", SrcCodeVisitor::handle_class_def_stmt},
+        {"struct_declaration", SrcCodeVisitor::handle_class_def_stmt},
+        {"destructor_declaration", SrcCodeVisitor::handle_destr_def_stmt},
+        {"constructor_declaration", SrcCodeVisitor::handle_constr_def_stmt},
+        {"parameter", SrcCodeVisitor::handle_param_def_stmt},
+        {"field_declaration", SrcCodeVisitor::handle_memb_var_def_stmt},
+        {"constructor_initializer", SrcCodeVisitor::handle_construct_init},
+        {"method_declaration", SrcCodeVisitor::handle_method_def_stmt},
+        {"local_function_statement", SrcCodeVisitor::handle_func_stmt},
+        {"block", SrcCodeVisitor::handle_block_stmt},
+        {"arrow_expression_clause", SrcCodeVisitor::handle_arrow_stmt},
         {"local_declaration_statement",
-         SourceCodeVisitor::handle_local_var_def_stmt},
-        {"do_statement", SourceCodeVisitor::handle_do_while_loop},
-        {"while_statement", SourceCodeVisitor::handle_while_loop},
-        {"for_statement", SourceCodeVisitor::handle_for_loop},
-        {"break_statement", SourceCodeVisitor::handle_break},
-        {"continue_statement", SourceCodeVisitor::handle_continue},
-        {"return_statement", SourceCodeVisitor::handle_return},
-        {"throw_statement", SourceCodeVisitor::handle_throw},
-        {"foreach_statement", SourceCodeVisitor::handle_for_each_loop},
-        {"if_statement", SourceCodeVisitor::handle_if_stmt},
-        {"try_statement", SourceCodeVisitor::handle_try_stmt},
-        {"catch_clause", SourceCodeVisitor::handle_catch_clause},
-        {"finally_clause", SourceCodeVisitor::handle_finally_clause},
-        {"catch_declaration", SourceCodeVisitor::handle_catch_decl},
-        {"switch_statement", SourceCodeVisitor::handle_switch_stmt},
-        {"switch_section", SourceCodeVisitor::handle_case_stmt},
-        {"expression_statement", SourceCodeVisitor::handle_expr_stmt},
+         SrcCodeVisitor::handle_local_var_def_stmt},
+        {"do_statement", SrcCodeVisitor::handle_do_while_loop},
+        {"while_statement", SrcCodeVisitor::handle_while_loop},
+        {"for_statement", SrcCodeVisitor::handle_for_loop},
+        {"break_statement", SrcCodeVisitor::handle_break},
+        {"continue_statement", SrcCodeVisitor::handle_continue},
+        {"return_statement", SrcCodeVisitor::handle_return},
+        {"throw_statement", SrcCodeVisitor::handle_throw},
+        {"foreach_statement", SrcCodeVisitor::handle_for_each_loop},
+        {"if_statement", SrcCodeVisitor::handle_if_stmt},
+        {"try_statement", SrcCodeVisitor::handle_try_stmt},
+        {"catch_clause", SrcCodeVisitor::handle_catch_clause},
+        {"finally_clause", SrcCodeVisitor::handle_finally},
+        {"catch_declaration", SrcCodeVisitor::handle_catch_decl},
+        {"switch_statement", SrcCodeVisitor::handle_switch_stmt},
+        {"switch_section", SrcCodeVisitor::handle_case_stmt},
+        {"expression_statement", SrcCodeVisitor::handle_expr_stmt},
         {"ERROR",
-         [](SourceCodeVisitor*, const TSNode* node) -> Stmt*
+         [](SrcCodeVisitor*, const TSNode* node) -> Stmt*
          {
              const auto [row, column] = ts_node_start_point(*node);
              throw std::runtime_error(
@@ -57,35 +57,35 @@ Handlers::Handlers() :
          }}
 }),
     exprs(
-        {{"integer_literal", SourceCodeVisitor::handle_int_lit},
-         {"real_literal", SourceCodeVisitor::handle_float_lit},
-         {"boolean_literal", SourceCodeVisitor::handle_bool_lit},
-         {"character_literal", SourceCodeVisitor::handle_char_lit},
-         {"string_literal", SourceCodeVisitor::handle_str_lit},
-         {"null_literal", SourceCodeVisitor::handle_null_lit},
+        {{"integer_literal", SrcCodeVisitor::handle_int_lit},
+         {"real_literal", SrcCodeVisitor::handle_float_lit},
+         {"boolean_literal", SrcCodeVisitor::handle_bool_lit},
+         {"character_literal", SrcCodeVisitor::handle_char_lit},
+         {"string_literal", SrcCodeVisitor::handle_str_lit},
+         {"null_literal", SrcCodeVisitor::handle_null_lit},
          {"verbatim_string_literal",
-          SourceCodeVisitor::handle_verbatim_str_lit},
-         {"raw_string_literal", SourceCodeVisitor::handle_raw_str_lit},
-         {"this_expression", SourceCodeVisitor::handle_this_expr},
-         {"this", SourceCodeVisitor::handle_this_expr},
-         {"conditional_expression", SourceCodeVisitor::handle_ternary_expr},
+          SrcCodeVisitor::handle_verbatim_str_lit},
+         {"raw_string_literal", SrcCodeVisitor::handle_raw_str_lit},
+         {"this_expression", SrcCodeVisitor::handle_this_expr},
+         {"this", SrcCodeVisitor::handle_this_expr},
+         {"conditional_expression", SrcCodeVisitor::handle_ternary_expr},
          {"prefix_unary_expression",
-          SourceCodeVisitor::handle_prefix_unary_op_expr},
+          SrcCodeVisitor::handle_prefix_unary_op_expr},
          // {"ref_expression",
          // CSharpTSTreeVisitor::handle_prefix_unary_op_expr},
          {"postfix_unary_expression",
-          SourceCodeVisitor::handle_postfix_unary_op_expr},
-         {"binary_expression", SourceCodeVisitor::handle_binary_op_expr},
-         {"assignment_expression", SourceCodeVisitor::handle_binary_op_expr},
+          SrcCodeVisitor::handle_postfix_unary_op_expr},
+         {"binary_expression", SrcCodeVisitor::handle_binary_op_expr},
+         {"assignment_expression", SrcCodeVisitor::handle_binary_op_expr},
          {"parenthesized_expression",
-          SourceCodeVisitor::handle_parenthesized_expr},
-         {"identifier", SourceCodeVisitor::handle_identifier},
+          SrcCodeVisitor::handle_parenthesized_expr},
+         {"identifier", SrcCodeVisitor::handle_identifier},
          {"member_access_expression",
-          SourceCodeVisitor::handle_memb_access_expr},
-         {"invocation_expression", SourceCodeVisitor::handle_invoc_expr},
-         {"constant_pattern", SourceCodeVisitor::handle_const_pattern},
+          SrcCodeVisitor::handle_memb_access_expr},
+         {"invocation_expression", SrcCodeVisitor::handle_invoc_expr},
+         {"constant_pattern", SrcCodeVisitor::handle_const_pattern},
          {"ERROR",
-          [](SourceCodeVisitor*, const TSNode* node) -> Expr*
+          [](SrcCodeVisitor*, const TSNode* node) -> Expr*
           {
               const auto [row, column] = ts_node_start_point(*node);
               throw std::runtime_error(
@@ -328,12 +328,12 @@ bool RegManager::is_stmt(const TSNode& node)
     return handlers_.stmts.contains(ts_node_type(node));
 }
 
-Expr* RegManager::default_expr_handler(SourceCodeVisitor*, const TSNode*)
+Expr* RegManager::default_expr_handler(SrcCodeVisitor*, const TSNode*)
 {
     return ExprFactory::get_instance().mk_unknown();
 }
 
-Stmt* RegManager::default_stmt_handler(SourceCodeVisitor*, const TSNode*)
+Stmt* RegManager::default_stmt_handler(SrcCodeVisitor*, const TSNode*)
 {
     return StmtFactory::get_instance().mk_uknown();
 }

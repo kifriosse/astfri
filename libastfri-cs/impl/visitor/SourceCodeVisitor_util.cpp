@@ -2,7 +2,7 @@
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -15,7 +15,7 @@
 namespace astfri::csharp
 {
 
-Stmt* SourceCodeVisitor::make_while_loop(
+Stmt* SrcCodeVisitor::make_while_loop(
     const TSNode* node,
     const bool is_do_while
 )
@@ -33,7 +33,7 @@ Stmt* SourceCodeVisitor::make_while_loop(
     return stmt_factory_.mk_while(condition, body);
 }
 
-Expr* SourceCodeVisitor::expr_list_to_comma_op(
+Expr* SrcCodeVisitor::expr_list_to_comma_op(
     const TSNode& start_node,
     const TSNode* end_node
 )
@@ -70,8 +70,8 @@ Expr* SourceCodeVisitor::expr_list_to_comma_op(
     return init_expr;
 }
 
-std::vector<ParamVarDefStmt*> SourceCodeVisitor::make_param_list(
-    SourceCodeVisitor* self,
+std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
+    SrcCodeVisitor* self,
     const TSNode* node,
     const bool make_shallow
 )
@@ -99,8 +99,8 @@ std::vector<ParamVarDefStmt*> SourceCodeVisitor::make_param_list(
     return params;
 }
 
-std::vector<Expr*> SourceCodeVisitor::handle_argument_list(
-    SourceCodeVisitor* self,
+std::vector<Expr*> SrcCodeVisitor::handle_argument_list(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -129,8 +129,8 @@ std::vector<Expr*> SourceCodeVisitor::handle_argument_list(
     return exprs;
 }
 
-Stmt* SourceCodeVisitor::handle_for_init_var_def(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_for_init_var_def(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -161,14 +161,14 @@ Stmt* SourceCodeVisitor::handle_for_init_var_def(
     return var_defs.front();
 }
 
-std::string_view SourceCodeVisitor::get_src_code() const
+std::string_view SrcCodeVisitor::get_src_code() const
 {
     return current_src
              ? current_src->file.content
              : throw std::logic_error("Current source code is not set");
 }
 
-const TSLanguage* SourceCodeVisitor::get_lang() const
+const TSLanguage* SrcCodeVisitor::get_lang() const
 {
     return current_src
              ? ts_tree_language(current_src->tree)

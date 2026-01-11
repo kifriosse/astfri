@@ -27,12 +27,12 @@ namespace astfri::csharp
 // Forward declarations
 struct SymbolTable;
 class SymbolTableBuilder;
-class SourceCodeVisitor;
+class SrcCodeVisitor;
 
 using MaskType    = uint32_t;
 
-using ExprHandler = std::function<Expr*(SourceCodeVisitor*, const TSNode*)>;
-using StmtHandler = std::function<Stmt*(SourceCodeVisitor*, const TSNode*)>;
+using ExprHandler = std::function<Expr*(SrcCodeVisitor*, const TSNode*)>;
+using StmtHandler = std::function<Stmt*(SrcCodeVisitor*, const TSNode*)>;
 
 using RegHandler
     = std::function<void(SymbolTableBuilder*, const TSNode&, SymbolTable&)>;

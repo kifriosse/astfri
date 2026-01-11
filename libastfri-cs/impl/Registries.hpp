@@ -25,7 +25,7 @@ class TypeFactory;
 namespace astfri::csharp
 {
 enum class CSModifier : MaskType;
-class SourceCodeVisitor;
+class SrcCodeVisitor;
 
 namespace regs
 {
@@ -82,8 +82,8 @@ public:
     static bool is_stmt(const TSNode& node);
 
 private:
-    static Expr* default_expr_handler(SourceCodeVisitor*, const TSNode*);
-    static Stmt* default_stmt_handler(SourceCodeVisitor*, const TSNode*);
+    static Expr* default_expr_handler(SrcCodeVisitor*, const TSNode*);
+    static Stmt* default_stmt_handler(SrcCodeVisitor*, const TSNode*);
 };
 } // namespace astfri::csharp
 #endif // CSHARP_REGISTRIES_HPP

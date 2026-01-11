@@ -430,11 +430,14 @@ public class ExceptionHandlingDemo
         {
             Console.WriteLine($"Caught General IO Error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }
-
+        catch
+        {
+            throw;
+        }
         finally
         {
             if (fileReader != null)
@@ -443,4 +446,9 @@ public class ExceptionHandlingDemo
             }
         }
     }
+}
+
+public partial class TestClass : TestBase
+{
+    
 }

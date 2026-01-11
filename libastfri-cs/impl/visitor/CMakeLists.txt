@@ -1,5 +1,5 @@
 target_sources(astfri-cs PRIVATE
-    SourceCodeVisitor.cpp
+    SrcCodeVisitor.cpp
     SourceCodeVisitor_expr.cpp
     SourceCodeVisitor_stmt.cpp
     SourceCodeVisitor_def.cpp

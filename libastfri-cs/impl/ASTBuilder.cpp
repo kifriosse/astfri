@@ -1,7 +1,7 @@
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -55,7 +55,7 @@ TranslationUnit* ASTBuilder::make_ast(
     symbol_table_builder.register_members(symbol_table);
     SemanticContext global_semantic_context(symbol_table);
 
-    SourceCodeVisitor source_visitor(source_codes, global_semantic_context);
+    SrcCodeVisitor source_visitor(source_codes, global_semantic_context);
     source_visitor.handle_comp_unit_stmt(*ast);
 
     return ast;

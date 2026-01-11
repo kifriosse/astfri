@@ -5,7 +5,7 @@
 #include <libastfri-cs/impl/util/common.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -17,8 +17,8 @@
 namespace astfri::csharp
 {
 
-Expr* SourceCodeVisitor::handle_int_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_int_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -73,8 +73,8 @@ Expr* SourceCodeVisitor::handle_int_lit(
     throw std::logic_error("This integer type is not implemented");
 }
 
-Expr* SourceCodeVisitor::handle_float_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_float_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -112,8 +112,8 @@ Expr* SourceCodeVisitor::handle_float_lit(
     }
 }
 
-Expr* SourceCodeVisitor::handle_bool_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_bool_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -122,8 +122,8 @@ Expr* SourceCodeVisitor::handle_bool_lit(
     return expr_factory_.mk_bool_literal(bool_str == "true");
 }
 
-Expr* SourceCodeVisitor::handle_char_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_char_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -138,8 +138,8 @@ Expr* SourceCodeVisitor::handle_char_lit(
     return expr_factory_.mk_char_literal(character_str[0]);
 }
 
-Expr* SourceCodeVisitor::handle_str_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_str_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -152,24 +152,24 @@ Expr* SourceCodeVisitor::handle_str_lit(
     return expr_factory_.mk_string_literal(content);
 }
 
-Expr* SourceCodeVisitor::handle_null_lit(
-    [[maybe_unused]] SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_null_lit(
+    [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     return expr_factory_.mk_null_literal();
 }
 
-Expr* SourceCodeVisitor::handle_this_expr(
-    [[maybe_unused]] SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_this_expr(
+    [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     return expr_factory_.mk_this();
 }
 
-Expr* SourceCodeVisitor::handle_verbatim_str_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_verbatim_str_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -182,8 +182,8 @@ Expr* SourceCodeVisitor::handle_verbatim_str_lit(
     return expr_factory_.mk_string_literal(node_contet);
 }
 
-Expr* SourceCodeVisitor::handle_raw_str_lit(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_raw_str_lit(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -194,16 +194,16 @@ Expr* SourceCodeVisitor::handle_raw_str_lit(
     return expr_factory_.mk_string_literal(content);
 }
 
-Expr* SourceCodeVisitor::handle_interpolated_str_lit(
-    [[maybe_unused]] SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_interpolated_str_lit(
+    [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     throw std::logic_error("Interpolated string literal not implemented");
 }
 
-Expr* SourceCodeVisitor::handle_identifier(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_identifier(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -227,8 +227,8 @@ Expr* SourceCodeVisitor::handle_identifier(
     return expr_factory_.mk_unknown();
 }
 
-Expr* SourceCodeVisitor::handle_memb_access_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_memb_access_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -254,8 +254,8 @@ Expr* SourceCodeVisitor::handle_memb_access_expr(
     return expr_factory_.mk_member_var_ref(left_side, name);
 }
 
-Expr* SourceCodeVisitor::handle_invoc_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_invoc_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -369,8 +369,8 @@ Expr* SourceCodeVisitor::handle_invoc_expr(
     return expr_factory_.mk_unknown();
 }
 
-Expr* SourceCodeVisitor::handle_prefix_unary_op_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_prefix_unary_op_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -391,8 +391,8 @@ Expr* SourceCodeVisitor::handle_prefix_unary_op_expr(
     return expr_factory_.mk_unary_op(op_type, right_side);
 }
 
-Expr* SourceCodeVisitor::handle_postfix_unary_op_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_postfix_unary_op_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -417,8 +417,8 @@ Expr* SourceCodeVisitor::handle_postfix_unary_op_expr(
     return expr_factory_.mk_unary_op(op_type, left_side);
 }
 
-Expr* SourceCodeVisitor::handle_binary_op_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_binary_op_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -470,8 +470,8 @@ Expr* SourceCodeVisitor::handle_binary_op_expr(
     );
 }
 
-Expr* SourceCodeVisitor::handle_ternary_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_ternary_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -489,8 +489,8 @@ Expr* SourceCodeVisitor::handle_ternary_expr(
     );
 }
 
-Expr* SourceCodeVisitor::handle_parenthesized_expr(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_parenthesized_expr(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -499,8 +499,8 @@ Expr* SourceCodeVisitor::handle_parenthesized_expr(
     return expr_factory_.mk_bracket(handler(self, &expr_node));
 }
 
-Expr* SourceCodeVisitor::handle_const_pattern(
-    SourceCodeVisitor* self,
+Expr* SrcCodeVisitor::handle_const_pattern(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {

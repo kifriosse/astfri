@@ -2,7 +2,7 @@
 #include <libastfri-cs/impl/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -16,13 +16,11 @@
 namespace astfri::csharp
 {
 
-Stmt* SourceCodeVisitor::handle_block_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_block_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
-    // todo add finding of local functions before handling the body - 2 pass
-    // approach
     std::vector<Stmt*> statements;
     static constexpr std::string_view local_func_type
         = "local_function_statement";
@@ -70,8 +68,8 @@ Stmt* SourceCodeVisitor::handle_block_stmt(
     return stmt_factory_.mk_compound(statements);
 }
 
-Stmt* SourceCodeVisitor::handle_arrow_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_arrow_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -89,24 +87,24 @@ Stmt* SourceCodeVisitor::handle_arrow_stmt(
     return stmt_factory_.mk_compound({body_stmt});
 }
 
-Stmt* SourceCodeVisitor::handle_while_loop(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_while_loop(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
     return self->make_while_loop(node, false);
 }
 
-Stmt* SourceCodeVisitor::handle_do_while_loop(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_do_while_loop(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
     return self->make_while_loop(node, true);
 }
 
-Stmt* SourceCodeVisitor::handle_for_loop(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_for_loop(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -161,8 +159,8 @@ Stmt* SourceCodeVisitor::handle_for_loop(
     return stmt_factory_.mk_for(init, condition, updater, body);
 }
 
-Stmt* SourceCodeVisitor::handle_for_each_loop(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_for_each_loop(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -194,8 +192,8 @@ Stmt* SourceCodeVisitor::handle_for_each_loop(
     return stmt_factory_.mk_for_each(left, right, body);
 }
 
-Stmt* SourceCodeVisitor::handle_if_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_if_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -253,12 +251,11 @@ Stmt* SourceCodeVisitor::handle_if_stmt(
     return current_else;
 }
 
-Stmt* SourceCodeVisitor::handle_try_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_try_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
-
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
     if (ts_node_child_count(*node) < 2)
         throw std::logic_error("Not a try-catch node");
@@ -287,8 +284,8 @@ Stmt* SourceCodeVisitor::handle_try_stmt(
         .mk_try(body_handler(self, &body_node), finally_stmt, catch_stmts);
 }
 
-Stmt* SourceCodeVisitor::handle_catch_clause(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_catch_clause(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -304,9 +301,9 @@ Stmt* SourceCodeVisitor::handle_catch_clause(
         StmtHandler current_handler
             = RegManager::get_stmt_handler(current_node);
         Stmt* current_stmt = current_handler(self, &current_node);
-        if (const auto expr = as_a<LocalVarDefStmt>(current_stmt))
+        if (const auto var_def = as_a<LocalVarDefStmt>(current_stmt))
         {
-            expr_var_def = expr;
+            expr_var_def = var_def;
             self->semantic_context_.reg_local_var(expr_var_def);
         }
         else if (is_a<CompoundStmt>(current_stmt))
@@ -322,8 +319,8 @@ Stmt* SourceCodeVisitor::handle_catch_clause(
     return stmt_factory_.mk_catch(expr_var_def, body);
 }
 
-Stmt* SourceCodeVisitor::handle_finally_clause(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_finally(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -331,21 +328,22 @@ Stmt* SourceCodeVisitor::handle_finally_clause(
     return RegManager::get_stmt_handler(body_node)(self, &body_node);
 }
 
-Stmt* SourceCodeVisitor::handle_catch_decl(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_catch_decl(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
     const TSNode type_node = util::child_by_field_name(*node, "type");
     const TSNode name_node = util::child_by_field_name(*node, "name");
     Type* type             = util::make_type(type_node, self->get_src_code());
-    const std::string name
-        = util::extract_node_text(name_node, self->get_src_code());
+    const std::string name = ts_node_is_null(name_node)
+        ? std::string{}
+        : util::extract_node_text(name_node, self->get_src_code());
     return stmt_factory_.mk_local_var_def(name, type, nullptr);
 }
 
-Stmt* SourceCodeVisitor::handle_switch_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_switch_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -378,8 +376,8 @@ Stmt* SourceCodeVisitor::handle_switch_stmt(
     return stmt_factory_.mk_switch(value, cases);
 }
 
-Stmt* SourceCodeVisitor::handle_case_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_case_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -423,8 +421,8 @@ Stmt* SourceCodeVisitor::handle_case_stmt(
     return stmt_factory_.mk_default_case(body);
 }
 
-Stmt* SourceCodeVisitor::handle_expr_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_expr_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -433,24 +431,24 @@ Stmt* SourceCodeVisitor::handle_expr_stmt(
     return stmt_factory_.mk_expr(handler(self, &expr_node));
 }
 
-Stmt* SourceCodeVisitor::handle_continue(
-    [[maybe_unused]] SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_continue(
+    [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     return stmt_factory_.mk_continue();
 }
 
-Stmt* SourceCodeVisitor::handle_break(
-    [[maybe_unused]] SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_break(
+    [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode* node
 )
 {
     return stmt_factory_.mk_break();
 }
 
-Stmt* SourceCodeVisitor::handle_return(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_return(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -465,8 +463,8 @@ Stmt* SourceCodeVisitor::handle_return(
     return stmt_factory_.mk_return(expr);
 }
 
-Stmt* SourceCodeVisitor::handle_throw(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_throw(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {

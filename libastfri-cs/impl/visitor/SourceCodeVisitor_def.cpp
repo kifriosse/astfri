@@ -5,7 +5,7 @@
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
-#include <libastfri-cs/impl/visitor/SourceCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -20,8 +20,8 @@
 
 namespace astfri::csharp
 {
-Stmt* SourceCodeVisitor::handle_class_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_class_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -133,11 +133,19 @@ Stmt* SourceCodeVisitor::handle_class_def_stmt(
         current_node = ts_node_next_sibling(current_node);
     } while (! ts_node_is_null(current_node));
 
-    if (base)
+    if (base && class_def->bases_.empty())
     {
         class_def->bases_.push_back(base);
     }
-    class_def->interfaces_   = interfaces;
+
+    if (class_def->interfaces_.empty())
+    {
+        class_def->interfaces_   = std::move(interfaces);
+    }
+
+    // if its partial class doesn't have a body
+    if (ts_node_is_null(class_body_node))
+        return class_def;
 
     TSTreeCursor body_cursor = ts_tree_cursor_new(class_body_node);
     ts_tree_cursor_goto_first_child(&body_cursor);
@@ -188,8 +196,8 @@ Stmt* SourceCodeVisitor::handle_class_def_stmt(
     return class_def;
 }
 
-Stmt* SourceCodeVisitor::handle_interface_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_interface_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -222,24 +230,24 @@ Stmt* SourceCodeVisitor::handle_interface_def_stmt(
     return interface_def_stmt;
 }
 
-Stmt* SourceCodeVisitor::handle_memb_var_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_memb_var_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
     return handle_var_def_stmt(self, node, util::VarDefType::Member);
 }
 
-Stmt* SourceCodeVisitor::handle_local_var_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_local_var_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
     return handle_var_def_stmt(self, node, util::VarDefType::Local);
 }
 
-Stmt* SourceCodeVisitor::handle_global_var_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_global_var_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -251,8 +259,8 @@ Stmt* SourceCodeVisitor::handle_global_var_def_stmt(
     );
 }
 
-Stmt* SourceCodeVisitor::handle_var_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_var_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node,
     const util::VarDefType def_type
 )
@@ -338,8 +346,8 @@ Stmt* SourceCodeVisitor::handle_var_def_stmt(
     return var_def_stmts.front();
 }
 
-Stmt* SourceCodeVisitor::handle_param_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_param_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -358,8 +366,8 @@ Stmt* SourceCodeVisitor::handle_param_def_stmt(
     return parameter;
 }
 
-Stmt* SourceCodeVisitor::handle_constr_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_constr_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -410,8 +418,8 @@ Stmt* SourceCodeVisitor::handle_constr_def_stmt(
     return constructor_def;
 }
 
-Stmt* SourceCodeVisitor::handle_construct_init(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_construct_init(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -449,8 +457,8 @@ Stmt* SourceCodeVisitor::handle_construct_init(
     return stmt_factory_.mk_base_initializer(base->type_, arguments);
 }
 
-Stmt* SourceCodeVisitor::handle_destr_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_destr_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -474,8 +482,8 @@ Stmt* SourceCodeVisitor::handle_destr_def_stmt(
     );
 }
 
-Stmt* SourceCodeVisitor::handle_method_def_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_method_def_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -548,8 +556,8 @@ Stmt* SourceCodeVisitor::handle_method_def_stmt(
     return method_def_stmt;
 }
 
-Stmt* SourceCodeVisitor::handle_local_func_stmt(
-    SourceCodeVisitor* self,
+Stmt* SrcCodeVisitor::handle_func_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node
 )
 {
@@ -592,8 +600,8 @@ Stmt* SourceCodeVisitor::handle_local_func_stmt(
     return func->func_def;
 }
 
-FunctionDefStmt* SourceCodeVisitor::handle_function_stmt(
-    SourceCodeVisitor* self,
+FunctionDefStmt* SrcCodeVisitor::handle_function_stmt(
+    SrcCodeVisitor* self,
     const TSNode* node,
     const bool is_method
 )

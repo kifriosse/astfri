@@ -13,7 +13,7 @@
 namespace astfri::csharp
 {
 
-class SourceCodeVisitor
+class SrcCodeVisitor
 {
 private:
     static ExprFactory& expr_factory_;
@@ -25,7 +25,7 @@ private:
     SourceCode* current_src{nullptr};
 
 public:
-    SourceCodeVisitor(
+    SrcCodeVisitor(
         std::vector<SourceCode>& source_codes,
         SemanticContext& semantic_context
     );
@@ -34,170 +34,143 @@ public:
 
     // Expressions
     // Literals
-    static Expr* handle_int_lit(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    ); // todo
-    static Expr* handle_float_lit(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    ); // todo
-    static Expr* handle_bool_lit(SourceCodeVisitor* self, const TSNode* node);
     // todo
-    static Expr* handle_char_lit(SourceCodeVisitor* self, const TSNode* node);
+    static Expr* handle_int_lit(SrcCodeVisitor* self, const TSNode* node);
     // todo
-    static Expr* handle_str_lit(SourceCodeVisitor* self, const TSNode* node);
-    static Expr* handle_null_lit(SourceCodeVisitor* self, const TSNode* node);
-    static Expr* handle_this_expr(SourceCodeVisitor* self, const TSNode* node);
+    static Expr* handle_float_lit(SrcCodeVisitor* self, const TSNode* node);
+    static Expr* handle_bool_lit(SrcCodeVisitor* self, const TSNode* node);
+    // todo
+    static Expr* handle_char_lit(SrcCodeVisitor* self, const TSNode* node);
+    // todo
+    static Expr* handle_str_lit(SrcCodeVisitor* self, const TSNode* node);
+    static Expr* handle_null_lit(SrcCodeVisitor* self, const TSNode* node);
+    static Expr* handle_this_expr(SrcCodeVisitor* self, const TSNode* node);
     static Expr* handle_verbatim_str_lit(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_raw_str_lit(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_interpolated_str_lit(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     ); // todo
 
     // Reference Expersions
-    static Expr* handle_identifier(SourceCodeVisitor* self, const TSNode* node);
+    static Expr* handle_identifier(SrcCodeVisitor* self, const TSNode* node);
     static Expr* handle_memb_access_expr(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
-    static Expr* handle_invoc_expr(SourceCodeVisitor* self, const TSNode* node);
+    static Expr* handle_invoc_expr(SrcCodeVisitor* self, const TSNode* node);
 
     // Operations
     static Expr* handle_prefix_unary_op_expr(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_postfix_unary_op_expr(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Expr* handle_binary_op_expr(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
-    static Expr* handle_ternary_expr(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
+    static Expr* handle_ternary_expr(SrcCodeVisitor* self, const TSNode* node);
 
     static Expr* handle_parenthesized_expr(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
 
     // switch patterns
-    static Expr* handle_const_pattern(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
+    static Expr* handle_const_pattern(SrcCodeVisitor* self, const TSNode* node);
 
     // Statements
     // Type Definitions
     static Stmt* handle_class_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_interface_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     // Variable Definitions
     static Stmt* handle_memb_var_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_local_var_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_global_var_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_var_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node,
         util::VarDefType def_type
     ); // general var def stmt handler
     static Stmt* handle_param_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_constr_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     ); // constructor def stmt
     static Stmt* handle_construct_init(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     ); // base initializer
     static Stmt* handle_destr_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     ); // destructor def stmt
     static Stmt* handle_method_def_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     ); // method def stmt
 
-    static Stmt* handle_block_stmt(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_arrow_stmt(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_local_func_stmt(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
+    static Stmt* handle_block_stmt(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_arrow_stmt(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_func_stmt(SrcCodeVisitor* self, const TSNode* node);
     static FunctionDefStmt* handle_function_stmt(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node,
         bool is_method
     );
 
     // loops
-    static Stmt* handle_while_loop(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_do_while_loop(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
-    static Stmt* handle_for_loop(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_for_each_loop(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
+    static Stmt* handle_while_loop(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_do_while_loop(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_for_loop(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_for_each_loop(SrcCodeVisitor* self, const TSNode* node);
 
     // branching statements
-    static Stmt* handle_if_stmt(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_if_stmt(SrcCodeVisitor* self, const TSNode* node);
 
-    static Stmt* handle_try_stmt(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_catch_clause(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
-    static Stmt* handle_finally_clause(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
-    static Stmt* handle_catch_decl(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_try_stmt(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_catch_clause(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_finally(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_catch_decl(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_catch_when(SrcCodeVisitor* self, const TSNode* node);
 
-    static Stmt* handle_switch_stmt(
-        SourceCodeVisitor* self,
-        const TSNode* node
-    );
-    static Stmt* handle_case_stmt(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_switch_stmt(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_case_stmt(SrcCodeVisitor* self, const TSNode* node);
 
     // other
-    static Stmt* handle_expr_stmt(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_continue(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_break(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_return(SourceCodeVisitor* self, const TSNode* node);
-    static Stmt* handle_throw(SourceCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_expr_stmt(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_continue(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_break(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_return(SrcCodeVisitor* self, const TSNode* node);
+    static Stmt* handle_throw(SrcCodeVisitor* self, const TSNode* node);
 
 private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
@@ -226,20 +199,25 @@ private:
      * @return vector of parameter variable definition statements
      */
     static std::vector<ParamVarDefStmt*> make_param_list(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node,
         bool make_shallow
     );
     static std::vector<Expr*> handle_argument_list(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
     static Stmt* handle_for_init_var_def(
-        SourceCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode* node
     );
 
 private:
+    static void normalize_catch_clause(
+        IdentifierMap<std::pair<CatchStmt*, IfStmt*>>& catch_map,
+        std::vector<CatchStmt*>& catch_stmts,
+        CatchStmt* catch_stmt
+    );
     [[nodiscard]] std::string_view get_src_code() const;
     [[nodiscard]] const TSLanguage* get_lang() const;
 };
