@@ -33,7 +33,7 @@ Scope create_scope(
     // todo add other type like struct and record
     static std::unordered_map<std::string_view, NodeType> node_type_map = {
         {"class_declaration",     Class    },
-        {"record_declaration",    Class    },
+        {"struct_declaration",    Class    },
         {"interface_declaration", Interface},
         {"namespace_declaration", Namespace},
         {"compilation_unit",      Root     },

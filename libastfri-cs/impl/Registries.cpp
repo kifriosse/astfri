@@ -18,79 +18,62 @@ namespace regs
 
 Handlers::Handlers() :
     stmts({
-        {"class_declaration", SrcCodeVisitor::handle_class_def_stmt},
-        {"struct_declaration", SrcCodeVisitor::handle_class_def_stmt},
-        {"destructor_declaration", SrcCodeVisitor::handle_destr_def_stmt},
-        {"constructor_declaration", SrcCodeVisitor::handle_constr_def_stmt},
-        {"parameter", SrcCodeVisitor::handle_param_def_stmt},
-        {"field_declaration", SrcCodeVisitor::handle_memb_var_def_stmt},
-        {"constructor_initializer", SrcCodeVisitor::handle_construct_init},
-        {"method_declaration", SrcCodeVisitor::handle_method_def_stmt},
-        {"local_function_statement", SrcCodeVisitor::handle_func_stmt},
-        {"block", SrcCodeVisitor::handle_block_stmt},
-        {"arrow_expression_clause", SrcCodeVisitor::handle_arrow_stmt},
+        {"class_declaration", SrcCodeVisitor::visit_class_def_stmt},
+        {"struct_declaration", SrcCodeVisitor::visit_class_def_stmt},
+        {"destructor_declaration", SrcCodeVisitor::visit_destr_def_stmt},
+        {"constructor_declaration", SrcCodeVisitor::visit_constr_def_stmt},
+        {"parameter", SrcCodeVisitor::visit_param_def_stmt},
+        {"field_declaration", SrcCodeVisitor::visit_memb_var_def_stmt},
+        {"constructor_initializer", SrcCodeVisitor::visit_construct_init},
+        {"method_declaration", SrcCodeVisitor::visit_method_def_stmt},
+        {"local_function_statement", SrcCodeVisitor::visit_func_stmt},
+        {"block", SrcCodeVisitor::visit_block_stmt},
+        {"arrow_expression_clause", SrcCodeVisitor::visit_arrow_stmt},
         {"local_declaration_statement",
-         SrcCodeVisitor::handle_local_var_def_stmt},
-        {"do_statement", SrcCodeVisitor::handle_do_while_loop},
-        {"while_statement", SrcCodeVisitor::handle_while_loop},
-        {"for_statement", SrcCodeVisitor::handle_for_loop},
-        {"break_statement", SrcCodeVisitor::handle_break},
-        {"continue_statement", SrcCodeVisitor::handle_continue},
-        {"return_statement", SrcCodeVisitor::handle_return},
-        {"throw_statement", SrcCodeVisitor::handle_throw},
-        {"foreach_statement", SrcCodeVisitor::handle_for_each_loop},
-        {"if_statement", SrcCodeVisitor::handle_if_stmt},
-        {"try_statement", SrcCodeVisitor::handle_try_stmt},
-        {"catch_clause", SrcCodeVisitor::handle_catch_clause},
-        {"finally_clause", SrcCodeVisitor::handle_finally},
-        {"catch_declaration", SrcCodeVisitor::handle_catch_decl},
-        {"switch_statement", SrcCodeVisitor::handle_switch_stmt},
-        {"switch_section", SrcCodeVisitor::handle_case_stmt},
-        {"expression_statement", SrcCodeVisitor::handle_expr_stmt},
-        {"ERROR",
-         [](auto, const TSNode* node) -> Stmt*
-         {
-             const auto [row, column] = ts_node_start_point(*node);
-             throw std::runtime_error(
-                 "Invalid C# syntax in source code at: row"
-                 + std::to_string(row) + "and column " + std::to_string(column)
-             );
-         }}  // todo redo this into a universal function
+         SrcCodeVisitor::visit_local_var_def_stmt},
+        {"do_statement", SrcCodeVisitor::visit_do_while_loop},
+        {"while_statement", SrcCodeVisitor::visit_while_loop},
+        {"for_statement", SrcCodeVisitor::visit_for_loop},
+        {"break_statement", SrcCodeVisitor::visit_break},
+        {"continue_statement", SrcCodeVisitor::visit_continue},
+        {"return_statement", SrcCodeVisitor::visit_return},
+        {"throw_statement", SrcCodeVisitor::visit_throw},
+        {"foreach_statement", SrcCodeVisitor::visit_for_each_loop},
+        {"if_statement", SrcCodeVisitor::visit_if_stmt},
+        {"try_statement", SrcCodeVisitor::visit_try_stmt},
+        {"catch_clause", SrcCodeVisitor::visit_catch_clause},
+        {"finally_clause", SrcCodeVisitor::visit_finally},
+        {"catch_declaration", SrcCodeVisitor::visit_catch_decl},
+        {"switch_statement", SrcCodeVisitor::visit_switch_stmt},
+        {"switch_section", SrcCodeVisitor::visit_case_stmt},
+        {"expression_statement", SrcCodeVisitor::visit_expr_stmt},
+        {"ERROR", visit_error<SrcCodeVisitor, Stmt*>}
 }),
     exprs(
-        {{"integer_literal", SrcCodeVisitor::handle_int_lit},
-         {"real_literal", SrcCodeVisitor::handle_float_lit},
-         {"boolean_literal", SrcCodeVisitor::handle_bool_lit},
-         {"character_literal", SrcCodeVisitor::handle_char_lit},
-         {"string_literal", SrcCodeVisitor::handle_str_lit},
-         {"null_literal", SrcCodeVisitor::handle_null_lit},
-         {"verbatim_string_literal", SrcCodeVisitor::handle_verbatim_str_lit},
-         {"raw_string_literal", SrcCodeVisitor::handle_raw_str_lit},
-         {"this_expression", SrcCodeVisitor::handle_this_expr},
-         {"this", SrcCodeVisitor::handle_this_expr},
-         {"conditional_expression", SrcCodeVisitor::handle_ternary_expr},
+        {{"integer_literal", SrcCodeVisitor::visit_int_lit},
+         {"real_literal", SrcCodeVisitor::visit_float_lit},
+         {"boolean_literal", SrcCodeVisitor::visit_bool_lit},
+         {"character_literal", SrcCodeVisitor::visit_char_lit},
+         {"string_literal", SrcCodeVisitor::visit_str_lit},
+         {"null_literal", SrcCodeVisitor::visit_null_lit},
+         {"verbatim_string_literal", SrcCodeVisitor::visit_verbatim_str_lit},
+         {"raw_string_literal", SrcCodeVisitor::visit_raw_str_lit},
+         {"this_expression", SrcCodeVisitor::visit_this_expr},
+         {"this", SrcCodeVisitor::visit_this_expr},
+         {"conditional_expression", SrcCodeVisitor::visit_ternary_expr},
          {"prefix_unary_expression",
-          SrcCodeVisitor::handle_prefix_unary_op_expr},
-         {"ref_expression", SrcCodeVisitor::handle_ref_expr},
+          SrcCodeVisitor::visit_prefix_unary_op_expr},
+         {"ref_expression", SrcCodeVisitor::visit_ref_expr},
          {"postfix_unary_expression",
-          SrcCodeVisitor::handle_postfix_unary_op_expr},
-         {"binary_expression", SrcCodeVisitor::handle_binary_op_expr},
-         {"assignment_expression", SrcCodeVisitor::handle_binary_op_expr},
-         {"parenthesized_expression",
-          SrcCodeVisitor::handle_parenthesized_expr},
-         {"identifier", SrcCodeVisitor::handle_identifier},
-         {"member_access_expression", SrcCodeVisitor::handle_memb_access_expr},
-         {"invocation_expression", SrcCodeVisitor::handle_invoc_expr},
-         {"constant_pattern", SrcCodeVisitor::handle_const_pattern},
-         {"ERROR",
-          [](auto, const TSNode* node) -> Expr*
-          {
-              const auto [row, column] = ts_node_start_point(*node);
-              throw std::runtime_error(
-                  "Invalid C# syntax in source code at: row"
-                  + std::to_string(row) + "and column " + std::to_string(column)
-              );
-          }}}
+          SrcCodeVisitor::visit_postfix_unary_op_expr},
+         {"binary_expression", SrcCodeVisitor::visit_binary_op_expr},
+         {"assignment_expression", SrcCodeVisitor::visit_binary_op_expr},
+         {"parenthesized_expression", SrcCodeVisitor::visit_parenthesized_expr},
+         {"identifier", SrcCodeVisitor::visit_identifier},
+         {"member_access_expression", SrcCodeVisitor::visit_memb_access_expr},
+         {"invocation_expression", SrcCodeVisitor::visit_invoc_expr},
+         {"constant_pattern", SrcCodeVisitor::visit_const_pattern},
+         {"ERROR", visit_error<SrcCodeVisitor, Expr*>}}
     ),
     types(
         {{"predefined_type", TypeTranslator::visit_predefined},
@@ -108,15 +91,7 @@ Handlers::Handlers() :
           TypeTranslator::visit_func_pointer}, // function pointer - not
                                                // delegate
          {"scoped_type", TypeTranslator::visit_scoped_type},
-         {"ERROR",
-          [](auto, const TSNode& node) -> Type*
-          {
-              const auto [row, column] = ts_node_start_point(node);
-              throw std::runtime_error(
-                  "Invalid C# syntax in source code at: row"
-                  + std::to_string(row) + "and column " + std::to_string(column)
-              );
-          }}}
+         {"ERROR", visit_error<TypeTranslator, Type*>}}
     ),
     symbol_regs(
         {{"class_declaration", SymbolTableBuilder::register_class},
@@ -288,79 +263,51 @@ RegHandler RegManager::get_reg_handler(const TSNode& node)
 
 StmtHandler RegManager::get_stmt_handler(const std::string_view node_type)
 {
-    auto& stmts   = handlers_.stmts;
-    const auto it = stmts.find(node_type);
-    return it != stmts.end() ? it->second : default_stmt_handler;
+    // todo redo this when the type is fixed
+    const StmtHandler def = default_stmt_visit;
+    return get_or_default(handlers_.stmts, node_type, def);
 }
 
 ExprHandler RegManager::get_expr_handler(const std::string_view node_type)
 {
-    auto& exprs   = handlers_.exprs;
-    const auto it = exprs.find(node_type);
-    return it != exprs.end() ? it->second : default_expr_handler;
+    const ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
+    return get_or_default(handlers_.exprs, node_type, def);
 }
 
-TypeHandler RegManager::get_type_handler(std::string_view node_type)
+TypeHandler RegManager::get_type_handler(const std::string_view node_type)
 {
-    auto& exprs   = handlers_.types;
-    const auto it = exprs.find(node_type);
-    return it != exprs.end() ? it->second : default_type_handler;
+    const TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
+    return get_or_default(handlers_.types, node_type, def);
 }
 
 RegHandler RegManager::get_reg_handler(const std::string_view node_type)
 {
-    auto& reg_handlers = handlers_.symbol_regs;
-    const auto it      = reg_handlers.find(node_type);
-    return it != reg_handlers.end() ? it->second
-                                    : [](auto, const auto&, auto&) { };
+    const RegHandler def = [](auto*, const auto&, auto&) { };
+    return get_or_default(handlers_.symbol_regs, node_type, def);
 }
 
 std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
     const std::string_view op
 )
 {
-    auto& prefix_unary_ops = operations_.prefix_unary_op;
-    const auto it          = prefix_unary_ops.find(op);
-    if (it != prefix_unary_ops.end())
-    {
-        return it->second;
-    }
-    return {};
+    return get_opt(operations_.prefix_unary_op, op);
 }
 
-std::optional<BinOpType> RegManager::get_bin_op(
-    const std::string_view operation
-)
+std::optional<BinOpType> RegManager::get_bin_op(const std::string_view op)
 {
-    auto& bin_ops = operations_.bin_operations;
-    const auto it = bin_ops.find(operation);
-    if (it != bin_ops.end())
-    {
-        return it->second;
-    }
-    return {};
+    return get_opt(operations_.bin_operations, op);
 }
 
 std::optional<Type*> RegManager::get_type(const std::string_view type_name)
 {
-    auto& types   = types_.types;
-    const auto it = types.find(type_name);
-    if (it != types.end())
-    {
-        return it->second;
-    }
-    return {};
+    return get_opt(types_.types, type_name);
 }
 
 std::optional<CSModifier> RegManager::get_modifier(
     const std::string_view modifier
 )
 {
-    auto& modifs  = modifiers_.modifiers;
-    const auto it = modifs.find(modifier);
-    if (it != modifs.end())
-        return it->second;
-    return {};
+    return get_opt(modifiers_.modifiers, modifier);
 }
 
 bool RegManager::is_expr(const TSNode& node)
@@ -373,18 +320,10 @@ bool RegManager::is_stmt(const TSNode& node)
     return handlers_.stmts.contains(ts_node_type(node));
 }
 
-Expr* RegManager::default_expr_handler(SrcCodeVisitor*, const TSNode*)
+Stmt* RegManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&)
 {
-    return ExprFactory::get_instance().mk_unknown();
-}
-
-Stmt* RegManager::default_stmt_handler(SrcCodeVisitor*, const TSNode*)
-{
+    // todo remove this when type is fixed
     return StmtFactory::get_instance().mk_uknown();
 }
 
-Type* RegManager::default_type_handler(TypeTranslator*, const TSNode&)
-{
-    return TypeFactory::get_instance().mk_unknown();
-}
 } // namespace astfri::csharp

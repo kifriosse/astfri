@@ -34,13 +34,10 @@ struct SymbolTable;
 using MaskType = uint32_t;
 
 template<class ReturnType, class Owner>
-using Handler
-    = std::function<ReturnType(Owner*, const TSNode*)>; // todo redo this into
-                                                        // reference
-
+using Handler     = std::function<ReturnType(Owner*, const TSNode&)>;
 using ExprHandler = Handler<Expr*, SrcCodeVisitor>;
 using StmtHandler = Handler<Stmt*, SrcCodeVisitor>;
-using TypeHandler = std::function<Type*(TypeTranslator*, const TSNode&)>;
+using TypeHandler = Handler<Type*, TypeTranslator>;
 
 using RegHandler
     = std::function<void(SymbolTableBuilder*, const TSNode&, SymbolTable&)>;

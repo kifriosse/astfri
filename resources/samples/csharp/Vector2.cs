@@ -1,6 +1,6 @@
 using System.Numerics;
 
-public struct Vector2
+public class Vector2
 {
 
     public static Vector2 Zero = new Vector2();

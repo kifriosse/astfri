@@ -25,7 +25,7 @@ SrcCodeVisitor::SrcCodeVisitor(
 {
 }
 
-void SrcCodeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit)
+void SrcCodeVisitor::visit_comp_unit_stmt(TranslationUnit& tr_unit)
 {
     for (auto& def_stmt : this->semantic_context_.get_user_types())
     {
@@ -41,7 +41,7 @@ void SrcCodeVisitor::handle_comp_unit_stmt(TranslationUnit& tr_unit)
                 continue;
             this->current_src   = src;
             StmtHandler handler = RegManager::get_stmt_handler(node);
-            Stmt* stmt          = handler(this, &node);
+            Stmt* stmt          = handler(this, node);
             if (added)
                 continue;
             if (is_a<ClassDefStmt>(stmt))

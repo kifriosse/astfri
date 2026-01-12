@@ -16,16 +16,16 @@ namespace astfri::csharp
 {
 
 Stmt* SrcCodeVisitor::make_while_loop(
-    const TSNode* node,
+    const TSNode& node,
     const bool is_do_while
 )
 {
-    const TSNode cond_node = util::child_by_field_name(*node, "condition");
-    const TSNode body_node = util::child_by_field_name(*node, "body");
+    const TSNode cond_node = util::child_by_field_name(node, "condition");
+    const TSNode body_node = util::child_by_field_name(node, "body");
     const ExprHandler cond_handler = RegManager::get_expr_handler(cond_node);
     const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
-    Expr* condition                = cond_handler(this, &cond_node);
-    Stmt* body                     = body_handler(this, &body_node);
+    Expr* condition                = cond_handler(this, cond_node);
+    Stmt* body                     = body_handler(this, body_node);
 
     if (is_do_while)
         return stmt_factory_.mk_do_while(condition, body);
@@ -52,7 +52,7 @@ Expr* SrcCodeVisitor::expr_list_to_comma_op(
 
         const ExprHandler expr_handler
             = RegManager::get_expr_handler(current_node);
-        exprs.push(expr_handler(this, &current_node));
+        exprs.push(expr_handler(this, current_node));
     }
 
     if (exprs.empty())
@@ -72,7 +72,7 @@ Expr* SrcCodeVisitor::expr_list_to_comma_op(
 
 std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
     SrcCodeVisitor* self,
-    const TSNode* node,
+    const TSNode& node,
     const bool make_shallow
 )
 {
@@ -89,30 +89,29 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
         if (! make_shallow && ! ts_node_is_null(init_node))
         {
             const ExprHandler handler = RegManager::get_expr_handler(init_node);
-            init                      = handler(self, &init_node);
+            init                      = handler(self, init_node);
         }
         ParamVarDefStmt* param_def
             = stmt_factory_.mk_param_var_def(std::move(name), type, init);
         params.push_back(param_def);
     };
-    util::process_param_list(*node, collector);
+    util::process_param_list(node, collector);
     return params;
 }
 
-std::vector<Expr*> SrcCodeVisitor::handle_argument_list(
+std::vector<Expr*> SrcCodeVisitor::visit_arg_list(
     SrcCodeVisitor* self,
-    const TSNode* node
+    const TSNode& node
 )
 {
-    TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    TSTreeCursor cursor = ts_tree_cursor_new(node);
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid node");
 
-    TSNode current = ts_tree_cursor_current_node(&cursor);
     std::vector<Expr*> exprs;
     do
     {
-        current = ts_tree_cursor_current_node(&cursor);
+        TSNode current = ts_tree_cursor_current_node(&cursor);
         if (! ts_node_is_named(current))
             continue;
 
@@ -120,7 +119,7 @@ std::vector<Expr*> SrcCodeVisitor::handle_argument_list(
 
         current                  = ts_tree_cursor_current_node(&cursor);
         ExprHandler expr_handler = RegManager::get_expr_handler(current);
-        exprs.emplace_back(expr_handler(self, &current));
+        exprs.emplace_back(expr_handler(self, current));
 
         ts_tree_cursor_goto_parent(&cursor);
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
@@ -129,26 +128,26 @@ std::vector<Expr*> SrcCodeVisitor::handle_argument_list(
     return exprs;
 }
 
-Stmt* SrcCodeVisitor::handle_for_init_var_def(
+Stmt* SrcCodeVisitor::visit_for_init_var_def(
     SrcCodeVisitor* self,
-    const TSNode* node
+    const TSNode& node
 )
 {
     std::vector<VarDefStmt*> var_defs;
-    const TSNode type_node = util::child_by_field_name(*node, "type");
+    const TSNode type_node = util::child_by_field_name(node, "type");
     Type* type             = util::make_type(type_node, self->get_src_code());
     const std::vector<TSNode> decltr_nodes
-        = util::find_nodes(*node, self->get_lang(), regs::Queries::decl_query);
+        = util::find_nodes(node, self->get_lang(), regs::Queries::decl_query);
     for (const auto declarator_node : decltr_nodes)
     {
-        TSNode var_name_node = ts_node_child(declarator_node, 0);
-        TSNode right_node    = ts_node_child(declarator_node, 2);
+        TSNode var_name_node = ts_node_named_child(declarator_node, 0);
+        TSNode right_node    = ts_node_named_child(declarator_node, 1);
         ExprHandler right_side_handler
             = RegManager::get_expr_handler(right_node);
         LocalVarDefStmt* var_def = stmt_factory_.mk_local_var_def(
             util::extract_node_text(var_name_node, self->get_src_code()),
             type,
-            right_side_handler(self, &right_node)
+            right_side_handler(self, right_node)
         );
         var_defs.push_back(var_def);
         self->semantic_context_.reg_local_var(var_def);

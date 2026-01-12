@@ -175,6 +175,8 @@ public class Literals
         c = (a + b) * (1 - (b - 2));
 
         int x_1, y_1 = 1;
+        y_1++;
+        ++y_1;
         const int c_1 = 1, c_2 = 2;
         x_1 = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
 

@@ -56,7 +56,7 @@ TranslationUnit* ASTBuilder::make_ast(
     SemanticContext global_semantic_context(symbol_table);
 
     SrcCodeVisitor source_visitor(source_codes, global_semantic_context);
-    source_visitor.handle_comp_unit_stmt(*ast);
+    source_visitor.visit_comp_unit_stmt(*ast);
 
     return ast;
 }

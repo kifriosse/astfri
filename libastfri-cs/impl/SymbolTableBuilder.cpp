@@ -197,7 +197,8 @@ void SymbolTableBuilder::register_memb_var(
     std::vector<VarDefStmt*> var_def_stmts;
     for (const TSNode& var_decltor_node : var_decltor_nodes)
     {
-        TSNode var_name_node = ts_node_child(var_decltor_node, 0); // left side
+        TSNode var_name_node
+            = ts_node_named_child(var_decltor_node, 0); // left side
         const std::string var_name
             = util::extract_node_text(var_name_node, source_code);
         MemberVarDefStmt* var_def = stmt_factory_.mk_member_var_def(
@@ -212,7 +213,7 @@ void SymbolTableBuilder::register_memb_var(
         MemberVarMetadata member_var_metadata{
             .var_def     = var_def,
             .var_node    = var_decltor_node,
-            .initializer = ts_node_child(var_decltor_node, 2) // right side
+            .initializer = ts_node_named_child(var_decltor_node, 1) // right side
         };
         type_metadata.member_vars.emplace(var_name, member_var_metadata);
     }
