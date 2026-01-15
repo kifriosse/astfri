@@ -7,6 +7,7 @@
 #define CSHARP_COMMON_HPP
 
 #include <cstddef>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <functional>
 
 namespace astfri::csharp::util

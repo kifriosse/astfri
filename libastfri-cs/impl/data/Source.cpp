@@ -4,10 +4,16 @@
 
 namespace astfri::csharp
 {
+
 SourceCode::SourceCode(SourceFile file, TSTree* tree) :
     file(std::move(file)),
     tree(tree)
 {
+}
+
+const TSLanguage* SourceCode::lang() const
+{
+    return ts_tree_language(tree);
 }
 
 SourceCode::~SourceCode()
@@ -20,6 +26,7 @@ SourceCode::~SourceCode()
 }
 
 SourceCode::SourceCode(SourceCode&& other) noexcept :
+    file_context(std::move(other.file_context)),
     file(std::move(other.file)),
     tree(other.tree)
 {
@@ -32,9 +39,10 @@ SourceCode& SourceCode::operator=(SourceCode&& other) noexcept
     {
         if (tree)
             ts_tree_delete(tree);
-        file       = std::move(other.file);
-        tree       = other.tree;
-        other.tree = nullptr;
+        file         = std::move(other.file);
+        file_context = std::move(other.file_context);
+        tree         = other.tree;
+        other.tree   = nullptr;
     }
     return *this;
 }

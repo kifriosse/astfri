@@ -71,6 +71,11 @@ void split_namespace(
         }
         ++it;
     }
+
+    if (! namespace_name.empty())
+    {
+        scope_str.emplace(namespace_name.begin(), slice_end);
+    }
 }
 
 bool is_interface_name(const std::string_view name)

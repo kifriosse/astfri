@@ -1,10 +1,12 @@
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/util/common.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
+#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -43,9 +45,9 @@ std::optional<TypeMetadata> SemanticContext::get_type_metadata(
     return {};
 }
 
-void SemanticContext::enter_type(UserTypeDefStmt* def_stmt)
+void SemanticContext::enter_type(UserTypeDefStmt* def)
 {
-    type_context_.type_stack.push(def_stmt);
+    type_context_.type_stack.push(def);
     enter_scope();
 }
 
@@ -121,7 +123,7 @@ void SemanticContext::unregister_return_type()
 
 UserTypeDefStmt* SemanticContext::current_type() const
 {
-    const auto& type_stack = type_context_.type_stack;
+    auto& type_stack = type_context_.type_stack;
     return type_stack.empty() ? nullptr : type_stack.top();
 }
 

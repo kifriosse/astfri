@@ -1,4 +1,5 @@
-using System.Numerics;
+global using System.Numerics;
+global using static System.Math;
 
 public class Vector2
 {

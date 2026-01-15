@@ -8,6 +8,7 @@
 #include <tree_sitter/api.h>
 
 #include <functional>
+#include <iostream>
 #include <stack>
 #include <string>
 #include <string_view>
@@ -59,8 +60,8 @@ Scope create_scope(
         case Class:
         case Interface:
         {
-            const TSNode name_node = child_by_field_name(current, "name");
-            const std::string name = extract_node_text(name_node, source);
+            const TSNode n_name    = child_by_field_name(current, "name");
+            const std::string name = extract_node_text(n_name, source);
             scope_str.push(name);
             break;
         }
@@ -77,17 +78,16 @@ Scope create_scope(
             if (ts_node_is_null(namespace_node))
                 break;
 
-            const TSNode name_node
-                = child_by_field_name(namespace_node, "name");
-            const std::string name = extract_node_text(name_node, source);
+            const TSNode n_name = child_by_field_name(namespace_node, "name");
+            const std::string name = extract_node_text(n_name, source);
             split_namespace(scope_str, name);
             break;
         }
         case Namespace:
         {
             found_name_space       = true;
-            const TSNode name_node = child_by_field_name(current, "name");
-            const std::string name = extract_node_text(name_node, source);
+            const TSNode n_name    = child_by_field_name(current, "name");
+            const std::string name = extract_node_text(n_name, source);
             split_namespace(scope_str, name);
             break;
         }
@@ -149,20 +149,21 @@ Type* make_type(const TSNode& node, const std::string_view src_code)
 
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
-    const TSLanguage* lang,
-    const std::string_view source_code
+    SourceCode& src,
+    TypeTranslator& type_translator
 )
 {
     StmtFactory& stmt_factory   = StmtFactory::get_instance();
     TypeFactory& type_factory   = TypeFactory::get_instance();
     const CSModifiers param_mod = CSModifiers::handle_modifiers(
-        find_nodes(node, lang, regs::Queries::var_modif_query),
-        source_code
+        find_nodes(node, src.lang(), regs::Queries::var_modif_query),
+        src.file.content
     );
 
     const TSNode type_node       = child_by_field_name(node, "type");
     const TSNode param_name_node = child_by_field_name(node, "name");
-    Type* param_type             = make_type(type_node, source_code);
+    const TypeHandler th         = RegManager::get_type_handler(type_node);
+    Type* param_type             = th(&type_translator, type_node);
 
     if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
     {
@@ -177,13 +178,17 @@ ParamVarDefStmt* make_param_def(
     }
 
     return stmt_factory.mk_param_var_def(
-        extract_node_text(param_name_node, source_code),
+        extract_node_text(param_name_node, src.file.content),
         param_type,
         nullptr
     );
 }
 
-ParamSignature discover_params(const TSNode& node, std::string_view src_code)
+ParamSignature discover_params(
+    const TSNode& node,
+    const std::string_view src_code,
+    TypeTranslator& type_translator
+)
 {
     static StmtFactory& stmt_factory = StmtFactory::get_instance();
     std::vector<ParamVarDefStmt*> params;
@@ -194,7 +199,8 @@ ParamSignature discover_params(const TSNode& node, std::string_view src_code)
         const TSNode param_name_node = child_by_field_name(current, "name");
         const TSNode type_node       = child_by_field_name(current, "type");
         std::string param_name = extract_node_text(param_name_node, src_code);
-        Type* type             = make_type(type_node, src_code);
+        const TypeHandler th   = RegManager::get_type_handler(type_node);
+        Type* type             = th(&type_translator, type_node);
         ParamVarDefStmt* param_def = stmt_factory.mk_param_var_def(
             std::move(param_name),
             type,
@@ -242,19 +248,22 @@ void process_param_list(
 
 FunctionMetadata make_func_metadata(
     const TSNode& node,
-    const std::string_view src_code
+    const std::string_view src_code,
+    TypeTranslator& type_translator
 )
 {
-    StmtFactory& stmt_factory  = StmtFactory::get_instance();
-    const TSNode name_node     = child_by_field_name(node, "name");
-    const TSNode return_node   = child_by_field_name(node, "type");
-    const TSNode params_node   = child_by_field_name(node, "parameters");
-    std::string name           = extract_node_text(name_node, src_code);
-    Type* ret_type             = make_type(return_node, src_code);
-    auto [params, params_data] = discover_params(params_node, src_code);
+    auto& stmt_f             = StmtFactory::get_instance();
+    const TSNode n_name      = child_by_field_name(node, "name");
+    const TSNode ret_node    = child_by_field_name(node, "type");
+    const TSNode params_node = child_by_field_name(node, "parameters");
+    std::string name         = extract_node_text(n_name, src_code);
+    const TypeHandler th     = RegManager::get_type_handler(ret_node);
+    Type* ret_type           = th(&type_translator, ret_node);
+    auto [params, params_data]
+        = discover_params(params_node, src_code, type_translator);
     return FunctionMetadata{
         .params   = std::move(params_data),
-        .func_def = stmt_factory.mk_function_def(
+        .func_def = stmt_f.mk_function_def(
             std::move(name),
             std::move(params),
             ret_type,

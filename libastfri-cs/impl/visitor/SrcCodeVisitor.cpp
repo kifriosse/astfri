@@ -18,19 +18,20 @@ TypeFactory& SrcCodeVisitor::type_factory_ = TypeFactory::get_instance();
 
 SrcCodeVisitor::SrcCodeVisitor(
     std::vector<SourceCode>& source_codes,
-    SemanticContext& semantic_context
+    SemanticContext& semantic_context,
+    SymbolTable& symbol_table
 ) :
     src_codes(source_codes),
+    type_tr_(symbol_table),
     semantic_context_(semantic_context)
 {
 }
 
-void SrcCodeVisitor::visit_comp_unit_stmt(TranslationUnit& tr_unit)
+void SrcCodeVisitor::visit_comp_unit(TranslationUnit& tr_unit)
 {
     for (auto& def_stmt : this->semantic_context_.get_user_types())
     {
-        std::optional<TypeMetadata> type_metadata
-            = this->semantic_context_.get_type_metadata(def_stmt);
+        auto type_metadata = semantic_context_.get_type_metadata(def_stmt);
         if (! type_metadata)
             continue;
 
@@ -39,7 +40,9 @@ void SrcCodeVisitor::visit_comp_unit_stmt(TranslationUnit& tr_unit)
         {
             if (! src)
                 continue;
-            this->current_src   = src;
+
+            current_src = src;
+            type_tr_.set_current_src(src);
             StmtHandler handler = RegManager::get_stmt_handler(node);
             Stmt* stmt          = handler(this, node);
             if (added)

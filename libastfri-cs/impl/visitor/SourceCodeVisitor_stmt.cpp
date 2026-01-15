@@ -19,11 +19,8 @@ namespace astfri::csharp
 Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
     std::vector<Stmt*> statements;
-    static const TSSymbol local_func_symb = util::symbol_for_name(
-        self->get_lang(),
-        "local_function_statement",
-        true
-    );
+    static const TSSymbol local_func_symb
+        = util::symbol_for_name(self->lang(), "local_function_statement", true);
 
     if (ts_node_named_child_count(node) != 0)
     {
@@ -38,7 +35,11 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
                 continue;
 
             self->semantic_context_.reg_local_func(
-                util::make_func_metadata(current_node, self->get_src_code())
+                util::make_func_metadata(
+                    current_node,
+                    self->src_str(),
+                    self->type_tr_
+                )
             );
         } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
@@ -120,7 +121,7 @@ Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
         }
         else
         {
-            init = visit_for_init_var_def(self, init_node);
+            init = self->visit_for_init_var_def(init_node);
         }
     }
 
@@ -164,10 +165,11 @@ Stmt* SrcCodeVisitor::visit_for_each_loop(
     }
 
     const std::string var_name
-        = util::extract_node_text(left_node, self->get_src_code());
+        = util::extract_node_text(left_node, self->src_str());
     const ExprHandler right_handler = RegManager::get_expr_handler(right_node);
     const StmtHandler body_handler  = RegManager::get_stmt_handler(body_node);
-    Type* type = util::make_type(type_node, self->get_src_code());
+    const TypeHandler th            = RegManager::get_type_handler(type_node);
+    Type* type                      = th(&self->type_tr_, type_node);
     LocalVarDefStmt* left
         = stmt_factory_.mk_local_var_def(var_name, type, nullptr);
     self->semantic_context_.reg_local_var(left);
@@ -306,12 +308,13 @@ Stmt* SrcCodeVisitor::visit_finally(SrcCodeVisitor* self, const TSNode& node)
 Stmt* SrcCodeVisitor::visit_catch_decl(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode type_node = util::child_by_field_name(node, "type");
-    const TSNode name_node = util::child_by_field_name(node, "name");
-    Type* type             = util::make_type(type_node, self->get_src_code());
+    const TSNode n_name    = util::child_by_field_name(node, "name");
+    const TypeHandler th   = RegManager::get_type_handler(type_node);
+    Type* type             = th(&self->type_tr_, type_node);
     const std::string name
-        = ts_node_is_null(name_node)
+        = ts_node_is_null(n_name)
             ? std::string{}
-            : util::extract_node_text(name_node, self->get_src_code());
+            : util::extract_node_text(n_name, self->src_str());
     return stmt_factory_.mk_local_var_def(name, type, nullptr);
 }
 

@@ -180,7 +180,7 @@ public class Literals
         const int c_1 = 1, c_2 = 2;
         x_1 = ((a + b) * (c - (a + (b * c)))) + ((a * (b + c)) - 3);
 
-        object? d = null;
+        Object? d = null;
         c = d == null ? 1 : a;
     }
 }

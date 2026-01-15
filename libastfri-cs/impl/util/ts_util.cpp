@@ -294,8 +294,8 @@ bool has_variadic_param(const TSNode& node, TSNode* type_node)
     if (type_node && ! ts_node_is_null(found_type))
         *type_node = found_type;
 
-    const TSNode name_node = child_by_field_name(node, "name");
-    return ! ts_node_is_null(found_type) && ! ts_node_is_null(name_node);
+    const TSNode n_name = child_by_field_name(node, "name");
+    return ! ts_node_is_null(found_type) && ! ts_node_is_null(n_name);
 }
 
 } // namespace astfri::csharp::util

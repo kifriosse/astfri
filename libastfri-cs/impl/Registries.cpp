@@ -81,37 +81,29 @@ Handlers::Handlers() :
          {"qualified_name",
           TypeTranslator::visit_qualified_name}, // type with namespace
          {"implicit_type", TypeTranslator::visit_qualified_name}, // var
-         {"nullable_type", TypeTranslator::visit_nullable},
-         {"pointer_type", TypeTranslator::visit_pointer},
-         {"ref_type", TypeTranslator::visit_ref},
+         {"nullable_type", TypeTranslator::visit_wrapper},
+         {"pointer_type", TypeTranslator::visit_inderect},
+         {"ref_type", TypeTranslator::visit_inderect},
          {"array_type", TypeTranslator::visit_array},
          {"generic_name", TypeTranslator::visit_generic_name},
          {"tuple_type", TypeTranslator::visit_tuple},
          {"function_pointer_type",
           TypeTranslator::visit_func_pointer}, // function pointer - not
                                                // delegate
-         {"scoped_type", TypeTranslator::visit_scoped_type},
+         {"scoped_type", TypeTranslator::visit_wrapper},
          {"ERROR", visit_error<TypeTranslator, Type*>}}
     ),
     symbol_regs(
-        {{"class_declaration", SymbolTableBuilder::register_class},
-         {"struct_declaration", SymbolTableBuilder::register_class},
-         {"interface_declaration", SymbolTableBuilder::register_interface},
-         {"enum_declaration", SymbolTableBuilder::register_enum},
-         {"delegate_declaration", SymbolTableBuilder::register_delegate},
-         {"record_declaration", SymbolTableBuilder::register_record},
-         {"field_declaration", SymbolTableBuilder::register_memb_var},
-         {"property_declaration", SymbolTableBuilder::register_property},
-         {"method_declaration", SymbolTableBuilder::register_method},
-         {"ERROR",
-          [](auto, const TSNode& node, auto&) -> void
-          {
-              const auto [row, column] = ts_node_start_point(node);
-              throw std::runtime_error(
-                  "Invalid C# syntax in source code at: row"
-                  + std::to_string(row) + "and column " + std::to_string(column)
-              );
-          }}}
+        {{"class_declaration", SymbolTableBuilder::reg_class},
+         {"struct_declaration", SymbolTableBuilder::reg_class},
+         {"interface_declaration", SymbolTableBuilder::reg_interface},
+         {"enum_declaration", SymbolTableBuilder::reg_enum},
+         {"delegate_declaration", SymbolTableBuilder::reg_delegate},
+         {"record_declaration", SymbolTableBuilder::reg_record},
+         {"field_declaration", SymbolTableBuilder::reg_memb_var},
+         {"property_declaration", SymbolTableBuilder::reg_property},
+         {"method_declaration", SymbolTableBuilder::reg_method},
+         {"ERROR", visit_error<SymbolTableBuilder, void>}}
     )
 {
 }
@@ -181,7 +173,6 @@ Modifiers::Modifiers() :
         {"out",       CSModifier::Out      },
         {"in",        CSModifier::In       },
         {"ref",       CSModifier::Ref      },
-        // todo add scoped - probably useless
 })
 {
 }
@@ -282,7 +273,7 @@ TypeHandler RegManager::get_type_handler(const std::string_view node_type)
 
 RegHandler RegManager::get_reg_handler(const std::string_view node_type)
 {
-    const RegHandler def = [](auto*, const auto&, auto&) { };
+    const RegHandler def = [](auto*, const auto&) { };
     return get_or_default(handlers_.symbol_regs, node_type, def);
 }
 

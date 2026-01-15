@@ -11,7 +11,6 @@
 #include <tree_sitter/api.h>
 
 #include <algorithm>
-#include <cstring>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -43,11 +42,11 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         "destructor_declaration",
     };
     static const TSSymbol base_list_symb
-        = util::symbol_for_name(self->get_lang(), "base_list", true);
+        = util::symbol_for_name(self->lang(), "base_list", true);
     static const TSSymbol type_param_list_sym
-        = util::symbol_for_name(self->get_lang(), "type_parameter_list", true);
+        = util::symbol_for_name(self->lang(), "type_parameter_list", true);
     static const TSSymbol type_param_constr_sym = util::symbol_for_name(
-        self->get_lang(),
+        self->lang(),
         "type_parameter_constraints_clause",
         true
     );
@@ -59,16 +58,16 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         class_members_nodes[node_type];
     }
 
-    const Scope scope
-        = util::create_scope(node, self->get_lang(), self->get_src_code());
+    Scope scope = util::create_scope(node, self->lang(), self->src_str());
     const TSNode class_name_node = util::child_by_field_name(node, "name");
     const std::string class_name
-        = util::extract_node_text(class_name_node, self->get_src_code());
+        = util::extract_node_text(class_name_node, self->src_str());
 
     ClassDefStmt* class_def = stmt_factory_.mk_class_def(class_name, scope);
     class_def->name_        = class_name; // todo remove this
 
     self->semantic_context_.enter_type(class_def);
+    self->type_tr_.set_current_namespace(std::move(scope));
 
     TSNode current_node          = ts_node_next_sibling(class_name_node);
     const TSNode class_body_node = util::child_by_field_name(node, "body");
@@ -85,7 +84,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         {
             TSNode type_node = ts_node_named_child(current_node, 0);
             std::string type_name
-                = util::extract_node_text(type_node, self->get_src_code());
+                = util::extract_node_text(type_node, self->src_str());
             // todo temporary solution
             if (util::is_interface_name(type_name))
             {
@@ -103,8 +102,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
             type_node = ts_node_next_sibling(current_node);
             while (! ts_node_is_null(type_node))
             {
-                type_name
-                    = util::extract_node_text(type_node, self->get_src_code());
+                type_name = util::extract_node_text(type_node, self->src_str());
                 // todo temporary solution
                 interfaces.emplace_back(
                     stmt_factory_.mk_interface_def(type_name, {})
@@ -206,11 +204,9 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
         // "indexer_declaration",     // todo
     };
 
-    const TSNode name_node = util::child_by_field_name(node, "name");
-    const std::string name
-        = util::extract_node_text(name_node, self->get_src_code());
-    const Scope scope
-        = util::create_scope(node, self->get_lang(), self->get_src_code());
+    const TSNode n_name    = util::child_by_field_name(node, "name");
+    const std::string name = util::extract_node_text(n_name, self->src_str());
+    const Scope scope = util::create_scope(node, self->lang(), self->src_str());
 
     InterfaceDefStmt* interface_def_stmt
         = stmt_factory_.mk_interface_def(name, scope);
@@ -226,7 +222,7 @@ Stmt* SrcCodeVisitor::visit_memb_var_def_stmt(
     const TSNode& node
 )
 {
-    return visit_var_def_stmt(self, node, util::VarDefType::Member);
+    return self->visit_var_def_stmt(node, util::VarDefType::Member);
 }
 
 Stmt* SrcCodeVisitor::visit_local_var_def_stmt(
@@ -234,7 +230,7 @@ Stmt* SrcCodeVisitor::visit_local_var_def_stmt(
     const TSNode& node
 )
 {
-    return visit_var_def_stmt(self, node, util::VarDefType::Local);
+    return self->visit_var_def_stmt(node, util::VarDefType::Local);
 }
 
 Stmt* SrcCodeVisitor::visit_global_var_def_stmt(
@@ -243,95 +239,7 @@ Stmt* SrcCodeVisitor::visit_global_var_def_stmt(
 )
 {
     const TSNode var_def = ts_node_child(node, 0);
-    return visit_var_def_stmt(self, var_def, util::VarDefType::Global);
-}
-
-Stmt* SrcCodeVisitor::visit_var_def_stmt(
-    SrcCodeVisitor* self,
-    const TSNode& node,
-    const util::VarDefType def_type
-)
-{
-    // todo refactor to use the Semantic context and Type Table
-    const std::vector<TSNode> modifier_nodes = util::find_nodes(
-        node,
-        self->get_lang(),
-        regs::Queries::var_modif_query
-    );
-
-    const TSNode var_decl_node
-        = modifier_nodes.empty() ? ts_node_child(node, 0)
-                                 : ts_node_next_sibling(modifier_nodes.back());
-
-    const TSNode type_node = util::child_by_field_name(var_decl_node, "type");
-    Type* type             = util::make_type(type_node, self->get_src_code());
-
-    const std::vector<TSNode> var_decltor_nodes = util::find_nodes(
-        var_decl_node,
-        self->get_lang(),
-        regs::Queries::decl_query
-    );
-
-    std::vector<VarDefStmt*> var_def_stmts;
-    for (const TSNode& var_decltor_node : var_decltor_nodes)
-    {
-        // left side
-        TSNode var_name_node = ts_node_named_child(var_decltor_node, 0);
-        // right side
-        TSNode init_node = ts_node_named_child(var_decltor_node, 1);
-
-        const std::string var_name
-            = util::extract_node_text(var_name_node, self->get_src_code());
-        Expr* init = nullptr;
-        if (! ts_node_is_null(init_node))
-        {
-            ExprHandler init_handler = RegManager::get_expr_handler(init_node);
-            init                     = init_handler(self, init_node);
-        }
-
-        VarDefStmt* var_def_stmt = nullptr;
-        switch (def_type)
-        {
-        case util::VarDefType::Member:
-        {
-            // todo handle other modifiers
-            MemberVarMetadata* var_data = self->semantic_context_.find_memb_var(
-                var_name,
-                self->semantic_context_.current_type()
-            );
-            var_def_stmt               = var_data->var_def;
-            var_def_stmt->initializer_ = init;
-            var_data->processed        = true;
-            break;
-        }
-        case util::VarDefType::Local:
-            // const CSModifiers modifiers
-            //     = CSModifiers::handle_modifiers(modifier_nodes,
-            //     self->src_code_);
-            // todo handle const
-            var_def_stmt = stmt_factory_.mk_local_var_def(var_name, type, init);
-            self->semantic_context_.reg_local_var(
-                as_a<LocalVarDefStmt>(var_def_stmt)
-            );
-            break;
-        case util::VarDefType::Global:
-            // todo handle const
-            var_def_stmt
-                = stmt_factory_.mk_global_var_def(var_name, type, init);
-            break;
-        }
-        // todo this might not be necessary in future
-        if (var_def_stmt)
-        {
-            var_def_stmt->name_ = var_name;
-            var_def_stmts.push_back(var_def_stmt);
-        }
-    }
-
-    if (var_def_stmts.size() > 1)
-        return stmt_factory_.mk_def(var_def_stmts);
-
-    return var_def_stmts.front();
+    return self->visit_var_def_stmt(var_def, util::VarDefType::Global);
 }
 
 Stmt* SrcCodeVisitor::visit_param_def_stmt(
@@ -343,7 +251,7 @@ Stmt* SrcCodeVisitor::visit_param_def_stmt(
     const TSNode init_node     = ts_node_next_named_sibling(var_name_node);
 
     ParamVarDefStmt* parameter
-        = util::make_param_def(node, self->get_lang(), self->get_src_code());
+        = util::make_param_def(node, *self->src(), self->type_tr_);
     if (! ts_node_is_null(init_node))
     {
         const ExprHandler init_handler
@@ -378,12 +286,12 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
     const TSNode initializer_node = ts_node_next_sibling(param_list_node);
 
     constructor_def->owner_       = as_a<ClassDefStmt>(result);
-    constructor_def->params_ = make_param_list(self, param_list_node, false);
+    constructor_def->params_ = self->make_param_list(param_list_node, false);
 
     const std::vector<TSNode> modifier_nodes
-        = util::find_nodes(node, self->get_lang(), "(modifier) @mod");
+        = util::find_nodes(node, self->lang(), "(modifier) @mod"); // todo move this into query registyr
     const CSModifiers modifiers
-        = CSModifiers::handle_modifiers(modifier_nodes, self->get_src_code());
+        = CSModifiers::handle_modifiers(modifier_nodes, self->src_str());
     constructor_def->access_
         = modifiers.get_access_mod().value_or(AccessModifier::Private);
 
@@ -415,10 +323,9 @@ Stmt* SrcCodeVisitor::visit_construct_init(
     if (! result)
         throw std::logic_error("Owner type not found");
     constexpr std::string_view this_init_sv = "this";
-    std::string source_code
-        = util::extract_node_text(node, self->get_src_code());
-    const auto bracket_it = std::ranges::find(source_code, '(');
-    const auto this_it    = std::search(
+    std::string source_code = util::extract_node_text(node, self->src_str());
+    const auto bracket_it   = std::ranges::find(source_code, '(');
+    const auto this_it      = std::search(
         source_code.begin(),
         bracket_it,
         this_init_sv.begin(),
@@ -426,7 +333,7 @@ Stmt* SrcCodeVisitor::visit_construct_init(
     );
 
     const TSNode arg_list_node         = ts_node_named_child(node, 0);
-    const std::vector<Expr*> arguments = visit_arg_list(self, arg_list_node);
+    const std::vector<Expr*> arguments = self->visit_arg_list(arg_list_node);
     if (this_it != bracket_it)
         return stmt_factory_.mk_self_initializer(arguments);
 
@@ -483,12 +390,12 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
     const TSNode params_node = util::child_by_field_name(node, "parameters");
     const std::vector<TSNode> modif_node = util::find_nodes(
         node,
-        self->get_lang(),
+        self->lang(),
         regs::Queries::method_modif_query
     );
     const CSModifiers modifiers
-        = CSModifiers::handle_modifiers(modif_node, self->get_src_code());
-    const TSNode name_node = util::child_by_field_name(node, "name");
+        = CSModifiers::handle_modifiers(modif_node, self->src_str());
+    const TSNode n_name    = util::child_by_field_name(node, "name");
     const bool is_variadic = util::has_variadic_param(params_node, nullptr);
     const size_t named_child_count = ts_node_named_child_count(params_node);
     const size_t param_count
@@ -496,7 +403,7 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
     const MethodId method_id{
         .func_id
-        = FuncId{.name = util::extract_node_text(name_node, self->get_src_code()), .param_count = param_count},
+        = FuncId{.name = util::extract_node_text(n_name, self->src_str()), .param_count = param_count},
         .is_static = modifiers.has(CSModifier::Static)
     };
 
@@ -538,7 +445,7 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
     // if it wansn't able to resolve method
     MethodDefStmt* method_def_stmt = stmt_factory_.mk_method_def();
     method_def_stmt->owner_        = current_type;
-    method_def_stmt->func_         = make_func_stmt(self, node, true);
+    method_def_stmt->func_         = self->make_func_stmt(node, true);
     method_def_stmt->access_
         = modifiers.get_access_mod().value_or(AccessModifier::Internal);
     return method_def_stmt;
@@ -546,13 +453,13 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
 Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode name_node    = util::child_by_field_name(node, "name");
+    const TSNode n_name       = util::child_by_field_name(node, "name");
     const TSNode paramas_node = util::child_by_field_name(node, "parameters");
     const bool is_variadic    = util::has_variadic_param(paramas_node, nullptr);
     const size_t named_count  = ts_node_named_child_count(paramas_node);
 
     const FuncId func_id{
-        .name        = util::extract_node_text(name_node, self->get_src_code()),
+        .name        = util::extract_node_text(n_name, self->src_str()),
         .param_count = is_variadic ? named_count - 1 : named_count
     };
     const FunctionMetadata* func = self->semantic_context_.find_func(func_id);
@@ -562,7 +469,7 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
         );
 
     if (! func->func_def)
-        return make_func_stmt(self, node, false);
+        return self->make_func_stmt(node, false);
 
     self->semantic_context_.enter_scope();
     self->semantic_context_.reg_return(func->func_def->retType_);
@@ -583,36 +490,6 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
     self->semantic_context_.leave_scope();
     self->semantic_context_.unregister_return_type();
     return func->func_def;
-}
-
-FunctionDefStmt* SrcCodeVisitor::make_func_stmt(
-    SrcCodeVisitor* self,
-    const TSNode& node,
-    const bool is_method
-)
-{
-    self->semantic_context_.enter_scope();
-
-    FunctionDefStmt* func_def = stmt_factory_.mk_function_def();
-    const TSNode ret_type_node
-        = util::child_by_field_name(node, is_method ? "returns" : "type");
-    const TSNode name_node  = util::child_by_field_name(node, "name");
-    const TSNode param_node = util::child_by_field_name(node, "parameters");
-    const TSNode body_node  = util::child_by_field_name(node, "body");
-
-    // todo handle generic parameters
-    Type* ret_type = util::make_type(ret_type_node, self->get_src_code());
-    self->semantic_context_.reg_return(ret_type);
-
-    func_def->retType_ = ret_type;
-    func_def->name_ = util::extract_node_text(name_node, self->get_src_code());
-    func_def->params_              = make_param_list(self, param_node, false);
-    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
-    func_def->body_ = as_a<CompoundStmt>(body_handler(self, body_node));
-
-    self->semantic_context_.leave_scope();
-    self->semantic_context_.unregister_return_type();
-    return func_def;
 }
 
 } // namespace astfri::csharp

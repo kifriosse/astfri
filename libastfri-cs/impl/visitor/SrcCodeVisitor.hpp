@@ -3,6 +3,7 @@
 
 #include <libastfri-cs/impl/data/Source.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/TypeTranslator.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -20,6 +21,7 @@ private:
     static StmtFactory& stmt_factory_;
     static TypeFactory& type_factory_;
 
+    TypeTranslator type_tr_;
     std::vector<SourceCode>& src_codes;
     SemanticContext& semantic_context_;
     SourceCode* current_src{nullptr};
@@ -27,45 +29,37 @@ private:
 public:
     SrcCodeVisitor(
         std::vector<SourceCode>& source_codes,
-        SemanticContext& semantic_context
+        SemanticContext& semantic_context,
+        SymbolTable& symbol_table
     );
     // compilation unit/translation unit
-    void visit_comp_unit_stmt(TranslationUnit& tr_unit);
+    void visit_comp_unit(TranslationUnit& tr_unit);
 
     // Expressions
     // Literals
     // todo
-    static Expr* visit_int_lit(const SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_int_lit(SrcCodeVisitor* self, const TSNode& node);
     // todo
-    static Expr* visit_float_lit(
-        const SrcCodeVisitor* self,
-        const TSNode& node
-    );
-    static Expr* visit_bool_lit(const SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_float_lit(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_bool_lit(SrcCodeVisitor* self, const TSNode& node);
     // todo
-    static Expr* visit_char_lit(const SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_char_lit(SrcCodeVisitor* self, const TSNode& node);
     // todo
-    static Expr* visit_str_lit(const SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_null_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_this_expr(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_verbatim_str_lit(
-        const SrcCodeVisitor* self,
+        SrcCodeVisitor* self,
         const TSNode& node
     );
-    static Expr* visit_raw_str_lit(
-        const SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Expr* visit_raw_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_interpolated_str_lit(
         SrcCodeVisitor* self,
         const TSNode& node
     ); // todo
 
     // Reference Expersions
-    static Expr* visit_identifier(
-        const SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Expr* visit_identifier(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_memb_access_expr(
         SrcCodeVisitor* self,
         const TSNode& node
@@ -113,11 +107,6 @@ public:
         SrcCodeVisitor* self,
         const TSNode& node
     );
-    static Stmt* visit_var_def_stmt(
-        SrcCodeVisitor* self,
-        const TSNode& node,
-        util::VarDefType def_type
-    ); // general var def stmt handler // todo move this
     static Stmt* visit_param_def_stmt(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_constr_def_stmt(
         SrcCodeVisitor* self,
@@ -139,12 +128,6 @@ public:
     static Stmt* visit_block_stmt(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_arrow_stmt(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_func_stmt(SrcCodeVisitor* self, const TSNode& node);
-
-    static FunctionDefStmt* make_func_stmt(
-        SrcCodeVisitor* self,
-        const TSNode& node,
-        bool is_method
-    ); // todo move this
 
     // loops
     static Stmt* visit_while_loop(SrcCodeVisitor* self, const TSNode& node);
@@ -170,7 +153,16 @@ public:
     static Stmt* visit_throw(SrcCodeVisitor* self, const TSNode& node);
 
 private:
+    Stmt* visit_var_def_stmt(
+        const TSNode& node,
+        util::VarDefType def_type
+    ); // general var def stmt handler
+
     Stmt* make_while_loop(const TSNode& node, bool is_do_while);
+    FunctionDefStmt* make_func_stmt(
+        const TSNode& node,
+        bool is_method
+    ); // todo move this
 
     /**
      * Turns an expression list into a chained comma operator expression
@@ -189,29 +181,22 @@ private:
     /**
      * Makes a list of parameter variable definition statements from the given
      * parameter list node
-     * @param self instance of SourceCodeVisitor
      * @param node parameter list node
      * @param make_shallow if true, makes shallow parameter definitions (without
      * default values), if false, makes full parameter definitions
      * @return vector of parameter variable definition statements
      */
-    static std::vector<ParamVarDefStmt*> make_param_list(
-        SrcCodeVisitor* self,
+    std::vector<ParamVarDefStmt*> make_param_list(
         const TSNode& node,
         bool make_shallow
     );
-    static std::vector<Expr*> visit_arg_list(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
-    static Stmt* visit_for_init_var_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    std::vector<Expr*> visit_arg_list(const TSNode& node);
+    Stmt* visit_for_init_var_def(const TSNode& node);
 
 private:
-    [[nodiscard]] std::string_view get_src_code() const;
-    [[nodiscard]] const TSLanguage* get_lang() const;
+    [[nodiscard]] std::string_view src_str() const;
+    [[nodiscard]] const TSLanguage* lang() const;
+    [[nodiscard]] SourceCode* src() const;
 };
 
 } // namespace astfri::csharp

@@ -19,6 +19,25 @@
 namespace astfri::csharp::util
 {
 
+/**
+ * @brief Helper struct to hold discovered parameter definitions and their
+ * metadata.
+ */
+struct ParamSignature
+{
+    std::vector<ParamVarDefStmt*> defs;
+    std::vector<ParamMetadata> metadata;
+};
+
+/**
+ * @brief Helper struct to group type and its definition statement
+ */
+struct TypeBinding
+{
+    ScopedType* type;
+    UserTypeDefStmt* def;
+};
+
 Scope create_scope(
     const TSNode& node,
     const TSLanguage* lang,
@@ -32,41 +51,36 @@ Scope create_scope(std::string_view qualifier);
  * @param src_code instance of CSharpTSTreeVisitor
  * @return instance of a Type
  */
-Type* make_type(const TSNode& node, std::string_view src_code);
+[[deprecated]] Type* make_type(const TSNode& node, std::string_view src_code);
 
 /**
  * @brief Creates a ParamVarDefStmt from the given TSNode.
  * @param node TSNode representing the parameter definition
- * @param lang Tree-sitter language
- * @param source_code original source code string
+ * @param src reference to SourceCode instance linked to the TSNode parameter
+ * @param type_translator TypeTranslator instance for translating type nodes
  * @return pointer to the created ParamVarDefStmt
  * @note Creates a ParamVarDefStmt but without initialization expression -
  * needs to be handled by the caller
  */
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
-    const TSLanguage* lang,
-    std::string_view source_code
+    SourceCode& src,
+    TypeTranslator& type_translator
 );
-
-/**
- * @brief Helper struct to hold discovered parameter definitions and their
- * metadata.
- */
-struct ParamSignature
-{
-    std::vector<ParamVarDefStmt*> defs;
-    std::vector<ParamMetadata> metadata;
-};
 
 /**
  * @brief Discovers parameters from the given TSNode representing a parameter
  * list.
  * @param node TSNode representing the parameter list
  * @param src_code original source code string
+ * @param type_translator TypeTranslator instance for translating type nodes
  * @return ParamSignature containing parameter definitions and metadata
  */
-ParamSignature discover_params(const TSNode& node, std::string_view src_code);
+ParamSignature discover_params(
+    const TSNode& node,
+    std::string_view src_code,
+    TypeTranslator& type_translator
+);
 
 /**
  * @brief Processes each parameter node in the parameter list node by invoking
@@ -81,7 +95,8 @@ void process_param_list(
 
 FunctionMetadata make_func_metadata(
     const TSNode& node,
-    std::string_view src_code
+    std::string_view src_code,
+    TypeTranslator& type_translator
 );
 
 } // namespace astfri::csharp::util

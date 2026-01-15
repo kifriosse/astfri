@@ -25,6 +25,8 @@ struct SourceCode
     explicit SourceCode(SourceFile file, TSTree* tree = nullptr);
     ~SourceCode();
 
+    const TSLanguage* lang() const;
+
     SourceCode(const SourceCode&)            = delete;
     SourceCode& operator=(const SourceCode&) = delete;
     SourceCode(SourceCode&& other) noexcept;

@@ -38,9 +38,7 @@ using Handler     = std::function<ReturnType(Owner*, const TSNode&)>;
 using ExprHandler = Handler<Expr*, SrcCodeVisitor>;
 using StmtHandler = Handler<Stmt*, SrcCodeVisitor>;
 using TypeHandler = Handler<Type*, TypeTranslator>;
-
-using RegHandler
-    = std::function<void(SymbolTableBuilder*, const TSNode&, SymbolTable&)>;
+using RegHandler  = Handler<void, SymbolTableBuilder>;
 
 template<class Value>
 using RegistryMap = std::unordered_map<std::string_view, Value>;

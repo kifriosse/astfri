@@ -1,3 +1,4 @@
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
@@ -10,6 +11,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -34,7 +36,7 @@ TranslationUnit* ASTBuilder::make_ast(
 ) const
 {
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
-    std::vector<SourceCode> source_codes;
+    std::vector<SourceCode> srcs;
 
     for (auto& source_file : get_source_codes(source_code_dir))
     {
@@ -44,19 +46,46 @@ TranslationUnit* ASTBuilder::make_ast(
             source_file.content.c_str(),
             static_cast<uint32_t>(source_file.content.size())
         );
-        source_codes.emplace_back(source_file, tree);
+        srcs.emplace_back(source_file, tree);
         ts_parser_reset(parser_);
     }
 
-    SymbolTableBuilder symbol_table_builder(source_codes);
-    SymbolTable symbol_table;
-    symbol_table_builder.register_user_types(symbol_table);
-    symbol_table_builder.load_using_directives();
-    symbol_table_builder.register_members(symbol_table);
-    SemanticContext global_semantic_context(symbol_table);
+    using milli = std::chrono::milliseconds;
 
-    SrcCodeVisitor source_visitor(source_codes, global_semantic_context);
-    source_visitor.visit_comp_unit_stmt(*ast);
+    SymbolTable symb_table;
+    SymbolTableBuilder symbol_table_builder(srcs, symb_table);
+
+    std::cout << "Phase 1: Symbol Table Building\n"
+              << "Discovering user defined types..." << std::endl;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    symbol_table_builder.reg_user_types();
+    std::cout << "Loading using directives...\n";
+    symbol_table_builder.reg_using_directives();
+    std::cout << "Discovering members of user defined types...\n";
+    symbol_table_builder.reg_members();
+
+    auto end      = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<milli>(end - start);
+
+    std::cout << "Symbol Table Building took " << duration.count() << " ms"
+              << std::endl;
+
+    SemanticContext glob_sem_context(symb_table);
+    SrcCodeVisitor source_visitor(srcs, glob_sem_context, symb_table);
+
+    std::cout << "Phase 2: Building of AST" << std::endl;
+
+    start = std::chrono::high_resolution_clock::now();
+
+    source_visitor.visit_comp_unit(*ast);
+
+    end      = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<milli>(end - start);
+
+    std::cout << "AST building completed.\n"
+              << "AST Building took " << duration.count() << " ms" << std::endl;
 
     return ast;
 }

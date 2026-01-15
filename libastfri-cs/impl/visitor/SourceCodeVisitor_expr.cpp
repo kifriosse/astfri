@@ -17,12 +17,9 @@
 namespace astfri::csharp
 {
 
-Expr* SrcCodeVisitor::visit_int_lit(
-    const SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_int_lit(SrcCodeVisitor* self, const TSNode& node)
 {
-    std::string int_str = util::extract_node_text(node, self->get_src_code());
+    std::string int_str = util::extract_node_text(node, self->src_str());
     std::erase(int_str, '_');
 
     const size_t string_len = int_str.length();
@@ -69,12 +66,9 @@ Expr* SrcCodeVisitor::visit_int_lit(
     throw std::logic_error("This integer type is not implemented");
 }
 
-Expr* SrcCodeVisitor::visit_float_lit(
-    const SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_float_lit(SrcCodeVisitor* self, const TSNode& node)
 {
-    std::string float_str = util::extract_node_text(node, self->get_src_code());
+    std::string float_str = util::extract_node_text(node, self->src_str());
     const char suffix
         = static_cast<char>(std::tolower(float_str[float_str.length() - 1]));
 
@@ -107,24 +101,17 @@ Expr* SrcCodeVisitor::visit_float_lit(
     }
 }
 
-Expr* SrcCodeVisitor::visit_bool_lit(
-    const SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_bool_lit(SrcCodeVisitor* self, const TSNode& node)
 {
-    const std::string bool_str
-        = util::extract_node_text(node, self->get_src_code());
+    const std::string bool_str = util::extract_node_text(node, self->src_str());
     return expr_factory_.mk_bool_literal(bool_str == "true");
 }
 
-Expr* SrcCodeVisitor::visit_char_lit(
-    const SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_char_lit(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode content_node = ts_node_named_child(node, 0);
     const std::string character_str
-        = util::extract_node_text(content_node, self->get_src_code());
+        = util::extract_node_text(content_node, self->src_str());
     if (character_str.length() > 1)
     {
         // todo handle 16-bit unicode characters
@@ -133,17 +120,14 @@ Expr* SrcCodeVisitor::visit_char_lit(
     return expr_factory_.mk_char_literal(character_str[0]);
 }
 
-Expr* SrcCodeVisitor::visit_str_lit(
-    const SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_str_lit(SrcCodeVisitor* self, const TSNode& node)
 {
     if (ts_node_child_count(node) < 3)
         return expr_factory_.mk_string_literal({});
 
     const TSNode str_content = ts_node_named_child(node, 0);
     const std::string content
-        = util::extract_node_text(str_content, self->get_src_code());
+        = util::extract_node_text(str_content, self->src_str());
     return expr_factory_.mk_string_literal(content);
 }
 
@@ -164,12 +148,11 @@ Expr* SrcCodeVisitor::visit_this_expr(
 }
 
 Expr* SrcCodeVisitor::visit_verbatim_str_lit(
-    const SrcCodeVisitor* self,
+    SrcCodeVisitor* self,
     const TSNode& node
 )
 {
-    std::string node_contet
-        = util::extract_node_text(node, self->get_src_code());
+    std::string node_contet = util::extract_node_text(node, self->src_str());
     node_contet.pop_back();
     node_contet.erase(node_contet.begin(), node_contet.begin() + 2);
     node_contet = util::escape_string(node_contet, true);
@@ -178,13 +161,13 @@ Expr* SrcCodeVisitor::visit_verbatim_str_lit(
 }
 
 Expr* SrcCodeVisitor::visit_raw_str_lit(
-    const SrcCodeVisitor* self,
+    SrcCodeVisitor* self,
     const TSNode& node
 )
 {
     const TSNode content_node = ts_node_named_child(node, 1);
     std::string content
-        = util::extract_node_text(content_node, self->get_src_code());
+        = util::extract_node_text(content_node, self->src_str());
     content = util::escape_string(content, false);
     return expr_factory_.mk_string_literal(content);
 }
@@ -197,13 +180,10 @@ Expr* SrcCodeVisitor::visit_interpolated_str_lit(
     throw std::logic_error("Interpolated string literal not implemented");
 }
 
-Expr* SrcCodeVisitor::visit_identifier(
-    const SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_identifier(SrcCodeVisitor* self, const TSNode& node)
 {
     const std::string identifier
-        = util::extract_node_text(node, self->get_src_code());
+        = util::extract_node_text(node, self->src_str());
     Stmt* def_stmt
         = self->semantic_context_.find_var(identifier, access::None{});
     if (! def_stmt)
@@ -231,11 +211,11 @@ Expr* SrcCodeVisitor::visit_memb_access_expr(
     const TSNode right_node = util::child_by_field_name(node, "name");
     const ExprHandler left_handler = RegManager::get_expr_handler(left_node);
     const std::string name
-        = util::extract_node_text(right_node, self->get_src_code());
+        = util::extract_node_text(right_node, self->src_str());
     Expr* left_side = left_handler(self, left_node);
     if (is_a<ThisExpr>(left_side))
     {
-        UserTypeDefStmt* owner = self->semantic_context_.current_type();
+        // UserTypeDefStmt* owner = self->semantic_context_.current_type()->def;
         if ([[maybe_unused]] const auto var_def = // todo for future use
             self->semantic_context_.find_var(name, access::Instance{}))
         {
@@ -251,25 +231,22 @@ Expr* SrcCodeVisitor::visit_memb_access_expr(
 
 Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
 {
-    static const TSSymbol identifier_node_symb
-        = util::symbol_for_name(self->get_lang(), "identifier", true);
-    static const TSSymbol memb_access_node_symb = util::symbol_for_name(
-        self->get_lang(),
-        "member_access_expression",
-        true
-    );
+    static const TSSymbol identifier_symb
+        = util::symbol_for_name(self->lang(), "identifier", true);
+    static const TSSymbol memb_access_symb
+        = util::symbol_for_name(self->lang(), "member_access_expression", true);
     // std::cout << "Invocation Expression: " << std::endl;
     // print_child_nodes_types(node, self->get_src_code());
     const TSNode function_node = util::child_by_field_name(node, "function");
     const TSNode arg_list_node = util::child_by_field_name(node, "arguments");
-    const std::vector<Expr*> arg_list = visit_arg_list(self, arg_list_node);
+    const std::vector<Expr*> arg_list = self->visit_arg_list(arg_list_node);
     // if it doesn't have a left side - it not a member access node in tree
     // sitter
-    if (ts_node_symbol(function_node) == identifier_node_symb)
+    if (ts_node_symbol(function_node) == identifier_symb)
     {
         // todo add handling of local functions
         const std::string name
-            = util::extract_node_text(function_node, self->get_src_code());
+            = util::extract_node_text(function_node, self->src_str());
         const FuncId func_id{
             .name        = name,
             .param_count = arg_list.size(),
@@ -300,17 +277,16 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
         }
     }
     // accessing a member of some variable - also includes `this`
-    if (ts_node_symbol(function_node) == memb_access_node_symb)
+    if (ts_node_symbol(function_node) == memb_access_symb)
     {
-        const TSNode name_node
-            = util::child_by_field_name(function_node, "name");
+        const TSNode n_name = util::child_by_field_name(function_node, "name");
         const TSNode left_node
             = util::child_by_field_name(function_node, "expression");
         const ExprHandler left_handler
             = RegManager::get_expr_handler(left_node);
         Expr* left_side = left_handler(self, left_node);
         const std::string name
-            = util::extract_node_text(name_node, self->get_src_code());
+            = util::extract_node_text(n_name, self->src_str());
         // it's a member of an instance - method or delegate type attribute
         if (is_a<ThisExpr>(left_side))
         {
@@ -361,7 +337,7 @@ Expr* SrcCodeVisitor::visit_prefix_unary_op_expr(
 {
     const TSNode op_node         = ts_node_child(node, 0);
     const TSNode right_side_node = ts_node_child(node, 1);
-    std::string op = util::extract_node_text(op_node, self->get_src_code());
+    std::string op = util::extract_node_text(op_node, self->src_str());
     std::erase_if(op, isspace);
 
     const auto res = RegManager::get_prefix_unary_op(op);
@@ -383,8 +359,7 @@ Expr* SrcCodeVisitor::visit_postfix_unary_op_expr(
 {
     const TSNode left_side_node = ts_node_child(node, 0);
     const TSNode op_node        = ts_node_child(node, 1);
-    const std::string op
-        = util::extract_node_text(op_node, self->get_src_code());
+    const std::string op = util::extract_node_text(op_node, self->src_str());
 
     const ExprHandler handler = RegManager::get_expr_handler(left_side_node);
     Expr* left_side           = handler(self, left_side_node);
@@ -420,10 +395,9 @@ Expr* SrcCodeVisitor::visit_binary_op_expr(
     const TSNode right              = ts_node_named_child(node, 1);
     const ExprHandler left_handler  = RegManager::get_expr_handler(left);
     const ExprHandler right_handler = RegManager::get_expr_handler(right);
-    const std::string op
-        = util::extract_node_text(op_node, self->get_src_code());
+    const std::string op = util::extract_node_text(op_node, self->src_str());
 
-    const auto res = RegManager::get_bin_op(op);
+    const auto res       = RegManager::get_bin_op(op);
     if (! res.has_value())
     {
         // `a ?? b` same as `a != null ? a : b`

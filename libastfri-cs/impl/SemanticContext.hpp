@@ -14,7 +14,6 @@ namespace astfri
 {
 // Forward declarations
 struct VarDefStmt;
-struct Type;
 struct LocalVarDefStmt;
 struct Stmt;
 struct UserTypeDefStmt;
@@ -22,15 +21,8 @@ struct UserTypeDefStmt;
 
 namespace astfri::csharp
 {
-
-/**
- * @brief Symbol table containing metadata about user defined types
- */
-struct SymbolTable
-{
-    std::unordered_map<UserTypeDefStmt*, TypeMetadata> user_types_metadata;
-    std::vector<UserTypeDefStmt*> user_type_keys;
-};
+// Forward declaration
+struct SymbolTable;
 
 /**
  * @brief Context for tracking current type during semantic analysis
@@ -72,10 +64,10 @@ private:
     };
 
 private:
-    SymbolTable& symbol_table_;
     ScopeContext scope_context_{};
     TypeContext type_context_{};
     std::stack<Type*> return_type_context_{};
+    SymbolTable& symbol_table_;
 
 public:
     explicit SemanticContext(SymbolTable& symbol_table);
@@ -90,7 +82,7 @@ public:
         UserTypeDefStmt* user_type
     ) const;
 
-    void enter_type(UserTypeDefStmt* def_stmt);
+    void enter_type(UserTypeDefStmt* def);
     void enter_scope();
 
     void reg_return(Type* return_type);
