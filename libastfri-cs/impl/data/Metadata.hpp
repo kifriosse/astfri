@@ -49,7 +49,7 @@ struct ParamMetadata
 /**
  * @brief Metadata about function
  */
-struct FunctionMetadata
+struct FuncMetadata
 {
     std::vector<ParamMetadata> params{};
     FunctionDefStmt* func_def{nullptr};

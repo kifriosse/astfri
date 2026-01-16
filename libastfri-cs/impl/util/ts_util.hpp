@@ -53,7 +53,7 @@ TSSymbol symbol_for_name(
  * @param src_code original source code string
  * @return extracted text from node
  */
-std::string extract_node_text(const TSNode& node, std::string_view src_code);
+std::string extract_text(const TSNode& node, std::string_view src_code);
 
 /**
  * @brief Finds all nodes in subtree of given root node that match the given
@@ -105,7 +105,7 @@ std::string remove_comments(
  * variadic parameter if found (nullptr if not found).
  * @return true if the parameter list contains a variadic parameter
  */
-bool has_variadic_param(const TSNode& node, TSNode* type_node);
+bool has_variadic_param(const TSNode& node, TSNode* type_node = nullptr);
 
 } // namespace astfri::csharp::util
 

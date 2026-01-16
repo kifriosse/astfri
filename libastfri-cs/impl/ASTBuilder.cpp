@@ -32,13 +32,13 @@ ASTBuilder::~ASTBuilder()
 }
 
 TranslationUnit* ASTBuilder::make_ast(
-    const std::filesystem::path& source_code_dir
+    const std::filesystem::path& src_dir
 ) const
 {
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     std::vector<SourceCode> srcs;
 
-    for (auto& source_file : get_source_codes(source_code_dir))
+    for (auto& source_file : get_source_codes(src_dir))
     {
         TSTree* tree = ts_parser_parse_string(
             parser_,
@@ -53,18 +53,18 @@ TranslationUnit* ASTBuilder::make_ast(
     using milli = std::chrono::milliseconds;
 
     SymbolTable symb_table;
-    SymbolTableBuilder symbol_table_builder(srcs, symb_table);
+    SymbolTableBuilder symb_table_builder(srcs, symb_table);
 
     std::cout << "Phase 1: Symbol Table Building\n"
               << "Discovering user defined types..." << std::endl;
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    symbol_table_builder.reg_user_types();
+    symb_table_builder.reg_user_types();
     std::cout << "Loading using directives...\n";
-    symbol_table_builder.reg_using_directives();
+    symb_table_builder.reg_using_directives();
     std::cout << "Discovering members of user defined types...\n";
-    symbol_table_builder.reg_members();
+    symb_table_builder.reg_members();
 
     auto end      = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<milli>(end - start);
@@ -72,8 +72,8 @@ TranslationUnit* ASTBuilder::make_ast(
     std::cout << "Symbol Table Building took " << duration.count() << " ms"
               << std::endl;
 
-    SemanticContext glob_sem_context(symb_table);
-    SrcCodeVisitor source_visitor(srcs, glob_sem_context, symb_table);
+    SemanticContext sem_context(symb_table);
+    SrcCodeVisitor source_visitor(srcs, sem_context, symb_table);
 
     std::cout << "Phase 2: Building of AST" << std::endl;
 
@@ -105,8 +105,8 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
         dirs.pop();
         for (const auto& dir_entry : dir_it)
         {
-            std::filesystem::path entry_path = dir_entry.path();
-            const auto file_name             = entry_path.filename().string();
+            const std::filesystem::path& entry_path = dir_entry.path();
+            const auto file_name = entry_path.filename().string();
 
             if (dir_entry.is_directory())
             {
@@ -124,25 +124,25 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                 {
                     continue;
                 }
-                std::string source_code;
-                std::ifstream file_stream(entry_path, std::ios::binary);
+                std::string src;
+                std::ifstream file_s(entry_path, std::ios::binary);
                 const auto file_size = std::filesystem::file_size(entry_path);
-                source_code.resize(file_size);
-                file_stream.read(
-                    source_code.data(),
+                src.resize(file_size);
+                file_s.read(
+                    src.data(),
                     static_cast<std::streamsize>(file_size)
                 );
                 TSTree* tree = ts_parser_parse_string(
                     parser_,
                     nullptr,
-                    source_code.c_str(),
-                    source_code.length()
+                    src.c_str(),
+                    src.length()
                 );
                 source_files.emplace_back(
                     entry_path,
                     util::remove_comments(
                         ts_tree_root_node(tree),
-                        source_code,
+                        src,
                         lang_,
                         entry_path
                     )

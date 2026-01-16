@@ -17,14 +17,15 @@ namespace astfri::csharp
 class SrcCodeVisitor
 {
 private:
-    static ExprFactory& expr_factory_;
-    static StmtFactory& stmt_factory_;
-    static TypeFactory& type_factory_;
+    static ExprFactory& expr_f_;
+    static StmtFactory& stmt_f_;
+    static TypeFactory& type_f_;
 
     TypeTranslator type_tr_;
-    std::vector<SourceCode>& src_codes;
+    std::vector<SourceCode>& src_codes_;
     SemanticContext& semantic_context_;
-    SourceCode* current_src{nullptr};
+    SourceCode* current_src_{nullptr};
+    const TSLanguage* lang_;
 
 public:
     SrcCodeVisitor(
@@ -158,7 +159,7 @@ private:
         util::VarDefType def_type
     ); // general var def stmt handler
 
-    Stmt* make_while_loop(const TSNode& node, bool is_do_while);
+    Stmt* make_while_loop(const TSNode& node, bool is_while);
     FunctionDefStmt* make_func_stmt(
         const TSNode& node,
         bool is_method
@@ -195,7 +196,6 @@ private:
 
 private:
     [[nodiscard]] std::string_view src_str() const;
-    [[nodiscard]] const TSLanguage* lang() const;
     [[nodiscard]] SourceCode* src() const;
 };
 

@@ -94,15 +94,15 @@ Handlers::Handlers() :
          {"ERROR", visit_error<TypeTranslator, Type*>}}
     ),
     symbol_regs(
-        {{"class_declaration", SymbolTableBuilder::reg_class},
-         {"struct_declaration", SymbolTableBuilder::reg_class},
-         {"interface_declaration", SymbolTableBuilder::reg_interface},
-         {"enum_declaration", SymbolTableBuilder::reg_enum},
-         {"delegate_declaration", SymbolTableBuilder::reg_delegate},
-         {"record_declaration", SymbolTableBuilder::reg_record},
-         {"field_declaration", SymbolTableBuilder::reg_memb_var},
-         {"property_declaration", SymbolTableBuilder::reg_property},
-         {"method_declaration", SymbolTableBuilder::reg_method},
+        {{"class_declaration", SymbolTableBuilder::visit_class},
+         {"struct_declaration", SymbolTableBuilder::visit_class},
+         {"interface_declaration", SymbolTableBuilder::visit_interface},
+         {"enum_declaration", SymbolTableBuilder::visit_enum},
+         {"delegate_declaration", SymbolTableBuilder::visit_delegate},
+         {"record_declaration", SymbolTableBuilder::visit_record},
+         {"field_declaration", SymbolTableBuilder::visit_memb_var},
+         {"property_declaration", SymbolTableBuilder::visit_property},
+         {"method_declaration", SymbolTableBuilder::visit_method},
          {"ERROR", visit_error<SymbolTableBuilder, void>}}
     )
 {
@@ -254,27 +254,27 @@ RegHandler RegManager::get_reg_handler(const TSNode& node)
 
 StmtHandler RegManager::get_stmt_handler(const std::string_view node_type)
 {
-    // todo redo this when the type is fixed
-    const StmtHandler def = default_stmt_visit;
-    return get_or_default(handlers_.stmts, node_type, def);
+    // todo redo this when the typo is fixed
+    StmtHandler def = default_stmt_visit;
+    return get_or_default(handlers_.stmts, node_type, std::move(def));
 }
 
 ExprHandler RegManager::get_expr_handler(const std::string_view node_type)
 {
-    const ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
-    return get_or_default(handlers_.exprs, node_type, def);
+    ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
+    return get_or_default(handlers_.exprs, node_type, std::move(def));
 }
 
 TypeHandler RegManager::get_type_handler(const std::string_view node_type)
 {
-    const TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
-    return get_or_default(handlers_.types, node_type, def);
+    TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
+    return get_or_default(handlers_.types, node_type, std::move(def));
 }
 
 RegHandler RegManager::get_reg_handler(const std::string_view node_type)
 {
-    const RegHandler def = [](auto*, const auto&) { };
-    return get_or_default(handlers_.symbol_regs, node_type, def);
+    RegHandler def = [](auto*, const auto&) { };
+    return get_or_default(handlers_.symbol_regs, node_type, std::move(def));
 }
 
 std::optional<UnaryOpType> RegManager::get_prefix_unary_op(

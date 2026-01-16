@@ -89,13 +89,9 @@ util::TypeBinding* SymbolTree::find_type(
     if (! search_parents)
     {
         const auto it = current->children.find(type_name);
-        if (it == current->children.end())
-            return nullptr;
-        else
-        {
-            auto* ret_val = std::get_if<util::TypeBinding>(&it->second->data);
-            return ret_val;
-        }
+        return it == current->children.end()
+                 ? nullptr
+                 : std::get_if<util::TypeBinding>(&it->second->data);
     }
 
     for (const auto node : std::views::reverse(nodes))

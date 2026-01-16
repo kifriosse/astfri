@@ -47,25 +47,18 @@ Scope create_scope(
 Scope create_scope(std::string_view qualifier);
 
 /**
- * @param node name node of the type (for example class or interface name)
- * @param src_code instance of CSharpTSTreeVisitor
- * @return instance of a Type
- */
-[[deprecated]] Type* make_type(const TSNode& node, std::string_view src_code);
-
-/**
  * @brief Creates a ParamVarDefStmt from the given TSNode.
  * @param node TSNode representing the parameter definition
  * @param src reference to SourceCode instance linked to the TSNode parameter
- * @param type_translator TypeTranslator instance for translating type nodes
+ * @param type_tr TypeTranslator instance for translating type nodes
  * @return pointer to the created ParamVarDefStmt
  * @note Creates a ParamVarDefStmt but without initialization expression -
  * needs to be handled by the caller
  */
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
-    SourceCode& src,
-    TypeTranslator& type_translator
+    const SourceCode& src,
+    TypeTranslator& type_tr
 );
 
 /**
@@ -73,13 +66,13 @@ ParamVarDefStmt* make_param_def(
  * list.
  * @param node TSNode representing the parameter list
  * @param src_code original source code string
- * @param type_translator TypeTranslator instance for translating type nodes
+ * @param type_tr TypeTranslator instance for translating type nodes
  * @return ParamSignature containing parameter definitions and metadata
  */
 ParamSignature discover_params(
     const TSNode& node,
     std::string_view src_code,
-    TypeTranslator& type_translator
+    TypeTranslator& type_tr
 );
 
 /**
@@ -93,10 +86,10 @@ void process_param_list(
     const std::function<void(const TSNode&)>& collector
 );
 
-FunctionMetadata make_func_metadata(
+FuncMetadata make_func_metadata(
     const TSNode& node,
-    std::string_view src_code,
-    TypeTranslator& type_translator
+    std::string_view src,
+    TypeTranslator& type_tr
 );
 
 } // namespace astfri::csharp::util

@@ -32,7 +32,7 @@ Scope create_scope(
     };
 
     // todo add other type like struct and record
-    static std::unordered_map<std::string_view, NodeType> node_type_map = {
+    static const std::unordered_map<std::string_view, NodeType> node_types = {
         {"class_declaration",     Class    },
         {"struct_declaration",    Class    },
         {"interface_declaration", Interface},
@@ -40,64 +40,64 @@ Scope create_scope(
         {"compilation_unit",      Root     },
     };
 
-    std::stack<std::string> scope_str;
-    Scope scope           = {};
-    TSNode current        = node;
-    TSNode parent         = ts_node_parent(current);
+    std::stack<std::string> scopes;
+    Scope scope      = {};
+    TSNode n_current = node;
+    TSNode n_parent  = ts_node_parent(n_current);
 
-    bool found_name_space = false;
-    while (! ts_node_is_null(parent))
+    bool found_nms   = false;
+    while (! ts_node_is_null(n_parent))
     {
-        const auto res = node_type_map.find(ts_node_type(parent));
-        current        = parent;
-        parent         = ts_node_parent(current);
+        const auto it = node_types.find(ts_node_type(n_parent));
+        n_current     = n_parent;
+        n_parent      = ts_node_parent(n_current);
 
-        if (res == node_type_map.end())
+        if (it == node_types.end())
             continue;
 
-        switch (res->second)
+        switch (it->second)
         {
         case Class:
         case Interface:
         {
-            const TSNode n_name    = child_by_field_name(current, "name");
-            const std::string name = extract_node_text(n_name, source);
-            scope_str.push(name);
+            const TSNode n_name = child_by_field_name(n_current, "name");
+            std::string name    = extract_text(n_name, source);
+            scopes.push(std::move(name));
             break;
         }
         case Root:
         {
-            if (found_name_space)
+            if (found_nms)
                 break;
 
-            const TSNode namespace_node = find_first_node(
-                current,
+            const TSNode n_namespace = find_first_node(
+                n_current,
                 lang,
                 regs::Queries::file_namespace_query
             );
-            if (ts_node_is_null(namespace_node))
+            if (ts_node_is_null(n_namespace))
                 break;
 
-            const TSNode n_name = child_by_field_name(namespace_node, "name");
-            const std::string name = extract_node_text(n_name, source);
-            split_namespace(scope_str, name);
+            const TSNode n_name    = child_by_field_name(n_namespace, "name");
+            const std::string name = extract_text(n_name, source);
+            split_namespace(scopes, name);
             break;
         }
         case Namespace:
         {
-            found_name_space       = true;
-            const TSNode n_name    = child_by_field_name(current, "name");
-            const std::string name = extract_node_text(n_name, source);
-            split_namespace(scope_str, name);
+            found_nms              = true;
+            const TSNode n_name    = child_by_field_name(n_current, "name");
+            const std::string name = extract_text(n_name, source);
+            split_namespace(scopes, name);
             break;
         }
         }
     }
 
-    while (! scope_str.empty())
+    while (! scopes.empty())
     {
-        scope.names_.push_back(scope_str.top());
-        scope_str.pop();
+        scope.names_.push_back(scopes.top());
+        scopes.pop();
     }
     return scope;
 }
@@ -127,58 +127,38 @@ Scope create_scope(const std::string_view qualifier)
     return scope;
 }
 
-Type* make_type(const TSNode& node, const std::string_view src_code)
-{
-    TypeFactory& type_factory      = TypeFactory::get_instance();
-    std::string type_name          = extract_node_text(node, src_code);
-    const char last_char           = type_name[type_name.length() - 1];
-    const bool is_indirection_type = last_char == '*' || last_char == '&';
-    // todo add `ref`
-    if (is_indirection_type)
-    {
-        type_name.pop_back();
-    }
-
-    std::erase_if(type_name, isspace);
-    const auto res = RegManager::get_type(type_name);
-    // todo implement scope
-    Type* type = res.has_value() ? *res : type_factory.mk_class(type_name, {});
-
-    return is_indirection_type ? type_factory.mk_indirect(type) : type;
-}
-
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
-    SourceCode& src,
-    TypeTranslator& type_translator
+    const SourceCode& src,
+    TypeTranslator& type_tr
 )
 {
-    StmtFactory& stmt_factory   = StmtFactory::get_instance();
-    TypeFactory& type_factory   = TypeFactory::get_instance();
+    static auto& stmt_f         = StmtFactory::get_instance();
+    static auto& type_f         = TypeFactory::get_instance();
     const CSModifiers param_mod = CSModifiers::handle_modifiers(
         find_nodes(node, src.lang(), regs::Queries::var_modif_query),
         src.file.content
     );
 
-    const TSNode type_node       = child_by_field_name(node, "type");
-    const TSNode param_name_node = child_by_field_name(node, "name");
-    const TypeHandler th         = RegManager::get_type_handler(type_node);
-    Type* param_type             = th(&type_translator, type_node);
+    const TSNode n_type  = child_by_field_name(node, "type");
+    const TSNode n_name  = child_by_field_name(node, "name");
+    const TypeHandler th = RegManager::get_type_handler(n_type);
+    Type* param_type     = th(&type_tr, n_type);
 
     if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
     {
-        param_type = type_factory.mk_indirect(param_type);
+        param_type = type_f.mk_indirect(param_type);
     }
     else if (param_mod.has(CSModifier::In)
              || (param_mod.has(CSModifier::Readonly)
                  && param_mod.has(CSModifier::Ref)))
     {
         // todo should be a constat reference for now, it will be just indirect
-        param_type = type_factory.mk_indirect(param_type);
+        param_type = type_f.mk_indirect(param_type);
     }
 
-    return stmt_factory.mk_param_var_def(
-        extract_node_text(param_name_node, src.file.content),
+    return stmt_f.mk_param_var_def(
+        extract_text(n_name, src.file.content),
         param_type,
         nullptr
     );
@@ -187,33 +167,30 @@ ParamVarDefStmt* make_param_def(
 ParamSignature discover_params(
     const TSNode& node,
     const std::string_view src_code,
-    TypeTranslator& type_translator
+    TypeTranslator& type_tr
 )
 {
-    static StmtFactory& stmt_factory = StmtFactory::get_instance();
+    static auto& stmt_f = StmtFactory::get_instance();
     std::vector<ParamVarDefStmt*> params;
     std::vector<ParamMetadata> params_data;
 
     auto collector = [&](const TSNode& current)
     {
-        const TSNode param_name_node = child_by_field_name(current, "name");
-        const TSNode type_node       = child_by_field_name(current, "type");
-        std::string param_name = extract_node_text(param_name_node, src_code);
-        const TypeHandler th   = RegManager::get_type_handler(type_node);
-        Type* type             = th(&type_translator, type_node);
-        ParamVarDefStmt* param_def = stmt_factory.mk_param_var_def(
-            std::move(param_name),
-            type,
-            nullptr
-        );
+        const TSNode n_name  = child_by_field_name(current, "name");
+        const TSNode n_type  = child_by_field_name(current, "type");
+        std::string name     = extract_text(n_name, src_code);
+        const TypeHandler th = RegManager::get_type_handler(n_type);
+        Type* type           = th(&type_tr, n_type);
+        ParamVarDefStmt* param_def
+            = stmt_f.mk_param_var_def(std::move(name), type, nullptr);
         params.push_back(param_def);
         params_data.emplace_back(
             param_def,
             current,
-            ts_node_next_named_sibling(param_name_node)
+            ts_node_next_named_sibling(n_name)
         );
     };
-    process_param_list(node, collector);
+    process_param_list(node, std::move(collector));
     return {std::move(params), std::move(params_data)};
 }
 
@@ -222,15 +199,15 @@ void process_param_list(
     const std::function<void(const TSNode&)>& collector
 )
 {
-    TSNode type_node{};
-    const bool is_variadic = has_variadic_param(node, &type_node);
+    TSNode n_type{};
+    const bool is_variadic = has_variadic_param(node, &n_type);
     TSTreeCursor cursor    = ts_tree_cursor_new(node);
     if (ts_tree_cursor_goto_first_child(&cursor))
     {
         do
         {
             TSNode current = ts_tree_cursor_current_node(&cursor);
-            if (is_variadic && ts_node_eq(current, type_node))
+            if (is_variadic && ts_node_eq(current, n_type))
             {
                 collector(node);
                 break;
@@ -246,22 +223,21 @@ void process_param_list(
     ts_tree_cursor_delete(&cursor);
 }
 
-FunctionMetadata make_func_metadata(
+FuncMetadata make_func_metadata(
     const TSNode& node,
-    const std::string_view src_code,
-    TypeTranslator& type_translator
+    const std::string_view src,
+    TypeTranslator& type_tr
 )
 {
-    auto& stmt_f             = StmtFactory::get_instance();
-    const TSNode n_name      = child_by_field_name(node, "name");
-    const TSNode ret_node    = child_by_field_name(node, "type");
-    const TSNode params_node = child_by_field_name(node, "parameters");
-    std::string name         = extract_node_text(n_name, src_code);
-    const TypeHandler th     = RegManager::get_type_handler(ret_node);
-    Type* ret_type           = th(&type_translator, ret_node);
-    auto [params, params_data]
-        = discover_params(params_node, src_code, type_translator);
-    return FunctionMetadata{
+    static auto& stmt_f        = StmtFactory::get_instance();
+    const TSNode n_name        = child_by_field_name(node, "name");
+    const TSNode n_ret         = child_by_field_name(node, "type");
+    const TSNode n_params      = child_by_field_name(node, "parameters");
+    std::string name           = extract_text(n_name, src);
+    const TypeHandler th       = RegManager::get_type_handler(n_ret);
+    Type* ret_type             = th(&type_tr, n_ret);
+    auto [params, params_data] = discover_params(n_params, src, type_tr);
+    return FuncMetadata{
         .params   = std::move(params_data),
         .func_def = stmt_f.mk_function_def(
             std::move(name),

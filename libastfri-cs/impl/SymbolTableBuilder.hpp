@@ -24,7 +24,7 @@ class SymbolTableBuilder
 {
 
 private:
-    static StmtFactory& stmt_factory_;
+    static StmtFactory& stmt_f_;
 
     TypeContext type_context_;
     TypeTranslator type_tr_;
@@ -50,19 +50,19 @@ public:
     void reg_using_directives();
     void reg_members();
 
-    static void reg_class(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_interface(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_record(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_enum(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_delegate(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_memb_var(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_property(SymbolTableBuilder* self, const TSNode& node);
-    static void reg_method(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_class(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_interface(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_record(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_enum(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_delegate(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_memb_var(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_property(SymbolTableBuilder* self, const TSNode& node);
+    static void visit_method(SymbolTableBuilder* self, const TSNode& node);
 
 private:
     void add_using_directive(const TSNode& node);
-    [[nodiscard]] SourceCode* get_src() const;
-    [[nodiscard]] std::string_view get_src_str() const;
+    [[nodiscard]] SourceCode* src() const;
+    [[nodiscard]] std::string_view src_str() const;
 };
 
 } // namespace astfri::csharp

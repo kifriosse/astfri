@@ -18,9 +18,9 @@ namespace astfri::csharp
 
 Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    std::vector<Stmt*> statements;
-    static const TSSymbol local_func_symb
-        = util::symbol_for_name(self->lang(), "local_function_statement", true);
+    std::vector<Stmt*> stmts;
+    static const TSSymbol func_symb
+        = util::symbol_for_name(self->lang_, "local_function_statement", true);
 
     if (ts_node_named_child_count(node) != 0)
     {
@@ -29,14 +29,14 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
         self->semantic_context_.enter_scope();
         do
         {
-            TSNode current_node = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(current_node)
-                || ts_node_symbol(current_node) != local_func_symb)
+            TSNode n_current = ts_tree_cursor_current_node(&cursor);
+            if (! ts_node_is_named(n_current)
+                || ts_node_symbol(n_current) != func_symb)
                 continue;
 
             self->semantic_context_.reg_local_func(
                 util::make_func_metadata(
-                    current_node,
+                    n_current,
                     self->src_str(),
                     self->type_tr_
                 )
@@ -48,40 +48,39 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
         ts_tree_cursor_goto_first_child(&cursor);
         do
         {
-            TSNode current_node = ts_tree_cursor_current_node(&cursor);
-            if (ts_node_is_named(current_node))
+            TSNode n_current = ts_tree_cursor_current_node(&cursor);
+            if (ts_node_is_named(n_current))
             {
-                StmtHandler handler
-                    = RegManager::get_stmt_handler(current_node);
-                statements.push_back(handler(self, current_node));
+                StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
+                stmts.push_back(h_stmt(self, n_current));
             }
         } while (ts_tree_cursor_goto_next_sibling(&cursor));
         self->semantic_context_.leave_scope();
         ts_tree_cursor_delete(&cursor);
     }
 
-    return stmt_factory_.mk_compound(statements);
+    return stmt_f_.mk_compound(std::move(stmts));
 }
 
 Stmt* SrcCodeVisitor::visit_arrow_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode body_node         = ts_node_named_child(node, 0);
-    const ExprHandler body_handler = RegManager::get_expr_handler(body_node);
+    const TSNode n_body      = ts_node_named_child(node, 0);
+    const ExprHandler h_body = RegManager::get_expr_handler(n_body);
+    Type* ret_type           = self->semantic_context_.current_return_type();
+    Expr* expr               = h_body(self, n_body);
+    Stmt* body               = nullptr;
 
-    Type* return_type = self->semantic_context_.current_return_type();
-    Expr* body_expr   = body_handler(self, body_node);
-    Stmt* body_stmt   = nullptr;
-    if (is_a<VoidType>(return_type) || ! return_type)
-        body_stmt = stmt_factory_.mk_expr(body_expr);
+    if (is_a<VoidType>(ret_type) || ! ret_type)
+        body = stmt_f_.mk_expr(expr);
     else
-        body_stmt = stmt_factory_.mk_return(body_expr);
+        body = stmt_f_.mk_return(expr);
 
-    return stmt_factory_.mk_compound({body_stmt});
+    return stmt_f_.mk_compound({body});
 }
 
 Stmt* SrcCodeVisitor::visit_while_loop(SrcCodeVisitor* self, const TSNode& node)
 {
-    return self->make_while_loop(node, false);
+    return self->make_while_loop(node, true);
 }
 
 Stmt* SrcCodeVisitor::visit_do_while_loop(
@@ -89,60 +88,55 @@ Stmt* SrcCodeVisitor::visit_do_while_loop(
     const TSNode& node
 )
 {
-    return self->make_while_loop(node, true);
+    return self->make_while_loop(node, false);
 }
 
 Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
 {
     self->semantic_context_.enter_scope();
-    Stmt* init                = nullptr;
-    Expr* condition           = nullptr;
-    Stmt* updater             = nullptr;
-    const TSNode init_node    = util::child_by_field_name(node, "initializer");
-    const TSNode cond_node    = util::child_by_field_name(node, "condition");
-    const TSNode updater_node = util::child_by_field_name(node, "update");
-    const TSNode body_node    = util::child_by_field_name(node, "body");
-    const bool cond_null      = ts_node_is_null(cond_node);
-    const bool updater_null   = ts_node_is_null(updater_node);
+    const TSNode n_init  = util::child_by_field_name(node, "initializer");
+    const TSNode n_cond  = util::child_by_field_name(node, "condition");
+    const TSNode n_step  = util::child_by_field_name(node, "update");
+    const TSNode n_body  = util::child_by_field_name(node, "body");
+    const bool cond_null = ts_node_is_null(n_cond);
+    const bool step_null = ts_node_is_null(n_step);
+    Stmt* init           = nullptr;
+    Expr* cond           = nullptr;
+    Stmt* step           = nullptr;
 
-    if (! ts_node_is_null(init_node))
+    if (! ts_node_is_null(n_init))
     {
-        if (RegManager::is_expr(init_node))
+        if (RegManager::is_expr(n_init))
         {
-            const TSNode* end_node = &body_node;
+            const TSNode* n_end = &n_body;
             if (! cond_null)
-                end_node = &cond_node;
-            else if (! updater_null)
-                end_node = &updater_node;
+                n_end = &n_cond;
+            else if (! step_null)
+                n_end = &n_step;
 
-            init = stmt_factory_.mk_expr(
-                self->expr_list_to_comma_op(init_node, end_node)
-            );
+            init = stmt_f_.mk_expr(self->expr_list_to_comma_op(n_init, n_end));
         }
         else
         {
-            init = self->visit_for_init_var_def(init_node);
+            init = self->visit_for_init_var_def(n_init);
         }
     }
 
     if (! cond_null)
     {
-        const ExprHandler cond_handler
-            = RegManager::get_expr_handler(cond_node);
-        condition = cond_handler(self, cond_node);
+        const ExprHandler h_cond = RegManager::get_expr_handler(n_cond);
+        cond                     = h_cond(self, n_cond);
     }
 
-    if (! updater_null)
+    if (! step_null)
     {
-        updater = stmt_factory_.mk_expr(
-            self->expr_list_to_comma_op(updater_node, &body_node)
-        );
+        step = stmt_f_.mk_expr(self->expr_list_to_comma_op(n_step, &n_body));
     }
 
-    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
-    Stmt* body                     = body_handler(self, body_node);
+    const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
+    Stmt* body               = h_body(self, n_body);
     self->semantic_context_.leave_scope();
-    return stmt_factory_.mk_for(init, condition, updater, body);
+    return stmt_f_.mk_for(init, cond, step, body);
 }
 
 Stmt* SrcCodeVisitor::visit_for_each_loop(
@@ -151,12 +145,12 @@ Stmt* SrcCodeVisitor::visit_for_each_loop(
 )
 {
     self->semantic_context_.enter_scope();
-    const TSNode type_node  = util::child_by_field_name(node, "type");
-    const TSNode left_node  = util::child_by_field_name(node, "left");
-    const TSNode right_node = util::child_by_field_name(node, "right");
-    const TSNode body_node  = util::child_by_field_name(node, "body");
+    const TSNode n_type  = util::child_by_field_name(node, "type");
+    const TSNode n_left  = util::child_by_field_name(node, "left");
+    const TSNode n_right = util::child_by_field_name(node, "right");
+    const TSNode n_body  = util::child_by_field_name(node, "body");
 
-    if (ts_node_is_null(type_node))
+    if (ts_node_is_null(n_type))
     {
         // todo handle deconstruction syntax
         throw std::logic_error(
@@ -164,19 +158,18 @@ Stmt* SrcCodeVisitor::visit_for_each_loop(
         );
     }
 
-    const std::string var_name
-        = util::extract_node_text(left_node, self->src_str());
-    const ExprHandler right_handler = RegManager::get_expr_handler(right_node);
-    const StmtHandler body_handler  = RegManager::get_stmt_handler(body_node);
-    const TypeHandler th            = RegManager::get_type_handler(type_node);
-    Type* type                      = th(&self->type_tr_, type_node);
+    std::string name          = util::extract_text(n_left, self->src_str());
+    const ExprHandler h_right = RegManager::get_expr_handler(n_right);
+    const StmtHandler h_body  = RegManager::get_stmt_handler(n_body);
+    const TypeHandler th      = RegManager::get_type_handler(n_type);
+    Type* type                = th(&self->type_tr_, n_type);
     LocalVarDefStmt* left
-        = stmt_factory_.mk_local_var_def(var_name, type, nullptr);
+        = stmt_f_.mk_local_var_def(std::move(name), type, nullptr);
     self->semantic_context_.reg_local_var(left);
-    Expr* right = right_handler(self, right_node);
-    Stmt* body  = body_handler(self, body_node);
+    Expr* right = h_right(self, n_right);
+    Stmt* body  = h_body(self, n_body);
     self->semantic_context_.leave_scope();
-    return stmt_factory_.mk_for_each(left, right, body);
+    return stmt_f_.mk_for_each(left, right, body);
 }
 
 Stmt* SrcCodeVisitor::visit_if_stmt(SrcCodeVisitor* self, const TSNode& node)
@@ -185,50 +178,43 @@ Stmt* SrcCodeVisitor::visit_if_stmt(SrcCodeVisitor* self, const TSNode& node)
 
     std::stack<TSNode> if_nodes;
     if_nodes.push(node);
-    TSNode current_node      = util::child_by_field_name(node, if_false);
-
-    const uint32_t if_symbol = ts_node_symbol(node);
-    TSSymbol current_symbol
-        = ts_node_is_null(current_node) ? 0 : ts_node_symbol(current_node);
-    while (current_symbol == if_symbol)
+    TSNode n_current       = util::child_by_field_name(node, if_false);
+    const TSSymbol if_symb = ts_node_symbol(node);
+    TSSymbol current_symb
+        = ts_node_is_null(n_current) ? 0 : ts_node_symbol(n_current);
+    while (current_symb == if_symb)
     {
-        if_nodes.push(current_node);
-        current_node = util::child_by_field_name(current_node, if_false);
-        if (ts_node_is_null(current_node))
+        if_nodes.push(n_current);
+        n_current = util::child_by_field_name(n_current, if_false);
+        if (ts_node_is_null(n_current))
             break;
 
-        current_symbol = ts_node_symbol(current_node);
+        current_symb = ts_node_symbol(n_current);
     }
 
     // handling of else in last node
-    const TSNode else_node
-        = util::child_by_field_name(if_nodes.top(), if_false);
+    const TSNode n_else = util::child_by_field_name(if_nodes.top(), if_false);
 
-    Stmt* current_else = nullptr;
-    if (! ts_node_is_null(else_node))
+    Stmt* current_else  = nullptr;
+    if (! ts_node_is_null(n_else))
     {
-        const StmtHandler else_handler
-            = RegManager::get_stmt_handler(else_node);
-        current_else = else_handler(self, else_node);
+        const StmtHandler h_else = RegManager::get_stmt_handler(n_else);
+        current_else             = h_else(self, n_else);
     }
 
     while (! if_nodes.empty())
     {
         const TSNode if_node = if_nodes.top();
         if_nodes.pop();
-        const TSNode if_true_node
-            = util::child_by_field_name(if_node, "consequence");
-        const TSNode cond_node
-            = util::child_by_field_name(if_node, "condition");
-        StmtHandler if_true_handler
-            = RegManager::get_stmt_handler(if_true_node);
-        ExprHandler cond_handler = RegManager::get_expr_handler(cond_node);
+        const TSNode n_true = util::child_by_field_name(if_node, "consequence");
+        const TSNode n_cond = util::child_by_field_name(if_node, "condition");
+        StmtHandler h_true  = RegManager::get_stmt_handler(n_true);
+        ExprHandler h_cond  = RegManager::get_expr_handler(n_cond);
 
-        Stmt* if_true_stmt       = if_true_handler(self, if_true_node);
-        Expr* cond_expr          = cond_handler(self, cond_node);
-        IfStmt* if_stmt
-            = stmt_factory_.mk_if(cond_expr, if_true_stmt, current_else);
-        current_else = if_stmt;
+        Stmt* true_stmt     = h_true(self, n_true);
+        Expr* cond_expr     = h_cond(self, n_cond);
+        IfStmt* if_stmt     = stmt_f_.mk_if(cond_expr, true_stmt, current_else);
+        current_else        = if_stmt;
     }
 
     return current_else;
@@ -236,23 +222,23 @@ Stmt* SrcCodeVisitor::visit_if_stmt(SrcCodeVisitor* self, const TSNode& node)
 
 Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    TSTreeCursor cursor = ts_tree_cursor_new(node);
     if (ts_node_child_count(node) < 2)
         throw std::logic_error("Not a try-catch node");
 
-    const TSNode body_node         = util::child_by_field_name(node, "body");
-    const StmtHandler body_handler = RegManager::get_stmt_handler(body_node);
+    TSTreeCursor cursor      = ts_tree_cursor_new(node);
+    const TSNode n_body      = util::child_by_field_name(node, "body");
+    const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
     ts_tree_cursor_goto_descendant(&cursor, 2);
 
-    Stmt* finally_stmt = nullptr;
+    Stmt* finally = nullptr;
     std::vector<CatchStmt*> catch_stmts;
     do
     {
-        TSNode current              = ts_tree_cursor_current_node(&cursor);
-        StmtHandler current_handler = RegManager::get_stmt_handler(current);
-        Stmt* current_stmt          = current_handler(self, current);
+        TSNode n_current      = ts_tree_cursor_current_node(&cursor);
+        StmtHandler h_current = RegManager::get_stmt_handler(n_current);
+        Stmt* current_stmt    = h_current(self, n_current);
         if (is_a<CompoundStmt>(current_stmt))
-            finally_stmt = current_stmt;
+            finally = current_stmt;
         else if (auto* catch_stmt = as_a<CatchStmt>(current_stmt))
             catch_stmts.push_back(catch_stmt);
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
@@ -260,8 +246,8 @@ Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
     self->semantic_context_.leave_scope();
     ts_tree_cursor_delete(&cursor);
 
-    return stmt_factory_
-        .mk_try(body_handler(self, body_node), finally_stmt, catch_stmts);
+    return stmt_f_
+        .mk_try(h_body(self, n_body), finally, std::move(catch_stmts));
 }
 
 Stmt* SrcCodeVisitor::visit_catch_clause(
@@ -277,10 +263,9 @@ Stmt* SrcCodeVisitor::visit_catch_clause(
     Stmt* body                    = nullptr;
     do
     {
-        TSNode current_node = ts_tree_cursor_current_node(&cursor);
-        StmtHandler current_handler
-            = RegManager::get_stmt_handler(current_node);
-        Stmt* current_stmt = current_handler(self, current_node);
+        TSNode n_current      = ts_tree_cursor_current_node(&cursor);
+        StmtHandler h_current = RegManager::get_stmt_handler(n_current);
+        Stmt* current_stmt    = h_current(self, n_current);
         if (const auto var_def = as_a<LocalVarDefStmt>(current_stmt))
         {
             expr_var_def = var_def;
@@ -296,26 +281,25 @@ Stmt* SrcCodeVisitor::visit_catch_clause(
     ts_tree_cursor_delete(&cursor);
 
     self->semantic_context_.leave_scope();
-    return stmt_factory_.mk_catch(expr_var_def, body);
+    return stmt_f_.mk_catch(expr_var_def, body);
 }
 
 Stmt* SrcCodeVisitor::visit_finally(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode body_node = ts_node_named_child(node, 0);
-    return RegManager::get_stmt_handler(body_node)(self, body_node);
+    const TSNode n_body = ts_node_named_child(node, 0);
+    return RegManager::get_stmt_handler(n_body)(self, n_body);
 }
 
 Stmt* SrcCodeVisitor::visit_catch_decl(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode type_node = util::child_by_field_name(node, "type");
-    const TSNode n_name    = util::child_by_field_name(node, "name");
-    const TypeHandler th   = RegManager::get_type_handler(type_node);
-    Type* type             = th(&self->type_tr_, type_node);
-    const std::string name
-        = ts_node_is_null(n_name)
-            ? std::string{}
-            : util::extract_node_text(n_name, self->src_str());
-    return stmt_factory_.mk_local_var_def(name, type, nullptr);
+    const TSNode n_type  = util::child_by_field_name(node, "type");
+    const TSNode n_name  = util::child_by_field_name(node, "name");
+    const TypeHandler th = RegManager::get_type_handler(n_type);
+    Type* type           = th(&self->type_tr_, n_type);
+    std::string name     = ts_node_is_null(n_name)
+                             ? std::string{}
+                             : util::extract_text(n_name, self->src_str());
+    return stmt_f_.mk_local_var_def(std::move(name), type, nullptr);
 }
 
 Stmt* SrcCodeVisitor::visit_switch_stmt(
@@ -323,23 +307,23 @@ Stmt* SrcCodeVisitor::visit_switch_stmt(
     const TSNode& node
 )
 {
-    const TSNode value_node       = util::child_by_field_name(node, "value");
-    const TSNode switch_body      = util::child_by_field_name(node, "body");
-    const ExprHandler val_handler = RegManager::get_expr_handler(value_node);
-    Expr* value                   = val_handler(self, value_node);
+    const TSNode n_value       = util::child_by_field_name(node, "value");
+    const TSNode n_switch_body = util::child_by_field_name(node, "body");
+    const ExprHandler h_value  = RegManager::get_expr_handler(n_value);
+    Expr* value                = h_value(self, n_value);
 
     std::vector<CaseBaseStmt*> cases;
-    TSTreeCursor cursor = ts_tree_cursor_new(switch_body);
+    TSTreeCursor cursor = ts_tree_cursor_new(n_switch_body);
     if (ts_tree_cursor_goto_first_child(&cursor))
     {
         do
         {
-            TSNode current = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(current))
+            TSNode n_current = ts_tree_cursor_current_node(&cursor);
+            if (! ts_node_is_named(n_current))
                 continue;
 
-            StmtHandler handler = RegManager::get_stmt_handler(current);
-            Stmt* stmt          = handler(self, current);
+            StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
+            Stmt* stmt         = h_stmt(self, n_current);
             if (auto* case_stmt = as_a<CaseBaseStmt>(stmt))
             {
                 cases.push_back(case_stmt);
@@ -349,56 +333,56 @@ Stmt* SrcCodeVisitor::visit_switch_stmt(
 
     ts_tree_cursor_delete(&cursor);
 
-    return stmt_factory_.mk_switch(value, cases);
+    return stmt_f_.mk_switch(value, std::move(cases));
 }
 
 Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
     std::vector<Stmt*> body_stmts;
     Expr* pattern       = nullptr;
-    TSNode current      = {};
+    TSNode n_current    = {};
     TSTreeCursor cursor = ts_tree_cursor_new(node);
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid case node");
 
     do
     {
-        current = ts_tree_cursor_current_node(&cursor);
-        if (std::strcmp(ts_node_type(current), ":") == 0)
+        n_current = ts_tree_cursor_current_node(&cursor);
+        if (std::strcmp(ts_node_type(n_current), ":") == 0)
             break;
         // todo handle more complex patterns
-        const ExprHandler pattern_handler
-            = RegManager::get_expr_handler(current);
-        pattern = pattern_handler(self, current);
+        const ExprHandler h_pattern = RegManager::get_expr_handler(n_current);
+        pattern                     = h_pattern(self, n_current);
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
     while (ts_tree_cursor_goto_next_sibling(&cursor))
     {
-        current = ts_tree_cursor_current_node(&cursor);
-        if (! ts_node_is_named(current))
+        n_current = ts_tree_cursor_current_node(&cursor);
+        if (! ts_node_is_named(n_current))
             continue;
 
-        StmtHandler handler = RegManager::get_stmt_handler(current);
-        Stmt* stmt          = handler(self, current);
+        StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
+        Stmt* stmt         = h_stmt(self, n_current);
         body_stmts.push_back(stmt);
     }
 
     Stmt* body = body_stmts.size() == 1 && is_a<CompoundStmt>(body_stmts.back())
                    ? body_stmts.back()
-                   : stmt_factory_.mk_compound(body_stmts);
-
-    if (pattern)
-        return stmt_factory_.mk_case(pattern, body);
+                   : stmt_f_.mk_compound(std::move(body_stmts));
 
     ts_tree_cursor_delete(&cursor);
-    return stmt_factory_.mk_default_case(body);
+
+    if (pattern)
+        return stmt_f_.mk_case(pattern, body);
+
+    return stmt_f_.mk_default_case(body);
 }
 
 Stmt* SrcCodeVisitor::visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode expr_node    = ts_node_child(node, 0);
-    const ExprHandler handler = RegManager::get_expr_handler(expr_node);
-    return stmt_factory_.mk_expr(handler(self, expr_node));
+    const TSNode n_expr      = ts_node_child(node, 0);
+    const ExprHandler h_expr = RegManager::get_expr_handler(n_expr);
+    return stmt_f_.mk_expr(h_expr(self, n_expr));
 }
 
 Stmt* SrcCodeVisitor::visit_continue(
@@ -406,7 +390,7 @@ Stmt* SrcCodeVisitor::visit_continue(
     [[maybe_unused]] const TSNode& node
 )
 {
-    return stmt_factory_.mk_continue();
+    return stmt_f_.mk_continue();
 }
 
 Stmt* SrcCodeVisitor::visit_break(
@@ -414,30 +398,31 @@ Stmt* SrcCodeVisitor::visit_break(
     [[maybe_unused]] const TSNode& node
 )
 {
-    return stmt_factory_.mk_break();
+    return stmt_f_.mk_break();
 }
 
 Stmt* SrcCodeVisitor::visit_return(SrcCodeVisitor* self, const TSNode& node)
 {
     Expr* expr = nullptr;
-    if (ts_node_child_count(node) > 2)
+    if (ts_node_named_child_count(node) > 0)
     {
-        const TSNode expr_node = ts_node_named_child(node, 0);
-        const ExprHandler expr_handler
-            = RegManager::get_expr_handler(expr_node);
-        expr = expr_handler(self, expr_node);
+        const TSNode n_expr      = ts_node_named_child(node, 0);
+        const ExprHandler h_expr = RegManager::get_expr_handler(n_expr);
+        expr                     = h_expr(self, n_expr);
     }
-    return stmt_factory_.mk_return(expr);
+    return stmt_f_.mk_return(expr);
 }
 
 Stmt* SrcCodeVisitor::visit_throw(SrcCodeVisitor* self, const TSNode& node)
 {
-    if (ts_node_child_count(node) <= 2)
-        return stmt_factory_.mk_throw(nullptr);
-
-    const TSNode expr_node         = ts_node_named_child(node, 0);
-    const ExprHandler expr_handler = RegManager::get_expr_handler(expr_node);
-    return stmt_factory_.mk_throw(expr_handler(self, expr_node));
+    Expr* expr = nullptr;
+    if (ts_node_named_child_count(node) > 0)
+    {
+        const TSNode n_expr      = ts_node_named_child(node, 0);
+        const ExprHandler h_expr = RegManager::get_expr_handler(n_expr);
+        expr                     = h_expr(self, n_expr);
+    }
+    return stmt_f_.mk_throw(expr);
 }
 
 } // namespace astfri::csharp

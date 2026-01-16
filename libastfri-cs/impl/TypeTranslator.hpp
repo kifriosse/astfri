@@ -9,11 +9,12 @@ class SemanticContext;
 class TypeTranslator
 {
 private:
-    static TypeFactory& type_factory_;
+    static TypeFactory& type_f_;
 
-    Scope current_namespace_{};
+    Scope current_ns_{};
     SymbolTable& symb_table_;
-    SourceCode* current_src{nullptr};
+    SourceCode* current_src_{nullptr};
+    const TSLanguage* lang_;
 
 public:
     explicit TypeTranslator(SymbolTable& symbol_table);
@@ -45,9 +46,8 @@ public:
     static Type* visit_func_pointer(TypeTranslator* self, const TSNode& node);
 
 private:
-    [[nodiscard]] std::string_view get_src_str() const;
-    [[nodiscard]] const TSLanguage* get_lang() const;
-    [[nodiscard]] SourceCode* get_src() const;
+    [[nodiscard]] SourceCode* src() const;
+    [[nodiscard]] std::string_view src_str() const;
 };
 
 } // namespace astfri::csharp

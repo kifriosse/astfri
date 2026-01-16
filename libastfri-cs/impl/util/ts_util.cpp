@@ -87,10 +87,7 @@ TSSymbol symbol_for_name(
     return ts_language_symbol_for_name(lang, name.data(), name.length(), named);
 }
 
-std::string extract_node_text(
-    const TSNode& node,
-    const std::string_view src_code
-)
+std::string extract_text(const TSNode& node, const std::string_view src_code)
 {
     if (ts_node_is_null(node))
         throw std::runtime_error("Node is null");
@@ -200,7 +197,7 @@ void print_child_nodes_types(const TSNode& node)
 void print_child_nodes_types(
     const TSNode& node,
     const std::string_view source,
-    bool named
+    const bool named
 )
 {
     for (size_t i = 0; i < ts_node_child_count(node); ++i)
@@ -210,7 +207,7 @@ void print_child_nodes_types(
             continue;
 
         std::string type = ts_node_type(child);
-        std::string text = extract_node_text(child, source);
+        std::string text = extract_text(child, source);
         std::cout << "Child " << i << " type: \'" << type << "\' text: \""
                   << text << "\"" << '\n';
     }
@@ -290,12 +287,12 @@ std::string remove_comments(
 
 bool has_variadic_param(const TSNode& node, TSNode* type_node)
 {
-    const TSNode found_type = child_by_field_name(node, "type");
-    if (type_node && ! ts_node_is_null(found_type))
-        *type_node = found_type;
+    const TSNode n_type = child_by_field_name(node, "type");
+    if (type_node && ! ts_node_is_null(n_type))
+        *type_node = n_type;
 
     const TSNode n_name = child_by_field_name(node, "name");
-    return ! ts_node_is_null(found_type) && ! ts_node_is_null(n_name);
+    return ! ts_node_is_null(n_type) && ! ts_node_is_null(n_name);
 }
 
 } // namespace astfri::csharp::util

@@ -1,7 +1,10 @@
 global using System.Numerics;
 global using static System.Math;
+global using Cons = System.Console;
+using System.Security.Cryptography.X509Certificates;
+using Generics = System.Collections.Generic;
 
-public class Vector2
+public class Vector2 : IComparable<Vector2>, IEquatable<Vector2>
 {
 
     public static Vector2 Zero = new Vector2();
@@ -53,5 +56,18 @@ public class Vector2
     {
         x = this.X;
         y = this.Y;
+        return;
+    }
+
+    public int CompareTo(Vector2? other)
+    {
+        if (other == null) return 1;
+        return (X, Y).CompareTo((other.X, other.Y));
+    }
+
+    public bool Equals(Vector2? other)
+    {
+        if (other == null) return false;
+        return X == other.X && Y == other.Y;
     }
 }

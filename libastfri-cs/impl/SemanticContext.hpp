@@ -40,7 +40,7 @@ struct ScopeContext
     std::stack<std::vector<Stmt*>> scope_stack{};
     IdentifierMap<ParamVarDefStmt*> params{};
     IdentifierMap<LocalVarDefStmt*> local_vars{};
-    std::unordered_map<FuncId, FunctionMetadata> function_map{};
+    std::unordered_map<FuncId, FuncMetadata> function_map{};
 };
 
 /**
@@ -78,9 +78,7 @@ public:
      * @note Keys will be in order of their insertion into symbol table
      */
     SymbolTableKV get_user_types() const;
-    std::optional<TypeMetadata> get_type_metadata(
-        UserTypeDefStmt* user_type
-    ) const;
+    TypeMetadata* get_type_metadata(UserTypeDefStmt* user_type) const;
 
     void enter_type(UserTypeDefStmt* def);
     void enter_scope();
@@ -88,7 +86,7 @@ public:
     void reg_return(Type* return_type);
     void reg_local_var(LocalVarDefStmt* var_def);
     void reg_param(ParamVarDefStmt* var_def);
-    void reg_local_func(FunctionMetadata func_data);
+    void reg_local_func(FuncMetadata func_meta);
 
     void leave_type();
     void leave_scope();
@@ -100,7 +98,7 @@ public:
         std::string_view name,
         access::Qualifier qualifier
     ) const;
-    const FunctionMetadata* find_func(const FuncId& func_id) const;
+    const FuncMetadata* find_func(const FuncId& func_id) const;
     const MethodMetadata* find_method(
         const MethodId& method_id,
         UserTypeDefStmt* owner

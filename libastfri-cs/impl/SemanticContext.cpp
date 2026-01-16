@@ -35,14 +35,13 @@ SemanticContext::SymbolTableKV SemanticContext::get_user_types() const
     return SymbolTableKV{symbol_table_.user_type_keys};
 }
 
-std::optional<TypeMetadata> SemanticContext::get_type_metadata(
+TypeMetadata* SemanticContext::get_type_metadata(
     UserTypeDefStmt* user_type
 ) const
 {
     const auto& it = symbol_table_.user_types_metadata.find(user_type);
-    if (it != symbol_table_.user_types_metadata.end())
-        return it->second;
-    return {};
+    return it != symbol_table_.user_types_metadata.end() ? &it->second
+                                                         : nullptr;
 }
 
 void SemanticContext::enter_type(UserTypeDefStmt* def)
@@ -68,15 +67,17 @@ void SemanticContext::reg_param(ParamVarDefStmt* var_def)
     scope_context_.params.emplace(var_def->name_, var_def);
 }
 
-void SemanticContext::reg_local_func(FunctionMetadata func_data)
+void SemanticContext::reg_local_func(FuncMetadata func_meta)
 {
-    const auto func_def = func_data.func_def;
+    const auto func_def = func_meta.func_def;
     scope_context_.scope_stack.top().push_back(func_def);
-    FuncId func_id{
-        .name        = func_def->name_,
-        .param_count = func_def->params_.size(),
-    };
-    scope_context_.function_map.emplace(func_id, func_data);
+    scope_context_.function_map.emplace(
+        FuncId{
+            .name        = func_def->name_,
+            .param_count = func_def->params_.size(),
+        },
+        std::move(func_meta)
+    );
 }
 
 void SemanticContext::reg_return(Type* return_type)
@@ -199,7 +200,7 @@ VarDefStmt* SemanticContext::find_var(
     return std::visit(overloaded, qualifier);
 }
 
-const FunctionMetadata* SemanticContext::find_func(const FuncId& func_id) const
+const FuncMetadata* SemanticContext::find_func(const FuncId& func_id) const
 {
     auto& funcs        = scope_context_.function_map;
     const auto it_func = funcs.find(func_id);
@@ -217,13 +218,13 @@ const MethodMetadata* SemanticContext::find_method(
     {
         while (current)
         {
-            const auto it_type_metadata = user_types.find(current);
-            if (it_type_metadata == user_types.end())
+            const auto it_type_meta = user_types.find(current);
+            if (it_type_meta == user_types.end())
                 return nullptr;
 
-            auto& methods        = it_type_metadata->second.methods;
-            const auto it_method = methods.find(method_id);
-            if (it_method != methods.end())
+            auto& [_, type_meta] = *it_type_meta;
+            const auto it_method = type_meta.methods.find(method_id);
+            if (it_method != type_meta.methods.end())
                 return &it_method->second;
 
             current
@@ -232,13 +233,13 @@ const MethodMetadata* SemanticContext::find_method(
     }
     else if (is_a<InterfaceDefStmt>(owner))
     {
-        const auto it_type_metadata = user_types.find(owner);
-        if (it_type_metadata == user_types.end())
+        const auto it_type_meta = user_types.find(owner);
+        if (it_type_meta == user_types.end())
             return nullptr;
 
-        auto& methods        = it_type_metadata->second.methods;
-        const auto it_method = methods.find(method_id);
-        if (it_method != methods.end())
+        auto& [_, type_meta] = *it_type_meta;
+        const auto it_method = type_meta.methods.find(method_id);
+        if (it_method != type_meta.methods.end())
             return &it_method->second;
     }
 
@@ -301,6 +302,7 @@ CallType SemanticContext::find_invoc_type(
          */
         return CallType::Delegate;
     }
+
     MethodId method_id{
         .func_id   = func_id,
         .is_static = std::holds_alternative<access::Static>(quelifier),
@@ -309,7 +311,7 @@ CallType SemanticContext::find_invoc_type(
     util::Overloaded overloaded{
         [&](const access::None&) -> CallType
         {
-            if ([[maybe_unused]] const FunctionMetadata* metadata
+            if ([[maybe_unused]] const FuncMetadata* metadata
                 = find_func(func_id))
                 return CallType::LocalFunc;
 

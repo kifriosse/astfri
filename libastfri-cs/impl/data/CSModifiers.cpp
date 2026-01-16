@@ -20,10 +20,10 @@ CSModifiers CSModifiers::handle_modifiers(
     CSModifiers modifiers;
     for (const TSNode& node : mod_nodes)
     {
-        std::string mod_str = util::extract_node_text(node, source_code);
-        if (const auto res = RegManager::get_modifier(mod_str))
+        std::string mod_str = util::extract_text(node, source_code);
+        if (const auto modif_opt = RegManager::get_modifier(mod_str))
         {
-            modifiers.add_modifier(*res);
+            modifiers.add_modifier(*modif_opt);
         }
     }
     return modifiers;
