@@ -1,5 +1,5 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
@@ -21,7 +21,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
 )
 {
     const std::vector<TSNode> n_modifs
-        = util::find_nodes(node, lang_, regs::Queries::var_modif_query);
+        = util::find_nodes(node, regs::QueryType::VarModifier);
 
     const TSNode n_var_decl = n_modifs.empty()
                                 ? ts_node_child(node, 0)
@@ -32,7 +32,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
     Type* type              = th(&type_tr_, n_type);
 
     const std::vector<TSNode> n_var_decltors
-        = util::find_nodes(n_var_decl, lang_, regs::Queries::decl_query);
+        = util::find_nodes(n_var_decl, regs::QueryType::VarDecltor);
 
     std::vector<VarDefStmt*> var_defs;
     for (const TSNode& n_var_decltor : n_var_decltors)
@@ -217,7 +217,7 @@ Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node)
     const TSNode n_type  = util::child_by_field_name(node, "type");
     const TypeHandler th = RegManager::get_type_handler(n_type);
     const std::vector<TSNode> n_decltr
-        = util::find_nodes(node, lang_, regs::Queries::decl_query);
+        = util::find_nodes(node, regs::QueryType::VarDecltor);
     for (const auto declarator_node : n_decltr)
     {
         TSNode n_name            = ts_node_named_child(declarator_node, 0);

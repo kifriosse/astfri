@@ -143,7 +143,6 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                     util::remove_comments(
                         ts_tree_root_node(tree),
                         src,
-                        lang_,
                         entry_path
                     )
                 );

@@ -1,5 +1,5 @@
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>

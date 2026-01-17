@@ -1,5 +1,5 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
@@ -8,7 +8,6 @@
 #include <tree_sitter/api.h>
 
 #include <functional>
-#include <iostream>
 #include <stack>
 #include <string>
 #include <string_view>
@@ -17,11 +16,7 @@
 namespace astfri::csharp::util
 {
 
-Scope create_scope(
-    const TSNode& node,
-    const TSLanguage* lang,
-    const std::string_view source
-)
+Scope create_scope(const TSNode& node, const std::string_view source)
 {
     enum NodeType
     {
@@ -70,11 +65,8 @@ Scope create_scope(
             if (found_nms)
                 break;
 
-            const TSNode n_namespace = find_first_node(
-                n_current,
-                lang,
-                regs::Queries::file_namespace_query
-            );
+            const TSNode n_namespace
+                = find_first_node(n_current, regs::QueryType::FileNamespace);
             if (ts_node_is_null(n_namespace))
                 break;
 
@@ -136,7 +128,7 @@ ParamVarDefStmt* make_param_def(
     static auto& stmt_f         = StmtFactory::get_instance();
     static auto& type_f         = TypeFactory::get_instance();
     const CSModifiers param_mod = CSModifiers::handle_modifiers(
-        find_nodes(node, src.lang(), regs::Queries::var_modif_query),
+        find_nodes(node, regs::QueryType::VarModifier),
         src.file.content
     );
 
@@ -176,11 +168,27 @@ ParamSignature discover_params(
 
     auto collector = [&](const TSNode& current)
     {
-        const TSNode n_name  = child_by_field_name(current, "name");
-        const TSNode n_type  = child_by_field_name(current, "type");
-        std::string name     = extract_text(n_name, src_code);
-        const TypeHandler th = RegManager::get_type_handler(n_type);
-        Type* type           = th(&type_tr, n_type);
+        const TSNode n_name         = child_by_field_name(current, "name");
+        const TSNode n_type         = child_by_field_name(current, "type");
+        std::string name            = extract_text(n_name, src_code);
+        const TypeHandler th        = RegManager::get_type_handler(n_type);
+        const CSModifiers param_mod = CSModifiers::handle_modifiers(
+            find_nodes(current, regs::QueryType::VarModifier),
+            src_code
+        );
+        Type* type = th(&type_tr, n_type);
+        if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
+        {
+            type = TypeFactory::get_instance().mk_indirect(type);
+        }
+        else if (param_mod.has(CSModifier::In)
+                 || (param_mod.has(CSModifier::Readonly)
+                     && param_mod.has(CSModifier::Ref)))
+        {
+            // todo should be a constat reference for now, it will be just
+            // indirect
+            type = TypeFactory::get_instance().mk_indirect(type);
+        }
         ParamVarDefStmt* param_def
             = stmt_f.mk_param_var_def(std::move(name), type, nullptr);
         params.push_back(param_def);

@@ -2,7 +2,6 @@ add_library(astfri-cs SHARED)
 
 target_sources(astfri-cs PRIVATE
     ASTBuilder.cpp
-    Registries.cpp
     SemanticContext.cpp
     SymbolTableBuilder.cpp
     TypeTranslator.cpp
@@ -10,6 +9,7 @@ target_sources(astfri-cs PRIVATE
 )
 
 add_subdirectory(data)
+add_subdirectory(regs)
 add_subdirectory(util)
 add_subdirectory(visitor)
 

@@ -139,6 +139,6 @@ private:
 
 } // namespace astfri::csharp
 
-#include <libastfri-cs/impl/Registries.inl>
+#include <libastfri-cs/impl/regs/Registries.inl>
 
 #endif // CSHARP_REGISTRIES_HPP

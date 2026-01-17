@@ -1,6 +1,6 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/util/utils.hpp>
@@ -58,7 +58,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         n_class_membs[node_type];
     }
 
-    Scope scope = util::create_scope(node, self->lang_, self->src_str());
+    Scope scope               = util::create_scope(node, self->src_str());
     const TSNode n_class_name = util::child_by_field_name(node, "name");
     std::string class_name  = util::extract_text(n_class_name, self->src_str());
 
@@ -193,7 +193,7 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
 
     const TSNode n_name = util::child_by_field_name(node, "name");
     std::string name    = util::extract_text(n_name, self->src_str());
-    Scope scope = util::create_scope(node, self->lang_, self->src_str());
+    Scope scope         = util::create_scope(node, self->src_str());
 
     InterfaceDefStmt* intr_def
         = stmt_f_.mk_interface_def(std::move(name), std::move(scope));
@@ -276,8 +276,7 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
 
     const std::vector<TSNode> n_modifs = util::find_nodes(
         node,
-        self->lang_,
-        "(modifier) @mod"
+        regs::QueryType::MethodModifier
     ); // todo move this into query registyr
     const CSModifiers modifs
         = CSModifiers::handle_modifiers(n_modifs, self->src_str());
@@ -373,11 +372,8 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
         throw std::logic_error("Owner type not found");
 
     const TSNode n_params = util::child_by_field_name(node, "parameters");
-    const std::vector<TSNode> n_modifs = util::find_nodes(
-        node,
-        self->lang_,
-        regs::Queries::method_modif_query
-    );
+    const std::vector<TSNode> n_modifs
+        = util::find_nodes(node, regs::QueryType::MethodModifier);
     const CSModifiers modifs
         = CSModifiers::handle_modifiers(n_modifs, self->src_str());
     const TSNode n_name        = util::child_by_field_name(node, "name");

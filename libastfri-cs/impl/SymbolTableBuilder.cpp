@@ -1,6 +1,6 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/astfri_util.hpp>
@@ -43,8 +43,7 @@ void SymbolTableBuilder::reg_user_types()
         type_tr_.set_current_src(&src);
         const std::vector<TSNode> top_level_nodes = util::find_nodes(
             ts_tree_root_node(tree),
-            lang_,
-            regs::Queries::top_level_stmt_query
+            regs::QueryType::TopLevel
         );
         for (const TSNode& node : top_level_nodes)
         {
@@ -60,13 +59,10 @@ void SymbolTableBuilder::reg_using_directives()
     for (auto& src : srcs_)
     {
         type_tr_.set_current_src(&src);
-        current_src_                   = &src;
-        TSNode root                    = ts_tree_root_node(src.tree);
-        std::vector<TSNode> directives = util::find_nodes(
-            root,
-            lang_,
-            regs::Queries::using_directives_query
-        );
+        current_src_ = &src;
+        TSNode root  = ts_tree_root_node(src.tree);
+        std::vector<TSNode> directives
+            = util::find_nodes(root, regs::QueryType::Using);
         for (auto& directive : directives)
         {
             // util::print_child_nodes_types(directive);
@@ -114,7 +110,7 @@ void SymbolTableBuilder::visit_class(
     const std::string_view src = self->src_str();
     const TSNode n_name        = util::child_by_field_name(node, "name");
     // todo handle generic parameters
-    Scope scope             = util::create_scope(node, self->lang_, src);
+    Scope scope             = util::create_scope(node, src);
     ClassDefStmt* class_def = stmt_f_.mk_class_def(
         util::extract_text(n_name, src),
         std::move(scope)
@@ -168,7 +164,7 @@ void SymbolTableBuilder::visit_memb_var(
 {
     const std::string_view src = self->src_str();
     const std::vector<TSNode> n_modifs
-        = util::find_nodes(node, self->lang_, regs::Queries::var_modif_query);
+        = util::find_nodes(node, regs::QueryType::VarModifier);
 
     const CSModifiers modifiers = CSModifiers::handle_modifiers(n_modifs, src);
     const TSNode n_var_decl     = n_modifs.empty()
@@ -179,7 +175,7 @@ void SymbolTableBuilder::visit_memb_var(
     Type* type                  = th(&self->type_tr_, n_type);
 
     const std::vector<TSNode> n_decltors
-        = util::find_nodes(n_var_decl, self->lang_, regs::Queries::decl_query);
+        = util::find_nodes(n_var_decl, regs::QueryType::VarDecltor);
 
     TypeMetadata& type_meta = self->symb_table_.user_types_metadata.at(
         self->type_context_.type_stack.top()
@@ -230,11 +226,8 @@ void SymbolTableBuilder::visit_method(
     if (! symb_table.user_types_metadata.contains(current_type))
         throw std::logic_error("Type wasn't discovered yet");
 
-    const std::vector<TSNode> n_modifs = util::find_nodes(
-        node,
-        self->lang_,
-        regs::Queries::method_modif_query
-    );
+    const std::vector<TSNode> n_modifs
+        = util::find_nodes(node, regs::QueryType::MethodModifier);
     const CSModifiers modif
         = CSModifiers::handle_modifiers(n_modifs, self->src_str());
     const TSNode n_ret_type    = util::child_by_field_name(node, "returns");

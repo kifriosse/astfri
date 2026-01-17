@@ -1,74 +1,14 @@
+#include <libastfri-cs/impl/regs/QueryRegistry.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-namespace astfri::csharp::regs
-{
-
-const std::string Queries::top_level_stmt_query =
-    R"(
-    (namespace_declaration
-        body: (declaration_list
-        [
-            (class_declaration)     @class
-            (interface_declaration) @interface
-            (struct_declaration)    @struct
-            (enum_declaration)      @enum
-            (delegate_declaration)  @delegate
-            (record_declaration)    @record
-        ])
-    )
-    (compilation_unit
-    [
-        (class_declaration)     @class
-        (interface_declaration) @interface
-        (struct_declaration)    @struct
-        (enum_declaration)      @enum
-        (delegate_declaration)  @delegate
-        (record_declaration)    @record
-    ])
-    )";
-
-const std::string Queries::decl_query =
-    R"(
-    (variable_declaration (variable_declarator) @var_decl)
-    )";
-
-const std::string Queries::var_modif_query =
-    R"(
-    [
-        (field_declaration           (modifier) @modifier)
-        (local_declaration_statement (modifier) @modifier)
-        (parameter                   (modifier) @modifier)
-    ]
-    )";
-
-const std::string Queries::method_modif_query =
-    R"(
-        (method_declaration (modifier) @modifier)
-    )";
-
-const std::string Queries::file_namespace_query
-    = "(file_scoped_namespace_declaration) @namespace";
-
-const std::string Queries::comment_error_query =
-    R"(
-        (comment) @comment
-        (ERROR) @error
-    )";
-
-const std::string Queries::using_directives_query =
-    R"(
-        (using_directive) @directive
-    )";
-
-} // namespace astfri::csharp::regs
 
 namespace astfri::csharp::util
 {
@@ -97,101 +37,55 @@ std::string extract_text(const TSNode& node, const std::string_view src_code)
     return {src_code.data() + from, to - from};
 }
 
-std::vector<TSNode> find_nodes(
-    const TSNode& root,
-    const TSLanguage* lang,
-    const std::string_view query_str
-)
+std::vector<TSNode> find_nodes(const TSNode& root, regs::QueryType query_type)
 {
+    static auto& query_reg = regs::QueryReg::get();
     std::vector<TSNode> results;
-    TSQueryError err;
-    uint32_t offset;
-    TSQuery* query = ts_query_new(
-        lang,
-        query_str.data(),
-        query_str.length(),
-        &offset,
-        &err
-    );
 
-    if (! query)
+    if (const TSQuery* query = query_reg.get_query(query_type))
     {
-        throw std::runtime_error(
-            "Error while creating query at offset " + std::to_string(offset)
-            + " Error code: " + std::to_string(err)
-        );
-    }
+        TSQueryCursor* cursor = ts_query_cursor_new();
+        ts_query_cursor_exec(cursor, query, root);
 
-    TSQueryCursor* cursor = ts_query_cursor_new();
-    ts_query_cursor_exec(cursor, query, root);
-
-    TSQueryMatch match;
-    while (ts_query_cursor_next_match(cursor, &match))
-    {
-        for (int i = 0; i < match.capture_count; ++i)
+        TSQueryMatch match;
+        while (ts_query_cursor_next_match(cursor, &match))
         {
-            results.push_back(match.captures[i].node);
+            for (int i = 0; i < match.capture_count; ++i)
+            {
+                results.push_back(match.captures[i].node);
+            }
         }
+
+        ts_query_cursor_delete(cursor);
     }
-
-    ts_query_cursor_delete(cursor);
-    ts_query_delete(query);
-
     return results;
 }
 
-TSNode find_first_node(
-    const TSNode& root,
-    const TSLanguage* lang,
-    const std::string_view query_str
-)
+TSNode find_first_node(const TSNode& root, const regs::QueryType query_type)
 {
-    TSQueryError err;
-    uint32_t offset;
-    TSQuery* query = ts_query_new(
-        lang,
-        query_str.data(),
-        query_str.length(),
-        &offset,
-        &err
-    );
-
-    if (! query)
+    static auto& query_reg = regs::QueryReg::get();
+    TSNode result{};
+    if (const TSQuery* query = query_reg.get_query(query_type))
     {
-        throw std::runtime_error(
-            "Error while creating query at offset " + std::to_string(offset)
-            + " Error code: " + std::to_string(err)
-        );
-    }
+        TSQueryCursor* cursor = ts_query_cursor_new();
+        ts_query_cursor_exec(cursor, query, root);
 
-    TSQueryCursor* cursor = ts_query_cursor_new();
-    ts_query_cursor_exec(cursor, query, root);
-
-    TSQueryMatch match;
-    TSNode result = {};
-    while (ts_query_cursor_next_match(cursor, &match))
-    {
-        if (match.capture_count >= 1)
-        {
+        TSQueryMatch match;
+        if (ts_query_cursor_next_match(cursor, &match))
             result = match.captures[0].node;
-            break;
-        }
-    }
 
-    ts_query_cursor_delete(cursor);
-    ts_query_delete(query);
+        ts_query_cursor_delete(cursor);
+    }
 
     return result;
 }
 
-void print_child_nodes_types(const TSNode& node)
+void print_child_nodes_types(const TSNode& node, const bool named)
 {
-    for (size_t i = 0; i < ts_node_child_count(node); ++i)
-    {
-        const TSNode child = ts_node_child(node, i);
-        std::string type   = ts_node_type(child);
-        std::cout << "Child " << i << " type: " << type << '\n';
-    }
+    size_t i     = 0;
+    auto process = [&i](TSNode child)
+    { std::cout << "Child " << ++i << " type: \'" << ts_node_type(child); };
+    for_each_child_node(node, process, named);
 }
 
 void print_child_nodes_types(
@@ -200,86 +94,73 @@ void print_child_nodes_types(
     const bool named
 )
 {
-    for (size_t i = 0; i < ts_node_child_count(node); ++i)
+    size_t i     = 0;
+    auto process = [&source, &i](TSNode child)
     {
-        const TSNode child = ts_node_child(node, i);
-        if (named && ! ts_node_is_named(child))
-            continue;
-
-        std::string type = ts_node_type(child);
-        std::string text = extract_text(child, source);
-        std::cout << "Child " << i << " type: \'" << type << "\' text: \""
+        const std::string type = ts_node_type(child);
+        const std::string text = extract_text(child, source);
+        std::cout << "Child " << ++i << " type: \'" << type << "\' text: \""
                   << text << "\"" << '\n';
-    }
+    };
+    for_each_child_node(node, process, named);
 }
 
 std::string remove_comments(
     const TSNode& root,
     const std::string_view source_code,
-    const TSLanguage* lang,
     const std::filesystem::path& path
 )
 {
+    using namespace regs;
+    using enum QueryType;
+    static auto& query_reg = QueryReg::get();
+
     std::string new_source;
 
-    TSQueryError query_error;
-    uint32_t offset;
-    TSQuery* ts_query = ts_query_new(
-        lang,
-        regs::Queries::comment_error_query.c_str(),
-        regs::Queries::comment_error_query.length(),
-        &offset,
-        &query_error
-    );
-    if (! ts_query)
+    if (const TSQuery* ts_query = query_reg.get_query(CommentError))
     {
-        throw std::runtime_error(
-            "Error while creating query at offset " + std::to_string(offset)
-            + " Error code: " + std::to_string(query_error)
-        );
-    }
-    TSQueryCursor* cursor = ts_query_cursor_new();
-    ts_query_cursor_exec(cursor, ts_query, root);
+        TSQueryCursor* cursor = ts_query_cursor_new();
+        ts_query_cursor_exec(cursor, ts_query, root);
 
-    TSQueryMatch match;
-    size_t next_start = 0;
-    std::vector<TSNode> errors;
-    uint32_t capture_index;
+        TSQueryMatch match;
+        size_t next_start = 0;
+        std::vector<TSNode> errors;
+        uint32_t capture_index;
 
-    while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
-    {
-        const TSNode node = match.captures[0].node;
-        if (ts_node_is_error(node))
+        while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
         {
-            errors.emplace_back(node);
-            continue;
+            const TSNode node = match.captures[0].node;
+            if (ts_node_is_error(node))
+            {
+                errors.emplace_back(node);
+                continue;
+            }
+            const size_t start = ts_node_start_byte(node);
+            const size_t n     = start - next_start;
+            new_source += source_code.substr(next_start, n);
+            next_start = ts_node_end_byte(node);
         }
-        const size_t start = ts_node_start_byte(node);
-        const size_t n     = start - next_start;
-        new_source += source_code.substr(next_start, n);
-        next_start = ts_node_end_byte(node);
-    }
-    new_source += source_code.substr(next_start);
+        new_source += source_code.substr(next_start);
 
-    ts_query_cursor_delete(cursor);
-    ts_query_delete(ts_query);
+        ts_query_cursor_delete(cursor);
 
-    if (! errors.empty())
-    {
-        std::cerr << "Source code contains syntax errors:\n\n";
-        for (const auto& error_node : errors)
+        if (! errors.empty())
         {
-            const auto& [row, column] = ts_node_start_point(error_node);
-            std::cerr << "Warning: Syntax error at line " << row + 1
-                      << ", column " << column + 1 << "\n";
+            std::cerr << "Source code contains syntax errors:\n\n";
+            for (const auto& error_node : errors)
+            {
+                const auto& [row, column] = ts_node_start_point(error_node);
+                std::cerr << "Warning: Syntax error at line " << row + 1
+                          << ", column " << column + 1 << "\n";
+            }
+
+            std::cerr << std::endl;
+
+            throw std::runtime_error(
+                "Source code in file \"" + path.string()
+                + "\" contains syntax errors."
+            );
         }
-
-        std::cerr << std::endl;
-
-        throw std::runtime_error(
-            "Source code in file \"" + path.string()
-            + "\" contains syntax errors."
-        );
     }
 
     return new_source;

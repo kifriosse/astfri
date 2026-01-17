@@ -1,14 +1,13 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/data/Source.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
-#include <optional>
 #include <vector>
 
 namespace astfri::csharp

@@ -1,5 +1,5 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/Registries.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
