@@ -24,6 +24,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
 )
 {
     // todo refactor this to use TSSymbol
+    // todo refactor this whole method
     static const std::vector<std::string_view> class_memb_node_types = {
         // "class_declaration",              // todo
         // "enum_declaration",               // todo
@@ -51,11 +52,10 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         true
     );
 
-    std::unordered_map<std::string_view, std::vector<TSNode>>
-        class_members_nodes;
+    RegistryMap<std::vector<TSNode>> n_class_membs;
     for (const std::string_view node_type : class_memb_node_types)
     {
-        class_members_nodes[node_type];
+        n_class_membs[node_type];
     }
 
     Scope scope = util::create_scope(node, self->lang_, self->src_str());
@@ -135,32 +135,23 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     if (ts_node_is_null(n_class_body))
         return class_def;
 
-    TSTreeCursor body_cursor = ts_tree_cursor_new(n_class_body);
-    ts_tree_cursor_goto_first_child(&body_cursor);
-
-    // getting of all class member statements
-    if (! ts_tree_cursor_goto_first_child(&body_cursor))
+    auto process = [&n_class_membs](TSNode current)
     {
-        do
-        {
-            TSNode current   = ts_tree_cursor_current_node(&body_cursor);
-            std::string type = ts_node_type(current);
-            if (! class_members_nodes.contains(type))
-                continue;
-            class_members_nodes[type].push_back(current);
-        } while (ts_tree_cursor_goto_next_sibling(&body_cursor));
-    }
-
-    ts_tree_cursor_delete(&body_cursor);
+        const std::string type = ts_node_type(current);
+        const auto it          = n_class_membs.find(type);
+        if (it != n_class_membs.end())
+            it->second.push_back(current);
+    };
+    util::for_each_child_node(n_class_body, process);
 
     // handling of all member statements
     for (const std::string_view name : class_memb_node_types)
     {
-        const std::vector<TSNode>& n_members = class_members_nodes[name];
+        const std::vector<TSNode>& n_members = n_class_membs[name];
         for (const TSNode& n_member : n_members)
         {
             if (ts_node_is_null(n_member))
-                throw std::runtime_error("Node is null");
+                continue;
 
             StmtHandler handler = RegManager::get_stmt_handler(n_member);
             Stmt* member_stmt   = handler(self, n_member);
@@ -326,7 +317,7 @@ Stmt* SrcCodeVisitor::visit_construct_init(
         this_init_sv.end()
     );
 
-    const TSNode n_arg_list       = ts_node_named_child(node, 0);
+    const TSNode n_arg_list = ts_node_named_child(node, 0);
     std::vector<Expr*> args = self->visit_arg_list(n_arg_list);
     if (this_it != bracket_it)
         return stmt_f_.mk_self_initializer(args);

@@ -12,7 +12,6 @@
 
 #include <tree_sitter/api.h>
 
-#include <functional>
 #include <string_view>
 #include <vector>
 
@@ -73,17 +72,6 @@ ParamSignature discover_params(
     const TSNode& node,
     std::string_view src_code,
     TypeTranslator& type_tr
-);
-
-/**
- * @brief Processes each parameter node in the parameter list node by invoking
- * the provided collector function.
- * @param node parameter list TSNode
- * @param collector function to be called for each parameter TSNode
- */
-void process_param_list(
-    const TSNode& node,
-    const std::function<void(const TSNode&)>& collector
 );
 
 FuncMetadata make_func_metadata(

@@ -201,26 +201,13 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
 std::vector<Expr*> SrcCodeVisitor::visit_arg_list(const TSNode& node)
 {
     std::vector<Expr*> exprs;
-    TSTreeCursor cursor = ts_tree_cursor_new(node);
-    if (ts_tree_cursor_goto_first_child(&cursor))
+    auto process = [this, &exprs](TSNode current)
     {
-        do
-        {
-            TSNode n_current = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(n_current))
-                continue;
-
-            ts_tree_cursor_goto_first_child(&cursor);
-
-            n_current          = ts_tree_cursor_current_node(&cursor);
-            ExprHandler h_expr = RegManager::get_expr_handler(n_current);
-            exprs.emplace_back(h_expr(this, n_current));
-
-            ts_tree_cursor_goto_parent(&cursor);
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-    }
-
-    ts_tree_cursor_delete(&cursor);
+        const TSNode n_child     = ts_node_child(current, 0);
+        const ExprHandler h_expr = RegManager::get_expr_handler(n_child);
+        exprs.emplace_back(h_expr(this, n_child));
+    };
+    util::for_each_child_node(node, process);
     return exprs;
 }
 

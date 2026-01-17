@@ -40,6 +40,13 @@ namespace astfri::csharp::util
  */
 TSNode child_by_field_name(const TSNode& node, std::string_view name);
 
+/**
+ * @brief Wrapper function for ts_language_symbol_for_name
+ * @param lang
+ * @param name
+ * @param named
+ * @return
+ */
 TSSymbol symbol_for_name(
     const TSLanguage* lang,
     std::string_view name,
@@ -107,6 +114,43 @@ std::string remove_comments(
  */
 bool has_variadic_param(const TSNode& node, TSNode* type_node = nullptr);
 
+/**
+ * @brief Iterates over each child node of the given TSNode and applies the
+ * provided function.
+ * @tparam Func A callable type that takes a TSNode as parameter and returns
+ * bool.
+ * @param node TSNode whose child nodes will be iterated over.
+ * @param process Function to apply to each child node. If it returns false, the
+ * iteration stops.
+ * @param only_named If true, only named child nodes will be processed.
+ */
+template<typename Func>
+requires std::same_as<std::invoke_result_t<Func, TSNode>, bool>
+void for_each_child_node(TSNode node, Func process, bool only_named = true);
+
+/**
+ * @brief Iterates over each child node of the given TSNode and applies the
+ * provided function.
+ * @tparam Func A callable type that takes a TSNode as parameter.
+ * @param node TSNode whose child nodes will be iterated over.
+ * @param process Function to apply to each child node.
+ * @param only_named If true, only named child nodes will be processed.
+ */
+template<typename Func>
+requires std::same_as<std::invoke_result_t<Func, TSNode>, void>
+void for_each_child_node(TSNode node, Func process, bool only_named = true);
+
+/**
+ * @brief Processes each parameter node in the parameter list node by invoking
+ * the provided collector function.
+ * @param node parameter list TSNode
+ * @param collector function to be called for each parameter TSNode
+ */
+template<std::invocable<TSNode> Func>
+void process_param_list(TSNode node, Func collector);
+
 } // namespace astfri::csharp::util
+
+#include <libastfri-cs/impl/util/ts_util.inl>
 
 #endif // CSHARP_TS_UTIL_HPP

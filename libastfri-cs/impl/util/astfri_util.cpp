@@ -194,35 +194,6 @@ ParamSignature discover_params(
     return {std::move(params), std::move(params_data)};
 }
 
-void process_param_list(
-    const TSNode& node,
-    const std::function<void(const TSNode&)>& collector
-)
-{
-    TSNode n_type{};
-    const bool is_variadic = has_variadic_param(node, &n_type);
-    TSTreeCursor cursor    = ts_tree_cursor_new(node);
-    if (ts_tree_cursor_goto_first_child(&cursor))
-    {
-        do
-        {
-            TSNode current = ts_tree_cursor_current_node(&cursor);
-            if (is_variadic && ts_node_eq(current, n_type))
-            {
-                collector(node);
-                break;
-            }
-
-            if (! ts_node_is_named(current))
-                continue;
-
-            collector(current);
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-    }
-
-    ts_tree_cursor_delete(&cursor);
-}
-
 FuncMetadata make_func_metadata(
     const TSNode& node,
     const std::string_view src,

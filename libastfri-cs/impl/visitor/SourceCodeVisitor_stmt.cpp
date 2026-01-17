@@ -22,42 +22,29 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
     static const TSSymbol func_symb
         = util::symbol_for_name(self->lang_, "local_function_statement", true);
 
-    if (ts_node_named_child_count(node) != 0)
+    self->semantic_context_.enter_scope();
+    auto dicover_func = [self](TSNode current)
     {
-        TSTreeCursor cursor = ts_tree_cursor_new(node);
-        ts_tree_cursor_goto_first_child(&cursor);
-        self->semantic_context_.enter_scope();
-        do
+        if (! ts_node_is_named(current) || ts_node_symbol(current) != func_symb)
+            return;
+
+        self->semantic_context_.reg_local_func(
+            util::make_func_metadata(current, self->src_str(), self->type_tr_)
+        );
+    };
+    util::for_each_child_node(node, dicover_func);
+
+    auto process_body = [self, &stmts](TSNode n_current)
+    {
+        if (ts_node_is_named(n_current))
         {
-            TSNode n_current = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(n_current)
-                || ts_node_symbol(n_current) != func_symb)
-                continue;
+            const StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
+            stmts.push_back(h_stmt(self, n_current));
+        }
+    };
+    util::for_each_child_node(node, process_body);
 
-            self->semantic_context_.reg_local_func(
-                util::make_func_metadata(
-                    n_current,
-                    self->src_str(),
-                    self->type_tr_
-                )
-            );
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-
-        ts_tree_cursor_reset(&cursor, node);
-
-        ts_tree_cursor_goto_first_child(&cursor);
-        do
-        {
-            TSNode n_current = ts_tree_cursor_current_node(&cursor);
-            if (ts_node_is_named(n_current))
-            {
-                StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
-                stmts.push_back(h_stmt(self, n_current));
-            }
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-        self->semantic_context_.leave_scope();
-        ts_tree_cursor_delete(&cursor);
-    }
+    self->semantic_context_.leave_scope();
 
     return stmt_f_.mk_compound(std::move(stmts));
 }
@@ -70,7 +57,7 @@ Stmt* SrcCodeVisitor::visit_arrow_stmt(SrcCodeVisitor* self, const TSNode& node)
     Expr* expr               = h_body(self, n_body);
     Stmt* body               = nullptr;
 
-    if (is_a<VoidType>(ret_type) || ! ret_type)
+    if (is_a<VoidType>(ret_type))
         body = stmt_f_.mk_expr(expr);
     else
         body = stmt_f_.mk_return(expr);
@@ -225,26 +212,28 @@ Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
     if (ts_node_child_count(node) < 2)
         throw std::logic_error("Not a try-catch node");
 
-    TSTreeCursor cursor      = ts_tree_cursor_new(node);
     const TSNode n_body      = util::child_by_field_name(node, "body");
     const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
-    ts_tree_cursor_goto_descendant(&cursor, 2);
 
-    Stmt* finally = nullptr;
+    Stmt* finally            = nullptr;
     std::vector<CatchStmt*> catch_stmts;
-    do
+
+    auto process = [&](TSNode current) -> void
     {
-        TSNode n_current      = ts_tree_cursor_current_node(&cursor);
-        StmtHandler h_current = RegManager::get_stmt_handler(n_current);
-        Stmt* current_stmt    = h_current(self, n_current);
+        if (ts_node_eq(current, n_body))
+            return;
+
+        const StmtHandler h_current = RegManager::get_stmt_handler(current);
+        Stmt* current_stmt          = h_current(self, current);
         if (is_a<CompoundStmt>(current_stmt))
             finally = current_stmt;
         else if (auto* catch_stmt = as_a<CatchStmt>(current_stmt))
             catch_stmts.push_back(catch_stmt);
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
+    };
+
+    util::for_each_child_node(node, process);
 
     self->semantic_context_.leave_scope();
-    ts_tree_cursor_delete(&cursor);
 
     return stmt_f_
         .mk_try(h_body(self, n_body), finally, std::move(catch_stmts));
@@ -256,32 +245,27 @@ Stmt* SrcCodeVisitor::visit_catch_clause(
 )
 {
     self->semantic_context_.enter_scope();
-    TSTreeCursor cursor = ts_tree_cursor_new(node);
-    ts_tree_cursor_goto_first_child(&cursor);
 
-    LocalVarDefStmt* expr_var_def = nullptr;
-    Stmt* body                    = nullptr;
-    do
+    LocalVarDefStmt* catch_var = nullptr;
+    Stmt* body                 = nullptr;
+    auto process               = [&](TSNode n_current) -> void
     {
-        TSNode n_current      = ts_tree_cursor_current_node(&cursor);
-        StmtHandler h_current = RegManager::get_stmt_handler(n_current);
-        Stmt* current_stmt    = h_current(self, n_current);
-        if (const auto var_def = as_a<LocalVarDefStmt>(current_stmt))
+        const StmtHandler h_current = RegManager::get_stmt_handler(n_current);
+        Stmt* current_stmt          = h_current(self, n_current);
+        if (const auto var = as_a<LocalVarDefStmt>(current_stmt))
         {
-            expr_var_def = var_def;
-            self->semantic_context_.reg_local_var(expr_var_def);
+            catch_var = var;
+            self->semantic_context_.reg_local_var(catch_var);
         }
         else if (is_a<CompoundStmt>(current_stmt))
         {
             body = current_stmt;
         }
-        // todo add exception filter
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
-
-    ts_tree_cursor_delete(&cursor);
+    };
+    util::for_each_child_node(node, process);
 
     self->semantic_context_.leave_scope();
-    return stmt_f_.mk_catch(expr_var_def, body);
+    return stmt_f_.mk_catch(catch_var, body);
 }
 
 Stmt* SrcCodeVisitor::visit_finally(SrcCodeVisitor* self, const TSNode& node)
@@ -313,69 +297,65 @@ Stmt* SrcCodeVisitor::visit_switch_stmt(
     Expr* value                = h_value(self, n_value);
 
     std::vector<CaseBaseStmt*> cases;
-    TSTreeCursor cursor = ts_tree_cursor_new(n_switch_body);
-    if (ts_tree_cursor_goto_first_child(&cursor))
+    auto process = [self, &cases](TSNode n_current) -> void
     {
-        do
-        {
-            TSNode n_current = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(n_current))
-                continue;
-
-            StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
-            Stmt* stmt         = h_stmt(self, n_current);
-            if (auto* case_stmt = as_a<CaseBaseStmt>(stmt))
-            {
-                cases.push_back(case_stmt);
-            }
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-    }
-
-    ts_tree_cursor_delete(&cursor);
-
+        const StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
+        Stmt* stmt               = h_stmt(self, n_current);
+        if (auto* case_stmt = as_a<CaseBaseStmt>(stmt))
+            cases.push_back(case_stmt);
+    };
+    util::for_each_child_node(n_switch_body, process);
     return stmt_f_.mk_switch(value, std::move(cases));
 }
 
 Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    std::vector<Stmt*> body_stmts;
-    Expr* pattern       = nullptr;
-    TSNode n_current    = {};
     TSTreeCursor cursor = ts_tree_cursor_new(node);
-    if (! ts_tree_cursor_goto_first_child(&cursor))
-        throw std::logic_error("Invalid case node");
-
-    do
+    if (ts_tree_cursor_goto_first_child(&cursor))
     {
-        n_current = ts_tree_cursor_current_node(&cursor);
-        if (std::strcmp(ts_node_type(n_current), ":") == 0)
-            break;
-        // todo handle more complex patterns
-        const ExprHandler h_pattern = RegManager::get_expr_handler(n_current);
-        pattern                     = h_pattern(self, n_current);
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
+        std::vector<Stmt*> body_stmts;
+        Expr* pattern    = nullptr;
+        TSNode n_current = {};
+        do
+        {
+            n_current = ts_tree_cursor_current_node(&cursor);
+            if (std::strcmp(ts_node_type(n_current), ":") == 0)
+                break;
+            if (! ts_node_is_named(n_current))
+                continue;
 
-    while (ts_tree_cursor_goto_next_sibling(&cursor))
-    {
-        n_current = ts_tree_cursor_current_node(&cursor);
-        if (! ts_node_is_named(n_current))
-            continue;
+            // todo handle more complex patterns
+            const ExprHandler h_pattern
+                = RegManager::get_expr_handler(n_current);
+            pattern = h_pattern(self, n_current);
+        } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
-        StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
-        Stmt* stmt         = h_stmt(self, n_current);
-        body_stmts.push_back(stmt);
+        while (ts_tree_cursor_goto_next_sibling(&cursor))
+        {
+            n_current = ts_tree_cursor_current_node(&cursor);
+            if (! ts_node_is_named(n_current))
+                continue;
+
+            StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
+            Stmt* stmt         = h_stmt(self, n_current);
+            body_stmts.push_back(stmt);
+        }
+
+        ts_tree_cursor_delete(&cursor);
+
+        Stmt* body
+            = body_stmts.size() == 1 && is_a<CompoundStmt>(body_stmts.back())
+                ? body_stmts.back()
+                : stmt_f_.mk_compound(std::move(body_stmts));
+
+        if (pattern)
+            return stmt_f_.mk_case(pattern, body);
+
+        return stmt_f_.mk_default_case(body);
     }
 
-    Stmt* body = body_stmts.size() == 1 && is_a<CompoundStmt>(body_stmts.back())
-                   ? body_stmts.back()
-                   : stmt_f_.mk_compound(std::move(body_stmts));
-
     ts_tree_cursor_delete(&cursor);
-
-    if (pattern)
-        return stmt_f_.mk_case(pattern, body);
-
-    return stmt_f_.mk_default_case(body);
+    return stmt_f_.mk_uknown();
 }
 
 Stmt* SrcCodeVisitor::visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node)
