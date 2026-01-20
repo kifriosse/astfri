@@ -189,6 +189,7 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
         }
         ParamVarDefStmt* param_def
             = stmt_f_.mk_param_var_def(std::move(name), type, init);
+        this->semantic_context_.reg_param(param_def);
         params.push_back(param_def);
     };
     util::process_param_list(node, std::move(collector));

@@ -71,13 +71,20 @@ void SemanticContext::reg_local_func(FuncMetadata func_meta)
 {
     const auto func_def = func_meta.func_def;
     scope_context_.scope_stack.top().push_back(func_def);
-    scope_context_.function_map.emplace(
+    auto [it, inserted] = scope_context_.function_map.try_emplace(
         FuncId{
             .name        = func_def->name_,
             .param_count = func_def->params_.size(),
-        },
-        std::move(func_meta)
+        }
     );
+    if (inserted)
+    {
+        it->second = std::move(func_meta);
+    }
+    else
+    {
+        it->second.func_def = nullptr;
+    }
 }
 
 void SemanticContext::reg_return(Type* return_type)

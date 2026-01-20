@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 namespace astfri::csharp
@@ -23,25 +22,6 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     const TSNode& node
 )
 {
-    // todo refactor this to use TSSymbol
-    // todo refactor this whole method
-    static const std::vector<std::string_view> class_memb_node_types = {
-        // "class_declaration",              // todo
-        // "enum_declaration",               // todo
-        // "interface_declaration",          // todo
-        // "struct_declaration",             // todo
-        // "record_declaration",             // todo
-        "field_declaration",
-        // "property_declaration",    // todo
-        // "delegate_declaration",    // todo
-        // "event_field_declaration", // todo
-        "constructor_declaration",
-        "method_declaration",
-        // "indexer_declaration",            // todo
-        // "operator_declaration",           // todo
-        // "conversion_operator_declaration" // todo
-        "destructor_declaration",
-    };
     static const TSSymbol base_list_symb
         = util::symbol_for_name(self->lang_, "base_list", true);
     static const TSSymbol type_param_list_sym
@@ -51,12 +31,6 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         "type_parameter_constraints_clause",
         true
     );
-
-    RegistryMap<std::vector<TSNode>> n_class_membs;
-    for (const std::string_view node_type : class_memb_node_types)
-    {
-        n_class_membs[node_type];
-    }
 
     Scope scope               = util::create_scope(node, self->src_str());
     const TSNode n_class_name = util::child_by_field_name(node, "name");
@@ -69,103 +43,81 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     self->semantic_context_.enter_type(class_def);
     self->type_tr_.set_current_namespace(std::move(scope));
 
-    TSNode n_current          = ts_node_next_sibling(n_class_name);
     const TSNode n_class_body = util::child_by_field_name(node, "body");
     // handling of base class and interface implementations
-    ClassDefStmt* base = nullptr;
-    std::vector<InterfaceDefStmt*> interfaces;
-    do
+    bool first             = true;
+    auto process_base_list = [&](TSNode current)
     {
-        if (ts_node_eq(n_current, n_class_body))
-            break;
+        std::string name     = util::extract_text(current, self->src_str());
+        const TypeHandler th = RegManager::get_type_handler(current);
+        Type* type           = th(&self->type_tr_, current);
+        if (first)
+        {
+            first = false;
+            if (const auto class_t = as_a<ClassType>(type))
+                class_def->bases_.push_back(class_t->m_def);
+        }
 
-        const TSSymbol current_symb = ts_node_symbol(n_current);
+        if (const auto interface_t = as_a<InterfaceType>(type))
+            class_def->interfaces_.push_back(interface_t->m_def);
+        else if (util::is_interface_name(name))
+            class_def->interfaces_.push_back(
+                stmt_f_.mk_interface_def(std::move(name), {})
+            );
+        else
+        {
+            // todo incomplete type
+        }
+    };
+
+    auto process_generic_params = [](TSNode current)
+    {
+
+    };
+
+    auto process_generic_constraints = []([[maybe_unused]] TSNode current) { };
+
+    auto process_class_header        = [&](TSNode current) -> bool
+    {
+        if (ts_node_eq(current, n_class_body))
+            return false;
+
+        const TSSymbol current_symb = ts_node_symbol(current);
         if (current_symb == base_list_symb) // base list handeling
         {
-            TSNode n_type         = ts_node_named_child(n_current, 0);
-            std::string type_name = util::extract_text(n_type, self->src_str());
-            // todo temporary solution
-            if (util::is_interface_name(type_name))
-            {
-                interfaces.emplace_back(
-                    // todo temporary solution - needs proper scope resolving
-                    stmt_f_.mk_interface_def(std::move(type_name), {})
-                );
-            }
-            else
-            {
-                // todo temporary solution - needs proper scope resolving
-                base = stmt_f_.mk_class_def(std::move(type_name), {});
-            }
-
-            n_type = ts_node_next_named_sibling(n_type);
-            while (! ts_node_is_null(n_type))
-            {
-                type_name = util::extract_text(n_type, self->src_str());
-                // todo temporary solution
-                interfaces.emplace_back(
-                    stmt_f_.mk_interface_def(std::move(type_name), {})
-                );
-                n_type = ts_node_next_named_sibling(n_type);
-            }
+            util::for_each_child_node(current, process_base_list);
         }
-        else if (current_symb == type_param_list_sym) // generic parameters
+        else if (current_symb == type_param_list_sym)
         {
-            // todo handle generic parameters;
+            util::for_each_child_node(current, process_generic_params);
         }
-        else if (current_symb == type_param_constr_sym) // constraints for
-                                                        // generic parameters
+        else if (current_symb == type_param_constr_sym)
         {
-            // todo handle generic parameter constraints
+            util::for_each_child_node(current, process_generic_constraints);
         }
-        n_current = ts_node_next_sibling(n_current);
-    } while (! ts_node_is_null(n_current));
-
-    if (base && class_def->bases_.empty())
-    {
-        class_def->bases_.push_back(base);
-    }
-
-    if (class_def->interfaces_.empty())
-    {
-        class_def->interfaces_ = std::move(interfaces);
-    }
+        return true;
+    };
+    util::for_each_child_node(node, process_class_header);
 
     // if its partial class doesn't have a body
     if (ts_node_is_null(n_class_body))
         return class_def;
 
-    auto process = [&n_class_membs](TSNode current)
+    auto process_membs = [class_def, self](TSNode n_member)
     {
-        const std::string type = ts_node_type(current);
-        const auto it          = n_class_membs.find(type);
-        if (it != n_class_membs.end())
-            it->second.push_back(current);
+        const StmtHandler handler = RegManager::get_stmt_handler(n_member);
+        Stmt* member_stmt         = handler(self, n_member);
+
+        if (const auto var_def = as_a<MemberVarDefStmt>(member_stmt))
+            class_def->vars_.push_back(var_def);
+        else if (const auto constr = as_a<ConstructorDefStmt>(member_stmt))
+            class_def->constructors_.push_back(constr);
+        else if (const auto destr = as_a<DestructorDefStmt>(member_stmt))
+            class_def->destructors_.push_back(destr);
+        else if (const auto method = as_a<MethodDefStmt>(member_stmt))
+            class_def->methods_.push_back(method);
     };
-    util::for_each_child_node(n_class_body, process);
-
-    // handling of all member statements
-    for (const std::string_view name : class_memb_node_types)
-    {
-        const std::vector<TSNode>& n_members = n_class_membs[name];
-        for (const TSNode& n_member : n_members)
-        {
-            if (ts_node_is_null(n_member))
-                continue;
-
-            StmtHandler handler = RegManager::get_stmt_handler(n_member);
-            Stmt* member_stmt   = handler(self, n_member);
-
-            if (auto var_def = as_a<MemberVarDefStmt>(member_stmt))
-                class_def->vars_.push_back(var_def);
-            else if (auto constr = as_a<ConstructorDefStmt>(member_stmt))
-                class_def->constructors_.push_back(constr);
-            else if (auto destr = as_a<DestructorDefStmt>(member_stmt))
-                class_def->destructors_.push_back(destr);
-            else if (auto method = as_a<MethodDefStmt>(member_stmt))
-                class_def->methods_.push_back(method);
-        }
-    }
+    util::for_each_child_node(n_class_body, process_membs);
 
     self->semantic_context_.leave_type();
     return class_def;
@@ -314,7 +266,7 @@ Stmt* SrcCodeVisitor::visit_construct_init(
     const TSNode n_arg_list = ts_node_named_child(node, 0);
     std::vector<Expr*> args = self->visit_arg_list(n_arg_list);
     if (this_it != bracket_it)
-        return stmt_f_.mk_self_initializer(args);
+        return stmt_f_.mk_self_initializer(std::move(args));
 
     const auto current_type = self->semantic_context_.current_type();
     if (! current_type)
@@ -328,10 +280,7 @@ Stmt* SrcCodeVisitor::visit_construct_init(
 
     // todo fix this for Incomplete types
     if (owner->bases_.empty())
-        throw std::logic_error(
-            "Constructor can't have base initializer without having defined "
-            "base class"
-        );
+        return stmt_f_.mk_uknown();
     const ClassDefStmt* base = owner->bases_.back();
     return stmt_f_.mk_base_initializer(base->type_, std::move(args));
 }

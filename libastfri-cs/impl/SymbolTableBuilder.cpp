@@ -251,18 +251,18 @@ void SymbolTableBuilder::visit_method(
     const size_t named_child_c = ts_node_named_child_count(n_params);
     const size_t param_c = is_variadic ? named_child_c - 1 : named_child_c;
     std::string name     = util::extract_text(n_func_name, self->src_str());
-    MethodId method_id{
+    const MethodId method_id{
         .func_id   = {name, param_c},
         .is_static = modifs.has(CSModifier::Static),
     };
-    // util::print_child_nodes_types(param_list_node);
 
     auto [params, params_meta]
         = util::discover_params(n_params, self->src_str(), self->type_tr_);
-    auto& methods             = it_type_meta->second.methods;
-    const auto it_method      = methods.find(method_id);
-    MethodDefStmt* method_def = nullptr;
-    if (it_method == methods.end())
+    MethodDefStmt* method_def         = nullptr;
+    auto& methods                     = it_type_meta->second.methods;
+    const auto& [it_method, inserted] = methods.try_emplace(method_id);
+
+    if (inserted)
     {
         const TypeHandler th = RegManager::get_type_handler(n_ret_type);
         Type* ret_type       = th(&self->type_tr_, n_ret_type);
@@ -279,13 +279,12 @@ void SymbolTableBuilder::visit_method(
         );
     }
 
-    MethodMetadata method_metadata{
+    MethodMetadata metadata{
         .params      = std::move(params_meta),
         .method_def  = method_def,
         .method_node = node,
     };
-
-    it_type_meta->second.methods.emplace(method_id, method_metadata);
+    it_method->second = std::move(metadata);
 }
 
 void SymbolTableBuilder::add_using_directive(const TSNode& node)
