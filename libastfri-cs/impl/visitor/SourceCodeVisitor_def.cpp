@@ -79,7 +79,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         if (ts_node_eq(n_current, n_class_body))
             break;
 
-        TSSymbol current_symb = ts_node_symbol(n_current);
+        const TSSymbol current_symb = ts_node_symbol(n_current);
         if (current_symb == base_list_symb) // base list handeling
         {
             TSNode n_type         = ts_node_named_child(n_current, 0);
@@ -234,19 +234,18 @@ Stmt* SrcCodeVisitor::visit_param_def_stmt(
     const TSNode& node
 )
 {
-    const TSNode var_name_node = util::child_by_field_name(node, "name");
-    const TSNode init_node     = ts_node_next_named_sibling(var_name_node);
+    const TSNode n_name = util::child_by_field_name(node, "name");
+    const TSNode n_init = ts_node_next_named_sibling(n_name);
 
-    ParamVarDefStmt* parameter
-        = util::make_param_def(node, *self->src(), self->type_tr_);
-    if (! ts_node_is_null(init_node))
+    ParamVarDefStmt* param
+        = util::make_param_def(node, self->src_str(), self->type_tr_);
+    if (! ts_node_is_null(n_init))
     {
-        const ExprHandler init_handler
-            = RegManager::get_expr_handler(init_node);
-        parameter->initializer_ = init_handler(self, init_node);
+        const ExprHandler h_init = RegManager::get_expr_handler(n_init);
+        param->initializer_      = h_init(self, n_init);
     }
-    self->semantic_context_.reg_param(parameter);
-    return parameter;
+    self->semantic_context_.reg_param(param);
+    return param;
 }
 
 Stmt* SrcCodeVisitor::visit_constr_def_stmt(
@@ -274,12 +273,8 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
     constr_def->owner_        = as_a<ClassDefStmt>(current_type);
     constr_def->params_       = self->make_param_list(n_param_list, false);
 
-    const std::vector<TSNode> n_modifs = util::find_nodes(
-        node,
-        regs::QueryType::MethodModifier
-    ); // todo move this into query registyr
     const CSModifiers modifs
-        = CSModifiers::handle_modifiers(n_modifs, self->src_str());
+        = CSModifiers::handle_modifs_memb(node, self->src_str());
     constr_def->access_
         = modifs.get_access_mod().value_or(AccessModifier::Private);
 
@@ -372,10 +367,8 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
         throw std::logic_error("Owner type not found");
 
     const TSNode n_params = util::child_by_field_name(node, "parameters");
-    const std::vector<TSNode> n_modifs
-        = util::find_nodes(node, regs::QueryType::MethodModifier);
     const CSModifiers modifs
-        = CSModifiers::handle_modifiers(n_modifs, self->src_str());
+        = CSModifiers::handle_modifs_memb(node, self->src_str());
     const TSNode n_name        = util::child_by_field_name(node, "name");
     const bool is_variadic     = util::has_variadic_param(n_params, nullptr);
     const size_t named_child_c = ts_node_named_child_count(n_params);

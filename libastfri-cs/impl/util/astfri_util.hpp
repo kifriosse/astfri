@@ -52,7 +52,7 @@ Scope create_scope(std::string_view qualifier);
  */
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
-    const SourceCode& src,
+    std::string_view src,
     TypeTranslator& type_tr
 );
 

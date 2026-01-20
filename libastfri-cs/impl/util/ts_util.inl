@@ -65,6 +65,26 @@ void process_param_list(TSNode node, Func collector)
     util::for_each_child_node(node, process);
 }
 
+template<std::invocable<const TSQueryMatch&> Func>
+void for_each_match(const TSNode root, const regs::QueryType type, Func process)
+{
+    static auto& query_reg = regs::QueryReg::get();
+
+    if (const regs::Query* query = query_reg.get_query(type))
+    {
+        TSQueryCursor* cursor = ts_query_cursor_new();
+        ts_query_cursor_exec(cursor, query->get(), root);
+
+        TSQueryMatch match;
+        while (ts_query_cursor_next_match(cursor, &match))
+        {
+            process(match);
+        }
+
+        ts_query_cursor_delete(cursor);
+    }
+}
+
 } // namespace astfri::csharp::util
 
 #endif // CSHARP_TS_UTIL_INL

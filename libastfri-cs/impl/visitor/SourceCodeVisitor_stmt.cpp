@@ -18,10 +18,10 @@ namespace astfri::csharp
 
 Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    std::vector<Stmt*> stmts;
     static const TSSymbol func_symb
         = util::symbol_for_name(self->lang_, "local_function_statement", true);
 
+    std::vector<Stmt*> stmts;
     self->semantic_context_.enter_scope();
     auto dicover_func = [self](TSNode current)
     {

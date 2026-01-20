@@ -21,7 +21,6 @@ struct SymbolTreeNode
 {
     IdentifierMap<std::unique_ptr<SymbolTreeNode>> children{};
     std::variant<std::string, util::TypeBinding> data;
-    // todo add pointer to parent
 };
 
 class SymbolTree

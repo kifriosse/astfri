@@ -31,7 +31,8 @@ class SrcCodeVisitor;
 class SymbolTableBuilder;
 struct SymbolTable;
 
-using MaskType = uint32_t;
+using MaskType  = uint32_t;
+using CaptureId = uint32_t;
 
 template<class ReturnType, class Owner>
 using Handler     = std::function<ReturnType(Owner*, const TSNode&)>;
@@ -40,6 +41,9 @@ using StmtHandler = Handler<Stmt*, SrcCodeVisitor>;
 using TypeHandler = Handler<Type*, TypeTranslator>;
 using RegHandler  = Handler<void, SymbolTableBuilder>;
 
+/**
+ * @brief Map with string_view identifiers as keys
+ */
 template<class Value>
 using RegistryMap = std::unordered_map<std::string_view, Value>;
 /**

@@ -1,6 +1,7 @@
 #ifndef CSHARP_SYMBOL_TABLE_BUILDER_HPP
 #define CSHARP_SYMBOL_TABLE_BUILDER_HPP
 
+#include <libastfri-cs/impl/regs/QueryRegistry.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
 
@@ -25,6 +26,7 @@ class SymbolTableBuilder
 
 private:
     static StmtFactory& stmt_f_;
+    static regs::QueryReg& query_reg_;
 
     TypeContext type_context_;
     TypeTranslator type_tr_;

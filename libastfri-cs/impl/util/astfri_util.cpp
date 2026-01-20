@@ -65,8 +65,11 @@ Scope create_scope(const TSNode& node, const std::string_view source)
             if (found_nms)
                 break;
 
-            const TSNode n_namespace
-                = find_first_node(n_current, regs::QueryType::FileNamespace);
+            TSNode n_namespace{};
+            auto process = [&n_namespace](const TSQueryMatch& match)
+            { n_namespace = match.captures[0].node; };
+            for_each_match(n_current, regs::QueryType::FileNamespace, process);
+
             if (ts_node_is_null(n_namespace))
                 break;
 
@@ -121,39 +124,18 @@ Scope create_scope(const std::string_view qualifier)
 
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
-    const SourceCode& src,
+    const std::string_view src,
     TypeTranslator& type_tr
 )
 {
-    static auto& stmt_f         = StmtFactory::get_instance();
-    static auto& type_f         = TypeFactory::get_instance();
-    const CSModifiers param_mod = CSModifiers::handle_modifiers(
-        find_nodes(node, regs::QueryType::VarModifier),
-        src.file.content
-    );
+    const TSNode n_type         = child_by_field_name(node, "type");
+    const TSNode n_name         = child_by_field_name(node, "name");
+    const TypeHandler th        = RegManager::get_type_handler(n_type);
+    const CSModifiers param_mod = CSModifiers::handle_modifs_param(node, src);
+    Type* param_type = param_mod.get_indection_type(th(&type_tr, n_type));
 
-    const TSNode n_type  = child_by_field_name(node, "type");
-    const TSNode n_name  = child_by_field_name(node, "name");
-    const TypeHandler th = RegManager::get_type_handler(n_type);
-    Type* param_type     = th(&type_tr, n_type);
-
-    if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
-    {
-        param_type = type_f.mk_indirect(param_type);
-    }
-    else if (param_mod.has(CSModifier::In)
-             || (param_mod.has(CSModifier::Readonly)
-                 && param_mod.has(CSModifier::Ref)))
-    {
-        // todo should be a constat reference for now, it will be just indirect
-        param_type = type_f.mk_indirect(param_type);
-    }
-
-    return stmt_f.mk_param_var_def(
-        extract_text(n_name, src.file.content),
-        param_type,
-        nullptr
-    );
+    return StmtFactory::get_instance()
+        .mk_param_var_def(extract_text(n_name, src), param_type, nullptr);
 }
 
 ParamSignature discover_params(
@@ -162,35 +144,13 @@ ParamSignature discover_params(
     TypeTranslator& type_tr
 )
 {
-    static auto& stmt_f = StmtFactory::get_instance();
     std::vector<ParamVarDefStmt*> params;
     std::vector<ParamMetadata> params_data;
 
-    auto collector = [&](const TSNode& current)
+    auto collector = [&](TSNode current)
     {
-        const TSNode n_name         = child_by_field_name(current, "name");
-        const TSNode n_type         = child_by_field_name(current, "type");
-        std::string name            = extract_text(n_name, src_code);
-        const TypeHandler th        = RegManager::get_type_handler(n_type);
-        const CSModifiers param_mod = CSModifiers::handle_modifiers(
-            find_nodes(current, regs::QueryType::VarModifier),
-            src_code
-        );
-        Type* type = th(&type_tr, n_type);
-        if (param_mod.has(CSModifier::Out) || param_mod.has(CSModifier::Ref))
-        {
-            type = TypeFactory::get_instance().mk_indirect(type);
-        }
-        else if (param_mod.has(CSModifier::In)
-                 || (param_mod.has(CSModifier::Readonly)
-                     && param_mod.has(CSModifier::Ref)))
-        {
-            // todo should be a constat reference for now, it will be just
-            // indirect
-            type = TypeFactory::get_instance().mk_indirect(type);
-        }
-        ParamVarDefStmt* param_def
-            = stmt_f.mk_param_var_def(std::move(name), type, nullptr);
+        const TSNode n_name        = child_by_field_name(current, "name");
+        ParamVarDefStmt* param_def = make_param_def(current, src_code, type_tr);
         params.push_back(param_def);
         params_data.emplace_back(
             param_def,
@@ -198,7 +158,7 @@ ParamSignature discover_params(
             ts_node_next_named_sibling(n_name)
         );
     };
-    process_param_list(node, std::move(collector));
+    process_param_list(node, collector);
     return {std::move(params), std::move(params_data)};
 }
 

@@ -13,9 +13,10 @@
 
 namespace astfri
 {
-
+// forward declarations
 enum class BinOpType;
 enum class UnaryOpType;
+
 struct Type;
 struct Stmt;
 struct Expr;
@@ -92,7 +93,8 @@ public:
     static std::optional<UnaryOpType> get_prefix_unary_op(std::string_view op);
     static std::optional<BinOpType> get_bin_op(std::string_view op);
     static std::optional<Type*> get_type(std::string_view type_name);
-    static std::optional<CSModifier> get_modifier(std::string_view modifier);
+    static CSModifier get_modifier(const TSNode& node, std::string_view src);
+    static CSModifier get_modifier(std::string_view modifier);
     static bool is_expr(const TSNode& node);
     static bool is_stmt(const TSNode& node);
 

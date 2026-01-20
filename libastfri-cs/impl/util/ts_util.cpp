@@ -29,55 +29,13 @@ TSSymbol symbol_for_name(
 
 std::string extract_text(const TSNode& node, const std::string_view src_code)
 {
-    if (ts_node_is_null(node))
-        throw std::runtime_error("Node is null");
-
-    const size_t from = ts_node_start_byte(node);
-    const size_t to   = ts_node_end_byte(node);
-    return {src_code.data() + from, to - from};
-}
-
-std::vector<TSNode> find_nodes(const TSNode& root, regs::QueryType query_type)
-{
-    static auto& query_reg = regs::QueryReg::get();
-    std::vector<TSNode> results;
-
-    if (const TSQuery* query = query_reg.get_query(query_type))
+    if (! ts_node_is_null(node))
     {
-        TSQueryCursor* cursor = ts_query_cursor_new();
-        ts_query_cursor_exec(cursor, query, root);
-
-        TSQueryMatch match;
-        while (ts_query_cursor_next_match(cursor, &match))
-        {
-            for (int i = 0; i < match.capture_count; ++i)
-            {
-                results.push_back(match.captures[i].node);
-            }
-        }
-
-        ts_query_cursor_delete(cursor);
+        const size_t from = ts_node_start_byte(node);
+        const size_t to   = ts_node_end_byte(node);
+        return {src_code.data() + from, to - from};
     }
-    return results;
-}
-
-TSNode find_first_node(const TSNode& root, const regs::QueryType query_type)
-{
-    static auto& query_reg = regs::QueryReg::get();
-    TSNode result{};
-    if (const TSQuery* query = query_reg.get_query(query_type))
-    {
-        TSQueryCursor* cursor = ts_query_cursor_new();
-        ts_query_cursor_exec(cursor, query, root);
-
-        TSQueryMatch match;
-        if (ts_query_cursor_next_match(cursor, &match))
-            result = match.captures[0].node;
-
-        ts_query_cursor_delete(cursor);
-    }
-
-    return result;
+    return {};
 }
 
 void print_child_nodes_types(const TSNode& node, const bool named)
@@ -112,58 +70,54 @@ std::string remove_comments(
 )
 {
     using namespace regs;
-    using enum QueryType;
-    static auto& query_reg = QueryReg::get();
+    static constexpr auto query_type  = QueryType::CommentError;
 
-    std::string new_source;
+    static const auto& query_reg      = QueryReg::get();
 
-    if (const TSQuery* ts_query = query_reg.get_query(CommentError))
+    std::string new_src;
+    size_t next_start = 0;
+    bool has_err      = false;
+    auto process      = [&](const TSQueryMatch& match)
     {
-        TSQueryCursor* cursor = ts_query_cursor_new();
-        ts_query_cursor_exec(cursor, ts_query, root);
+        static const Query* const query   = query_reg.get_query(query_type);
+        static const CaptureId comment_id = query->id("comment");
+        static const CaptureId error_id   = query->id("error");
 
-        TSQueryMatch match;
-        size_t next_start = 0;
-        std::vector<TSNode> errors;
-        uint32_t capture_index;
-
-        while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
+        for (uint32_t i = 0; i < match.capture_count; ++i)
         {
-            const TSNode node = match.captures[0].node;
-            if (ts_node_is_error(node))
+            auto& [node, index] = match.captures[i];
+            if (index == error_id)
             {
-                errors.emplace_back(node);
-                continue;
-            }
-            const size_t start = ts_node_start_byte(node);
-            const size_t n     = start - next_start;
-            new_source += source_code.substr(next_start, n);
-            next_start = ts_node_end_byte(node);
-        }
-        new_source += source_code.substr(next_start);
-
-        ts_query_cursor_delete(cursor);
-
-        if (! errors.empty())
-        {
-            std::cerr << "Source code contains syntax errors:\n\n";
-            for (const auto& error_node : errors)
-            {
-                const auto& [row, column] = ts_node_start_point(error_node);
+                if (! has_err)
+                {
+                    std::cerr << "Source code contains syntax errors:\n\n";
+                    has_err = true;
+                }
+                const auto& [row, column] = ts_node_start_point(node);
                 std::cerr << "Warning: Syntax error at line " << row + 1
                           << ", column " << column + 1 << "\n";
             }
-
-            std::cerr << std::endl;
-
-            throw std::runtime_error(
-                "Source code in file \"" + path.string()
-                + "\" contains syntax errors."
-            );
+            else if (index == comment_id)
+            {
+                const size_t start = ts_node_start_byte(node);
+                const size_t n     = start - next_start;
+                new_src += source_code.substr(next_start, n);
+                next_start = ts_node_end_byte(node);
+            }
         }
+    };
+    for_each_match(root, query_type, process);
+    new_src += source_code.substr(next_start);
+
+    if (has_err)
+    {
+        throw std::runtime_error(
+            "Source code in file \"" + path.string()
+            + "\" contains syntax errors."
+        );
     }
 
-    return new_source;
+    return new_src;
 }
 
 bool has_variadic_param(const TSNode& node, TSNode* type_node)

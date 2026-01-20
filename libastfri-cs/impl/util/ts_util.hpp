@@ -13,7 +13,6 @@
 #include <filesystem>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace astfri::csharp::util
 {
@@ -50,17 +49,21 @@ TSSymbol symbol_for_name(
 std::string extract_text(const TSNode& node, std::string_view src_code);
 
 /**
- * @brief Finds all nodes in subtree of given root node that match the given
- * query
- * @param root root node to start searching from
- * @param query_type Tree-sitter query string to match nodes
- * @return vector of matching nodes
+ * @brief Prints the types of child nodes of the given TSNode to standard
+ * output.
+ * @param node TSNode whose child nodes' types will be printed.
+ * @param named If true, only named child nodes will be printed.
  */
-std::vector<TSNode> find_nodes(const TSNode& root, regs::QueryType query_type);
-
-TSNode find_first_node(const TSNode& root, regs::QueryType query_type);
-
 void print_child_nodes_types(const TSNode& node, bool named = false);
+
+/**
+ * @brief Prints the type and representation inside source code of child nodes
+ * of the given TSNode to standard output.
+ * @param node TSNode whose child nodes' type and source code representation
+ * will be printed.
+ * @param source source code corresponding to the TSNode.
+ * @param named If true, only named child nodes will be printed.
+ */
 void print_child_nodes_types(
     const TSNode& node,
     std::string_view source,
@@ -85,7 +88,8 @@ std::string remove_comments(
  * @brief Checks if the parameter list node contains a variadic parameter.
  * @param node parameter list node
  * @param type_node output parameter that will hold node to the type of the
- * variadic parameter if found (nullptr if not found).
+ * variadic parameter if found (null node if not found). If set to nullptr,
+ * result will be ignored.
  * @return true if the parameter list contains a variadic parameter
  */
 bool has_variadic_param(const TSNode& node, TSNode* type_node = nullptr);
@@ -119,11 +123,23 @@ void for_each_child_node(TSNode node, Func process, bool only_named = true);
 /**
  * @brief Processes each parameter node in the parameter list node by invoking
  * the provided collector function.
+ * @tparam Func a callable type that takes a TSNode as parameter.
  * @param node parameter list TSNode
  * @param collector function to be called for each parameter TSNode
  */
 template<std::invocable<TSNode> Func>
 void process_param_list(TSNode node, Func collector);
+
+/**
+ * @brief Iterates over captures of the specified query in sub-tree of given
+ * root node and applies the provided function.
+ * @tparam Func A callable type that takes a const TSQueryMatch& as parameter.
+ * @param root TSNode to search for captures.
+ * @param type Type of query to use for finding captures.
+ * @param process Function to apply to each capture match.
+ */
+template<std::invocable<const TSQueryMatch&> Func>
+void for_each_match(TSNode root, regs::QueryType type, Func process);
 
 } // namespace astfri::csharp::util
 

@@ -1,32 +1,79 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
-#include <libastfri/inc/Stmt.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <optional>
-#include <string>
 #include <string_view>
-#include <vector>
 
 namespace astfri::csharp
 {
-CSModifiers CSModifiers::handle_modifiers(
-    const std::vector<TSNode>& mod_nodes,
-    const std::string_view source_code
+CSModifiers CSModifiers::handle_modifs_memb(
+    const TSNode& memb_node,
+    const std::string_view src
 )
 {
-    CSModifiers modifiers;
-    for (const TSNode& node : mod_nodes)
+    CSModifiers modifs;
+    auto process = [&modifs, &src](const TSQueryMatch& match)
     {
-        std::string mod_str = util::extract_text(node, source_code);
-        if (const auto modif_opt = RegManager::get_modifier(mod_str))
+        for (uint32_t i = 0; i < match.capture_count; ++i)
         {
-            modifiers.add_modifier(*modif_opt);
+            TSNode n_current = match.captures[i].node;
+            modifs.add_modifier(RegManager::get_modifier(n_current, src));
         }
-    }
-    return modifiers;
+    };
+    util::for_each_match(memb_node, regs::QueryType::MethodModif, process);
+    return modifs;
+}
+
+CSModifiers CSModifiers::handle_modifs_var(
+    const TSNode& var_node,
+    const std::string_view src,
+    TSNode* n_var_decl
+)
+{
+    using namespace regs;
+
+    static constexpr auto q_type = QueryType::VarDecl;
+
+    CSModifiers modifs;
+    auto process = [&](const TSQueryMatch& match)
+    {
+        static const Query* const query = QueryReg::get().get_query(q_type);
+        static const uint32_t decl_id   = query->id("decl");
+        static const uint32_t modif_id  = query->id("modifier");
+
+        for (uint32_t i = 0; i < match.capture_count; ++i)
+        {
+            auto [n_current, index] = match.captures[i];
+            if (index == decl_id && n_var_decl)
+                *n_var_decl = n_current;
+            else if (index == modif_id)
+                modifs.add_modifier(RegManager::get_modifier(n_current, src));
+        }
+    };
+    util::for_each_match(var_node, q_type, process);
+    return modifs;
+}
+
+CSModifiers CSModifiers::handle_modifs_param(
+    const TSNode& param_node,
+    std::string_view src
+)
+{
+    CSModifiers param_mod;
+    auto process = [&param_mod, &src](const TSQueryMatch& match)
+    {
+        for (uint32_t i = 0; i < match.capture_count; ++i)
+        {
+            const TSNode n_modif = match.captures[i].node;
+            param_mod.add_modifier(RegManager::get_modifier(n_modif, src));
+        }
+    };
+    util::for_each_match(param_node, regs::QueryType::ParamModif, process);
+    return param_mod;
 }
 
 bool CSModifiers::has(CSModifier mod) const
@@ -71,6 +118,20 @@ Virtuality CSModifiers::get_virtuality() const
     if (has(CSModifier::Virtual) || has(CSModifier::Override))
         return Virtuality::Virtual;
     return Virtuality::NotVirtual;
+}
+
+Type* CSModifiers::get_indection_type(Type* type) const
+{
+    if (has(CSModifier::Ref) || has(CSModifier::Out))
+        return TypeFactory::get_instance().mk_indirect(type);
+    if (has(CSModifier::In)
+        || (has(CSModifier::Readonly) && has(CSModifier::Ref)))
+    {
+        // todo add handling of readonly ref and in - should be a const
+        // reference to const
+        return TypeFactory::get_instance().mk_indirect(type);
+    }
+    return type;
 }
 
 } // namespace astfri::csharp

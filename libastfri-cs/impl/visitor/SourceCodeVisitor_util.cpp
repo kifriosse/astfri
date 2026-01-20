@@ -1,6 +1,6 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
-#include <libastfri-cs/impl/util/astfri_util.hpp>
 #include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
@@ -20,68 +20,65 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
     const util::VarDefType def_type
 )
 {
-    const std::vector<TSNode> n_modifs
-        = util::find_nodes(node, regs::QueryType::VarModifier);
+    TSNode n_var_decl{};
 
-    const TSNode n_var_decl = n_modifs.empty()
-                                ? ts_node_child(node, 0)
-                                : ts_node_next_sibling(n_modifs.back());
+    [[maybe_unused]] CSModifiers modifs
+        = CSModifiers::handle_modifs_var(node, src_str(), &n_var_decl);
 
-    const TSNode n_type     = util::child_by_field_name(n_var_decl, "type");
-    const TypeHandler th    = RegManager::get_type_handler(n_type);
-    Type* type              = th(&type_tr_, n_type);
-
-    const std::vector<TSNode> n_var_decltors
-        = util::find_nodes(n_var_decl, regs::QueryType::VarDecltor);
+    const TSNode n_type  = util::child_by_field_name(n_var_decl, "type");
+    const TypeHandler th = RegManager::get_type_handler(n_type);
+    Type* type           = th(&type_tr_, n_type);
 
     std::vector<VarDefStmt*> var_defs;
-    for (const TSNode& n_var_decltor : n_var_decltors)
+    auto process = [&](const TSQueryMatch& match)
     {
-        TSNode n_var_name = ts_node_named_child(n_var_decltor, 0);
-        TSNode n_init     = ts_node_named_child(n_var_decltor, 1);
-        std::string name  = util::extract_text(n_var_name, src_str());
-        Expr* init        = nullptr;
-        if (! ts_node_is_null(n_init))
+        for (uint32_t i = 0; i < match.capture_count; ++i)
         {
-            ExprHandler h_init = RegManager::get_expr_handler(n_init);
-            init               = h_init(this, n_init);
-        }
+            const TSNode n_var_decltor = match.captures[i].node;
+            TSNode n_var_name          = ts_node_named_child(n_var_decltor, 0);
+            TSNode n_init              = ts_node_named_child(n_var_decltor, 1);
+            std::string name = util::extract_text(n_var_name, src_str());
+            Expr* init       = nullptr;
+            if (! ts_node_is_null(n_init))
+            {
+                ExprHandler h_init = RegManager::get_expr_handler(n_init);
+                init               = h_init(this, n_init);
+            }
 
-        VarDefStmt* var_def = nullptr;
-        switch (def_type)
-        {
-        case util::VarDefType::Member:
-        {
-            // todo handle other modifiers
-            MemberVarMetadata* var_meta = semantic_context_.find_memb_var(
-                name,
-                semantic_context_.current_type()
-            );
-            var_def               = var_meta->var_def;
-            var_def->initializer_ = init;
-            var_meta->processed   = true;
-            break;
+            VarDefStmt* var_def = nullptr;
+            switch (def_type)
+            {
+            case util::VarDefType::Member:
+            {
+                MemberVarMetadata* var_meta = semantic_context_.find_memb_var(
+                    name,
+                    semantic_context_.current_type()
+                );
+                var_def               = var_meta->var_def;
+                var_def->initializer_ = init;
+                var_meta->processed   = true;
+                break;
+            }
+            case util::VarDefType::Local:
+                // todo handle const
+                var_def = stmt_f_.mk_local_var_def(std::move(name), type, init);
+                semantic_context_.reg_local_var(as_a<LocalVarDefStmt>(var_def));
+                break;
+            case util::VarDefType::Global:
+                // todo handle const
+                var_def
+                    = stmt_f_.mk_global_var_def(std::move(name), type, init);
+                break;
+            }
+
+            if (var_def)
+            {
+                // var_def->name_ = var_name;
+                var_defs.push_back(var_def);
+            }
         }
-        case util::VarDefType::Local:
-            // const CSModifiers modifiers
-            //     = CSModifiers::handle_modifiers(modifier_nodes,
-            //     self->src_code_);
-            // todo handle const
-            var_def = stmt_f_.mk_local_var_def(std::move(name), type, init);
-            semantic_context_.reg_local_var(as_a<LocalVarDefStmt>(var_def));
-            break;
-        case util::VarDefType::Global:
-            // todo handle const
-            var_def = stmt_f_.mk_global_var_def(std::move(name), type, init);
-            break;
-        }
-        // todo this might be unnecessary in future
-        if (var_def)
-        {
-            // var_def->name_ = var_name;
-            var_defs.push_back(var_def);
-        }
-    }
+    };
+    util::for_each_match(n_var_decl, regs::QueryType::VarDecltor, process);
 
     if (var_defs.size() > 1)
         return stmt_f_.mk_def(std::move(var_defs));
@@ -216,21 +213,25 @@ Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node)
     std::vector<VarDefStmt*> var_defs;
     const TSNode n_type  = util::child_by_field_name(node, "type");
     const TypeHandler th = RegManager::get_type_handler(n_type);
-    const std::vector<TSNode> n_decltr
-        = util::find_nodes(node, regs::QueryType::VarDecltor);
-    for (const auto declarator_node : n_decltr)
+
+    auto proces          = [&](const TSQueryMatch& match)
     {
-        TSNode n_name            = ts_node_named_child(declarator_node, 0);
-        TSNode n_right           = ts_node_named_child(declarator_node, 1);
-        ExprHandler h_right      = RegManager::get_expr_handler(n_right);
-        LocalVarDefStmt* var_def = stmt_f_.mk_local_var_def(
-            util::extract_text(n_name, src_str()),
-            th(&type_tr_, n_type),
-            h_right(this, n_right)
-        );
-        var_defs.push_back(var_def);
-        semantic_context_.reg_local_var(var_def);
-    }
+        for (uint32_t i = 0; i < match.capture_count; ++i)
+        {
+            const TSNode n_decltor   = match.captures[i].node;
+            TSNode n_name            = ts_node_named_child(n_decltor, 0);
+            TSNode n_right           = ts_node_named_child(n_decltor, 1);
+            ExprHandler h_right      = RegManager::get_expr_handler(n_right);
+            LocalVarDefStmt* var_def = stmt_f_.mk_local_var_def(
+                util::extract_text(n_name, src_str()),
+                th(&type_tr_, n_type),
+                h_right(this, n_right)
+            );
+            var_defs.push_back(var_def);
+            semantic_context_.reg_local_var(var_def);
+        }
+    };
+    util::for_each_match(node, regs::QueryType::VarDecltor, proces);
 
     if (var_defs.size() > 1)
         return stmt_f_.mk_def(std::move(var_defs));

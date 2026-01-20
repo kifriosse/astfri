@@ -2,6 +2,7 @@
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
+#include <libastfri-cs/impl/util/ts_util.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -294,11 +295,17 @@ std::optional<Type*> RegManager::get_type(const std::string_view type_name)
     return get_opt(types_.types, type_name);
 }
 
-std::optional<CSModifier> RegManager::get_modifier(
-    const std::string_view modifier
+CSModifier RegManager::get_modifier(
+    const TSNode& node,
+    const std::string_view src
 )
 {
-    return get_opt(modifiers_.modifiers, modifier);
+    return get_modifier(util::extract_text(node, src));
+}
+
+CSModifier RegManager::get_modifier(const std::string_view modifier)
+{
+    return get_opt(modifiers_.modifiers, modifier).value_or(CSModifier::None);
 }
 
 bool RegManager::is_expr(const TSNode& node)

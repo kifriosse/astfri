@@ -8,7 +8,6 @@
 
 #include <optional>
 #include <string_view>
-#include <vector>
 
 namespace astfri::csharp
 {
@@ -43,19 +42,43 @@ enum class CSModifier : MaskType
 class CSModifiers
 {
 private:
-    MaskType modifier_mask = 0;
+    MaskType modifier_mask{0};
 
 public:
-    static CSModifiers handle_modifiers(
-        const std::vector<TSNode>& mod_nodes,
-        std::string_view source_code
+    static CSModifiers handle_modifs_memb(
+        const TSNode& memb_node,
+        std::string_view src
+    );
+    static CSModifiers handle_modifs_var(
+        const TSNode& var_node,
+        std::string_view src,
+        TSNode* n_var_decl
+    );
+    static CSModifiers handle_modifs_param(
+        const TSNode& param_node,
+        std::string_view src
     );
 
     [[nodiscard]] bool has(CSModifier mod) const;
     void add_modifier(CSModifier mod);
     void remove_modifier(CSModifier mod);
+    /**
+     * returns access modifier based on modifiers stored in this object
+     * @return access modifier
+     */
     [[nodiscard]] std::optional<AccessModifier> get_access_mod() const;
+    /**
+     * returns virtuality based on modifiers stored in this object
+     * @return virtuality type
+     */
     [[nodiscard]] Virtuality get_virtuality() const;
+    /**
+     * @brief Get indection type based on modifiers stored in this object
+     * @param type type to apply indection to
+     * @return indection type based on modifiers - if modifiers reference type
+     * isn't reference type, original type is returned
+     */
+    [[nodiscard]] Type* get_indection_type(Type* type) const;
 };
 
 } // namespace astfri::csharp

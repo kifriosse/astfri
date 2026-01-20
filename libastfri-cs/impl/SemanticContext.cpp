@@ -361,8 +361,8 @@ CallType SemanticContext::find_invoc_type(
         },
         [](const access::Unknown&) -> CallType
         {
-            return CallType::Unknown; // todo this should be some generic
-                                      // invocation expression
+            // todo this should be some universal invocation expression
+            return CallType::Unknown;
         }
     };
     return std::visit(overloaded, quelifier);

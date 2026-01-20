@@ -18,7 +18,8 @@ namespace astfri::csharp
 {
 struct SourceCode;
 
-StmtFactory& SymbolTableBuilder::stmt_f_ = StmtFactory::get_instance();
+StmtFactory& SymbolTableBuilder::stmt_f_       = StmtFactory::get_instance();
+regs::QueryReg& SymbolTableBuilder::query_reg_ = regs::QueryReg::get();
 
 SymbolTableBuilder::SymbolTableBuilder(
     std::vector<SourceCode>& srcs,
@@ -33,6 +34,13 @@ SymbolTableBuilder::SymbolTableBuilder(
 
 void SymbolTableBuilder::reg_user_types()
 {
+    auto process = [this](const TSQueryMatch& match)
+    {
+        const TSNode node        = match.captures[0].node;
+        const RegHandler handler = RegManager::get_reg_handler(node);
+        handler(this, node);
+    };
+
     for (auto& src : srcs_)
     {
         auto& [context, file, tree] = src;
@@ -41,33 +49,25 @@ void SymbolTableBuilder::reg_user_types()
 
         current_src_ = &src;
         type_tr_.set_current_src(&src);
-        const std::vector<TSNode> top_level_nodes = util::find_nodes(
+        util::for_each_match(
             ts_tree_root_node(tree),
-            regs::QueryType::TopLevel
+            regs::QueryType::TopLevel,
+            process
         );
-        for (const TSNode& node : top_level_nodes)
-        {
-            const RegHandler handler = RegManager::get_reg_handler(node);
-            handler(this, node);
-        }
     }
     current_src_ = nullptr;
 }
 
 void SymbolTableBuilder::reg_using_directives()
 {
+    auto process = [this](const TSQueryMatch match) -> void
+    { add_using_directive(match.captures[0].node); };
     for (auto& src : srcs_)
     {
         type_tr_.set_current_src(&src);
-        current_src_ = &src;
-        TSNode root  = ts_tree_root_node(src.tree);
-        std::vector<TSNode> directives
-            = util::find_nodes(root, regs::QueryType::Using);
-        for (auto& directive : directives)
-        {
-            // util::print_child_nodes_types(directive);
-            add_using_directive(directive);
-        }
+        current_src_      = &src;
+        const TSNode root = ts_tree_root_node(src.tree);
+        util::for_each_match(root, regs::QueryType::Using, process);
     }
 }
 
@@ -162,39 +162,52 @@ void SymbolTableBuilder::visit_memb_var(
     const TSNode& node
 )
 {
-    const std::string_view src = self->src_str();
-    const std::vector<TSNode> n_modifs
-        = util::find_nodes(node, regs::QueryType::VarModifier);
+    using namespace regs;
+    static const Query* query      = query_reg_.get_query(QueryType::VarDecl);
+    static const uint32_t decl_id  = query->id("decl");
+    static const uint32_t modif_id = query->id("modifier");
 
-    const CSModifiers modifiers = CSModifiers::handle_modifiers(n_modifs, src);
-    const TSNode n_var_decl     = n_modifs.empty()
-                                    ? ts_node_child(node, 0)
-                                    : ts_node_next_sibling(n_modifs.back());
-    const TSNode n_type         = util::child_by_field_name(n_var_decl, "type");
-    const TypeHandler th        = RegManager::get_type_handler(n_type);
-    Type* type                  = th(&self->type_tr_, n_type);
+    const std::string_view src     = self->src_str();
 
-    const std::vector<TSNode> n_decltors
-        = util::find_nodes(n_var_decl, regs::QueryType::VarDecltor);
+    CSModifiers modifiers;
+    TSNode n_var_decl;
+    auto process_var = [&](const TSQueryMatch& match)
+    {
+        for (uint32_t i = 0; i < match.capture_count; ++i)
+        {
+            auto [n_current, index] = match.captures[i];
+            if (index == decl_id)
+            {
+                n_var_decl = n_current;
+            }
+            else if (index == modif_id)
+            {
+                const CSModifier mod = RegManager::get_modifier(n_current, src);
+                modifiers.add_modifier(mod);
+            }
+        }
+    };
+    util::for_each_match(node, QueryType::VarDecl, process_var);
 
+    const TSNode n_type     = util::child_by_field_name(n_var_decl, "type");
+    const TypeHandler th    = RegManager::get_type_handler(n_type);
+    Type* type              = th(&self->type_tr_, n_type);
     TypeMetadata& type_meta = self->symb_table_.user_types_metadata.at(
         self->type_context_.type_stack.top()
     );
 
     std::vector<VarDefStmt*> var_defs;
-    for (const TSNode& n_decltor : n_decltors)
+    auto process_decl = [&](const TSQueryMatch& match)
     {
-        // left side
-        TSNode n_name    = util::child_by_field_name(n_decltor, "name");
-        std::string name = util::extract_text(n_name, src);
+        const TSNode n_decltor = match.captures[0].node;
+        const TSNode n_name    = util::child_by_field_name(n_decltor, "name");
         MemberVarDefStmt* var_def = stmt_f_.mk_member_var_def(
-            std::move(name),
+            util::extract_text(n_name, src),
             type,
             nullptr,
             modifiers.get_access_mod().value_or(AccessModifier::Private)
         );
 
-        // var_def->name_ = name; // todo remove this
         var_defs.push_back(var_def);
         MemberVarMetadata member_var_meta{
             .var_def     = var_def,
@@ -202,7 +215,8 @@ void SymbolTableBuilder::visit_memb_var(
             .initializer = ts_node_named_child(n_decltor, 1) // right side
         };
         type_meta.member_vars.emplace(var_def->name_, member_var_meta);
-    }
+    };
+    util::for_each_match(n_var_decl, QueryType::VarDecltor, process_decl);
 }
 
 void SymbolTableBuilder::visit_property(
@@ -226,10 +240,9 @@ void SymbolTableBuilder::visit_method(
     if (! symb_table.user_types_metadata.contains(current_type))
         throw std::logic_error("Type wasn't discovered yet");
 
-    const std::vector<TSNode> n_modifs
-        = util::find_nodes(node, regs::QueryType::MethodModifier);
-    const CSModifiers modif
-        = CSModifiers::handle_modifiers(n_modifs, self->src_str());
+    const CSModifiers modifs
+        = CSModifiers::handle_modifs_memb(node, self->src_str());
+
     const TSNode n_ret_type    = util::child_by_field_name(node, "returns");
     const TSNode n_func_name   = util::child_by_field_name(node, "name");
     const TSNode n_params      = util::child_by_field_name(node, "parameters");
@@ -240,7 +253,7 @@ void SymbolTableBuilder::visit_method(
     std::string name     = util::extract_text(n_func_name, self->src_str());
     MethodId method_id{
         .func_id   = {name, param_c},
-        .is_static = modif.has(CSModifier::Static),
+        .is_static = modifs.has(CSModifier::Static),
     };
     // util::print_child_nodes_types(param_list_node);
 
@@ -261,8 +274,8 @@ void SymbolTableBuilder::visit_method(
                 ret_type,
                 nullptr
             ),
-            modif.get_access_mod().value_or(AccessModifier::Internal),
-            modif.get_virtuality()
+            modifs.get_access_mod().value_or(AccessModifier::Internal),
+            modifs.get_virtuality()
         );
     }
 
@@ -294,11 +307,10 @@ void SymbolTableBuilder::add_using_directive(const TSNode& node)
         const TSNode n_qualif = ts_node_named_child(node, 0);
         // std::cout << ts_node_type(qualifier_node) << std::endl;
         // util::print_child_nodes_types(qualifier_node, src_code);
-        const std::string namespace_str
-            = util::extract_text(n_qualif, src_str());
-        Scope scope    = util::create_scope(namespace_str);
-        bool is_global = false;
-        bool is_static = false;
+        const std::string nms_str = util::extract_text(n_qualif, src_str());
+        Scope scope               = util::create_scope(nms_str);
+        bool is_global            = false;
+        bool is_static            = false;
         for (uint32_t i = 0; i < ts_node_child_count(node); ++i)
         {
             const TSSymbol s_current = ts_node_symbol(ts_node_child(node, i));
