@@ -40,7 +40,7 @@ struct ScopeContext
     std::stack<std::vector<Stmt*>> scope_stack{};
     IdentifierMap<ParamVarDefStmt*> params{};
     IdentifierMap<LocalVarDefStmt*> local_vars{};
-    std::unordered_map<FuncId, FuncMetadata> function_map{};
+    IdentifierMap<FuncMetadata> function_map{};
 };
 
 /**
@@ -98,7 +98,7 @@ public:
         std::string_view name,
         access::Qualifier qualifier
     ) const;
-    const FuncMetadata* find_func(const FuncId& func_id) const;
+    const FuncMetadata* find_func(std::string_view func_name) const;
     const MethodMetadata* find_method(
         const MethodId& method_id,
         UserTypeDefStmt* owner
@@ -108,7 +108,8 @@ public:
         UserTypeDefStmt* owner
     ) const;
     CallType find_invoc_type(
-        const FuncId& func_id,
+        InvocationId id,
+        // todo redo this into an InvocationID
         access::Qualifier quelifier
     ) const;
 };

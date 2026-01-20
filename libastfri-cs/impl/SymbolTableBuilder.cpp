@@ -251,16 +251,18 @@ void SymbolTableBuilder::visit_method(
     const size_t named_child_c = ts_node_named_child_count(n_params);
     const size_t param_c = is_variadic ? named_child_c - 1 : named_child_c;
     std::string name     = util::extract_text(n_func_name, self->src_str());
-    const MethodId method_id{
-        .func_id   = {name, param_c},
-        .is_static = modifs.has(CSModifier::Static),
+    MethodId method_id{
+        .name        = name,
+        .param_count = param_c,
+        .is_static   = modifs.has(CSModifier::Static),
     };
 
     auto [params, params_meta]
         = util::discover_params(n_params, self->src_str(), self->type_tr_);
-    MethodDefStmt* method_def         = nullptr;
-    auto& methods                     = it_type_meta->second.methods;
-    const auto& [it_method, inserted] = methods.try_emplace(method_id);
+    MethodDefStmt* method_def = nullptr;
+    auto& methods             = it_type_meta->second.methods;
+    const auto& [it_method, inserted]
+        = methods.try_emplace(std::move(method_id));
 
     if (inserted)
     {

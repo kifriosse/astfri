@@ -235,19 +235,21 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
     {
         // todo add handling of local functions
         std::string name = util::extract_text(n_func, self->src_str());
-        FuncId func_id{
-            .name        = std::move(name),
+        InvocationId id{
+            .name        = name,
             .param_count = arg_list.size(),
         };
-        const CallType invoc_type
-            = self->semantic_context_.find_invoc_type(func_id, access::None{});
+        const CallType invoc_type = self->semantic_context_.find_invoc_type(
+            std::move(id),
+            access::None{}
+        );
 
         // name = util::extract_text(n_func, self->src_str());
         switch (invoc_type)
         {
         case CallType::LocalFunc:
             return expr_f_.mk_function_call(
-                std::move(func_id.name),
+                std::move(name),
                 std::move(arg_list)
             );
         case CallType::Delegate:
@@ -259,7 +261,7 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
         case CallType::Method:
             return expr_f_.mk_method_call(
                 expr_f_.mk_this(),
-                std::move(func_id.name),
+                std::move(name),
                 std::move(arg_list)
             );
         case CallType::StaticMethod:
@@ -268,7 +270,7 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
             // todo add static method call handling
             return expr_f_.mk_method_call(
                 expr_f_.mk_class_ref(current->name_),
-                std::move(func_id.name),
+                std::move(name),
                 std::move(arg_list)
             );
         }
@@ -287,13 +289,13 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
         // it's a member of an instance - method or delegate type attribute
         if (is_a<ThisExpr>(left))
         {
-            FuncId func_id{
-                .name        = std::move(name),
+            InvocationId id{
+                .name        = name,
                 .param_count = arg_list.size(),
             };
 
             const CallType invoc_type = self->semantic_context_.find_invoc_type(
-                func_id,
+                std::move(id),
                 access::Instance{}
             );
 
@@ -301,22 +303,16 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
             {
             case CallType::Delegate:
                 return expr_f_.mk_lambda_call(
-                    expr_f_.mk_member_var_ref(left, std::move(func_id.name)),
+                    expr_f_.mk_member_var_ref(left, std::move(name)),
                     std::move(arg_list)
                 );
             case CallType::Method:
-                return expr_f_.mk_method_call(
-                    left,
-                    std::move(func_id.name),
-                    std::move(arg_list)
-                );
+                return expr_f_
+                    .mk_method_call(left, std::move(name), std::move(arg_list));
             default:
                 // todo placeholder
-                return expr_f_.mk_method_call(
-                    left,
-                    std::move(func_id.name),
-                    std::move(arg_list)
-                );
+                return expr_f_
+                    .mk_method_call(left, std::move(name), std::move(arg_list));
             }
         }
         // todo accessing of base members

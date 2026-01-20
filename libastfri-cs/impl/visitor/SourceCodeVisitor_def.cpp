@@ -324,17 +324,15 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
     const size_t param_c = is_variadic ? named_child_c - 1 : named_child_c;
 
     const MethodId method_id{
-        .func_id
-        = FuncId{.name = util::extract_text(n_name, self->src_str()), .param_count = param_c},
-        .is_static = modifs.has(CSModifier::Static)
+        .name        = util::extract_text(n_name, self->src_str()),
+        .param_count = param_c,
+        .is_static   = modifs.has(CSModifier::Static)
     };
 
     const MethodMetadata* method_meta
         = self->semantic_context_.find_method(method_id, current_type);
     if (! method_meta)
-        throw std::logic_error(
-            "Method \'" + method_id.func_id.name + "\' not found"
-        );
+        throw std::logic_error("Method \'" + method_id.name + "\' not found");
 
     // if method could be resolved
     if (method_meta->method_def)
@@ -380,15 +378,10 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
     const bool is_variadic = util::has_variadic_param(n_params);
     const size_t named_c   = ts_node_named_child_count(n_params);
 
-    const FuncId func_id{
-        .name        = util::extract_text(n_name, self->src_str()),
-        .param_count = is_variadic ? named_c - 1 : named_c
-    };
-    const FuncMetadata* func_meta = self->semantic_context_.find_func(func_id);
+    std::string name       = util::extract_text(n_name, self->src_str());
+    const FuncMetadata* func_meta = self->semantic_context_.find_func(name);
     if (! func_meta)
-        throw std::logic_error(
-            "Local function \'" + func_id.name + "\' not found"
-        );
+        throw std::logic_error("Local function \'" + name + "\' not found");
 
     if (! func_meta->func_def)
         return self->make_func_stmt(node, false);

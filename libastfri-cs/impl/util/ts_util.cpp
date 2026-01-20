@@ -70,9 +70,8 @@ std::string remove_comments(
 )
 {
     using namespace regs;
-    static constexpr auto query_type  = QueryType::CommentError;
-
-    static const auto& query_reg      = QueryReg::get();
+    static constexpr auto query_type = QueryType::CommentError;
+    static const auto& query_reg     = QueryReg::get();
 
     std::string new_src;
     size_t next_start = 0;

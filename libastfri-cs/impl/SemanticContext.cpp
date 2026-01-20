@@ -71,12 +71,8 @@ void SemanticContext::reg_local_func(FuncMetadata func_meta)
 {
     const auto func_def = func_meta.func_def;
     scope_context_.scope_stack.top().push_back(func_def);
-    auto [it, inserted] = scope_context_.function_map.try_emplace(
-        FuncId{
-            .name        = func_def->name_,
-            .param_count = func_def->params_.size(),
-        }
-    );
+    auto [it, inserted]
+        = scope_context_.function_map.try_emplace(func_def->name_);
     if (inserted)
     {
         it->second = std::move(func_meta);
@@ -112,12 +108,7 @@ void SemanticContext::leave_scope()
             scope_context_.local_vars.erase(var->name_);
         else if (const auto func = as_a<FunctionDefStmt>(scope_memb))
         {
-            scope_context_.function_map.erase(
-                FuncId{
-                    .name        = func->name_,
-                    .param_count = func->params_.size(),
-                }
-            );
+            scope_context_.function_map.erase(func->name_);
         }
     }
     scope_context_.scope_stack.pop();
@@ -207,10 +198,12 @@ VarDefStmt* SemanticContext::find_var(
     return std::visit(overloaded, qualifier);
 }
 
-const FuncMetadata* SemanticContext::find_func(const FuncId& func_id) const
+const FuncMetadata* SemanticContext::find_func(
+    const std::string_view func_name
+) const
 {
     auto& funcs        = scope_context_.function_map;
-    const auto it_func = funcs.find(func_id);
+    const auto it_func = funcs.find(func_name);
     return it_func == funcs.end() ? nullptr : &it_func->second;
 }
 
@@ -295,13 +288,12 @@ MemberVarMetadata* SemanticContext::find_memb_var(
 }
 
 CallType SemanticContext::find_invoc_type(
-    const FuncId& func_id,
+    InvocationId id,
     access::Qualifier quelifier
 ) const
 {
     // todo static variables
-    if ([[maybe_unused]] VarDefStmt* var_def
-        = find_var(func_id.name, quelifier))
+    if ([[maybe_unused]] VarDefStmt* var_def = find_var(id.name, quelifier))
     {
         /* todo
          * this should probably be something else like a delegate invocation
@@ -310,17 +302,18 @@ CallType SemanticContext::find_invoc_type(
         return CallType::Delegate;
     }
 
-    MethodId method_id{
-        .func_id   = func_id,
-        .is_static = std::holds_alternative<access::Static>(quelifier),
-    };
-
     util::Overloaded overloaded{
         [&](const access::None&) -> CallType
         {
             if ([[maybe_unused]] const FuncMetadata* metadata
-                = find_func(func_id))
+                = find_func(id.name))
                 return CallType::LocalFunc;
+
+            MethodId method_id{
+                .name        = std::move(id.name),
+                .param_count = id.param_count,
+                .is_static   = false
+            };
 
             const auto current_type = this->current_type();
             if ([[maybe_unused]] const MethodMetadata* metadata
@@ -341,6 +334,12 @@ CallType SemanticContext::find_invoc_type(
         [&](const access::Instance&) -> CallType
         {
             const auto current_type = this->current_type();
+            const MethodId method_id{
+                .name        = std::move(id.name),
+                .param_count = id.param_count,
+                .is_static   = false
+            };
+
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, current_type))
             {
@@ -351,6 +350,11 @@ CallType SemanticContext::find_invoc_type(
         },
         [&](const access::Static& static_memb) -> CallType
         {
+            const MethodId method_id{
+                .name        = std::move(id.name),
+                .param_count = id.param_count,
+                .is_static   = false
+            };
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, static_memb.owner))
                 return CallType::StaticMethod;
@@ -359,6 +363,11 @@ CallType SemanticContext::find_invoc_type(
         },
         [&](const access::Base& base) -> CallType
         {
+            const MethodId method_id{
+                .name        = std::move(id.name),
+                .param_count = id.param_count,
+                .is_static   = true
+            };
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(method_id, base.parent_type))
             {

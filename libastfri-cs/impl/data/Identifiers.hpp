@@ -11,18 +11,17 @@
 namespace astfri::csharp
 {
 
-struct FuncId
+struct InvocationId
 {
     std::string name;
     size_t param_count{0};
-
-    bool operator==(const FuncId& other) const;
 };
 
 struct MethodId
 {
-    FuncId func_id;
-    bool is_static{false};
+    std::string name;
+    size_t param_count{0};
+    bool is_static;
 
     bool operator==(const MethodId& other) const;
 };
