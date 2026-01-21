@@ -221,9 +221,9 @@ Expr* SrcCodeVisitor::visit_memb_access_expr(
 Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
 {
     static const TSSymbol identifier_symb
-        = util::symbol_for_name(self->lang_, "identifier", true);
+        = util::symbol_for_name("identifier", true);
     static const TSSymbol memb_access_symb
-        = util::symbol_for_name(self->lang_, "member_access_expression", true);
+        = util::symbol_for_name("member_access_expression", true);
     // std::cout << "Invocation Expression: " << std::endl;
     // print_child_nodes_types(node, self->get_src_code());
     const TSNode n_func         = util::child_by_field_name(node, "function");
@@ -321,12 +321,17 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
         return expr_f_
             .mk_method_call(left, std::move(name), std::move(arg_list));
     }
-    // todo add anonymous lambda call
     // left side is a anonymous lambda
-    // if (is_anonymou_lambda(function_node))
-    // {
-    //
-    // }
+    TSNode n_lambda;
+    TSNode n_delegate;
+    if (util::is_anonymous_lambda(n_func, &n_lambda, &n_delegate))
+    {
+        // todo add anonymous lambda call
+        return expr_f_.mk_lambda_call(
+            expr_f_.mk_unknown(),
+            std::move(arg_list)
+        );
+    }
 
     return expr_f_.mk_unknown();
 }

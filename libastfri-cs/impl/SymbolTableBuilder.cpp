@@ -295,12 +295,10 @@ void SymbolTableBuilder::add_using_directive(const TSNode& node)
     //     = util::symbol_for_name(lang, "qualified_name", true);
     // const static TSSymbol generic_name_symb
     //     = util::symbol_for_name(lang, "generic_name", true);
-    static const TSSymbol s_global
-        = util::symbol_for_name(lang_, "global", false);
-    static const TSSymbol s_static
-        = util::symbol_for_name(lang_, "static", false);
+    static const TSSymbol s_global = util::symbol_for_name("global", false);
+    static const TSSymbol s_static = util::symbol_for_name("static", false);
 
-    const TSNode n_name = util::child_by_field_name(node, "name");
+    const TSNode n_name            = util::child_by_field_name(node, "name");
     // util::print_child_nodes_types(node, src_code, true);
 
     if (ts_node_is_null(n_name))

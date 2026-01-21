@@ -23,14 +23,11 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
 )
 {
     static const TSSymbol base_list_symb
-        = util::symbol_for_name(self->lang_, "base_list", true);
+        = util::symbol_for_name("base_list", true);
     static const TSSymbol type_param_list_sym
-        = util::symbol_for_name(self->lang_, "type_parameter_list", true);
-    static const TSSymbol type_param_constr_sym = util::symbol_for_name(
-        self->lang_,
-        "type_parameter_constraints_clause",
-        true
-    );
+        = util::symbol_for_name("type_parameter_list", true);
+    static const TSSymbol type_param_constr_sym
+        = util::symbol_for_name("type_parameter_constraints_clause", true);
 
     Scope scope               = util::create_scope(node, self->src_str());
     const TSNode n_class_name = util::child_by_field_name(node, "name");
@@ -72,12 +69,13 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
 
     auto process_generic_params = [](const TSNode& current) -> void
     {
-
+        // todo implement temporary generic handling
     };
 
-    auto process_generic_constraints = []([[maybe_unused]] const TSNode& current)-> void { };
+    auto process_generic_constraints
+        = []([[maybe_unused]] const TSNode& current) -> void { };
 
-    auto process_class_header        = [&](const TSNode& current) -> bool
+    auto process_class_header = [&](const TSNode& current) -> bool
     {
         if (ts_node_eq(current, n_class_body))
             return false;
@@ -373,12 +371,8 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
 Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode n_name    = util::child_by_field_name(node, "name");
-    const TSNode n_params  = util::child_by_field_name(node, "parameters");
-    const bool is_variadic = util::has_variadic_param(n_params);
-    const size_t named_c   = ts_node_named_child_count(n_params);
-
-    std::string name       = util::extract_text(n_name, self->src_str());
+    const TSNode n_name           = util::child_by_field_name(node, "name");
+    const std::string name        = util::extract_text(n_name, self->src_str());
     const FuncMetadata* func_meta = self->semantic_context_.find_func(name);
     if (! func_meta)
         throw std::logic_error("Local function \'" + name + "\' not found");

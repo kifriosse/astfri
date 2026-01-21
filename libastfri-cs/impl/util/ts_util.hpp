@@ -28,16 +28,11 @@ TSNode child_by_field_name(const TSNode& node, std::string_view name);
 
 /**
  * @brief Wrapper function for ts_language_symbol_for_name
- * @param lang
- * @param name
- * @param named
- * @return
+ * @param name type/name of node we want symbol of
+ * @param named if the symbol we are looking for is for named node
+ * @return TSSymbol corresponding to the given name
  */
-TSSymbol symbol_for_name(
-    const TSLanguage* lang,
-    std::string_view name,
-    bool named
-);
+TSSymbol symbol_for_name(std::string_view name, bool named);
 
 /**
  * @brief Extracts the text corresponding to the given TSNode from the source
@@ -93,6 +88,10 @@ std::string remove_comments(
  * @return true if the parameter list contains a variadic parameter
  */
 bool has_variadic_param(const TSNode& node, TSNode* type_node = nullptr);
+
+bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate);
+
+TSNode unwrap_parantheses(const TSNode& node);
 
 /**
  * @brief Iterates over each child node of the given TSNode and applies the
