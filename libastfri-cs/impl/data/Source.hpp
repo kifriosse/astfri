@@ -1,14 +1,27 @@
 #ifndef CSHARP_SOURCE_HPP
 #define CSHARP_SOURCE_HPP
 
-#include <libastfri-cs/impl/data/FileContext.hpp>
+#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <filesystem>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace astfri::csharp
 {
+
+struct FileContext
+{
+    // todo add global aliases
+    std::vector<Scope> usings{};
+    std::vector<UserTypeDefStmt*> static_usings{};
+    // todo redo this into namespace aware
+    IdentifierMap<std::variant<Type*, std::string>> aliases{};
+};
 
 struct SourceFile
 {

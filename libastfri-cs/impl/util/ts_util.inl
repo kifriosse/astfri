@@ -4,6 +4,7 @@
 namespace astfri::csharp::util
 {
 
+// todo refactor this into one function
 template<typename Func>
 requires std::same_as<std::invoke_result_t<Func, TSNode>, bool>
 void for_each_child_node(const TSNode node, Func process, const bool only_named)
