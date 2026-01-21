@@ -23,7 +23,7 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
 
     std::vector<Stmt*> stmts;
     self->semantic_context_.enter_scope();
-    auto dicover_func = [self](TSNode current)
+    auto dicover_func = [self](const TSNode& current) -> void
     {
         if (! ts_node_is_named(current) || ts_node_symbol(current) != func_symb)
             return;
@@ -34,7 +34,7 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
     };
     util::for_each_child_node(node, dicover_func);
 
-    auto process_body = [self, &stmts](TSNode n_current)
+    auto process_body = [self, &stmts](const TSNode& n_current) -> void
     {
         if (ts_node_is_named(n_current))
         {
@@ -218,7 +218,7 @@ Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
     Stmt* finally            = nullptr;
     std::vector<CatchStmt*> catch_stmts;
 
-    auto process = [&](TSNode current) -> void
+    auto process = [&](const TSNode& current) -> void
     {
         if (ts_node_eq(current, n_body))
             return;
@@ -248,7 +248,7 @@ Stmt* SrcCodeVisitor::visit_catch_clause(
 
     LocalVarDefStmt* catch_var = nullptr;
     Stmt* body                 = nullptr;
-    auto process               = [&](TSNode n_current) -> void
+    auto process               = [&](const TSNode& n_current) -> void
     {
         const StmtHandler h_current = RegManager::get_stmt_handler(n_current);
         Stmt* current_stmt          = h_current(self, n_current);
@@ -297,7 +297,7 @@ Stmt* SrcCodeVisitor::visit_switch_stmt(
     Expr* value                = h_value(self, n_value);
 
     std::vector<CaseBaseStmt*> cases;
-    auto process = [self, &cases](TSNode n_current) -> void
+    auto process = [self, &cases](const TSNode& n_current) -> void
     {
         const StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
         Stmt* stmt               = h_stmt(self, n_current);

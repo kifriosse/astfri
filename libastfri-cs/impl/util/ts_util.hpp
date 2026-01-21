@@ -97,49 +97,38 @@ bool has_variadic_param(const TSNode& node, TSNode* type_node = nullptr);
 /**
  * @brief Iterates over each child node of the given TSNode and applies the
  * provided function.
- * @tparam Func A callable type that takes a TSNode as parameter and returns
- * bool.
- * @param node TSNode whose child nodes will be iterated over.
- * @param process Function to apply to each child node. If it returns false, the
- * iteration stops.
- * @param only_named If true, only named child nodes will be processed.
- */
-template<typename Func>
-requires std::same_as<std::invoke_result_t<Func, TSNode>, bool>
-void for_each_child_node(TSNode node, Func process, bool only_named = true);
-
-/**
- * @brief Iterates over each child node of the given TSNode and applies the
- * provided function.
- * @tparam Func A callable type that takes a TSNode as parameter.
+ * @tparam F A callable type that takes a @code const TSNode&@endcode as
+ * parameter.
  * @param node TSNode whose child nodes will be iterated over.
  * @param process Function to apply to each child node.
  * @param only_named If true, only named child nodes will be processed.
+ * @note If @p process parameter returns @c bool, returning @c false will end
+ * the iteration. When the @p process returns  @c void (or any type other than
+ * bool), it will iterator over every children.
  */
-template<typename Func>
-requires std::same_as<std::invoke_result_t<Func, TSNode>, void>
-void for_each_child_node(TSNode node, Func process, bool only_named = true);
+template<std::invocable<const TSNode&> F>
+void for_each_child_node(const TSNode& node, F process, bool only_named = true);
 
 /**
  * @brief Processes each parameter node in the parameter list node by invoking
  * the provided collector function.
- * @tparam Func a callable type that takes a TSNode as parameter.
+ * @tparam F a callable type that takes a TSNode as parameter.
  * @param node parameter list TSNode
  * @param collector function to be called for each parameter TSNode
  */
-template<std::invocable<TSNode> Func>
-void process_param_list(TSNode node, Func collector);
+template<std::invocable<const TSNode&> F>
+void process_param_list(const TSNode& node, F collector);
 
 /**
  * @brief Iterates over captures of the specified query in sub-tree of given
  * root node and applies the provided function.
- * @tparam Func A callable type that takes a const TSQueryMatch& as parameter.
+ * @tparam F A callable type that takes a const TSQueryMatch& as parameter.
  * @param root TSNode to search for captures.
  * @param type Type of query to use for finding captures.
  * @param process Function to apply to each capture match.
  */
-template<std::invocable<const TSQueryMatch&> Func>
-void for_each_match(TSNode root, regs::QueryType type, Func process);
+template<std::invocable<const TSQueryMatch&> F>
+void for_each_match(const TSNode& root, regs::QueryType type, F process);
 
 } // namespace astfri::csharp::util
 

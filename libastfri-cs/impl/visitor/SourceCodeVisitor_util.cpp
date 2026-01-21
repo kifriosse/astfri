@@ -199,7 +199,7 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
 std::vector<Expr*> SrcCodeVisitor::visit_arg_list(const TSNode& node)
 {
     std::vector<Expr*> exprs;
-    auto process = [this, &exprs](TSNode current)
+    auto process = [this, &exprs](const TSNode& current) -> void
     {
         const TSNode n_child     = ts_node_child(current, 0);
         const ExprHandler h_expr = RegManager::get_expr_handler(n_child);

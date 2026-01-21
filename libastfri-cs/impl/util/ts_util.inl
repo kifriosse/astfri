@@ -4,10 +4,8 @@
 namespace astfri::csharp::util
 {
 
-// todo refactor this into one function
-template<typename Func>
-requires std::same_as<std::invoke_result_t<Func, TSNode>, bool>
-void for_each_child_node(const TSNode node, Func process, const bool only_named)
+template<std::invocable<const TSNode&> F>
+void for_each_child_node(const TSNode& node, F process, const bool only_named)
 {
     TSTreeCursor cursor = ts_tree_cursor_new(node);
     if (ts_tree_cursor_goto_first_child(&cursor))
@@ -18,41 +16,28 @@ void for_each_child_node(const TSNode node, Func process, const bool only_named)
             if (only_named && ! ts_node_is_named(n_current))
                 continue;
 
-            if (! process(n_current))
-                break;
-
+            using ResType = std::invoke_result_t<F, const TSNode&>;
+            if constexpr (std::same_as<ResType, bool>)
+            {
+                if (! process(n_current))
+                    break;
+            }
+            else
+            {
+                process(n_current);
+            }
         } while (ts_tree_cursor_goto_next_sibling(&cursor));
     }
     ts_tree_cursor_delete(&cursor);
 }
 
-template<typename Func>
-requires std::same_as<std::invoke_result_t<Func, TSNode>, void>
-void for_each_child_node(const TSNode node, Func process, const bool only_named)
-{
-    TSTreeCursor cursor = ts_tree_cursor_new(node);
-    if (ts_tree_cursor_goto_first_child(&cursor))
-    {
-        do
-        {
-            TSNode n_current = ts_tree_cursor_current_node(&cursor);
-            if (only_named && ! ts_node_is_named(n_current))
-                continue;
-
-            process(n_current);
-
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
-    }
-    ts_tree_cursor_delete(&cursor);
-}
-
-template<std::invocable<TSNode> Func>
-void process_param_list(TSNode node, Func collector)
+template<std::invocable<const TSNode&> F>
+void process_param_list(const TSNode& node, F collector)
 {
     TSNode n_type{};
     const bool is_variadic = has_variadic_param(node, &n_type);
 
-    auto process           = [&](TSNode current) -> bool
+    auto process           = [&](const TSNode& current) -> bool
     {
         if (is_variadic && ts_node_eq(current, n_type))
         {
@@ -66,8 +51,8 @@ void process_param_list(TSNode node, Func collector)
     util::for_each_child_node(node, process);
 }
 
-template<std::invocable<const TSQueryMatch&> Func>
-void for_each_match(const TSNode root, const regs::QueryType type, Func process)
+template<std::invocable<const TSQueryMatch&> F>
+void for_each_match(const TSNode& root, const regs::QueryType type, F process)
 {
     static auto& query_reg = regs::QueryReg::get();
 

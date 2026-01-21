@@ -41,7 +41,7 @@ std::string extract_text(const TSNode& node, const std::string_view src_code)
 void print_child_nodes_types(const TSNode& node, const bool named)
 {
     size_t i     = 0;
-    auto process = [&i](TSNode child)
+    auto process = [&i](const TSNode& child) -> void
     { std::cout << "Child " << ++i << " type: \'" << ts_node_type(child); };
     for_each_child_node(node, process, named);
 }
@@ -53,7 +53,7 @@ void print_child_nodes_types(
 )
 {
     size_t i     = 0;
-    auto process = [&source, &i](TSNode child)
+    auto process = [&source, &i](const TSNode& child) -> void
     {
         const std::string type = ts_node_type(child);
         const std::string text = extract_text(child, source);
@@ -70,18 +70,17 @@ std::string remove_comments(
 )
 {
     using namespace regs;
-    static constexpr auto query_type = QueryType::CommentError;
-    static const auto& query_reg     = QueryReg::get();
+    static constexpr auto query_type  = QueryType::CommentError;
+    static const auto& query_reg      = QueryReg::get();
+    static const Query* const query   = query_reg.get_query(query_type);
+    static const CaptureId comment_id = query->id("comment");
+    static const CaptureId error_id   = query->id("error");
 
     std::string new_src;
     size_t next_start = 0;
     bool has_err      = false;
-    auto process      = [&](const TSQueryMatch& match)
+    auto process      = [&](const TSQueryMatch& match) -> void
     {
-        static const Query* const query   = query_reg.get_query(query_type);
-        static const CaptureId comment_id = query->id("comment");
-        static const CaptureId error_id   = query->id("error");
-
         for (uint32_t i = 0; i < match.capture_count; ++i)
         {
             auto& [node, index] = match.captures[i];

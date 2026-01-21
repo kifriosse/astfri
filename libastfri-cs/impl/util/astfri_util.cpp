@@ -147,7 +147,7 @@ ParamSignature discover_params(
     std::vector<ParamVarDefStmt*> params;
     std::vector<ParamMetadata> params_data;
 
-    auto collector = [&](TSNode current)
+    auto collector = [&](const TSNode& current) -> void
     {
         const TSNode n_name        = child_by_field_name(current, "name");
         ParamVarDefStmt* param_def = make_param_def(current, src_code, type_tr);

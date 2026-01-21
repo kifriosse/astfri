@@ -46,7 +46,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     const TSNode n_class_body = util::child_by_field_name(node, "body");
     // handling of base class and interface implementations
     bool first             = true;
-    auto process_base_list = [&](TSNode current)
+    auto process_base_list = [&](const TSNode& current) -> void
     {
         std::string name     = util::extract_text(current, self->src_str());
         const TypeHandler th = RegManager::get_type_handler(current);
@@ -70,14 +70,14 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         }
     };
 
-    auto process_generic_params = [](TSNode current)
+    auto process_generic_params = [](const TSNode& current) -> void
     {
 
     };
 
-    auto process_generic_constraints = []([[maybe_unused]] TSNode current) { };
+    auto process_generic_constraints = []([[maybe_unused]] const TSNode& current)-> void { };
 
-    auto process_class_header        = [&](TSNode current) -> bool
+    auto process_class_header        = [&](const TSNode& current) -> bool
     {
         if (ts_node_eq(current, n_class_body))
             return false;
@@ -103,7 +103,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     if (ts_node_is_null(n_class_body))
         return class_def;
 
-    auto process_membs = [class_def, self](TSNode n_member)
+    auto process_membs = [class_def, self](const TSNode& n_member) -> void
     {
         const StmtHandler handler = RegManager::get_stmt_handler(n_member);
         Stmt* member_stmt         = handler(self, n_member);
