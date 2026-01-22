@@ -9,15 +9,15 @@ class SemanticContext;
 class TypeTranslator
 {
 private:
-    static TypeFactory& type_f_;
+    static TypeFactory& typeFact_;
 
-    Scope current_ns_{};
-    SymbolTable& symb_table_;
-    SourceCode* current_src_{nullptr};
+    Scope currentNms_{};
+    SymbolTable& symbTable_;
+    SourceCode* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
-    explicit TypeTranslator(SymbolTable& symbol_table);
+    explicit TypeTranslator(SymbolTable& symbTable);
     void set_current_src(SourceCode* src);
     void set_current_namespace(Scope scope);
 

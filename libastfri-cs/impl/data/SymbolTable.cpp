@@ -49,18 +49,18 @@ void SymbolTree::add_type(
 
 util::TypeBinding* SymbolTree::find_type(
     const Scope& scope,
-    const std::string_view type_name,
-    const bool search_parents
+    const std::string_view typeName,
+    const bool searchParents
 ) const
 {
-    return find_type({}, scope, type_name, search_parents);
+    return find_type({}, scope, typeName, searchParents);
 }
 
 util::TypeBinding* SymbolTree::find_type(
     const Scope& start,
     const Scope& end,
-    const std::string_view type_name,
-    const bool search_parents
+    const std::string_view typeName,
+    const bool searchParents
 ) const
 {
     SymbolTreeNode* current = root_.get();
@@ -74,7 +74,7 @@ util::TypeBinding* SymbolTree::find_type(
                 return false;
 
             current = it->second.get();
-            if (search_parents)
+            if (searchParents)
                 nodes.push_back(current);
         }
         return true;
@@ -86,9 +86,9 @@ util::TypeBinding* SymbolTree::find_type(
     if (! process(end))
         return nullptr;
 
-    if (! search_parents)
+    if (! searchParents)
     {
-        const auto it = current->children.find(type_name);
+        const auto it = current->children.find(typeName);
         return it == current->children.end()
                  ? nullptr
                  : std::get_if<util::TypeBinding>(&it->second->data);
@@ -96,7 +96,7 @@ util::TypeBinding* SymbolTree::find_type(
 
     for (const auto node : std::views::reverse(nodes))
     {
-        auto it = node->children.find(type_name);
+        auto it = node->children.find(typeName);
         if (it == node->children.end())
             continue;
 

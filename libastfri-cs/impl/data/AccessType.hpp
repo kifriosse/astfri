@@ -44,7 +44,7 @@ struct Static
  */
 struct Base
 {
-    UserTypeDefStmt* parent_type{nullptr};
+    UserTypeDefStmt* parent{nullptr};
 };
 
 /**
@@ -52,7 +52,7 @@ struct Base
  */
 struct Unknown
 {
-    Expr* left_side{nullptr}; // todo might be useless
+    Expr* leftSide{nullptr}; // todo might be useless
 };
 
 /**

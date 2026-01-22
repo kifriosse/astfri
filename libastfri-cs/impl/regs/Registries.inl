@@ -29,11 +29,11 @@ template<class Type>
 Type RegManager::get_or_default(
     const RegistryMap<Type>& map,
     std::string_view name,
-    Type def_value
+    Type nDefVal
 )
 {
     const auto it = map.find(name);
-    return it != map.end() ? it->second : def_value;
+    return it != map.end() ? it->second : nDefVal;
 }
 
 template<class RetType>

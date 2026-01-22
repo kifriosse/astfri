@@ -46,16 +46,16 @@ private:
 
 public:
     static CSModifiers handle_modifs_memb(
-        const TSNode& memb_node,
+        const TSNode& nMemb,
         std::string_view src
     );
     static CSModifiers handle_modifs_var(
-        const TSNode& var_node,
+        const TSNode& nVar,
         std::string_view src,
-        TSNode* n_var_decl
+        TSNode* nVarDecl
     );
     static CSModifiers handle_modifs_param(
-        const TSNode& param_node,
+        const TSNode& nParam,
         std::string_view src
     );
 

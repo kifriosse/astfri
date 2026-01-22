@@ -1,7 +1,7 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
-#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -17,180 +17,181 @@ namespace astfri::csharp
 
 Stmt* SrcCodeVisitor::visit_var_def_stmt(
     const TSNode& node,
-    const util::VarDefType def_type
+    const util::VarDefType defType
 )
 {
-    TSNode n_var_decl{};
+    TSNode nVarDecl{};
 
     [[maybe_unused]] CSModifiers modifs
-        = CSModifiers::handle_modifs_var(node, src_str(), &n_var_decl);
+        = CSModifiers::handle_modifs_var(node, src_str(), &nVarDecl);
 
-    const TSNode n_type  = util::child_by_field_name(n_var_decl, "type");
-    const TypeHandler th = RegManager::get_type_handler(n_type);
-    Type* type           = th(&type_tr_, n_type);
+    const TSNode nType   = util::child_by_field_name(nVarDecl, "type");
+    const TypeHandler th = RegManager::get_type_handler(nType);
+    Type* type           = th(&typeTrs_, nType);
 
-    std::vector<VarDefStmt*> var_defs;
+    std::vector<VarDefStmt*> varDefs;
     auto process = [&](const TSQueryMatch& match)
     {
         for (uint32_t i = 0; i < match.capture_count; ++i)
         {
-            const TSNode n_var_decltor = match.captures[i].node;
-            TSNode n_var_name          = ts_node_named_child(n_var_decltor, 0);
-            TSNode n_init              = ts_node_named_child(n_var_decltor, 1);
-            std::string name = util::extract_text(n_var_name, src_str());
+            const TSNode nVarDecltotr = match.captures[i].node;
+            TSNode n_varName          = ts_node_named_child(nVarDecltotr, 0);
+            TSNode nInit              = ts_node_named_child(nVarDecltotr, 1);
+            std::string name = util::extract_text(n_varName, src_str());
             Expr* init       = nullptr;
-            if (! ts_node_is_null(n_init))
+            if (! ts_node_is_null(nInit))
             {
-                ExprHandler h_init = RegManager::get_expr_handler(n_init);
-                init               = h_init(this, n_init);
+                ExprHandler hInit = RegManager::get_expr_handler(nInit);
+                init              = hInit(this, nInit);
             }
 
-            VarDefStmt* var_def = nullptr;
-            switch (def_type)
+            VarDefStmt* varDef = nullptr;
+            switch (defType)
             {
             case util::VarDefType::Member:
             {
-                MemberVarMetadata* var_meta = semantic_context_.find_memb_var(
+                MemberVarMetadata* varMeta = semanticContext_.find_memb_var(
                     name,
-                    semantic_context_.current_type()
+                    semanticContext_.current_type()
                 );
-                var_def               = var_meta->var_def;
-                var_def->initializer_ = init;
-                var_meta->processed   = true;
+                varDef               = varMeta->varDef;
+                varDef->initializer_ = init;
+                varMeta->processed   = true;
                 break;
             }
             case util::VarDefType::Local:
                 // todo handle const
-                var_def = stmt_f_.mk_local_var_def(std::move(name), type, init);
-                semantic_context_.reg_local_var(as_a<LocalVarDefStmt>(var_def));
+                varDef
+                    = stmtFact_.mk_local_var_def(std::move(name), type, init);
+                semanticContext_.reg_local_var(as_a<LocalVarDefStmt>(varDef));
                 break;
             case util::VarDefType::Global:
                 // todo handle const
-                var_def
-                    = stmt_f_.mk_global_var_def(std::move(name), type, init);
+                varDef
+                    = stmtFact_.mk_global_var_def(std::move(name), type, init);
                 break;
             }
 
-            if (var_def)
+            if (varDef)
             {
                 // var_def->name_ = var_name;
-                var_defs.push_back(var_def);
+                varDefs.push_back(varDef);
             }
         }
     };
-    util::for_each_match(n_var_decl, regs::QueryType::VarDecltor, process);
+    util::for_each_match(node, regs::QueryType::VarDecltor, process);
 
-    if (var_defs.size() > 1)
-        return stmt_f_.mk_def(std::move(var_defs));
+    if (varDefs.size() > 1)
+        return stmtFact_.mk_def(std::move(varDefs));
 
-    return var_defs.front();
+    return varDefs.front();
 }
 
 Stmt* SrcCodeVisitor::make_while_loop(const TSNode& node, const bool is_while)
 {
-    const TSNode n_cond      = util::child_by_field_name(node, "condition");
-    const TSNode n_body      = util::child_by_field_name(node, "body");
-    const ExprHandler h_cond = RegManager::get_expr_handler(n_cond);
-    const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
-    Expr* cond               = h_cond(this, n_cond);
-    Stmt* body               = h_body(this, n_body);
+    const TSNode nCond      = util::child_by_field_name(node, "condition");
+    const TSNode nBody      = util::child_by_field_name(node, "body");
+    const ExprHandler hCond = RegManager::get_expr_handler(nCond);
+    const StmtHandler hBody = RegManager::get_stmt_handler(nBody);
+    Expr* cond              = hCond(this, nCond);
+    Stmt* body              = hBody(this, nBody);
 
     if (is_while)
-        return stmt_f_.mk_while(cond, body);
-    return stmt_f_.mk_do_while(cond, body);
+        return stmtFact_.mk_while(cond, body);
+    return stmtFact_.mk_do_while(cond, body);
 }
 
 FunctionDefStmt* SrcCodeVisitor::make_func_stmt(
     const TSNode& node,
-    const bool is_method
+    const bool isMethod
 )
 {
-    semantic_context_.enter_scope();
+    semanticContext_.enter_scope();
 
-    FunctionDefStmt* func_def = stmt_f_.mk_function_def();
-    const TSNode n_ret_type
-        = util::child_by_field_name(node, is_method ? "returns" : "type");
-    const TSNode n_name  = util::child_by_field_name(node, "name");
-    const TSNode n_param = util::child_by_field_name(node, "parameters");
-    const TSNode n_body  = util::child_by_field_name(node, "body");
+    FunctionDefStmt* funcDef = stmtFact_.mk_function_def();
+    const TSNode nRetType
+        = util::child_by_field_name(node, isMethod ? "returns" : "type");
+    const TSNode nName  = util::child_by_field_name(node, "name");
+    const TSNode nParam = util::child_by_field_name(node, "parameters");
+    const TSNode nBody  = util::child_by_field_name(node, "body");
 
     // todo handle generic parameters
-    const TypeHandler th     = RegManager::get_type_handler(n_ret_type);
-    const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
-    Type* ret_type           = th(&type_tr_, n_ret_type);
+    const TypeHandler th    = RegManager::get_type_handler(nRetType);
+    const StmtHandler hBody = RegManager::get_stmt_handler(nBody);
+    Type* retType           = th(&typeTrs_, nRetType);
 
-    semantic_context_.reg_return(ret_type);
+    semanticContext_.reg_return(retType);
 
-    func_def->retType_ = ret_type;
-    func_def->name_    = util::extract_text(n_name, src_str());
-    func_def->params_  = make_param_list(n_param, false);
-    func_def->body_    = as_a<CompoundStmt>(h_body(this, n_body));
+    funcDef->retType_ = retType;
+    funcDef->name_    = util::extract_text(nName, src_str());
+    funcDef->params_  = make_param_list(nParam, false);
+    funcDef->body_    = as_a<CompoundStmt>(hBody(this, nBody));
 
-    semantic_context_.leave_scope();
-    semantic_context_.unregister_return_type();
-    return func_def;
+    semanticContext_.leave_scope();
+    semanticContext_.unregister_return_type();
+    return funcDef;
 }
 
 Expr* SrcCodeVisitor::expr_list_to_comma_op(
-    const TSNode& start_node,
-    const TSNode* end_node
+    const TSNode& nStart,
+    const TSNode* nEnd
 )
 {
     std::queue<Expr*> exprs;
-    TSNode n_next = start_node;
-    while (! ts_node_is_null(n_next))
+    TSNode nNext = nStart;
+    while (! ts_node_is_null(nNext))
     {
-        TSNode n_current = n_next;
-        n_next           = ts_node_next_sibling(n_current);
-        if (end_node && ts_node_eq(n_current, *end_node))
+        TSNode nCurrent = nNext;
+        nNext           = ts_node_next_sibling(nCurrent);
+        if (nEnd && ts_node_eq(nCurrent, *nEnd))
             break;
 
-        if (! ts_node_is_named(n_current))
+        if (! ts_node_is_named(nCurrent))
             continue;
 
-        const ExprHandler h_expr = RegManager::get_expr_handler(n_current);
-        exprs.push(h_expr(this, n_current));
+        const ExprHandler hExpr = RegManager::get_expr_handler(nCurrent);
+        exprs.push(hExpr(this, nCurrent));
     }
 
     if (exprs.empty())
         return nullptr;
 
-    Expr* init_expr = exprs.front();
+    Expr* initExpr = exprs.front();
     exprs.pop();
 
     while (! exprs.empty())
     {
         Expr* right = exprs.front();
         exprs.pop();
-        init_expr = expr_f_.mk_bin_on(init_expr, BinOpType::Comma, right);
+        initExpr = exprFact_.mk_bin_on(initExpr, BinOpType::Comma, right);
     }
-    return init_expr;
+    return initExpr;
 }
 
 std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
     const TSNode& node,
-    const bool make_shallow
+    const bool makeShallow
 )
 {
     std::vector<ParamVarDefStmt*> params;
     auto collector = [&](const TSNode& current)
     {
-        const TSNode n_name  = util::child_by_field_name(current, "name");
-        const TSNode n_type  = util::child_by_field_name(current, "type");
-        const TSNode n_init  = ts_node_next_named_sibling(n_name);
-        std::string name     = util::extract_text(n_name, src_str());
-        const TypeHandler th = RegManager::get_type_handler(n_type);
-        Type* type           = th(&type_tr_, n_type);
+        const TSNode nName  = util::child_by_field_name(current, "name");
+        const TSNode nType  = util::child_by_field_name(current, "type");
+        const TSNode nInit  = ts_node_next_named_sibling(nName);
+        std::string name     = util::extract_text(nName, src_str());
+        const TypeHandler th = RegManager::get_type_handler(nType);
+        Type* type           = th(&typeTrs_, nType);
         Expr* init           = nullptr;
-        if (! make_shallow && ! ts_node_is_null(n_init))
+        if (! makeShallow && ! ts_node_is_null(nInit))
         {
-            const ExprHandler h_init = RegManager::get_expr_handler(n_init);
-            init                     = h_init(this, n_init);
+            const ExprHandler hInit = RegManager::get_expr_handler(nInit);
+            init                     = hInit(this, nInit);
         }
-        ParamVarDefStmt* param_def
-            = stmt_f_.mk_param_var_def(std::move(name), type, init);
-        this->semantic_context_.reg_param(param_def);
-        params.push_back(param_def);
+        ParamVarDefStmt* paramDef
+            = stmtFact_.mk_param_var_def(std::move(name), type, init);
+        this->semanticContext_.reg_param(paramDef);
+        params.push_back(paramDef);
     };
     util::process_param_list(node, std::move(collector));
     return params;
@@ -201,9 +202,9 @@ std::vector<Expr*> SrcCodeVisitor::visit_arg_list(const TSNode& node)
     std::vector<Expr*> exprs;
     auto process = [this, &exprs](const TSNode& current) -> void
     {
-        const TSNode n_child     = ts_node_child(current, 0);
-        const ExprHandler h_expr = RegManager::get_expr_handler(n_child);
-        exprs.emplace_back(h_expr(this, n_child));
+        const TSNode nChild     = ts_node_child(current, 0);
+        const ExprHandler hExpr = RegManager::get_expr_handler(nChild);
+        exprs.emplace_back(hExpr(this, nChild));
     };
     util::for_each_child_node(node, process);
     return exprs;
@@ -211,45 +212,45 @@ std::vector<Expr*> SrcCodeVisitor::visit_arg_list(const TSNode& node)
 
 Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node)
 {
-    std::vector<VarDefStmt*> var_defs;
-    const TSNode n_type  = util::child_by_field_name(node, "type");
-    const TypeHandler th = RegManager::get_type_handler(n_type);
+    std::vector<VarDefStmt*> varDefs;
+    const TSNode nType   = util::child_by_field_name(node, "type");
+    const TypeHandler th = RegManager::get_type_handler(nType);
 
     auto proces          = [&](const TSQueryMatch& match)
     {
         for (uint32_t i = 0; i < match.capture_count; ++i)
         {
-            const TSNode n_decltor   = match.captures[i].node;
-            TSNode n_name            = ts_node_named_child(n_decltor, 0);
-            TSNode n_right           = ts_node_named_child(n_decltor, 1);
-            ExprHandler h_right      = RegManager::get_expr_handler(n_right);
-            LocalVarDefStmt* var_def = stmt_f_.mk_local_var_def(
-                util::extract_text(n_name, src_str()),
-                th(&type_tr_, n_type),
-                h_right(this, n_right)
+            const TSNode nDecltor   = match.captures[i].node;
+            TSNode nName            = ts_node_named_child(nDecltor, 0);
+            TSNode nRight           = ts_node_named_child(nDecltor, 1);
+            ExprHandler hRight      = RegManager::get_expr_handler(nRight);
+            LocalVarDefStmt* varDef = stmtFact_.mk_local_var_def(
+                util::extract_text(nName, src_str()),
+                th(&typeTrs_, nType),
+                hRight(this, nRight)
             );
-            var_defs.push_back(var_def);
-            semantic_context_.reg_local_var(var_def);
+            varDefs.push_back(varDef);
+            semanticContext_.reg_local_var(varDef);
         }
     };
     util::for_each_match(node, regs::QueryType::VarDecltor, proces);
 
-    if (var_defs.size() > 1)
-        return stmt_f_.mk_def(std::move(var_defs));
-    return var_defs.front();
+    if (varDefs.size() > 1)
+        return stmtFact_.mk_def(std::move(varDefs));
+    return varDefs.front();
 }
 
 std::string_view SrcCodeVisitor::src_str() const
 {
-    return current_src_
-             ? current_src_->file.content
+    return currentSrc_
+             ? currentSrc_->file.content
              : throw std::logic_error("Current source code is not set");
 }
 
 SourceCode* SrcCodeVisitor::src() const
 {
-    return current_src_
-             ? current_src_
+    return currentSrc_
+             ? currentSrc_
              : throw std::logic_error("Current source code is not set");
 }
 

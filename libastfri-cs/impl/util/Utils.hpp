@@ -1,7 +1,7 @@
 #ifndef CSHARP_UTILS_HPP
 #define CSHARP_UTILS_HPP
 
-#include <libastfri-cs/impl/util/common.hpp>
+#include <libastfri-cs/impl/util/Common.hpp>
 
 #include <stack>
 #include <string>
@@ -32,8 +32,8 @@ IntSuffix get_suffix_type(std::string_view suffix);
 bool almost_equal(double a, double b, double epsilon = 1e-9);
 
 void split_namespace(
-    std::stack<std::string>& scope_str,
-    std::string_view namespace_name
+    std::stack<std::string>& scopeStr,
+    std::string_view nmsQualifier
 );
 
 bool is_interface_name(std::string_view name);
@@ -41,10 +41,10 @@ bool is_interface_name(std::string_view name);
 /**
  * @brief Escapes special characters in verbatim and raw C# strings.
  * @param str input string to escape
- * @param is_verbatim whether the string is a verbatim string literal
+ * @param isVerbatim whether the string is a verbatim string literal
  * @return escaped string
  */
-std::string escape_string(std::string_view str, bool is_verbatim);
+std::string escape_string(std::string_view str, bool isVerbatim);
 
 } // namespace astfri::csharp::util
 

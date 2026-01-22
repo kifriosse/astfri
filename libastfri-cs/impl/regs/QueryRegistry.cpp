@@ -53,11 +53,11 @@ Query::Query(const TSLanguage* lang, const std::string_view query)
     }
     else
     {
-        for (size_t i = 0; i < ts_query_capture_count(query_); ++i)
+        for (CaptureId i = 0; i < ts_query_capture_count(query_); ++i)
         {
             uint32_t len;
             const char* name = ts_query_capture_name_for_id(query_, i, &len);
-            capture_ids_.try_emplace({name, len}, i);
+            captureIds.try_emplace({name, len}, i);
         }
     }
 }
@@ -73,7 +73,7 @@ Query::~Query()
 
 Query::Query(Query&& other) noexcept :
     query_(other.query_),
-    capture_ids_(std::move(other.capture_ids_))
+    captureIds(std::move(other.captureIds))
 {
     other.query_ = nullptr;
 }
@@ -86,15 +86,15 @@ Query& Query::operator=(Query&& other) noexcept
             ts_query_delete(query_);
         query_       = other.query_;
         other.query_ = nullptr;
-        capture_ids_ = std::move(other.capture_ids_);
+        captureIds   = std::move(other.captureIds);
     }
     return *this;
 }
 
-uint32_t Query::id(const std::string_view name) const
+CaptureId Query::id(const std::string_view name) const
 {
-    const auto it = capture_ids_.find(name);
-    return it != capture_ids_.end()
+    const auto it = captureIds.find(name);
+    return it != captureIds.end()
              ? it->second
              : throw std::out_of_range(
                    "Query: Capture id not found for name: \""
@@ -125,21 +125,21 @@ QueryReg::QueryReg()
 {
     using enum QueryType;
     const std::pair<QueryType, std::string_view> mapping[] = {
-        {TopLevel,      queries::top_level_stmts_q},
-        {VarDecltor,    queries::decltor_q        },
-        {VarDecl,       queries::var_decl_q       },
-        {ParamModif,    queries::param_modif_q    },
-        {MethodModif,   queries::method_modif_q   },
-        {FileNamespace, queries::file_namespace_q },
-        {CommentError,  queries::comment_error_q  },
-        {Using,         queries::using_dir_q      }
+        {TopLevel,      queries::qTopLevelStmts},
+        {VarDecltor,    queries::qDeclor       },
+        {VarDecl,       queries::qVarDecl      },
+        {ParamModif,    queries::qParamModif   },
+        {MethodModif,   queries::qMethodModif  },
+        {FileNamespace, queries::qFileNamespace},
+        {CommentError,  queries::qCommentError },
+        {Using,         queries::qUsingDir     }
     };
 
     const TSLanguage* lang = tree_sitter_c_sharp();
 
-    for (const auto& [type, query_str] : mapping)
+    for (const auto& [type, strQuery] : mapping)
     {
-        queries_.try_emplace(type, lang, query_str);
+        queries_.try_emplace(type, lang, strQuery);
     }
 }
 

@@ -38,7 +38,7 @@ struct Handlers
     const RegistryMap<StmtHandler> stmts;
     const RegistryMap<ExprHandler> exprs;
     const RegistryMap<TypeHandler> types;
-    const RegistryMap<RegHandler> symbol_regs;
+    const RegistryMap<RegHandler> symbolRegs;
     Handlers();
 
 private:
@@ -54,14 +54,14 @@ private:
 
 struct Operations
 {
-    const RegistryMap<UnaryOpType> prefix_unary_op;
-    const RegistryMap<BinOpType> bin_operations;
+    const RegistryMap<UnaryOpType> prefixUnaryOps;
+    const RegistryMap<BinOpType> binaryOps;
     Operations();
 };
 
 struct Types
 {
-    TypeFactory& type_factory;
+    TypeFactory& typeFact;
     const RegistryMap<Type*> types;
     Types();
 };
@@ -86,15 +86,15 @@ public:
     static ExprHandler get_expr_handler(const TSNode& node);
     static TypeHandler get_type_handler(const TSNode& node);
     static RegHandler get_reg_handler(const TSNode& node);
-    static StmtHandler get_stmt_handler(std::string_view node_type);
-    static ExprHandler get_expr_handler(std::string_view node_type);
-    static TypeHandler get_type_handler(std::string_view node_type);
-    static RegHandler get_reg_handler(std::string_view node_type);
+    static StmtHandler get_stmt_handler(std::string_view nodeType);
+    static ExprHandler get_expr_handler(std::string_view nodeType);
+    static TypeHandler get_type_handler(std::string_view nodeType);
+    static RegHandler get_reg_handler(std::string_view nodeType);
     static std::optional<UnaryOpType> get_prefix_unary_op(std::string_view op);
     static std::optional<BinOpType> get_bin_op(std::string_view op);
-    static std::optional<Type*> get_type(std::string_view type_name);
+    static std::optional<Type*> get_type(std::string_view nodeType);
     static CSModifier get_modifier(const TSNode& node, std::string_view src);
-    static CSModifier get_modifier(std::string_view modifier);
+    static CSModifier get_modifier(std::string_view modifs);
     static bool is_expr(const TSNode& node);
     static bool is_stmt(const TSNode& node);
 
@@ -116,14 +116,14 @@ private:
      * @tparam Type type of value in the registry map
      * @param map map for lookup
      * @param name name to lookup
-     * @param def_value default value to return if name wasn't found
+     * @param nDefVal default value to return if name wasn't found
      * @return value from the map or default value
      */
     template<class Type>
     static Type get_or_default(
         const RegistryMap<Type>& map,
         std::string_view name,
-        Type def_value
+        Type nDefVal
     );
     /**
      * Gets optional value from the registry map

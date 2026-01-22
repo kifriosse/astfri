@@ -1,5 +1,5 @@
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
-#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/TSUtil.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -24,13 +24,13 @@ TSSymbol symbol_for_name(const std::string_view name, const bool named)
     return ts_language_symbol_for_name(lang, name.data(), name.length(), named);
 }
 
-std::string extract_text(const TSNode& node, const std::string_view src_code)
+std::string extract_text(const TSNode& node, const std::string_view src)
 {
     if (! ts_node_is_null(node))
     {
         const size_t from = ts_node_start_byte(node);
         const size_t to   = ts_node_end_byte(node);
-        return {src_code.data() + from, to - from};
+        return {src.data() + from, to - from};
     }
     return {};
 }
@@ -45,15 +45,15 @@ void print_child_nodes_types(const TSNode& node, const bool named)
 
 void print_child_nodes_types(
     const TSNode& node,
-    const std::string_view source,
+    const std::string_view src,
     const bool named
 )
 {
     size_t i     = 0;
-    auto process = [&source, &i](const TSNode& child) -> void
+    auto process = [&src, &i](const TSNode& child) -> void
     {
         const std::string type = ts_node_type(child);
-        const std::string text = extract_text(child, source);
+        const std::string text = extract_text(child, src);
         std::cout << "Child " << ++i << " type: \'" << type << "\' text: \""
                   << text << "\"" << '\n';
     };
@@ -62,49 +62,49 @@ void print_child_nodes_types(
 
 std::string remove_comments(
     const TSNode& root,
-    const std::string_view source_code,
+    const std::string_view src,
     const std::filesystem::path& path
 )
 {
     using namespace regs;
-    static constexpr auto query_type  = QueryType::CommentError;
-    static const auto& query_reg      = QueryReg::get();
-    static const Query* const query   = query_reg.get_query(query_type);
-    static const CaptureId comment_id = query->id("comment");
-    static const CaptureId error_id   = query->id("error");
+    static constexpr auto qType      = QueryType::CommentError;
+    static const auto& queryReg      = QueryReg::get();
+    static const Query* const query  = queryReg.get_query(qType);
+    static const CaptureId commentId = query->id("comment");
+    static const CaptureId errorId   = query->id("error");
 
-    std::string new_src;
-    size_t next_start = 0;
-    bool has_err      = false;
-    auto process      = [&](const TSQueryMatch& match) -> void
+    std::string newSrc;
+    size_t nextStart = 0;
+    bool hasErr      = false;
+    auto process     = [&](const TSQueryMatch& match) -> void
     {
-        for (uint32_t i = 0; i < match.capture_count; ++i)
+        for (CaptureId i = 0; i < match.capture_count; ++i)
         {
             auto& [node, index] = match.captures[i];
-            if (index == error_id)
+            if (index == errorId)
             {
-                if (! has_err)
+                if (! hasErr)
                 {
                     std::cerr << "Source code contains syntax errors:\n\n";
-                    has_err = true;
+                    hasErr = true;
                 }
                 const auto& [row, column] = ts_node_start_point(node);
                 std::cerr << "Warning: Syntax error at line " << row + 1
                           << ", column " << column + 1 << "\n";
             }
-            else if (index == comment_id)
+            else if (index == commentId)
             {
                 const size_t start = ts_node_start_byte(node);
-                const size_t n     = start - next_start;
-                new_src += source_code.substr(next_start, n);
-                next_start = ts_node_end_byte(node);
+                const size_t n     = start - nextStart;
+                newSrc += src.substr(nextStart, n);
+                nextStart = ts_node_end_byte(node);
             }
         }
     };
-    for_each_match(root, query_type, process);
-    new_src += source_code.substr(next_start);
+    for_each_match(root, qType, process);
+    newSrc += src.substr(nextStart);
 
-    if (has_err)
+    if (hasErr)
     {
         throw std::runtime_error(
             "Source code in file \"" + path.string()
@@ -112,50 +112,49 @@ std::string remove_comments(
         );
     }
 
-    return new_src;
+    return newSrc;
 }
 
-bool has_variadic_param(const TSNode& node, TSNode* type_node)
+bool has_variadic_param(const TSNode& node, TSNode* nType)
 {
-    const TSNode n_type = child_by_field_name(node, "type");
-    if (type_node && ! ts_node_is_null(n_type))
-        *type_node = n_type;
+    const TSNode l_nType = child_by_field_name(node, "type");
+    if (nType && ! ts_node_is_null(l_nType))
+        *nType = l_nType;
 
-    const TSNode n_name = child_by_field_name(node, "name");
-    return ! ts_node_is_null(n_type) && ! ts_node_is_null(n_name);
+    const TSNode nName = child_by_field_name(node, "name");
+    return ! ts_node_is_null(l_nType) && ! ts_node_is_null(nName);
 }
 
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate)
 {
-    static const TSSymbol cast_expr_symb = symbol_for_name("cast_expr", true);
-    static const TSSymbol lambda_expr_symb
-        = symbol_for_name("lambda_expression", true);
+    static const TSSymbol sCastExpr = symbol_for_name("cast_expr", true);
+    static const TSSymbol sLambda = symbol_for_name("lambda_expression", true);
 
-    const TSNode n_cast = unwrap_parantheses(node);
-    if (ts_node_symbol(n_cast) != cast_expr_symb)
+    const TSNode nCast            = unwrap_parantheses(node);
+    if (ts_node_symbol(nCast) != sCastExpr)
         return false;
 
-    const TSNode n_value  = child_by_field_name(n_cast, "value");
-    const TSNode n_lambda = unwrap_parantheses(n_value);
+    const TSNode nValue  = child_by_field_name(nCast, "value");
+    const TSNode nLambda = unwrap_parantheses(nValue);
 
-    if (ts_node_symbol(n_lambda) != lambda_expr_symb)
+    if (ts_node_symbol(nLambda) != sLambda)
         return false;
 
     if (lambda)
-        *lambda = n_lambda;
+        *lambda = nLambda;
     if (delegate)
-        *delegate = child_by_field_name(n_cast, "type");
+        *delegate = child_by_field_name(nCast, "type");
     return true;
 }
 
 TSNode unwrap_parantheses(const TSNode& node)
 {
-    static const TSSymbol bracket_expr_symb
+    static const TSSymbol sBracketExpr
         = symbol_for_name("parenthesized_expression", true);
 
     TSNode current = node;
     while (! ts_node_is_null(current)
-           && ts_node_symbol(current) == bracket_expr_symb)
+           && ts_node_symbol(current) == sBracketExpr)
     {
         current = ts_node_named_child(current, 0);
     }

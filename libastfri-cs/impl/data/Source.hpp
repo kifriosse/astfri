@@ -18,20 +18,20 @@ struct FileContext
 {
     // todo add global aliases
     std::vector<Scope> usings{};
-    std::vector<UserTypeDefStmt*> static_usings{};
+    std::vector<UserTypeDefStmt*> staticUsings{};
     // todo redo this into namespace aware
     IdentifierMap<std::variant<Type*, std::string>> aliases{};
 };
 
 struct SourceFile
 {
-    std::filesystem::path file_path{};
+    std::filesystem::path filePath{};
     std::string content{};
 };
 
 struct SourceCode
 {
-    FileContext file_context{};
+    FileContext fileContext{};
     SourceFile file{};
     TSTree* tree{nullptr};
 

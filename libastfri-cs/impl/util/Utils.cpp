@@ -1,5 +1,5 @@
-#include <libastfri-cs/impl/util/common.hpp>
-#include <libastfri-cs/impl/util/utils.hpp>
+#include <libastfri-cs/impl/util/Common.hpp>
+#include <libastfri-cs/impl/util/Utils.hpp>
 
 #include <cctype>
 #include <cmath>
@@ -52,29 +52,29 @@ bool almost_equal(const double a, const double b, const double epsilon)
 }
 
 void split_namespace(
-    std::stack<std::string>& scope_str,
-    const std::string_view namespace_name
+    std::stack<std::string>& scopeStr,
+    const std::string_view nmsQualifier
 )
 {
-    const auto r_begin = std::make_reverse_iterator(namespace_name.end());
-    const auto r_end   = std::make_reverse_iterator(namespace_name.begin());
-    auto it            = r_begin;
-    auto slice_end     = namespace_name.end();
+    const auto rBegin = std::make_reverse_iterator(nmsQualifier.end());
+    const auto rEnd   = std::make_reverse_iterator(nmsQualifier.begin());
+    auto it           = rBegin;
+    auto sliceEnd     = nmsQualifier.end();
 
-    while (it != r_end)
+    while (it != rEnd)
     {
         if (*it == '.')
         {
-            auto slice_start = it.base();
-            scope_str.emplace(slice_start, slice_end);
-            slice_end = slice_start - 1;
+            auto sliceStart = it.base();
+            scopeStr.emplace(sliceStart, sliceEnd);
+            sliceEnd = sliceStart - 1;
         }
         ++it;
     }
 
-    if (! namespace_name.empty())
+    if (! nmsQualifier.empty())
     {
-        scope_str.emplace(namespace_name.begin(), slice_end);
+        scopeStr.emplace(nmsQualifier.begin(), sliceEnd);
     }
 }
 
@@ -83,65 +83,65 @@ bool is_interface_name(const std::string_view name)
     return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
 }
 
-std::string escape_string(const std::string_view str, const bool is_verbatim)
+std::string escape_string(const std::string_view str, const bool isVerbatim)
 {
-    std::string escaped_str;
+    std::string escapedStr;
     for (size_t i = 0; i < str.length(); ++i)
     {
         switch (const char c = str[i])
         {
         case '\n':
-            escaped_str += "\\n";
+            escapedStr += "\\n";
             break;
         case '\t':
-            escaped_str += "\\t";
+            escapedStr += "\\t";
             break;
         case '\r':
-            escaped_str += "\\r";
+            escapedStr += "\\r";
             break;
         case '\"':
         {
-            if (! is_verbatim)
+            if (! isVerbatim)
             {
-                escaped_str += "\\\"";
+                escapedStr += "\\\"";
                 break;
             }
 
             const size_t next = i + 1;
             if (next < str.length() && str.at(next) == '\"')
             {
-                escaped_str += "\\\"";
+                escapedStr += "\\\"";
                 i += 1;
             }
             break;
         }
         case '\'':
-            escaped_str += "\\\'";
+            escapedStr += "\\\'";
             break;
         case '\\':
-            escaped_str += "\\\\";
+            escapedStr += "\\\\";
             break;
         case '\0':
-            escaped_str += "\\0";
+            escapedStr += "\\0";
             break;
         case '\a':
-            escaped_str += "\\a";
+            escapedStr += "\\a";
             break;
         case '\b':
-            escaped_str += "\\b";
+            escapedStr += "\\b";
             break;
         case '\f':
-            escaped_str += "\\f";
+            escapedStr += "\\f";
             break;
         case '\v':
-            escaped_str += "\\v";
+            escapedStr += "\\v";
             break;
         default:
-            escaped_str += c;
+            escapedStr += c;
             break;
         }
     }
-    return escaped_str;
+    return escapedStr;
 }
 
 } // namespace astfri::csharp::util

@@ -1,7 +1,7 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
-#include <libastfri-cs/impl/util/astfri_util.hpp>
-#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/AstfriUtil.hpp>
+#include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -18,51 +18,51 @@ namespace astfri::csharp
 
 Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    static const TSSymbol func_symb
+    static const TSSymbol sFunc
         = util::symbol_for_name("local_function_statement", true);
 
-    std::vector<Stmt*> stmts;
-    self->semantic_context_.enter_scope();
-    auto dicover_func = [self](const TSNode& current) -> void
+    self->semanticContext_.enter_scope();
+    auto discoverFunc = [self](const TSNode& current) -> void
     {
-        if (! ts_node_is_named(current) || ts_node_symbol(current) != func_symb)
+        if (! ts_node_is_named(current) || ts_node_symbol(current) != sFunc)
             return;
 
-        self->semantic_context_.reg_local_func(
-            util::make_func_metadata(current, self->src_str(), self->type_tr_)
+        self->semanticContext_.reg_local_func(
+            util::make_func_metadata(current, self->src_str(), self->typeTrs_)
         );
     };
-    util::for_each_child_node(node, dicover_func);
+    util::for_each_child_node(node, discoverFunc);
 
-    auto process_body = [self, &stmts](const TSNode& n_current) -> void
+    std::vector<Stmt*> stmts;
+    auto processBody = [self, &stmts](const TSNode& nCurrent) -> void
     {
-        if (ts_node_is_named(n_current))
+        if (ts_node_is_named(nCurrent))
         {
-            const StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
-            stmts.push_back(h_stmt(self, n_current));
+            const StmtHandler hStmt = RegManager::get_stmt_handler(nCurrent);
+            stmts.push_back(hStmt(self, nCurrent));
         }
     };
-    util::for_each_child_node(node, process_body);
+    util::for_each_child_node(node, processBody);
 
-    self->semantic_context_.leave_scope();
+    self->semanticContext_.leave_scope();
 
-    return stmt_f_.mk_compound(std::move(stmts));
+    return stmtFact_.mk_compound(std::move(stmts));
 }
 
 Stmt* SrcCodeVisitor::visit_arrow_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode n_body      = ts_node_named_child(node, 0);
-    const ExprHandler h_body = RegManager::get_expr_handler(n_body);
-    Type* ret_type           = self->semantic_context_.current_return_type();
-    Expr* expr               = h_body(self, n_body);
-    Stmt* body               = nullptr;
+    const TSNode nBody      = ts_node_named_child(node, 0);
+    const ExprHandler hBody = RegManager::get_expr_handler(nBody);
+    Type* returnType        = self->semanticContext_.current_return_type();
+    Expr* expr              = hBody(self, nBody);
+    Stmt* body              = nullptr;
 
-    if (is_a<VoidType>(ret_type))
-        body = stmt_f_.mk_expr(expr);
+    if (is_a<VoidType>(returnType))
+        body = stmtFact_.mk_expr(expr);
     else
-        body = stmt_f_.mk_return(expr);
+        body = stmtFact_.mk_return(expr);
 
-    return stmt_f_.mk_compound({body});
+    return stmtFact_.mk_compound({body});
 }
 
 Stmt* SrcCodeVisitor::visit_while_loop(SrcCodeVisitor* self, const TSNode& node)
@@ -80,50 +80,50 @@ Stmt* SrcCodeVisitor::visit_do_while_loop(
 
 Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
 {
-    self->semantic_context_.enter_scope();
-    const TSNode n_init  = util::child_by_field_name(node, "initializer");
-    const TSNode n_cond  = util::child_by_field_name(node, "condition");
-    const TSNode n_step  = util::child_by_field_name(node, "update");
-    const TSNode n_body  = util::child_by_field_name(node, "body");
-    const bool cond_null = ts_node_is_null(n_cond);
-    const bool step_null = ts_node_is_null(n_step);
-    Stmt* init           = nullptr;
-    Expr* cond           = nullptr;
-    Stmt* step           = nullptr;
+    self->semanticContext_.enter_scope();
+    const TSNode nInit  = util::child_by_field_name(node, "initializer");
+    const TSNode nCond  = util::child_by_field_name(node, "condition");
+    const TSNode nStep  = util::child_by_field_name(node, "update");
+    const TSNode nBody  = util::child_by_field_name(node, "body");
+    const bool condNull = ts_node_is_null(nCond);
+    const bool stepNull = ts_node_is_null(nStep);
+    Stmt* init          = nullptr;
+    Expr* cond          = nullptr;
+    Stmt* step          = nullptr;
 
-    if (! ts_node_is_null(n_init))
+    if (! ts_node_is_null(nInit))
     {
-        if (RegManager::is_expr(n_init))
+        if (RegManager::is_expr(nInit))
         {
-            const TSNode* n_end = &n_body;
-            if (! cond_null)
-                n_end = &n_cond;
-            else if (! step_null)
-                n_end = &n_step;
+            const TSNode* nEnd = &nBody;
+            if (! condNull)
+                nEnd = &nCond;
+            else if (! stepNull)
+                nEnd = &nStep;
 
-            init = stmt_f_.mk_expr(self->expr_list_to_comma_op(n_init, n_end));
+            init = stmtFact_.mk_expr(self->expr_list_to_comma_op(nInit, nEnd));
         }
         else
         {
-            init = self->visit_for_init_var_def(n_init);
+            init = self->visit_for_init_var_def(nInit);
         }
     }
 
-    if (! cond_null)
+    if (! condNull)
     {
-        const ExprHandler h_cond = RegManager::get_expr_handler(n_cond);
-        cond                     = h_cond(self, n_cond);
+        const ExprHandler hCond = RegManager::get_expr_handler(nCond);
+        cond                    = hCond(self, nCond);
     }
 
-    if (! step_null)
+    if (! stepNull)
     {
-        step = stmt_f_.mk_expr(self->expr_list_to_comma_op(n_step, &n_body));
+        step = stmtFact_.mk_expr(self->expr_list_to_comma_op(nStep, &nBody));
     }
 
-    const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
-    Stmt* body               = h_body(self, n_body);
-    self->semantic_context_.leave_scope();
-    return stmt_f_.mk_for(init, cond, step, body);
+    const StmtHandler hBody = RegManager::get_stmt_handler(nBody);
+    Stmt* body              = hBody(self, nBody);
+    self->semanticContext_.leave_scope();
+    return stmtFact_.mk_for(init, cond, step, body);
 }
 
 Stmt* SrcCodeVisitor::visit_for_each_loop(
@@ -131,13 +131,13 @@ Stmt* SrcCodeVisitor::visit_for_each_loop(
     const TSNode& node
 )
 {
-    self->semantic_context_.enter_scope();
-    const TSNode n_type  = util::child_by_field_name(node, "type");
-    const TSNode n_left  = util::child_by_field_name(node, "left");
-    const TSNode n_right = util::child_by_field_name(node, "right");
-    const TSNode n_body  = util::child_by_field_name(node, "body");
+    self->semanticContext_.enter_scope();
+    const TSNode nType  = util::child_by_field_name(node, "type");
+    const TSNode hLeft  = util::child_by_field_name(node, "left");
+    const TSNode nRight = util::child_by_field_name(node, "right");
+    const TSNode nBody  = util::child_by_field_name(node, "body");
 
-    if (ts_node_is_null(n_type))
+    if (ts_node_is_null(nType))
     {
         // todo handle deconstruction syntax
         throw std::logic_error(
@@ -145,66 +145,66 @@ Stmt* SrcCodeVisitor::visit_for_each_loop(
         );
     }
 
-    std::string name          = util::extract_text(n_left, self->src_str());
-    const ExprHandler h_right = RegManager::get_expr_handler(n_right);
-    const StmtHandler h_body  = RegManager::get_stmt_handler(n_body);
-    const TypeHandler th      = RegManager::get_type_handler(n_type);
-    Type* type                = th(&self->type_tr_, n_type);
+    std::string name         = util::extract_text(hLeft, self->src_str());
+    const ExprHandler hRight = RegManager::get_expr_handler(nRight);
+    const StmtHandler hBody  = RegManager::get_stmt_handler(nBody);
+    const TypeHandler th     = RegManager::get_type_handler(nType);
+    Type* type               = th(&self->typeTrs_, nType);
     LocalVarDefStmt* left
-        = stmt_f_.mk_local_var_def(std::move(name), type, nullptr);
-    self->semantic_context_.reg_local_var(left);
-    Expr* right = h_right(self, n_right);
-    Stmt* body  = h_body(self, n_body);
-    self->semantic_context_.leave_scope();
-    return stmt_f_.mk_for_each(left, right, body);
+        = stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
+    self->semanticContext_.reg_local_var(left);
+    Expr* right = hRight(self, nRight);
+    Stmt* body  = hBody(self, nBody);
+    self->semanticContext_.leave_scope();
+    return stmtFact_.mk_for_each(left, right, body);
 }
 
 Stmt* SrcCodeVisitor::visit_if_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    static constexpr std::string_view if_false = "alternative";
+    static constexpr std::string_view falseSw = "alternative";
 
-    std::stack<TSNode> if_nodes;
-    if_nodes.push(node);
-    TSNode n_current       = util::child_by_field_name(node, if_false);
-    const TSSymbol if_symb = ts_node_symbol(node);
-    TSSymbol current_symb
-        = ts_node_is_null(n_current) ? 0 : ts_node_symbol(n_current);
-    while (current_symb == if_symb)
+    std::stack<TSNode> nIfs;
+    nIfs.push(node);
+    TSNode nCurrent    = util::child_by_field_name(node, falseSw);
+    const TSSymbol sIf = ts_node_symbol(node);
+    TSSymbol sCurrent
+        = ts_node_is_null(nCurrent) ? 0 : ts_node_symbol(nCurrent);
+    while (sCurrent == sIf)
     {
-        if_nodes.push(n_current);
-        n_current = util::child_by_field_name(n_current, if_false);
-        if (ts_node_is_null(n_current))
+        nIfs.push(nCurrent);
+        nCurrent = util::child_by_field_name(nCurrent, falseSw);
+        if (ts_node_is_null(nCurrent))
             break;
 
-        current_symb = ts_node_symbol(n_current);
+        sCurrent = ts_node_symbol(nCurrent);
     }
 
     // handling of else in last node
-    const TSNode n_else = util::child_by_field_name(if_nodes.top(), if_false);
+    const TSNode nElse = util::child_by_field_name(nIfs.top(), falseSw);
 
-    Stmt* current_else  = nullptr;
-    if (! ts_node_is_null(n_else))
+    Stmt* currentElse  = nullptr;
+    if (! ts_node_is_null(nElse))
     {
-        const StmtHandler h_else = RegManager::get_stmt_handler(n_else);
-        current_else             = h_else(self, n_else);
+        const StmtHandler hElse = RegManager::get_stmt_handler(nElse);
+        currentElse             = hElse(self, nElse);
     }
 
-    while (! if_nodes.empty())
+    while (! nIfs.empty())
     {
-        const TSNode if_node = if_nodes.top();
-        if_nodes.pop();
-        const TSNode n_true = util::child_by_field_name(if_node, "consequence");
-        const TSNode n_cond = util::child_by_field_name(if_node, "condition");
-        StmtHandler h_true  = RegManager::get_stmt_handler(n_true);
-        ExprHandler h_cond  = RegManager::get_expr_handler(n_cond);
+        const TSNode ifNode = nIfs.top();
+        nIfs.pop();
+        const TSNode nTrue = util::child_by_field_name(ifNode, "consequence");
+        const TSNode nCond = util::child_by_field_name(ifNode, "condition");
+        StmtHandler hTrue  = RegManager::get_stmt_handler(nTrue);
+        ExprHandler hCond  = RegManager::get_expr_handler(nCond);
 
-        Stmt* true_stmt     = h_true(self, n_true);
-        Expr* cond_expr     = h_cond(self, n_cond);
-        IfStmt* if_stmt     = stmt_f_.mk_if(cond_expr, true_stmt, current_else);
-        current_else        = if_stmt;
+        Stmt* trueStmt     = hTrue(self, nTrue);
+        Expr* condExpr     = hCond(self, nCond);
+        IfStmt* ifStmt     = stmtFact_.mk_if(condExpr, trueStmt, currentElse);
+        currentElse        = ifStmt;
     }
 
-    return current_else;
+    return currentElse;
 }
 
 Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
@@ -212,31 +212,30 @@ Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
     if (ts_node_child_count(node) < 2)
         throw std::logic_error("Not a try-catch node");
 
-    const TSNode n_body      = util::child_by_field_name(node, "body");
-    const StmtHandler h_body = RegManager::get_stmt_handler(n_body);
+    const TSNode nBody      = util::child_by_field_name(node, "body");
+    const StmtHandler hBody = RegManager::get_stmt_handler(nBody);
 
-    Stmt* finally            = nullptr;
-    std::vector<CatchStmt*> catch_stmts;
+    Stmt* finally           = nullptr;
+    std::vector<CatchStmt*> catchStmts;
 
     auto process = [&](const TSNode& current) -> void
     {
-        if (ts_node_eq(current, n_body))
+        if (ts_node_eq(current, nBody))
             return;
 
-        const StmtHandler h_current = RegManager::get_stmt_handler(current);
-        Stmt* current_stmt          = h_current(self, current);
-        if (is_a<CompoundStmt>(current_stmt))
-            finally = current_stmt;
-        else if (auto* catch_stmt = as_a<CatchStmt>(current_stmt))
-            catch_stmts.push_back(catch_stmt);
+        const StmtHandler hCurrent = RegManager::get_stmt_handler(current);
+        Stmt* currentStmt          = hCurrent(self, current);
+        if (is_a<CompoundStmt>(currentStmt))
+            finally = currentStmt;
+        else if (auto* catchStmt = as_a<CatchStmt>(currentStmt))
+            catchStmts.push_back(catchStmt);
     };
 
     util::for_each_child_node(node, process);
 
-    self->semantic_context_.leave_scope();
+    self->semanticContext_.leave_scope();
 
-    return stmt_f_
-        .mk_try(h_body(self, n_body), finally, std::move(catch_stmts));
+    return stmtFact_.mk_try(hBody(self, nBody), finally, std::move(catchStmts));
 }
 
 Stmt* SrcCodeVisitor::visit_catch_clause(
@@ -244,46 +243,46 @@ Stmt* SrcCodeVisitor::visit_catch_clause(
     const TSNode& node
 )
 {
-    self->semantic_context_.enter_scope();
+    self->semanticContext_.enter_scope();
 
-    LocalVarDefStmt* catch_var = nullptr;
-    Stmt* body                 = nullptr;
-    auto process               = [&](const TSNode& n_current) -> void
+    LocalVarDefStmt* catchVar = nullptr;
+    Stmt* body                = nullptr;
+    auto process              = [&](const TSNode& n_current) -> void
     {
-        const StmtHandler h_current = RegManager::get_stmt_handler(n_current);
-        Stmt* current_stmt          = h_current(self, n_current);
-        if (const auto var = as_a<LocalVarDefStmt>(current_stmt))
+        const StmtHandler hCurrent = RegManager::get_stmt_handler(n_current);
+        Stmt* currentStmt          = hCurrent(self, n_current);
+        if (const auto var = as_a<LocalVarDefStmt>(currentStmt))
         {
-            catch_var = var;
-            self->semantic_context_.reg_local_var(catch_var);
+            catchVar = var;
+            self->semanticContext_.reg_local_var(catchVar);
         }
-        else if (is_a<CompoundStmt>(current_stmt))
+        else if (is_a<CompoundStmt>(currentStmt))
         {
-            body = current_stmt;
+            body = currentStmt;
         }
     };
     util::for_each_child_node(node, process);
 
-    self->semantic_context_.leave_scope();
-    return stmt_f_.mk_catch(catch_var, body);
+    self->semanticContext_.leave_scope();
+    return stmtFact_.mk_catch(catchVar, body);
 }
 
 Stmt* SrcCodeVisitor::visit_finally(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode n_body = ts_node_named_child(node, 0);
-    return RegManager::get_stmt_handler(n_body)(self, n_body);
+    const TSNode nBody = ts_node_named_child(node, 0);
+    return RegManager::get_stmt_handler(nBody)(self, nBody);
 }
 
 Stmt* SrcCodeVisitor::visit_catch_decl(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode n_type  = util::child_by_field_name(node, "type");
-    const TSNode n_name  = util::child_by_field_name(node, "name");
-    const TypeHandler th = RegManager::get_type_handler(n_type);
-    Type* type           = th(&self->type_tr_, n_type);
-    std::string name     = ts_node_is_null(n_name)
+    const TSNode nType   = util::child_by_field_name(node, "type");
+    const TSNode nName   = util::child_by_field_name(node, "name");
+    const TypeHandler th = RegManager::get_type_handler(nType);
+    Type* type           = th(&self->typeTrs_, nType);
+    std::string name     = ts_node_is_null(nName)
                              ? std::string{}
-                             : util::extract_text(n_name, self->src_str());
-    return stmt_f_.mk_local_var_def(std::move(name), type, nullptr);
+                             : util::extract_text(nName, self->src_str());
+    return stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
 }
 
 Stmt* SrcCodeVisitor::visit_switch_stmt(
@@ -291,21 +290,21 @@ Stmt* SrcCodeVisitor::visit_switch_stmt(
     const TSNode& node
 )
 {
-    const TSNode n_value       = util::child_by_field_name(node, "value");
-    const TSNode n_switch_body = util::child_by_field_name(node, "body");
-    const ExprHandler h_value  = RegManager::get_expr_handler(n_value);
-    Expr* value                = h_value(self, n_value);
+    const TSNode nValue      = util::child_by_field_name(node, "value");
+    const TSNode nSwitchBody = util::child_by_field_name(node, "body");
+    const ExprHandler hValue = RegManager::get_expr_handler(nValue);
+    Expr* value              = hValue(self, nValue);
 
     std::vector<CaseBaseStmt*> cases;
-    auto process = [self, &cases](const TSNode& n_current) -> void
+    auto process = [self, &cases](const TSNode& nCurrent) -> void
     {
-        const StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
-        Stmt* stmt               = h_stmt(self, n_current);
-        if (auto* case_stmt = as_a<CaseBaseStmt>(stmt))
-            cases.push_back(case_stmt);
+        const StmtHandler hStmt = RegManager::get_stmt_handler(nCurrent);
+        Stmt* stmt              = hStmt(self, nCurrent);
+        if (auto* caseStmt = as_a<CaseBaseStmt>(stmt))
+            cases.push_back(caseStmt);
     };
-    util::for_each_child_node(n_switch_body, process);
-    return stmt_f_.mk_switch(value, std::move(cases));
+    util::for_each_child_node(nSwitchBody, process);
+    return stmtFact_.mk_switch(value, std::move(cases));
 }
 
 Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
@@ -313,56 +312,55 @@ Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
     TSTreeCursor cursor = ts_tree_cursor_new(node);
     if (ts_tree_cursor_goto_first_child(&cursor))
     {
-        std::vector<Stmt*> body_stmts;
-        Expr* pattern    = nullptr;
-        TSNode n_current = {};
+        std::vector<Stmt*> bodyStmts;
+        Expr* pattern = nullptr;
+        TSNode nCurrent;
         do
         {
-            n_current = ts_tree_cursor_current_node(&cursor);
-            if (std::strcmp(ts_node_type(n_current), ":") == 0)
+            nCurrent = ts_tree_cursor_current_node(&cursor);
+            if (std::strcmp(ts_node_type(nCurrent), ":") == 0)
                 break;
-            if (! ts_node_is_named(n_current))
+            if (! ts_node_is_named(nCurrent))
                 continue;
 
             // todo handle more complex patterns
-            const ExprHandler h_pattern
-                = RegManager::get_expr_handler(n_current);
-            pattern = h_pattern(self, n_current);
+            const ExprHandler hParrent = RegManager::get_expr_handler(nCurrent);
+            pattern                    = hParrent(self, nCurrent);
         } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
         while (ts_tree_cursor_goto_next_sibling(&cursor))
         {
-            n_current = ts_tree_cursor_current_node(&cursor);
-            if (! ts_node_is_named(n_current))
+            nCurrent = ts_tree_cursor_current_node(&cursor);
+            if (! ts_node_is_named(nCurrent))
                 continue;
 
-            StmtHandler h_stmt = RegManager::get_stmt_handler(n_current);
-            Stmt* stmt         = h_stmt(self, n_current);
-            body_stmts.push_back(stmt);
+            StmtHandler hStmt = RegManager::get_stmt_handler(nCurrent);
+            Stmt* stmt        = hStmt(self, nCurrent);
+            bodyStmts.push_back(stmt);
         }
 
         ts_tree_cursor_delete(&cursor);
 
         Stmt* body
-            = body_stmts.size() == 1 && is_a<CompoundStmt>(body_stmts.back())
-                ? body_stmts.back()
-                : stmt_f_.mk_compound(std::move(body_stmts));
+            = bodyStmts.size() == 1 && is_a<CompoundStmt>(bodyStmts.back())
+                ? bodyStmts.back()
+                : stmtFact_.mk_compound(std::move(bodyStmts));
 
         if (pattern)
-            return stmt_f_.mk_case(pattern, body);
+            return stmtFact_.mk_case(pattern, body);
 
-        return stmt_f_.mk_default_case(body);
+        return stmtFact_.mk_default_case(body);
     }
 
     ts_tree_cursor_delete(&cursor);
-    return stmt_f_.mk_uknown();
+    return stmtFact_.mk_uknown();
 }
 
 Stmt* SrcCodeVisitor::visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode n_expr      = ts_node_child(node, 0);
-    const ExprHandler h_expr = RegManager::get_expr_handler(n_expr);
-    return stmt_f_.mk_expr(h_expr(self, n_expr));
+    const TSNode nExpr      = ts_node_child(node, 0);
+    const ExprHandler hExpr = RegManager::get_expr_handler(nExpr);
+    return stmtFact_.mk_expr(hExpr(self, nExpr));
 }
 
 Stmt* SrcCodeVisitor::visit_continue(
@@ -370,7 +368,7 @@ Stmt* SrcCodeVisitor::visit_continue(
     [[maybe_unused]] const TSNode& node
 )
 {
-    return stmt_f_.mk_continue();
+    return stmtFact_.mk_continue();
 }
 
 Stmt* SrcCodeVisitor::visit_break(
@@ -378,7 +376,7 @@ Stmt* SrcCodeVisitor::visit_break(
     [[maybe_unused]] const TSNode& node
 )
 {
-    return stmt_f_.mk_break();
+    return stmtFact_.mk_break();
 }
 
 Stmt* SrcCodeVisitor::visit_return(SrcCodeVisitor* self, const TSNode& node)
@@ -386,11 +384,11 @@ Stmt* SrcCodeVisitor::visit_return(SrcCodeVisitor* self, const TSNode& node)
     Expr* expr = nullptr;
     if (ts_node_named_child_count(node) > 0)
     {
-        const TSNode n_expr      = ts_node_named_child(node, 0);
-        const ExprHandler h_expr = RegManager::get_expr_handler(n_expr);
-        expr                     = h_expr(self, n_expr);
+        const TSNode nExpr      = ts_node_named_child(node, 0);
+        const ExprHandler hExpr = RegManager::get_expr_handler(nExpr);
+        expr                    = hExpr(self, nExpr);
     }
-    return stmt_f_.mk_return(expr);
+    return stmtFact_.mk_return(expr);
 }
 
 Stmt* SrcCodeVisitor::visit_throw(SrcCodeVisitor* self, const TSNode& node)
@@ -398,11 +396,11 @@ Stmt* SrcCodeVisitor::visit_throw(SrcCodeVisitor* self, const TSNode& node)
     Expr* expr = nullptr;
     if (ts_node_named_child_count(node) > 0)
     {
-        const TSNode n_expr      = ts_node_named_child(node, 0);
-        const ExprHandler h_expr = RegManager::get_expr_handler(n_expr);
-        expr                     = h_expr(self, n_expr);
+        const TSNode nExpr       = ts_node_named_child(node, 0);
+        const ExprHandler hhExpr = RegManager::get_expr_handler(nExpr);
+        expr                     = hhExpr(self, nExpr);
     }
-    return stmt_f_.mk_throw(expr);
+    return stmtFact_.mk_throw(expr);
 }
 
 } // namespace astfri::csharp

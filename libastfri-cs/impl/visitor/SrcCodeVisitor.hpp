@@ -17,24 +17,24 @@ namespace astfri::csharp
 class SrcCodeVisitor
 {
 private:
-    static ExprFactory& expr_f_;
-    static StmtFactory& stmt_f_;
-    static TypeFactory& type_f_;
+    static ExprFactory& exprFact_;
+    static StmtFactory& stmtFact_;
+    static TypeFactory& typeFact_;
 
-    TypeTranslator type_tr_;
-    std::vector<SourceCode>& src_codes_;
-    SemanticContext& semantic_context_;
-    SourceCode* current_src_{nullptr};
+    TypeTranslator typeTrs_;
+    std::vector<SourceCode>& srcCodes_;
+    SemanticContext& semanticContext_;
+    SourceCode* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
     SrcCodeVisitor(
-        std::vector<SourceCode>& source_codes,
-        SemanticContext& semantic_context,
-        SymbolTable& symbol_table
+        std::vector<SourceCode>& srcCodes,
+        SemanticContext& semanticContext,
+        SymbolTable& symbTable
     );
     // compilation unit/translation unit
-    void visit_comp_unit(TranslationUnit& tr_unit);
+    void visit_comp_unit(TranslationUnit& trUnit);
 
     // Expressions
     // Literals
@@ -156,40 +156,37 @@ public:
 private:
     Stmt* visit_var_def_stmt(
         const TSNode& node,
-        util::VarDefType def_type
+        util::VarDefType defType
     ); // general var def stmt handler
 
-    Stmt* make_while_loop(const TSNode& node, bool is_while);
+    Stmt* make_while_loop(const TSNode& node, bool isWhile);
     FunctionDefStmt* make_func_stmt(
         const TSNode& node,
-        bool is_method
+        bool isMethod
     ); // todo move this
 
     /**
      * Turns an expression list into a chained comma operator expression
-     * @param start_node node from which to start
-     * @param end_node node at which to end (exclusive). If nullptr, ends when
+     * @param nStart node from which to start
+     * @param nEnd node at which to end (exclusive). If nullptr, ends when
      * there aren't other siblings
      * @return returns the chained comma operator expression. If there is only
      * one expression, that expression is returned. If start and end are the
      * same, nullptr is returned.
      */
-    Expr* expr_list_to_comma_op(
-        const TSNode& start_node,
-        const TSNode* end_node
-    );
+    Expr* expr_list_to_comma_op(const TSNode& nStart, const TSNode* nEnd);
 
     /**
      * Makes a list of parameter variable definition statements from the given
      * parameter list node
      * @param node parameter list node
-     * @param make_shallow if true, makes shallow parameter definitions (without
+     * @param makeShallow if true, makes shallow parameter definitions (without
      * default values), if false, makes full parameter definitions
      * @return vector of parameter variable definition statements
      */
     std::vector<ParamVarDefStmt*> make_param_list(
         const TSNode& node,
-        bool make_shallow
+        bool makeShallow
     );
     std::vector<Expr*> visit_arg_list(const TSNode& node);
     Stmt* visit_for_init_var_def(const TSNode& node);

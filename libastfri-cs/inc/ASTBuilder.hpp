@@ -21,7 +21,7 @@ public:
     ASTBuilder();
     ~ASTBuilder();
     [[nodiscard]] TranslationUnit* make_ast(
-        const std::filesystem::path& src_dir
+        const std::filesystem::path& srcDir
     ) const;
 
     ASTBuilder(ASTBuilder&)             = delete;

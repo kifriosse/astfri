@@ -25,14 +25,14 @@ class SymbolTableBuilder
 {
 
 private:
-    static StmtFactory& stmt_f_;
-    static regs::QueryReg& query_reg_;
+    static StmtFactory& stmtFact_;
+    static regs::QueryReg& queryReg_;
 
-    TypeContext type_context_;
-    TypeTranslator type_tr_;
+    TypeContext typeContext_;
+    TypeTranslator typeTrs_;
     std::vector<SourceCode>& srcs_;
-    SymbolTable& symb_table_;
-    SourceCode* current_src_{nullptr};
+    SymbolTable& symbTable_;
+    SourceCode* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
@@ -40,12 +40,12 @@ public:
      * @brief Constructs a SymbolTableBuilder
      * @param srcs reference to a vector of source codes. Vector's lifetime
      * must exceed lifetime of Symbol table builder
-     * @param symb_table reference to symbol table that user wants to fill up.
+     * @param symbTable reference to symbol table that user wants to fill up.
      * Symbol table's lifetime must exceed lifetime of Symbol table builder
      */
     explicit SymbolTableBuilder(
         std::vector<SourceCode>& srcs,
-        SymbolTable& symb_table
+        SymbolTable& symbTable
     );
 
     void reg_user_types();

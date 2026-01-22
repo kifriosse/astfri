@@ -29,7 +29,7 @@ struct SymbolTable;
  */
 struct TypeContext
 {
-    std::stack<UserTypeDefStmt*> type_stack;
+    std::stack<UserTypeDefStmt*> typeStack;
 };
 
 /**
@@ -37,10 +37,10 @@ struct TypeContext
  */
 struct ScopeContext
 {
-    std::stack<std::vector<Stmt*>> scope_stack{};
+    std::stack<std::vector<Stmt*>> scopeStack{};
     IdentifierMap<ParamVarDefStmt*> params{};
-    IdentifierMap<LocalVarDefStmt*> local_vars{};
-    IdentifierMap<FuncMetadata> function_map{};
+    IdentifierMap<LocalVarDefStmt*> localVars{};
+    IdentifierMap<FuncMetadata> functions{};
 };
 
 /**
@@ -57,20 +57,20 @@ private:
      */
     struct SymbolTableKV
     {
-        const std::vector<UserTypeDefStmt*>& user_types_metadata_;
+        const std::vector<UserTypeDefStmt*>& userTypesMetadata;
         using iterator = std::vector<UserTypeDefStmt*>::const_iterator;
         [[nodiscard]] iterator begin() const;
         [[nodiscard]] iterator end() const;
     };
 
 private:
-    ScopeContext scope_context_{};
-    TypeContext type_context_{};
-    std::stack<Type*> return_type_context_{};
-    SymbolTable& symbol_table_;
+    ScopeContext scopeContext_{};
+    TypeContext typeContext_{};
+    std::stack<Type*> retTypeContext_{};
+    SymbolTable& symbTable_;
 
 public:
-    explicit SemanticContext(SymbolTable& symbol_table);
+    explicit SemanticContext(SymbolTable& symbTable);
 
     /**
      * @brief Type for iterating over keys of user types in symbol table
@@ -78,15 +78,15 @@ public:
      * @note Keys will be in order of their insertion into symbol table
      */
     SymbolTableKV get_user_types() const;
-    TypeMetadata* get_type_metadata(UserTypeDefStmt* user_type) const;
+    TypeMetadata* get_type_metadata(UserTypeDefStmt* userType) const;
 
     void enter_type(UserTypeDefStmt* def);
     void enter_scope();
 
-    void reg_return(Type* return_type);
-    void reg_local_var(LocalVarDefStmt* var_def);
-    void reg_param(ParamVarDefStmt* var_def);
-    void reg_local_func(FuncMetadata func_meta);
+    void reg_return(Type* returnType);
+    void reg_local_var(LocalVarDefStmt* varDef);
+    void reg_param(ParamVarDefStmt* varDef);
+    void reg_local_func(FuncMetadata funcMeta);
 
     void leave_type();
     void leave_scope();
@@ -98,9 +98,9 @@ public:
         std::string_view name,
         access::Qualifier qualifier
     ) const;
-    const FuncMetadata* find_func(std::string_view func_name) const;
+    const FuncMetadata* find_func(std::string_view funcName) const;
     const MethodMetadata* find_method(
-        const MethodId& method_id,
+        const MethodId& methodId,
         UserTypeDefStmt* owner
     ) const;
     MemberVarMetadata* find_memb_var(

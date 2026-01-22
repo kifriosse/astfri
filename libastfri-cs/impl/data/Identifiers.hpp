@@ -2,7 +2,7 @@
 #define CSHARP_IDENTIFIERS_HPP
 
 // ReSharper disable once CppUnusedIncludeDirective
-#include <libastfri-cs/impl/util/common.hpp>
+#include <libastfri-cs/impl/util/Common.hpp>
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include <functional>
@@ -14,14 +14,14 @@ namespace astfri::csharp
 struct InvocationId
 {
     std::string name;
-    size_t param_count{0};
+    size_t paramCount{0};
 };
 
 struct MethodId
 {
     std::string name;
-    size_t param_count{0};
-    bool is_static;
+    size_t paramCount{0};
+    bool isStatic;
 
     bool operator==(const MethodId& other) const;
 };

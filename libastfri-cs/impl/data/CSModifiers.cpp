@@ -1,6 +1,6 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
-#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -11,20 +11,20 @@
 namespace astfri::csharp
 {
 CSModifiers CSModifiers::handle_modifs_memb(
-    const TSNode& memb_node,
+    const TSNode& nMemb,
     const std::string_view src
 )
 {
     CSModifiers modifs;
     auto process = [&modifs, &src](const TSQueryMatch& match)
     {
-        for (uint32_t i = 0; i < match.capture_count; ++i)
+        for (CaptureId i = 0; i < match.capture_count; ++i)
         {
-            TSNode n_current = match.captures[i].node;
-            modifs.add_modifier(RegManager::get_modifier(n_current, src));
+            const TSNode nModif = match.captures[i].node;
+            modifs.add_modifier(RegManager::get_modifier(nModif, src));
         }
     };
-    util::for_each_match(memb_node, regs::QueryType::MethodModif, process);
+    util::for_each_match(nMemb, regs::QueryType::ParamModif, process);
     return modifs;
 }
 

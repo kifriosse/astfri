@@ -9,8 +9,8 @@ struct std::hash<astfri::csharp::MethodId>
     size_t operator()(const MethodId& m) const noexcept
     {
         size_t seed = std::hash<std::string>{}(m.name);
-        astfri::csharp::util::hash_combine(seed, m.param_count);
-        astfri::csharp::util::hash_combine(seed, m.is_static);
+        astfri::csharp::util::hash_combine(seed, m.paramCount);
+        astfri::csharp::util::hash_combine(seed, m.isStatic);
         return seed;
     }
 };

@@ -76,6 +76,6 @@ struct Overloaded : Ts...
 
 } // namespace astfri::csharp::util
 
-#include <libastfri-cs/impl/util/common.inl>
+#include <libastfri-cs/impl/util/Common.inl>
 
 #endif // CSHARP_COMMON_HPP

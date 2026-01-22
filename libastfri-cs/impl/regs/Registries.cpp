@@ -2,7 +2,7 @@
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
-#include <libastfri-cs/impl/util/ts_util.hpp>
+#include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -94,7 +94,7 @@ Handlers::Handlers() :
          {"scoped_type", TypeTranslator::visit_wrapper},
          {"ERROR", visit_error<TypeTranslator, Type*>}}
     ),
-    symbol_regs(
+    symbolRegs(
         {{"class_declaration", SymbolTableBuilder::visit_class},
          {"struct_declaration", SymbolTableBuilder::visit_class},
          {"interface_declaration", SymbolTableBuilder::visit_interface},
@@ -110,7 +110,7 @@ Handlers::Handlers() :
 }
 
 Operations::Operations() :
-    prefix_unary_op({
+    prefixUnaryOps({
         {"+",  UnaryOpType::Plus        },
         {"-",  UnaryOpType::Minus       },
         {"++", UnaryOpType::PreIncrement},
@@ -120,7 +120,7 @@ Operations::Operations() :
         {"*",  UnaryOpType::Dereference },
         {"&",  UnaryOpType::AddressOf   },
 }),
-    bin_operations(
+    binaryOps(
         {{"=", BinOpType::Assign},
          {"+", BinOpType::Add},
          {"-", BinOpType::Subtract},
@@ -179,49 +179,47 @@ Modifiers::Modifiers() :
 }
 
 Types::Types() :
-    type_factory(TypeFactory::get_instance()),
+    typeFact(TypeFactory::get_instance()),
     types({
-        {"bool", type_factory.mk_bool()},
-        {"byte", type_factory.mk_int()}, // TODO: implement `byte` type
-        {"char", type_factory.mk_char()},
-        {"short", type_factory.mk_int()}, // TODO: implement `short` type
-        {"ushort", type_factory.mk_int()}, // TODO: implement `ushort` type
-        {"int", type_factory.mk_int()},
-        {"uint", type_factory.mk_int()}, // TODO: implement `uint` type
-        {"long", type_factory.mk_unknown()}, // TODO: implement `long` type
-        {"ulong", type_factory.mk_unknown()}, // TODO: implement `ulong` type
+        {"bool", typeFact.mk_bool()},
+        {"byte", typeFact.mk_int()}, // TODO: implement `byte` type
+        {"char", typeFact.mk_char()},
+        {"short", typeFact.mk_int()}, // TODO: implement `short` type
+        {"ushort", typeFact.mk_int()}, // TODO: implement `ushort` type
+        {"int", typeFact.mk_int()},
+        {"uint", typeFact.mk_int()}, // TODO: implement `uint` type
+        {"long", typeFact.mk_unknown()}, // TODO: implement `long` type
+        {"ulong", typeFact.mk_unknown()}, // TODO: implement `ulong` type
 
-        {"float", type_factory.mk_float()},
-        {"double", type_factory.mk_unknown()}, // TODO: implement `double` type
-        {"decimal",
-         type_factory.mk_unknown()}, // TODO: implement `decimal` type
+        {"float", typeFact.mk_float()},
+        {"double", typeFact.mk_unknown()}, // TODO: implement `double` type
+        {"decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
 
-        {"void", type_factory.mk_void()},
-        {"dynamic", type_factory.mk_dynamic()},
+        {"void", typeFact.mk_void()},
+        {"dynamic", typeFact.mk_dynamic()},
 
-        {"Boolean", type_factory.mk_bool()},
-        {"Byte", type_factory.mk_int()}, // TODO: implement `Byte` type
-        {"SByte", type_factory.mk_int()}, // TODO: implement `SByte` type
-        {"Char", type_factory.mk_char()},
-        {"Int16", type_factory.mk_int()}, // TODO: implement `Int16` type
-        {"Int32", type_factory.mk_int()},
-        {"Int64", type_factory.mk_unknown()}, // TODO: implement `Int64` type
-        {"UInt16", type_factory.mk_int()}, // TODO: implement `UInt16` type
-        {"UInt32", type_factory.mk_int()}, // TODO: implement `UInt32` type
-        {"UInt64", type_factory.mk_unknown()}, // TODO: implement `UInt64` type
+        {"Boolean", typeFact.mk_bool()},
+        {"Byte", typeFact.mk_int()}, // TODO: implement `Byte` type
+        {"SByte", typeFact.mk_int()}, // TODO: implement `SByte` type
+        {"Char", typeFact.mk_char()},
+        {"Int16", typeFact.mk_int()}, // TODO: implement `Int16` type
+        {"Int32", typeFact.mk_int()},
+        {"Int64", typeFact.mk_unknown()}, // TODO: implement `Int64` type
+        {"UInt16", typeFact.mk_int()}, // TODO: implement `UInt16` type
+        {"UInt32", typeFact.mk_int()}, // TODO: implement `UInt32` type
+        {"UInt64", typeFact.mk_unknown()}, // TODO: implement `UInt64` type
 
-        {"Single", type_factory.mk_float()},
-        {"Double", type_factory.mk_unknown()}, // TODO: implement `double` type
-        {"Decimal",
-         type_factory.mk_unknown()}, // TODO: implement `decimal` type
+        {"Single", typeFact.mk_float()},
+        {"Double", typeFact.mk_unknown()}, // TODO: implement `double` type
+        {"Decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
 
-        {"object", type_factory.mk_class("object", {{"System"}})},
-        {"Object", type_factory.mk_class("object", {{"System"}})},
-        {"string", type_factory.mk_class("string", {{"System"}})},
-        {"String", type_factory.mk_class("string", {{"System"}})},
+        {"object", typeFact.mk_class("object", {{"System"}})},
+        {"Object", typeFact.mk_class("object", {{"System"}})},
+        {"string", typeFact.mk_class("string", {{"System"}})},
+        {"String", typeFact.mk_class("string", {{"System"}})},
 
-        {"var", type_factory.mk_unknown()}, // todo handle var type
-        {"_", type_factory.mk_unknown()}, // todo handle discard type
+        {"var", typeFact.mk_unknown()}, // todo handle var type
+        {"_", typeFact.mk_unknown()}, // todo handle discard type
 })
 {
 }
@@ -253,46 +251,46 @@ RegHandler RegManager::get_reg_handler(const TSNode& node)
     return get_reg_handler(ts_node_type(node));
 }
 
-StmtHandler RegManager::get_stmt_handler(const std::string_view node_type)
+StmtHandler RegManager::get_stmt_handler(const std::string_view nodeType)
 {
     // todo redo this when the typo is fixed
     StmtHandler def = default_stmt_visit;
-    return get_or_default(handlers_.stmts, node_type, std::move(def));
+    return get_or_default(handlers_.stmts, nodeType, std::move(def));
 }
 
-ExprHandler RegManager::get_expr_handler(const std::string_view node_type)
+ExprHandler RegManager::get_expr_handler(const std::string_view nodeType)
 {
     ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
-    return get_or_default(handlers_.exprs, node_type, std::move(def));
+    return get_or_default(handlers_.exprs, nodeType, std::move(def));
 }
 
-TypeHandler RegManager::get_type_handler(const std::string_view node_type)
+TypeHandler RegManager::get_type_handler(const std::string_view nodeType)
 {
     TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
-    return get_or_default(handlers_.types, node_type, std::move(def));
+    return get_or_default(handlers_.types, nodeType, std::move(def));
 }
 
-RegHandler RegManager::get_reg_handler(const std::string_view node_type)
+RegHandler RegManager::get_reg_handler(const std::string_view nodeType)
 {
     RegHandler def = [](auto*, const auto&) { };
-    return get_or_default(handlers_.symbol_regs, node_type, std::move(def));
+    return get_or_default(handlers_.symbolRegs, nodeType, std::move(def));
 }
 
 std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
     const std::string_view op
 )
 {
-    return get_opt(operations_.prefix_unary_op, op);
+    return get_opt(operations_.prefixUnaryOps, op);
 }
 
 std::optional<BinOpType> RegManager::get_bin_op(const std::string_view op)
 {
-    return get_opt(operations_.bin_operations, op);
+    return get_opt(operations_.binaryOps, op);
 }
 
-std::optional<Type*> RegManager::get_type(const std::string_view type_name)
+std::optional<Type*> RegManager::get_type(const std::string_view nodeType)
 {
-    return get_opt(types_.types, type_name);
+    return get_opt(types_.types, nodeType);
 }
 
 CSModifier RegManager::get_modifier(
@@ -303,9 +301,9 @@ CSModifier RegManager::get_modifier(
     return get_modifier(util::extract_text(node, src));
 }
 
-CSModifier RegManager::get_modifier(const std::string_view modifier)
+CSModifier RegManager::get_modifier(const std::string_view modifs)
 {
-    return get_opt(modifiers_.modifiers, modifier).value_or(CSModifier::None);
+    return get_opt(modifiers_.modifiers, modifs).value_or(CSModifier::None);
 }
 
 bool RegManager::is_expr(const TSNode& node)

@@ -38,10 +38,10 @@ TSSymbol symbol_for_name(std::string_view name, bool named);
  * @brief Extracts the text corresponding to the given TSNode from the source
  * code
  * @param node TSNode to extract text from
- * @param src_code original source code string
+ * @param src original source code string
  * @return extracted text from node
  */
-std::string extract_text(const TSNode& node, std::string_view src_code);
+std::string extract_text(const TSNode& node, std::string_view src);
 
 /**
  * @brief Prints the types of child nodes of the given TSNode to standard
@@ -56,12 +56,12 @@ void print_child_nodes_types(const TSNode& node, bool named = false);
  * of the given TSNode to standard output.
  * @param node TSNode whose child nodes' type and source code representation
  * will be printed.
- * @param source source code corresponding to the TSNode.
+ * @param src source code corresponding to the TSNode.
  * @param named If true, only named child nodes will be printed.
  */
 void print_child_nodes_types(
     const TSNode& node,
-    std::string_view source,
+    std::string_view src,
     bool named = false
 );
 
@@ -69,25 +69,25 @@ void print_child_nodes_types(
  * @brief Removes comments from the given source code using the syntax tree.
  * @param root starting node of the syntax tree (usually the root node of the
  * TSTree)
- * @param source_code original source code with comments
+ * @param src original source code with comments
  * @param path file path of the source code file
  * @return source code with comments removed
  */
 std::string remove_comments(
     const TSNode& root,
-    std::string_view source_code,
+    std::string_view src,
     const std::filesystem::path& path = {}
 );
 
 /**
  * @brief Checks if the parameter list node contains a variadic parameter.
  * @param node parameter list node
- * @param type_node output parameter that will hold node to the type of the
+ * @param nType output parameter that will hold node to the type of the
  * variadic parameter if found (null node if not found). If set to nullptr,
  * result will be ignored.
  * @return true if the parameter list contains a variadic parameter
  */
-bool has_variadic_param(const TSNode& node, TSNode* type_node = nullptr);
+bool has_variadic_param(const TSNode& node, TSNode* nType = nullptr);
 
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate);
 
@@ -131,6 +131,6 @@ void for_each_match(const TSNode& root, regs::QueryType type, F process);
 
 } // namespace astfri::csharp::util
 
-#include <libastfri-cs/impl/util/ts_util.inl>
+#include <libastfri-cs/impl/util/TSUtil.inl>
 
 #endif // CSHARP_TS_UTIL_HPP

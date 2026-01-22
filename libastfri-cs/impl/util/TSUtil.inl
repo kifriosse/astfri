@@ -12,19 +12,19 @@ void for_each_child_node(const TSNode& node, F process, const bool only_named)
     {
         do
         {
-            TSNode n_current = ts_tree_cursor_current_node(&cursor);
-            if (only_named && ! ts_node_is_named(n_current))
+            TSNode nCurrent = ts_tree_cursor_current_node(&cursor);
+            if (only_named && ! ts_node_is_named(nCurrent))
                 continue;
 
             using ResType = std::invoke_result_t<F, const TSNode&>;
             if constexpr (std::same_as<ResType, bool>)
             {
-                if (! process(n_current))
+                if (! process(nCurrent))
                     break;
             }
             else
             {
-                process(n_current);
+                process(nCurrent);
             }
         } while (ts_tree_cursor_goto_next_sibling(&cursor));
     }
@@ -34,12 +34,12 @@ void for_each_child_node(const TSNode& node, F process, const bool only_named)
 template<std::invocable<const TSNode&> F>
 void process_param_list(const TSNode& node, F collector)
 {
-    TSNode n_type{};
-    const bool is_variadic = has_variadic_param(node, &n_type);
+    TSNode nType{};
+    const bool isVariadic = has_variadic_param(node, &nType);
 
-    auto process           = [&](const TSNode& current) -> bool
+    auto process          = [&](const TSNode& current) -> bool
     {
-        if (is_variadic && ts_node_eq(current, n_type))
+        if (isVariadic && ts_node_eq(current, nType))
         {
             collector(node);
             return false;

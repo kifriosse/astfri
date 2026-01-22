@@ -5,7 +5,7 @@
 
 namespace astfri::csharp::regs::queries
 {
-inline static constexpr std::string_view top_level_stmts_q =
+inline static constexpr std::string_view qTopLevelStmts =
     R"(
     (namespace_declaration
         body: (declaration_list
@@ -30,12 +30,12 @@ inline static constexpr std::string_view top_level_stmts_q =
         ] @top_level_stmt
     ))";
 
-inline static constexpr std::string_view decltor_q =
+inline static constexpr std::string_view qDeclor =
     R"(
         (variable_declaration (variable_declarator)+ @var_decl)
     )";
 
-inline static constexpr std::string_view var_decl_q =
+inline static constexpr std::string_view qVarDecl =
     R"([
         (field_declaration
             (modifier)* @modifier
@@ -45,25 +45,25 @@ inline static constexpr std::string_view var_decl_q =
             (variable_declaration) @decl)
     ])";
 
-inline static constexpr std::string_view param_modif_q
+inline static constexpr std::string_view qParamModif
     = "(parameter (modifier)* @modifier)";
 
-inline static constexpr std::string_view method_modif_q =
+inline static constexpr std::string_view qMethodModif =
     R"([
         (method_declaration (modifier)* @modifier)
         (constructor_declaration (modifier)* @modifier)
     ])";
 
-inline static constexpr std::string_view file_namespace_q
+inline static constexpr std::string_view qFileNamespace
     = "(file_scoped_namespace_declaration) @namespace";
 
-inline static constexpr std::string_view comment_error_q =
+inline static constexpr std::string_view qCommentError =
     R"(
         (comment) @comment
         (ERROR) @error
     )";
 
-inline static constexpr std::string_view using_dir_q
+inline static constexpr std::string_view qUsingDir
     = "(using_directive) @directive";
 
 } // namespace astfri::csharp::regs::queries

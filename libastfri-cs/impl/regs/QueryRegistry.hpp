@@ -26,7 +26,7 @@ class Query
 {
 private:
     TSQuery* query_;
-    IdentifierMap<uint32_t> capture_ids_;
+    IdentifierMap<CaptureId> captureIds;
 
 public:
     Query(const TSLanguage* lang, std::string_view query);
@@ -34,7 +34,7 @@ public:
     Query(Query&& other) noexcept;
     Query& operator=(Query&& other) noexcept;
 
-    uint32_t id(std::string_view name) const;
+    CaptureId id(std::string_view name) const;
     TSQuery* get() const;
 };
 

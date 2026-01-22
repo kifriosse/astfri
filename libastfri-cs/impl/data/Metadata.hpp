@@ -29,9 +29,9 @@ namespace astfri::csharp
  */
 struct MemberVarMetadata
 {
-    MemberVarDefStmt* var_def{nullptr};
-    TSNode var_node{};
-    TSNode initializer{}; // right side of assignment
+    MemberVarDefStmt* varDef{nullptr};
+    TSNode nVar{};
+    TSNode nInit{}; // right side of assignment
     // todo maybe add flag for static variable
     bool processed{false};
 };
@@ -41,9 +41,9 @@ struct MemberVarMetadata
  */
 struct ParamMetadata
 {
-    ParamVarDefStmt* param_def{nullptr};
-    TSNode param_node{};
-    TSNode initializer{}; // right side of assignment
+    ParamVarDefStmt* paramDef{nullptr};
+    TSNode nParam{};
+    TSNode nInit{}; // right side of assignment
 };
 
 /**
@@ -52,8 +52,8 @@ struct ParamMetadata
 struct FuncMetadata
 {
     std::vector<ParamMetadata> params{};
-    FunctionDefStmt* func_def{nullptr};
-    TSNode function_node{};
+    FunctionDefStmt* funcDef{nullptr};
+    TSNode nFunc{};
 };
 
 /**
@@ -62,8 +62,8 @@ struct FuncMetadata
 struct MethodMetadata
 {
     std::vector<ParamMetadata> params{};
-    MethodDefStmt* method_def{nullptr};
-    TSNode method_node{};
+    MethodDefStmt* methodDef{nullptr};
+    TSNode nMethod{};
 };
 
 /**
@@ -71,7 +71,7 @@ struct MethodMetadata
  */
 struct PropertyNode
 {
-    MemberVarMetadata backing_field;
+    MemberVarMetadata backingField;
     MethodMetadata getter;
     MethodMetadata setter;
 };
@@ -81,8 +81,8 @@ struct PropertyNode
  */
 struct TypeDefLoc
 {
-    TSNode type_node{};
-    SourceCode* src_code{nullptr};
+    TSNode nType{};
+    SourceCode* src{nullptr};
 };
 
 /**
@@ -90,9 +90,9 @@ struct TypeDefLoc
  */
 struct TypeMetadata
 {
-    UserTypeDefStmt* user_type{nullptr};
+    UserTypeDefStmt* userType{nullptr};
     std::unordered_map<MethodId, MethodMetadata> methods{};
-    IdentifierMap<MemberVarMetadata> member_vars{};
+    IdentifierMap<MemberVarMetadata> memberVars{};
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
     bool processed{false};

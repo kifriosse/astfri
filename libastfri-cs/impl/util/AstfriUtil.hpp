@@ -37,7 +37,7 @@ struct TypeBinding
     UserTypeDefStmt* def;
 };
 
-Scope create_scope(const TSNode& node, std::string_view source);
+Scope create_scope(const TSNode& node, std::string_view src);
 
 Scope create_scope(std::string_view qualifier);
 
@@ -45,7 +45,7 @@ Scope create_scope(std::string_view qualifier);
  * @brief Creates a ParamVarDefStmt from the given TSNode.
  * @param node TSNode representing the parameter definition
  * @param src reference to SourceCode instance linked to the TSNode parameter
- * @param type_tr TypeTranslator instance for translating type nodes
+ * @param typeTrs TypeTranslator instance for translating type nodes
  * @return pointer to the created ParamVarDefStmt
  * @note Creates a ParamVarDefStmt but without initialization expression -
  * needs to be handled by the caller
@@ -53,27 +53,27 @@ Scope create_scope(std::string_view qualifier);
 ParamVarDefStmt* make_param_def(
     const TSNode& node,
     std::string_view src,
-    TypeTranslator& type_tr
+    TypeTranslator& typeTrs
 );
 
 /**
  * @brief Discovers parameters from the given TSNode representing a parameter
  * list.
  * @param node TSNode representing the parameter list
- * @param src_code original source code string
- * @param type_tr TypeTranslator instance for translating type nodes
+ * @param src original source code string
+ * @param typeTrs TypeTranslator instance for translating type nodes
  * @return ParamSignature containing parameter definitions and metadata
  */
 ParamSignature discover_params(
     const TSNode& node,
-    std::string_view src_code,
-    TypeTranslator& type_tr
+    std::string_view src,
+    TypeTranslator& typeTrs
 );
 
 FuncMetadata make_func_metadata(
     const TSNode& node,
     std::string_view src,
-    TypeTranslator& type_tr
+    TypeTranslator& typeTrs
 );
 
 } // namespace astfri::csharp::util
