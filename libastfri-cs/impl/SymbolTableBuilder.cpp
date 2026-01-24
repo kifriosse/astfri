@@ -73,32 +73,21 @@ void SymbolTableBuilder::reg_using_directives()
 
 void SymbolTableBuilder::reg_members()
 {
+    auto process = [this](const TSNode& current)
+    {
+        const RegHandler handler = RegManager::get_reg_handler(current);
+        handler(this, current);
+    };
     for (auto& metadata : symbTable_.userTypeMetadata | std::views::values)
     {
         for (auto& [node, src] : metadata.defs)
         {
-            // todo refactor this to use the for_each_child function
-            currentSrc_ = src;
-            typeTrs_.set_current_src(src);
             const TSNode nClassBody = util::child_by_field_name(node, "body");
-            TSTreeCursor cursor     = ts_tree_cursor_new(nClassBody);
+            currentSrc_             = src;
+            typeTrs_.set_current_src(src);
             typeContext_.typeStack.push(metadata.userType);
-
-            if (! ts_tree_cursor_goto_first_child(&cursor))
-                continue;
-
-            do
-            {
-                TSNode nCurrent = ts_tree_cursor_current_node(&cursor);
-                if (! ts_node_is_named(nCurrent))
-                    continue;
-
-                RegHandler handler = RegManager::get_reg_handler(nCurrent);
-                handler(this, nCurrent);
-            } while (ts_tree_cursor_goto_next_sibling(&cursor));
-
+            util::for_each_child_node(nClassBody, process);
             typeContext_.typeStack.pop();
-            ts_tree_cursor_delete(&cursor);
         }
     }
 }
@@ -354,7 +343,7 @@ void SymbolTableBuilder::register_type(
     {
         ClassDefStmt* classDef
             = stmtFact_.mk_class_def(std::move(name), std::move(scope));
-        def = classDef;
+        def  = classDef;
         type = classDef->type_;
         break;
     }
@@ -362,7 +351,7 @@ void SymbolTableBuilder::register_type(
     {
         InterfaceDefStmt* intfDef
             = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
-        def = intfDef;
+        def  = intfDef;
         type = intfDef->m_type;
         break;
     }
@@ -373,7 +362,8 @@ void SymbolTableBuilder::register_type(
         break;
     }
 
-    if (def && type) {
+    if (def && type)
+    {
         symbTable_.symbTree.add_type(scope, type, def);
         auto [it, inserted] = symbTable_.userTypeMetadata.try_emplace(
             def,
