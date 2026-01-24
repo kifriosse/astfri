@@ -217,7 +217,9 @@ Expr* SrcCodeVisitor::visit_memb_access_expr(
     {
         // todo static member access handling
     }
-    return exprFact_.mk_member_var_ref(left, std::move(name));
+    // todo generic member access
+    // return exprFact_.mk_member_var_ref(left, std::move(name));
+    return exprFact_.mk_unknown();
 }
 
 Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
@@ -313,15 +315,18 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
                     .mk_method_call(left, std::move(name), std::move(argList));
             default:
                 // todo placeholder
-                return exprFact_
-                    .mk_method_call(left, std::move(name), std::move(argList));
+                // return exprFact_
+                //     .mk_method_call(left, std::move(name), std::move(argList));
+                return exprFact_.mk_unknown();
+
             }
         }
         // todo accessing of base members
 
         // todo accessing of static members left side is a Usertype Reference
-        return exprFact_
-            .mk_method_call(left, std::move(name), std::move(argList));
+        // return exprFact_
+        //     .mk_method_call(left, std::move(name), std::move(argList));
+        return exprFact_.mk_unknown();
     }
     // left side is a anonymous lambda
     TSNode nLambda;
