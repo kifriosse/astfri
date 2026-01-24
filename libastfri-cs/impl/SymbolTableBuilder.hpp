@@ -63,6 +63,7 @@ public:
 
 private:
     void add_using_directive(const TSNode& node);
+    void register_type(const TSNode& node, util::TypeKind type_kind);
     [[nodiscard]] SourceCode* src() const;
     [[nodiscard]] std::string_view src_str() const;
 };

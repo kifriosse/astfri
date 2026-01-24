@@ -28,9 +28,10 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     static const TSSymbol sTypeParamConstr
         = util::symbol_for_name("type_parameter_constraints_clause", true);
 
-    Scope scope             = util::create_scope(node, self->src_str());
+    const std::string_view src = self->src_str();
     const TSNode nClassName = util::child_by_field_name(node, "name");
-    std::string className   = util::extract_text(nClassName, self->src_str());
+    std::string className   = util::extract_text(nClassName, src);
+    Scope scope             = util::create_scope(node, src);
 
     ClassDefStmt* classDef  = stmtFact_.mk_class_def(className, scope);
     classDef->name_         = std::move(className); // todo remove this
@@ -52,6 +53,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
             first = false;
             if (const auto class_t = as_a<ClassType>(type))
                 classDef->bases_.push_back(class_t->m_def);
+            return;
         }
 
         if (const auto interface_t = as_a<InterfaceType>(type))
@@ -66,13 +68,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         }
     };
 
-    auto processGenericParam = [](const TSNode& current) -> void
-    {
-        // todo implement temporary generic handling
-    };
-
-    auto processGenericConstraints
-        = []([[maybe_unused]] const TSNode& current) -> void { };
+    // auto processGenericConstraints = [](const TSNode&) -> void { };
 
     auto processClassHeader = [&](const TSNode& current) -> bool
     {
@@ -86,11 +82,11 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         }
         else if (sCurrent == sTypeParam)
         {
-            util::for_each_child_node(current, processGenericParam);
+            classDef->tparams_ = util::make_generic_params(current, src);
         }
         else if (sCurrent == sTypeParamConstr)
         {
-            util::for_each_child_node(current, processGenericConstraints);
+            // util::for_each_child_node(current, processGenericConstraints);
         }
         return true;
     };
@@ -125,32 +121,82 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     const TSNode& node
 )
 {
-    [[maybe_unused]] static const std::vector<std::string_view> nClassMembTypes
-        = {
-            // "class_declaration",              // todo
-            // "enum_declaration",               // todo
-            // "interface_declaration",          // todo
-            // "struct_declaration",             // todo
-            // "record_declaration",             // todo
-            "field_declaration",    // todo
-                                    // "delegate_declaration",    // todo
-                                    // "event_field_declaration", // todo
-            "property_declaration", // todo
-            "method_declaration",   // todo
-                                    // "indexer_declaration",     // todo
-        };
+    static const TSSymbol sBaseList = util::symbol_for_name("base_list", true);
+    static const TSSymbol sTypeParam
+        = util::symbol_for_name("type_parameter_list", true);
+    static const TSSymbol sTypeParamConstr
+        = util::symbol_for_name("type_parameter_constraints_clause", true);
 
-    const TSNode nName = util::child_by_field_name(node, "name");
-    std::string name   = util::extract_text(nName, self->src_str());
-    Scope scope        = util::create_scope(node, self->src_str());
+    const std::string_view src = self->src_str();
+    const TSNode nIntfName     = util::child_by_field_name(node, "name");
+    std::string intfName       = util::extract_text(nIntfName, src);
+    Scope scope                = util::create_scope(node, src);
 
-    InterfaceDefStmt* intrDef
-        = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
+    InterfaceDefStmt* intfDef  = stmtFact_.mk_interface_def(intfName, scope);
+    intfDef->name_             = std::move(intfName); // todo remove this
+    // todo use move semantic for the string
 
-    // todo not finished
-    // needs type resolver to work properly
+    self->semanticContext_.enter_type(intfDef);
+    self->typeTrs_.set_current_namespace(std::move(scope));
 
-    return intrDef;
+    // handling of base class and interface implementations
+    auto processBaseList = [&](const TSNode& current) -> void
+    {
+        const TypeHandler th = RegManager::get_type_handler(current);
+        Type* type           = th(&self->typeTrs_, current);
+
+        if (const auto interface_t = as_a<InterfaceType>(type))
+            intfDef->bases_.push_back(interface_t->m_def);
+        else
+        {
+            // todo incomplete type
+        }
+    };
+    // auto processGenericConstraints = [](const TSNode&) -> void { };
+
+    const TSNode nIntfBody  = util::child_by_field_name(node, "body");
+    auto processClassHeader = [&](const TSNode& current) -> bool
+    {
+        if (ts_node_eq(current, nIntfBody))
+            return false;
+
+        const TSSymbol sCurrent = ts_node_symbol(current);
+        if (sCurrent == sBaseList) // base list handeling
+        {
+            util::for_each_child_node(current, processBaseList);
+        }
+        else if (sCurrent == sTypeParam)
+        {
+            intfDef->tparams_ = util::make_generic_params(current, src);
+        }
+        else if (sCurrent == sTypeParamConstr)
+        {
+            // util::for_each_child_node(current, processGenericConstraints);
+        }
+        return true;
+    };
+    util::for_each_child_node(node, processClassHeader);
+
+    // if its partial interface and doesn't have a body
+    if (ts_node_is_null(nIntfBody))
+        return intfDef;
+
+    auto processMembs = [intfDef, self](const TSNode& nMember) -> void
+    {
+        const StmtHandler hMemb = RegManager::get_stmt_handler(nMember);
+        Stmt* membStmt          = hMemb(self, nMember);
+
+        if (const auto varDef = as_a<MemberVarDefStmt>(membStmt))
+        {
+            // intfDef->vars_.push_back(varDef); // todo static variables
+        }
+        else if (const auto method = as_a<MethodDefStmt>(membStmt))
+            intfDef->methods_.push_back(method);
+    };
+    util::for_each_child_node(nIntfBody, processMembs);
+
+    self->semanticContext_.leave_type();
+    return intfDef;
 }
 
 Stmt* SrcCodeVisitor::visit_memb_var_def_stmt(
@@ -223,7 +269,7 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
     constrDef->params_      = self->make_param_list(nParamList, false);
 
     const CSModifiers modifs
-        = CSModifiers::handle_modifs_memb(node, self->src_str());
+        = CSModifiers::handle_memb_modifs(node, self->src_str());
     constrDef->access_
         = modifs.get_access_mod().value_or(AccessModifier::Private);
 
@@ -314,11 +360,11 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
     const TSNode nParams = util::child_by_field_name(node, "parameters");
     const CSModifiers modifs
-        = CSModifiers::handle_modifs_memb(node, self->src_str());
-    const TSNode nName         = util::child_by_field_name(node, "name");
-    const bool isVariadic      = util::has_variadic_param(nParams, nullptr);
-    const size_t cNameChildren = ts_node_named_child_count(nParams);
-    const size_t cParam        = isVariadic ? cNameChildren - 1 : cNameChildren;
+        = CSModifiers::handle_memb_modifs(node, self->src_str());
+    const TSNode nName          = util::child_by_field_name(node, "name");
+    const bool isVariadic       = util::has_variadic_param(nParams, nullptr);
+    const size_t cNamedChildren = ts_node_named_child_count(nParams);
+    const size_t cParam         = cNamedChildren - (isVariadic ? 1 : 0);
 
     const MethodId methodId{
         .name       = util::extract_text(nName, self->src_str()),
@@ -351,8 +397,11 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
         const TSNode nBody
             = util::child_by_field_name(methodMeta->nMethod, "body");
-        const StmtHandler hBody = RegManager::get_stmt_handler(nBody);
-        methodDef->func_->body_ = as_a<CompoundStmt>(hBody(self, nBody));
+        if (! ts_node_is_null(nBody))
+        {
+            const StmtHandler hBody = RegManager::get_stmt_handler(nBody);
+            methodDef->func_->body_ = as_a<CompoundStmt>(hBody(self, nBody));
+        }
 
         self->semanticContext_.leave_scope();
 

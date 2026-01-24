@@ -13,6 +13,14 @@
 namespace astfri::csharp::util
 {
 
+enum class TypeKind {
+    Class,
+    Interface,
+    Record,
+    Enum,
+    Delegate
+};
+
 enum class VarDefType
 {
     Local,

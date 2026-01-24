@@ -45,16 +45,16 @@ private:
     MaskType modifier_mask{0};
 
 public:
-    static CSModifiers handle_modifs_memb(
+    static CSModifiers handle_memb_modifs(
         const TSNode& nMemb,
         std::string_view src
     );
-    static CSModifiers handle_modifs_var(
+    static CSModifiers handle_var_modifs(
         const TSNode& nVar,
         std::string_view src,
         TSNode* nVarDecl
     );
-    static CSModifiers handle_modifs_param(
+    static CSModifiers handle_param_modifs(
         const TSNode& nParam,
         std::string_view src
     );
@@ -78,7 +78,7 @@ public:
      * @return indection type based on modifiers - if modifiers reference type
      * isn't reference type, original type is returned
      */
-    [[nodiscard]] Type* get_indection_type(Type* type) const;
+    [[nodiscard]] Type* get_indirection_type(Type* type) const;
 };
 
 } // namespace astfri::csharp

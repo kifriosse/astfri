@@ -10,7 +10,7 @@
 
 namespace astfri::csharp
 {
-CSModifiers CSModifiers::handle_modifs_memb(
+CSModifiers CSModifiers::handle_memb_modifs(
     const TSNode& nMemb,
     const std::string_view src
 )
@@ -28,10 +28,10 @@ CSModifiers CSModifiers::handle_modifs_memb(
     return modifs;
 }
 
-CSModifiers CSModifiers::handle_modifs_var(
-    const TSNode& var_node,
+CSModifiers CSModifiers::handle_var_modifs(
+    const TSNode& nVar,
     const std::string_view src,
-    TSNode* n_var_decl
+    TSNode* nVarDecl
 )
 {
     using namespace regs;
@@ -47,33 +47,33 @@ CSModifiers CSModifiers::handle_modifs_var(
 
         for (uint32_t i = 0; i < match.capture_count; ++i)
         {
-            auto [n_current, index] = match.captures[i];
-            if (index == decl_id && n_var_decl)
-                *n_var_decl = n_current;
+            auto [nCurrent, index] = match.captures[i];
+            if (index == decl_id && nVarDecl)
+                *nVarDecl = nCurrent;
             else if (index == modif_id)
-                modifs.add_modifier(RegManager::get_modifier(n_current, src));
+                modifs.add_modifier(RegManager::get_modifier(nCurrent, src));
         }
     };
-    util::for_each_match(var_node, q_type, process);
+    util::for_each_match(nVar, q_type, process);
     return modifs;
 }
 
-CSModifiers CSModifiers::handle_modifs_param(
-    const TSNode& param_node,
+CSModifiers CSModifiers::handle_param_modifs(
+    const TSNode& nParam,
     std::string_view src
 )
 {
-    CSModifiers param_mod;
-    auto process = [&param_mod, &src](const TSQueryMatch& match)
+    CSModifiers paramMod;
+    auto process = [&paramMod, &src](const TSQueryMatch& match)
     {
         for (uint32_t i = 0; i < match.capture_count; ++i)
         {
             const TSNode n_modif = match.captures[i].node;
-            param_mod.add_modifier(RegManager::get_modifier(n_modif, src));
+            paramMod.add_modifier(RegManager::get_modifier(n_modif, src));
         }
     };
-    util::for_each_match(param_node, regs::QueryType::ParamModif, process);
-    return param_mod;
+    util::for_each_match(nParam, regs::QueryType::ParamModif, process);
+    return paramMod;
 }
 
 bool CSModifiers::has(CSModifier mod) const
@@ -107,7 +107,6 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
         return AccessModifier::Protected;
     if (has(CSModifier::File))
         return AccessModifier::Internal;
-
     return {};
 }
 
@@ -120,7 +119,7 @@ Virtuality CSModifiers::get_virtuality() const
     return Virtuality::NotVirtual;
 }
 
-Type* CSModifiers::get_indection_type(Type* type) const
+Type* CSModifiers::get_indirection_type(Type* type) const
 {
     if (has(CSModifier::Ref) || has(CSModifier::Out))
         return TypeFactory::get_instance().mk_indirect(type);

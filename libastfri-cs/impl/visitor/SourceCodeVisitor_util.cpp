@@ -23,7 +23,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
     TSNode nVarDecl{};
 
     [[maybe_unused]] CSModifiers modifs
-        = CSModifiers::handle_modifs_var(node, src_str(), &nVarDecl);
+        = CSModifiers::handle_var_modifs(node, src_str(), &nVarDecl);
 
     const TSNode nType   = util::child_by_field_name(nVarDecl, "type");
     const TypeHandler th = RegManager::get_type_handler(nType);
@@ -176,9 +176,9 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
     std::vector<ParamVarDefStmt*> params;
     auto collector = [&](const TSNode& current)
     {
-        const TSNode nName  = util::child_by_field_name(current, "name");
-        const TSNode nType  = util::child_by_field_name(current, "type");
-        const TSNode nInit  = ts_node_next_named_sibling(nName);
+        const TSNode nName   = util::child_by_field_name(current, "name");
+        const TSNode nType   = util::child_by_field_name(current, "type");
+        const TSNode nInit   = ts_node_next_named_sibling(nName);
         std::string name     = util::extract_text(nName, src_str());
         const TypeHandler th = RegManager::get_type_handler(nType);
         Type* type           = th(&typeTrs_, nType);
@@ -186,7 +186,7 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
         if (! makeShallow && ! ts_node_is_null(nInit))
         {
             const ExprHandler hInit = RegManager::get_expr_handler(nInit);
-            init                     = hInit(this, nInit);
+            init                    = hInit(this, nInit);
         }
         ParamVarDefStmt* paramDef
             = stmtFact_.mk_param_var_def(std::move(name), type, init);

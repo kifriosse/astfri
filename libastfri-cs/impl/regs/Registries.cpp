@@ -21,6 +21,7 @@ Handlers::Handlers() :
     stmts({
         {"class_declaration", SrcCodeVisitor::visit_class_def_stmt},
         {"struct_declaration", SrcCodeVisitor::visit_class_def_stmt},
+        {"interface_declaration", SrcCodeVisitor::visit_interface_def_stmt},
         {"destructor_declaration", SrcCodeVisitor::visit_destr_def_stmt},
         {"constructor_declaration", SrcCodeVisitor::visit_constr_def_stmt},
         {"parameter", SrcCodeVisitor::visit_param_def_stmt},

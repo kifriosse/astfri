@@ -22,14 +22,15 @@ Scope create_scope(const TSNode& node, const std::string_view src)
     {
         Class,
         Interface,
+        Record,
         Namespace,
         Root,
     };
 
-    // todo add other type like struct and record
     static const std::unordered_map<std::string_view, NodeType> node_types = {
         {"class_declaration",     Class    },
         {"struct_declaration",    Class    },
+        {"record_declaration",    Record   },
         {"interface_declaration", Interface},
         {"namespace_declaration", Namespace},
         {"compilation_unit",      Root     },
@@ -40,6 +41,7 @@ Scope create_scope(const TSNode& node, const std::string_view src)
     TSNode nCurrent = node;
     TSNode nParent  = ts_node_parent(nCurrent);
 
+    // todo rewrite this to use TreeCursor
     bool foundNms   = false;
     while (! ts_node_is_null(nParent))
     {
@@ -54,9 +56,10 @@ Scope create_scope(const TSNode& node, const std::string_view src)
         {
         case Class:
         case Interface:
+        case Record:
         {
-            const TSNode n_name = child_by_field_name(nCurrent, "name");
-            std::string name    = extract_text(n_name, src);
+            const TSNode nName = child_by_field_name(nCurrent, "name");
+            std::string name   = extract_text(nName, src);
             scopes.push(std::move(name));
             break;
         }
@@ -66,6 +69,7 @@ Scope create_scope(const TSNode& node, const std::string_view src)
                 break;
 
             TSNode nNms{};
+            // todo move this to FileContext
             auto process = [&nNms](const TSQueryMatch& match)
             { nNms = match.captures[0].node; };
             for_each_match(nCurrent, regs::QueryType::FileNamespace, process);
@@ -73,16 +77,16 @@ Scope create_scope(const TSNode& node, const std::string_view src)
             if (ts_node_is_null(nNms))
                 break;
 
-            const TSNode n_name    = child_by_field_name(nNms, "name");
-            const std::string name = extract_text(n_name, src);
+            const TSNode nName     = child_by_field_name(nNms, "name");
+            const std::string name = extract_text(nName, src);
             split_namespace(scopes, name);
             break;
         }
         case Namespace:
         {
             foundNms               = true;
-            const TSNode n_name    = child_by_field_name(nCurrent, "name");
-            const std::string name = extract_text(n_name, src);
+            const TSNode nName     = child_by_field_name(nCurrent, "name");
+            const std::string name = extract_text(nName, src);
             split_namespace(scopes, name);
             break;
         }
@@ -131,8 +135,8 @@ ParamVarDefStmt* make_param_def(
     const TSNode nType         = child_by_field_name(node, "type");
     const TSNode nName         = child_by_field_name(node, "name");
     const TypeHandler th       = RegManager::get_type_handler(nType);
-    const CSModifiers paramMod = CSModifiers::handle_modifs_param(node, src);
-    Type* tParam = paramMod.get_indection_type(th(&typeTrs, nType));
+    const CSModifiers paramMod = CSModifiers::handle_param_modifs(node, src);
+    Type* tParam = paramMod.get_indirection_type(th(&typeTrs, nType));
 
     return StmtFactory::get_instance()
         .mk_param_var_def(extract_text(nName, src), tParam, nullptr);
@@ -183,5 +187,24 @@ FuncMetadata make_func_metadata(
         ),
         .nFunc = node,
     };
+}
+
+std::vector<GenericParam*> make_generic_params(
+    const TSNode& node,
+    const std::string_view src
+)
+{
+    static auto& stmtFact = StmtFactory::get_instance();
+    std::vector<GenericParam*> tparams;
+    auto processGenericParam = [&](const TSNode& current) -> void
+    {
+        // todo temporary solution
+        const TSNode nName = child_by_field_name(current, "name");
+        GenericParam* genParam
+            = stmtFact.mk_generic_param({}, extract_text(nName, src));
+        tparams.push_back(genParam);
+    };
+    for_each_child_node(node, processGenericParam);
+    return tparams;
 }
 } // namespace astfri::csharp::util

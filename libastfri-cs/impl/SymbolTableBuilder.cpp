@@ -18,7 +18,7 @@ namespace astfri::csharp
 {
 struct SourceCode;
 
-StmtFactory& SymbolTableBuilder::stmtFact_       = StmtFactory::get_instance();
+StmtFactory& SymbolTableBuilder::stmtFact_    = StmtFactory::get_instance();
 regs::QueryReg& SymbolTableBuilder::queryReg_ = regs::QueryReg::get();
 
 SymbolTableBuilder::SymbolTableBuilder(
@@ -77,6 +77,7 @@ void SymbolTableBuilder::reg_members()
     {
         for (auto& [node, src] : metadata.defs)
         {
+            // todo refactor this to use the for_each_child function
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
             const TSNode nClassBody = util::child_by_field_name(node, "body");
@@ -107,24 +108,7 @@ void SymbolTableBuilder::visit_class(
     const TSNode& node
 )
 {
-    const std::string_view src = self->src_str();
-    const TSNode nName         = util::child_by_field_name(node, "name");
-    // todo handle generic parameters
-    Scope scope = util::create_scope(node, src);
-    ClassDefStmt* classDef
-        = stmtFact_.mk_class_def(util::extract_text(nName, src), std::move(scope));
-
-    self->symbTable_.symbTree.add_type(scope, classDef->type_, classDef);
-
-    auto [it, inserted] = self->symbTable_.userTypeMetadata.try_emplace(
-        classDef,
-        TypeMetadata{.userType = classDef}
-    );
-    if (inserted)
-    {
-        self->symbTable_.userTypeKeys.push_back(classDef);
-    }
-    it->second.defs.emplace_back(node, self->currentSrc_);
+    self->register_type(node, util::TypeKind::Class);
 }
 
 void SymbolTableBuilder::visit_interface(
@@ -132,6 +116,7 @@ void SymbolTableBuilder::visit_interface(
     [[maybe_unused]] const TSNode& node
 )
 {
+    self->register_type(node, util::TypeKind::Interface);
 }
 
 void SymbolTableBuilder::visit_record(
@@ -139,6 +124,7 @@ void SymbolTableBuilder::visit_record(
     [[maybe_unused]] const TSNode& node
 )
 {
+    self->register_type(node, util::TypeKind::Record);
 }
 
 void SymbolTableBuilder::visit_enum(
@@ -146,6 +132,7 @@ void SymbolTableBuilder::visit_enum(
     [[maybe_unused]] const TSNode& node
 )
 {
+    self->register_type(node, util::TypeKind::Enum);
 }
 
 void SymbolTableBuilder::visit_delegate(
@@ -153,6 +140,7 @@ void SymbolTableBuilder::visit_delegate(
     [[maybe_unused]] const TSNode& node
 )
 {
+    self->register_type(node, util::TypeKind::Delegate);
 }
 
 void SymbolTableBuilder::visit_memb_var(
@@ -164,7 +152,7 @@ void SymbolTableBuilder::visit_memb_var(
 
     TSNode nVarDecl;
     const CSModifiers modifs
-        = CSModifiers::handle_modifs_var(node, src, &nVarDecl);
+        = CSModifiers::handle_var_modifs(node, src, &nVarDecl);
     const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
     const TypeHandler th   = RegManager::get_type_handler(nType);
     Type* type             = th(&self->typeTrs_, nType);
@@ -188,7 +176,7 @@ void SymbolTableBuilder::visit_memb_var(
         MemberVarMetadata membVarMeta{
             .varDef = varDef,
             .nVar   = nDecltor,
-            .nInit   = ts_node_named_child(nDecltor, 1) // right side
+            .nInit  = ts_node_named_child(nDecltor, 1) // right side
         };
         typeMeta.memberVars.emplace(varDef->name_, membVarMeta);
     };
@@ -217,7 +205,7 @@ void SymbolTableBuilder::visit_method(
         throw std::logic_error("Type wasn't discovered yet");
 
     const CSModifiers modifs
-        = CSModifiers::handle_modifs_memb(node, self->src_str());
+        = CSModifiers::handle_memb_modifs(node, self->src_str());
 
     const TSNode nRetType       = util::child_by_field_name(node, "returns");
     const TSNode nFuncName      = util::child_by_field_name(node, "name");
@@ -344,6 +332,57 @@ void SymbolTableBuilder::add_using_directive(const TSNode& node)
         // util::split_namespace(scope_stack, qualifier);
 
         // if (ClassDefStmt* class_def = stmt_factory_.get_class_def(, ))
+    }
+}
+
+void SymbolTableBuilder::register_type(
+    const TSNode& node,
+    const util::TypeKind type_kind
+)
+{
+    using enum util::TypeKind;
+    const std::string_view src = src_str();
+    const TSNode nName         = util::child_by_field_name(node, "name");
+    std::string name           = util::extract_text(nName, src);
+    Scope scope                = util::create_scope(node, src);
+    UserTypeDefStmt* def       = nullptr;
+    ScopedType* type           = nullptr;
+
+    switch (type_kind)
+    {
+    case Class:
+    {
+        ClassDefStmt* classDef
+            = stmtFact_.mk_class_def(std::move(name), std::move(scope));
+        def = classDef;
+        type = classDef->type_;
+        break;
+    }
+    case Interface:
+    {
+        InterfaceDefStmt* intfDef
+            = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
+        def = intfDef;
+        type = intfDef->m_type;
+        break;
+    }
+    case Record:
+    case Enum:
+    case Delegate:
+        // todo add registration for other types
+        break;
+    }
+
+    if (def && type) {
+        symbTable_.symbTree.add_type(scope, type, def);
+        auto [it, inserted] = symbTable_.userTypeMetadata.try_emplace(
+            def,
+            TypeMetadata{.userType = def}
+        );
+
+        if (inserted)
+            symbTable_.userTypeKeys.push_back(def);
+        it->second.defs.emplace_back(node, this->src());
     }
 }
 

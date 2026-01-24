@@ -76,6 +76,11 @@ FuncMetadata make_func_metadata(
     TypeTranslator& typeTrs
 );
 
+std::vector<GenericParam*> make_generic_params(
+    const TSNode& node,
+    std::string_view src
+);
+
 } // namespace astfri::csharp::util
 
 #endif // CSHARP_ASTFRI_UTIL_H
