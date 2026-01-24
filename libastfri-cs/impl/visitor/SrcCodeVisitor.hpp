@@ -22,14 +22,14 @@ private:
     static TypeFactory& typeFact_;
 
     TypeTranslator typeTrs_;
-    std::vector<SourceCode>& srcCodes_;
+    std::vector<SourceFile>& srcCodes_;
     SemanticContext& semanticContext_;
-    SourceCode* currentSrc_{nullptr};
+    SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
     SrcCodeVisitor(
-        std::vector<SourceCode>& srcCodes,
+        std::vector<SourceFile>& srcCodes,
         SemanticContext& semanticContext,
         SymbolTable& symbTable
     );
@@ -138,7 +138,6 @@ public:
 
     // branching statements
     static Stmt* visit_if_stmt(SrcCodeVisitor* self, const TSNode& node);
-
     static Stmt* visit_try_stmt(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_catch_clause(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_finally(SrcCodeVisitor* self, const TSNode& node);
@@ -193,7 +192,7 @@ private:
 
 private:
     [[nodiscard]] std::string_view src_str() const;
-    [[nodiscard]] SourceCode* src() const;
+    [[nodiscard]] SourceFile* src() const;
 };
 
 } // namespace astfri::csharp

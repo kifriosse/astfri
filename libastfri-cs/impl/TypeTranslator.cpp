@@ -19,7 +19,7 @@ TypeTranslator::TypeTranslator(SymbolTable& symbTable) :
 {
 }
 
-void TypeTranslator::set_current_src(SourceCode* src)
+void TypeTranslator::set_current_src(SourceFile* src)
 {
     currentSrc_ = src;
 }
@@ -139,7 +139,7 @@ Type* TypeTranslator::visit_func_pointer(
     return typeFact_.mk_unknown();
 }
 
-SourceCode* TypeTranslator::src() const
+SourceFile* TypeTranslator::src() const
 {
     return currentSrc_
              ? currentSrc_
@@ -148,7 +148,7 @@ SourceCode* TypeTranslator::src() const
 
 std::string_view TypeTranslator::src_str() const
 {
-    return src()->file.content;
+    return src()->srcStr;
 }
 
 } // namespace astfri::csharp

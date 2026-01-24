@@ -75,7 +75,7 @@ void print_child_nodes_types(
  */
 std::string remove_comments(
     const TSNode& root,
-    std::string_view src,
+    std::string src,
     const std::filesystem::path& path = {}
 );
 
@@ -90,6 +90,8 @@ std::string remove_comments(
 bool has_variadic_param(const TSNode& node, TSNode* nType = nullptr);
 
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate);
+
+TSTree* make_tree(TSParser* parser, std::string_view str);
 
 TSNode unwrap_parantheses(const TSNode& node);
 

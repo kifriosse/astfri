@@ -243,11 +243,11 @@ Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node)
 std::string_view SrcCodeVisitor::src_str() const
 {
     return currentSrc_
-             ? currentSrc_->file.content
+             ? currentSrc_->srcStr
              : throw std::logic_error("Current source code is not set");
 }
 
-SourceCode* SrcCodeVisitor::src() const
+SourceFile* SrcCodeVisitor::src() const
 {
     return currentSrc_
              ? currentSrc_

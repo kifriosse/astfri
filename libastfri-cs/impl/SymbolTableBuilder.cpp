@@ -16,13 +16,13 @@
 
 namespace astfri::csharp
 {
-struct SourceCode;
+struct SourceFile;
 
 StmtFactory& SymbolTableBuilder::stmtFact_    = StmtFactory::get_instance();
 regs::QueryReg& SymbolTableBuilder::queryReg_ = regs::QueryReg::get();
 
 SymbolTableBuilder::SymbolTableBuilder(
-    std::vector<SourceCode>& srcs,
+    std::vector<SourceFile>& srcs,
     SymbolTable& symbTable
 ) :
     typeTrs_(symbTable),
@@ -326,18 +326,17 @@ void SymbolTableBuilder::add_using_directive(const TSNode& node)
 
 void SymbolTableBuilder::register_type(
     const TSNode& node,
-    const util::TypeKind type_kind
+    const util::TypeKind typeKind
 )
 {
     using enum util::TypeKind;
-    const std::string_view src = src_str();
     const TSNode nName         = util::child_by_field_name(node, "name");
-    std::string name           = util::extract_text(nName, src);
-    Scope scope                = util::create_scope(node, src);
+    std::string name           = util::extract_text(nName, src_str());
+    Scope scope                = util::create_scope(node, *src());
     UserTypeDefStmt* def       = nullptr;
     ScopedType* type           = nullptr;
 
-    switch (type_kind)
+    switch (typeKind)
     {
     case Class:
     {
@@ -376,7 +375,7 @@ void SymbolTableBuilder::register_type(
     }
 }
 
-SourceCode* SymbolTableBuilder::src() const
+SourceFile* SymbolTableBuilder::src() const
 {
     return currentSrc_
              ? currentSrc_
@@ -385,7 +384,7 @@ SourceCode* SymbolTableBuilder::src() const
 
 std::string_view SymbolTableBuilder::src_str() const
 {
-    return src()->file.content;
+    return src()->srcStr;
 }
 
 } // namespace astfri::csharp

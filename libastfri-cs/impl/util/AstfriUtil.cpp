@@ -16,9 +16,9 @@
 namespace astfri::csharp::util
 {
 
-Scope create_scope(const TSNode& node, const std::string_view src)
+Scope create_scope(const TSNode& node, const SourceFile& src_file)
 {
-    enum NodeType
+    enum class NodeType
     {
         Class,
         Interface,
@@ -28,12 +28,12 @@ Scope create_scope(const TSNode& node, const std::string_view src)
     };
 
     static const std::unordered_map<std::string_view, NodeType> node_types = {
-        {"class_declaration",     Class    },
-        {"struct_declaration",    Class    },
-        {"record_declaration",    Record   },
-        {"interface_declaration", Interface},
-        {"namespace_declaration", Namespace},
-        {"compilation_unit",      Root     },
+        {"class_declaration",     NodeType::Class    },
+        {"struct_declaration",    NodeType::Class    },
+        {"record_declaration",    NodeType::Record   },
+        {"interface_declaration", NodeType::Interface},
+        {"namespace_declaration", NodeType::Namespace},
+        {"compilation_unit",      NodeType::Root     },
     };
 
     std::stack<std::string> scopes;
@@ -54,39 +54,28 @@ Scope create_scope(const TSNode& node, const std::string_view src)
 
         switch (it->second)
         {
-        case Class:
-        case Interface:
-        case Record:
+        case NodeType::Class:
+        case NodeType::Interface:
+        case NodeType::Record:
         {
             const TSNode nName = child_by_field_name(nCurrent, "name");
-            std::string name   = extract_text(nName, src);
+            std::string name   = extract_text(nName, src_file.srcStr);
             scopes.push(std::move(name));
             break;
         }
-        case Root:
+        case NodeType::Root:
         {
-            if (foundNms)
+            if (foundNms || ! src_file.fileContext.fileNms)
                 break;
 
-            TSNode nNms{};
-            // todo move this to FileContext
-            auto process = [&nNms](const TSQueryMatch& match)
-            { nNms = match.captures[0].node; };
-            for_each_match(nCurrent, regs::QueryType::FileNamespace, process);
-
-            if (ts_node_is_null(nNms))
-                break;
-
-            const TSNode nName     = child_by_field_name(nNms, "name");
-            const std::string name = extract_text(nName, src);
-            split_namespace(scopes, name);
+            split_namespace(scopes, *src_file.fileContext.fileNms);
             break;
         }
-        case Namespace:
+        case NodeType::Namespace:
         {
             foundNms               = true;
             const TSNode nName     = child_by_field_name(nCurrent, "name");
-            const std::string name = extract_text(nName, src);
+            const std::string name = extract_text(nName, src_file.srcStr);
             split_namespace(scopes, name);
             break;
         }

@@ -62,7 +62,7 @@ void print_child_nodes_types(
 
 std::string remove_comments(
     const TSNode& root,
-    const std::string_view src,
+    std::string src,
     const std::filesystem::path& path
 )
 {
@@ -72,15 +72,13 @@ std::string remove_comments(
     static const Query* const query  = queryReg.get_query(qType);
     static const CaptureId commentId = query->id("comment");
     static const CaptureId errorId   = query->id("error");
-
-    std::string newSrc;
-    size_t nextStart = 0;
+    
     bool hasErr      = false;
     auto process     = [&](const TSQueryMatch& match) -> void
     {
-        for (CaptureId i = 0; i < match.capture_count; ++i)
+        for (CaptureId id = 0; id < match.capture_count; ++id)
         {
-            auto& [node, index] = match.captures[i];
+            auto& [node, index] = match.captures[id];
             if (index == errorId)
             {
                 if (! hasErr)
@@ -92,17 +90,20 @@ std::string remove_comments(
                 std::cerr << "Warning: Syntax error at line " << row + 1
                           << ", column " << column + 1 << "\n";
             }
-            else if (index == commentId)
+            else if (index == commentId && ! hasErr)
             {
-                const size_t start = ts_node_start_byte(node);
-                const size_t n     = start - nextStart;
-                newSrc += src.substr(nextStart, n);
-                nextStart = ts_node_end_byte(node);
+                const uint32_t start = ts_node_start_byte(node);
+                const uint32_t end   = ts_node_end_byte(node);
+                for (uint32_t i = start; i < end; ++i)
+                {
+                    if (src[i] == '\n' || src[i] == '\r')
+                        continue;
+                    src[i] = ' ';
+                }
             }
         }
     };
     for_each_match(root, qType, process);
-    newSrc += src.substr(nextStart);
 
     if (hasErr)
     {
@@ -112,7 +113,7 @@ std::string remove_comments(
         );
     }
 
-    return newSrc;
+    return src;
 }
 
 bool has_variadic_param(const TSNode& node, TSNode* nType)
@@ -145,6 +146,11 @@ bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate)
     if (delegate)
         *delegate = child_by_field_name(nCast, "type");
     return true;
+}
+
+TSTree* make_tree(TSParser* parser, const std::string_view str)
+{
+    return ts_parser_parse_string(parser, nullptr, str.data(), str.length());
 }
 
 TSNode unwrap_parantheses(const TSNode& node)

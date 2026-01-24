@@ -13,12 +13,12 @@ private:
 
     Scope currentNms_{};
     SymbolTable& symbTable_;
-    SourceCode* currentSrc_{nullptr};
+    SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
     explicit TypeTranslator(SymbolTable& symbTable);
-    void set_current_src(SourceCode* src);
+    void set_current_src(SourceFile* src);
     void set_current_namespace(Scope scope);
 
     static Type* visit_predefined(TypeTranslator* self, const TSNode& node);
@@ -46,7 +46,7 @@ public:
     static Type* visit_func_pointer(TypeTranslator* self, const TSNode& node);
 
 private:
-    [[nodiscard]] SourceCode* src() const;
+    [[nodiscard]] SourceFile* src() const;
     [[nodiscard]] std::string_view src_str() const;
 };
 

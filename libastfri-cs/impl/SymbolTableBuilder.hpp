@@ -30,9 +30,9 @@ private:
 
     TypeContext typeContext_;
     TypeTranslator typeTrs_;
-    std::vector<SourceCode>& srcs_;
+    std::vector<SourceFile>& srcs_;
     SymbolTable& symbTable_;
-    SourceCode* currentSrc_{nullptr};
+    SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
@@ -44,7 +44,7 @@ public:
      * Symbol table's lifetime must exceed lifetime of Symbol table builder
      */
     explicit SymbolTableBuilder(
-        std::vector<SourceCode>& srcs,
+        std::vector<SourceFile>& srcs,
         SymbolTable& symbTable
     );
 
@@ -63,8 +63,8 @@ public:
 
 private:
     void add_using_directive(const TSNode& node);
-    void register_type(const TSNode& node, util::TypeKind type_kind);
-    [[nodiscard]] SourceCode* src() const;
+    void register_type(const TSNode& node, util::TypeKind typeKind);
+    [[nodiscard]] SourceFile* src() const;
     [[nodiscard]] std::string_view src_str() const;
 };
 

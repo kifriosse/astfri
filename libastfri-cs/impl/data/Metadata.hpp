@@ -82,7 +82,7 @@ struct PropertyNode
 struct TypeDefLoc
 {
     TSNode nType{};
-    SourceCode* src{nullptr};
+    SourceFile* src{nullptr};
 };
 
 /**

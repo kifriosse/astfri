@@ -37,7 +37,7 @@ struct TypeBinding
     UserTypeDefStmt* def;
 };
 
-Scope create_scope(const TSNode& node, std::string_view src);
+Scope create_scope(const TSNode& node, const SourceFile& src_file);
 
 Scope create_scope(std::string_view qualifier);
 

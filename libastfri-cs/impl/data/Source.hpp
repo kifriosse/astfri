@@ -7,6 +7,7 @@
 #include <tree_sitter/api.h>
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -17,33 +18,26 @@ namespace astfri::csharp
 struct FileContext
 {
     // todo add global aliases
-    std::vector<Scope> usings{};
-    std::vector<UserTypeDefStmt*> staticUsings{};
     // todo redo this into namespace aware
     IdentifierMap<std::variant<Type*, std::string>> aliases{};
+    std::vector<Scope> usings{};
+    std::vector<UserTypeDefStmt*> staticUsings{};
+    std::optional<std::string> fileNms{};
 };
 
 struct SourceFile
 {
-    std::filesystem::path filePath{};
-    std::string content{};
-};
-
-struct SourceCode
-{
     FileContext fileContext{};
-    SourceFile file{};
+    std::string srcStr;
     TSTree* tree{nullptr};
 
-    explicit SourceCode(SourceFile file, TSTree* tree = nullptr);
-    ~SourceCode();
+    explicit SourceFile(FileContext context, std::string src, TSTree* tree);
+    ~SourceFile();
 
-    const TSLanguage* lang() const;
-
-    SourceCode(const SourceCode&)            = delete;
-    SourceCode& operator=(const SourceCode&) = delete;
-    SourceCode(SourceCode&& other) noexcept;
-    SourceCode& operator=(SourceCode&& other) noexcept;
+    SourceFile(const SourceFile&)            = delete;
+    SourceFile& operator=(const SourceFile&) = delete;
+    SourceFile(SourceFile&& other) noexcept;
+    SourceFile& operator=(SourceFile&& other) noexcept;
 };
 
 } // namespace astfri::csharp

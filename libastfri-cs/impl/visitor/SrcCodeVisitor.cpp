@@ -18,7 +18,7 @@ StmtFactory& SrcCodeVisitor::stmtFact_ = StmtFactory::get_instance();
 TypeFactory& SrcCodeVisitor::typeFact_ = TypeFactory::get_instance();
 
 SrcCodeVisitor::SrcCodeVisitor(
-    std::vector<SourceCode>& srcCodes,
+    std::vector<SourceFile>& srcCodes,
     SemanticContext& semanticContext,
     SymbolTable& symbTable
 ) :

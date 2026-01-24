@@ -33,22 +33,20 @@ ASTBuilder::~ASTBuilder()
 
 TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
 {
+    using milli          = std::chrono::milliseconds;
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
-    std::vector<SourceCode> srcs;
+    std::cout << "Preprocessing Phase: \n"
+              << "Gathering souce files and removing comments..." << std::endl;
+    auto start                   = std::chrono::high_resolution_clock::now();
 
-    for (auto& srcFile : get_source_codes(srcDir))
-    {
-        TSTree* tree = ts_parser_parse_string(
-            parser_,
-            nullptr,
-            srcFile.content.c_str(),
-            static_cast<uint32_t>(srcFile.content.size())
-        );
-        srcs.emplace_back(srcFile, tree);
-        ts_parser_reset(parser_);
-    }
+    std::vector<SourceFile> srcs = get_source_codes(srcDir);
 
-    using milli = std::chrono::milliseconds;
+    auto end                     = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<milli>(end - start);
+    auto total    = duration;
+    std::cout << "Preprocesing complete.\n"
+              << "Preprocessing took " << duration.count() << " ms"
+              << std::endl;
 
     SymbolTable symbTable;
     SymbolTableBuilder symbTableBuilder(srcs, symbTable);
@@ -56,7 +54,7 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
     std::cout << "Phase 1: Symbol Table Building\n"
               << "Discovering user defined types..." << std::endl;
 
-    auto start = std::chrono::high_resolution_clock::now();
+    start = std::chrono::high_resolution_clock::now();
 
     symbTableBuilder.reg_user_types();
     std::cout << "Loading using directives...\n";
@@ -64,8 +62,9 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
     std::cout << "Discovering members of user defined types...\n";
     symbTableBuilder.reg_members();
 
-    auto end      = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<milli>(end - start);
+    end      = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<milli>(end - start);
+    total += duration;
 
     std::cout << "Symbol Table Building took " << duration.count() << " ms"
               << std::endl;
@@ -81,9 +80,11 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
 
     end      = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<milli>(end - start);
+    total += duration;
 
     std::cout << "AST building completed.\n"
-              << "AST Building took " << duration.count() << " ms" << std::endl;
+              << "AST Building took " << duration.count() << " ms\n"
+              << "Total time: " << total.count() << " ms" << std::endl;
 
     return ast;
 }
@@ -92,7 +93,7 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
     const std::filesystem::path& project_dir
 ) const
 {
-    std::vector<SourceFile> srcFiles;
+    std::vector<SourceFile> srcs;
     std::stack<std::filesystem::path> dirs;
     const std::filesystem::path& rootPath{project_dir};
     dirs.emplace(rootPath);
@@ -101,9 +102,9 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
     {
         auto dirIt = std::filesystem::directory_iterator(dirs.top());
         dirs.pop();
-        for (const auto& dirEntry : dirIt)
+        for (auto& dirEntry : dirIt)
         {
-            const std::filesystem::path& entryPath = dirEntry.path();
+            auto& entryPath            = dirEntry.path();
             const std::string fileName = entryPath.filename().string();
 
             if (dirEntry.is_directory())
@@ -124,30 +125,37 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                 }
                 std::string src;
                 std::ifstream fileStream(entryPath, std::ios::binary);
-                const auto fileSize = std::filesystem::file_size(entryPath);
+                const auto fileSize = file_size(entryPath);
                 src.resize(fileSize);
                 fileStream.read(
                     src.data(),
                     static_cast<std::streamsize>(fileSize)
                 );
-                TSTree* tree = ts_parser_parse_string(
-                    parser_,
-                    nullptr,
-                    src.c_str(),
-                    src.length()
-                );
-                srcFiles.emplace_back(
-                    entryPath,
-                    util::remove_comments(
-                        ts_tree_root_node(tree),
-                        src,
-                        entryPath
-                    )
-                );
+                TSTree* tree = util::make_tree(parser_, src);
+                TSNode root  = ts_tree_root_node(tree);
+                src = util::remove_comments(root, std::move(src), entryPath);
                 ts_tree_delete(tree);
+                ts_parser_reset(parser_);
+                tree = util::make_tree(parser_, src);
+
+                TSNode nNms{};
+                util::for_each_match(
+                    ts_tree_root_node(tree),
+                    regs::QueryType::FileNamespace,
+                    [&nNms](const TSQueryMatch& match)
+                    { nNms = match.captures[0].node; }
+                );
+                FileContext context;
+                if (! ts_node_is_null(nNms))
+                {
+                    TSNode nNmsName = util::child_by_field_name(nNms, "name");
+                    context.fileNms = util::extract_text(nNmsName, src);
+                }
+                srcs.emplace_back(std::move(context), std::move(src), tree);
+                ts_parser_reset(parser_);
             }
         }
     }
-    return srcFiles;
+    return srcs;
 }
 } // namespace astfri::csharp
