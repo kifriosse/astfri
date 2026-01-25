@@ -1,7 +1,7 @@
 #ifndef CSHARP_SOURCE_CODE_VISITOR_HPP
 #define CSHARP_SOURCE_CODE_VISITOR_HPP
 
-#include <libastfri-cs/impl/data/Source.hpp>
+#include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
 #include <libastfri/inc/Astfri.hpp>

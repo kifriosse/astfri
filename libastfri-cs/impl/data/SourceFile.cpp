@@ -1,4 +1,4 @@
-#include <libastfri-cs/impl/data/Source.hpp>
+#include <libastfri-cs/impl/data/SourceFile.hpp>
 
 #include <tree_sitter/api.h>
 

@@ -1,6 +1,6 @@
 target_sources(astfri-cs PRIVATE
     Identifiers.cpp
-    Source.cpp
+    SourceFile.cpp
     CSModifiers.cpp
     SymbolTable.cpp
 )

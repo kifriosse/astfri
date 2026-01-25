@@ -1,7 +1,7 @@
 #ifndef CSHARP_AST_BUILDER_HPP
 #define CSHARP_AST_BUILDER_HPP
 
-#include <libastfri-cs/impl/data/Source.hpp>
+#include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>

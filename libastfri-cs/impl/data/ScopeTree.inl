@@ -19,8 +19,9 @@ ScopeTree<T>::Node* ScopeTree<T>::add_namespace(const Scope& scope)
         auto [it, inserted] = current->children.try_emplace(str);
         if (inserted)
         {
-            it->second       = std::make_unique<Node>();
-            it->second->data = str;
+            it->second         = std::make_unique<Node>();
+            it->second->data   = str;
+            it->second->parent = current;
         }
         current = it->second.get();
     }
@@ -38,8 +39,9 @@ ScopeTree<T>::Node* ScopeTree<T>::add_data(
     auto [it, inserted] = last->children.try_emplace(identifier);
     if (inserted)
     {
-        it->second       = std::make_unique<Node>();
-        it->second->data = data;
+        it->second         = std::make_unique<Node>();
+        it->second->data   = data;
+        it->second->parent = last;
         return it->second.get();
     }
     return nullptr;
@@ -64,7 +66,6 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
 ) const
 {
     Node* current = root_.get();
-    std::vector<Node*> nodes;
     auto process = [&](const Scope& scope) -> bool
     {
         for (std::string_view name : scope.names_)
@@ -74,8 +75,6 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
                 return false;
 
             current = it->second.get();
-            if (searchParents)
-                nodes.push_back(current);
         }
         return true;
     };
@@ -86,11 +85,13 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
     if (! searchParents)
         return current;
 
-    for (const Node* node : std::views::reverse(nodes))
+    while (current)
     {
-        auto it = node->children.find(typeName);
-        if (it != node->children.end())
+        auto it = current->children.find(typeName);
+        if (it != current->children.end())
             return it->second.get();
+
+        current = current->parent;
     }
 
     return nullptr;

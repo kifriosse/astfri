@@ -15,8 +15,9 @@ namespace astfri::csharp
 template<typename T>
 struct ScopeNode
 {
-    IdentifierMap<std::unique_ptr<ScopeNode>> children{};
     T data;
+    IdentifierMap<std::unique_ptr<ScopeNode>> children{};
+    ScopeNode* parent{nullptr};
 };
 
 template<typename T>

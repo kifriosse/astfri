@@ -1,6 +1,6 @@
 #ifndef CSHARP_TYPE_TRANSLATOR
 #define CSHARP_TYPE_TRANSLATOR
-#include <libastfri-cs/impl/data/Source.hpp>
+#include <libastfri-cs/impl/data/SourceFile.hpp>
 
 namespace astfri::csharp
 {
