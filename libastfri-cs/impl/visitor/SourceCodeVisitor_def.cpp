@@ -33,12 +33,10 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     std::string className      = util::extract_text(nClassName, src);
     Scope scope                = util::create_scope(node, *self->src());
 
-    ClassDefStmt* classDef     = stmtFact_.mk_class_def(className, scope);
+    ClassDefStmt* classDef     = stmtFact_.mk_class_def(className, std::move(scope));
     classDef->name_            = std::move(className); // todo remove this
     // todo use move semantic for the string
-
     self->semanticContext_.enter_type(classDef);
-    self->typeTrs_.set_current_namespace(std::move(scope));
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
     // handling of base class and interface implementations
@@ -132,13 +130,11 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     std::string intfName       = util::extract_text(nIntfName, src);
     Scope scope                = util::create_scope(node, *self->src());
 
-    InterfaceDefStmt* intfDef  = stmtFact_.mk_interface_def(intfName, scope);
+    InterfaceDefStmt* intfDef  = stmtFact_.mk_interface_def(intfName, std::move(scope));
     intfDef->name_             = std::move(intfName); // todo remove this
     // todo use move semantic for the string
 
     self->semanticContext_.enter_type(intfDef);
-    self->typeTrs_.set_current_namespace(std::move(scope));
-
     // handling of base class and interface implementations
     auto processBaseList = [&](const TSNode& current) -> void
     {

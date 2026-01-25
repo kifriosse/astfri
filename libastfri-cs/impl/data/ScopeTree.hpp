@@ -48,6 +48,7 @@ public:
         std::string_view typeName,
         bool searchParents = false
     ) const;
+    [[nodiscard]] Node* find_node(Node* start, std::string_view typeName) const;
 };
 
 } // namespace astfri::csharp

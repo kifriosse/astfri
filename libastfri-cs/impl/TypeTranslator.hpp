@@ -1,17 +1,21 @@
 #ifndef CSHARP_TYPE_TRANSLATOR
 #define CSHARP_TYPE_TRANSLATOR
-#include <libastfri-cs/impl/data/SourceFile.hpp>
+
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
 
 namespace astfri::csharp
 {
-class SemanticContext;
+struct SourceFile;
 
 class TypeTranslator
 {
 private:
     static TypeFactory& typeFact_;
 
-    Scope currentNms_{};
+    SymbolTree::SymbolNode* currentNmsNode_{};
     SymbolTable& symbTable_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
@@ -19,7 +23,7 @@ private:
 public:
     explicit TypeTranslator(SymbolTable& symbTable);
     void set_current_src(SourceFile* src);
-    void set_current_namespace(Scope scope);
+    void set_current_namespace(SymbolTree::SymbolNode* node);
 
     static Type* visit_predefined(TypeTranslator* self, const TSNode& node);
     static Type* visit_identitifier(TypeTranslator* self, const TSNode& node);

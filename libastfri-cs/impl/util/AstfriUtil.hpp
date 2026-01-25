@@ -1,5 +1,5 @@
 /**
- * @file astfri_util.hpp
+ * @file AstfriUtil.hpp
  * @brief Header for helper functions and structs used for creating FRI AST
  * nodes from C# syntax.
  */

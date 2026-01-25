@@ -5,7 +5,6 @@
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 
-#include <optional>
 #include <stack>
 #include <unordered_map>
 #include <vector>

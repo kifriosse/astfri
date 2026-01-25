@@ -362,10 +362,11 @@ void SymbolTableBuilder::register_type(
 
     if (def && type)
     {
-        symbTable_.symbTree.add_type(scope, type, def);
+        SymbolTree::SymbolNode* nmsNode
+            = symbTable_.symbTree.add_type(scope, type, def);
         auto [it, inserted] = symbTable_.userTypeMetadata.try_emplace(
             def,
-            TypeMetadata{.userType = def}
+            TypeMetadata{.userType = def, .nmsNode = nmsNode}
         );
 
         if (inserted)

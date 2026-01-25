@@ -3,7 +3,6 @@
 
 #include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/ScopeTree.hpp>
-#include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <string>
@@ -29,9 +28,9 @@ struct TypeBinding
 class SymbolTree
 {
 public:
-    using Data           = std::variant<std::string, TypeBinding>;
-    using Tree           = ScopeTree<Data>;
-    using SymbolTreeNode = Tree::Node;
+    using Data       = std::variant<std::string, TypeBinding>;
+    using Tree       = ScopeTree<Data>;
+    using SymbolNode = Tree::Node;
 
 private:
     Tree tree_{};
@@ -42,14 +41,14 @@ public:
      * @param scope scope/namespace to add
      * @return pointer to the last node of the added namespace (can be ignored)
      */
-    SymbolTreeNode* add_namespace(const Scope& scope);
+    SymbolNode* add_namespace(const Scope& scope);
     /**
      * @brief Adds a type to the symbol tree under the given scope
      * @param scope scope/namespace under which to add the type
      * @param type type to add
      * @param def pointer to the type definition statement
      */
-    SymbolTreeNode* add_type(
+    SymbolNode* add_type(
         const Scope& scope,
         ScopedType* type,
         UserTypeDefStmt* def
@@ -82,6 +81,10 @@ public:
         const Scope& end,
         std::string_view typeName,
         bool searchParents = false
+    ) const;
+    [[nodiscard]] TypeBinding* find_type(
+        SymbolNode* start,
+        std::string_view typeName
     ) const;
 };
 

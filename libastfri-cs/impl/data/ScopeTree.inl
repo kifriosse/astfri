@@ -61,7 +61,7 @@ template<typename T>
 ScopeTree<T>::Node* ScopeTree<T>::find_node(
     const Scope& start,
     const Scope& end,
-    std::string_view typeName,
+    const std::string_view typeName,
     const bool searchParents
 ) const
 {
@@ -82,9 +82,16 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
     if (! process(start) || ! process(end))
         return nullptr;
 
-    if (! searchParents)
-        return current;
+    return ! searchParents ? current : find_node(current, typeName);
+}
 
+template<typename T>
+ScopeTree<T>::Node* ScopeTree<T>::find_node(
+    Node* start,
+    std::string_view typeName
+) const
+{
+    Node* current = start;
     while (current)
     {
         auto it = current->children.find(typeName);

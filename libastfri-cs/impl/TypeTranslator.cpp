@@ -24,9 +24,9 @@ void TypeTranslator::set_current_src(SourceFile* src)
     currentSrc_ = src;
 }
 
-void TypeTranslator::set_current_namespace(Scope scope)
+void TypeTranslator::set_current_namespace(SymbolTree::SymbolNode* node)
 {
-    currentNms_ = std::move(scope);
+    currentNmsNode_ = node;
 }
 
 Type* TypeTranslator::visit_predefined(TypeTranslator* self, const TSNode& node)
@@ -51,7 +51,7 @@ Type* TypeTranslator::visit_identitifier(
 
     // current namespace and its parents
     const SymbolTree& symbTree = self->symbTable_.symbTree;
-    if (const auto type = symbTree.find_type(self->currentNms_, name, true))
+    if (const auto type = symbTree.find_type(self->currentNmsNode_, name))
         return type->type;
 
     // file scoped usings

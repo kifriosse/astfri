@@ -8,12 +8,12 @@
 namespace astfri::csharp
 {
 
-SymbolTree::SymbolTreeNode* SymbolTree::add_namespace(const Scope& scope)
+SymbolTree::SymbolNode* SymbolTree::add_namespace(const Scope& scope)
 {
     return tree_.add_namespace(scope);
 }
 
-SymbolTree::SymbolTreeNode* SymbolTree::add_type(
+SymbolTree::SymbolNode* SymbolTree::add_type(
     const Scope& scope,
     ScopedType* type,
     UserTypeDefStmt* def
@@ -39,7 +39,16 @@ TypeBinding* SymbolTree::find_type(
     const bool searchParents
 ) const
 {
-    SymbolTreeNode* node = tree_.find_node(start, end, typeName, searchParents);
+    SymbolNode* node = tree_.find_node(start, end, typeName, searchParents);
+    return node ? std::get_if<TypeBinding>(&node->data) : nullptr;
+}
+
+TypeBinding* SymbolTree::find_type(
+    SymbolNode* start,
+    const std::string_view typeName
+) const
+{
+    SymbolNode* node = tree_.find_node(start, typeName);
     return node ? std::get_if<TypeBinding>(&node->data) : nullptr;
 }
 

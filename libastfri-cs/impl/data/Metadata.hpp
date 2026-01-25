@@ -4,6 +4,7 @@
 #include <libastfri-cs/impl/CSAliases.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/SourceFile.hpp>
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -90,11 +91,12 @@ struct TypeDefLoc
  */
 struct TypeMetadata
 {
-    UserTypeDefStmt* userType{nullptr};
     std::unordered_map<MethodId, MethodMetadata> methods{};
     IdentifierMap<MemberVarMetadata> memberVars{};
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
+    UserTypeDefStmt* userType{nullptr};
+    SymbolTree::SymbolNode* nmsNode{nullptr};
     bool processed{false};
 };
 } // namespace astfri::csharp
