@@ -67,6 +67,15 @@ rm -rf build
 ok
 echo ""
 
+# Initialize and update submodules
+heading "Initializing and updating submodules"
+set -x
+git submodule update --init --recursive
+{ set +x; } 2>/dev/null
+possibly_die "Git submodule update failed"
+ok
+echo ""
+
 # Remove external bin files
 heading "Removing external bin files"
 set -x
