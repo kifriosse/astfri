@@ -42,7 +42,7 @@ Scope create_scope(const TSNode& node, const SourceFile& src_file)
     TSNode nParent  = ts_node_parent(nCurrent);
 
     // todo rewrite this to use TreeCursor
-    bool foundNms   = false;
+    bool foundNms = false;
     while (! ts_node_is_null(nParent))
     {
         const auto it = node_types.find(ts_node_type(nParent));

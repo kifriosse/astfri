@@ -28,15 +28,6 @@ struct ParamSignature
     std::vector<ParamMetadata> metadata;
 };
 
-/**
- * @brief Helper struct to group type and its definition statement
- */
-struct TypeBinding
-{
-    ScopedType* type;
-    UserTypeDefStmt* def;
-};
-
 Scope create_scope(const TSNode& node, const SourceFile& src_file);
 
 Scope create_scope(std::string_view qualifier);

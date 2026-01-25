@@ -213,7 +213,7 @@ const MethodMetadata* SemanticContext::find_method(
                 return nullptr;
 
             auto& [_, typeMetadata] = *itTypeMetadata;
-            const auto itMethod = typeMetadata.methods.find(methodId);
+            const auto itMethod     = typeMetadata.methods.find(methodId);
             if (itMethod != typeMetadata.methods.end())
                 return &itMethod->second;
 

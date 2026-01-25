@@ -72,9 +72,8 @@ std::string remove_comments(
     static const Query* const query  = queryReg.get_query(qType);
     static const CaptureId commentId = query->id("comment");
     static const CaptureId errorId   = query->id("error");
-    
-    bool hasErr      = false;
-    auto process     = [&](const TSQueryMatch& match) -> void
+    bool hasErr                      = false;
+    auto process                     = [&](const TSQueryMatch& match) -> void
     {
         for (CaptureId id = 0; id < match.capture_count; ++id)
         {

@@ -17,9 +17,10 @@ namespace astfri::csharp
 
 struct FileContext
 {
+    using Alias = std::variant<Type*, Scope, std::string>;
     // todo add global aliases
     // todo redo this into namespace aware
-    IdentifierMap<std::variant<Type*, std::string>> aliases{};
+    IdentifierMap<Alias> aliases{};
     std::vector<Scope> usings{};
     std::vector<UserTypeDefStmt*> staticUsings{};
     std::optional<std::string> fileNms{};

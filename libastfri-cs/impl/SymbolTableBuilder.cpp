@@ -329,16 +329,15 @@ void SymbolTableBuilder::register_type(
     const util::TypeKind typeKind
 )
 {
-    using enum util::TypeKind;
-    const TSNode nName         = util::child_by_field_name(node, "name");
-    std::string name           = util::extract_text(nName, src_str());
-    Scope scope                = util::create_scope(node, *src());
-    UserTypeDefStmt* def       = nullptr;
-    ScopedType* type           = nullptr;
+    const TSNode nName   = util::child_by_field_name(node, "name");
+    std::string name     = util::extract_text(nName, src_str());
+    Scope scope          = util::create_scope(node, *src());
+    UserTypeDefStmt* def = nullptr;
+    ScopedType* type     = nullptr;
 
     switch (typeKind)
     {
-    case Class:
+    case util::TypeKind::Class:
     {
         ClassDefStmt* classDef
             = stmtFact_.mk_class_def(std::move(name), std::move(scope));
@@ -346,7 +345,7 @@ void SymbolTableBuilder::register_type(
         type = classDef->type_;
         break;
     }
-    case Interface:
+    case util::TypeKind::Interface:
     {
         InterfaceDefStmt* intfDef
             = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
@@ -354,9 +353,9 @@ void SymbolTableBuilder::register_type(
         type = intfDef->m_type;
         break;
     }
-    case Record:
-    case Enum:
-    case Delegate:
+    case util::TypeKind::Record:
+    case util::TypeKind::Enum:
+    case util::TypeKind::Delegate:
         // todo add registration for other types
         break;
     }

@@ -13,7 +13,8 @@
 namespace astfri::csharp::util
 {
 
-enum class TypeKind {
+enum class TypeKind
+{
     Class,
     Interface,
     Record,

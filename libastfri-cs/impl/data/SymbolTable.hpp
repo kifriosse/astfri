@@ -2,10 +2,10 @@
 #define CSHARP_SYMBOL_TABLE_HPP
 
 #include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/data/ScopeTree.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
-#include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -17,19 +17,26 @@ namespace astfri::csharp
 // forward declaration
 struct TypeMetadata;
 
-struct SymbolTreeNode
+/**
+ * @brief Helper struct to group type and its definition statement
+ */
+struct TypeBinding
 {
-    IdentifierMap<std::unique_ptr<SymbolTreeNode>> children{};
-    std::variant<std::string, util::TypeBinding> data;
+    ScopedType* type;
+    UserTypeDefStmt* def;
 };
 
 class SymbolTree
 {
+public:
+    using Data           = std::variant<std::string, TypeBinding>;
+    using Tree           = ScopeTree<Data>;
+    using SymbolTreeNode = Tree::Node;
+
 private:
-    std::unique_ptr<SymbolTreeNode> root_;
+    Tree tree_{};
 
 public:
-    SymbolTree();
     /**
      * @brief Adds a namespace/scope to the symbol tree
      * @param scope scope/namespace to add
@@ -42,7 +49,11 @@ public:
      * @param type type to add
      * @param def pointer to the type definition statement
      */
-    void add_type(const Scope& scope, ScopedType* type, UserTypeDefStmt* def);
+    SymbolTreeNode* add_type(
+        const Scope& scope,
+        ScopedType* type,
+        UserTypeDefStmt* def
+    );
     /**
      * @brief Resolves type by traversing the given scope
      * @param scope namespace/scope to search in
@@ -51,7 +62,7 @@ public:
      * scopes/namespaces
      * @return pointer to the found type, or nullptr if not found
      */
-    [[nodiscard]] util::TypeBinding* find_type(
+    [[nodiscard]] TypeBinding* find_type(
         const Scope& scope,
         std::string_view typeName,
         bool searchParents = false
@@ -66,7 +77,7 @@ public:
      * @return pointer to the found type, or nullptr if type was not found in
      * that namespace/scope
      */
-    [[nodiscard]] util::TypeBinding* find_type(
+    [[nodiscard]] TypeBinding* find_type(
         const Scope& start,
         const Scope& end,
         std::string_view typeName,
@@ -88,5 +99,7 @@ struct SymbolTable
 };
 
 } // namespace astfri::csharp
+
+#include <libastfri-cs/impl/data/ScopeTree.inl>
 
 #endif // CSHARP_SYMBOL_TABLE_HPP

@@ -35,7 +35,7 @@ SourceFile& SourceFile::operator=(SourceFile&& other) noexcept
     {
         if (tree)
             ts_tree_delete(tree);
-        srcStr         = std::move(other.srcStr);
+        srcStr      = std::move(other.srcStr);
         fileContext = std::move(other.fileContext);
         tree        = other.tree;
         other.tree  = nullptr;

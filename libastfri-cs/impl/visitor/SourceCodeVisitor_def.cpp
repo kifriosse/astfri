@@ -29,12 +29,12 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
         = util::symbol_for_name("type_parameter_constraints_clause", true);
 
     const std::string_view src = self->src_str();
-    const TSNode nClassName = util::child_by_field_name(node, "name");
-    std::string className   = util::extract_text(nClassName, src);
-    Scope scope             = util::create_scope(node, *self->src());
+    const TSNode nClassName    = util::child_by_field_name(node, "name");
+    std::string className      = util::extract_text(nClassName, src);
+    Scope scope                = util::create_scope(node, *self->src());
 
-    ClassDefStmt* classDef  = stmtFact_.mk_class_def(className, scope);
-    classDef->name_         = std::move(className); // todo remove this
+    ClassDefStmt* classDef     = stmtFact_.mk_class_def(className, scope);
+    classDef->name_            = std::move(className); // todo remove this
     // todo use move semantic for the string
 
     self->semanticContext_.enter_type(classDef);
