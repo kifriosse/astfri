@@ -400,8 +400,20 @@ struct BracketExpr : Expr, details::MkVisitable<BracketExpr> {
     BracketExpr(Expr* e);
 };
 
+
+// TODO
+struct SwitchExpr
+{
+};
+
+// TODO
+struct Sink
+{
+    // _
+};
+
 /**
- * @brief TODO
+ * @brief TODO, tento bude moct ist prec, pozri UnknownType
  */
 struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr>
 {

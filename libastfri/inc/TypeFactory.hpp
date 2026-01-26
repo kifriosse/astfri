@@ -32,6 +32,7 @@ public:
     UnknownType* mk_unknown();
     DynamicType* mk_dynamic();
     IndirectionType* mk_indirect(Type* type);
+    // TODO get metody
     ClassType *mk_class(const std::string &name, const Scope &scope);
     ClassType *mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def);
     InterfaceType *mk_interface(const std::string &name, const Scope &scope);

@@ -62,6 +62,7 @@ enum class Virtuality
  */
 struct VarDefStmt : Stmt // TODO visitable here?
 {
+    // TODO kvalifikatory
     std::string name_;
     Type* type_;
     Expr* initializer_;

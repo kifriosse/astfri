@@ -15,6 +15,7 @@ namespace astfri
 struct Type : virtual IVisitable // TODO just Visitable
 {
     virtual ~Type() = default;
+    // TODO nejake kvalifikatory tu?
 };
 
 /**
@@ -134,6 +135,7 @@ struct DeducedType : Type, details::MkVisitable<DeducedType>
 // struct RecordType : ScopedType, details::MkVisitable<RecordType>
 // {
 //     std::vector<Type*> types_;
+//      tu bude RecordDefStmt
 // };
 
 // /**
@@ -143,6 +145,9 @@ struct DeducedType : Type, details::MkVisitable<DeducedType>
 // {
 //     std::vector<Type*> types_; // TODO otazka ci by mali mat aj typy
 // };
+
+
+// TODO array, tuple (toto nebude potrebovat DefStmt (asi))
 
 
 /**
