@@ -19,7 +19,6 @@
 // ASTFRI Java
 #include <libastfri-java/inc/ASTBuilder.hpp>
 
-
 #include "cxxopts.hpp"
 
 #pragma region DEFINITIONS
@@ -42,17 +41,20 @@ const std::map<std::string, InputType> input_map = {
 #pragma region OUTPUT ENUM
 enum class OutputType
 {
-    Text,
+    Text_Pseudocode,
+    Text_JavaCode,
     UML,
     Unknown // default
 };
 const std::map<std::string, OutputType> output_map = {
-    {"text", OutputType::Text},
-    {"uml",  OutputType::UML }
+    {"text-pseudocode", OutputType::Text_Pseudocode},
+    {"text-javacode",   OutputType::Text_JavaCode  },
+    {"uml",             OutputType::UML            }
 };
 #pragma endregion OUTPUT ENUM
 
 #pragma region HELPERS
+
 // map keys to string (separated by ,)
 template<typename T>
 std::string map_keys_to_string(const std::map<std::string, T>& map)
@@ -68,12 +70,13 @@ std::string map_keys_to_string(const std::map<std::string, T>& map)
     }
     return result;
 }
+
 #pragma endregion HELPERS
 #pragma endregion DEFINITIONS
 
 int main(int argc, const char** argv)
 {
-    #pragma region ARGS
+#pragma region ARGS
 
     cxxopts::Options options(
         "astfri",
@@ -85,6 +88,7 @@ int main(int argc, const char** argv)
         ("i,input", "Type of input library. Possible values: " + map_keys_to_string(input_map), cxxopts::value<std::string>()->default_value("cpp"))
         ("if,input-file", "Input source file", cxxopts::value<std::string>())
         ("o,output", "Type of output library. Possible values: " + map_keys_to_string(output_map), cxxopts::value<std::string>()->default_value("text"))
+        ("ocf,output-config-file", "Output config file", cxxopts::value<std::string>()->default_value(""))
     ;
 
     auto result = options.parse(argc, argv);
@@ -139,11 +143,26 @@ int main(int argc, const char** argv)
                   << std::endl;
         exit(1);
     }
-    #pragma endregion ARGS
+    // output config file
+    auto output_config_file = result["output-config-file"].as<std::string>();
+    // if output config file is specified, verify that it exists
+    if (! output_config_file.empty())
+    {
+        std::ifstream outfile(output_config_file);
+        if (! outfile.good())
+        {
+            std::cerr << "Output config file does not exist: "
+                      << output_config_file << std::endl;
+            exit(1);
+        }
+    }
+#pragma endregion ARGS
 
-    #pragma region INPUT
-    
-    (void)argc;
+#pragma region INPUT
+
+    std::cout << "Input type: " << input_lib_str << std::endl;
+    std::cout << "Input file: " << input_file << std::endl;
+
     astfri::TranslationUnit tu;
     switch (input_lib)
     {
@@ -170,9 +189,10 @@ int main(int argc, const char** argv)
     {
         astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 
-        std::string sourceCode = tb->load_directory(input_file);
-        TSTree* tree           = tb->make_syntax_tree(sourceCode);
-        astfri::TranslationUnit* tu_ptr = tb->get_translation_unit(tree, sourceCode);
+        std::string sourceCode       = tb->load_directory(input_file);
+        TSTree* tree                 = tb->make_syntax_tree(sourceCode);
+        astfri::TranslationUnit* tu_ptr
+            = tb->get_translation_unit(tree, sourceCode);
         tu = *tu_ptr;
 
         // freeing memory
@@ -184,25 +204,68 @@ int main(int argc, const char** argv)
         std::cerr << "Input library not implemented yet!" << std::endl;
         return 1;
     }
-    #pragma endregion INPUT
 
-    #pragma region OUTPUT
-    // TODO
+    std::cout << "Translation unit loaded." << std::endl;
+#pragma endregion INPUT
 
-    // ako toto rozbehať?
-    astfri::text::TextLibManager& man
-        = astfri::text::TextLibManager::get_instance();
-    man.visit_and_export(tu);
+#pragma region OUTPUT
+    std::cout << "Output type: " << output_lib_str << std::endl;
+    std::cout << "Output config file: "
+              << (output_config_file.empty() ? "none" : output_config_file)
+              << std::endl;
 
-    // UML
-    astfri::uml::UMLLibWrapper wrapper;
-    astfri::uml::Config config;
-    astfri::uml::PlantUMLOutputter op;
-    config.separator_ = ':';
-    wrapper.init(config, op);
-    wrapper.run(tu);
+    switch (output_lib)
+    {
+    case OutputType::Text_Pseudocode:
+    case OutputType::Text_JavaCode:
+    {
+        astfri::text::TextLibManager& manager
+            = astfri::text::TextLibManager::get_instance();
 
-    #pragma endregion OUTPUT
+        switch (output_lib)
+        {
+        case OutputType::Text_Pseudocode:
+            manager.change_output(astfri::text::OutputFormat::Pseudocode);
+            break;
+        case OutputType::Text_JavaCode:
+            manager.change_output(astfri::text::OutputFormat::JavaCode);
+            break;
+        default:
+            break;
+        }
+
+        manager.visit_and_export(tu);
+        break;
+    }
+    case OutputType::UML:
+    {
+        astfri::uml::UMLLibWrapper wrapper;
+        astfri::uml::PlantUMLOutputter op;
+
+        astfri::uml::Config config;
+        if (! output_config_file.empty())
+        {
+            if (! config.parse_json(output_config_file.c_str()))
+            {
+                config.use_default_values();
+                std::cout
+                    << "Unable to parse JSON config. Using default values.\n";
+            }
+        }
+
+        wrapper.init(config, op);
+        wrapper.run(tu);
+        break;
+    }
+    case OutputType::Unknown:
+    {
+        std::cerr << "Output library not implemented yet!" << std::endl;
+        return 1;
+    }
+    }
+
+    std::cout << "Output generated." << std::endl;
+#pragma endregion OUTPUT
 
     return 0;
 }
