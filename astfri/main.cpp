@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 
 // astfri headers
@@ -9,11 +10,21 @@
 // ASTFRI UML
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
-// to co je treba na moje
+// ASTFRI CPP
 #include <libastfri-cpp/inc/ClangManagement.hpp>
+
+// ASTFRI Csharp
+#include <libastfri-cs/inc/CSharpASTBuilder.hpp>
+
+// ASTFRI Java
+#include <libastfri-java/inc/ASTBuilder.hpp>
+
 
 #include "cxxopts.hpp"
 
+#pragma region DEFINITIONS
+
+#pragma region INPUT ENUM
 enum class InputType
 {
     Cpp,
@@ -26,7 +37,9 @@ const std::map<std::string, InputType> input_map = {
     {"csharp", InputType::Csharp},
     {"java",   InputType::Java  }
 };
+#pragma endregion INPUT ENUM
 
+#pragma region OUTPUT ENUM
 enum class OutputType
 {
     Text,
@@ -37,8 +50,10 @@ const std::map<std::string, OutputType> output_map = {
     {"text", OutputType::Text},
     {"uml",  OutputType::UML }
 };
+#pragma endregion OUTPUT ENUM
 
-// map keys to string (seperated by ,)
+#pragma region HELPERS
+// map keys to string (separated by ,)
 template<typename T>
 std::string map_keys_to_string(const std::map<std::string, T>& map)
 {
@@ -53,9 +68,13 @@ std::string map_keys_to_string(const std::map<std::string, T>& map)
     }
     return result;
 }
+#pragma endregion HELPERS
+#pragma endregion DEFINITIONS
 
 int main(int argc, const char** argv)
 {
+    #pragma region ARGS
+
     cxxopts::Options options(
         "astfri",
         "ASTFRI - CLI interface for library astfri"
@@ -64,6 +83,7 @@ int main(int argc, const char** argv)
     options.add_options()
         ("h,help", "Print help")
         ("i,input", "Type of input library. Possible values: " + map_keys_to_string(input_map), cxxopts::value<std::string>()->default_value("cpp"))
+        ("if,input-file", "Input source file", cxxopts::value<std::string>())
         ("o,output", "Type of output library. Possible values: " + map_keys_to_string(output_map), cxxopts::value<std::string>()->default_value("text"))
     ;
 
@@ -75,7 +95,7 @@ int main(int argc, const char** argv)
         exit(0);
     }
 
-    // parse intput lib
+    // parse input lib
     auto input_lib_str = result["input"].as<std::string>();
     auto input_lib     = InputType::Unknown;
     if (input_map.find(input_lib_str) != input_map.end())
@@ -88,7 +108,25 @@ int main(int argc, const char** argv)
                   << std::endl;
         exit(1);
     }
+    // input file check
+    if (result.count("input-file") == 0)
+    {
+        std::cerr << "Input file not specified!" << std::endl;
+        exit(1);
+    }
+    auto input_file = result["input-file"].as<std::string>();
+    // verify that input file exists
+    {
+        std::ifstream infile(input_file);
+        if (! infile.good())
+        {
+            std::cerr << "Input file does not exist: " << input_file
+                      << std::endl;
+            exit(1);
+        }
+    }
 
+    // parse output lib
     auto output_lib_str = result["output"].as<std::string>();
     auto output_lib     = OutputType::Unknown;
     if (output_map.find(output_lib_str) != output_map.end())
@@ -101,22 +139,55 @@ int main(int argc, const char** argv)
                   << std::endl;
         exit(1);
     }
+    #pragma endregion ARGS
 
-    // TODO - input libs
-
+    #pragma region INPUT
+    
     (void)argc;
     astfri::TranslationUnit tu;
-
-    if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
+    switch (input_lib)
     {
-        std::cout << "chyba pri fill_translation_unit\n";
+    case InputType::Cpp:
+    {
+        if (astfri::astfri_cpp::fill_translation_unit(tu, input_file) != 0)
+        {
+            std::cout << "chyba pri fill_translation_unit\n";
+            return 1;
+        }
+        break;
+    }
+    case InputType::Csharp:
+    {
+        const astfri::csharp::CSharpASTBuilder ast_builder;
+        astfri::text::TextLibManager& manager
+            = astfri::text::TextLibManager::get_instance();
+
+        tu = *(ast_builder.make_ast(input_file));
+        manager.visit_and_export(tu);
+        break;
+    }
+    case InputType::Java:
+    {
+        astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
+
+        std::string sourceCode = tb->load_directory(input_file);
+        TSTree* tree           = tb->make_syntax_tree(sourceCode);
+        astfri::TranslationUnit* tu_ptr = tb->get_translation_unit(tree, sourceCode);
+        tu = *tu_ptr;
+
+        // freeing memory
+        ts_tree_delete(tree);
+        delete (tb);
+        break;
+    }
+    case InputType::Unknown:
+        std::cerr << "Input library not implemented yet!" << std::endl;
         return 1;
     }
-    // koniec mojho
-    // std::cout << "Ill be back!" << std::endl;
-    // AST Visitor - nice
+    #pragma endregion INPUT
 
-    // TODO - output libs
+    #pragma region OUTPUT
+    // TODO
 
     // ako toto rozbehať?
     astfri::text::TextLibManager& man
@@ -130,6 +201,8 @@ int main(int argc, const char** argv)
     config.separator_ = ':';
     wrapper.init(config, op);
     wrapper.run(tu);
+
+    #pragma endregion OUTPUT
 
     return 0;
 }
