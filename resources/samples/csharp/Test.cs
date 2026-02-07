@@ -171,8 +171,7 @@ public partial class TestClass
         Console.WriteLine($"Vector components: X = {x}, Y = {y}");
         System.Collections.Generic.IReadOnlyList<int>.Equals(list, list);
 
-        
-
+        MyTypeAlias testClassInstance = new MyTypeAlias();
 
         ((Func<int, bool>)((x) => { return false; }))(1);
     //  ^   ^           ^          ^             ^

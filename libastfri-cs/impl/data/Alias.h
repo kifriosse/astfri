@@ -25,6 +25,8 @@ struct Alias
     SourceFile* srcFile;
     AliasTarget target;
     TSNode nTarget; // right side of alias declaration
+
+    bool is_type(TypeBinding*& out) const;
 };
 
 } // namespace astfri::csharp

@@ -48,6 +48,16 @@ Type* TypeTranslator::visit_identitifier(
 
     // Scope current = self->current_namespace_;
     // todo check aliases
+    const auto itGlobAlias = self->symbTable_.globAliases.find(name);
+    if (itGlobAlias != self->symbTable_.globAliases.end())
+    {
+        const Alias& alias = itGlobAlias->second;
+        TypeBinding* typeBinding = nullptr;
+        if (alias.is_type(typeBinding))
+            return typeBinding->type;
+
+        return typeFact_.mk_unknown();
+    }
 
     // current namespace and its parents
     const SymbolTree& symbTree = self->symbTable_.symbTree;
