@@ -62,7 +62,8 @@ void SymbolTableBuilder::reg_user_types()
 void SymbolTableBuilder::reg_using_directives()
 {
     auto process = [this](const TSQueryMatch& match) -> void
-    { discover_using_directives(match.captures[0].node); };
+    { reg_using_directive(match.captures[0].node); };
+
     for (auto& src : srcs_)
     {
         typeTrs_.set_current_src(&src);
@@ -72,7 +73,6 @@ void SymbolTableBuilder::reg_using_directives()
     }
     currentSrc_ = nullptr;
     typeTrs_.set_current_src(nullptr);
-    resolve_using_directives();
 }
 
 void SymbolTableBuilder::reg_members()
@@ -245,17 +245,16 @@ void SymbolTableBuilder::visit_method(
     itMethod->second = std::move(metadata);
 }
 
-void SymbolTableBuilder::discover_using_directives(const TSNode& node)
+void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
 {
+    const std::string_view src    = src_str();
     static const TSSymbol sGlobal = util::symbol_for_name("global", false);
     static const TSSymbol sStatic = util::symbol_for_name("static", false);
-    bool isGlobal                 = false;
-    bool isStatic                 = false;
-    const TSNode nAliasName       = util::child_by_field_name(node, "name");
+    const TSNode nAliasName = util::child_by_field_name(nUsingDirective, "name");
+    bool isGlobal           = false;
+    bool isStatic           = false;
 
-    const std::string_view src    = src_str();
-
-    auto process = [&isGlobal, &isStatic](const TSNode& current)
+    auto process            = [&isGlobal, &isStatic](const TSNode& current)
     {
         const TSSymbol sCurrent = ts_node_symbol(current);
         if (sCurrent == sGlobal)
@@ -263,11 +262,12 @@ void SymbolTableBuilder::discover_using_directives(const TSNode& node)
         else if (sCurrent == sStatic)
             isStatic = true;
     };
-    util::for_each_child_node(node, process, false);
+
+    util::for_each_child_node(nUsingDirective, process, false);
 
     if (ts_node_is_null(nAliasName))
     {
-        const TSNode nQualif     = ts_node_named_child(node, 0);
+        const TSNode nQualif     = ts_node_named_child(nUsingDirective, 0);
         const std::string fqnStr = util::extract_text(nQualif, src);
         Scope fqn                = util::create_scope(fqnStr);
 
@@ -304,11 +304,7 @@ void SymbolTableBuilder::discover_using_directives(const TSNode& node)
         std::string aliasName = util::extract_text(nAliasName, src);
         if (isGlobal)
         {
-            Alias alias{
-                .srcFile = this->src(),
-                .target  = std::monostate{},
-                .nTarget = nQualif
-            };
+            Alias alias = mk_global_alias(nQualif);
             symbTable_.globAliases.emplace(
                 std::move(aliasName),
                 std::move(alias)
@@ -321,27 +317,14 @@ void SymbolTableBuilder::discover_using_directives(const TSNode& node)
     }
 }
 
-void SymbolTableBuilder::resolve_using_directives()
-{
-    std::vector<Alias*> unresolved;
-    unresolved.reserve(symbTable_.globAliases.size());
-    auto& globAliases = symbTable_.globAliases;
-    for (auto& alias : globAliases | std::views::values)
-    {
-        currentSrc_ = alias.srcFile;
-        typeTrs_.set_current_src(alias.srcFile);
-        resolve_global_alias(alias);
-    }
-}
-
-void SymbolTableBuilder::resolve_global_alias(Alias& alias)
+Alias SymbolTableBuilder::mk_global_alias(const TSNode& nAliasQualif) const
 {
     static const TSSymbol sQualifName
         = util::symbol_for_name("qualified_name", true);
     static const TSSymbol sAliasQualfName
         = util::symbol_for_name("alias_qualified_name", true);
     const std::string_view src = src_str();
-    TSNode current             = alias.nTarget;
+    TSNode current             = nAliasQualif;
     std::vector<TSNode> nQualifs;
 
     while (ts_node_symbol(current) == sQualifName)
@@ -382,10 +365,8 @@ void SymbolTableBuilder::resolve_global_alias(Alias& alias)
         currentNode = cursor.current();
     }
 
-    if (found)
-        alias.target = AliasTarget{currentNode};
-    else
-        alias.target = AliasTarget{util::extract_text(alias.nTarget, src)};
+    return found ? Alias{currentNode}
+                 : Alias{util::extract_text(nAliasQualif, src)};
 }
 
 void SymbolTableBuilder::register_type(

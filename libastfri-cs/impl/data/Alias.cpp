@@ -2,9 +2,9 @@
 
 namespace astfri::csharp
 {
-bool Alias::is_type(TypeBinding*& out) const
+bool is_type_alias(const Alias& alias, TypeBinding*& out)
 {
-    if (const auto* nodeHandle = std::get_if<SymbolTree::ScopeNode*>(&target))
+    if (const auto* nodeHandle = std::get_if<SymbolTree::ScopeNode*>(&alias))
     {
         SymbolTree::ScopeNode* node = *nodeHandle;
         if (auto* type = std::get_if<TypeBinding>(&node->data))

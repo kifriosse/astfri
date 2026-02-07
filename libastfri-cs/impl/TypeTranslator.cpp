@@ -53,7 +53,7 @@ Type* TypeTranslator::visit_identitifier(
     {
         const Alias& alias = itGlobAlias->second;
         TypeBinding* typeBinding = nullptr;
-        if (alias.is_type(typeBinding))
+        if (is_type_alias(alias, typeBinding))
             return typeBinding->type;
 
         return typeFact_.mk_unknown();
