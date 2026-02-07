@@ -1,19 +1,23 @@
-#include <libastfri-cs/impl/data/SymbolTable.hpp>
+#include <libastfri-cs/impl/data/SymbolTree.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
-#include <string>
 #include <string_view>
 #include <variant>
 
 namespace astfri::csharp
 {
 
-SymbolTree::SymbolNode* SymbolTree::add_namespace(const Scope& scope)
+SymbolTree::ScopeNode* SymbolTree::root()
+{
+    return tree_.root();
+}
+
+SymbolTree::ScopeNode* SymbolTree::add_namespace(const Scope& scope)
 {
     return tree_.add_namespace(scope);
 }
 
-SymbolTree::SymbolNode* SymbolTree::add_type(
+SymbolTree::ScopeNode* SymbolTree::add_type(
     const Scope& scope,
     ScopedType* type,
     UserTypeDefStmt* def
@@ -39,17 +43,25 @@ TypeBinding* SymbolTree::find_type(
     const bool searchParents
 ) const
 {
-    SymbolNode* node = tree_.find_node(start, end, typeName, searchParents);
+    ScopeNode* node = tree_.find_node(start, end, typeName, searchParents);
     return node ? std::get_if<TypeBinding>(&node->data) : nullptr;
 }
 
 TypeBinding* SymbolTree::find_type(
-    SymbolNode* start,
+    ScopeNode* start,
     const std::string_view typeName
 ) const
 {
-    SymbolNode* node = tree_.find_node(start, typeName);
+    ScopeNode* node = tree_.find_node(*start, typeName);
     return node ? std::get_if<TypeBinding>(&node->data) : nullptr;
+}
+
+SymbolTree::ScopeNode* SymbolTree::find_node(
+    ScopeNode* start,
+    const std::string_view name
+) const
+{
+    return tree_.find_node(*start, name);
 }
 
 } // namespace astfri::csharp

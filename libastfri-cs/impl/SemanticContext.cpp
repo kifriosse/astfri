@@ -7,7 +7,6 @@
 #include <libastfri/inc/Astfri.hpp>
 
 #include <algorithm>
-#include <optional>
 #include <string>
 
 namespace astfri::csharp

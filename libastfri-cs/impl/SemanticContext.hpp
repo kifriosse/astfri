@@ -1,7 +1,7 @@
 #ifndef CSHARP_SEMANTIC_CONTEXT_HPP
 #define CSHARP_SEMANTIC_CONTEXT_HPP
 
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 

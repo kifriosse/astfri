@@ -1,7 +1,7 @@
 #ifndef CSHARP_CS_MODIFIERS_HPP
 #define CSHARP_CS_MODIFIERS_HPP
 
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri/inc/Stmt.hpp>
 
 #include <tree_sitter/api.h>

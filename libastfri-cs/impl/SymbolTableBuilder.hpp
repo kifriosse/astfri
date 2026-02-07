@@ -1,9 +1,14 @@
 #ifndef CSHARP_SYMBOL_TABLE_BUILDER_HPP
 #define CSHARP_SYMBOL_TABLE_BUILDER_HPP
 
+#include <tree_sitter/api.h>
+
+#include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/TypeTranslator.hpp>
+
+#include <vector>
 
 namespace astfri
 {
@@ -62,7 +67,9 @@ public:
     static void visit_method(SymbolTableBuilder* self, const TSNode& node);
 
 private:
-    void add_using_directive(const TSNode& node);
+    void discover_using_directives(const TSNode& node);
+    void resolve_using_directives();
+    void resolve_global_alias(Alias& alias);
     void register_type(const TSNode& node, util::TypeKind typeKind);
     [[nodiscard]] SourceFile* src() const;
     [[nodiscard]] std::string_view src_str() const;

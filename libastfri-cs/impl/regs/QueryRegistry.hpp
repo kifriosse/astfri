@@ -1,7 +1,7 @@
 #ifndef CSHARP_QUERY_REGISTRY_HPP
 #define CSHARP_QUERY_REGISTRY_HPP
 
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 
 #include <tree_sitter/api.h>
 

@@ -1,4 +1,4 @@
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
@@ -33,8 +33,9 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     std::string className      = util::extract_text(nClassName, src);
     Scope scope                = util::create_scope(node, *self->src());
 
-    ClassDefStmt* classDef     = stmtFact_.mk_class_def(className, std::move(scope));
-    classDef->name_            = std::move(className); // todo remove this
+    ClassDefStmt* classDef
+        = stmtFact_.mk_class_def(className, std::move(scope));
+    classDef->name_ = std::move(className); // todo remove this
     // todo use move semantic for the string
     self->semanticContext_.enter_type(classDef);
 
@@ -130,8 +131,9 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     std::string intfName       = util::extract_text(nIntfName, src);
     Scope scope                = util::create_scope(node, *self->src());
 
-    InterfaceDefStmt* intfDef  = stmtFact_.mk_interface_def(intfName, std::move(scope));
-    intfDef->name_             = std::move(intfName); // todo remove this
+    InterfaceDefStmt* intfDef
+        = stmtFact_.mk_interface_def(intfName, std::move(scope));
+    intfDef->name_ = std::move(intfName); // todo remove this
     // todo use move semantic for the string
 
     self->semanticContext_.enter_type(intfDef);

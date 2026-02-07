@@ -1,4 +1,4 @@
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>

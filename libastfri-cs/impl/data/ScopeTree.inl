@@ -11,6 +11,12 @@ ScopeTree<T>::ScopeTree() :
 }
 
 template<typename T>
+ScopeTree<T>::Node* ScopeTree<T>::root()
+{
+    return root_.get();
+}
+
+template<typename T>
 ScopeTree<T>::Node* ScopeTree<T>::add_namespace(const Scope& scope)
 {
     Node* current = root_.get();
@@ -66,7 +72,7 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
 ) const
 {
     Node* current = root_.get();
-    auto process = [&](const Scope& scope) -> bool
+    auto process  = [&](const Scope& scope) -> bool
     {
         for (std::string_view name : scope.names_)
         {
@@ -82,16 +88,16 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
     if (! process(start) || ! process(end))
         return nullptr;
 
-    return ! searchParents ? current : find_node(current, typeName);
+    return ! searchParents ? current : find_node(*current, typeName);
 }
 
 template<typename T>
 ScopeTree<T>::Node* ScopeTree<T>::find_node(
-    Node* start,
+    Node& start,
     std::string_view typeName
 ) const
 {
-    Node* current = start;
+    Node* current = &start;
     while (current)
     {
         auto it = current->children.find(typeName);
@@ -102,6 +108,39 @@ ScopeTree<T>::Node* ScopeTree<T>::find_node(
     }
 
     return nullptr;
+}
+
+template<typename T>
+ScopeTreeCursor<T>::ScopeTreeCursor(ScopeNode<T>& root) :
+    current_(&root)
+{
+}
+
+template<typename Data>
+ScopeNode<Data>* ScopeTreeCursor<Data>::current()
+{
+    return current_;
+}
+
+template<typename Data>
+bool ScopeTreeCursor<Data>::try_goto_parent()
+{
+    if (! current_->parent)
+        return false;
+
+    current_ = current_->parent;
+    return true;
+}
+
+template<typename Data>
+bool ScopeTreeCursor<Data>::try_goto_child(std::string_view child)
+{
+    auto it = current_->children.find(child);
+    if (it == current_->children.end())
+        return false;
+
+    current_ = it->second.get();
+    return true;
 }
 
 } // namespace astfri::csharp

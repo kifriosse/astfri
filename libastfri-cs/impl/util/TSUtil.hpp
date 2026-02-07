@@ -1,5 +1,5 @@
 /**
- * @file ts_util.hpp
+ * @file TSUtil.hpp
  * @brief Utility functions for working with Tree-sitter with in C# grammer.
  */
 

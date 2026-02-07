@@ -1,7 +1,7 @@
 #ifndef CSHARP_METADATA_HPP
 #define CSHARP_METADATA_HPP
 
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
@@ -96,9 +96,10 @@ struct TypeMetadata
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
     UserTypeDefStmt* userType{nullptr};
-    SymbolTree::SymbolNode* nmsNode{nullptr};
+    SymbolTree::ScopeNode* nmsNode{nullptr};
     bool processed{false};
 };
+
 } // namespace astfri::csharp
 
 #endif // #define CSHARP_METADATA_HPP

@@ -1,8 +1,16 @@
+// extern alias MyExternalAlias;
+
+global using S = System;
+global using A = AnotherNamespace.SubNamespace;
+global using MyTypeAlias = AnotherNamespace.SubNamespace.TestClass;
+using MyNamespace = System.Collections;
+
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using MyAlias = System.Collections.Generic.Dictionary<string, int>;
-using MyNamespace = System.Text;
+
+
 namespace AnotherNamespace.SubNamespace
 {
     using SingleNamespace = System;
@@ -113,6 +121,13 @@ public partial class TestClass
         x = x + y.ToString();
     }
 
+    public int Item { get; set; }
+
+    public int get_Item(int index)
+    {
+        return index * 2;
+    }
+
     public unsafe void Main()
     {
 
@@ -123,14 +138,14 @@ public partial class TestClass
         ref int? refNullableInt = ref nullableInt;
         (string, float) tuple = ("STRING", 1.0f);
         
+        List<int>? list = new List<int> { 1, 2, 3 };
+        // list!.Add(4);
         
         delegate* managed <string, int, void> parsePointer = &TestClass.test;
 
         scoped Span<int> stackSpan = stackalloc int[10];
         Vector2.X = 0f;
         Vector2.Zero = new Vector2(0, 0);
-
-
 
         void test(int x)
         {
@@ -152,9 +167,12 @@ public partial class TestClass
         string z = localFunc().ToString();
 
         // string w = LocalFunc().ToString();
-        System.Collections.Generic.List<int> list = new System.Collections.Generic.List<int>();
-        System.Console.WriteLine($"Vector components: X = {x}, Y = {y}");
+        System.Collections.Generic.List<int> l = new System.Collections.Generic.List<int>();
+        Console.WriteLine($"Vector components: X = {x}, Y = {y}");
         System.Collections.Generic.IReadOnlyList<int>.Equals(list, list);
+
+        
+
 
         ((Func<int, bool>)((x) => { return false; }))(1);
     //  ^   ^           ^          ^             ^

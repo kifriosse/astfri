@@ -5,7 +5,7 @@ target_sources(astfri-cs PRIVATE
     SemanticContext.cpp
     SymbolTableBuilder.cpp
     TypeTranslator.cpp
-    CSAliases.hpp
+    CSFwd.hpp
 )
 
 add_subdirectory(data)

@@ -1,7 +1,7 @@
 #ifndef CSHARP_REGISTRIES_HPP
 #define CSHARP_REGISTRIES_HPP
 
-#include <libastfri-cs/impl/CSAliases.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 
 #include <tree_sitter/api.h>
 

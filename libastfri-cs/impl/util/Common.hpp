@@ -1,5 +1,5 @@
 /**
- * @file common.hpp
+ * @file Common.hpp
  * @brief Common utility functions and enums
  */
 

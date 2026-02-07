@@ -24,7 +24,7 @@ void TypeTranslator::set_current_src(SourceFile* src)
     currentSrc_ = src;
 }
 
-void TypeTranslator::set_current_namespace(SymbolTree::SymbolNode* node)
+void TypeTranslator::set_current_namespace(SymbolTree::ScopeNode* node)
 {
     currentNmsNode_ = node;
 }

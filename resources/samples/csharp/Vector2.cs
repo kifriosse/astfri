@@ -1,7 +1,7 @@
 global using System.Numerics;
 global using static System.Math;
-global using Cons = System.Console;
-using System.Security.Cryptography.X509Certificates;
+global using Cons = global::System.Console;
+using global::System.Security.Cryptography.X509Certificates;
 using Generics = System.Collections.Generic;
 
 public class Vector2 : IComparable<Vector2>, IEquatable<Vector2>

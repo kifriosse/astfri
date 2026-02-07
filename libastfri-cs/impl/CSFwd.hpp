@@ -1,5 +1,5 @@
 /**
- * @file CSAliases.hpp
+ * @file CSFwd.hpp
  * @brief Type aliases for astfri-cs.
  * @note Used to mitigate circular dependencies.
  */
@@ -8,6 +8,7 @@
 #define CSHARP_FWD_H
 
 #include <libastfri-cs/impl/util/Utils.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -20,7 +21,6 @@ namespace astfri
 struct Type;
 struct Stmt;
 struct Expr;
-
 } // namespace astfri
 
 namespace astfri::csharp
