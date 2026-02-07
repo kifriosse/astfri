@@ -1,12 +1,12 @@
 #ifndef CSHARP_SYMBOL_TABLE_BUILDER_HPP
 #define CSHARP_SYMBOL_TABLE_BUILDER_HPP
 
-#include <tree_sitter/api.h>
-
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/TypeTranslator.hpp>
+#include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
+
+#include <tree_sitter/api.h>
 
 #include <vector>
 
@@ -68,7 +68,7 @@ public:
 
 private:
     void reg_using_directive(const TSNode& nUsingDirective);
-    Alias mk_global_alias(const TSNode& nAliasQualif) const;
+    [[nodiscard]] Alias mk_global_alias(const TSNode& nAliasQualif) const;
     void register_type(const TSNode& node, util::TypeKind typeKind);
     [[nodiscard]] SourceFile* src() const;
     [[nodiscard]] std::string_view src_str() const;

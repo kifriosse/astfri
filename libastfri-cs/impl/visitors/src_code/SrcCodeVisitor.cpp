@@ -3,7 +3,7 @@
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/tree-sitter-c-sharp.h>

@@ -1,10 +1,9 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
-#include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
+#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -312,6 +311,9 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
         }
         else
         {
+            // SourceFile* src  = this->src();
+            // Scope aliasScope = util::create_scope(nDirective, *src);
+            // src->fileContext.
             // todo local aliases
         }
     }

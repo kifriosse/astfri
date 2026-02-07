@@ -1,8 +1,8 @@
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/SymbolTableBuilder.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
-#include <libastfri-cs/impl/visitor/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 

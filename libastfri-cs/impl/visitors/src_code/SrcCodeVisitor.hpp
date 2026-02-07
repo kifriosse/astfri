@@ -3,7 +3,7 @@
 
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/TypeTranslator.hpp>
+#include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
