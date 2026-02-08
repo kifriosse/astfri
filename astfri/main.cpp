@@ -25,6 +25,17 @@
 
 #define ASTFRI_VERSION "0.0.1"
 
+// exit code meanings:
+//  - 0 - OK
+//  - 1X - problem with astfri wrapper
+//  - 2X - problem with input library
+//  - 3X - problem with output library
+#define EXIT_OK 0
+#define EXIT_ASTFRI_WRAPPER_ERROR 10
+#define EXIT_INPUT_LIB_ERROR 20
+#define EXIT_OUTPUT_LIB_ERROR 30
+
+
 #pragma region INPUT ENUM
 enum class InputType
 {
@@ -100,7 +111,7 @@ int main(int argc, const char** argv)
     if (result.count("help"))
     {
         std::cout << options.help() << std::endl;
-        exit(0);
+        exit(EXIT_OK);
     }
 
     auto mode_version = result.count("version");
@@ -118,7 +129,7 @@ int main(int argc, const char** argv)
         {
             std::cout << "  " << pair.first << " vTODO" << "\n";
         }
-        exit(0);
+        exit(EXIT_OK);
     }
 #pragma endregion VERSION
     auto mode_verbose = result.count("verbose");
@@ -134,13 +145,13 @@ int main(int argc, const char** argv)
     {
         std::cerr << "Unknown input library type: " << input_lib_str
                   << std::endl;
-        exit(1);
+        exit(EXIT_INPUT_LIB_ERROR);
     }
     // input file check
     if (result.count("input-file") == 0)
     {
         std::cerr << "Input file not specified!" << std::endl;
-        exit(1);
+        exit(EXIT_INPUT_LIB_ERROR);
     }
     auto input_file = result["input-file"].as<std::string>();
     // verify that input file exists
@@ -150,7 +161,7 @@ int main(int argc, const char** argv)
         {
             std::cerr << "Input file does not exist: " << input_file
                       << std::endl;
-            exit(1);
+            exit(EXIT_INPUT_LIB_ERROR);
         }
     }
 
@@ -165,7 +176,7 @@ int main(int argc, const char** argv)
     {
         std::cerr << "Unknown output library type: " << output_lib_str
                   << std::endl;
-        exit(1);
+        exit(EXIT_OUTPUT_LIB_ERROR);
     }
     // output config file
     auto output_config_file = result["output-config-file"].as<std::string>();
@@ -177,7 +188,7 @@ int main(int argc, const char** argv)
         {
             std::cerr << "Output config file does not exist: "
                       << output_config_file << std::endl;
-            exit(1);
+            exit(EXIT_OUTPUT_LIB_ERROR);
         }
     }
 #pragma endregion ARGS
@@ -203,7 +214,7 @@ int main(int argc, const char** argv)
                     << "Error filling translation unit from C++ source file: "
                     << input_file << std::endl;
             }
-            return 1;
+            return EXIT_INPUT_LIB_ERROR;
         }
         break;
     }
@@ -234,7 +245,7 @@ int main(int argc, const char** argv)
     }
     case InputType::Unknown:
         std::cerr << "Input library not implemented yet!" << std::endl;
-        return 1;
+        return EXIT_INPUT_LIB_ERROR;
     }
 
     if (mode_verbose)
@@ -301,7 +312,7 @@ int main(int argc, const char** argv)
     case OutputType::Unknown:
     {
         std::cerr << "Output library not implemented yet!" << std::endl;
-        return 1;
+        return EXIT_OUTPUT_LIB_ERROR;
     }
     }
 
@@ -311,5 +322,5 @@ int main(int argc, const char** argv)
     }
 #pragma endregion OUTPUT
 
-    return 0;
+    return EXIT_OK;
 }

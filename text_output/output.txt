@@ -1,0 +1,16 @@
+  1.   function nieco() -> returns bool
+  2.   {
+  3.       define int intDecl
+  4.       define  lam = λ(int a)
+  5.       {
+  6.           a = a + 3
+  7.           intDecl = 0
+  8.           return true
+  9.       }
+ 10.       return λ(int a)
+ 11.       {
+ 12.           a = a + 3
+ 13.           intDecl = 0
+ 14.           return true
+ 15.       }(intDecl)
+ 16.   }
