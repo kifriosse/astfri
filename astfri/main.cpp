@@ -23,6 +23,8 @@
 
 #pragma region DEFINITIONS
 
+#define ASTFRI_VERSION "0.0.1"
+
 #pragma region INPUT ENUM
 enum class InputType
 {
@@ -85,6 +87,7 @@ int main(int argc, const char** argv)
 
     options.add_options()
         ("h,help", "Print help")
+        ("v,version", "Print version of ASTFRI and input/output libraries. Then exit.")
         ("i,input", "Type of input library. Possible values: " + map_keys_to_string(input_map), cxxopts::value<std::string>()->default_value("cpp"))
         ("if,input-file", "Input source file", cxxopts::value<std::string>())
         ("o,output", "Type of output library. Possible values: " + map_keys_to_string(output_map), cxxopts::value<std::string>()->default_value("text"))
@@ -98,6 +101,25 @@ int main(int argc, const char** argv)
         std::cout << options.help() << std::endl;
         exit(0);
     }
+
+    auto mode_version = result.count("version");
+#pragma region VERSION
+    if (mode_version)
+    {
+        std::cout << "ASTFRI version: " << ASTFRI_VERSION << "\n";
+        std::cout << "Input libraries:\n";
+        for (const auto& pair : input_map)
+        {
+            std::cout << "  " << pair.first << " vTODO" << "\n";
+        }
+        std::cout << "Output libraries:\n";
+        for (const auto& pair : output_map)
+        {
+            std::cout << "  " << pair.first << " vTODO" << "\n";
+        }
+        exit(0);
+    }
+#pragma endregion VERSION
 
     // parse input lib
     auto input_lib_str = result["input"].as<std::string>();
