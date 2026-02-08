@@ -87,7 +87,8 @@ int main(int argc, const char** argv)
 
     options.add_options()
         ("h,help", "Print help")
-        ("v,version", "Print version of ASTFRI and input/output libraries. Then exit.")
+        ("version", "Print version of ASTFRI and input/output libraries. Then exit.")
+        ("v,verbose", "Verbose mode - advanced logging. Not suitable for API use")
         ("i,input", "Type of input library. Possible values: " + map_keys_to_string(input_map), cxxopts::value<std::string>()->default_value("cpp"))
         ("if,input-file", "Input source file", cxxopts::value<std::string>())
         ("o,output", "Type of output library. Possible values: " + map_keys_to_string(output_map), cxxopts::value<std::string>()->default_value("text"))
@@ -120,6 +121,7 @@ int main(int argc, const char** argv)
         exit(0);
     }
 #pragma endregion VERSION
+    auto mode_verbose = result.count("verbose");
 
     // parse input lib
     auto input_lib_str = result["input"].as<std::string>();
@@ -182,8 +184,11 @@ int main(int argc, const char** argv)
 
 #pragma region INPUT
 
-    std::cout << "Input type: " << input_lib_str << std::endl;
-    std::cout << "Input file: " << input_file << std::endl;
+    if (mode_verbose)
+    {
+        std::cout << "Input type: " << input_lib_str << std::endl;
+        std::cout << "Input file: " << input_file << std::endl;
+    }
 
     astfri::TranslationUnit tu;
     switch (input_lib)
@@ -192,7 +197,12 @@ int main(int argc, const char** argv)
     {
         if (astfri::astfri_cpp::fill_translation_unit(tu, input_file) != 0)
         {
-            std::cout << "chyba pri fill_translation_unit\n";
+            if (mode_verbose)
+            {
+                std::cerr
+                    << "Error filling translation unit from C++ source file: "
+                    << input_file << std::endl;
+            }
             return 1;
         }
         break;
@@ -227,14 +237,20 @@ int main(int argc, const char** argv)
         return 1;
     }
 
-    std::cout << "Translation unit loaded." << std::endl;
+    if (mode_verbose)
+    {
+        std::cout << "Translation unit loaded." << std::endl;
+    }
 #pragma endregion INPUT
 
 #pragma region OUTPUT
-    std::cout << "Output type: " << output_lib_str << std::endl;
-    std::cout << "Output config file: "
-              << (output_config_file.empty() ? "none" : output_config_file)
-              << std::endl;
+    if (mode_verbose)
+    {
+        std::cout << "Output type: " << output_lib_str << std::endl;
+        std::cout << "Output config file: "
+                  << (output_config_file.empty() ? "none" : output_config_file)
+                  << std::endl;
+    }
 
     switch (output_lib)
     {
@@ -270,8 +286,11 @@ int main(int argc, const char** argv)
             if (! config.parse_json(output_config_file.c_str()))
             {
                 config.use_default_values();
-                std::cout
-                    << "Unable to parse JSON config. Using default values.\n";
+                if (mode_verbose)
+                {
+                    std::cout << "Unable to parse JSON config. Using default "
+                                 "values.\n";
+                }
             }
         }
 
@@ -286,7 +305,10 @@ int main(int argc, const char** argv)
     }
     }
 
-    std::cout << "Output generated." << std::endl;
+    if (mode_verbose)
+    {
+        std::cout << "Output generated." << std::endl;
+    }
 #pragma endregion OUTPUT
 
     return 0;
