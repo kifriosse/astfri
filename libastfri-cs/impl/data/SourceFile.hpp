@@ -16,7 +16,6 @@ namespace astfri::csharp
 struct FileContext
 {
     std::vector<Scope> usings{};
-    std::vector<UserTypeDefStmt*> staticUsings{};
     std::optional<std::string> fileNms{};
 };
 

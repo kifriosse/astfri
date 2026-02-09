@@ -28,9 +28,9 @@ struct ParamSignature
     std::vector<ParamMetadata> metadata;
 };
 
-Scope create_scope(const TSNode& node, const SourceFile& src_file);
+Scope mk_scope(const TSNode& node, const SourceFile& src_file);
 
-Scope create_scope(std::string_view qualifier);
+Scope mk_scope(std::string_view qualifier);
 
 /**
  * @brief Creates a ParamVarDefStmt from the given TSNode.

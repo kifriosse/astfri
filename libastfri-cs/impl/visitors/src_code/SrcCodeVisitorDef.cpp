@@ -31,7 +31,7 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     const std::string_view src = self->src_str();
     const TSNode nClassName    = util::child_by_field_name(node, "name");
     std::string className      = util::extract_text(nClassName, src);
-    Scope scope                = util::create_scope(node, *self->src());
+    Scope scope                = util::mk_scope(node, *self->src());
 
     ClassDefStmt* classDef
         = stmtFact_.mk_class_def(className, std::move(scope));
@@ -129,7 +129,7 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     const std::string_view src = self->src_str();
     const TSNode nIntfName     = util::child_by_field_name(node, "name");
     std::string intfName       = util::extract_text(nIntfName, src);
-    Scope scope                = util::create_scope(node, *self->src());
+    Scope scope                = util::mk_scope(node, *self->src());
 
     InterfaceDefStmt* intfDef
         = stmtFact_.mk_interface_def(intfName, std::move(scope));

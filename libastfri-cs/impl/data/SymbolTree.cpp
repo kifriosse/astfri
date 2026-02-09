@@ -12,9 +12,9 @@ Nms::Nms(std::string name) :
 {
 }
 
-void Nms::add_static_using(SourceFile* src, const ScopedType* type)
+void Nms::add_static_using(SourceFile* src, const TypeBinding type)
 {
-    if (type && src)
+    if (src)
     {
         auto [it, inserted] = staticUsings_.try_emplace(src);
         it->second.push_back(type);
@@ -45,7 +45,7 @@ Alias* Nms::find_alias(const std::string_view aliasName, SourceFile* src)
     return nullptr;
 }
 
-std::span<const ScopedType* const> Nms::get_static_usings(SourceFile* src) const
+std::span<const TypeBinding> Nms::get_static_usings(SourceFile* src) const
 {
     if (src)
     {
@@ -129,24 +129,14 @@ TypeBinding* SymbolTree::find_type(
     const bool searchParents
 ) const
 {
-    SymbolTreeCursor cursor(*root_);
-    auto process = [&cursor](const Scope& scope) -> bool
-    {
-        for (const std::string_view qualif : scope.names_)
-        {
-            if (! cursor.go_to_child(qualif))
-                return false;
-        }
-        return true;
-    };
-
-    if (! process(start) || ! process(end))
+    SymbolNode* node = find_node(start, end);
+    if (! node)
         return nullptr;
 
     if (searchParents)
-        return find_type(*cursor.current(), typeName);
+        return find_type(*node, typeName);
 
-    SymbolNode* childNode = cursor.current()->find_child(typeName);
+    SymbolNode* childNode = node->find_child(typeName);
     return childNode->is_content<TypeBinding>();
 }
 
@@ -164,6 +154,30 @@ TypeBinding* SymbolTree::find_type(
     } while (cursor.go_to_parent());
 
     return nullptr;
+}
+
+SymbolNode* SymbolTree::find_node(const Scope& scope) const
+{
+    return find_node({}, scope);
+}
+
+SymbolNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
+{
+    SymbolTreeCursor cursor(*root_);
+    auto process = [&cursor](const Scope& scope) -> bool
+    {
+        for (const std::string_view qualif : scope.names_)
+        {
+            if (! cursor.go_to_child(qualif))
+                return false;
+        }
+        return true;
+    };
+
+    if (! process(start) || ! process(end))
+        return nullptr;
+
+    return cursor.current();
 }
 
 SymbolTreeCursor::SymbolTreeCursor(SymbolNode& root) :

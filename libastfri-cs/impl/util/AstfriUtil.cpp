@@ -16,7 +16,7 @@
 namespace astfri::csharp::util
 {
 
-Scope create_scope(const TSNode& node, const SourceFile& src_file)
+Scope mk_scope(const TSNode& node, const SourceFile& src_file)
 {
     enum class NodeType
     {
@@ -90,7 +90,7 @@ Scope create_scope(const TSNode& node, const SourceFile& src_file)
     return scope;
 }
 
-Scope create_scope(const std::string_view qualifier)
+Scope mk_scope(const std::string_view qualifier)
 {
     Scope scope;
     auto current     = qualifier.begin();

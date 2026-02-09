@@ -94,6 +94,9 @@ void SymbolTableBuilder::reg_members()
             typeContext_.typeStack.pop();
         }
     }
+    typeTrs_.set_current_namespace(nullptr);
+    typeTrs_.set_current_src(nullptr);
+    currentSrc_ = nullptr;
 }
 
 void SymbolTableBuilder::visit_class(
@@ -247,7 +250,7 @@ void SymbolTableBuilder::visit_method(
 
 void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
 {
-    const std::string_view src    = src_str();
+    const std::string_view srcStr = src_str();
     static const TSSymbol sGlobal = util::symbol_for_name("global", false);
     static const TSSymbol sStatic = util::symbol_for_name("static", false);
     const TSNode nAliasName
@@ -269,8 +272,8 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
     if (ts_node_is_null(nAliasName))
     {
         const TSNode nQualif     = ts_node_named_child(nUsingDirective, 0);
-        const std::string fqnStr = util::extract_text(nQualif, src);
-        Scope fqn                = util::create_scope(fqnStr);
+        const std::string fqnStr = util::extract_text(nQualif, srcStr);
+        Scope fqn                = util::mk_scope(fqnStr);
 
         if (isGlobal && isStatic)
         {
@@ -287,7 +290,11 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
             fqn.names_.pop_back();
             if (const auto type = symbTable_.symbTree.find_type(fqn, typeName))
             {
-                this->src()->fileContext.staticUsings.push_back(type->def);
+                const Scope scope
+                    = util::mk_scope(nUsingDirective, *this->src());
+                SymbolNode* node = symbTable_.symbTree.find_node(scope);
+                if (Nms* nms = node->is_content<Nms>())
+                    nms->add_static_using(this->src(), *type);
             }
         }
         else if (isGlobal)
@@ -302,7 +309,7 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
     else
     {
         const TSNode nQualif  = ts_node_next_named_sibling(nAliasName);
-        std::string aliasName = util::extract_text(nAliasName, src);
+        std::string aliasName = util::extract_text(nAliasName, srcStr);
         if (isGlobal)
         {
             Alias alias = mk_global_alias(nQualif);
@@ -313,10 +320,7 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
         }
         else
         {
-            // SourceFile* src  = this->src();
-            // Scope aliasScope = util::create_scope(nDirective, *src);
-            // src->fileContext.
-            // todo local aliases
+
         }
     }
 }
@@ -373,6 +377,14 @@ Alias SymbolTableBuilder::mk_global_alias(const TSNode& nAliasQualif) const
                  : Alias{util::extract_text(nAliasQualif, src)};
 }
 
+Alias SymbolTableBuilder::mk_local_alias(
+    const TSNode& nAliasQualif,
+    const Scope& scope
+) const
+{
+    return {};
+}
+
 void SymbolTableBuilder::register_type(
     const TSNode& node,
     const util::TypeKind typeKind
@@ -380,7 +392,7 @@ void SymbolTableBuilder::register_type(
 {
     const TSNode nName   = util::child_by_field_name(node, "name");
     std::string name     = util::extract_text(nName, src_str());
-    Scope scope          = util::create_scope(node, *src());
+    Scope scope          = util::mk_scope(node, *src());
     UserTypeDefStmt* def = nullptr;
     ScopedType* type     = nullptr;
 

@@ -69,6 +69,7 @@ public:
 private:
     void reg_using_directive(const TSNode& nUsingDirective);
     [[nodiscard]] Alias mk_global_alias(const TSNode& nAliasQualif) const;
+    [[nodiscard]] Alias mk_local_alias(const TSNode& nAliasQualif, const Scope& scope) const;
     void register_type(const TSNode& node, util::TypeKind typeKind);
     [[nodiscard]] SourceFile* src() const;
     [[nodiscard]] std::string_view src_str() const;

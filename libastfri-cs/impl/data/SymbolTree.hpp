@@ -40,18 +40,18 @@ class Nms
 {
 private:
     std::string name_{};
-    std::unordered_map<SourceFile*, std::vector<const ScopedType*>>
+    std::unordered_map<SourceFile*, std::vector<TypeBinding>>
         staticUsings_{};
     IdentifierMap<std::unordered_map<SourceFile*, Alias>> aliases_{};
 
 public:
     explicit Nms(std::string name);
 
-    void add_static_using(SourceFile* src, const ScopedType* type);
+    void add_static_using(SourceFile* src, TypeBinding type);
     void add_alias(std::string aliasName, SourceFile* src, const Alias& alias);
 
     Alias* find_alias(std::string_view aliasName, SourceFile* src);
-    std::span<const ScopedType* const> get_static_usings(SourceFile* src) const;
+    std::span<const TypeBinding> get_static_usings(SourceFile* src) const;
 };
 
 class SymbolNode
@@ -103,6 +103,12 @@ public:
      * @param typeBinding
      */
     SymbolNode* add_type(const Scope& scope, TypeBinding typeBinding);
+
+    [[nodiscard]] SymbolNode* find_node(const Scope& scope) const;
+    [[nodiscard]] SymbolNode* find_node(
+        const Scope& start,
+        const Scope& end
+    ) const;
     /**
      * @brief Resolves type by traversing the given scope
      * @param scope namespace/scope to search in
@@ -116,7 +122,6 @@ public:
         std::string_view typeName,
         bool searchParents = false
     ) const;
-
     /**
      * @brief Resolves a type by traversing a concatenated path (start + end).
      * @param start base namespace/scope.
