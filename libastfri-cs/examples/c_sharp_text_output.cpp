@@ -4,10 +4,10 @@
 
 int main()
 {
-    const astfri::csharp::ASTBuilder astBuilder;
-    astfri::text::TextLibManager& manager
-        = astfri::text::TextLibManager::get_instance();
-    const astfri::TranslationUnit* ast = astBuilder.make_ast(
+    using namespace astfri;
+    const csharp::ASTBuilder astBuilder;
+    text::TextLibManager& manager = text::TextLibManager::get_instance();
+    const TranslationUnit* ast    = astBuilder.make_ast(
         "/home/andrew/Coding/astfri/resources/samples/csharp"
     );
     manager.visit_and_export(*ast);

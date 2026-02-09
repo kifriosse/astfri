@@ -21,7 +21,7 @@ StmtFactory& SymbolTableBuilder::stmtFact_    = StmtFactory::get_instance();
 regs::QueryReg& SymbolTableBuilder::queryReg_ = regs::QueryReg::get();
 
 SymbolTableBuilder::SymbolTableBuilder(
-    std::vector<SourceFile>& srcs,
+    std::vector<std::unique_ptr<SourceFile>>& srcs,
     SymbolTable& symbTable
 ) :
     typeTrs_(symbTable),
@@ -42,12 +42,12 @@ void SymbolTableBuilder::reg_user_types()
 
     for (auto& src : srcs_)
     {
-        auto& [context, file, tree] = src;
+        auto& [context, file, tree] = *src;
         if (! tree)
             continue;
 
-        currentSrc_ = &src;
-        typeTrs_.set_current_src(&src);
+        currentSrc_ = src.get();
+        typeTrs_.set_current_src(src.get());
         util::for_each_match(
             ts_tree_root_node(tree),
             regs::QueryType::TopLevel,
@@ -65,9 +65,9 @@ void SymbolTableBuilder::reg_using_directives()
 
     for (auto& src : srcs_)
     {
-        typeTrs_.set_current_src(&src);
-        currentSrc_       = &src;
-        const TSNode root = ts_tree_root_node(src.tree);
+        typeTrs_.set_current_src(src.get());
+        currentSrc_       = src.get();
+        const TSNode root = ts_tree_root_node(src->tree);
         util::for_each_match(root, regs::QueryType::Using, process);
     }
     currentSrc_ = nullptr;
@@ -250,11 +250,12 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
     const std::string_view src    = src_str();
     static const TSSymbol sGlobal = util::symbol_for_name("global", false);
     static const TSSymbol sStatic = util::symbol_for_name("static", false);
-    const TSNode nAliasName = util::child_by_field_name(nUsingDirective, "name");
-    bool isGlobal           = false;
-    bool isStatic           = false;
+    const TSNode nAliasName
+        = util::child_by_field_name(nUsingDirective, "name");
+    bool isGlobal = false;
+    bool isStatic = false;
 
-    auto process            = [&isGlobal, &isStatic](const TSNode& current)
+    auto process  = [&isGlobal, &isStatic](const TSNode& current)
     {
         const TSSymbol sCurrent = ts_node_symbol(current);
         if (sCurrent == sGlobal)
@@ -412,12 +413,11 @@ void SymbolTableBuilder::register_type(
     {
         TypeMetadata metadata{
             .userType = def,
-            .typeNms = symbTable_.symbTree.add_type(type->scope_, TypeBinding { type, def})
+            .typeNms
+            = symbTable_.symbTree.add_type(type->scope_, TypeBinding{type, def})
         };
-        auto [it, inserted] = symbTable_.userTypeMetadata.try_emplace(
-            def,
-            std::move(metadata)
-        );
+        auto [it, inserted]
+            = symbTable_.userTypeMetadata.try_emplace(def, std::move(metadata));
 
         if (inserted)
             symbTable_.userTypeKeys.push_back(def);

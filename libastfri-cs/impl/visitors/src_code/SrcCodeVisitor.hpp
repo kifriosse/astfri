@@ -22,14 +22,14 @@ private:
     static TypeFactory& typeFact_;
 
     TypeTranslator typeTrs_;
-    std::vector<SourceFile>& srcCodes_;
+    std::vector<std::unique_ptr<SourceFile>>& srcCodes_;
     SemanticContext& semanticContext_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
     SrcCodeVisitor(
-        std::vector<SourceFile>& srcCodes,
+        std::vector<std::unique_ptr<SourceFile>>& srcCodes,
         SemanticContext& semanticContext,
         SymbolTable& symbTable
     );

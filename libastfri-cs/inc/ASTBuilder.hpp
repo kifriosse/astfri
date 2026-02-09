@@ -30,7 +30,7 @@ public:
     ASTBuilder& operator=(ASTBuilder&&) = delete;
 
 private:
-    [[nodiscard]] std::vector<SourceFile> get_source_codes(
+    [[nodiscard]] std::vector<std::unique_ptr<SourceFile>> get_source_codes(
         const std::filesystem::path& project_dir
     ) const;
 };

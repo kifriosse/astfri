@@ -50,19 +50,6 @@ struct ScopeContext
 class SemanticContext
 {
 private:
-    /**
-     * @brief Helper stuct representing a view over keys of user types in symbol
-     * table
-     */
-    struct SymbolTableKV
-    {
-        const std::vector<UserTypeDefStmt*>& userTypesMetadata;
-        using iterator = std::vector<UserTypeDefStmt*>::const_iterator;
-        [[nodiscard]] iterator begin() const;
-        [[nodiscard]] iterator end() const;
-    };
-
-private:
     ScopeContext scopeContext_{};
     TypeContext typeContext_{};
     std::stack<Type*> retTypeContext_{};
@@ -76,7 +63,7 @@ public:
      * @return An iterable view over user types in symbol table
      * @note Keys will be in order of their insertion into symbol table
      */
-    SymbolTableKV get_user_types() const;
+    std::span<UserTypeDefStmt*> get_user_types() const;
     TypeMetadata* get_type_metadata(UserTypeDefStmt* userType) const;
 
     void enter_type(UserTypeDefStmt* def);

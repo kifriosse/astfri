@@ -12,26 +12,14 @@
 namespace astfri::csharp
 {
 
-SemanticContext::SymbolTableKV::iterator SemanticContext::SymbolTableKV::
-    begin() const
-{
-    return userTypesMetadata.begin();
-}
-
-SemanticContext::SymbolTableKV::iterator SemanticContext::SymbolTableKV::
-    end() const
-{
-    return userTypesMetadata.end();
-}
-
 SemanticContext::SemanticContext(SymbolTable& symbTable) :
     symbTable_(symbTable)
 {
 }
 
-SemanticContext::SymbolTableKV SemanticContext::get_user_types() const
+std::span<UserTypeDefStmt*> SemanticContext::get_user_types() const
 {
-    return SymbolTableKV{symbTable_.userTypeKeys};
+    return symbTable_.userTypeKeys;
 }
 
 TypeMetadata* SemanticContext::get_type_metadata(

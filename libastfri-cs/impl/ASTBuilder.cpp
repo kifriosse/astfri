@@ -37,11 +37,11 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     std::cout << "Preprocessing Phase: \n"
               << "Gathering souce files and removing comments..." << std::endl;
-    auto start                   = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<SourceFile> srcs = get_source_codes(srcDir);
+    std::vector<std::unique_ptr<SourceFile>> srcs = get_source_codes(srcDir);
 
-    auto end                     = std::chrono::high_resolution_clock::now();
+    auto end      = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<milli>(end - start);
     auto total    = duration;
     std::cout << "Preprocesing complete.\n"
@@ -89,11 +89,11 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
     return ast;
 }
 
-std::vector<SourceFile> ASTBuilder::get_source_codes(
+std::vector<std::unique_ptr<SourceFile>> ASTBuilder::get_source_codes(
     const std::filesystem::path& project_dir
 ) const
 {
-    std::vector<SourceFile> srcs;
+    std::vector<std::unique_ptr<SourceFile>> srcs;
     std::stack<std::filesystem::path> dirs;
     const std::filesystem::path& rootPath{project_dir};
     dirs.emplace(rootPath);
@@ -151,7 +151,13 @@ std::vector<SourceFile> ASTBuilder::get_source_codes(
                     TSNode nNmsName = util::child_by_field_name(nNms, "name");
                     context.fileNms = util::extract_text(nNmsName, src);
                 }
-                srcs.emplace_back(std::move(context), std::move(src), tree);
+                srcs.emplace_back(
+                    std::make_unique<SourceFile>(
+                        std::move(context),
+                        std::move(src),
+                        tree
+                    )
+                );
                 ts_parser_reset(parser_);
             }
         }

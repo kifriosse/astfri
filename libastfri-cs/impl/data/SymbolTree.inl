@@ -11,6 +11,6 @@ T* SymbolNode::is_content()
     return std::get_if<T>(&content_);
 }
 
-}
+} // namespace astfri::csharp
 
-#endif
+#endif // CSHARP_SYMBOL_TREE_INL

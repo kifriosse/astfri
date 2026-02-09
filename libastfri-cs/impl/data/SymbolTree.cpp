@@ -7,8 +7,53 @@
 namespace astfri::csharp
 {
 
-Nms::Nms(std::string name) : name_(std::move(name))
+Nms::Nms(std::string name) :
+    name_(std::move(name))
 {
+}
+
+void Nms::add_static_using(SourceFile* src, const ScopedType* type)
+{
+    if (type && src)
+    {
+        auto [it, inserted] = staticUsings_.try_emplace(src);
+        it->second.push_back(type);
+    }
+}
+
+void Nms::add_alias(std::string aliasName, SourceFile* src, const Alias& alias)
+{
+    if (src)
+    {
+        auto [idIt, _] = aliases_.try_emplace(std::move(aliasName));
+        idIt->second.try_emplace(src, alias);
+    }
+}
+
+Alias* Nms::find_alias(const std::string_view aliasName, SourceFile* src)
+{
+    if (src)
+    {
+        const auto alisesIt = aliases_.find(aliasName);
+        if (alisesIt != aliases_.end())
+        {
+            const auto aliasIt = alisesIt->second.find(src);
+            if (aliasIt != alisesIt->second.end())
+                return &aliasIt->second;
+        }
+    }
+    return nullptr;
+}
+
+std::span<const ScopedType* const> Nms::get_static_usings(SourceFile* src) const
+{
+    if (src)
+    {
+        const auto it = staticUsings_.find(src);
+        if (it != staticUsings_.end())
+            return it->second;
+    }
+    return {};
 }
 
 SymbolNode::SymbolNode(Content content, SymbolNode* parent) :
@@ -17,7 +62,7 @@ SymbolNode::SymbolNode(Content content, SymbolNode* parent) :
 {
 }
 
-SymbolNode* SymbolNode::parent()
+SymbolNode* SymbolNode::parent() const
 {
     return parent_;
 }
@@ -47,7 +92,7 @@ SymbolTree::SymbolTree() :
 {
 }
 
-SymbolNode* SymbolTree::root()
+SymbolNode* SymbolTree::root() const
 {
     return root_.get();
 }
@@ -121,7 +166,8 @@ TypeBinding* SymbolTree::find_type(
     return nullptr;
 }
 
-SymbolTreeCursor::SymbolTreeCursor(SymbolNode& root) : current_(&root)
+SymbolTreeCursor::SymbolTreeCursor(SymbolNode& root) :
+    current_(&root)
 {
 }
 

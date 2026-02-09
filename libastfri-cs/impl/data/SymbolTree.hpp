@@ -4,6 +4,7 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 
 #include <memory>
+#include <span>
 #include <string>
 #include <variant>
 #include <vector>
@@ -17,6 +18,7 @@ struct ScopedType;
 
 namespace astfri::csharp
 {
+struct SourceFile;
 
 /**
  * @brief Helper struct to group type and its definition statement
@@ -38,10 +40,18 @@ class Nms
 {
 private:
     std::string name_{};
-    std::vector<ScopedType*> staticUsings_{};
-    IdentifierMap<Alias> aliases_{};
+    std::unordered_map<SourceFile*, std::vector<const ScopedType*>>
+        staticUsings_{};
+    IdentifierMap<std::unordered_map<SourceFile*, Alias>> aliases_{};
+
 public:
     explicit Nms(std::string name);
+
+    void add_static_using(SourceFile* src, const ScopedType* type);
+    void add_alias(std::string aliasName, SourceFile* src, const Alias& alias);
+
+    Alias* find_alias(std::string_view aliasName, SourceFile* src);
+    std::span<const ScopedType* const> get_static_usings(SourceFile* src) const;
 };
 
 class SymbolNode
@@ -60,7 +70,7 @@ public:
     SymbolNode& operator=(const SymbolNode& other) = delete;
     SymbolNode& operator=(SymbolNode&& other)      = delete;
 
-    SymbolNode* parent();
+    SymbolNode* parent() const;
     SymbolNode* find_child(std::string_view childName);
     SymbolNode* try_add_child(
         std::string name,
@@ -80,7 +90,7 @@ private:
 
 public:
     SymbolTree();
-    SymbolNode* root();
+    [[nodiscard]] SymbolNode* root() const;
     /**
      * @brief Adds a namespace/scope to the symbol tree
      * @param scope scope/namespace to add
@@ -106,6 +116,7 @@ public:
         std::string_view typeName,
         bool searchParents = false
     ) const;
+
     /**
      * @brief Resolves a type by traversing a concatenated path (start + end).
      * @param start base namespace/scope.

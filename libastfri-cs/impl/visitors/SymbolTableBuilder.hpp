@@ -33,9 +33,9 @@ private:
     static StmtFactory& stmtFact_;
     static regs::QueryReg& queryReg_;
 
+    std::vector<std::unique_ptr<SourceFile>>& srcs_;
     TypeContext typeContext_;
     TypeTranslator typeTrs_;
-    std::vector<SourceFile>& srcs_;
     SymbolTable& symbTable_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
@@ -49,7 +49,7 @@ public:
      * Symbol table's lifetime must exceed lifetime of Symbol table builder
      */
     explicit SymbolTableBuilder(
-        std::vector<SourceFile>& srcs,
+        std::vector<std::unique_ptr<SourceFile>>& srcs,
         SymbolTable& symbTable
     );
 
