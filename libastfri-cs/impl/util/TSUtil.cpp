@@ -106,10 +106,11 @@ std::string remove_comments(
 
     if (hasErr)
     {
-        throw std::runtime_error(
-            "Source code in file \"" + path.string()
-            + "\" contains syntax errors."
-        );
+        std::string message = "Source code ";
+        if (path.empty())
+            message.append("in file \"" + path.string() + "\" ");
+        message.append("contains syntax errors.");
+        throw std::runtime_error(message);
     }
 
     return src;

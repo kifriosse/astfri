@@ -338,11 +338,9 @@ Alias SymbolTableBuilder::mk_global_alias(const TSNode& nAliasQualif) const
     while (ts_node_symbol(current) == sQualifName)
     {
         nQualifs.push_back(util::child_by_field_name(current, "name"));
-        util::print_child_nodes_types(current, src, false);
         current = util::child_by_field_name(current, "qualifier");
     }
 
-    util::print_child_nodes_types(current, src, false);
     SymbolTree& symbTree = symbTable_.symbTree;
     auto* currentNode    = symbTree.root();
     if (ts_node_symbol(current) == sAliasQualfName)

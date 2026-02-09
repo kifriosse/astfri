@@ -14,25 +14,38 @@ namespace astfri::csharp
 class ASTBuilder
 {
 private:
+    using path = std::filesystem::path;
     const TSLanguage* lang_;
     TSParser* parser_;
+    std::vector<std::unique_ptr<SourceFile>> srcs_;
 
 public:
     ASTBuilder();
     ~ASTBuilder();
-    [[nodiscard]] TranslationUnit* make_ast(
-        const std::filesystem::path& srcDir
-    ) const;
-
     ASTBuilder(ASTBuilder&)             = delete;
     ASTBuilder(ASTBuilder&&)            = delete;
     ASTBuilder& operator=(ASTBuilder&)  = delete;
     ASTBuilder& operator=(ASTBuilder&&) = delete;
 
+    /**
+     * Loads souce code of a project into AST Builder
+     * @param projectDir path to directory that contains C# source code
+     */
+    void load_src(const path& projectDir);
+    /**
+     * Loads souce code from a stream
+     * @param inputStream stream containing source code
+     */
+    void load_src(std::istream& inputStream);
+    /**
+     * Makes AST from loaded source code
+     * @return AST from loaded source code
+     */
+    TranslationUnit* mk_ast();
+
+
 private:
-    [[nodiscard]] std::vector<std::unique_ptr<SourceFile>> get_source_codes(
-        const std::filesystem::path& project_dir
-    ) const;
+    void load_from_stream(std::istream& inputStream, const path& path = {});
 };
 
 } // namespace astfri::csharp
