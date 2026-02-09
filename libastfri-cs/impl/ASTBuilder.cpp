@@ -35,8 +35,8 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
 {
     using milli          = std::chrono::milliseconds;
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
-    std::cout << "Preprocessing Phase: \n"
-              << "Gathering souce files and removing comments..." << std::endl;
+    // std::cout << "Preprocessing Phase: \n"
+    //           << "Gathering souce files and removing comments..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<std::unique_ptr<SourceFile>> srcs = get_source_codes(srcDir);
@@ -44,35 +44,35 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
     auto end      = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<milli>(end - start);
     auto total    = duration;
-    std::cout << "Preprocesing complete.\n"
-              << "Preprocessing took " << duration.count() << " ms"
-              << std::endl;
+    // std::cout << "Preprocesing complete.\n"
+    //           << "Preprocessing took " << duration.count() << " ms"
+    //           << std::endl;
 
     SymbolTable symbTable;
     SymbolTableBuilder symbTableBuilder(srcs, symbTable);
 
-    std::cout << "Phase 1: Symbol Table Building\n"
-              << "Discovering user defined types..." << std::endl;
+    // std::cout << "Phase 1: Symbol Table Building\n"
+    //           << "Discovering user defined types..." << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
 
     symbTableBuilder.reg_user_types();
-    std::cout << "Loading using directives...\n";
+    // std::cout << "Loading using directives...\n";
     symbTableBuilder.reg_using_directives();
-    std::cout << "Discovering members of user defined types...\n";
+    // std::cout << "Discovering members of user defined types...\n";
     symbTableBuilder.reg_members();
 
     end      = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<milli>(end - start);
     total += duration;
 
-    std::cout << "Symbol Table Building took " << duration.count() << " ms"
-              << std::endl;
+    // std::cout << "Symbol Table Building took " << duration.count() << " ms"
+    //           << std::endl;
 
     SemanticContext semanticContext(symbTable);
     SrcCodeVisitor srcVisitor(srcs, semanticContext, symbTable);
 
-    std::cout << "Phase 2: Building of AST" << std::endl;
+    // std::cout << "Phase 2: Building of AST" << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
 
@@ -82,9 +82,9 @@ TranslationUnit* ASTBuilder::make_ast(const std::filesystem::path& srcDir) const
     duration = std::chrono::duration_cast<milli>(end - start);
     total += duration;
 
-    std::cout << "AST building completed.\n"
-              << "AST Building took " << duration.count() << " ms\n"
-              << "Total time: " << total.count() << " ms" << std::endl;
+    // std::cout << "AST building completed.\n"
+    //           << "AST Building took " << duration.count() << " ms\n"
+    //           << "Total time: " << total.count() << " ms" << std::endl;
 
     return ast;
 }
