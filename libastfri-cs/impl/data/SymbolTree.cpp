@@ -7,24 +7,65 @@
 namespace astfri::csharp
 {
 
-SymbolTree::ScopeNode* SymbolTree::root()
+Nms::Nms(std::string name) : name_(std::move(name))
 {
-    return tree_.root();
 }
 
-SymbolTree::ScopeNode* SymbolTree::add_namespace(const Scope& scope)
+SymbolNode::SymbolNode(Content content, SymbolNode* parent) :
+    content_(std::move(content)),
+    parent_(parent)
 {
-    return tree_.add_namespace(scope);
 }
 
-SymbolTree::ScopeNode* SymbolTree::add_type(
-    const Scope& scope,
-    ScopedType* type,
-    UserTypeDefStmt* def
+SymbolNode* SymbolNode::parent()
+{
+    return parent_;
+}
+
+SymbolNode* SymbolNode::find_child(const std::string_view childName)
+{
+    const auto it = children_.find(childName);
+    return it != children_.end() ? it->second.get() : nullptr;
+}
+
+SymbolNode* SymbolNode::try_add_child(
+    std::string name,
+    Content content,
+    SymbolNode* parent
 )
 {
-    return tree_
-        .add_data(scope, TypeBinding{.type = type, .def = def}, type->name_);
+    auto [it, inserted] = children_.try_emplace(std::move(name));
+    if (inserted)
+    {
+        it->second = std::make_unique<SymbolNode>(std::move(content), parent);
+    }
+    return it->second.get();
+}
+
+SymbolTree::SymbolTree() :
+    root_(std::make_unique<SymbolNode>(Nms({})))
+{
+}
+
+SymbolNode* SymbolTree::root()
+{
+    return root_.get();
+}
+
+SymbolNode* SymbolTree::add_scope(const Scope& scope)
+{
+    SymbolNode* current = root();
+    for (const std::string& str : scope.names_)
+    {
+        current = current->try_add_child(str, Nms(str), current);
+    }
+    return current;
+}
+
+SymbolNode* SymbolTree::add_type(const Scope& scope, TypeBinding typeBinding)
+{
+    SymbolNode* last = add_scope(scope);
+    return last->try_add_child(typeBinding.type->name_, typeBinding, last);
 }
 
 TypeBinding* SymbolTree::find_type(
@@ -43,25 +84,83 @@ TypeBinding* SymbolTree::find_type(
     const bool searchParents
 ) const
 {
-    ScopeNode* node = tree_.find_node(start, end, typeName, searchParents);
-    return node ? std::get_if<TypeBinding>(&node->data) : nullptr;
+    SymbolTreeCursor cursor(*root_);
+    auto process = [&cursor](const Scope& scope) -> bool
+    {
+        for (const std::string_view qualif : scope.names_)
+        {
+            if (! cursor.go_to_child(qualif))
+                return false;
+        }
+        return true;
+    };
+
+    if (! process(start) || ! process(end))
+        return nullptr;
+
+    if (searchParents)
+        return find_type(*cursor.current(), typeName);
+
+    SymbolNode* childNode = cursor.current()->find_child(typeName);
+    return childNode->is_content<TypeBinding>();
 }
 
 TypeBinding* SymbolTree::find_type(
-    ScopeNode* start,
+    SymbolNode& start,
     const std::string_view typeName
-) const
+)
 {
-    ScopeNode* node = tree_.find_node(*start, typeName);
-    return node ? std::get_if<TypeBinding>(&node->data) : nullptr;
+    SymbolTreeCursor cursor(start);
+    do
+    {
+        if (auto* node = cursor.current()->find_child(typeName))
+            return node->is_content<TypeBinding>();
+
+    } while (cursor.go_to_parent());
+
+    return nullptr;
 }
 
-SymbolTree::ScopeNode* SymbolTree::find_node(
-    ScopeNode* start,
-    const std::string_view name
-) const
+SymbolTreeCursor::SymbolTreeCursor(SymbolNode& root) : current_(&root)
 {
-    return tree_.find_node(*start, name);
+}
+
+SymbolNode* SymbolTreeCursor::current()
+{
+    return current_;
+}
+
+bool SymbolTreeCursor::go_to_parent()
+{
+    if (current_->parent())
+    {
+        current_ = current_->parent();
+        return true;
+    }
+    return false;
+}
+
+bool SymbolTreeCursor::go_to_child(const std::string_view childName)
+{
+    if (SymbolNode* child = current_->find_child(childName))
+    {
+        current_ = child;
+        return true;
+    }
+    return false;
+}
+
+TypeBinding* type_from_alias(const Alias& alias)
+{
+    if (const auto* nodeHandle = std::get_if<SymbolNode*>(&alias))
+    {
+        SymbolNode* node = *nodeHandle;
+        if (auto* binding = node->is_content<TypeBinding>())
+        {
+            return binding;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace astfri::csharp

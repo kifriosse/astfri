@@ -2,7 +2,6 @@
 #define CSHARP_SYMBOL_TABLE_HPP
 
 #include <libastfri-cs/impl/CSFwd.hpp>
-#include <libastfri-cs/impl/data/Alias.h>
 #include <libastfri-cs/impl/data/SymbolTree.hpp>
 #include <libastfri/inc/Astfri.hpp>
 

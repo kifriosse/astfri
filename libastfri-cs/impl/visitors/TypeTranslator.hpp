@@ -15,7 +15,7 @@ class TypeTranslator
 private:
     static TypeFactory& typeFact_;
 
-    SymbolTree::ScopeNode* currentNmsNode_{};
+    SymbolNode* currentNmsNode_{};
     SymbolTable& symbTable_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
@@ -23,7 +23,7 @@ private:
 public:
     explicit TypeTranslator(SymbolTable& symbTable);
     void set_current_src(SourceFile* src);
-    void set_current_namespace(SymbolTree::ScopeNode* node);
+    void set_current_namespace(SymbolNode* node);
 
     static Type* visit_predefined(TypeTranslator* self, const TSNode& node);
     static Type* visit_identitifier(TypeTranslator* self, const TSNode& node);

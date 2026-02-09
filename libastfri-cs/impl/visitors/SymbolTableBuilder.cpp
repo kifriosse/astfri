@@ -83,6 +83,7 @@ void SymbolTableBuilder::reg_members()
     };
     for (auto& metadata : symbTable_.userTypeMetadata | std::views::values)
     {
+        typeTrs_.set_current_namespace(metadata.typeNms);
         for (auto& [node, src] : metadata.defs)
         {
             const TSNode nClassBody = util::child_by_field_name(node, "body");
@@ -354,12 +355,12 @@ Alias SymbolTableBuilder::mk_global_alias(const TSNode& nAliasQualif) const
         nQualifs.push_back(current);
     }
 
-    ScopeTreeCursor cursor(*currentNode);
+    SymbolTreeCursor cursor(*currentNode);
     bool found = true;
     for (auto& nName : std::views::reverse(nQualifs))
     {
         std::string qualifName = util::extract_text(nName, src);
-        if (! cursor.try_goto_child(qualifName))
+        if (! cursor.go_to_child(qualifName))
         {
             found = false;
             break;
@@ -409,11 +410,13 @@ void SymbolTableBuilder::register_type(
 
     if (def && type)
     {
-        SymbolTree::ScopeNode* nmsNode
-            = symbTable_.symbTree.add_type(type->scope_, type, def);
+        TypeMetadata metadata{
+            .userType = def,
+            .typeNms = symbTable_.symbTree.add_type(type->scope_, TypeBinding { type, def})
+        };
         auto [it, inserted] = symbTable_.userTypeMetadata.try_emplace(
             def,
-            TypeMetadata{.userType = def, .nmsNode = nmsNode}
+            std::move(metadata)
         );
 
         if (inserted)

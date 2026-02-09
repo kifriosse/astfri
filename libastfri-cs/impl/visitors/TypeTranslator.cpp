@@ -24,7 +24,7 @@ void TypeTranslator::set_current_src(SourceFile* src)
     currentSrc_ = src;
 }
 
-void TypeTranslator::set_current_namespace(SymbolTree::ScopeNode* node)
+void TypeTranslator::set_current_namespace(SymbolNode* node)
 {
     currentNmsNode_ = node;
 }
@@ -41,27 +41,24 @@ Type* TypeTranslator::visit_identitifier(
     const TSNode& node
 )
 {
+    // look up order form language specification
+    // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#781-general
+
+    // todo generic types - generic parameter identifiers
+
+    // todo nested types of inherited types - doesn't include interfaces
+
+    // todo incorect finding of aliases and types
     const std::string name = util::extract_text(node, self->src_str());
     if (const auto typeOpt = RegManager::get_type(name))
         return *typeOpt;
     FileContext& fileContext = self->src()->fileContext;
 
-    // Scope current = self->current_namespace_;
     // todo check aliases
-    const auto itGlobAlias = self->symbTable_.globAliases.find(name);
-    if (itGlobAlias != self->symbTable_.globAliases.end())
-    {
-        const Alias& alias = itGlobAlias->second;
-        TypeBinding* typeBinding = nullptr;
-        if (is_type_alias(alias, typeBinding))
-            return typeBinding->type;
-
-        return typeFact_.mk_unknown();
-    }
 
     // current namespace and its parents
     const SymbolTree& symbTree = self->symbTable_.symbTree;
-    if (const auto type = symbTree.find_type(self->currentNmsNode_, name))
+    if (const auto type = SymbolTree::find_type(*self->currentNmsNode_, name))
         return type->type;
 
     // file scoped usings
@@ -70,7 +67,6 @@ Type* TypeTranslator::visit_identitifier(
         if (const auto type = symbTree.find_type(scope, name))
             return type->type;
     }
-    // todo global aliases
 
     // global usings
     for (Scope& scope : self->symbTable_.globUsings)
@@ -78,10 +74,17 @@ Type* TypeTranslator::visit_identitifier(
         if (const auto type = symbTree.find_type(scope, name))
             return type->type;
     }
+    // todo global aliases
+    const auto itGlobAlias = self->symbTable_.globAliases.find(name);
+    if (itGlobAlias != self->symbTable_.globAliases.end())
+    {
+        const Alias& alias = itGlobAlias->second;
+        if (const TypeBinding* typeBinding = type_from_alias(alias))
+            return typeBinding->type;
 
+        return typeFact_.mk_unknown();
+    }
     // global scope - root
-    if (const auto type = symbTree.find_type({}, name))
-        return type->type;
 
     return typeFact_.mk_unknown(); // todo make this incomplete type
 }

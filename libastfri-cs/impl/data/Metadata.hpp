@@ -96,7 +96,7 @@ struct TypeMetadata
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
     UserTypeDefStmt* userType{nullptr};
-    SymbolTree::ScopeNode* nmsNode{nullptr};
+    SymbolNode* typeNms{nullptr};
     bool processed{false};
 };
 

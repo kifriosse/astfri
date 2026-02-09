@@ -1,10 +1,12 @@
 #ifndef CSHARP_SYMB_TREE_HPP
 #define CSHARP_SYMB_TREE_HPP
 
-#include <libastfri-cs/impl/data/ScopeTree.hpp>
+#include <libastfri-cs/impl/CSFwd.hpp>
 
+#include <memory>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace astfri
 {
@@ -15,6 +17,7 @@ struct ScopedType;
 
 namespace astfri::csharp
 {
+
 /**
  * @brief Helper struct to group type and its definition statement
  */
@@ -24,35 +27,72 @@ struct TypeBinding
     UserTypeDefStmt* def;
 };
 
+class SymbolNode;
+
+using Alias = std::variant<std::monostate, std::string, SymbolNode*>;
+
+/**
+ * @brief class for representing namespace
+ */
+class Nms
+{
+private:
+    std::string name_{};
+    std::vector<ScopedType*> staticUsings_{};
+    IdentifierMap<Alias> aliases_{};
+public:
+    explicit Nms(std::string name);
+};
+
+class SymbolNode
+{
+private:
+    using Content = std::variant<Nms, TypeBinding>;
+    Content content_;
+    IdentifierMap<std::unique_ptr<SymbolNode>> children_;
+    SymbolNode* parent_;
+
+public:
+    explicit SymbolNode(Content content, SymbolNode* parent = nullptr);
+
+    SymbolNode(const SymbolNode& other)            = delete;
+    SymbolNode(SymbolNode&& other)                 = delete;
+    SymbolNode& operator=(const SymbolNode& other) = delete;
+    SymbolNode& operator=(SymbolNode&& other)      = delete;
+
+    SymbolNode* parent();
+    SymbolNode* find_child(std::string_view childName);
+    SymbolNode* try_add_child(
+        std::string name,
+        Content content,
+        SymbolNode* parent
+    );
+
+    template<typename T>
+    requires requires(Content v) { std::get_if<T>(&v); }
+    T* is_content();
+};
+
 class SymbolTree
 {
-public:
-    using Data      = std::variant<std::string, TypeBinding>;
-    using Tree      = ScopeTree<Data>;
-    using ScopeNode = Tree::Node;
-
 private:
-    Tree tree_{};
+    std::unique_ptr<SymbolNode> root_;
 
 public:
-    ScopeNode* root();
+    SymbolTree();
+    SymbolNode* root();
     /**
      * @brief Adds a namespace/scope to the symbol tree
      * @param scope scope/namespace to add
      * @return pointer to the last node of the added namespace (can be ignored)
      */
-    ScopeNode* add_namespace(const Scope& scope);
+    SymbolNode* add_scope(const Scope& scope);
     /**
      * @brief Adds a type to the symbol tree under the given scope
      * @param scope scope/namespace under which to add the type
-     * @param type type to add
-     * @param def pointer to the type definition statement
+     * @param typeBinding
      */
-    ScopeNode* add_type(
-        const Scope& scope,
-        ScopedType* type,
-        UserTypeDefStmt* def
-    );
+    SymbolNode* add_type(const Scope& scope, TypeBinding typeBinding);
     /**
      * @brief Resolves type by traversing the given scope
      * @param scope namespace/scope to search in
@@ -82,12 +122,28 @@ public:
         std::string_view typeName,
         bool searchParents = false
     ) const;
-    [[nodiscard]] TypeBinding* find_type(
-        ScopeNode* start,
+    [[nodiscard]] static TypeBinding* find_type(
+        SymbolNode& start,
         std::string_view typeName
-    ) const;
-    ScopeNode* find_node(ScopeNode* start, std::string_view name) const;
+    );
 };
+
+class SymbolTreeCursor
+{
+private:
+    SymbolNode* current_;
+
+public:
+    explicit SymbolTreeCursor(SymbolNode& root);
+    SymbolNode* current();
+    bool go_to_parent();
+    bool go_to_child(std::string_view childName);
+};
+
+TypeBinding* type_from_alias(const Alias& alias);
+
 } // namespace astfri::csharp
+
+#include <libastfri-cs/impl/data/SymbolTree.inl>
 
 #endif // CSHARP_SYMB_TREE_HPP
