@@ -32,6 +32,7 @@ namespace astfri::text
         ~TextLibManager() = default;
     public:
         void change_output(OutputFormat const& format);
+        void execute_export(std::ostream& ostream);
         void execute_export();
         void clear_builder();
         void append_text(std::string const& text);
@@ -39,6 +40,9 @@ namespace astfri::text
         void append_space();
         void update_configuration();
         void reload_configuration();
+        // -----
+        template<astfri_node Node>
+        void visit_and_export(Node const& node, std::ostream& ostream);
         // -----
         template<astfri_node Node>
         void visit_and_export(Node const& node);
@@ -50,6 +54,13 @@ namespace astfri::text
     //
     // -----
     //
+
+    template<astfri_node Node>
+    void TextLibManager::visit_and_export(Node const& node, std::ostream& ostream)
+    {
+        visit(node);
+        execute_export(ostream);
+    }
 
     template<astfri_node Node>
     void TextLibManager::visit_and_export(Node const& node)
