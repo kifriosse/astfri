@@ -69,6 +69,8 @@ private:
 
     astfri::DoWhileStmt* transform_do_while_stmt_node(TSNode tsNode, std::string const& sourceCode);
 
+    astfri::ForEachStmt* transform_foreach_stmt_node(TSNode tsNode, std::string const& sourceCode);
+
     astfri::ReturnStmt* transform_return_stmt_node(TSNode tsNode, std::string const& sourceCode);
 
     astfri::CompoundStmt* transform_body_node(TSNode tsNode, std::string const& sourceCode);

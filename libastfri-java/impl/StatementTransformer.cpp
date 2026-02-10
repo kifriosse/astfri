@@ -5,6 +5,7 @@
 #include <string>
 #include <sys/types.h>
 #include <tree_sitter/api.h>
+#include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
 
@@ -56,6 +57,10 @@ astfri::Stmt* StatementTransformer::get_stmt(TSNode tsNode, std::string const& s
     else if (nodeType == "do_statement")
     {
         return this->transform_do_while_stmt_node(tsNode, sourceCode);
+    }
+    else if (nodeType == "enhanced_for_statement")
+    {
+        return this->transform_foreach_stmt_node(tsNode, sourceCode);
     }
     else if (nodeType == "return_statement")
     {
@@ -444,6 +449,39 @@ astfri::DoWhileStmt* StatementTransformer::transform_do_while_stmt_node(
     }
 
     return stmtFactory.mk_do_while(condition, body);
+}
+
+astfri::ForEachStmt* StatementTransformer::transform_foreach_stmt_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::LocalVarDefStmt* localVar   = nullptr;
+    astfri::Expr* container             = nullptr;
+    astfri::Stmt* body                  = nullptr;
+
+    uint32_t childCount = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < childCount; i++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+        char const* fieldName = ts_node_field_name_for_named_child(tsNode, i);
+
+        if (fieldName != nullptr && std::strcmp(fieldName, "name") == 0)
+        {
+            localVar = this->transform_local_var_node(child, sourceCode);
+        }
+        if (fieldName != nullptr && std::strcmp(fieldName, "value") == 0)
+        {
+            container = exprTransformer->get_expr(child, sourceCode);
+        }
+        if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0)
+        {
+            body = this->transform_body_node(child, sourceCode);
+        }
+    }
+
+    return stmtFactory.mk_for_each(localVar, container, body);
 }
 
 astfri::ReturnStmt* StatementTransformer::transform_return_stmt_node(
