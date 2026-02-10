@@ -220,7 +220,7 @@ void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt)
 {
-    this->currentClass_.name_ = stmt.name_;
+    this->currentClass_.name_ = stmt.m_type->name_;
     this->currentClass_.type_ = UserDefinedType::INTERFACE;
 
     for (astfri::GenericParam* gp : stmt.tparams_)
@@ -250,7 +250,7 @@ void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
     // insert names of all interfaces in the TU into a set
     for (astfri::InterfaceDefStmt* i : stmt.interfaces_)
     {
-        this->interfaces_.insert(i->name_);
+        this->interfaces_.insert(i->m_type->name_);
     }
 
     // go through every class in the TU and create realations for it's base classes and interfaces
@@ -264,7 +264,7 @@ void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
 
         for (astfri::InterfaceDefStmt* i : c->interfaces_)
         {
-            this->create_relation(i->name_, RelationType::IMPLEMENTATION);
+            this->create_relation(i->m_type->name_, RelationType::IMPLEMENTATION);
         }
         this->currentClass_.reset();
     }
@@ -272,10 +272,10 @@ void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
     // go through every interface in the TU and create relations for it's base interfaces
     for (astfri::InterfaceDefStmt* i : stmt.interfaces_)
     {
-        this->currentClass_.name_ = i->name_;
+        this->currentClass_.name_ = i->m_type->name_;
         for (astfri::InterfaceDefStmt* base : i->bases_)
         {
-            this->create_relation(base->name_, RelationType::EXTENSION);
+            this->create_relation(base->m_type->name_, RelationType::EXTENSION);
         }
         this->currentClass_.reset();
     }
