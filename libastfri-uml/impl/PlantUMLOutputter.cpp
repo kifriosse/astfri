@@ -58,7 +58,9 @@ void PlantUMLOutputter::apply_style_from_config()
     style += "arrow {\nLineColor " + this->config_->arrowColor_ + "\n}\n";
     style += "</style>\n";
     if (this->config_->handleNamespaces_)
-        style += "set separator ::\n";
+    {
+        style += "set separator " + this->config_->namespaceSeparator_ + "\n";
+    }
     if (! this->config_->drawAccessModIcons_)
         style += "skinparam classAttributeIconSize 0\n";
     this->outputString_ = style + this->outputString_;

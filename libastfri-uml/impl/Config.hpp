@@ -18,7 +18,8 @@ struct Config
 
     char indirectIndicator_        = '*';
     char destructorIndicator_      = '~';
-    char separator_                = ' ';
+    std::string separator_         = " : ";
+    std::string namespaceSeparator_ = "::";
     char accessPrefix_[4]          = {'+', '-', '#', '~'};
 
     std::string relationArrows_[4] = {"<--", "*--", "<|--", "<|.."};
