@@ -5,6 +5,7 @@
 #include <libastfri-uml/impl/ElementStructs.hpp>
 
 #include <iostream>
+#include <fstream>
 
 namespace astfri::uml
 {
@@ -20,6 +21,7 @@ protected:
 public:
     void set_config(Config const& config);
 
+    virtual void write_to_stream(std::ostream& p_stream);
     virtual void write_to_file();
     virtual void write_to_console();
 
