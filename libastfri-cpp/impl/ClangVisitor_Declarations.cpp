@@ -4,7 +4,8 @@ namespace astfri::astfri_cpp
 {
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND)
 {
-    std::cout << "Traversing namespace: " << ND->getNameAsString() << "\n";
+    (void)ND; // aby nevyskakoval warning o unused premennej
+    // std::cout << "Traversing namespace: " << ND->getNameAsString() << "\n";
     return true; // Pokračujeme v prechádzaní poduzlov
 }
 
