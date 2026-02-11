@@ -1,7 +1,8 @@
 #ifndef CSHARP_TS_TREE_VISITOR_HPP
 #define CSHARP_TS_TREE_VISITOR_HPP
 
-#include <libastfri-cs/impl/TypeContext.hpp>
+#include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/utils.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -27,7 +28,7 @@ private:
 
     std::string source_code_;
     const TSLanguage* language_;
-    TypeContext type_context_;
+    SemanticContext semantic_context_;
 
 public:
     CSharpTSTreeVisitor(std::string source_code, const TSLanguage* language);
@@ -71,21 +72,25 @@ public:
     static Expr* handle_verbatim_str_lit(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
+    static Expr* handle_raw_str_lit(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
     static Expr* handle_interpolated_str_lit(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // todo
 
     // Reference Expersions
-    static Expr* handle_param_var_ref_expr(
+    static Expr* handle_identifier(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
-    static Expr* handle_local_var_ref_expr(
+    );
+    static Expr* handle_memb_access_expr(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
 
     // Operations
     static Expr* handle_prefix_unary_op_expr(
@@ -99,11 +104,11 @@ public:
     static Expr* handle_binary_op_expr(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
     static Expr* handle_ternary_expr(
         CSharpTSTreeVisitor* self,
         const TSNode* node
-    ); // todo
+    );
 
     static Expr* handle_parenthesized_expr(
         CSharpTSTreeVisitor* self,
@@ -125,6 +130,19 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );
+    static Stmt* handle_local_var_def_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_global_var_def_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_var_def_stmt(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node,
+        VarDefType def_type
+    ); // general var def stmt handler
     static Stmt* handle_param_def_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
@@ -134,7 +152,7 @@ public:
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // constructor def stmt
-    static Stmt* handle_base_init_stmt(
+    static Stmt* handle_construct_init_stmt(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     ); // base initializer
@@ -166,6 +184,13 @@ public:
         const TSNode* node
     );
     static Stmt* handle_for_loop(CSharpTSTreeVisitor* self, const TSNode* node);
+    static Stmt* handle_for_each_loop(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+
+    // branching statements
+    static Stmt* handle_if_stmt(CSharpTSTreeVisitor* self, const TSNode* node);
 
     // other
     static Stmt* handle_expr_stmt(
@@ -179,8 +204,8 @@ public:
 
     Scope create_scope(const TSNode* node) const;
 
+private:
     Stmt* make_while_loop(const TSNode* node, bool is_do_while);
-
     Expr* expr_list_to_comma_op(
         const TSNode& start_node,
         const TSNode* end_node
@@ -190,6 +215,10 @@ public:
         const TSNode* node
     );
     static std::vector<Expr*> handle_argument_list(
+        CSharpTSTreeVisitor* self,
+        const TSNode* node
+    );
+    static Stmt* handle_for_init_var_def(
         CSharpTSTreeVisitor* self,
         const TSNode* node
     );

@@ -1,4 +1,5 @@
 #include <libastfri/inc/Stmt.hpp>
+#include <vector>
 
 namespace astfri
 {
@@ -64,6 +65,17 @@ BaseInitializerStmt::BaseInitializerStmt(ClassType *type, std::vector<Expr*> arg
     base_(""),
     type(type),
     args_(std::move(args))
+{
+}
+
+SelfInitializerStmt::SelfInitializerStmt(std::vector<Expr*> args) :
+    args(std::move(args))
+{
+}
+
+MemberInitializerStmt::MemberInitializerStmt(MemberVarDefStmt *member, Expr *arg) :
+    member(member),
+    arg(arg)
 {
 }
 

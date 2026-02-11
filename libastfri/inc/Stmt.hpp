@@ -53,7 +53,8 @@ enum class AccessModifier
 enum class Virtuality
 {
     NotVirtual,
-    Virtual
+    Virtual,
+    PureVirtual
 };
 
 /**
@@ -111,9 +112,9 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt>
  * In this case, you would use:
  * @code
    DefStmt
-   |-VarDefStmt
+   |-LocalVarDefStmt
    | `-IntLiteralExpr(10)
-   `-VarDefStmt
+   `-LocalVarDefStmt
      `-IntLiteralExpr(10)
  * @endcode
  */
@@ -147,7 +148,7 @@ struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt>
  */
 struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
 {
-    UserTypeDefStmt* owner_{nullptr}; // TODO ClassType?
+    UserTypeDefStmt* owner_{nullptr}; // TODO ClassType or Interface, variant?
     FunctionDefStmt* func_{nullptr};
     AccessModifier access_{AccessModifier::Public};
     Virtuality virtuality_{Virtuality::NotVirtual};
@@ -158,7 +159,7 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt>
  */
 struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt>
 {
-    std::string base_; // TODO type
+    [[deprecated]] std::string base_; // TODO type
     ClassType *type;
     std::vector<Expr*> args_;
 
@@ -180,7 +181,7 @@ struct SelfInitializerStmt : Stmt, details::MkVisitable<SelfInitializerStmt> {
 struct MemberInitializerStmt : Stmt, details::MkVisitable<MemberInitializerStmt> {
     MemberVarDefStmt *member;
     Expr *arg;
-    MemberInitializerStmt(MemberVarDefStmt *member, Expr *arg); // TODO
+    MemberInitializerStmt(MemberVarDefStmt *member, Expr *arg);
 };
 
 /**
@@ -192,12 +193,12 @@ struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt>
     std::vector<ParamVarDefStmt*> params_;
     std::vector<BaseInitializerStmt*> baseInit_;
     std::vector<SelfInitializerStmt*> selfInitializers;
-    std::vector<MemberInitializerStmt*> memberInitializers; // TODO
+    std::vector<MemberInitializerStmt*> memberInitializers;
     CompoundStmt* body_;
     AccessModifier access_;
 
     ConstructorDefStmt();
-    ConstructorDefStmt(
+    [[deprecated]] ConstructorDefStmt(
         ClassDefStmt* owner,
         std::vector<ParamVarDefStmt*> params,
         std::vector<BaseInitializerStmt*> baseInit,
@@ -235,7 +236,7 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam>
  */
 struct UserTypeDefStmt : Stmt
 {
-    std::string name_;
+    [[deprecated]] std::string name_;
 };
 
 /**
@@ -310,7 +311,7 @@ struct IfStmt : Stmt, details::MkVisitable<IfStmt>
 /**
  * @brief Base for case options in switch statement
  */
-struct CaseBaseStmt : Stmt
+struct CaseBaseStmt : Stmt // variant alebo common base? rovnako pri method ownerovi
 {
     Stmt* body_;
 

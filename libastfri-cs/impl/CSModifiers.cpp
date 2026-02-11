@@ -43,12 +43,10 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
 {
     if (has_modifier(CSModifier::Internal)
         && has_modifier(CSModifier::Protected))
-        // todo handle protected internal
-        return {};
+        return AccessModifier::Internal;
     if (has_modifier(CSModifier::Private)
         && has_modifier(CSModifier::Protected))
-        // todo handle private protected
-        return {};
+        return AccessModifier::Protected;
     if (has_modifier(CSModifier::Public))
         return AccessModifier::Public;
     if (has_modifier(CSModifier::Private))
@@ -58,8 +56,7 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
     if (has_modifier(CSModifier::Protected))
         return AccessModifier::Protected;
     if (has_modifier(CSModifier::File))
-        // todo handle file
-        return {};
+        return AccessModifier::Internal;
 
     return {};
 }

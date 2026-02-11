@@ -104,8 +104,8 @@ Stmt* CSharpTSTreeVisitor::make_while_loop(
     const TSNode body_node = ts_node_child_by_field_name(*node, "body", 4);
     const ExprHandler cond_handler = NodeRegistry::get_expr_handler(cond_node);
     const StmtHandler body_handler = NodeRegistry::get_stmt_handler(body_node);
-    Expr* condition                = cond_handler(this, node);
-    Stmt* body                     = body_handler(this, node);
+    Expr* condition                = cond_handler(this, &cond_node);
+    Stmt* body                     = body_handler(this, &body_node);
 
     if (is_do_while)
         return stmt_factory_.mk_do_while(condition, body);
@@ -127,20 +127,22 @@ Expr* CSharpTSTreeVisitor::expr_list_to_comma_op(
     const TSNode* end_node
 )
 {
-    TSTreeCursor cursor = ts_tree_cursor_new(start_node);
     std::queue<Expr*> exprs;
-
-    do
+    TSNode next = start_node;
+    while (! ts_node_is_null(next))
     {
-        const TSNode current_node = ts_tree_cursor_current_node(&cursor);
+        TSNode current_node = next;
+        next                = ts_node_next_sibling(current_node);
         if (end_node && ts_node_eq(current_node, *end_node))
             break;
+
+        if (NodeRegistry::is_structural_node(ts_node_type(current_node)))
+            continue;
 
         const ExprHandler expr_handler
             = NodeRegistry::get_expr_handler(current_node);
         exprs.push(expr_handler(this, &current_node));
-    } while (ts_tree_cursor_goto_next_sibling(&cursor));
-    ts_tree_cursor_delete(&cursor);
+    }
 
     if (exprs.empty())
         return nullptr;
@@ -171,9 +173,13 @@ std::vector<ParamVarDefStmt*> CSharpTSTreeVisitor::handle_param_list(
     do
     {
         TSNode current = ts_tree_cursor_current_node(&cursor);
+        if (NodeRegistry::is_structural_node(ts_node_type(current)))
+            continue;
+
         parameters.emplace_back(as_a<ParamVarDefStmt>(handler(self, &current)));
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
+    ts_tree_cursor_delete(&cursor);
     return parameters;
 }
 
@@ -183,15 +189,20 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
 )
 {
     TSTreeCursor cursor = ts_tree_cursor_new(*node);
+    TSNode current      = ts_tree_cursor_current_node(&cursor);
     if (! ts_tree_cursor_goto_first_child(&cursor))
         throw std::logic_error("Invalid node");
 
     std::vector<Expr*> exprs;
     do
     {
+        current = ts_tree_cursor_current_node(&cursor);
+        if (NodeRegistry::is_structural_node(ts_node_type(current)))
+            continue;
+
         ts_tree_cursor_goto_first_child(&cursor);
 
-        TSNode current           = ts_tree_cursor_current_node(&cursor);
+        current                  = ts_tree_cursor_current_node(&cursor);
         ExprHandler expr_handler = NodeRegistry::get_expr_handler(current);
         exprs.emplace_back(expr_handler(self, &current));
 
@@ -199,5 +210,42 @@ std::vector<Expr*> CSharpTSTreeVisitor::handle_argument_list(
     } while (ts_tree_cursor_goto_next_sibling(&cursor));
 
     return exprs;
+}
+
+Stmt* CSharpTSTreeVisitor::handle_for_init_var_def(
+    CSharpTSTreeVisitor* self,
+    const TSNode* node
+)
+{
+    static const std::string decl_query =
+        R"(
+        (variable_declaration
+            (variable_declarator) @var_decl)
+        )";
+    std::vector<VarDefStmt*> var_defs;
+    const TSNode type_node = ts_node_child_by_field_name(*node, "type", 4);
+    Type* type             = make_type(self, type_node);
+    std::vector<TSNode> decltr_nodes
+        = find_nodes(*node, self->language_, decl_query);
+    for (const auto declarator_node : decltr_nodes)
+    {
+        TSNode var_name_node = ts_node_child(declarator_node, 0);
+        TSNode right_node    = ts_node_child(declarator_node, 2);
+        ExprHandler right_side_handler
+            = NodeRegistry::get_expr_handler(right_node);
+        LocalVarDefStmt* var_def = stmt_factory_.mk_local_var_def(
+            extract_node_text(var_name_node, self->source_code_),
+            type,
+            right_side_handler(self, &right_node)
+        );
+        var_defs.push_back(var_def);
+        self->semantic_context_.add_local_var(var_def);
+    }
+
+    if (var_defs.size() > 1)
+    {
+        return stmt_factory_.mk_def(var_defs);
+    }
+    return var_defs.front();
 }
 } // namespace astfri::csharp

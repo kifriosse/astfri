@@ -1,4 +1,5 @@
 
+
 public class Vector2(float x, float y)
 {
     // [Obsolete]
@@ -35,4 +36,10 @@ public class Vector2(float x, float y)
         new(first.X + second.X, first.Y + second.Y);
 
     public static explicit operator int(Vector2 v) => (int)v.X;
+
+    public void Deconstruct(out float x, out float y)
+    {
+        x = X;
+        y = Y;
+    }
 }

@@ -12,7 +12,7 @@ namespace astfri
 /**
  * @brief TODO
  */
-struct Type : virtual IVisitable
+struct Type : virtual IVisitable // TODO just Visitable
 {
     virtual ~Type() = default;
 };
@@ -113,6 +113,13 @@ struct LambdaType : Type, details::MkVisitable<LambdaType>
     LambdaType(std::string name, LambdaExpr *def);
 };
 
+/**
+ * @brief TODO
+ */
+struct DeducedType : Type, details::MkVisitable<DeducedType>
+{
+    Type *realType;
+};
 
 // /**
 //  * @brief TODO
@@ -148,7 +155,7 @@ struct IncompleteType : Type, details::MkVisitable<IncompleteType>
 };
 
 /**
- * @brief TODO
+ * @brief TODO, tento pojde prec, namiesto neho bude nullptr a test to vyhlasi za bug
  */
 struct UnknownType : PrimitiveType, details::MkVisitable<VoidType>
 {
