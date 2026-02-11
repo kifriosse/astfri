@@ -61,6 +61,10 @@ private:
 
     astfri::IfStmt* transform_if_stmt_node(TSNode tsNode, std::string const& sourceCode);
 
+    astfri::TryStmt* transform_try_stmt_node(TSNode tsNode, std::string const& sourceCode);
+
+    astfri::CatchStmt* transform_catch_clause_node(TSNode tsNode, std::string const& sourceCode);
+
     astfri::SwitchStmt* transform_switch_stmt_node(TSNode tsNode, std::string const& sourceCode);
 
     astfri::ForStmt* transform_for_stmt_node(TSNode tsNode, std::string const& sourceCode);
