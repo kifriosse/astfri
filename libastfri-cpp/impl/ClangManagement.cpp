@@ -13,7 +13,7 @@ void CppASTConsumer::HandleTranslationUnit(clang::ASTContext& Context)
 {
     this->Visitor.setSM(&Context.getSourceManager());
     this->Visitor.setMainFileID(this->Visitor.getSM()->getMainFileID());
-    std::cout << "Beginning of filling ASTFRI Translation Unit.\n";
+    // std::cout << "Beginning of filling ASTFRI Translation Unit.\n";
     clang::NamespaceDecl* desired_namespace
         = this->Visitor.get_desired_namespace(Context.getTranslationUnitDecl());
     if (desired_namespace)
@@ -24,7 +24,7 @@ void CppASTConsumer::HandleTranslationUnit(clang::ASTContext& Context)
     {
         this->Visitor.TraverseDecl(Context.getTranslationUnitDecl());
     }
-    std::cout << "ASTFRI Translation Unit is filled succesfully.\n";
+    // std::cout << "ASTFRI Translation Unit is filled succesfully.\n";
 }
 
 CppFrontendAction::CppFrontendAction(astfri::TranslationUnit& _tu) :
