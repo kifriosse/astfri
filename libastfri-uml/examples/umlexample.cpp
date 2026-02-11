@@ -114,7 +114,7 @@ int main(int argc, char** argv)
     if (! conf.parse_json(config_file.c_str()))
     {
         conf.use_default_values();
-        std::cout << "Unable to parse JSON config. Using default values.\n";
+        //std::cout << "Unable to parse JSON config. Using default values.\n";
     }
     // config can be changed at any point before calling run
     // either by directly accessing its member variables
