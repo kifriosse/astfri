@@ -80,7 +80,7 @@ bool Config::parse_types_info(rapidjson::Value const& val)
     this->indirectIndicator_ = val["indirect_indicator"].GetString()[0];
     if (! val.HasMember("separator"))
         return false;
-    this->separator_ = val["separator"].GetString()[0];
+    this->separator_ = val["separator"].GetString();
     if (! val.HasMember("type_convention"))
         return false;
     std::string str = val["type_convention"].GetString();
@@ -170,6 +170,7 @@ bool Config::parse_namespace_info(rapidjson::Value const& val)
 void Config::use_default_values()
 {
 
+    this->typeConvention_ = TypeConventions::TYPE_AFTER_IDENTIFIER;
     this->innerView_           = true;
     this->writeToFile_         = false;
     this->drawAccessModIcons_  = true;
@@ -177,7 +178,8 @@ void Config::use_default_values()
 
     this->indirectIndicator_   = '*';
     this->destructorIndicator_ = '~';
-    this->separator_           = ' ';
+    this->separator_           = " : ";
+    this->namespaceSeparator_ = "::";
     this->accessPrefix_[0]     = '+';
     this->accessPrefix_[1]     = '-';
     this->accessPrefix_[2]     = '#';

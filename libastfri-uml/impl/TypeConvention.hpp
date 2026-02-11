@@ -17,7 +17,7 @@ public:
     static std::string get_string(
             std::string type,
             std::string identifier,
-            char separator,
+            std::string separator,
             TypeConventions conv
     );
 
