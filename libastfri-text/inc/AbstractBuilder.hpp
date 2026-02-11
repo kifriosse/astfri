@@ -16,6 +16,7 @@ namespace astfri::text
         explicit AbstractBuilder();
         virtual ~AbstractBuilder() = default;
     public:
+        std::stringstream* get_builded_text(); // TODO tmp
         // SET_UP
         void increase_indentation();
         void decrease_indentation();

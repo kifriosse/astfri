@@ -33,3 +33,9 @@ void AbstractVisitor::process_condition(Expr const* const& expr)
     }
     builder_->write_right_bracket(")");
 }
+
+// TODO tmp
+std::stringstream* AbstractVisitor::get_builded_text()
+{
+    return builder_->get_builded_text();
+}

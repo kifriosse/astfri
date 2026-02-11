@@ -39,6 +39,11 @@ void TextLibManager::change_output(OutputFormat const& format)
     clear_builder();
 }
 
+void TextLibManager::execute_export(std::ostream& ostream)
+{
+    ostream << visitor_->get_builded_text()->str();
+}
+
 void TextLibManager::execute_export()
 {
     if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_))

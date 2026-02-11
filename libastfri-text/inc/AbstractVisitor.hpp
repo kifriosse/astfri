@@ -53,9 +53,10 @@ namespace astfri::text
         AbstractVisitor() = delete;
         explicit AbstractVisitor(AbstractBuilder& builder);
         virtual ~AbstractVisitor() = default;
-    protected:
+    public: // TODO tmp
         void process_body(Stmt const* const& stmt);
         void process_condition(Expr const* const& expr);
+        std::stringstream* get_builded_text(); // TODO tmp getter
         // -----
         template<v_astfri_nodes Vector>
         void process_pargs(Vector const& pargs, bool useGeneric);
