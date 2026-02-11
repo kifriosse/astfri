@@ -27,7 +27,8 @@ public class Vector2(float x, float y)
                 case 1:
                     Y = value;
                     break;
-                default: throw new ArgumentException($"Invalid index : {i}");
+                default: 
+                    throw new ArgumentException($"Invalid index : {i}");
             }
         }
     }

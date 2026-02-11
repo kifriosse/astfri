@@ -1,0 +1,450 @@
+#include <libastfri-cs/impl/data/CSModifiers.hpp>
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/util/AstfriUtil.hpp>
+#include <libastfri-cs/impl/util/TSUtil.hpp>
+#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
+#include <tree_sitter/tree-sitter-c-sharp.h>
+
+#include <ranges>
+#include <string>
+#include <vector>
+
+namespace astfri::csharp
+{
+struct SourceFile;
+
+StmtFactory& SymbolTableBuilder::stmtFact_    = StmtFactory::get_instance();
+regs::QueryReg& SymbolTableBuilder::queryReg_ = regs::QueryReg::get();
+
+SymbolTableBuilder::SymbolTableBuilder(
+    std::vector<std::unique_ptr<SourceFile>>& srcs,
+    SymbolTable& symbTable
+) :
+    typeTrs_(symbTable),
+    srcs_(srcs),
+    symbTable_(symbTable),
+    lang_(tree_sitter_c_sharp())
+{
+}
+
+void SymbolTableBuilder::reg_user_types()
+{
+    auto process = [this](const TSQueryMatch& match)
+    {
+        const TSNode node        = match.captures[0].node;
+        const RegHandler handler = RegManager::get_reg_handler(node);
+        handler(this, node);
+    };
+
+    for (auto& src : srcs_)
+    {
+        auto& [context, file, tree] = *src;
+        if (! tree)
+            continue;
+
+        currentSrc_ = src.get();
+        typeTrs_.set_current_src(src.get());
+        util::for_each_match(
+            ts_tree_root_node(tree),
+            regs::QueryType::TopLevel,
+            process
+        );
+    }
+    currentSrc_ = nullptr;
+    typeTrs_.set_current_src(nullptr);
+}
+
+void SymbolTableBuilder::reg_using_directives()
+{
+    auto process = [this](const TSQueryMatch& match) -> void
+    { reg_using_directive(match.captures[0].node); };
+
+    for (auto& src : srcs_)
+    {
+        typeTrs_.set_current_src(src.get());
+        currentSrc_       = src.get();
+        const TSNode root = ts_tree_root_node(src->tree);
+        util::for_each_match(root, regs::QueryType::Using, process);
+    }
+    currentSrc_ = nullptr;
+    typeTrs_.set_current_src(nullptr);
+}
+
+void SymbolTableBuilder::reg_members()
+{
+    auto process = [this](const TSNode& current)
+    {
+        const RegHandler handler = RegManager::get_reg_handler(current);
+        handler(this, current);
+    };
+    for (auto& metadata : symbTable_.userTypeMetadata | std::views::values)
+    {
+        typeTrs_.set_current_namespace(metadata.typeNms);
+        for (auto& [node, src] : metadata.defs)
+        {
+            const TSNode nClassBody = util::child_by_field_name(node, "body");
+            currentSrc_             = src;
+            typeTrs_.set_current_src(src);
+            typeContext_.typeStack.push(metadata.userType);
+            util::for_each_child_node(nClassBody, process);
+            typeContext_.typeStack.pop();
+        }
+    }
+    typeTrs_.set_current_namespace(nullptr);
+    typeTrs_.set_current_src(nullptr);
+    currentSrc_ = nullptr;
+}
+
+void SymbolTableBuilder::visit_class(
+    SymbolTableBuilder* self,
+    const TSNode& node
+)
+{
+    self->register_type(node, util::TypeKind::Class);
+}
+
+void SymbolTableBuilder::visit_interface(
+    [[maybe_unused]] SymbolTableBuilder* self,
+    [[maybe_unused]] const TSNode& node
+)
+{
+    self->register_type(node, util::TypeKind::Interface);
+}
+
+void SymbolTableBuilder::visit_record(
+    [[maybe_unused]] SymbolTableBuilder* self,
+    [[maybe_unused]] const TSNode& node
+)
+{
+    self->register_type(node, util::TypeKind::Record);
+}
+
+void SymbolTableBuilder::visit_enum(
+    [[maybe_unused]] SymbolTableBuilder* self,
+    [[maybe_unused]] const TSNode& node
+)
+{
+    self->register_type(node, util::TypeKind::Enum);
+}
+
+void SymbolTableBuilder::visit_delegate(
+    [[maybe_unused]] SymbolTableBuilder* self,
+    [[maybe_unused]] const TSNode& node
+)
+{
+    self->register_type(node, util::TypeKind::Delegate);
+}
+
+void SymbolTableBuilder::visit_memb_var(
+    SymbolTableBuilder* self,
+    const TSNode& node
+)
+{
+    const std::string_view src = self->src_str();
+
+    TSNode nVarDecl;
+    const CSModifiers modifs
+        = CSModifiers::handle_var_modifs(node, src, &nVarDecl);
+    const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
+    const TypeHandler th   = RegManager::get_type_handler(nType);
+    Type* type             = th(&self->typeTrs_, nType);
+    TypeMetadata& typeMeta = self->symbTable_.userTypeMetadata.at(
+        self->typeContext_.typeStack.top()
+    );
+
+    std::vector<VarDefStmt*> varDefs;
+    auto process = [&](const TSQueryMatch& match)
+    {
+        const TSNode nDecltor    = match.captures[0].node;
+        const TSNode nName       = util::child_by_field_name(nDecltor, "name");
+        MemberVarDefStmt* varDef = stmtFact_.mk_member_var_def(
+            util::extract_text(nName, src),
+            type,
+            nullptr,
+            modifs.get_access_mod().value_or(AccessModifier::Private)
+        );
+
+        varDefs.push_back(varDef);
+        MemberVarMetadata membVarMeta{
+            .varDef = varDef,
+            .nVar   = nDecltor,
+            .nInit  = ts_node_named_child(nDecltor, 1) // right side
+        };
+        typeMeta.memberVars.emplace(varDef->name_, membVarMeta);
+    };
+    util::for_each_match(nVarDecl, regs::QueryType::VarDecltor, process);
+}
+
+void SymbolTableBuilder::visit_property(
+    [[maybe_unused]] SymbolTableBuilder* self,
+    [[maybe_unused]] const TSNode& node
+)
+{
+}
+
+void SymbolTableBuilder::visit_method(
+    SymbolTableBuilder* self,
+    const TSNode& node
+)
+{
+    const auto currentType = self->typeContext_.typeStack.top();
+    if (! currentType)
+        throw std::logic_error("Owner type not found");
+
+    auto& userTypeMetadata = self->symbTable_.userTypeMetadata;
+    const auto itTypeMeta  = userTypeMetadata.find(currentType);
+    if (itTypeMeta == userTypeMetadata.end())
+        throw std::logic_error("Type wasn't discovered yet");
+
+    const CSModifiers modifs
+        = CSModifiers::handle_memb_modifs(node, self->src_str());
+
+    const TSNode nRetType       = util::child_by_field_name(node, "returns");
+    const TSNode nFuncName      = util::child_by_field_name(node, "name");
+    const TSNode nParams        = util::child_by_field_name(node, "parameters");
+
+    const bool isVariadic       = util::has_variadic_param(nParams);
+    const size_t cNamedChildren = ts_node_named_child_count(nParams);
+    const size_t cParam = isVariadic ? cNamedChildren - 1 : cNamedChildren;
+    std::string name    = util::extract_text(nFuncName, self->src_str());
+    MethodId methodId{
+        .name       = name,
+        .paramCount = cParam,
+        .isStatic   = modifs.has(CSModifier::Static),
+    };
+
+    auto [params, paramsMeta]
+        = util::discover_params(nParams, self->src_str(), self->typeTrs_);
+    MethodDefStmt* methodDef         = nullptr;
+    auto& methods                    = itTypeMeta->second.methods;
+    const auto& [itMethod, inserted] = methods.try_emplace(std::move(methodId));
+
+    if (inserted)
+    {
+        const TypeHandler th = RegManager::get_type_handler(nRetType);
+        Type* retType        = th(&self->typeTrs_, nRetType);
+        methodDef            = stmtFact_.mk_method_def(
+            currentType,
+            stmtFact_.mk_function_def(
+                std::move(name),
+                std::move(params),
+                retType,
+                nullptr
+            ),
+            modifs.get_access_mod().value_or(AccessModifier::Internal),
+            modifs.get_virtuality()
+        );
+    }
+
+    MethodMetadata metadata{
+        .params    = std::move(paramsMeta),
+        .methodDef = methodDef,
+        .nMethod   = node,
+    };
+    itMethod->second = std::move(metadata);
+}
+
+void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
+{
+    const std::string_view srcStr = src_str();
+    static const TSSymbol sGlobal = util::symbol_for_name("global", false);
+    static const TSSymbol sStatic = util::symbol_for_name("static", false);
+    const TSNode nAliasName
+        = util::child_by_field_name(nUsingDirective, "name");
+    bool isGlobal = false;
+    bool isStatic = false;
+
+    auto process  = [&isGlobal, &isStatic](const TSNode& current)
+    {
+        const TSSymbol sCurrent = ts_node_symbol(current);
+        if (sCurrent == sGlobal)
+            isGlobal = true;
+        else if (sCurrent == sStatic)
+            isStatic = true;
+    };
+
+    util::for_each_child_node(nUsingDirective, process, false);
+
+    if (ts_node_is_null(nAliasName))
+    {
+        const TSNode nQualif     = ts_node_named_child(nUsingDirective, 0);
+        const std::string fqnStr = util::extract_text(nQualif, srcStr);
+        Scope fqn                = util::mk_scope(fqnStr);
+
+        if (isGlobal && isStatic)
+        {
+            const std::string typeName = std::move(fqn.names_.back());
+            fqn.names_.pop_back();
+            if (const auto type = symbTable_.symbTree.find_type(fqn, typeName))
+            {
+                symbTable_.globStaticUsings.push_back(type->def);
+            }
+        }
+        else if (isStatic)
+        {
+            const std::string typeName = std::move(fqn.names_.back());
+            fqn.names_.pop_back();
+            if (const auto type = symbTable_.symbTree.find_type(fqn, typeName))
+            {
+                const Scope scope
+                    = util::mk_scope(nUsingDirective, *this->src());
+                SymbolNode* node = symbTable_.symbTree.find_node(scope);
+                if (Nms* nms = node->is_content<Nms>())
+                    nms->add_static_using(this->src(), *type);
+            }
+        }
+        else if (isGlobal)
+        {
+            symbTable_.globUsings.push_back(std::move(fqn));
+        }
+        else
+        {
+            this->src()->fileContext.usings.push_back(std::move(fqn));
+        }
+    }
+    else
+    {
+        const TSNode nQualif  = ts_node_next_named_sibling(nAliasName);
+        std::string aliasName = util::extract_text(nAliasName, srcStr);
+        if (isGlobal)
+        {
+            Alias alias = mk_global_alias(nQualif);
+            symbTable_.globAliases.emplace(
+                std::move(aliasName),
+                std::move(alias)
+            );
+        }
+        else
+        {
+
+        }
+    }
+}
+
+Alias SymbolTableBuilder::mk_global_alias(const TSNode& nAliasQualif) const
+{
+    static const TSSymbol sQualifName
+        = util::symbol_for_name("qualified_name", true);
+    static const TSSymbol sAliasQualfName
+        = util::symbol_for_name("alias_qualified_name", true);
+    const std::string_view src = src_str();
+    TSNode current             = nAliasQualif;
+    std::vector<TSNode> nQualifs;
+
+    while (ts_node_symbol(current) == sQualifName)
+    {
+        nQualifs.push_back(util::child_by_field_name(current, "name"));
+        current = util::child_by_field_name(current, "qualifier");
+    }
+
+    SymbolTree& symbTree = symbTable_.symbTree;
+    auto* currentNode    = symbTree.root();
+    if (ts_node_symbol(current) == sAliasQualfName)
+    {
+        nQualifs.push_back(util::child_by_field_name(current, "name"));
+        const TSNode nAlias = util::child_by_field_name(current, "alias");
+        const std::string aliasStr = util::extract_text(nAlias, src);
+        if (aliasStr != "global")
+        {
+            // todo external aliases
+        }
+    }
+    else
+    {
+        nQualifs.push_back(current);
+    }
+
+    SymbolTreeCursor cursor(*currentNode);
+    bool found = true;
+    for (auto& nName : std::views::reverse(nQualifs))
+    {
+        std::string qualifName = util::extract_text(nName, src);
+        if (! cursor.go_to_child(qualifName))
+        {
+            found = false;
+            break;
+        }
+        currentNode = cursor.current();
+    }
+
+    return found ? Alias{currentNode}
+                 : Alias{util::extract_text(nAliasQualif, src)};
+}
+
+Alias SymbolTableBuilder::mk_local_alias(
+    const TSNode& nAliasQualif,
+    const Scope& scope
+) const
+{
+    return {};
+}
+
+void SymbolTableBuilder::register_type(
+    const TSNode& node,
+    const util::TypeKind typeKind
+)
+{
+    const TSNode nName   = util::child_by_field_name(node, "name");
+    std::string name     = util::extract_text(nName, src_str());
+    Scope scope          = util::mk_scope(node, *src());
+    UserTypeDefStmt* def = nullptr;
+    ScopedType* type     = nullptr;
+
+    switch (typeKind)
+    {
+    case util::TypeKind::Class:
+    {
+        ClassDefStmt* classDef
+            = stmtFact_.mk_class_def(std::move(name), std::move(scope));
+        def  = classDef;
+        type = classDef->type_;
+        break;
+    }
+    case util::TypeKind::Interface:
+    {
+        InterfaceDefStmt* intfDef
+            = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
+        def  = intfDef;
+        type = intfDef->m_type;
+        break;
+    }
+    case util::TypeKind::Record:
+    case util::TypeKind::Enum:
+    case util::TypeKind::Delegate:
+        // todo add registration for other types
+        break;
+    }
+
+    if (def && type)
+    {
+        TypeMetadata metadata{
+            .userType = def,
+            .typeNms
+            = symbTable_.symbTree.add_type(type->scope_, TypeBinding{type, def})
+        };
+        auto [it, inserted]
+            = symbTable_.userTypeMetadata.try_emplace(def, std::move(metadata));
+
+        if (inserted)
+            symbTable_.userTypeKeys.push_back(def);
+        it->second.defs.emplace_back(node, this->src());
+    }
+}
+
+SourceFile* SymbolTableBuilder::src() const
+{
+    return currentSrc_
+             ? currentSrc_
+             : throw std::logic_error("Current source code is not set");
+}
+
+std::string_view SymbolTableBuilder::src_str() const
+{
+    return src()->srcStr;
+}
+
+} // namespace astfri::csharp

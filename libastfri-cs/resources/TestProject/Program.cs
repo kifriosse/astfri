@@ -1,200 +1,94 @@
 ﻿using System.Collections;
 using Zoznam = System.Collections.Generic.List<string>;
+using System.Collections.Generic;
 
-// public class Program {
-//     public static void Main(string[] args) {
-//         Console.WriteLine("Hello World");
-//         Zoznam z = new();
-//     }
-// }
 
-namespace CSharp.T.Test
+public class Program
 {
-    namespace Test2
+    private const int constant = 6; // test comment
+    private string test = "test";
+    private IEnumerable enumerable;
+    private unsafe volatile protected string* testPtr;
+
+    static void RecursiveFunc(int i)
     {
-        internal delegate int Pr(int x);
+        Console.WriteLine($"{i}");
+        RecursiveFunc(i + 1);
     }
 
-    public interface IIntr<G> : IComparable where G : IComparable<int>
+    static void Main(string[] args)
     {
-        private static int s = 10;
-        void Interfacing(Test5 t)
+        
+        var rand = new Random();
+        int num = unchecked((int)rand.NextInt64()) % 100;
+        int guess;
+        Console.WriteLine("Guess the number from 0 to 99");
+        do
         {
-            
-        }
-
-
-        public interface Test5
-        {
-            void testIntMethod()
+            Console.WriteLine("Enter the guess");
+            string? strGuess = Console.ReadLine();
+            if (! int.TryParse(strGuess, out guess))
             {
-                Console.WriteLine();
-            }
-
-        }
-    }
-
-    public partial class Program
-    {
-        private const int constant = 6; // test comment
-        private string test = "test";
-        private IEnumerable enumerable;
-        private unsafe volatile protected string* testPtr;
-
-        static void Main2(string[] args)
-        {
-            
-            int[] array = { 4, 5, 6, 8, 77, 47, 59 };
-            while (true)
-            {
-                break;
-            }
-            
-            do
-            {
+                Console.WriteLine("Input a number");
                 continue;
-            } while (true);
-            // List<Person> people = [];
-            // for (
-            //     int i = 0, j = 0;
-            //     i < 10;
-            //     ++i, j += 2, people.Add(new Person($"Person {i}", j))
-            // )
-            // {
-            //     //...
-            // }
-            // foreach (Person person in people)
-            // {
-            //     Console.WriteLine($"Name: {person.Name} Age: {person.Age}");
-            // }
-
-            // decimal a_d = 1254.587m;
-            // string b_s = @"test";
-
-            // _ = 8;
-            // string h = @"Multi
-            // line
-            // raw";
-
-            // const int constant2 = 1;
-
-            // int a = 4, b = 5;
-            // float c = (float)a;
-
-            // ref readonly int r = ref a;
-
-            // int? nullable = null;
-            // int bar = nullable ?? 5;
-
-            // int foo = nullable is null ? bar : 6;
-
-            // int brackets = (a + b) * 10;
-
-            // int a1;
-            // const int a2 = 1;
-            // a1 = a;
-        }
-
-        unsafe public void UnsafeMethod()
-        {
-            fixed(string* testPtr = &test)
+            }
+            if (guess != num)
             {
-                this.testPtr = testPtr;
+                Console.WriteLine("Incorrect guess");
+            }
+            else
+            {
+                Console.WriteLine("Correct guess");        
             }
         }
-    }
+        while (guess != num);
 
-    /// <summary>
-    /// Testing documentation comments
-    /// </summary>
-    public class Person
-    {
-        private static readonly int mf = 8;
-        private string _firstName;
-        private string _lastName;
-    
-        public string Name { 
-            get => _firstName + " " + _lastName;
-            set
-            {
-                string[] /* test */ parts = value.Split(" ");
-                _firstName = parts[0];
-                _lastName = parts[1];
-            } 
-        }
+        int[] array = { 4, 5, 6, 8, 77, 47, 59 };
+        IEnumerator<int> enumerator = array.AsEnumerable().GetEnumerator();
 
-        public Vector2 Position { get; set; }
-
-        public int Age { get; init; }
-        private Pohlavie gender = Pohlavie.Muz;
-
-        public Person(string fullName, int age)
+        while (enumerator.MoveNext())
         {
-            Age = age;
-            Name = fullName;
+            Console.WriteLine($"{enumerator.Current}");
         }
 
-        public void Print()
+        List<Person> people = [];
+        for (
+            int i = 0, j = 0;
+            i < 10;
+            ++i, j += 2, people.Add(new Person($"Person {i}", j))
+        )
         {
-            Console.WriteLine($"{Name}, {Age}");
+            //...
         }
-
-        protected virtual void TestVirtuality()
-        {
-        }
-
-        ~Person() => Print();
-
-        private enum Pohlavie
-        {
-            Zena, Muz, Ine
-        }
-
-        public delegate void ChangeDelegate(int something);
-        public event ChangeDelegate OnChange;
-
-        public void Deconstruct(out int age, out string name, out Vector2 position)
-        {
-            age = Age;
-            name = Name;
-            position = Position;
-        }
-
-        public Vector2 GetPossition()
-        {
-            return Position;
-        }
-    }
-
-    class Child<T, U> : Person where U: IEnumerable<T>, IComparable<U>
-    {
-        static Child()
-        {
-
-        }
-
-        public Child(string name, int age) 
-            : base(name ?? "Unknown", age > 18 ? 18 : age)
-        {
-            
-        }
-
-        // public Child() 
-        //     : this("DefaultName", 0)
+        // foreach (Person person in people)
         // {
+        //     Console.WriteLine($"Name: {person.Name} Age: {person.Age}");
         // }
 
-        public G TestGenericMethod<G>() where G : new()
-        {
-            return new G();
-        }
+        // decimal a_d = 1254.587m;
+        // string b_s = @"test";
 
-        protected sealed override void TestVirtuality()
-        {
-            base.TestVirtuality();
-            
-        }
+        // _ = 8;
+        // string h = @"Multi
+        // line
+        // raw";
+
+        // const int constant2 = 1;
+
+        // int a = 4, b = 5;
+        // float c = (float)a;
+
+        // ref readonly int r = ref a;
+
+        // int? nullable = null;
+        // int bar = nullable ?? 5;
+
+        // int foo = nullable is null ? bar : 6;
+
+        // int brackets = (a + b) * 10;
+
+        // int a1;
+        // const int a2 = 1;
+        // a1 = a;
     }
 }
-
-

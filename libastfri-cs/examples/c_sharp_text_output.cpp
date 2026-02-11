@@ -1,13 +1,15 @@
-#include <libastfri-cs/inc/CSharpASTBuilder.hpp>
+#include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri-text/inc/TextLibManager.hpp>
+#include <libastfri/inc/Astfri.hpp>
 
 int main()
 {
-    const astfri::csharp::CSharpASTBuilder ast_builder;
-    astfri::text::TextLibManager& manager
-        = astfri::text::TextLibManager::get_instance();
-    const astfri::TranslationUnit* ast = ast_builder.make_ast(
-        "/home/andrew/Coding/astfri/libastfri-cs/resources/TestProject"
-    );
+    using namespace astfri;
+    csharp::ASTBuilder astBuilder;
+    text::TextLibManager& manager = text::TextLibManager::get_instance();
+    astBuilder.load_src("/home/andrew/Coding/astfri/resources/samples/csharp");
+    // for loading file from stream
+    // astBuilder.load_src(stream);
+    const TranslationUnit* ast = astBuilder.mk_ast();
     manager.visit_and_export(*ast);
 }
