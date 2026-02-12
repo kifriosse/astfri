@@ -7,27 +7,30 @@ void UMLOutputter::set_config(Config const& config)
     this->config_ = (Config*)&config;
 }
 
+void UMLOutputter::write_to_stream(std::ostream& p_stream)
+{
+    p_stream << this->outputString_;
+}
+
 void UMLOutputter::write_to_console()
 {
-    std::cout << "UMLOutputter - diagram output:" << std::endl;
-    std::cout << this->outputString_;
+    //std::cout << "UMLOutputter - diagram output:" << std::endl;
+    write_to_stream(std::cout);
 }
 
 void UMLOutputter::write_to_file()
 {
-    std::string path = this->config_->outputFilePath_ + this->getFileExtension();
-    FILE* fhandle    = fopen(path.c_str(), "wt");
-    if (fhandle)
+    std::string v_path = this->config_->outputFilePath_ + this->getFileExtension();
+    std::fstream v_stream;
+    v_stream.open(v_path);
+
+    if (!v_stream.is_open())
     {
-        fprintf(fhandle, "%s", this->outputString_.c_str());
-        std::cout << "UMLOutputter - Successfully written to: " << path << std::endl;
+        // TODO - throw?
     }
-    else
-    {
-        std::cout << "UMLOutputter - Could not write into file" << std::endl;
-        // TODO - throw
-    }
-    fclose(fhandle);
+
+    write_to_stream(v_stream);
+    v_stream.close();
 }
 
 } // namespace astfri::uml

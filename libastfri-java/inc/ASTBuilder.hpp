@@ -20,6 +20,8 @@ public:
     ASTBuilder();
     ~ASTBuilder();
 
+    std::string load_stream(std::istream& stream);
+
     std::string load_file(std::string const& path);
 
     std::string load_directory(std::string const& path);

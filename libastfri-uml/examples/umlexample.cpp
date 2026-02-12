@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     astfri::ClassDefStmt* classFoo                = statements.mk_class_def("Foo", scope);
     astfri::ClassDefStmt* classBar                = statements.mk_class_def("Bar", scope);
     astfri::ClassDefStmt* classParent             = statements.mk_class_def("Parent", scope);
-    astfri::InterfaceDefStmt* interfaceIVisitable = statements.mk_interface_def("IVisitable");
+    astfri::InterfaceDefStmt* interfaceIVisitable = statements.mk_interface_def("IVisitable", scope);
 
     astfri::ClassType* classTypeFoo = types.mk_class("Foo", scope);
     astfri::ClassType* classTypeBar = types.mk_class("Bar", scope);
@@ -111,11 +111,10 @@ int main(int argc, char** argv)
     }
 
     astfri::uml::Config conf;
-    conf.innerView_ = true;
     if (! conf.parse_json(config_file.c_str()))
     {
         conf.use_default_values();
-        std::cout << "Unable to parse JSON config. Using default values.\n";
+        //std::cout << "Unable to parse JSON config. Using default values.\n";
     }
     // config can be changed at any point before calling run
     // either by directly accessing its member variables

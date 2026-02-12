@@ -5,7 +5,7 @@ namespace astfri::uml
 std::string TypeConvention::get_string(
         std::string type,
         std::string identifier,
-        char separator,
+        std::string separator,
         TypeConventions conv
 )
 {

@@ -18,6 +18,13 @@ ASTBuilder::~ASTBuilder()
     delete this->stmtTransformer;
 }
 
+std::string ASTBuilder::load_stream(std::istream& stream)
+{
+    std::stringstream buffer;
+    buffer << stream.rdbuf();
+    return buffer.str();
+}
+
 std::string ASTBuilder::load_file(std::string const& path)
 {
     std::ifstream file(path);
@@ -27,10 +34,7 @@ std::string ASTBuilder::load_file(std::string const& path)
         return "";
     }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-    return buffer.str();
+    return load_stream(file);
 }
 
 std::string ASTBuilder::load_directory(std::string const& path)
@@ -44,9 +48,9 @@ std::string ASTBuilder::load_directory(std::string const& path)
         return sourceCode;
     }
 
-    for (auto const& dir_entry : std::filesystem::directory_iterator{directory})
+    for (auto const& dir_entry : std::filesystem::recursive_directory_iterator{directory})
     {
-        if (dir_entry.path().extension() == ".java")
+        if (dir_entry.is_regular_file() && dir_entry.path().extension() == ".java")
         {
             sourceCode += this->load_file(dir_entry.path());
         }

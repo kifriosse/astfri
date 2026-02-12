@@ -82,10 +82,10 @@ namespace astfri::text
         void visit(WhileStmt const& stmt) override;
         void visit(DoWhileStmt const& stmt) override;
         void visit(ForStmt const& stmt) override;
-        void visit(ForEachStmt const& stmt) override {} // MM: TODO
+        void visit(ForEachStmt const& /*stmt*/) override {} // TODO
         void visit(ThrowStmt const& stmt) override;
-        void visit(CatchStmt const& stmt) override {} // MM: TODO
-        void visit(TryStmt const& stmt) override {} // MM: TODO
+        void visit(CatchStmt const& /*stmt*/) override {} // TODO
+        void visit(TryStmt const& /*stmt*/) override {} // TODO
         void visit(UnknownStmt const& stmt) override;
         void visit(LocalVarDefStmt const& stmt) override;
         void visit(ParamVarDefStmt const& stmt) override;
@@ -144,11 +144,15 @@ namespace astfri::text
             {
                 if (ispolym)
                 {
-                    builder_->write_interface_name(vrel.at(i)->name_);
+                    //builder_->write_interface_name(vrel.at(i)->name_);
+                    //builder_->write_interface_name(vrel.at(i)->type->name_);
+                    builder_->write_interface_name("TEMPORARY SOLUTION"); // TODO ask for change
                 }
                 else
                 {
-                    builder_->write_class_name(vrel.at(i)->name_);
+                    //builder_->write_class_name(vrel.at(i)->name_);
+                    //builder_->write_class_name(vrel.at(i)->m_type_->name_);
+                    builder_->write_class_name("TEMPORARY SOLUTION"); // TODO ask for change
                 }
                 if (!vrel.at(i)->tparams_.empty())
                 {

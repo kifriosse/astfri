@@ -38,6 +38,7 @@
         "indicator":"~"
     },
     "NAMESPACE":{
-        "do_namespace":true
+        "do_namespace":false,
+        "namespace_separator":"::"
     }
 }

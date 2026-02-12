@@ -83,7 +83,9 @@ namespace astfri::text
         }
         for (size_t i = 0; i < types.size(); ++i)
         {
-            builder_->append_text(types.at(i)->name_);
+            //builder_->append_text(types.at(i)->name_);
+            //builder_->append_text(types.at(i)->type_->name_); // TODO check
+            builder_->append_text("TEMPORARY SOLUTION"); // TODO ask for change
             if (i < types.size() - 1)
             {
                 builder_->append_text(", ");

@@ -67,6 +67,15 @@ rm -rf build
 ok
 echo ""
 
+# Initialize and update submodules
+heading "Initializing and updating submodules"
+set -x
+git submodule update --init --recursive
+{ set +x; } 2>/dev/null
+possibly_die "Git submodule update failed"
+ok
+echo ""
+
 # Remove external bin files
 heading "Removing external bin files"
 set -x
@@ -91,6 +100,7 @@ cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
       -DCMAKE_BUILD_TYPE=Debug             \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON   \
+      -DASTFRI_BUILD_WRAPPER=ON            \
       -DASTFRI_BUILD_CPP_INPUT=ON          \
       -DASTFRI_BUILD_JAVA_INPUT=ON         \
       -DASTFRI_BUILD_C_SHARP_INPUT=ON      \

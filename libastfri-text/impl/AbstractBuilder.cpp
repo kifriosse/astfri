@@ -9,6 +9,12 @@ AbstractBuilder::AbstractBuilder() :
 {
 }
 
+// TODO tmp
+std::stringstream* AbstractBuilder::get_builded_text()
+{
+    return buildedText_.get();
+}
+
 //
 // SET_UP
 //

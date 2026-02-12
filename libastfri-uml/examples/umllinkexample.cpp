@@ -10,7 +10,7 @@ int main(int argc, char const** argv)
 
     if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
     {
-        std::cout << "chyba pri fill_translation_unit\n";
+        //std::cout << "chyba pri fill_translation_unit\n";
         return 1;
     }
 

@@ -871,7 +871,7 @@ void PseudocodeVisitor::visit(MethodDefStmt const& stmt)
     }
     if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
     {
-        builder_->write_class_name(stmt.owner_->name_);
+        //builder_->write_class_name(stmt.owner_->name_); // TODO what's next
         if (!ownerClass->tparams_.empty() && configurator_->sh_con_des_meth_template())
         {
             if (configurator_->sh_generic_param())
@@ -896,7 +896,8 @@ void PseudocodeVisitor::visit(BaseInitializerStmt const& stmt)
         builder_->write_constructor_word();
         builder_->append_space();
     }
-    builder_->write_class_name(stmt.base_);
+    //builder_->write_class_name(stmt.base_);
+    builder_->write_class_name(stmt.type->name_); // TODO check
     process_pargs(stmt.args_, false);
 }
 
@@ -922,7 +923,8 @@ void PseudocodeVisitor::visit(ConstructorDefStmt const& stmt)
     }
     if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
     {
-        builder_->write_class_name(stmt.owner_->name_);
+        //builder_->write_class_name(stmt.owner_->name_);
+        builder_->write_class_name(stmt.owner_->type_->name_); // TODO check
         if (!stmt.owner_->tparams_.empty() && configurator_->sh_con_des_meth_template())
         {
             process_pargs(stmt.owner_->tparams_, true);
@@ -931,7 +933,8 @@ void PseudocodeVisitor::visit(ConstructorDefStmt const& stmt)
     }
     if (stmt.owner_)
     {
-        builder_->write_class_name(stmt.owner_->name_);
+        //builder_->write_class_name(stmt.owner_->name_);
+        builder_->write_class_name(stmt.owner_->type_->name_); // TODO check
     }
     else
     {
@@ -977,7 +980,8 @@ void PseudocodeVisitor::visit(DestructorDefStmt const& stmt)
     }
     if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
     {
-        builder_->write_class_name(stmt.owner_->name_);
+        //builder_->write_class_name(stmt.owner_->name_);
+        builder_->write_class_name(stmt.owner_->type_->name_); // TODO check
         if (!stmt.owner_->tparams_.empty() && configurator_->sh_con_des_meth_template())
         {
             process_pargs(stmt.owner_->tparams_, true);
@@ -986,7 +990,8 @@ void PseudocodeVisitor::visit(DestructorDefStmt const& stmt)
     }
     if (stmt.owner_)
     {
-        builder_->write_class_name("~" + stmt.owner_->name_);
+        //builder_->write_class_name("~" + stmt.owner_->name_);
+        builder_->write_class_name("~" + stmt.owner_->type_->name_); // TODO check
     }
     else
     {
@@ -1016,7 +1021,8 @@ void PseudocodeVisitor::visit(InterfaceDefStmt const& stmt)
     }
     builder_->write_interface_word();
     builder_->append_space();
-    builder_->write_interface_name(stmt.name_);
+    //builder_->write_interface_name(stmt.name_);
+    builder_->write_interface_name(stmt.m_type->name_); // TODO check
     if (!stmt.bases_.empty())
     {
         process_relations(stmt.bases_, true);
@@ -1042,7 +1048,8 @@ void PseudocodeVisitor::visit(ClassDefStmt const& stmt)
         }
         builder_->write_class_word();
         builder_->append_space();
-        builder_->write_class_name(stmt.name_);
+        //builder_->write_class_name(stmt.name_);
+        builder_->write_class_name(stmt.type_->name_); // TODO check
         if (!stmt.interfaces_.empty())
         {
             process_relations(stmt.interfaces_, true);
@@ -1273,7 +1280,8 @@ void PseudocodeVisitor::process_constructor(std::vector<ConstructorDefStmt*>& co
     {
         if (constr.at(i) && constr.at(i)->owner_)
         {
-            builder_->write_class_name(constr.at(i)->owner_->name_);
+            //builder_->write_class_name(constr.at(i)->owner_->name_);
+            builder_->write_class_name(constr.at(i)->owner_->type_->name_); // TODO check
             process_pargs(constr.at(i)->params_, false);
         }
         else
@@ -1295,7 +1303,8 @@ void PseudocodeVisitor::process_destructor_decl(std::vector<DestructorDefStmt*> 
     {
         if (vdestructors.at(i) && vdestructors.at(i)->owner_)
         {
-            builder_->write_class_name("~" + vdestructors.at(i)->owner_->name_);
+            //builder_->write_class_name("~" + vdestructors.at(i)->owner_->name_);
+            builder_->write_class_name("~" + vdestructors.at(i)->owner_->type_->name_); // TODO check
             builder_->write_left_bracket("(");
             builder_->write_right_bracket(")");
         }
