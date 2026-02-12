@@ -1,25 +1,5 @@
 // extern alias MyExternalAlias;
 
-global using S = System;
-global using A = AnotherNamespace.SubNamespace;
-global using MyTypeAlias = AnotherNamespace.SubNamespace.TestClass;
-using MyNamespace = System.Collections;
-
-using System.Drawing;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using MyAlias = System.Collections.Generic.Dictionary<string, int>;
-
-
-namespace AnotherNamespace.SubNamespace
-{
-    using SingleNamespace = System;
-    public class TestClass
-    {
-        
-    }
-};
-
 public delegate void MyDelegate(int x);
 
 public record struct MyRecordStruct(int X, int Y);
@@ -170,8 +150,6 @@ public partial class TestClass
         System.Collections.Generic.List<int> l = new System.Collections.Generic.List<int>();
         Console.WriteLine($"Vector components: X = {x}, Y = {y}");
         System.Collections.Generic.IReadOnlyList<int>.Equals(list, list);
-
-        MyTypeAlias testClassInstance = new MyTypeAlias();
 
         ((Func<int, bool>)((x) => { return false; }))(1);
     //  ^   ^           ^          ^             ^

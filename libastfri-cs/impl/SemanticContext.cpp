@@ -235,15 +235,14 @@ MemberVarMetadata* SemanticContext::find_memb_var(
         while (current)
         {
             const auto& itTypeMeta = userTypes.find(current);
-            if (itTypeMeta == userTypes.end())
-                continue;
+            if (itTypeMeta != userTypes.end())
+            {
+                auto& membVars     = itTypeMeta->second.memberVars;
 
-            auto& membVars     = itTypeMeta->second.memberVars;
-
-            const auto& itVars = membVars.find(name);
-            if (itVars != membVars.end())
-                return &itVars->second;
-
+                const auto& itVars = membVars.find(name);
+                if (itVars != membVars.end())
+                    return &itVars->second;
+            }
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }

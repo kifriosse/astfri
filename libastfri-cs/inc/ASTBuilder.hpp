@@ -43,7 +43,6 @@ public:
      */
     TranslationUnit* mk_ast();
 
-
 private:
     void load_from_stream(std::istream& inputStream, const path& path = {});
 };

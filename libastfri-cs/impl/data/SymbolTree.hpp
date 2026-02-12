@@ -6,12 +6,14 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
 namespace astfri
 {
 // forward declaration
+struct Scope;
 struct UserTypeDefStmt;
 struct ScopedType;
 } // namespace astfri
@@ -19,19 +21,24 @@ struct ScopedType;
 namespace astfri::csharp
 {
 struct SourceFile;
+class ScopeNode;
 
 /**
  * @brief Helper struct to group type and its definition statement
  */
 struct TypeBinding
 {
+    ScopeNode* treeNode{nullptr};
     ScopedType* type;
     UserTypeDefStmt* def;
 };
 
-class SymbolNode;
+struct ExternalMarker
+{
+    std::string fqn;
+};
 
-using Alias = std::variant<std::monostate, std::string, SymbolNode*>;
+using Alias = std::variant<std::monostate, std::string, ScopeNode*>;
 
 /**
  * @brief class for representing namespace
@@ -40,72 +47,81 @@ class Nms
 {
 private:
     std::string name_{};
-    std::unordered_map<SourceFile*, std::vector<TypeBinding>>
-        staticUsings_{};
+    std::unordered_map<SourceFile*, std::vector<TypeBinding>> staticUsings_{};
     IdentifierMap<std::unordered_map<SourceFile*, Alias>> aliases_{};
 
 public:
     explicit Nms(std::string name);
 
     void add_static_using(SourceFile* src, TypeBinding type);
-    void add_alias(std::string aliasName, SourceFile* src, const Alias& alias);
+    void add_alias(std::string aliasName, SourceFile* src, Alias alias);
 
-    Alias* find_alias(std::string_view aliasName, SourceFile* src);
+    const Alias* find_alias(std::string_view aliasName, SourceFile* src) const;
     std::span<const TypeBinding> get_static_usings(SourceFile* src) const;
 };
 
-class SymbolNode
+class ScopeNode
 {
 private:
-    using Content = std::variant<Nms, TypeBinding>;
-    Content content_;
-    IdentifierMap<std::unique_ptr<SymbolNode>> children_;
-    SymbolNode* parent_;
+    using NodeData = std::variant<Nms, TypeBinding, ExternalMarker>;
+    NodeData data_;
+    IdentifierMap<std::unique_ptr<ScopeNode>> children_{};
+    ScopeNode* parent_;
 
 public:
-    explicit SymbolNode(Content content, SymbolNode* parent = nullptr);
+    explicit ScopeNode(NodeData content, ScopeNode* parent = nullptr);
 
-    SymbolNode(const SymbolNode& other)            = delete;
-    SymbolNode(SymbolNode&& other)                 = delete;
-    SymbolNode& operator=(const SymbolNode& other) = delete;
-    SymbolNode& operator=(SymbolNode&& other)      = delete;
+    ScopeNode(const ScopeNode& other)            = delete;
+    ScopeNode(ScopeNode&& other)                 = delete;
+    ScopeNode& operator=(const ScopeNode& other) = delete;
+    ScopeNode& operator=(ScopeNode&& other)      = delete;
 
-    SymbolNode* parent() const;
-    SymbolNode* find_child(std::string_view childName);
-    SymbolNode* try_add_child(
+    [[nodiscard]] const NodeData& data() const;
+
+    ScopeNode* parent() const;
+    ScopeNode* find_child(std::string_view childName);
+    ScopeNode* try_add_child(
         std::string name,
-        Content content,
-        SymbolNode* parent
+        NodeData content,
+        ScopeNode* parent
     );
 
     template<typename T>
-    requires requires(Content v) { std::get_if<T>(&v); }
-    T* is_content();
+    requires requires(NodeData v) { std::get_if<T>(&v); }
+    T* has_data();
+    template<typename T>
+    requires requires(NodeData v) { std::get_if<T>(&v); }
+    T& data();
 };
 
 class SymbolTree
 {
 private:
-    std::unique_ptr<SymbolNode> root_;
+    std::unique_ptr<ScopeNode> root_;
 
 public:
     SymbolTree();
-    [[nodiscard]] SymbolNode* root() const;
+    [[nodiscard]] ScopeNode* root() const;
     /**
      * @brief Adds a namespace/scope to the symbol tree
      * @param scope scope/namespace to add
      * @return pointer to the last node of the added namespace (can be ignored)
      */
-    SymbolNode* add_scope(const Scope& scope);
+    ScopeNode* add_scope(const Scope& scope);
     /**
      * @brief Adds a type to the symbol tree under the given scope
      * @param scope scope/namespace under which to add the type
-     * @param typeBinding
+     * @param type type to add
+     * @param def definition of the type
      */
-    SymbolNode* add_type(const Scope& scope, TypeBinding typeBinding);
+    ScopeNode* add_type(
+        const Scope& scope,
+        ScopedType* type,
+        UserTypeDefStmt* def
+    );
 
-    [[nodiscard]] SymbolNode* find_node(const Scope& scope) const;
-    [[nodiscard]] SymbolNode* find_node(
+    [[nodiscard]] ScopeNode* find_node(const Scope& scope) const;
+    [[nodiscard]] ScopeNode* find_node(
         const Scope& start,
         const Scope& end
     ) const;
@@ -139,7 +155,7 @@ public:
         bool searchParents = false
     ) const;
     [[nodiscard]] static TypeBinding* find_type(
-        SymbolNode& start,
+        ScopeNode& start,
         std::string_view typeName
     );
 };
@@ -147,11 +163,11 @@ public:
 class SymbolTreeCursor
 {
 private:
-    SymbolNode* current_;
+    ScopeNode* current_;
 
 public:
-    explicit SymbolTreeCursor(SymbolNode& root);
-    SymbolNode* current();
+    explicit SymbolTreeCursor(ScopeNode& root);
+    ScopeNode* current();
     bool go_to_parent();
     bool go_to_child(std::string_view childName);
 };

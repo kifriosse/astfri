@@ -1,6 +1,9 @@
 #include <libastfri-cs/impl/data/SymbolTree.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
+#include <memory>
+#include <span>
+#include <string>
 #include <string_view>
 #include <variant>
 
@@ -21,7 +24,7 @@ void Nms::add_static_using(SourceFile* src, const TypeBinding type)
     }
 }
 
-void Nms::add_alias(std::string aliasName, SourceFile* src, const Alias& alias)
+void Nms::add_alias(std::string aliasName, SourceFile* src, Alias alias)
 {
     if (src)
     {
@@ -30,7 +33,10 @@ void Nms::add_alias(std::string aliasName, SourceFile* src, const Alias& alias)
     }
 }
 
-Alias* Nms::find_alias(const std::string_view aliasName, SourceFile* src)
+const Alias* Nms::find_alias(
+    const std::string_view aliasName,
+    SourceFile* src
+) const
 {
     if (src)
     {
@@ -56,50 +62,57 @@ std::span<const TypeBinding> Nms::get_static_usings(SourceFile* src) const
     return {};
 }
 
-SymbolNode::SymbolNode(Content content, SymbolNode* parent) :
-    content_(std::move(content)),
+ScopeNode::ScopeNode(NodeData content, ScopeNode* parent) :
+    data_(std::move(content)),
     parent_(parent)
 {
+    if (auto* b = std::get_if<TypeBinding>(&data_))
+        b->treeNode = this;
 }
 
-SymbolNode* SymbolNode::parent() const
+ScopeNode* ScopeNode::parent() const
 {
     return parent_;
 }
 
-SymbolNode* SymbolNode::find_child(const std::string_view childName)
+ScopeNode* ScopeNode::find_child(const std::string_view childName)
 {
     const auto it = children_.find(childName);
     return it != children_.end() ? it->second.get() : nullptr;
 }
 
-SymbolNode* SymbolNode::try_add_child(
+ScopeNode* ScopeNode::try_add_child(
     std::string name,
-    Content content,
-    SymbolNode* parent
+    NodeData content,
+    ScopeNode* parent
 )
 {
     auto [it, inserted] = children_.try_emplace(std::move(name));
     if (inserted)
     {
-        it->second = std::make_unique<SymbolNode>(std::move(content), parent);
+        it->second = std::make_unique<ScopeNode>(std::move(content), parent);
     }
     return it->second.get();
 }
 
+const ScopeNode::NodeData& ScopeNode::data() const
+{
+    return data_;
+}
+
 SymbolTree::SymbolTree() :
-    root_(std::make_unique<SymbolNode>(Nms({})))
+    root_(std::make_unique<ScopeNode>(Nms({})))
 {
 }
 
-SymbolNode* SymbolTree::root() const
+ScopeNode* SymbolTree::root() const
 {
     return root_.get();
 }
 
-SymbolNode* SymbolTree::add_scope(const Scope& scope)
+ScopeNode* SymbolTree::add_scope(const Scope& scope)
 {
-    SymbolNode* current = root();
+    ScopeNode* current = root();
     for (const std::string& str : scope.names_)
     {
         current = current->try_add_child(str, Nms(str), current);
@@ -107,10 +120,19 @@ SymbolNode* SymbolTree::add_scope(const Scope& scope)
     return current;
 }
 
-SymbolNode* SymbolTree::add_type(const Scope& scope, TypeBinding typeBinding)
+ScopeNode* SymbolTree::add_type(
+    const Scope& scope,
+    ScopedType* type,
+    UserTypeDefStmt* def
+)
 {
-    SymbolNode* last = add_scope(scope);
-    return last->try_add_child(typeBinding.type->name_, typeBinding, last);
+    TypeBinding binding{
+        .type = type,
+        .def  = def,
+    };
+    ScopeNode* last    = add_scope(scope);
+    ScopeNode* newNode = last->try_add_child(type->name_, binding, last);
+    return newNode;
 }
 
 TypeBinding* SymbolTree::find_type(
@@ -129,19 +151,19 @@ TypeBinding* SymbolTree::find_type(
     const bool searchParents
 ) const
 {
-    SymbolNode* node = find_node(start, end);
+    ScopeNode* node = find_node(start, end);
     if (! node)
         return nullptr;
 
     if (searchParents)
         return find_type(*node, typeName);
 
-    SymbolNode* childNode = node->find_child(typeName);
-    return childNode->is_content<TypeBinding>();
+    ScopeNode* childNode = node->find_child(typeName);
+    return childNode->has_data<TypeBinding>();
 }
 
 TypeBinding* SymbolTree::find_type(
-    SymbolNode& start,
+    ScopeNode& start,
     const std::string_view typeName
 )
 {
@@ -149,19 +171,19 @@ TypeBinding* SymbolTree::find_type(
     do
     {
         if (auto* node = cursor.current()->find_child(typeName))
-            return node->is_content<TypeBinding>();
+            return node->has_data<TypeBinding>();
 
     } while (cursor.go_to_parent());
 
     return nullptr;
 }
 
-SymbolNode* SymbolTree::find_node(const Scope& scope) const
+ScopeNode* SymbolTree::find_node(const Scope& scope) const
 {
     return find_node({}, scope);
 }
 
-SymbolNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
+ScopeNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
 {
     SymbolTreeCursor cursor(*root_);
     auto process = [&cursor](const Scope& scope) -> bool
@@ -180,12 +202,12 @@ SymbolNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
     return cursor.current();
 }
 
-SymbolTreeCursor::SymbolTreeCursor(SymbolNode& root) :
+SymbolTreeCursor::SymbolTreeCursor(ScopeNode& root) :
     current_(&root)
 {
 }
 
-SymbolNode* SymbolTreeCursor::current()
+ScopeNode* SymbolTreeCursor::current()
 {
     return current_;
 }
@@ -202,7 +224,7 @@ bool SymbolTreeCursor::go_to_parent()
 
 bool SymbolTreeCursor::go_to_child(const std::string_view childName)
 {
-    if (SymbolNode* child = current_->find_child(childName))
+    if (ScopeNode* child = current_->find_child(childName))
     {
         current_ = child;
         return true;
@@ -212,10 +234,10 @@ bool SymbolTreeCursor::go_to_child(const std::string_view childName)
 
 TypeBinding* type_from_alias(const Alias& alias)
 {
-    if (const auto* nodeHandle = std::get_if<SymbolNode*>(&alias))
+    if (const auto* nodeHandle = std::get_if<ScopeNode*>(&alias))
     {
-        SymbolNode* node = *nodeHandle;
-        if (auto* binding = node->is_content<TypeBinding>())
+        ScopeNode* node = *nodeHandle;
+        if (auto* binding = node->has_data<TypeBinding>())
         {
             return binding;
         }

@@ -5,10 +5,17 @@ namespace astfri::csharp
 {
 
 template<typename T>
-requires requires(SymbolNode::Content v) { std::get_if<T>(&v); }
-T* SymbolNode::is_content()
+requires requires(ScopeNode::NodeData v) { std::get_if<T>(&v); }
+T* ScopeNode::has_data()
 {
-    return std::get_if<T>(&content_);
+    return std::get_if<T>(&data_);
+}
+
+template<typename T>
+requires requires(ScopeNode::NodeData v) { std::get_if<T>(&v); }
+T& ScopeNode::data()
+{
+    return std::get<T>(data_);
 }
 
 } // namespace astfri::csharp

@@ -24,8 +24,8 @@ SymbolTableBuilder::SymbolTableBuilder(
     std::vector<std::unique_ptr<SourceFile>>& srcs,
     SymbolTable& symbTable
 ) :
-    typeTrs_(symbTable),
     srcs_(srcs),
+    typeTrs_(symbTable),
     symbTable_(symbTable),
     lang_(tree_sitter_c_sharp())
 {
@@ -78,12 +78,15 @@ void SymbolTableBuilder::reg_members()
 {
     auto process = [this](const TSNode& current)
     {
+        if (util::is_type_decl(current))
+            return;
+
         const RegHandler handler = RegManager::get_reg_handler(current);
         handler(this, current);
     };
     for (auto& metadata : symbTable_.userTypeMetadata | std::views::values)
     {
-        typeTrs_.set_current_namespace(metadata.typeNms);
+        typeTrs_.set_current_namespace(metadata.scope);
         for (auto& [node, src] : metadata.defs)
         {
             const TSNode nClassBody = util::child_by_field_name(node, "body");
@@ -161,8 +164,9 @@ void SymbolTableBuilder::visit_memb_var(
     {
         const TSNode nDecltor    = match.captures[0].node;
         const TSNode nName       = util::child_by_field_name(nDecltor, "name");
+        std::string name         = util::extract_text(nName, src);
         MemberVarDefStmt* varDef = stmtFact_.mk_member_var_def(
-            util::extract_text(nName, src),
+            std::move(name),
             type,
             nullptr,
             modifs.get_access_mod().value_or(AccessModifier::Private)
@@ -250,7 +254,8 @@ void SymbolTableBuilder::visit_method(
 
 void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
 {
-    const std::string_view srcStr = src_str();
+    SourceFile* src               = this->src();
+    const std::string_view srcStr = src->srcStr;
     static const TSSymbol sGlobal = util::symbol_for_name("global", false);
     static const TSSymbol sStatic = util::symbol_for_name("static", false);
     const TSNode nAliasName
@@ -269,118 +274,70 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
 
     util::for_each_child_node(nUsingDirective, process, false);
 
+    const Scope directiveScope = util::mk_scope(nUsingDirective, *src);
+    ScopeNode* searchStart     = symbTable_.symbTree.find_node(directiveScope);
+
     if (ts_node_is_null(nAliasName))
     {
-        const TSNode nQualif     = ts_node_named_child(nUsingDirective, 0);
-        const std::string fqnStr = util::extract_text(nQualif, srcStr);
-        Scope fqn                = util::mk_scope(fqnStr);
+        using enum util::SearchScope;
+        util::SearchScope searchScope;
+        if (isStatic)
+            searchScope = isGlobal ? GlobStaticUsing : LocalStaticUsing;
+        else
+            searchScope = isGlobal ? GlobUsing : FileUsing;
 
-        if (isGlobal && isStatic)
+        const TSNode nQualif = ts_node_named_child(nUsingDirective, 0);
+        ScopeNode* node
+            = typeTrs_.resolve_qualif_name(nQualif, searchScope, searchStart);
+
+        if (! node)
+            return;
+
+        if (isStatic)
         {
-            const std::string typeName = std::move(fqn.names_.back());
-            fqn.names_.pop_back();
-            if (const auto type = symbTable_.symbTree.find_type(fqn, typeName))
+            if (const auto* b = node->has_data<TypeBinding>())
             {
-                symbTable_.globStaticUsings.push_back(type->def);
+                if (isGlobal)
+                    symbTable_.globStaticUsings.push_back(*b);
+                else
+                    searchStart->data<Nms>().add_static_using(src, *b);
             }
-        }
-        else if (isStatic)
-        {
-            const std::string typeName = std::move(fqn.names_.back());
-            fqn.names_.pop_back();
-            if (const auto type = symbTable_.symbTree.find_type(fqn, typeName))
-            {
-                const Scope scope
-                    = util::mk_scope(nUsingDirective, *this->src());
-                SymbolNode* node = symbTable_.symbTree.find_node(scope);
-                if (Nms* nms = node->is_content<Nms>())
-                    nms->add_static_using(this->src(), *type);
-            }
-        }
-        else if (isGlobal)
-        {
-            symbTable_.globUsings.push_back(std::move(fqn));
         }
         else
         {
-            this->src()->fileContext.usings.push_back(std::move(fqn));
+            if (isGlobal)
+                symbTable_.globUsings.push_back(node);
+            else
+                src->fileContext.usings.push_back(node);
         }
     }
     else
     {
+        using enum util::SearchScope;
+        const auto seachScope = isGlobal ? GlobAlias : LocalAlias;
         const TSNode nQualif  = ts_node_next_named_sibling(nAliasName);
-        std::string aliasName = util::extract_text(nAliasName, srcStr);
-        if (isGlobal)
+        ScopeNode* node
+            = typeTrs_.resolve_qualif_name(nQualif, seachScope, searchStart);
+        if (node)
         {
-            Alias alias = mk_global_alias(nQualif);
-            symbTable_.globAliases.emplace(
-                std::move(aliasName),
-                std::move(alias)
-            );
-        }
-        else
-        {
+            auto* ext   = node->has_data<ExternalMarker>();
+            Alias alias = ext ? Alias{std::move(ext->fqn)} : Alias{node};
+            std::string aliasName = util::extract_text(nAliasName, srcStr);
 
-        }
-    }
-}
-
-Alias SymbolTableBuilder::mk_global_alias(const TSNode& nAliasQualif) const
-{
-    static const TSSymbol sQualifName
-        = util::symbol_for_name("qualified_name", true);
-    static const TSSymbol sAliasQualfName
-        = util::symbol_for_name("alias_qualified_name", true);
-    const std::string_view src = src_str();
-    TSNode current             = nAliasQualif;
-    std::vector<TSNode> nQualifs;
-
-    while (ts_node_symbol(current) == sQualifName)
-    {
-        nQualifs.push_back(util::child_by_field_name(current, "name"));
-        current = util::child_by_field_name(current, "qualifier");
-    }
-
-    SymbolTree& symbTree = symbTable_.symbTree;
-    auto* currentNode    = symbTree.root();
-    if (ts_node_symbol(current) == sAliasQualfName)
-    {
-        nQualifs.push_back(util::child_by_field_name(current, "name"));
-        const TSNode nAlias = util::child_by_field_name(current, "alias");
-        const std::string aliasStr = util::extract_text(nAlias, src);
-        if (aliasStr != "global")
-        {
-            // todo external aliases
+            if (isGlobal)
+            {
+                symbTable_.globAliases.emplace(
+                    std::move(aliasName),
+                    std::move(alias)
+                );
+            }
+            else
+            {
+                Nms& nms = searchStart->data<Nms>();
+                nms.add_alias(std::move(aliasName), src, std::move(alias));
+            }
         }
     }
-    else
-    {
-        nQualifs.push_back(current);
-    }
-
-    SymbolTreeCursor cursor(*currentNode);
-    bool found = true;
-    for (auto& nName : std::views::reverse(nQualifs))
-    {
-        std::string qualifName = util::extract_text(nName, src);
-        if (! cursor.go_to_child(qualifName))
-        {
-            found = false;
-            break;
-        }
-        currentNode = cursor.current();
-    }
-
-    return found ? Alias{currentNode}
-                 : Alias{util::extract_text(nAliasQualif, src)};
-}
-
-Alias SymbolTableBuilder::mk_local_alias(
-    const TSNode& nAliasQualif,
-    const Scope& scope
-) const
-{
-    return {};
 }
 
 void SymbolTableBuilder::register_type(
@@ -423,8 +380,7 @@ void SymbolTableBuilder::register_type(
     {
         TypeMetadata metadata{
             .userType = def,
-            .typeNms
-            = symbTable_.symbTree.add_type(type->scope_, TypeBinding{type, def})
+            .scope    = symbTable_.symbTree.add_type(type->scope_, type, def)
         };
         auto [it, inserted]
             = symbTable_.userTypeMetadata.try_emplace(def, std::move(metadata));

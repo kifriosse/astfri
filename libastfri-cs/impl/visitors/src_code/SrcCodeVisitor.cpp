@@ -37,7 +37,7 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
         if (! typeMetaOpt)
             continue;
 
-        typeTrs_.set_current_namespace(typeMetaOpt->typeNms);
+        typeTrs_.set_current_namespace(typeMetaOpt->scope);
         bool added = false;
         for (auto& [node, src] : typeMetaOpt->defs)
         {

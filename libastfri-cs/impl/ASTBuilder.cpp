@@ -78,16 +78,6 @@ TranslationUnit* ASTBuilder::mk_ast()
 {
     // using milli          = std::chrono::milliseconds;
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
-    // std::cout << "Preprocessing Phase: \n"
-    //           << "Gathering souce files and removing comments..." <<
-    //           std::endl;
-    // auto start = std::chrono::high_resolution_clock::now();
-    // auto end      = std::chrono::high_resolution_clock::now();
-    // auto duration = std::chrono::duration_cast<milli>(end - start);
-    // auto total    = duration;
-    // std::cout << "Preprocesing complete.\n"
-    //           << "Preprocessing took " << duration.count() << " ms"
-    //           << std::endl;
 
     SymbolTable symbTable;
     SymbolTableBuilder symbTableBuilder(srcs_, symbTable);

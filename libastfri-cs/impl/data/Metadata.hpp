@@ -34,7 +34,6 @@ struct MemberVarMetadata
     TSNode nVar{};
     TSNode nInit{}; // right side of assignment
     // todo maybe add flag for static variable
-    bool processed{false};
 };
 
 /**
@@ -96,8 +95,7 @@ struct TypeMetadata
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
     UserTypeDefStmt* userType{nullptr};
-    SymbolNode* typeNms{nullptr};
-    bool processed{false};
+    ScopeNode* scope{nullptr};
 };
 
 } // namespace astfri::csharp

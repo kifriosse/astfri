@@ -95,6 +95,8 @@ TSTree* make_tree(TSParser* parser, std::string_view str);
 
 TSNode unwrap_parantheses(const TSNode& node);
 
+bool is_type_decl(const TSNode& node);
+
 /**
  * @brief Iterates over each child node of the given TSNode and applies the
  * provided function.

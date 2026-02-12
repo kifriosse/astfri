@@ -54,9 +54,9 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
                     name,
                     semanticContext_.current_type()
                 );
+
                 varDef               = varMeta->varDef;
                 varDef->initializer_ = init;
-                varMeta->processed   = true;
                 break;
             }
             case util::VarDefType::Local:

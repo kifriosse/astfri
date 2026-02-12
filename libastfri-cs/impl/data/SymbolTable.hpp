@@ -20,8 +20,8 @@ struct SymbolTable
 {
     std::unordered_map<UserTypeDefStmt*, TypeMetadata> userTypeMetadata;
     std::vector<UserTypeDefStmt*> userTypeKeys;
-    std::vector<Scope> globUsings;
-    std::vector<UserTypeDefStmt*> globStaticUsings;
+    std::vector<ScopeNode*> globUsings;
+    std::vector<TypeBinding> globStaticUsings;
     IdentifierMap<Alias> globAliases;
     SymbolTree symbTree{};
 };

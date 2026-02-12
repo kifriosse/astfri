@@ -9,6 +9,7 @@
 #include <ranges>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 namespace astfri::csharp::util
 {
@@ -165,6 +166,18 @@ TSNode unwrap_parantheses(const TSNode& node)
         current = ts_node_named_child(current, 0);
     }
     return current;
+}
+
+bool is_type_decl(const TSNode& node)
+{
+    static const std::unordered_set sTypeDecls{
+        symbol_for_name("class_declaration", true),
+        symbol_for_name("interface_declaration", true),
+        symbol_for_name("record_declaration", true),
+        symbol_for_name("enum_declaration", true),
+        symbol_for_name("delegate_declaration", true)
+    };
+    return sTypeDecls.contains(ts_node_symbol(node));
 }
 
 } // namespace astfri::csharp::util

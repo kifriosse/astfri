@@ -97,6 +97,8 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
 
     auto processMembs = [classDef, self](const TSNode& nMember) -> void
     {
+        if (util::is_type_decl(nMember))
+            return;
         const StmtHandler hMemb = RegManager::get_stmt_handler(nMember);
         Stmt* membStmt          = hMemb(self, nMember);
 

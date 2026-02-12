@@ -57,7 +57,7 @@ public class Person
     {
     }
 
-    ~Person() => Print();
+    ~Person() => Console.WriteLine($"Person {Name} is being finalized.");
 
     private enum Pohlavie
     {

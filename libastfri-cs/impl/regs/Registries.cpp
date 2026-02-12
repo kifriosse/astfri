@@ -8,6 +8,7 @@
 
 #include <tree_sitter/api.h>
 
+// #include <iostream>
 #include <optional>
 #include <string>
 
@@ -255,24 +256,28 @@ RegHandler RegManager::get_reg_handler(const TSNode& node)
 StmtHandler RegManager::get_stmt_handler(const std::string_view nodeType)
 {
     // todo redo this when the typo is fixed
+    // std::cerr << "Entering statement handler: " << nodeType << "\n";
     StmtHandler def = default_stmt_visit;
     return get_or_default(handlers_.stmts, nodeType, std::move(def));
 }
 
 ExprHandler RegManager::get_expr_handler(const std::string_view nodeType)
 {
+    // std::cerr << "Entering expression handler: " << nodeType << "\n";
     ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, std::move(def));
 }
 
 TypeHandler RegManager::get_type_handler(const std::string_view nodeType)
 {
+    // std::cerr << "Entering type handler: " << nodeType << "\n";
     TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, std::move(def));
 }
 
 RegHandler RegManager::get_reg_handler(const std::string_view nodeType)
 {
+    // std::cerr << "Entering registration handler: " << nodeType << "\n";
     RegHandler def = [](auto*, const auto&) { };
     return get_or_default(handlers_.symbolRegs, nodeType, std::move(def));
 }

@@ -1,8 +1,6 @@
 #ifndef CSHARP_SOURCE_HPP
 #define CSHARP_SOURCE_HPP
 
-#include <libastfri/inc/Astfri.hpp>
-
 #include <tree_sitter/api.h>
 
 #include <filesystem>
@@ -12,11 +10,12 @@
 
 namespace astfri::csharp
 {
+class ScopeNode;
 
 struct FileContext
 {
-    std::vector<Scope> usings{};
-    std::optional<std::string> fileNms{};
+    std::vector<ScopeNode*> usings{};
+    std::optional<std::string> fileNms{}; // use ScopeNode here
 };
 
 struct SourceFile
