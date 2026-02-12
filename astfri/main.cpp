@@ -221,12 +221,9 @@ int main(int argc, const char** argv)
     case InputType::Csharp:
     {
         astfri::csharp::ASTBuilder ast_builder;
-        astfri::text::TextLibManager& manager
-            = astfri::text::TextLibManager::get_instance();
         ast_builder.load_src(input_file);
 
         tu = *(ast_builder.mk_ast());
-        manager.visit_and_export(tu);
         break;
     }
     case InputType::Java:
