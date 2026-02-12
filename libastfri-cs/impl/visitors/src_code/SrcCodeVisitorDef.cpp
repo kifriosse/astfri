@@ -34,9 +34,8 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     Scope scope                = util::mk_scope(node, *self->src());
 
     ClassDefStmt* classDef
-        = stmtFact_.mk_class_def(className, std::move(scope));
-    classDef->name_ = std::move(className); // todo remove this
-    // todo use move semantic for the string
+        = stmtFact_.mk_class_def(std::move(className), std::move(scope));
+
     self->semanticContext_.enter_type(classDef);
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
@@ -134,9 +133,7 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     Scope scope                = util::mk_scope(node, *self->src());
 
     InterfaceDefStmt* intfDef
-        = stmtFact_.mk_interface_def(intfName, std::move(scope));
-    intfDef->name_ = std::move(intfName); // todo remove this
-    // todo use move semantic for the string
+        = stmtFact_.mk_interface_def(std::move(intfName), std::move(scope));
 
     self->semanticContext_.enter_type(intfDef);
     // handling of base class and interface implementations

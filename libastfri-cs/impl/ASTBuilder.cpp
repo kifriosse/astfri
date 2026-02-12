@@ -33,6 +33,16 @@ ASTBuilder::~ASTBuilder()
 
 void ASTBuilder::load_src(const path& projectDir)
 {
+    if (is_regular_file(projectDir))
+    {
+        if (projectDir.extension() == ".cs")
+        {
+            std::ifstream fileStream(projectDir, std::ios::binary);
+            load_from_stream(fileStream, projectDir);
+        }
+        return;
+    }
+
     std::stack<std::filesystem::path> dirs;
     const std::filesystem::path& rootPath{projectDir};
     dirs.emplace(rootPath);

@@ -14,7 +14,7 @@
 #include <libastfri-cpp/inc/ClangManagement.hpp>
 
 // ASTFRI Csharp
-#include <libastfri-cs/inc/CSharpASTBuilder.hpp>
+#include <libastfri-cs/inc/ASTBuilder.hpp>
 
 // ASTFRI Java
 #include <libastfri-java/inc/ASTBuilder.hpp>
@@ -220,11 +220,12 @@ int main(int argc, const char** argv)
     }
     case InputType::Csharp:
     {
-        const astfri::csharp::CSharpASTBuilder ast_builder;
+        astfri::csharp::ASTBuilder ast_builder;
         astfri::text::TextLibManager& manager
             = astfri::text::TextLibManager::get_instance();
+        ast_builder.load_src(input_file);
 
-        tu = *(ast_builder.make_ast(input_file));
+        tu = *(ast_builder.mk_ast());
         manager.visit_and_export(tu);
         break;
     }
