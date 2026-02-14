@@ -94,8 +94,7 @@ struct TypeMetadata
     IdentifierMap<MemberVarMetadata> memberVars{};
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
-    TypeBinding typeBinding;
-    ScopeNode* scope{nullptr};
+    TypeBinding tb;
 };
 
 } // namespace astfri::csharp

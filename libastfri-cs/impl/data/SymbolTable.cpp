@@ -5,8 +5,8 @@
 namespace astfri::csharp
 {
 
-SymbolTable::SymbolTable(std::vector<ScopeNode*> implicitUsings)
-    : globUsings(std::move(implicitUsings))
+SymbolTable::SymbolTable(std::vector<ScopeNode*> implicitUsings) :
+    globUsings(std::move(implicitUsings))
 {
 }
 
@@ -39,15 +39,14 @@ ScopeNode* SymbolTable::add_type(
     auto [it, inserted] = userTypeMetadata.try_emplace(tb.def);
     if (inserted)
     {
-        TypeMetadata metadata {
-            .typeBinding = tb,
-            .scope = symbTree_.add_type(tb.type->scope_, tb.type, tb.def)
-        };
+        TypeMetadata metadata{.tb = tb};
+        metadata.tb.treeNode
+            = symbTree_.add_type(tb.type->scope_, tb.type, tb.def);
         it->second = std::move(metadata);
         userTypes_.push_back(tb.def);
     }
     it->second.defs.emplace_back(node, src);
-    return it->second.scope;
+    return it->second.tb.treeNode;
 }
 
 TypeMetadata* SymbolTable::get_type_metadata(UserTypeDefStmt* def)

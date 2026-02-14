@@ -86,13 +86,13 @@ void SymbolTableBuilder::reg_members()
     };
     for (auto* metadata : symbTable_.get_type_metadata())
     {
-        typeTrs_.set_current_namespace(metadata->scope);
+        typeTrs_.set_current_namespace(metadata->tb.treeNode);
         for (auto& [node, src] : metadata->defs)
         {
             const TSNode nClassBody = util::child_by_field_name(node, "body");
             currentSrc_             = src;
             typeTrs_.set_current_src(src);
-            typeContext_.typeStack.push(&metadata->typeBinding);
+            typeContext_.typeStack.push(&metadata->tb);
             util::for_each_child_node(nClassBody, process);
             typeContext_.typeStack.pop();
         }
