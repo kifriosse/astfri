@@ -17,22 +17,9 @@ SemanticContext::SemanticContext(SymbolTable& symbTable) :
 {
 }
 
-std::span<UserTypeDefStmt*> SemanticContext::get_user_types() const
+void SemanticContext::enter_type(TypeBinding tb)
 {
-    return symbTable_.userTypeKeys;
-}
-
-TypeMetadata* SemanticContext::get_type_metadata(
-    UserTypeDefStmt* userType
-) const
-{
-    const auto& it = symbTable_.userTypeMetadata.find(userType);
-    return it != symbTable_.userTypeMetadata.end() ? &it->second : nullptr;
-}
-
-void SemanticContext::enter_type(UserTypeDefStmt* def)
-{
-    typeContext_.typeStack.push(def);
+    typeContext_.typeStack.push(tb.def);
     enter_scope();
 }
 
@@ -67,7 +54,7 @@ void SemanticContext::reg_return(Type* returnType)
 
 void SemanticContext::leave_type()
 {
-    if (typeContext_.typeStack.empty())
+    if (! typeContext_.typeStack.empty())
         typeContext_.typeStack.pop();
     leave_scope();
 }
@@ -127,16 +114,15 @@ VarDefStmt* SemanticContext::find_var(
                 return itParam->second;
 
             // member variables - includes both static and instance members
-            UserTypeDefStmt* currentType = this->current_type();
+            UserTypeDefStmt* currentType = current_type();
 
             if (! currentType)
                 return nullptr;
 
-            const auto& metadata = symbTable_.userTypeMetadata;
-            const auto itType    = metadata.find(currentType);
-            if (itType != symbTable_.userTypeMetadata.end())
+            TypeMetadata* metadata = symbTable_.get_type_metadata(currentType);
+            if (metadata)
             {
-                const auto& membVars = itType->second.memberVars;
+                const auto& membVars = metadata->memberVars;
                 const auto& itMemb   = membVars.find(name);
                 if (itMemb != membVars.end())
                     return itMemb->second.varDef;
@@ -145,7 +131,7 @@ VarDefStmt* SemanticContext::find_var(
         },
         [&](const access::Instance&) -> VarDefStmt*
         {
-            auto currentType = as_a<ClassDefStmt>(this->current_type());
+            auto currentType = as_a<ClassDefStmt>(current_type());
 
             while (currentType)
             {
@@ -189,34 +175,31 @@ const MethodMetadata* SemanticContext::find_method(
     UserTypeDefStmt* owner
 ) const
 {
-
-    auto& userTypes = symbTable_.userTypeMetadata;
-    if (auto* current = as_a<ClassDefStmt>(owner))
+    if (auto* classDef = as_a<ClassDefStmt>(owner))
     {
+        ClassDefStmt* current = classDef;
         while (current)
         {
-            const auto itTypeMetadata = userTypes.find(current);
-            if (itTypeMetadata == userTypes.end())
+            TypeMetadata* metadata = symbTable_.get_type_metadata(current);
+            if (! metadata)
                 return nullptr;
 
-            auto& [_, typeMetadata] = *itTypeMetadata;
-            const auto itMethod     = typeMetadata.methods.find(methodId);
-            if (itMethod != typeMetadata.methods.end())
+            const auto itMethod     = metadata->methods.find(methodId);
+            if (itMethod != metadata->methods.end())
                 return &itMethod->second;
 
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }
     }
-    else if (is_a<InterfaceDefStmt>(owner))
+    else if (auto* intDef = as_a<InterfaceDefStmt>(owner))
     {
-        const auto itTypeMeta = userTypes.find(owner);
-        if (itTypeMeta == userTypes.end())
+        TypeMetadata* metadata = symbTable_.get_type_metadata(intDef);
+        if (! metadata)
             return nullptr;
 
-        auto& [_, typeMeta] = *itTypeMeta;
-        const auto itMethod = typeMeta.methods.find(methodId);
-        if (itMethod != typeMeta.methods.end())
+        const auto itMethod = metadata->methods.find(methodId);
+        if (itMethod != metadata->methods.end())
             return &itMethod->second;
     }
 
@@ -228,35 +211,30 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     UserTypeDefStmt* owner
 ) const
 {
-    auto& userTypes = symbTable_.userTypeMetadata;
     // todo add handling of records
     if (auto* current = as_a<ClassDefStmt>(owner))
     {
         while (current)
         {
-            const auto& itTypeMeta = userTypes.find(current);
-            if (itTypeMeta != userTypes.end())
-            {
-                auto& membVars     = itTypeMeta->second.memberVars;
+            TypeMetadata* metadata = symbTable_.get_type_metadata(current);
+            if (! metadata)
+                return nullptr;
 
-                const auto& itVars = membVars.find(name);
-                if (itVars != membVars.end())
-                    return &itVars->second;
-            }
+            const auto& itVars = metadata->memberVars.find(name);
+            if (itVars != metadata->memberVars.end())
+                return &itVars->second;
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }
     }
     else if (is_a<InterfaceDefStmt>(owner))
     {
-        const auto& itTypeMeta = userTypes.find(owner);
-        if (itTypeMeta == userTypes.end())
+        TypeMetadata* metadata = symbTable_.get_type_metadata(current);
+        if (! metadata)
             return nullptr;
 
-        auto& membVars    = itTypeMeta->second.memberVars;
-
-        const auto& itVar = membVars.find(name);
-        if (itVar != membVars.end())
+        const auto& itVar = metadata->memberVars.find(name);
+        if (itVar != metadata->memberVars.end())
             return &itVar->second;
     }
 

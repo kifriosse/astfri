@@ -84,15 +84,15 @@ void SymbolTableBuilder::reg_members()
         const RegHandler handler = RegManager::get_reg_handler(current);
         handler(this, current);
     };
-    for (auto& metadata : symbTable_.userTypeMetadata | std::views::values)
+    for (const auto* metadata : symbTable_.get_type_metadata())
     {
-        typeTrs_.set_current_namespace(metadata.scope);
-        for (auto& [node, src] : metadata.defs)
+        typeTrs_.set_current_namespace(metadata->scope);
+        for (auto& [node, src] : metadata->defs)
         {
             const TSNode nClassBody = util::child_by_field_name(node, "body");
             currentSrc_             = src;
             typeTrs_.set_current_src(src);
-            typeContext_.typeStack.push(metadata.userType);
+            typeContext_.typeStack.push(metadata->typeBinding.def);
             util::for_each_child_node(nClassBody, process);
             typeContext_.typeStack.pop();
         }
@@ -155,9 +155,12 @@ void SymbolTableBuilder::visit_memb_var(
     const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
     const TypeHandler th   = RegManager::get_type_handler(nType);
     Type* type             = th(&self->typeTrs_, nType);
-    TypeMetadata& typeMeta = self->symbTable_.userTypeMetadata.at(
+    TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(
         self->typeContext_.typeStack.top()
     );
+
+    if (! typeMeta)
+        return;
 
     std::vector<VarDefStmt*> varDefs;
     auto process = [&](const TSQueryMatch& match)
@@ -178,7 +181,7 @@ void SymbolTableBuilder::visit_memb_var(
             .nVar   = nDecltor,
             .nInit  = ts_node_named_child(nDecltor, 1) // right side
         };
-        typeMeta.memberVars.emplace(varDef->name_, membVarMeta);
+        typeMeta->memberVars.emplace(varDef->name_, membVarMeta);
     };
     util::for_each_match(nVarDecl, regs::QueryType::VarDecltor, process);
 }
@@ -196,12 +199,9 @@ void SymbolTableBuilder::visit_method(
 )
 {
     const auto currentType = self->typeContext_.typeStack.top();
-    if (! currentType)
-        throw std::logic_error("Owner type not found");
 
-    auto& userTypeMetadata = self->symbTable_.userTypeMetadata;
-    const auto itTypeMeta  = userTypeMetadata.find(currentType);
-    if (itTypeMeta == userTypeMetadata.end())
+    const auto typeMeta = self->symbTable_.get_type_metadata(currentType);
+    if (! typeMeta)
         throw std::logic_error("Type wasn't discovered yet");
 
     const CSModifiers modifs
@@ -224,7 +224,7 @@ void SymbolTableBuilder::visit_method(
     auto [params, paramsMeta]
         = util::discover_params(nParams, self->src_str(), self->typeTrs_);
     MethodDefStmt* methodDef         = nullptr;
-    auto& methods                    = itTypeMeta->second.methods;
+    auto& methods                    = typeMeta->methods;
     const auto& [itMethod, inserted] = methods.try_emplace(std::move(methodId));
 
     if (inserted)
@@ -275,7 +275,7 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
     util::for_each_child_node(nUsingDirective, process, false);
 
     const Scope directiveScope = util::mk_scope(nUsingDirective, *src);
-    ScopeNode* searchStart     = symbTable_.symbTree.find_node(directiveScope);
+    ScopeNode* searchStart = symbTable_.symbTree().find_node(directiveScope);
 
     if (ts_node_is_null(nAliasName))
     {
@@ -298,7 +298,7 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
             if (const auto* b = node->has_data<TypeBinding>())
             {
                 if (isGlobal)
-                    symbTable_.globStaticUsings.push_back(*b);
+                    symbTable_.add_glob_static_using(*b);
                 else
                     searchStart->data<Nms>().add_static_using(src, *b);
             }
@@ -306,7 +306,7 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
         else
         {
             if (isGlobal)
-                symbTable_.globUsings.push_back(node);
+                symbTable_.add_glob_using(node);
             else
                 src->fileContext.usings.push_back(node);
         }
@@ -326,7 +326,7 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
 
             if (isGlobal)
             {
-                symbTable_.globAliases.emplace(
+                symbTable_.add_glob_alias(
                     std::move(aliasName),
                     std::move(alias)
                 );
@@ -345,11 +345,10 @@ void SymbolTableBuilder::register_type(
     const util::TypeKind typeKind
 )
 {
-    const TSNode nName   = util::child_by_field_name(node, "name");
-    std::string name     = util::extract_text(nName, src_str());
-    Scope scope          = util::mk_scope(node, *src());
-    UserTypeDefStmt* def = nullptr;
-    ScopedType* type     = nullptr;
+    const TSNode nName = util::child_by_field_name(node, "name");
+    std::string name   = util::extract_text(nName, src_str());
+    Scope scope        = util::mk_scope(node, *src());
+    TypeBinding tb{nullptr, nullptr, nullptr};
 
     switch (typeKind)
     {
@@ -357,16 +356,16 @@ void SymbolTableBuilder::register_type(
     {
         ClassDefStmt* classDef
             = stmtFact_.mk_class_def(std::move(name), std::move(scope));
-        def  = classDef;
-        type = classDef->type_;
+        tb.def  = classDef;
+        tb.type = classDef->type_;
         break;
     }
     case util::TypeKind::Interface:
     {
         InterfaceDefStmt* intfDef
             = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
-        def  = intfDef;
-        type = intfDef->m_type;
+        tb.def  = intfDef;
+        tb.type = intfDef->m_type;
         break;
     }
     case util::TypeKind::Record:
@@ -376,18 +375,9 @@ void SymbolTableBuilder::register_type(
         break;
     }
 
-    if (def && type)
+    if (tb.def && tb.type)
     {
-        TypeMetadata metadata{
-            .userType = def,
-            .scope    = symbTable_.symbTree.add_type(type->scope_, type, def)
-        };
-        auto [it, inserted]
-            = symbTable_.userTypeMetadata.try_emplace(def, std::move(metadata));
-
-        if (inserted)
-            symbTable_.userTypeKeys.push_back(def);
-        it->second.defs.emplace_back(node, this->src());
+        symbTable_.add_type(tb, node, src());
     }
 }
 

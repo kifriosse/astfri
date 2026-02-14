@@ -94,7 +94,7 @@ struct TypeMetadata
     IdentifierMap<MemberVarMetadata> memberVars{};
     IdentifierMap<PropertyNode> properties{};
     std::vector<TypeDefLoc> defs{};
-    UserTypeDefStmt* userType{nullptr};
+    TypeBinding typeBinding;
     ScopeNode* scope{nullptr};
 };
 

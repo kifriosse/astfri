@@ -75,7 +75,7 @@ ScopeNode* ScopeNode::parent() const
     return parent_;
 }
 
-ScopeNode* ScopeNode::find_child(const std::string_view childName)
+ScopeNode* ScopeNode::find_child(const std::string_view childName) const
 {
     const auto it = children_.find(childName);
     return it != children_.end() ? it->second.get() : nullptr;
@@ -133,49 +133,6 @@ ScopeNode* SymbolTree::add_type(
     ScopeNode* last    = add_scope(scope);
     ScopeNode* newNode = last->try_add_child(type->name_, binding, last);
     return newNode;
-}
-
-TypeBinding* SymbolTree::find_type(
-    const Scope& scope,
-    const std::string_view typeName,
-    const bool searchParents
-) const
-{
-    return find_type({}, scope, typeName, searchParents);
-}
-
-TypeBinding* SymbolTree::find_type(
-    const Scope& start,
-    const Scope& end,
-    const std::string_view typeName,
-    const bool searchParents
-) const
-{
-    ScopeNode* node = find_node(start, end);
-    if (! node)
-        return nullptr;
-
-    if (searchParents)
-        return find_type(*node, typeName);
-
-    ScopeNode* childNode = node->find_child(typeName);
-    return childNode->has_data<TypeBinding>();
-}
-
-TypeBinding* SymbolTree::find_type(
-    ScopeNode& start,
-    const std::string_view typeName
-)
-{
-    SymbolTreeCursor cursor(start);
-    do
-    {
-        if (auto* node = cursor.current()->find_child(typeName))
-            return node->has_data<TypeBinding>();
-
-    } while (cursor.go_to_parent());
-
-    return nullptr;
 }
 
 ScopeNode* SymbolTree::find_node(const Scope& scope) const

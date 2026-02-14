@@ -191,7 +191,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
         nCurrent = util::child_by_field_name(nCurrent, "qualifier");
     }
 
-    SymbolTree& symbTree  = symbTable_.symbTree;
+    const SymbolTree& symbTree  = symbTable_.symbTree();
     ScopeNode* entryPoint = start;
     bool hasExplicitAlias = false;
     if (ts_node_symbol(nCurrent) == sAliasQualfName)
@@ -277,7 +277,7 @@ const Alias* TypeTranslator::resolve_explicit_alias(
     if (aliasName == "global")
         return nullptr;
 
-    const ScopeNode* root = symbTable_.symbTree.root();
+    const ScopeNode* root = symbTable_.symbTree().root();
     ScopeNode* current = searchScope == UserTypeRef ? start : start->parent();
 
     while (current && current != root)
@@ -301,9 +301,7 @@ const Alias* TypeTranslator::resolve_explicit_alias(
 
     if (searchScope == UserTypeRef || start != root)
     {
-        const auto it = symbTable_.globAliases.find(aliasName);
-        if (it != symbTable_.globAliases.end())
-            return &it->second;
+        return symbTable_.get_glob_alias(aliasName);
     }
 
     // todo handling of unresolved aliases - types/namespaces outside project
@@ -329,27 +327,25 @@ ScopeNode* TypeTranslator::find_entry_point(
         if (ScopeNode* node = bottom_up_search(qualif, start, src))
             return node;
         // check global aliasis
-        const auto globAliasIt = symbTable_.globAliases.find(qualif);
-        if (globAliasIt != symbTable_.globAliases.end())
+        if (const auto* alias = symbTable_.get_glob_alias(qualif))
         {
-            const Alias* alias = &globAliasIt->second;
             if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
                 return *node;
         }
         // check global static usings for nested types
-        for (const auto& b : symbTable_.globStaticUsings)
+        for (const auto& b : symbTable_.get_glob_static_usings())
         {
             if (ScopeNode* node = b.treeNode->find_child(qualif))
                 return node;
         }
         // check file scoped using directives
-        for (const auto usingDirective : src->fileContext.usings)
+        for (const auto* usingDirective : src->fileContext.usings)
         {
             if (ScopeNode* node = usingDirective->find_child(qualif))
                 return node;
         }
         // check global using directives
-        for (const auto usingDirective : symbTable_.globUsings)
+        for (const auto* usingDirective : symbTable_.get_glob_usings())
         {
             if (ScopeNode* node = usingDirective->find_child(qualif))
                 return node;
@@ -367,7 +363,7 @@ ScopeNode* TypeTranslator::find_entry_point(
         if (ScopeNode* node = bottom_up_search(qualif, start, src))
             return node;
         // check global static usings for nested types
-        for (const auto& b : symbTable_.globStaticUsings)
+        for (const auto& b : symbTable_.get_glob_static_usings())
         {
             if (ScopeNode* node = b.treeNode->find_child(qualif))
                 return node;
@@ -379,7 +375,7 @@ ScopeNode* TypeTranslator::find_entry_point(
     case GlobAlias:
     case GlobUsing:
     {
-        if (ScopeNode* node = symbTable_.symbTree.root()->find_child(qualif))
+        if (ScopeNode* node = symbTable_.symbTree().root()->find_child(qualif))
             return node;
         break;
     }
@@ -451,12 +447,12 @@ ScopeNode* TypeTranslator::search_parents(
         if (! current->bases_.empty())
         {
             current     = current->bases_.back();
-            auto itMeta = symbTable_.userTypeMetadata.find(current);
-            if (itMeta == symbTable_.userTypeMetadata.end())
+            const auto metadata = symbTable_.get_type_metadata(current);
+            if (! metadata)
                 continue;
 
-            ScopeNode* parent = itMeta->second.scope;
-            if (ScopeNode* nestedType = parent->find_child(qualif))
+            const ScopeNode* scope = metadata->scope;
+            if (ScopeNode* nestedType = scope->find_child(qualif))
                 return nestedType;
         }
         else

@@ -79,7 +79,7 @@ public:
     [[nodiscard]] const NodeData& data() const;
 
     ScopeNode* parent() const;
-    ScopeNode* find_child(std::string_view childName);
+    ScopeNode* find_child(std::string_view childName) const;
     ScopeNode* try_add_child(
         std::string name,
         NodeData content,
@@ -101,6 +101,11 @@ private:
 
 public:
     SymbolTree();
+    SymbolTree(const SymbolTree& other) = delete;
+    SymbolTree& operator=(const SymbolTree& other) = delete;
+    SymbolTree(SymbolTree&&) noexcept = delete;
+    SymbolTree& operator=(SymbolTree&&) noexcept = delete;
+
     [[nodiscard]] ScopeNode* root() const;
     /**
      * @brief Adds a namespace/scope to the symbol tree
@@ -125,41 +130,10 @@ public:
         const Scope& start,
         const Scope& end
     ) const;
-    /**
-     * @brief Resolves type by traversing the given scope
-     * @param scope namespace/scope to search in
-     * @param typeName identifier of the type to find
-     * @param searchParents if true, it will also search in parent
-     * scopes/namespaces
-     * @return pointer to the found type, or nullptr if not found
-     */
-    [[nodiscard]] TypeBinding* find_type(
-        const Scope& scope,
-        std::string_view typeName,
-        bool searchParents = false
-    ) const;
-    /**
-     * @brief Resolves a type by traversing a concatenated path (start + end).
-     * @param start base namespace/scope.
-     * @param end relative namespace/scope qualification.
-     * @param typeName identifier of the type to find.
-     * @param searchParents if true, it will also search in parent
-     * scopes/namespaces
-     * @return pointer to the found type, or nullptr if type was not found in
-     * that namespace/scope
-     */
-    [[nodiscard]] TypeBinding* find_type(
-        const Scope& start,
-        const Scope& end,
-        std::string_view typeName,
-        bool searchParents = false
-    ) const;
-    [[nodiscard]] static TypeBinding* find_type(
-        ScopeNode& start,
-        std::string_view typeName
-    );
 };
 
+
+// todo probably can be removed
 class SymbolTreeCursor
 {
 private:

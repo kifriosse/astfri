@@ -4,6 +4,7 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 
 #include <stack>
 #include <unordered_map>
@@ -20,15 +21,12 @@ struct UserTypeDefStmt;
 
 namespace astfri::csharp
 {
-// Forward declaration
-struct SymbolTable;
-
 /**
  * @brief Context for tracking current type during semantic analysis
  */
 struct TypeContext
 {
-    std::stack<UserTypeDefStmt*> typeStack;
+    std::stack<UserTypeDefStmt*> typeStack; // todo change it to type binding
 };
 
 /**
@@ -58,15 +56,9 @@ private:
 public:
     explicit SemanticContext(SymbolTable& symbTable);
 
-    /**
-     * @brief Type for iterating over keys of user types in symbol table
-     * @return An iterable view over user types in symbol table
-     * @note Keys will be in order of their insertion into symbol table
-     */
-    std::span<UserTypeDefStmt*> get_user_types() const;
-    TypeMetadata* get_type_metadata(UserTypeDefStmt* userType) const;
+    auto get_type_metadata() const;
 
-    void enter_type(UserTypeDefStmt* def);
+    void enter_type(TypeBinding tb);
     void enter_scope();
 
     void reg_return(Type* returnType);
@@ -99,6 +91,9 @@ public:
         access::Qualifier quelifier
     ) const;
 };
+
 } // namespace astfri::csharp
+
+#include <libastfri-cs/impl/SemanticContext.inl>
 
 #endif // CSHARP_SEMANTIC_CONTEXT_HPP

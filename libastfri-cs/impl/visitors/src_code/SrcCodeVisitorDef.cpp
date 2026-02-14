@@ -35,8 +35,9 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
 
     ClassDefStmt* classDef
         = stmtFact_.mk_class_def(std::move(className), std::move(scope));
+    // todo refactor this into using symbol tree to find the type
 
-    self->semanticContext_.enter_type(classDef);
+    self->semanticContext_.enter_type(TypeBinding { nullptr, classDef->type_, classDef,});
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
     // handling of base class and interface implementations
@@ -135,7 +136,7 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     InterfaceDefStmt* intfDef
         = stmtFact_.mk_interface_def(std::move(intfName), std::move(scope));
 
-    self->semanticContext_.enter_type(intfDef);
+    self->semanticContext_.enter_type(TypeBinding { nullptr, intfDef->m_type, intfDef,});
     // handling of base class and interface implementations
     auto processBaseList = [&](const TSNode& current) -> void
     {

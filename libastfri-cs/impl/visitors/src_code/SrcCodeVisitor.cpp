@@ -31,15 +31,11 @@ SrcCodeVisitor::SrcCodeVisitor(
 
 void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
 {
-    for (auto& defStmt : this->semanticContext_.get_user_types())
+    for (const auto metadata : this->semanticContext_.get_type_metadata())
     {
-        const auto typeMetaOpt = semanticContext_.get_type_metadata(defStmt);
-        if (! typeMetaOpt)
-            continue;
-
-        typeTrs_.set_current_namespace(typeMetaOpt->scope);
+        typeTrs_.set_current_namespace(metadata->scope);
         bool added = false;
-        for (auto& [node, src] : typeMetaOpt->defs)
+        for (auto& [node, src] : metadata->defs)
         {
             if (! src)
                 continue;

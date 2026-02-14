@@ -29,7 +29,7 @@ namespace astfri::csharp
 class TypeTranslator;
 class SrcCodeVisitor;
 class SymbolTableBuilder;
-struct SymbolTable;
+class SymbolTable;
 
 using MaskType  = uint32_t;
 using CaptureId = uint32_t;
