@@ -52,7 +52,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
             {
                 MemberVarMetadata* varMeta = semanticContext_.find_memb_var(
                     name,
-                    semanticContext_.current_type()
+                    semanticContext_.current_type()->def
                 );
 
                 varDef               = varMeta->varDef;

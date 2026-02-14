@@ -60,6 +60,7 @@ public:
         util::SearchScope searchScope,
         ScopeNode* start
     ) const;
+    TypeBinding* get_type(std::string_view name, const Scope& scope) const;
 
 private:
     /**

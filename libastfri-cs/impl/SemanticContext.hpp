@@ -26,7 +26,7 @@ namespace astfri::csharp
  */
 struct TypeContext
 {
-    std::stack<UserTypeDefStmt*> typeStack; // todo change it to type binding
+    std::stack<TypeBinding*> typeStack;
 };
 
 /**
@@ -58,7 +58,7 @@ public:
 
     auto get_type_metadata() const;
 
-    void enter_type(TypeBinding tb);
+    void enter_type(TypeBinding* tb);
     void enter_scope();
 
     void reg_return(Type* returnType);
@@ -70,7 +70,7 @@ public:
     void leave_scope();
     void unregister_return_type();
 
-    UserTypeDefStmt* current_type() const;
+    TypeBinding* current_type() const;
     Type* current_return_type() const;
     VarDefStmt* find_var(
         std::string_view name,

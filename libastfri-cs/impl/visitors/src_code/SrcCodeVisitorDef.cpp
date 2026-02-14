@@ -28,16 +28,14 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     static const TSSymbol sTypeParamConstr
         = util::symbol_for_name("type_parameter_constraints_clause", true);
 
-    const std::string_view src = self->src_str();
-    const TSNode nClassName    = util::child_by_field_name(node, "name");
-    std::string className      = util::extract_text(nClassName, src);
-    Scope scope                = util::mk_scope(node, *self->src());
+    const std::string_view src  = self->src_str();
+    const TSNode nClassName     = util::child_by_field_name(node, "name");
+    const std::string className = util::extract_text(nClassName, src);
+    const Scope scope           = util::mk_scope(node, *self->src());
+    TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
+    auto* classDef              = as_a<ClassDefStmt>(tb->def);
 
-    ClassDefStmt* classDef
-        = stmtFact_.mk_class_def(std::move(className), std::move(scope));
-    // todo refactor this into using symbol tree to find the type
-
-    self->semanticContext_.enter_type(TypeBinding { nullptr, classDef->type_, classDef,});
+    self->semanticContext_.enter_type(tb);
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
     // handling of base class and interface implementations
@@ -130,21 +128,20 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
 
     const std::string_view src = self->src_str();
     const TSNode nIntfName     = util::child_by_field_name(node, "name");
-    std::string intfName       = util::extract_text(nIntfName, src);
-    Scope scope                = util::mk_scope(node, *self->src());
+    const std::string intfName = util::extract_text(nIntfName, src);
+    const Scope scope          = util::mk_scope(node, *self->src());
+    TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
+    auto* intfDef              = as_a<InterfaceDefStmt>(tb->def);
+    self->semanticContext_.enter_type(tb);
 
-    InterfaceDefStmt* intfDef
-        = stmtFact_.mk_interface_def(std::move(intfName), std::move(scope));
-
-    self->semanticContext_.enter_type(TypeBinding { nullptr, intfDef->m_type, intfDef,});
-    // handling of base class and interface implementations
+    // handling of interface implementations
     auto processBaseList = [&](const TSNode& current) -> void
     {
         const TypeHandler th = RegManager::get_type_handler(current);
         Type* type           = th(&self->typeTrs_, current);
 
-        if (const auto interface_t = as_a<InterfaceType>(type))
-            intfDef->bases_.push_back(interface_t->m_def);
+        if (const auto tInterface = as_a<InterfaceType>(type))
+            intfDef->bases_.push_back(tInterface->m_def);
         else
         {
             // todo incomplete type
@@ -184,7 +181,8 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
         const StmtHandler hMemb = RegManager::get_stmt_handler(nMember);
         Stmt* membStmt          = hMemb(self, nMember);
 
-        if (const auto varDef = as_a<MemberVarDefStmt>(membStmt))
+        if ([[maybe_unused]] const auto varDef
+            = as_a<MemberVarDefStmt>(membStmt))
         {
             // intfDef->vars_.push_back(varDef); // todo static variables
         }
@@ -254,7 +252,8 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
     if (! currentType)
         throw std::logic_error("Owner type not found");
 
-    if (! is_a<ClassDefStmt>(currentType))
+    const auto currentClass = as_a<ClassDefStmt>(currentType->def);
+    if (! currentClass)
         throw std::logic_error(
             "Constructor can only be defined for class type"
         );
@@ -263,7 +262,7 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
     const TSNode nBody      = util::child_by_field_name(node, "body");
     const TSNode nInit      = ts_node_next_sibling(nParamList);
 
-    constrDef->owner_       = as_a<ClassDefStmt>(currentType);
+    constrDef->owner_       = as_a<ClassDefStmt>(currentClass);
     constrDef->params_      = self->make_param_list(nParamList, false);
 
     const CSModifiers modifs
@@ -312,7 +311,8 @@ Stmt* SrcCodeVisitor::visit_construct_init(
     const auto currentType = self->semanticContext_.current_type();
     if (! currentType)
         throw std::logic_error("Owner type not found");
-    const auto* owner = as_a<ClassDefStmt>(currentType);
+
+    const auto* owner = as_a<ClassDefStmt>(currentType->def);
     // todo add records
     if (! owner)
         throw std::logic_error(
@@ -339,7 +339,7 @@ Stmt* SrcCodeVisitor::visit_destr_def_stmt(
 
     if (! currentType)
         throw std::logic_error("Owner type not found");
-    auto* owner = as_a<ClassDefStmt>(currentType);
+    auto* owner = as_a<ClassDefStmt>(currentType->def);
     if (! owner)
         throw std::logic_error("Destructor can only be defined for class type");
 
@@ -371,7 +371,7 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
     };
 
     const MethodMetadata* methodMeta
-        = self->semanticContext_.find_method(methodId, currentType);
+        = self->semanticContext_.find_method(methodId, currentType->def);
     if (! methodMeta)
         throw std::logic_error("Method \'" + methodId.name + "\' not found");
 
@@ -408,7 +408,7 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
     // if it wansn't able to resolve method
     MethodDefStmt* methodDef = stmtFact_.mk_method_def();
-    methodDef->owner_        = currentType;
+    methodDef->owner_        = currentType->def;
     methodDef->func_         = self->make_func_stmt(node, true);
     methodDef->access_
         = modifs.get_access_mod().value_or(AccessModifier::Internal);

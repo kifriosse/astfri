@@ -84,7 +84,7 @@ void SymbolTableBuilder::reg_members()
         const RegHandler handler = RegManager::get_reg_handler(current);
         handler(this, current);
     };
-    for (const auto* metadata : symbTable_.get_type_metadata())
+    for (auto* metadata : symbTable_.get_type_metadata())
     {
         typeTrs_.set_current_namespace(metadata->scope);
         for (auto& [node, src] : metadata->defs)
@@ -92,7 +92,7 @@ void SymbolTableBuilder::reg_members()
             const TSNode nClassBody = util::child_by_field_name(node, "body");
             currentSrc_             = src;
             typeTrs_.set_current_src(src);
-            typeContext_.typeStack.push(metadata->typeBinding.def);
+            typeContext_.typeStack.push(&metadata->typeBinding);
             util::for_each_child_node(nClassBody, process);
             typeContext_.typeStack.pop();
         }
@@ -156,7 +156,7 @@ void SymbolTableBuilder::visit_memb_var(
     const TypeHandler th   = RegManager::get_type_handler(nType);
     Type* type             = th(&self->typeTrs_, nType);
     TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(
-        self->typeContext_.typeStack.top()
+        self->typeContext_.typeStack.top()->def
     );
 
     if (! typeMeta)
@@ -200,7 +200,7 @@ void SymbolTableBuilder::visit_method(
 {
     const auto currentType = self->typeContext_.typeStack.top();
 
-    const auto typeMeta = self->symbTable_.get_type_metadata(currentType);
+    const auto typeMeta = self->symbTable_.get_type_metadata(currentType->def);
     if (! typeMeta)
         throw std::logic_error("Type wasn't discovered yet");
 
@@ -232,7 +232,7 @@ void SymbolTableBuilder::visit_method(
         const TypeHandler th = RegManager::get_type_handler(nRetType);
         Type* retType        = th(&self->typeTrs_, nRetType);
         methodDef            = stmtFact_.mk_method_def(
-            currentType,
+            currentType->def,
             stmtFact_.mk_function_def(
                 std::move(name),
                 std::move(params),

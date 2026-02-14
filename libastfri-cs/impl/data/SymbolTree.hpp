@@ -80,7 +80,7 @@ public:
 
     ScopeNode* parent() const;
     ScopeNode* find_child(std::string_view childName) const;
-    ScopeNode* try_add_child(
+    ScopeNode* add_child(
         std::string name,
         NodeData content,
         ScopeNode* parent

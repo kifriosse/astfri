@@ -191,9 +191,9 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
         nCurrent = util::child_by_field_name(nCurrent, "qualifier");
     }
 
-    const SymbolTree& symbTree  = symbTable_.symbTree();
-    ScopeNode* entryPoint = start;
-    bool hasExplicitAlias = false;
+    const SymbolTree& symbTree = symbTable_.symbTree();
+    ScopeNode* entryPoint      = start;
+    bool hasExplicitAlias      = false;
     if (ts_node_symbol(nCurrent) == sAliasQualfName)
     {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
@@ -254,6 +254,19 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     }
 
     return currentNode;
+}
+
+TypeBinding* TypeTranslator::get_type(
+    const std::string_view name,
+    const Scope& scope
+) const
+{
+    const ScopeNode* node = symbTable_.symbTree().find_node(scope);
+    if (ScopeNode* typeNode = node->find_child(name))
+    {
+        return typeNode->has_data<TypeBinding>();
+    }
+    return nullptr;
 }
 
 const Alias* TypeTranslator::resolve_explicit_alias(
@@ -446,7 +459,7 @@ ScopeNode* TypeTranslator::search_parents(
     {
         if (! current->bases_.empty())
         {
-            current     = current->bases_.back();
+            current             = current->bases_.back();
             const auto metadata = symbTable_.get_type_metadata(current);
             if (! metadata)
                 continue;

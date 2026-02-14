@@ -81,7 +81,7 @@ ScopeNode* ScopeNode::find_child(const std::string_view childName) const
     return it != children_.end() ? it->second.get() : nullptr;
 }
 
-ScopeNode* ScopeNode::try_add_child(
+ ScopeNode* ScopeNode::add_child(
     std::string name,
     NodeData content,
     ScopeNode* parent
@@ -115,7 +115,7 @@ ScopeNode* SymbolTree::add_scope(const Scope& scope)
     ScopeNode* current = root();
     for (const std::string& str : scope.names_)
     {
-        current = current->try_add_child(str, Nms(str), current);
+        current = current->add_child(str, Nms(str), current);
     }
     return current;
 }
@@ -131,7 +131,7 @@ ScopeNode* SymbolTree::add_type(
         .def  = def,
     };
     ScopeNode* last    = add_scope(scope);
-    ScopeNode* newNode = last->try_add_child(type->name_, binding, last);
+    ScopeNode* newNode = last->add_child(type->name_, binding, last);
     return newNode;
 }
 

@@ -17,9 +17,9 @@ SemanticContext::SemanticContext(SymbolTable& symbTable) :
 {
 }
 
-void SemanticContext::enter_type(TypeBinding tb)
+void SemanticContext::enter_type(TypeBinding* tb)
 {
-    typeContext_.typeStack.push(tb.def);
+    typeContext_.typeStack.push(tb);
     enter_scope();
 }
 
@@ -84,7 +84,7 @@ void SemanticContext::unregister_return_type()
         retTypeContext_.pop();
 }
 
-UserTypeDefStmt* SemanticContext::current_type() const
+TypeBinding* SemanticContext::current_type() const
 {
     auto& typeStack = typeContext_.typeStack;
     return typeStack.empty() ? nullptr : typeStack.top();
@@ -114,12 +114,13 @@ VarDefStmt* SemanticContext::find_var(
                 return itParam->second;
 
             // member variables - includes both static and instance members
-            UserTypeDefStmt* currentType = current_type();
+            const TypeBinding* currentType = current_type();
 
             if (! currentType)
                 return nullptr;
 
-            TypeMetadata* metadata = symbTable_.get_type_metadata(currentType);
+            const TypeMetadata* metadata
+                = symbTable_.get_type_metadata(currentType->def);
             if (metadata)
             {
                 const auto& membVars = metadata->memberVars;
@@ -131,7 +132,7 @@ VarDefStmt* SemanticContext::find_var(
         },
         [&](const access::Instance&) -> VarDefStmt*
         {
-            auto currentType = as_a<ClassDefStmt>(current_type());
+            auto currentType = as_a<ClassDefStmt>(current_type()->def);
 
             while (currentType)
             {
@@ -184,7 +185,7 @@ const MethodMetadata* SemanticContext::find_method(
             if (! metadata)
                 return nullptr;
 
-            const auto itMethod     = metadata->methods.find(methodId);
+            const auto itMethod = metadata->methods.find(methodId);
             if (itMethod != metadata->methods.end())
                 return &itMethod->second;
 
@@ -271,14 +272,14 @@ CallType SemanticContext::find_invoc_type(
 
             const auto currentType = this->current_type();
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType))
+                = find_method(methodId, currentType->def))
             {
                 return CallType::Method;
             }
 
             methodId.isStatic = true;
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType))
+                = find_method(methodId, currentType->def))
             {
                 return CallType::StaticMethod;
             }
@@ -295,7 +296,7 @@ CallType SemanticContext::find_invoc_type(
             };
 
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType))
+                = find_method(methodId, currentType->def))
             {
                 return CallType::Method;
             }
