@@ -86,13 +86,13 @@ void SymbolTableBuilder::reg_members()
     };
     for (auto* metadata : symbTable_.get_type_metadata())
     {
-        typeTrs_.set_current_namespace(metadata->tb.treeNode);
-        for (auto& [node, src] : metadata->defs)
+        typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
+        for (auto& [node, src] : metadata->defs())
         {
             const TSNode nClassBody = util::child_by_field_name(node, "body");
             currentSrc_             = src;
             typeTrs_.set_current_src(src);
-            typeContext_.typeStack.push(&metadata->tb);
+            typeContext_.typeStack.push(&metadata->type_binding());
             util::for_each_child_node(nClassBody, process);
             typeContext_.typeStack.pop();
         }
@@ -176,12 +176,12 @@ void SymbolTableBuilder::visit_memb_var(
         );
 
         varDefs.push_back(varDef);
-        MemberVarMetadata membVarMeta{
+        const MemberVarMetadata membVarMeta{
             .varDef = varDef,
             .nVar   = nDecltor,
             .nInit  = ts_node_named_child(nDecltor, 1) // right side
         };
-        typeMeta->memberVars.emplace(varDef->name_, membVarMeta);
+        typeMeta->add_memb_var(varDef->name_, membVarMeta);
     };
     util::for_each_match(nVarDecl, regs::QueryType::VarDecltor, process);
 }
@@ -204,8 +204,8 @@ void SymbolTableBuilder::visit_method(
     if (! typeMeta)
         throw std::logic_error("Type wasn't discovered yet");
 
-    const CSModifiers modifs
-        = CSModifiers::handle_memb_modifs(node, self->src_str());
+    const std::string_view srcStr = self->src_str();
+    const CSModifiers modifs    = CSModifiers::handle_memb_modifs(node, srcStr);
 
     const TSNode nRetType       = util::child_by_field_name(node, "returns");
     const TSNode nFuncName      = util::child_by_field_name(node, "name");
@@ -214,7 +214,7 @@ void SymbolTableBuilder::visit_method(
     const bool isVariadic       = util::has_variadic_param(nParams);
     const size_t cNamedChildren = ts_node_named_child_count(nParams);
     const size_t cParam = isVariadic ? cNamedChildren - 1 : cNamedChildren;
-    std::string name    = util::extract_text(nFuncName, self->src_str());
+    std::string name    = util::extract_text(nFuncName, srcStr);
     MethodId methodId{
         .name       = name,
         .paramCount = cParam,
@@ -222,34 +222,26 @@ void SymbolTableBuilder::visit_method(
     };
 
     auto [params, paramsMeta]
-        = util::discover_params(nParams, self->src_str(), self->typeTrs_);
-    MethodDefStmt* methodDef         = nullptr;
-    auto& methods                    = typeMeta->methods;
-    const auto& [itMethod, inserted] = methods.try_emplace(std::move(methodId));
+        = util::discover_params(nParams, srcStr, self->typeTrs_);
 
-    if (inserted)
-    {
-        const TypeHandler th = RegManager::get_type_handler(nRetType);
-        Type* retType        = th(&self->typeTrs_, nRetType);
-        methodDef            = stmtFact_.mk_method_def(
-            currentType->def,
-            stmtFact_.mk_function_def(
-                std::move(name),
-                std::move(params),
-                retType,
-                nullptr
-            ),
-            modifs.get_access_mod().value_or(AccessModifier::Internal),
-            modifs.get_virtuality()
-        );
-    }
-
-    MethodMetadata metadata{
+    const TypeHandler th     = RegManager::get_type_handler(nRetType);
+    MethodDefStmt* methodDef = stmtFact_.mk_method_def(
+        currentType->def,
+        stmtFact_.mk_function_def(
+            std::move(name),
+            std::move(params),
+            th(&self->typeTrs_, nRetType),
+            nullptr
+        ),
+        modifs.get_access_mod().value_or(AccessModifier::Internal),
+        modifs.get_virtuality()
+    );
+    MethodMetadata methodMetadata{
         .params    = std::move(paramsMeta),
         .methodDef = methodDef,
-        .nMethod   = node,
+        .nMethod   = node
     };
-    itMethod->second = std::move(metadata);
+    typeMeta->add_method(std::move(methodId), std::move(methodMetadata));
 }
 
 void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)

@@ -464,7 +464,7 @@ ScopeNode* TypeTranslator::search_parents(
             if (! metadata)
                 continue;
 
-            const ScopeNode* scope = metadata->tb.treeNode;
+            const ScopeNode* scope = metadata->type_binding().treeNode;
             if (ScopeNode* nestedType = scope->find_child(qualif))
                 return nestedType;
         }

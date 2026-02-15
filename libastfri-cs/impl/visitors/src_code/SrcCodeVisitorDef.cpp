@@ -372,11 +372,9 @@ Stmt* SrcCodeVisitor::visit_method_def_stmt(
 
     const MethodMetadata* methodMeta
         = self->semanticContext_.find_method(methodId, currentType->def);
-    if (! methodMeta)
-        throw std::logic_error("Method \'" + methodId.name + "\' not found");
 
     // if method could be resolved
-    if (methodMeta->methodDef)
+    if (methodMeta && methodMeta->methodDef)
     {
         auto& methodDef = methodMeta->methodDef;
         self->semanticContext_.enter_scope();

@@ -80,11 +80,7 @@ public:
 
     ScopeNode* parent() const;
     ScopeNode* find_child(std::string_view childName) const;
-    ScopeNode* add_child(
-        std::string name,
-        NodeData content,
-        ScopeNode* parent
-    );
+    ScopeNode* add_child(std::string name, NodeData content, ScopeNode* parent);
 
     template<typename T>
     requires requires(NodeData v) { std::get_if<T>(&v); }
@@ -101,10 +97,10 @@ private:
 
 public:
     SymbolTree();
-    SymbolTree(const SymbolTree& other) = delete;
+    SymbolTree(const SymbolTree& other)            = delete;
     SymbolTree& operator=(const SymbolTree& other) = delete;
-    SymbolTree(SymbolTree&&) noexcept = delete;
-    SymbolTree& operator=(SymbolTree&&) noexcept = delete;
+    SymbolTree(SymbolTree&&) noexcept              = delete;
+    SymbolTree& operator=(SymbolTree&&) noexcept   = delete;
 
     [[nodiscard]] ScopeNode* root() const;
     /**
@@ -131,7 +127,6 @@ public:
         const Scope& end
     ) const;
 };
-
 
 // todo probably can be removed
 class SymbolTreeCursor

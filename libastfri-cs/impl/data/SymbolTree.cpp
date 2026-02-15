@@ -81,7 +81,7 @@ ScopeNode* ScopeNode::find_child(const std::string_view childName) const
     return it != children_.end() ? it->second.get() : nullptr;
 }
 
- ScopeNode* ScopeNode::add_child(
+ScopeNode* ScopeNode::add_child(
     std::string name,
     NodeData content,
     ScopeNode* parent

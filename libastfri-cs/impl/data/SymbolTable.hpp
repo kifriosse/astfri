@@ -4,8 +4,8 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/SymbolTree.hpp>
 
-#include <span>
 #include <ranges>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -18,8 +18,9 @@ struct UserTypeDefStmt;
 namespace astfri::csharp
 {
 // forward declaration
-struct TypeMetadata;
+class TypeMetadata;
 struct TypeBinding;
+
 /**
  * @brief Symbol table containing metadata about user defined types
  */
@@ -28,17 +29,18 @@ class SymbolTable
 private:
     template<typename T>
     using span = std::span<T>;
-    std::unordered_map<UserTypeDefStmt*, TypeMetadata> userTypeMetadata;
+
+    std::unordered_map<UserTypeDefStmt*, TypeMetadata> userTypeMetadata_;
     std::vector<UserTypeDefStmt*> userTypes_;
-    IdentifierMap<Alias> globAliases;
-    std::vector<ScopeNode*> globUsings;
-    std::vector<TypeBinding> globStaticUsings;
+    IdentifierMap<Alias> globAliases_;
+    std::vector<ScopeNode*> globUsings_;
+    std::vector<TypeBinding> globStaticUsings_;
     SymbolTree symbTree_{};
+
 public:
     explicit SymbolTable(std::vector<ScopeNode*> implicitUsings = {});
 
-    // todo other constructors
-    SymbolTable(const SymbolTable& other) = delete;
+    SymbolTable(const SymbolTable& other)            = delete;
     SymbolTable& operator=(const SymbolTable& other) = delete;
 
     const SymbolTree& symbTree();
@@ -56,11 +58,10 @@ public:
 
     TypeMetadata* get_type_metadata(UserTypeDefStmt* def);
     span<UserTypeDefStmt* const> get_user_types();
-    span<const ScopeNode *const> get_glob_usings();
+    span<const ScopeNode* const> get_glob_usings();
     span<const TypeBinding> get_glob_static_usings();
 
     Alias* get_glob_alias(std::string_view name);
-
 };
 
 } // namespace astfri::csharp

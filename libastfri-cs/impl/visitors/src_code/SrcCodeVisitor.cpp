@@ -33,9 +33,9 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
 {
     for (const auto metadata : this->semanticContext_.get_type_metadata())
     {
-        typeTrs_.set_current_namespace(metadata->tb.treeNode);
+        typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         bool added = false;
-        for (auto& [node, src] : metadata->defs)
+        for (auto& [node, src] : metadata->defs())
         {
             if (! src)
                 continue;

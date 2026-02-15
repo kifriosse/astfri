@@ -119,14 +119,10 @@ VarDefStmt* SemanticContext::find_var(
             if (! currentType)
                 return nullptr;
 
-            const TypeMetadata* metadata
-                = symbTable_.get_type_metadata(currentType->def);
-            if (metadata)
+            if (auto* typeMeta = symbTable_.get_type_metadata(currentType->def))
             {
-                const auto& membVars = metadata->memberVars;
-                const auto& itMemb   = membVars.find(name);
-                if (itMemb != membVars.end())
-                    return itMemb->second.varDef;
+                if (const auto* varMeta = typeMeta->find_memb_var(name))
+                    return varMeta->varDef;
             }
             return nullptr;
         },
@@ -181,13 +177,12 @@ const MethodMetadata* SemanticContext::find_method(
         ClassDefStmt* current = classDef;
         while (current)
         {
-            TypeMetadata* metadata = symbTable_.get_type_metadata(current);
-            if (! metadata)
+            TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+            if (! typeMeta)
                 return nullptr;
 
-            const auto itMethod = metadata->methods.find(methodId);
-            if (itMethod != metadata->methods.end())
-                return &itMethod->second;
+            if (const auto* methodMeta = typeMeta->find_method(methodId))
+                return methodMeta;
 
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
@@ -195,13 +190,12 @@ const MethodMetadata* SemanticContext::find_method(
     }
     else if (auto* intDef = as_a<InterfaceDefStmt>(owner))
     {
-        TypeMetadata* metadata = symbTable_.get_type_metadata(intDef);
-        if (! metadata)
+        TypeMetadata* typeMeta = symbTable_.get_type_metadata(intDef);
+        if (! typeMeta)
             return nullptr;
 
-        const auto itMethod = metadata->methods.find(methodId);
-        if (itMethod != metadata->methods.end())
-            return &itMethod->second;
+        if (const auto* methodMeta = typeMeta->find_method(methodId))
+            return methodMeta;
     }
 
     return nullptr;
@@ -217,26 +211,23 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     {
         while (current)
         {
-            TypeMetadata* metadata = symbTable_.get_type_metadata(current);
-            if (! metadata)
+            TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+            if (! typeMeta)
                 return nullptr;
 
-            const auto& itVars = metadata->memberVars.find(name);
-            if (itVars != metadata->memberVars.end())
-                return &itVars->second;
+            if (auto* varMeta = typeMeta->find_memb_var(name))
+                return varMeta;
+
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }
     }
     else if (is_a<InterfaceDefStmt>(owner))
     {
-        TypeMetadata* metadata = symbTable_.get_type_metadata(current);
-        if (! metadata)
+        TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+        if (! typeMeta)
             return nullptr;
-
-        const auto& itVar = metadata->memberVars.find(name);
-        if (itVar != metadata->memberVars.end())
-            return &itVar->second;
+        return typeMeta->find_memb_var(name);
     }
 
     return nullptr;

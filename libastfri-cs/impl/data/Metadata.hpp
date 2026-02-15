@@ -81,20 +81,35 @@ struct PropertyNode
  */
 struct TypeDefLoc
 {
-    TSNode nType{};
-    SourceFile* src{nullptr};
+    TSNode nType;
+    SourceFile* src;
 };
 
 /**
  * @brief Metadata about user defined type
  */
-struct TypeMetadata
+class TypeMetadata
 {
-    std::unordered_map<MethodId, MethodMetadata> methods{};
-    IdentifierMap<MemberVarMetadata> memberVars{};
-    IdentifierMap<PropertyNode> properties{};
-    std::vector<TypeDefLoc> defs{};
-    TypeBinding tb;
+private:
+    std::unordered_map<MethodId, std::vector<MethodMetadata>> methods_{};
+    IdentifierMap<MemberVarMetadata> memberVars_{};
+    IdentifierMap<PropertyNode> properties_{};
+    std::vector<TypeDefLoc> defs_{};
+    TypeBinding tb_;
+
+public:
+    explicit TypeMetadata(TypeBinding tb);
+    void add_def(TSNode node, SourceFile* src);
+    void add_def(TypeDefLoc defLocation);
+    void add_method(MethodId id, MethodMetadata methodMetadata);
+    bool add_property(std::string name, PropertyNode prop);
+    bool add_memb_var(std::string name, MemberVarMetadata membMetadata);
+
+    std::span<const TypeDefLoc> defs();
+    MethodMetadata* find_method(const MethodId& id);
+    MemberVarMetadata* find_memb_var(std::string_view name);
+    PropertyNode* find_property(std::string_view name);
+    TypeBinding& type_binding();
 };
 
 } // namespace astfri::csharp
