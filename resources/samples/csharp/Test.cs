@@ -127,6 +127,8 @@ public partial class TestClass
         Vector2.X = 0f;
         Vector2.Zero = new Vector2(0, 0);
 
+        dynamic dyn = 1;
+
         void test(int x)
         {
             

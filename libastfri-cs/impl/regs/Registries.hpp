@@ -44,7 +44,7 @@ struct Handlers
 private:
     /**
      * Default error visit function that throws runtime error
-     * @tparam Self type of self used in handler
+     * @tparam Self type of self parameter used in handler
      * @tparam RetType return type of handler
      * @return always throws runtime error
      */

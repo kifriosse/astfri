@@ -15,14 +15,6 @@
 #include <functional>
 #include <string_view>
 
-namespace astfri
-{
-// Forward declarations
-struct Type;
-struct Stmt;
-struct Expr;
-} // namespace astfri
-
 namespace astfri::csharp
 {
 // Forward declarations
