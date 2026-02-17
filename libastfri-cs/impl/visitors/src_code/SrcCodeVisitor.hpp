@@ -17,6 +17,8 @@ namespace astfri::csharp
 class SrcCodeVisitor
 {
 private:
+    friend regs::Handlers;
+
     static ExprFactory& exprFact_;
     static StmtFactory& stmtFact_;
     static TypeFactory& typeFact_;
@@ -36,6 +38,7 @@ public:
     // compilation unit/translation unit
     void visit_comp_unit(TranslationUnit& trUnit);
 
+private:
     // Expressions
     // Literals
     // todo
@@ -152,7 +155,6 @@ public:
     static Stmt* visit_return(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_throw(SrcCodeVisitor* self, const TSNode& node);
 
-private:
     Stmt* visit_var_def_stmt(
         const TSNode& node,
         util::VarDefType defType

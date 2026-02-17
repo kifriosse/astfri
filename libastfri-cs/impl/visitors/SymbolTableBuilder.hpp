@@ -30,6 +30,8 @@ class SymbolTableBuilder
 {
 
 private:
+    friend regs::Handlers;
+
     static StmtFactory& stmtFact_;
     static regs::QueryReg& queryReg_;
 
@@ -57,6 +59,7 @@ public:
     void reg_using_directives();
     void reg_members();
 
+private:
     static void visit_class(SymbolTableBuilder* self, const TSNode& node);
     static void visit_interface(SymbolTableBuilder* self, const TSNode& node);
     static void visit_record(SymbolTableBuilder* self, const TSNode& node);
@@ -66,7 +69,6 @@ public:
     static void visit_property(SymbolTableBuilder* self, const TSNode& node);
     static void visit_method(SymbolTableBuilder* self, const TSNode& node);
 
-private:
     void reg_using_directive(const TSNode& nUsingDirective);
     void register_type(const TSNode& node, util::TypeKind typeKind);
     [[nodiscard]] SourceFile* src() const;

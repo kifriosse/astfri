@@ -13,6 +13,8 @@ struct SourceFile;
 class TypeTranslator
 {
 private:
+    friend regs::Handlers;
+
     static TypeFactory& typeFact_;
     /**
      * @brief Node used for marking types that can't be resolved. It's used as
@@ -31,6 +33,17 @@ public:
     void set_current_src(SourceFile* src);
     void set_current_namespace(ScopeNode* node);
 
+    [[nodiscard]] TypeBinding* get_type(
+        std::string_view name,
+        const Scope& scope
+    ) const;
+    ScopeNode* resolve_qualif_name(
+        const TSNode& nQualif,
+        util::SearchScope searchScope,
+        ScopeNode* start
+    ) const;
+
+private:
     static Type* visit_predefined(TypeTranslator* self, const TSNode& node);
     static Type* visit_identitifier(TypeTranslator* self, const TSNode& node);
     static Type* visit_qualified_name(TypeTranslator* self, const TSNode& node);
@@ -55,14 +68,7 @@ public:
     static Type* visit_tuple(TypeTranslator* self, const TSNode& node);
     static Type* visit_func_pointer(TypeTranslator* self, const TSNode& node);
 
-    ScopeNode* resolve_qualif_name(
-        const TSNode& nQualif,
-        util::SearchScope searchScope,
-        ScopeNode* start
-    ) const;
-    TypeBinding* get_type(std::string_view name, const Scope& scope) const;
 
-private:
     /**
      * Resolves alias qualifier node - alias qualifier:
      * \code Alias::Namespace.OtherNamespace.Type\endcode
