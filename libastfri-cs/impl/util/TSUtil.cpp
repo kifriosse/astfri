@@ -1,4 +1,5 @@
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 
 #include <tree_sitter/api.h>
@@ -129,17 +130,15 @@ bool has_variadic_param(const TSNode& node, TSNode* nType)
 
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate)
 {
-    static const TSSymbol sCastExpr = symbol_for_name("cast_expr", true);
-    static const TSSymbol sLambda = symbol_for_name("lambda_expression", true);
-
+    using enum NodeType;
     const TSNode nCast            = unwrap_parantheses(node);
-    if (ts_node_symbol(nCast) != sCastExpr)
+    if (ts_node_symbol(nCast) != RegManager::get_symbol(CastExpr))
         return false;
 
     const TSNode nValue  = child_by_field_name(nCast, "value");
     const TSNode nLambda = unwrap_parantheses(nValue);
 
-    if (ts_node_symbol(nLambda) != sLambda)
+    if (ts_node_symbol(nLambda) != RegManager::get_symbol(LambdaExpr))
         return false;
 
     if (lambda)
@@ -156,12 +155,11 @@ TSTree* make_tree(TSParser* parser, const std::string_view str)
 
 TSNode unwrap_parantheses(const TSNode& node)
 {
-    static const TSSymbol sBracketExpr
-        = symbol_for_name("parenthesized_expression", true);
+    using enum NodeType;
+    static const TSSymbol sBracketExpr = RegManager::get_symbol(ParenthesizedExpr);
 
     TSNode current = node;
-    while (! ts_node_is_null(current)
-           && ts_node_symbol(current) == sBracketExpr)
+    while (! ts_node_is_null(current) && ts_node_symbol(current) == sBracketExpr)
     {
         current = ts_node_named_child(current, 0);
     }
@@ -171,11 +169,11 @@ TSNode unwrap_parantheses(const TSNode& node)
 bool is_type_decl(const TSNode& node)
 {
     static const std::unordered_set sTypeDecls{
-        symbol_for_name("class_declaration", true),
-        symbol_for_name("interface_declaration", true),
-        symbol_for_name("record_declaration", true),
-        symbol_for_name("enum_declaration", true),
-        symbol_for_name("delegate_declaration", true)
+        RegManager::get_symbol(NodeType::ClassDecl),
+        RegManager::get_symbol(NodeType::InterfaceDecl),
+        RegManager::get_symbol(NodeType::EnumDecl),
+        RegManager::get_symbol(NodeType::RecordDecl),
+        RegManager::get_symbol(NodeType::DelegateDecl)
     };
     return sTypeDecls.contains(ts_node_symbol(node));
 }

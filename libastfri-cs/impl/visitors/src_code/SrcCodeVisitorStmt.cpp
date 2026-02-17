@@ -16,15 +16,13 @@
 namespace astfri::csharp
 {
 
-Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
+Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node)
 {
-    static const TSSymbol sFunc
-        = util::symbol_for_name("local_function_statement", true);
-
     self->semanticContext_.enter_scope();
     auto discoverFunc = [self](const TSNode& current) -> void
     {
-        if (! ts_node_is_named(current) || ts_node_symbol(current) != sFunc)
+        if (! ts_node_is_named(current)
+            || ts_node_symbol(current) != RegManager::get_symbol(NodeType::LocalFuncDecl))
             return;
 
         self->semanticContext_.reg_local_func(
@@ -49,7 +47,7 @@ Stmt* SrcCodeVisitor::visit_block_stmt(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_compound(std::move(stmts));
 }
 
-Stmt* SrcCodeVisitor::visit_arrow_stmt(SrcCodeVisitor* self, const TSNode& node)
+Stmt* SrcCodeVisitor::visit_arrow_body(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode nBody      = ts_node_named_child(node, 0);
     const ExprHandler hBody = RegManager::get_expr_handler(nBody);
@@ -65,15 +63,12 @@ Stmt* SrcCodeVisitor::visit_arrow_stmt(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_compound({body});
 }
 
-Stmt* SrcCodeVisitor::visit_while_loop(SrcCodeVisitor* self, const TSNode& node)
+Stmt* SrcCodeVisitor::visit_while(SrcCodeVisitor* self, const TSNode& node)
 {
     return self->make_while_loop(node, true);
 }
 
-Stmt* SrcCodeVisitor::visit_do_while_loop(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_do_while(SrcCodeVisitor* self, const TSNode& node)
 {
     return self->make_while_loop(node, false);
 }
@@ -126,10 +121,7 @@ Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_for(init, cond, step, body);
 }
 
-Stmt* SrcCodeVisitor::visit_for_each_loop(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node)
 {
     self->semanticContext_.enter_scope();
     const TSNode nType  = util::child_by_field_name(node, "type");
@@ -159,7 +151,7 @@ Stmt* SrcCodeVisitor::visit_for_each_loop(
     return stmtFact_.mk_for_each(left, right, body);
 }
 
-Stmt* SrcCodeVisitor::visit_if_stmt(SrcCodeVisitor* self, const TSNode& node)
+Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
 {
     static constexpr std::string_view falseSw = "alternative";
 
@@ -207,7 +199,7 @@ Stmt* SrcCodeVisitor::visit_if_stmt(SrcCodeVisitor* self, const TSNode& node)
     return currentElse;
 }
 
-Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
+Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node)
 {
     if (ts_node_child_count(node) < 2)
         throw std::logic_error("Not a try-catch node");
@@ -238,10 +230,7 @@ Stmt* SrcCodeVisitor::visit_try_stmt(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_try(hBody(self, nBody), finally, std::move(catchStmts));
 }
 
-Stmt* SrcCodeVisitor::visit_catch_clause(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node)
 {
     self->semanticContext_.enter_scope();
 
@@ -285,10 +274,7 @@ Stmt* SrcCodeVisitor::visit_catch_decl(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
 }
 
-Stmt* SrcCodeVisitor::visit_switch_stmt(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_switch(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode nValue      = util::child_by_field_name(node, "value");
     const TSNode nSwitchBody = util::child_by_field_name(node, "body");

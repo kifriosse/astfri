@@ -248,8 +248,6 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
 {
     SourceFile* src               = this->src();
     const std::string_view srcStr = src->srcStr;
-    static const TSSymbol sGlobal = util::symbol_for_name("global", false);
-    static const TSSymbol sStatic = util::symbol_for_name("static", false);
     const TSNode nAliasName
         = util::child_by_field_name(nUsingDirective, "name");
     bool isGlobal = false;
@@ -258,9 +256,9 @@ void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
     auto process  = [&isGlobal, &isStatic](const TSNode& current)
     {
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == sGlobal)
+        if (sCurrent == RegManager::get_symbol(NodeType::Static))
             isGlobal = true;
-        else if (sCurrent == sStatic)
+        else if (sCurrent == RegManager::get_symbol(NodeType::Global))
             isStatic = true;
     };
 

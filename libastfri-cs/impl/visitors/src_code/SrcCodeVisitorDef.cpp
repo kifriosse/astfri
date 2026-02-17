@@ -17,17 +17,11 @@
 
 namespace astfri::csharp
 {
-Stmt* SrcCodeVisitor::visit_class_def_stmt(
+Stmt* SrcCodeVisitor::visit_class_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
 {
-    static const TSSymbol sBaseList = util::symbol_for_name("base_list", true);
-    static const TSSymbol sTypeParam
-        = util::symbol_for_name("type_parameter_list", true);
-    static const TSSymbol sTypeParamConstr
-        = util::symbol_for_name("type_parameter_constraints_clause", true);
-
     const std::string_view src  = self->src_str();
     const TSNode nClassName     = util::child_by_field_name(node, "name");
     const std::string className = util::extract_text(nClassName, src);
@@ -73,15 +67,15 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == sBaseList) // base list handeling
+        if (sCurrent == RegManager::get_symbol(NodeType::BaseList)) // base list handeling
         {
             util::for_each_child_node(current, processBaseList);
         }
-        else if (sCurrent == sTypeParam)
+        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamList))
         {
             classDef->tparams_ = util::make_generic_params(current, src);
         }
-        else if (sCurrent == sTypeParamConstr)
+        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamConstrClause))
         {
             // util::for_each_child_node(current, processGenericConstraints);
         }
@@ -115,17 +109,11 @@ Stmt* SrcCodeVisitor::visit_class_def_stmt(
     return classDef;
 }
 
-Stmt* SrcCodeVisitor::visit_interface_def_stmt(
+Stmt* SrcCodeVisitor::visit_interface_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
 {
-    static const TSSymbol sBaseList = util::symbol_for_name("base_list", true);
-    static const TSSymbol sTypeParam
-        = util::symbol_for_name("type_parameter_list", true);
-    static const TSSymbol sTypeParamConstr
-        = util::symbol_for_name("type_parameter_constraints_clause", true);
-
     const std::string_view src = self->src_str();
     const TSNode nIntfName     = util::child_by_field_name(node, "name");
     const std::string intfName = util::extract_text(nIntfName, src);
@@ -156,15 +144,15 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == sBaseList) // base list handeling
+        if (sCurrent == RegManager::get_symbol(NodeType::BaseList)) // base list handeling
         {
             util::for_each_child_node(current, processBaseList);
         }
-        else if (sCurrent == sTypeParam)
+        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamList))
         {
             intfDef->tparams_ = util::make_generic_params(current, src);
         }
-        else if (sCurrent == sTypeParamConstr)
+        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamConstrClause))
         {
             // util::for_each_child_node(current, processGenericConstraints);
         }
@@ -195,7 +183,7 @@ Stmt* SrcCodeVisitor::visit_interface_def_stmt(
     return intfDef;
 }
 
-Stmt* SrcCodeVisitor::visit_memb_var_def_stmt(
+Stmt* SrcCodeVisitor::visit_memb_var_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -203,7 +191,7 @@ Stmt* SrcCodeVisitor::visit_memb_var_def_stmt(
     return self->visit_var_def_stmt(node, util::VarDefType::Member);
 }
 
-Stmt* SrcCodeVisitor::visit_local_var_def_stmt(
+Stmt* SrcCodeVisitor::visit_local_var_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -220,7 +208,7 @@ Stmt* SrcCodeVisitor::visit_global_var_def_stmt(
     return self->visit_var_def_stmt(nVarDef, util::VarDefType::Global);
 }
 
-Stmt* SrcCodeVisitor::visit_param_def_stmt(
+Stmt* SrcCodeVisitor::visit_param_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -239,7 +227,7 @@ Stmt* SrcCodeVisitor::visit_param_def_stmt(
     return param;
 }
 
-Stmt* SrcCodeVisitor::visit_constr_def_stmt(
+Stmt* SrcCodeVisitor::visit_constr_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -288,7 +276,7 @@ Stmt* SrcCodeVisitor::visit_constr_def_stmt(
     return constrDef;
 }
 
-Stmt* SrcCodeVisitor::visit_construct_init(
+Stmt* SrcCodeVisitor::visit_constr_init(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -326,7 +314,7 @@ Stmt* SrcCodeVisitor::visit_construct_init(
     return stmtFact_.mk_base_initializer(base->type_, std::move(args));
 }
 
-Stmt* SrcCodeVisitor::visit_destr_def_stmt(
+Stmt* SrcCodeVisitor::visit_destr_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -347,7 +335,7 @@ Stmt* SrcCodeVisitor::visit_destr_def_stmt(
     return stmtFact_.mk_destructor_def(owner, as_a<CompoundStmt>(body));
 }
 
-Stmt* SrcCodeVisitor::visit_method_def_stmt(
+Stmt* SrcCodeVisitor::visit_method_def(
     SrcCodeVisitor* self,
     const TSNode& node
 )

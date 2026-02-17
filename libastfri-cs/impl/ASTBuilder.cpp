@@ -1,4 +1,5 @@
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
@@ -11,7 +12,7 @@
 
 #include <filesystem>
 #include <fstream>
-// #include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
 

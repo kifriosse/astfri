@@ -28,17 +28,17 @@ RetType RegManager::default_visit(Self*, const TSNode&)
 template<class Type>
 Type RegManager::get_or_default(
     const RegistryMap<Type>& map,
-    std::string_view name,
+    NodeType nodeType,
     Type nDefVal
 )
 {
-    const auto it = map.find(name);
+    const auto it = map.find(nodeType);
     return it != map.end() ? it->second : nDefVal;
 }
 
 template<class RetType>
 std::optional<RetType> RegManager::get_opt(
-    const RegistryMap<RetType>& map,
+    const RegistryStrMap<RetType>& map,
     std::string_view name
 )
 {

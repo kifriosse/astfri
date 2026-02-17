@@ -194,7 +194,7 @@ Expr* SrcCodeVisitor::visit_identifier(SrcCodeVisitor* self, const TSNode& node)
     return exprFact_.mk_unknown();
 }
 
-Expr* SrcCodeVisitor::visit_memb_access_expr(
+Expr* SrcCodeVisitor::visit_memb_access(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -222,12 +222,8 @@ Expr* SrcCodeVisitor::visit_memb_access_expr(
     return exprFact_.mk_unknown();
 }
 
-Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
+Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node)
 {
-    static const TSSymbol sIndentifier
-        = util::symbol_for_name("identifier", true);
-    static const TSSymbol sMembAccess
-        = util::symbol_for_name("member_access_expression", true);
     // std::cout << "Invocation Expression: " << std::endl;
     // print_child_nodes_types(node, self->get_src_code());
     const TSNode nFunc         = util::child_by_field_name(node, "function");
@@ -235,7 +231,7 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
     std::vector<Expr*> argList = self->visit_arg_list(nArgList);
     // if it doesn't have a left side - it not a member access node in tree
     // sitter
-    if (ts_node_symbol(nFunc) == sIndentifier)
+    if (ts_node_symbol(nFunc) == RegManager::get_symbol(NodeType::Identifier))
     {
         // todo add handling of local functions
         std::string name = util::extract_text(nFunc, self->src_str());
@@ -283,7 +279,7 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
         }
     }
     // accessing a member of some variable - also includes `this`
-    if (ts_node_symbol(nFunc) == sMembAccess)
+    if (ts_node_symbol(nFunc) == RegManager::get_symbol(NodeType::MemberAccess))
     {
         const TSNode nName = util::child_by_field_name(nFunc, "name");
         const TSNode nLeft = util::child_by_field_name(nFunc, "expression");
@@ -338,7 +334,7 @@ Expr* SrcCodeVisitor::visit_invoc_expr(SrcCodeVisitor* self, const TSNode& node)
     return exprFact_.mk_unknown();
 }
 
-Expr* SrcCodeVisitor::visit_prefix_unary_op_expr(
+Expr* SrcCodeVisitor::visit_prefix_unary_opr(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -358,7 +354,7 @@ Expr* SrcCodeVisitor::visit_prefix_unary_op_expr(
     return exprFact_.mk_unary_op(opType, right);
 }
 
-Expr* SrcCodeVisitor::visit_postfix_unary_op_expr(
+Expr* SrcCodeVisitor::visit_postfix_unary_opr(
     SrcCodeVisitor* self,
     const TSNode& node
 )
@@ -391,7 +387,7 @@ Expr* SrcCodeVisitor::visit_ref_expr(SrcCodeVisitor* self, const TSNode& node)
     return exprFact_.mk_unary_op(UnaryOpType::AddressOf, expr);
 }
 
-Expr* SrcCodeVisitor::visit_binary_op_expr(
+Expr* SrcCodeVisitor::visit_binary_opr(
     SrcCodeVisitor* self,
     const TSNode& node
 )

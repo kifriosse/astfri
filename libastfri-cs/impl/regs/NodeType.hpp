@@ -1,11 +1,14 @@
 #ifndef CSHARP_NODE_TYPE_HPP
 #define CSHARP_NODE_TYPE_HPP
 
+#include <tree_sitter/api.h>
+
 namespace astfri::csharp
 {
 
-enum class NodeType
+enum class NodeType : TSSymbol
 {
+    Unknown,
     // Definitions
     // Type Definitions
     ClassDecl,
@@ -18,14 +21,15 @@ enum class NodeType
     ConstructorDecl,
     ConstructorInit,
     MethodDecl,
-    DecstructorDecl,
-    FieldDecl,
+    DestructorDecl,
+    MemberVarDef,
     PropertyDecl,
     IndexerDecl,
-    OperatorDecl,
+    OprDecl,
+    CastOprDecl,
     // Other Definitions
-    LocalFunctionDecl,
-    Parameter,
+    LocalFuncDecl,
+    ParameterDecl,
     LocalVarDef,
     // Statements
     Block,
@@ -37,12 +41,12 @@ enum class NodeType
     BreakStmt,
     ContinueStmt,
     IfStmt,
-    TryStmt,
-    CatchClause,
-    FinallyClause,
-    CatchDecl,
     SwitchStmt,
     SwitchSection,
+    TryStmt,
+    CatchClause,
+    CatchDecl,
+    FinallyClause,
     ExprStmt,
     ReturnStmt,
     ThrowStmt,
@@ -52,19 +56,18 @@ enum class NodeType
     BoolLit,
     CharLit,
     StrLit,
-    NullLit,
     VerbatimStrLit,
     RawStrLit,
+    NullLit,
     // Operation expressions
     PrefixUnOpr,
-    SuffixUnOpr,
+    PostfixUnOpr,
     BinaryOpr,
     TernaryOpr,
     Assignment,
     // Patterns
     ConstPattern,
     // other expr
-    ThisExpr,
     This,
     RefExpr,
     ParenthesizedExpr,
@@ -75,7 +78,7 @@ enum class NodeType
 
     // Types
     PredefinedType,
-    QualifiedName,
+    QualifName,
     ImplicitType,
     NullableType,
     PointerType,
@@ -85,7 +88,6 @@ enum class NodeType
     TupleType,
     FuncPointerType,
     ScopedType,
-
     // Other
     Modifier,
     Identifier,
@@ -106,7 +108,8 @@ enum class NodeType
     /**
      * @brief Node for list of constrains for generic parameters
      */
-    TypeParamConstraints,
+    TypeParamConstrClause,
+    TypeParamConstraint,
 
     ERROR,
 };
