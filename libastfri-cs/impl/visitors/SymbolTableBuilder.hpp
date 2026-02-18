@@ -5,6 +5,7 @@
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
+#include <libastfri-cs/inc/SDKProfile.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -57,6 +58,7 @@ public:
 
     void reg_user_types();
     void reg_using_directives();
+    void load_implicit_usings(SDKProfile profile);
     void reg_members();
 
 private:

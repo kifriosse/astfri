@@ -2,6 +2,7 @@
 #define CSHARP_AST_BUILDER_HPP
 
 #include <libastfri-cs/impl/data/SourceFile.hpp>
+#include <libastfri-cs/inc/SDKProfile.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
@@ -41,8 +42,7 @@ public:
      * Makes AST from loaded source code
      * @return AST from loaded source code
      */
-    TranslationUnit* mk_ast();
-
+    TranslationUnit* mk_ast(SDKProfile profile = SDKProfile::NET);
 private:
     void load_from_stream(std::istream& inputStream, const path& path = {});
 };

@@ -1,6 +1,7 @@
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
 #include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
@@ -10,9 +11,9 @@
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -85,7 +86,7 @@ void ASTBuilder::load_src(std::istream& inputStream)
     load_from_stream(inputStream);
 }
 
-TranslationUnit* ASTBuilder::mk_ast()
+TranslationUnit* ASTBuilder::mk_ast(const SDKProfile profile)
 {
     // using milli          = std::chrono::milliseconds;
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
@@ -100,6 +101,7 @@ TranslationUnit* ASTBuilder::mk_ast()
 
     symbTableBuilder.reg_user_types();
     // std::cout << "Loading using directives...\n";
+    symbTableBuilder.load_implicit_usings(profile);
     symbTableBuilder.reg_using_directives();
     // std::cout << "Discovering members of user defined types...\n";
     symbTableBuilder.reg_members();
@@ -158,4 +160,5 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path)
     );
     ts_parser_reset(parser_);
 }
+
 } // namespace astfri::csharp

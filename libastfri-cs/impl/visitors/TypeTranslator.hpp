@@ -42,6 +42,12 @@ public:
         util::SearchScope searchScope,
         ScopeNode* start
     ) const;
+    [[nodiscard]] ScopeNode* find_entry_point(
+        std::string_view qualif,
+        util::SearchScope searchScope,
+        ScopeNode* start,
+        SourceFile* src
+    ) const;
 
 private:
     static Type* visit_predefined(TypeTranslator* self, const TSNode& node);
@@ -84,12 +90,6 @@ private:
      */
     [[nodiscard]] const Alias* resolve_explicit_alias(
         std::string_view aliasName,
-        util::SearchScope searchScope,
-        ScopeNode* start,
-        SourceFile* src
-    ) const;
-    [[nodiscard]] ScopeNode* find_entry_point(
-        std::string_view qualif,
         util::SearchScope searchScope,
         ScopeNode* start,
         SourceFile* src

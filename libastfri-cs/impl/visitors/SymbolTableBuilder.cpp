@@ -15,6 +15,48 @@
 
 namespace astfri::csharp
 {
+
+namespace
+{
+
+constexpr std::string_view netSdk[]{
+    "System",
+    "System.Collections.Generic",
+    "System.IO",
+    "System.Linq",
+    "System.Net.Http",
+    "System.Threading",
+    "System.Threading.Tasks"
+};
+
+constexpr std::string_view webSdk[]{
+    "System.Net.Http.Json",
+    "Microsoft.AspNetCore.Builder",
+    "Microsoft.AspNetCore.Hosting",
+    "Microsoft.AspNetCore.Http",
+    "Microsoft.AspNetCore.Routing",
+    "Microsoft.Extensions.Configuration",
+    "Microsoft.Extensions.DependencyInjection",
+    "Microsoft.Extensions.Hosting",
+    "Microsoft.Extensions.Logging"
+};
+
+constexpr std::string_view workerSdk[]{
+    "Microsoft.Extensions.Configuration",
+    "Microsoft.Extensions.DependencyInjection",
+    "Microsoft.Extensions.Hosting",
+    "Microsoft.Extensions.Logging"
+};
+
+constexpr std::string_view winFormsSdk[]{
+    "System.Drawing",
+    "System.Windows.Forms"
+};
+
+constexpr std::string_view wpfSdkExclude[]{"System.IO", "System.Net.Http"};
+
+} // namespace
+
 struct SourceFile;
 
 StmtFactory& SymbolTableBuilder::stmtFact_    = StmtFactory::get_instance();
@@ -242,6 +284,59 @@ void SymbolTableBuilder::visit_method(
         .nMethod   = node
     };
     typeMeta->add_method(std::move(methodId), std::move(methodMetadata));
+}
+
+void SymbolTableBuilder::load_implicit_usings(const SDKProfile profile)
+{
+    using enum SDKProfile;
+    if (profile == None)
+        return;
+
+    auto addToScope = [this](const std::string_view qualif)
+    {
+        ScopeNode* entryPoint = typeTrs_.find_entry_point(
+            qualif,
+            util::SearchScope::GlobUsing,
+            symbTable_.symbTree().root(),
+            nullptr
+        );
+        if (! entryPoint)
+            return;
+        symbTable_.add_glob_using(entryPoint);
+    };
+
+    for (auto qualif : netSdk)
+    {
+        using namespace std::ranges;
+        const auto end = std::end(wpfSdkExclude);
+        if (profile == WPF && find(wpfSdkExclude, qualif) != end)
+            continue;
+
+        addToScope(qualif);
+    }
+
+    if (profile == NET || profile == WPF)
+        return;
+
+    std::span<const std::string_view> usings{};
+    switch (profile)
+    {
+    case Web:
+        usings = webSdk;
+        break;
+    case Worker:
+        usings = workerSdk;
+        break;
+    case WinForms:
+        usings = winFormsSdk;
+    default:
+        break;
+    }
+
+    for (const auto& qualif : usings)
+    {
+        addToScope(qualif);
+    }
 }
 
 void SymbolTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
