@@ -176,22 +176,25 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
      * Global lookup (including file usings)
      * * Checks only external aliases
      */
-    static const TSSymbol sQualifName = RegManager::get_symbol(NodeType::QualifName);
+    static const TSSymbol sQualifName
+        = RegManager::get_symbol(NodeType::QualifName);
 
     const std::string_view srcStr = src_str();
     TSNode nCurrent               = nQualif;
     std::vector<TSNode> nQualifs;
 
-    while (ts_node_symbol(nCurrent) == sQualifName)
+    TSSymbol sCurrent = ts_node_symbol(nCurrent);
+    while (sCurrent == sQualifName)
     {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         nCurrent = util::child_by_field_name(nCurrent, "qualifier");
+        sCurrent = ts_node_symbol(nCurrent);
     }
 
     const SymbolTree& symbTree = symbTable_.symbTree();
     ScopeNode* entryPoint      = start;
     bool hasExplicitAlias      = false;
-    if (ts_node_symbol(nCurrent) == RegManager::get_symbol(NodeType::AliasQualifName))
+    if (sCurrent == RegManager::get_symbol(NodeType::AliasQualifName))
     {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         const TSNode nAlias = util::child_by_field_name(nCurrent, "alias");

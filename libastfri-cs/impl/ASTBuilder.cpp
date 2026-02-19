@@ -45,14 +45,14 @@ void ASTBuilder::load_src(const path& projectDir)
         return;
     }
 
-    std::stack<std::filesystem::path> dirs;
+    std::vector<std::filesystem::path> dirs;
     const std::filesystem::path& rootPath{projectDir};
-    dirs.emplace(rootPath);
+    dirs.emplace_back(rootPath);
 
     while (! dirs.empty())
     {
-        auto dirIt = std::filesystem::directory_iterator(dirs.top());
-        dirs.pop();
+        auto dirIt = std::filesystem::directory_iterator(dirs.back());
+        dirs.pop_back();
         for (auto& dirEntry : dirIt)
         {
             auto& entryPath            = dirEntry.path();
@@ -65,7 +65,7 @@ void ASTBuilder::load_src(const path& projectDir)
                 {
                     continue;
                 }
-                dirs.push(entryPath);
+                dirs.push_back(entryPath);
             }
             else if (entryPath.extension() == ".cs")
             {

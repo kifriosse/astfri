@@ -12,4 +12,3 @@ enum class SDKProfile
 };
 
 #endif // CSHARP_SDK_PROFILE_HPP
-

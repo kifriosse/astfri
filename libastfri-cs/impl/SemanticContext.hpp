@@ -6,7 +6,6 @@
 #include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 
-#include <stack>
 #include <unordered_map>
 #include <vector>
 
@@ -26,7 +25,7 @@ namespace astfri::csharp
  */
 struct TypeContext
 {
-    std::stack<TypeBinding*> typeStack;
+    std::vector<TypeBinding*> typeStack;
 };
 
 /**
@@ -34,7 +33,7 @@ struct TypeContext
  */
 struct ScopeContext
 {
-    std::stack<std::vector<Stmt*>> scopeStack{};
+    std::vector<std::vector<Stmt*>> scopeStack{};
     IdentifierMap<ParamVarDefStmt*> params{};
     IdentifierMap<LocalVarDefStmt*> localVars{};
     IdentifierMap<FuncMetadata> functions{};
@@ -50,7 +49,7 @@ class SemanticContext
 private:
     ScopeContext scopeContext_{};
     TypeContext typeContext_{};
-    std::stack<Type*> retTypeContext_{};
+    std::vector<Type*> retTypeContext_{};
     SymbolTable& symbTable_;
 
 public:

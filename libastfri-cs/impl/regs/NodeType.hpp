@@ -9,7 +9,9 @@ namespace astfri::csharp
 enum class NodeType : TSSymbol
 {
     Unknown,
+    CompilationUnit,
     // Definitions
+    NamespaceDecl,
     // Type Definitions
     ClassDecl,
     StructDecl,
@@ -17,7 +19,7 @@ enum class NodeType : TSSymbol
     EnumDecl,
     DelegateDecl,
     RecordDecl,
-    //Member Definitions
+    // Member Definitions
     ConstructorDecl,
     ConstructorInit,
     MethodDecl,
@@ -117,4 +119,3 @@ enum class NodeType : TSSymbol
 } // namespace astfri::csharp
 
 #endif // CSHARP_NODE_TYPE_HPP
-

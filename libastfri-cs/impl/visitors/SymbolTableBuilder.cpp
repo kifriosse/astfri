@@ -134,9 +134,9 @@ void SymbolTableBuilder::reg_members()
             const TSNode nClassBody = util::child_by_field_name(node, "body");
             currentSrc_             = src;
             typeTrs_.set_current_src(src);
-            typeContext_.typeStack.push(&metadata->type_binding());
+            typeContext_.typeStack.push_back(&metadata->type_binding());
             util::for_each_child_node(nClassBody, process);
-            typeContext_.typeStack.pop();
+            typeContext_.typeStack.pop_back();
         }
     }
     typeTrs_.set_current_namespace(nullptr);
@@ -198,7 +198,7 @@ void SymbolTableBuilder::visit_memb_var(
     const TypeHandler th   = RegManager::get_type_handler(nType);
     Type* type             = th(&self->typeTrs_, nType);
     TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(
-        self->typeContext_.typeStack.top()->def
+        self->typeContext_.typeStack.back()->def
     );
 
     if (! typeMeta)
@@ -240,7 +240,7 @@ void SymbolTableBuilder::visit_method(
     const TSNode& node
 )
 {
-    const auto currentType = self->typeContext_.typeStack.top();
+    const auto currentType = self->typeContext_.typeStack.back();
 
     const auto typeMeta = self->symbTable_.get_type_metadata(currentType->def);
     if (! typeMeta)

@@ -387,10 +387,7 @@ Expr* SrcCodeVisitor::visit_ref_expr(SrcCodeVisitor* self, const TSNode& node)
     return exprFact_.mk_unary_op(UnaryOpType::AddressOf, expr);
 }
 
-Expr* SrcCodeVisitor::visit_binary_opr(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Expr* SrcCodeVisitor::visit_binary_opr(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode nLeft       = ts_node_named_child(node, 0);
     const TSNode nOp         = ts_node_child(node, 1);

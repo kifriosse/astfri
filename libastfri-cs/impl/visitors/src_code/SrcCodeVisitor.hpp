@@ -64,10 +64,7 @@ private:
 
     // Reference Expersions
     static Expr* visit_identifier(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_memb_access(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Expr* visit_memb_access(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_invoc(SrcCodeVisitor* self, const TSNode& node);
 
     // Operations
@@ -94,19 +91,10 @@ private:
     // Statements
     // Type Definitions
     static Stmt* visit_class_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_interface_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Stmt* visit_interface_def(SrcCodeVisitor* self, const TSNode& node);
     // Variable Definitions
-    static Stmt* visit_memb_var_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
-    static Stmt* visit_local_var_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Stmt* visit_memb_var_def(SrcCodeVisitor* self, const TSNode& node);
+    static Stmt* visit_local_var_def(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_global_var_def_stmt(
         SrcCodeVisitor* self,
         const TSNode& node

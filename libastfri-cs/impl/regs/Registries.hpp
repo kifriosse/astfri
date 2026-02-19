@@ -44,9 +44,11 @@ class NodeTypes
 {
 public:
     static constexpr TSSymbol INVALID_SYMBOL = UINT16_MAX;
+
 private:
     std::vector<TSSymbol> symbolMap_;
     std::vector<NodeType> nodeTypeMap_;
+
 public:
     NodeTypes();
     [[nodiscard]] TSSymbol get_symbol(NodeType type) const;
@@ -101,6 +103,7 @@ private:
     static regs::Types types_;
     static regs::Modifiers modifiers_;
     static regs::NodeTypes nodeTypes_;
+
 public:
     static StmtHandler get_stmt_handler(const TSNode& node);
     static ExprHandler get_expr_handler(const TSNode& node);
@@ -117,6 +120,7 @@ public:
     static CSModifier get_modifier(std::string_view modifs);
     static bool is_expr(const TSNode& node);
     static bool is_stmt(const TSNode& node);
+    static NodeType get_node_type(const TSNode& node);
     static TSSymbol get_symbol(NodeType type);
 
 private:

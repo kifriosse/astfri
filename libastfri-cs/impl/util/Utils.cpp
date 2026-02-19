@@ -3,9 +3,9 @@
 
 #include <cctype>
 #include <cmath>
-#include <stack>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace astfri::csharp::util
 {
@@ -52,7 +52,7 @@ bool almost_equal(const double a, const double b, const double epsilon)
 }
 
 void split_namespace(
-    std::stack<std::string>& scopeStr,
+    std::vector<std::string>& scopeStr,
     const std::string_view nmsQualifier
 )
 {
@@ -66,7 +66,7 @@ void split_namespace(
         if (*it == '.')
         {
             auto sliceStart = it.base();
-            scopeStr.emplace(sliceStart, sliceEnd);
+            scopeStr.emplace_back(sliceStart, sliceEnd);
             sliceEnd = sliceStart - 1;
         }
         ++it;
@@ -74,7 +74,7 @@ void split_namespace(
 
     if (! nmsQualifier.empty())
     {
-        scopeStr.emplace(nmsQualifier.begin(), sliceEnd);
+        scopeStr.emplace_back(nmsQualifier.begin(), sliceEnd);
     }
 }
 

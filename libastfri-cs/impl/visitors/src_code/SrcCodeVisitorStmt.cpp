@@ -8,7 +8,6 @@
 #include <tree_sitter/api.h>
 
 #include <cstring>
-#include <stack>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -21,14 +20,16 @@ Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node)
     self->semanticContext_.enter_scope();
     auto discoverFunc = [self](const TSNode& current) -> void
     {
+        using enum NodeType;
         if (! ts_node_is_named(current)
-            || ts_node_symbol(current) != RegManager::get_symbol(NodeType::LocalFuncDecl))
+            || ts_node_symbol(current) != RegManager::get_symbol(LocalFuncDecl))
             return;
 
         self->semanticContext_.reg_local_func(
             util::make_func_metadata(current, self->src_str(), self->typeTrs_)
         );
     };
+
     util::for_each_child_node(node, discoverFunc);
 
     std::vector<Stmt*> stmts;
@@ -155,15 +156,15 @@ Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
 {
     static constexpr std::string_view falseSw = "alternative";
 
-    std::stack<TSNode> nIfs;
-    nIfs.push(node);
+    std::vector<TSNode> nIfs;
+    nIfs.push_back(node);
     TSNode nCurrent    = util::child_by_field_name(node, falseSw);
     const TSSymbol sIf = ts_node_symbol(node);
     TSSymbol sCurrent
         = ts_node_is_null(nCurrent) ? 0 : ts_node_symbol(nCurrent);
     while (sCurrent == sIf)
     {
-        nIfs.push(nCurrent);
+        nIfs.push_back(nCurrent);
         nCurrent = util::child_by_field_name(nCurrent, falseSw);
         if (ts_node_is_null(nCurrent))
             break;
@@ -172,7 +173,7 @@ Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
     }
 
     // handling of else in last node
-    const TSNode nElse = util::child_by_field_name(nIfs.top(), falseSw);
+    const TSNode nElse = util::child_by_field_name(nIfs.back(), falseSw);
 
     Stmt* currentElse  = nullptr;
     if (! ts_node_is_null(nElse))
@@ -183,8 +184,8 @@ Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
 
     while (! nIfs.empty())
     {
-        const TSNode ifNode = nIfs.top();
-        nIfs.pop();
+        const TSNode ifNode = nIfs.back();
+        nIfs.pop_back();
         const TSNode nTrue = util::child_by_field_name(ifNode, "consequence");
         const TSNode nCond = util::child_by_field_name(ifNode, "condition");
         StmtHandler hTrue  = RegManager::get_stmt_handler(nTrue);

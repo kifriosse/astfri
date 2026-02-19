@@ -17,10 +17,7 @@
 
 namespace astfri::csharp
 {
-Stmt* SrcCodeVisitor::visit_class_def(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
 {
     const std::string_view src  = self->src_str();
     const TSNode nClassName     = util::child_by_field_name(node, "name");
@@ -63,19 +60,20 @@ Stmt* SrcCodeVisitor::visit_class_def(
 
     auto processClassHeader = [&](const TSNode& current) -> bool
     {
+        using enum NodeType;
         if (ts_node_eq(current, nClassBody))
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == RegManager::get_symbol(NodeType::BaseList)) // base list handeling
+        if (sCurrent == RegManager::get_symbol(BaseList))
         {
             util::for_each_child_node(current, processBaseList);
         }
-        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamList))
+        else if (sCurrent == RegManager::get_symbol(TypeParamList))
         {
             classDef->tparams_ = util::make_generic_params(current, src);
         }
-        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamConstrClause))
+        else if (sCurrent == RegManager::get_symbol(TypeParamConstrClause))
         {
             // util::for_each_child_node(current, processGenericConstraints);
         }
@@ -140,19 +138,20 @@ Stmt* SrcCodeVisitor::visit_interface_def(
     const TSNode nIntfBody  = util::child_by_field_name(node, "body");
     auto processClassHeader = [&](const TSNode& current) -> bool
     {
+        using enum NodeType;
         if (ts_node_eq(current, nIntfBody))
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == RegManager::get_symbol(NodeType::BaseList)) // base list handeling
+        if (sCurrent == RegManager::get_symbol(BaseList))
         {
             util::for_each_child_node(current, processBaseList);
         }
-        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamList))
+        else if (sCurrent == RegManager::get_symbol(TypeParamList))
         {
             intfDef->tparams_ = util::make_generic_params(current, src);
         }
-        else if (sCurrent == RegManager::get_symbol(NodeType::TypeParamConstrClause))
+        else if (sCurrent == RegManager::get_symbol(TypeParamConstrClause))
         {
             // util::for_each_child_node(current, processGenericConstraints);
         }
@@ -208,10 +207,7 @@ Stmt* SrcCodeVisitor::visit_global_var_def_stmt(
     return self->visit_var_def_stmt(nVarDef, util::VarDefType::Global);
 }
 
-Stmt* SrcCodeVisitor::visit_param_def(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_param_def(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode nName = util::child_by_field_name(node, "name");
     const TSNode nInit = ts_node_next_named_sibling(nName);
@@ -227,10 +223,7 @@ Stmt* SrcCodeVisitor::visit_param_def(
     return param;
 }
 
-Stmt* SrcCodeVisitor::visit_constr_def(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node)
 {
     self->semanticContext_.enter_scope();
     self->semanticContext_.reg_return(typeFact_.mk_void());
@@ -314,10 +307,7 @@ Stmt* SrcCodeVisitor::visit_constr_init(
     return stmtFact_.mk_base_initializer(base->type_, std::move(args));
 }
 
-Stmt* SrcCodeVisitor::visit_destr_def(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_destr_def(SrcCodeVisitor* self, const TSNode& node)
 {
     self->semanticContext_.reg_return(typeFact_.mk_void());
     const TSNode nBody      = util::child_by_field_name(node, "body");
@@ -335,10 +325,7 @@ Stmt* SrcCodeVisitor::visit_destr_def(
     return stmtFact_.mk_destructor_def(owner, as_a<CompoundStmt>(body));
 }
 
-Stmt* SrcCodeVisitor::visit_method_def(
-    SrcCodeVisitor* self,
-    const TSNode& node
-)
+Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
 {
     const auto currentType = self->semanticContext_.current_type();
     if (! currentType)

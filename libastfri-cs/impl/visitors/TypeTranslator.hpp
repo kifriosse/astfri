@@ -74,7 +74,6 @@ private:
     static Type* visit_tuple(TypeTranslator* self, const TSNode& node);
     static Type* visit_func_pointer(TypeTranslator* self, const TSNode& node);
 
-
     /**
      * Resolves alias qualifier node - alias qualifier:
      * \code Alias::Namespace.OtherNamespace.Type\endcode

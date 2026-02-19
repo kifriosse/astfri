@@ -25,6 +25,8 @@ namespace
 using enum NodeType;
 
 constexpr MappingRule mappingRules_[] = {
+    {"compilation_unit",                  CompilationUnit,       true },
+    {"namespace_declaration",             NamespaceDecl,         true },
     {"class_declaration",                 ClassDecl,             true },
     {"struct_declaration",                StructDecl,            true },
     {"interface_declaration",             InterfaceDecl,         true },
@@ -83,7 +85,7 @@ constexpr MappingRule mappingRules_[] = {
     {"cast_expression",                   CastExpr,              true },
     {"lambda_expression",                 LambdaExpr,            true },
     {"predefined_type",                   PredefinedType,        true },
-    {"qualified_name",                    QualifName,         true },
+    {"qualified_name",                    QualifName,            true },
     {"implicit_type",                     ImplicitType,          true },
     {"nullable_type",                     NullableType,          true },
     {"pointer_type",                      PointerType,           true },
@@ -187,8 +189,8 @@ Handlers::Handlers() :
     types({
         {PredefinedType, TypeTranslator::visit_predefined},
         {Identifier, TypeTranslator::visit_identitifier},
-        {QualifName, TypeTranslator::visit_qualified_name}, // FQN, PQN
-        {ImplicitType, TypeTranslator::visit_qualified_name},  // var
+        {QualifName, TypeTranslator::visit_qualified_name},   // FQN, PQN
+        {ImplicitType, TypeTranslator::visit_qualified_name}, // var
         {NullableType, TypeTranslator::visit_wrapper},
         {PointerType, TypeTranslator::visit_inderect},
         {RefType, TypeTranslator::visit_inderect},
@@ -424,6 +426,11 @@ bool RegManager::is_expr(const TSNode& node)
 bool RegManager::is_stmt(const TSNode& node)
 {
     return handlers_.stmts.contains(nodeTypes_.get_node_type(node));
+}
+
+NodeType RegManager::get_node_type(const TSNode& node)
+{
+    return nodeTypes_.get_node_type(node);
 }
 
 TSSymbol RegManager::get_symbol(const NodeType type)

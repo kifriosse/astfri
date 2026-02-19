@@ -131,7 +131,7 @@ bool has_variadic_param(const TSNode& node, TSNode* nType)
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate)
 {
     using enum NodeType;
-    const TSNode nCast            = unwrap_parantheses(node);
+    const TSNode nCast = unwrap_parantheses(node);
     if (ts_node_symbol(nCast) != RegManager::get_symbol(CastExpr))
         return false;
 
@@ -156,10 +156,12 @@ TSTree* make_tree(TSParser* parser, const std::string_view str)
 TSNode unwrap_parantheses(const TSNode& node)
 {
     using enum NodeType;
-    static const TSSymbol sBracketExpr = RegManager::get_symbol(ParenthesizedExpr);
+    static const TSSymbol sBracketExpr
+        = RegManager::get_symbol(ParenthesizedExpr);
 
     TSNode current = node;
-    while (! ts_node_is_null(current) && ts_node_symbol(current) == sBracketExpr)
+    while (! ts_node_is_null(current)
+           && ts_node_symbol(current) == sBracketExpr)
     {
         current = ts_node_named_child(current, 0);
     }

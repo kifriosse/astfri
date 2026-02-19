@@ -8,35 +8,16 @@
 #include <tree_sitter/api.h>
 
 #include <functional>
-#include <stack>
 #include <string>
 #include <string_view>
-#include <unordered_map>
+#include <vector>
 
 namespace astfri::csharp::util
 {
 
 Scope mk_scope(const TSNode& node, const SourceFile& src_file)
 {
-    enum class NodeType
-    {
-        Class,
-        Interface,
-        Record,
-        Namespace,
-        Root,
-    };
-
-    static const std::unordered_map<std::string_view, NodeType> node_types = {
-        {"class_declaration",     NodeType::Class    },
-        {"struct_declaration",    NodeType::Class    },
-        {"record_declaration",    NodeType::Record   },
-        {"interface_declaration", NodeType::Interface},
-        {"namespace_declaration", NodeType::Namespace},
-        {"compilation_unit",      NodeType::Root     },
-    };
-
-    std::stack<std::string> scopes;
+    std::vector<std::string> scopes;
     Scope scope     = {};
     TSNode nCurrent = node;
     TSNode nParent  = ts_node_parent(nCurrent);
@@ -45,25 +26,22 @@ Scope mk_scope(const TSNode& node, const SourceFile& src_file)
     bool foundNms = false;
     while (! ts_node_is_null(nParent))
     {
-        const auto it = node_types.find(ts_node_type(nParent));
-        nCurrent      = nParent;
-        nParent       = ts_node_parent(nCurrent);
+        const NodeType type = RegManager::get_node_type(nParent);
+        nCurrent            = nParent;
+        nParent             = ts_node_parent(nCurrent);
 
-        if (it == node_types.end())
-            continue;
-
-        switch (it->second)
+        switch (type)
         {
-        case NodeType::Class:
-        case NodeType::Interface:
-        case NodeType::Record:
+        case NodeType::ClassDecl:
+        case NodeType::InterfaceDecl:
+        case NodeType::RecordDecl:
         {
             const TSNode nName = child_by_field_name(nCurrent, "name");
             std::string name   = extract_text(nName, src_file.srcStr);
-            scopes.push(std::move(name));
+            scopes.push_back(std::move(name));
             break;
         }
-        case NodeType::Root:
+        case NodeType::CompilationUnit:
         {
             if (foundNms || ! src_file.fileContext.fileNms)
                 break;
@@ -71,7 +49,7 @@ Scope mk_scope(const TSNode& node, const SourceFile& src_file)
             split_namespace(scopes, *src_file.fileContext.fileNms);
             break;
         }
-        case NodeType::Namespace:
+        case NodeType::NamespaceDecl:
         {
             foundNms               = true;
             const TSNode nName     = child_by_field_name(nCurrent, "name");
@@ -79,13 +57,15 @@ Scope mk_scope(const TSNode& node, const SourceFile& src_file)
             split_namespace(scopes, name);
             break;
         }
+        default:
+            break;
         }
     }
 
     while (! scopes.empty())
     {
-        scope.names_.push_back(scopes.top());
-        scopes.pop();
+        scope.names_.push_back(scopes.back());
+        scopes.pop_back();
     }
     return scope;
 }

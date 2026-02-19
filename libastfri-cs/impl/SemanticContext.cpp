@@ -19,43 +19,43 @@ SemanticContext::SemanticContext(SymbolTable& symbTable) :
 
 void SemanticContext::enter_type(TypeBinding* tb)
 {
-    typeContext_.typeStack.push(tb);
+    typeContext_.typeStack.push_back(tb);
     enter_scope();
 }
 
 void SemanticContext::enter_scope()
 {
-    scopeContext_.scopeStack.emplace();
+    scopeContext_.scopeStack.emplace_back();
 }
 
 void SemanticContext::reg_local_var(LocalVarDefStmt* varDef)
 {
-    scopeContext_.scopeStack.top().push_back(varDef);
+    scopeContext_.scopeStack.back().push_back(varDef);
     scopeContext_.localVars.emplace(varDef->name_, varDef);
 }
 
 void SemanticContext::reg_param(ParamVarDefStmt* varDef)
 {
-    scopeContext_.scopeStack.top().push_back(varDef);
+    scopeContext_.scopeStack.back().push_back(varDef);
     scopeContext_.params.emplace(varDef->name_, varDef);
 }
 
 void SemanticContext::reg_local_func(FuncMetadata funcMeta)
 {
     const auto funcDef = funcMeta.funcDef;
-    scopeContext_.scopeStack.top().push_back(funcDef);
+    scopeContext_.scopeStack.back().push_back(funcDef);
     scopeContext_.functions.emplace(funcDef->name_, std::move(funcMeta));
 }
 
 void SemanticContext::reg_return(Type* returnType)
 {
-    retTypeContext_.push(returnType);
+    retTypeContext_.push_back(returnType);
 }
 
 void SemanticContext::leave_type()
 {
     if (! typeContext_.typeStack.empty())
-        typeContext_.typeStack.pop();
+        typeContext_.typeStack.pop_back();
     leave_scope();
 }
 
@@ -64,7 +64,7 @@ void SemanticContext::leave_scope()
     if (scopeContext_.scopeStack.empty())
         return;
 
-    for (const auto scopeMemb : scopeContext_.scopeStack.top())
+    for (const auto scopeMemb : scopeContext_.scopeStack.back())
     {
         if (const auto param = as_a<ParamVarDefStmt>(scopeMemb))
             scopeContext_.params.erase(param->name_);
@@ -75,24 +75,24 @@ void SemanticContext::leave_scope()
             scopeContext_.functions.erase(func->name_);
         }
     }
-    scopeContext_.scopeStack.pop();
+    scopeContext_.scopeStack.pop_back();
 }
 
 void SemanticContext::unregister_return_type()
 {
     if (! retTypeContext_.empty())
-        retTypeContext_.pop();
+        retTypeContext_.pop_back();
 }
 
 TypeBinding* SemanticContext::current_type() const
 {
     auto& typeStack = typeContext_.typeStack;
-    return typeStack.empty() ? nullptr : typeStack.top();
+    return typeStack.empty() ? nullptr : typeStack.back();
 }
 
 Type* SemanticContext::current_return_type() const
 {
-    return retTypeContext_.empty() ? nullptr : retTypeContext_.top();
+    return retTypeContext_.empty() ? nullptr : retTypeContext_.back();
 }
 
 VarDefStmt* SemanticContext::find_var(

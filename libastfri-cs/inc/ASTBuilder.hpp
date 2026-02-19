@@ -43,6 +43,7 @@ public:
      * @return AST from loaded source code
      */
     TranslationUnit* mk_ast(SDKProfile profile = SDKProfile::NET);
+
 private:
     void load_from_stream(std::istream& inputStream, const path& path = {});
 };

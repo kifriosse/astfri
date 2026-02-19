@@ -3,9 +3,9 @@
 
 #include <libastfri-cs/impl/util/Common.hpp>
 
-#include <stack>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace astfri::csharp::util
 {
@@ -32,7 +32,7 @@ IntSuffix get_suffix_type(std::string_view suffix);
 bool almost_equal(double a, double b, double epsilon = 1e-9);
 
 void split_namespace(
-    std::stack<std::string>& scopeStr,
+    std::vector<std::string>& scopeStr,
     std::string_view nmsQualifier
 );
 
