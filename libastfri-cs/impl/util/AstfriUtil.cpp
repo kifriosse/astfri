@@ -7,6 +7,7 @@
 
 #include <tree_sitter/api.h>
 
+#include <deque>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -15,15 +16,13 @@
 namespace astfri::csharp::util
 {
 
-Scope mk_scope(const TSNode& node, const SourceFile& src_file)
+Scope mk_scope(const TSNode& node, const SourceFile& currentSrc)
 {
-    std::vector<std::string> scopes;
-    Scope scope     = {};
+    std::deque<std::string> qualifs;
     TSNode nCurrent = node;
     TSNode nParent  = ts_node_parent(nCurrent);
+    bool foundNms   = false;
 
-    // todo rewrite this to use TreeCursor
-    bool foundNms = false;
     while (! ts_node_is_null(nParent))
     {
         const NodeType type = RegManager::get_node_type(nParent);
@@ -37,24 +36,35 @@ Scope mk_scope(const TSNode& node, const SourceFile& src_file)
         case NodeType::RecordDecl:
         {
             const TSNode nName = child_by_field_name(nCurrent, "name");
-            std::string name   = extract_text(nName, src_file.srcStr);
-            scopes.push_back(std::move(name));
+            std::string name   = extract_text(nName, currentSrc.srcStr);
+            qualifs.push_front(std::move(name));
             break;
         }
         case NodeType::CompilationUnit:
         {
-            if (foundNms || ! src_file.fileContext.fileNms)
+            if (foundNms)
                 break;
 
-            split_namespace(scopes, *src_file.fileContext.fileNms);
+            if (qualifs.empty())
+            {
+                return currentSrc.fileContext.fileNms;
+            }
+
+            const auto reverseFileNms = std::ranges::views::reverse(
+                currentSrc.fileContext.fileNms.names_
+            );
+            for (const auto& nmsQualif : reverseFileNms)
+            {
+                qualifs.push_front(nmsQualif);
+            }
             break;
         }
         case NodeType::NamespaceDecl:
         {
             foundNms               = true;
             const TSNode nName     = child_by_field_name(nCurrent, "name");
-            const std::string name = extract_text(nName, src_file.srcStr);
-            split_namespace(scopes, name);
+            const std::string name = extract_text(nName, currentSrc.srcStr);
+            split_namespace(qualifs, name);
             break;
         }
         default:
@@ -62,12 +72,10 @@ Scope mk_scope(const TSNode& node, const SourceFile& src_file)
         }
     }
 
-    while (! scopes.empty())
-    {
-        scope.names_.push_back(scopes.back());
-        scopes.pop_back();
-    }
-    return scope;
+    return {std::vector(
+        std::make_move_iterator(qualifs.begin()),
+        std::make_move_iterator(qualifs.end())
+    )};
 }
 
 Scope mk_scope(const std::string_view qualifier)
@@ -95,7 +103,42 @@ Scope mk_scope(const std::string_view qualifier)
     return scope;
 }
 
-ParamVarDefStmt* make_param_def(
+Scope mk_scope(ScopeNode* start, SourceFile& currentSrc)
+{
+    std::deque<std::string> scope;
+    ScopeNode* current = start;
+    while (current)
+    {
+        std::string name;
+        if (const Nms* nms = current->is_a<Nms>())
+            name = nms->get_name();
+        else if (const auto* tb = current->is_a<TypeBinding>())
+            name = tb->type->name_;
+
+        if (! name.empty())
+            scope.emplace_front(std::move(name));
+
+        current = current->parent();
+    }
+    if (scope.empty())
+    {
+        return currentSrc.fileContext.fileNms;
+    }
+
+    const auto reverseFileNms
+        = std::ranges::views::reverse(currentSrc.fileContext.fileNms.names_);
+    for (const auto& nmsQualif : reverseFileNms)
+    {
+        scope.push_front(nmsQualif);
+    }
+
+    return {std::vector(
+        std::make_move_iterator(scope.begin()),
+        std::make_move_iterator(scope.end())
+    )};
+}
+
+ParamVarDefStmt* mk_param_def(
     const TSNode& node,
     const std::string_view src,
     TypeTranslator& typeTrs
@@ -103,7 +146,7 @@ ParamVarDefStmt* make_param_def(
 {
     const TSNode nType         = child_by_field_name(node, "type");
     const TSNode nName         = child_by_field_name(node, "name");
-    const TypeHandler th       = RegManager::get_type_handler(nType);
+    const TypeMapper th        = RegManager::get_type_mapper(nType);
     const CSModifiers paramMod = CSModifiers::handle_param_modifs(node, src);
     Type* tParam = paramMod.get_indirection_type(th(&typeTrs, nType));
 
@@ -123,7 +166,7 @@ ParamSignature discover_params(
     auto collector = [&](const TSNode& current) -> void
     {
         const TSNode nName        = child_by_field_name(current, "name");
-        ParamVarDefStmt* paramDef = make_param_def(current, src, typeTrs);
+        ParamVarDefStmt* paramDef = mk_param_def(current, src, typeTrs);
         params.push_back(paramDef);
         paramsMeta
             .emplace_back(paramDef, current, ts_node_next_named_sibling(nName));
@@ -138,17 +181,16 @@ FuncMetadata make_func_metadata(
     TypeTranslator& typeTrs
 )
 {
-    static auto& stmtF        = StmtFactory::get_instance();
     const TSNode nName        = child_by_field_name(node, "name");
     const TSNode nRet         = child_by_field_name(node, "type");
     const TSNode nParams      = child_by_field_name(node, "parameters");
     std::string name          = extract_text(nName, src);
-    const TypeHandler th      = RegManager::get_type_handler(nRet);
+    const TypeMapper th       = RegManager::get_type_mapper(nRet);
     Type* retType             = th(&typeTrs, nRet);
     auto [params, paramsMeta] = discover_params(nParams, src, typeTrs);
     return FuncMetadata{
         .params  = std::move(paramsMeta),
-        .funcDef = stmtF.mk_function_def(
+        .funcDef = StmtFactory::get_instance().mk_function_def(
             std::move(name),
             std::move(params),
             retType,

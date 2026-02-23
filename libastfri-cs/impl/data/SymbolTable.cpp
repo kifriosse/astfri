@@ -10,7 +10,7 @@ SymbolTable::SymbolTable(std::vector<ScopeNode*> implicitUsings) :
 {
 }
 
-const SymbolTree& SymbolTable::symbTree()
+const SymbolTree& SymbolTable::symb_tree()
 {
     return symbTree_;
 }

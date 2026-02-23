@@ -1,10 +1,11 @@
 #ifndef CSHARP_SOURCE_HPP
 #define CSHARP_SOURCE_HPP
 
+#include <libastfri/impl/Scope.hpp>
+
 #include <tree_sitter/api.h>
 
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,7 @@ class ScopeNode;
 struct FileContext
 {
     std::vector<ScopeNode*> usings{};
-    std::optional<std::string> fileNms{}; // use ScopeNode here
+    Scope fileNms{};
 };
 
 struct SourceFile

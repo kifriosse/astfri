@@ -25,20 +25,22 @@ struct Expr;
 namespace astfri::csharp
 {
 // Forward declarations
+class ScopeNode;
 class TypeTranslator;
 class SrcCodeVisitor;
-class SymbolTableBuilder;
+class SymbTableBuilder;
 class SymbolTable;
 
 using MaskType  = uint32_t;
 using CaptureId = uint32_t;
 
 template<typename ReturnType, typename Owner>
-using Handler     = std::function<ReturnType(Owner*, const TSNode&)>;
-using ExprHandler = Handler<Expr*, SrcCodeVisitor>;
-using StmtHandler = Handler<Stmt*, SrcCodeVisitor>;
-using TypeHandler = Handler<Type*, TypeTranslator>;
-using RegHandler  = Handler<void, SymbolTableBuilder>;
+using TSNodeProcessor = std::function<ReturnType(Owner*, const TSNode&)>;
+using ExprMapper      = TSNodeProcessor<Expr*, SrcCodeVisitor>;
+using StmtMapper      = TSNodeProcessor<Stmt*, SrcCodeVisitor>;
+using TypeMapper      = TSNodeProcessor<Type*, TypeTranslator>;
+using TypeCollector   = TSNodeProcessor<ScopeNode*, SymbTableBuilder>;
+using SymbCollector   = TSNodeProcessor<void, SymbTableBuilder>;
 
 /**
  * @brief Map with NodeType enum as keys
@@ -46,7 +48,7 @@ using RegHandler  = Handler<void, SymbolTableBuilder>;
 template<typename Value>
 using RegistryMap = std::unordered_map<NodeType, Value>;
 template<typename Value>
-using RegistryStrMap = std::unordered_map<std::string_view, Value>;
+using RegistryStrViewMap = std::unordered_map<std::string_view, Value>;
 /**
  * @brief Map with string identifiers as keys, using custom string hash for
  * better performance - this map can also use string_view for lookups

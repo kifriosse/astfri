@@ -42,8 +42,8 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
 
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-            StmtHandler hStmt = RegManager::get_stmt_handler(node);
-            Stmt* stmt        = hStmt(this, node);
+             StmtMapper hStmt = RegManager::get_stmt_mapper(node);
+            Stmt* stmt       = hStmt(this, node);
             if (added)
                 continue;
 

@@ -58,6 +58,7 @@ public:
 
     const Alias* find_alias(std::string_view aliasName, SourceFile* src) const;
     std::span<const TypeBinding> get_static_usings(SourceFile* src) const;
+    const std::string& get_name() const;
 };
 
 class ScopeNode
@@ -80,11 +81,11 @@ public:
 
     ScopeNode* parent() const;
     ScopeNode* find_child(std::string_view childName) const;
-    ScopeNode* add_child(std::string name, NodeData content, ScopeNode* parent);
+    ScopeNode* add_child(std::string name, NodeData content);
 
     template<typename T>
     requires requires(NodeData v) { std::get_if<T>(&v); }
-    T* has_data();
+    T* is_a();
     template<typename T>
     requires requires(NodeData v) { std::get_if<T>(&v); }
     T& data();

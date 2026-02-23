@@ -3,9 +3,9 @@
 
 #include <cctype>
 #include <cmath>
+#include <deque>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace astfri::csharp::util
 {
@@ -52,29 +52,24 @@ bool almost_equal(const double a, const double b, const double epsilon)
 }
 
 void split_namespace(
-    std::vector<std::string>& scopeStr,
-    const std::string_view nmsQualifier
+    std::deque<std::string>& qualifs,
+    const std::string_view nmsQualif
 )
 {
-    const auto rBegin = std::make_reverse_iterator(nmsQualifier.end());
-    const auto rEnd   = std::make_reverse_iterator(nmsQualifier.begin());
-    auto it           = rBegin;
-    auto sliceEnd     = nmsQualifier.end();
+    if (nmsQualif.empty())
+        return;
 
-    while (it != rEnd)
+    size_t end = nmsQualif.length();
+    while (true)
     {
-        if (*it == '.')
+        const size_t dotPos = nmsQualif.find_last_of('.', end - 1);
+        if (dotPos == std::string::npos)
         {
-            auto sliceStart = it.base();
-            scopeStr.emplace_back(sliceStart, sliceEnd);
-            sliceEnd = sliceStart - 1;
+            qualifs.emplace_front(nmsQualif.substr(0, end));
+            break;
         }
-        ++it;
-    }
-
-    if (! nmsQualifier.empty())
-    {
-        scopeStr.emplace_back(nmsQualifier.begin(), sliceEnd);
+        qualifs.emplace_front(nmsQualif.substr(dotPos + 1, end - (dotPos + 1)));
+        end = dotPos;
     }
 }
 

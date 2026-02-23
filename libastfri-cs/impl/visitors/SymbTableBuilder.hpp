@@ -27,7 +27,7 @@ namespace astfri::csharp
  * reference to symbol table.
  * Caller has to ensure that both objects live longer than SymbolTableBuilder
  */
-class SymbolTableBuilder
+class SymbTableBuilder
 {
 
 private:
@@ -41,6 +41,7 @@ private:
     TypeTranslator typeTrs_;
     SymbolTable& symbTable_;
     SourceFile* currentSrc_{nullptr};
+    ScopeNode* currentParent_{nullptr};
     const TSLanguage* lang_;
 
 public:
@@ -51,28 +52,35 @@ public:
      * @param symbTable reference to symbol table that user wants to fill up.
      * Symbol table's lifetime must exceed lifetime of Symbol table builder
      */
-    explicit SymbolTableBuilder(
+    explicit SymbTableBuilder(
         std::vector<std::unique_ptr<SourceFile>>& srcs,
         SymbolTable& symbTable
     );
 
     void reg_user_types();
     void reg_using_directives();
+    void collect_types(const TSTree* tree);
     void load_implicit_usings(SDKProfile profile);
     void reg_members();
 
 private:
-    static void visit_class(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_interface(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_record(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_enum(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_delegate(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_memb_var(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_property(SymbolTableBuilder* self, const TSNode& node);
-    static void visit_method(SymbolTableBuilder* self, const TSNode& node);
+    static ScopeNode* visit_class(SymbTableBuilder* self, const TSNode& node);
+    static ScopeNode* visit_interface(
+        SymbTableBuilder* self,
+        const TSNode& node
+    );
+    static ScopeNode* visit_record(SymbTableBuilder* self, const TSNode& node);
+    static ScopeNode* visit_enum(SymbTableBuilder* self, const TSNode& node);
+    static ScopeNode* visit_delegate(
+        SymbTableBuilder* self,
+        const TSNode& node
+    );
+    static void visit_memb_var(SymbTableBuilder* self, const TSNode& node);
+    static void visit_property(SymbTableBuilder* self, const TSNode& node);
+    static void visit_method(SymbTableBuilder* self, const TSNode& node);
 
     void reg_using_directive(const TSNode& nUsingDirective);
-    void register_type(const TSNode& node, util::TypeKind typeKind);
+    ScopeNode* visit_type_def(const TSNode& node, util::TypeKind typeKind);
     [[nodiscard]] SourceFile* src() const;
     [[nodiscard]] std::string_view src_str() const;
 };

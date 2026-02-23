@@ -108,16 +108,16 @@ Type* TypeTranslator::visit_implicit(
 
 Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node)
 {
-    const TSNode nType   = util::child_by_field_name(node, "type");
-    const TypeHandler th = RegManager::get_type_handler(nType);
+    const TSNode nType  = util::child_by_field_name(node, "type");
+    const TypeMapper th = RegManager::get_type_mapper(nType);
     return th(self, nType);
 }
 
 Type* TypeTranslator::visit_inderect(TypeTranslator* self, const TSNode& node)
 {
     // todo add handling of readonly
-    const TSNode nType   = util::child_by_field_name(node, "type");
-    const TypeHandler th = RegManager::get_type_handler(nType);
+    const TSNode nType  = util::child_by_field_name(node, "type");
+    const TypeMapper th = RegManager::get_type_mapper(nType);
     return typeFact_.mk_indirect(th(self, nType));
 }
 
@@ -191,7 +191,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
         sCurrent = ts_node_symbol(nCurrent);
     }
 
-    const SymbolTree& symbTree = symbTable_.symbTree();
+    const SymbolTree& symbTree = symbTable_.symb_tree();
     ScopeNode* entryPoint      = start;
     bool hasExplicitAlias      = false;
     if (sCurrent == RegManager::get_symbol(NodeType::AliasQualifName))
@@ -223,8 +223,6 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
                     = util::extract_text(nQualif, srcStr);
                 return &extMarkNode_;
             }
-            // todo handling of unresolved aliases - types/namespaces
-            // outside project
         }
     }
     else
@@ -261,10 +259,10 @@ TypeBinding* TypeTranslator::get_type(
     const Scope& scope
 ) const
 {
-    const ScopeNode* node = symbTable_.symbTree().find_node(scope);
+    const ScopeNode* node = symbTable_.symb_tree().find_node(scope);
     if (ScopeNode* typeNode = node->find_child(name))
     {
-        return typeNode->has_data<TypeBinding>();
+        return typeNode->is_a<TypeBinding>();
     }
     return nullptr;
 }
@@ -290,12 +288,12 @@ const Alias* TypeTranslator::resolve_explicit_alias(
     if (aliasName == "global")
         return nullptr;
 
-    const ScopeNode* root = symbTable_.symbTree().root();
+    const ScopeNode* root = symbTable_.symb_tree().root();
     ScopeNode* current = searchScope == UserTypeRef ? start : start->parent();
 
     while (current && current != root)
     {
-        if (const Nms* nms = current->has_data<Nms>())
+        if (const Nms* nms = current->is_a<Nms>())
         {
             if (const Alias* a = nms->find_alias(aliasName, src))
                 return a;
@@ -305,7 +303,7 @@ const Alias* TypeTranslator::resolve_explicit_alias(
 
     if (current && current == root)
     {
-        if (const Nms* nms = current->has_data<Nms>())
+        if (const Nms* nms = current->is_a<Nms>())
         {
             if (const Alias* a = nms->find_alias(aliasName, src))
                 return a;
@@ -388,7 +386,7 @@ ScopeNode* TypeTranslator::find_entry_point(
     case GlobAlias:
     case GlobUsing:
     {
-        if (ScopeNode* node = symbTable_.symbTree().root()->find_child(qualif))
+        if (ScopeNode* node = symbTable_.symb_tree().root()->find_child(qualif))
             return node;
         break;
     }
@@ -412,13 +410,13 @@ ScopeNode* TypeTranslator::bottom_up_search(
             return child;
 
         // if node contains type look into nested types in parent classes
-        if (const TypeBinding* b = current->has_data<TypeBinding>())
+        if (const TypeBinding* b = current->is_a<TypeBinding>())
         {
             if (ScopeNode* inheretedChild = search_parents(qualif, *b))
                 return inheretedChild;
         }
         // if node is namespace
-        const Nms* nms = current->has_data<Nms>();
+        const Nms* nms = current->is_a<Nms>();
         if (! nms)
         {
             current = current->parent();

@@ -199,11 +199,11 @@ Expr* SrcCodeVisitor::visit_memb_access(
     const TSNode& node
 )
 {
-    const TSNode nLeft      = util::child_by_field_name(node, "expression");
-    const TSNode nRight     = util::child_by_field_name(node, "name");
-    const ExprHandler hLeft = RegManager::get_expr_handler(nLeft);
-    std::string name        = util::extract_text(nRight, self->src_str());
-    Expr* left              = hLeft(self, nLeft);
+    const TSNode nLeft     = util::child_by_field_name(node, "expression");
+    const TSNode nRight    = util::child_by_field_name(node, "name");
+    const ExprMapper hLeft = RegManager::get_expr_mapper(nLeft);
+    std::string name       = util::extract_text(nRight, self->src_str());
+    Expr* left             = hLeft(self, nLeft);
     if (is_a<ThisExpr>(left))
     {
         // UserTypeDefStmt* owner = self->semantic_context_.current_type()->def;
@@ -254,8 +254,8 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node)
             );
         case CallType::Delegate:
         {
-            const ExprHandler hLeft = RegManager::get_expr_handler(nFunc);
-            Expr* left              = hLeft(self, nFunc);
+            const ExprMapper hLeft = RegManager::get_expr_mapper(nFunc);
+            Expr* left             = hLeft(self, nFunc);
             return exprFact_.mk_lambda_call(left, std::move(argList));
         }
         case CallType::Method:
@@ -281,11 +281,11 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node)
     // accessing a member of some variable - also includes `this`
     if (ts_node_symbol(nFunc) == RegManager::get_symbol(NodeType::MemberAccess))
     {
-        const TSNode nName = util::child_by_field_name(nFunc, "name");
-        const TSNode nLeft = util::child_by_field_name(nFunc, "expression");
-        const ExprHandler hLeft = RegManager::get_expr_handler(nLeft);
-        Expr* left              = hLeft(self, nLeft);
-        std::string name        = util::extract_text(nName, self->src_str());
+        const TSNode nName     = util::child_by_field_name(nFunc, "name");
+        const TSNode nLeft     = util::child_by_field_name(nFunc, "expression");
+        const ExprMapper hLeft = RegManager::get_expr_mapper(nLeft);
+        Expr* left             = hLeft(self, nLeft);
+        std::string name       = util::extract_text(nName, self->src_str());
         // it's a member of an instance - method or delegate type attribute
         if (is_a<ThisExpr>(left))
         {
@@ -349,7 +349,7 @@ Expr* SrcCodeVisitor::visit_prefix_unary_opr(
         throw std::runtime_error("Operation \"" + op + "\" is not implemented");
 
     const UnaryOpType opType = *res;
-    const ExprHandler hRight = RegManager::get_expr_handler(nRight);
+    const ExprMapper hRight  = RegManager::get_expr_mapper(nRight);
     Expr* right              = hRight(self, nRight);
     return exprFact_.mk_unary_op(opType, right);
 }
@@ -359,11 +359,11 @@ Expr* SrcCodeVisitor::visit_postfix_unary_opr(
     const TSNode& node
 )
 {
-    const TSNode nLeft      = ts_node_child(node, 0);
-    const TSNode nOp        = ts_node_child(node, 1);
-    const std::string op    = util::extract_text(nOp, self->src_str());
-    const ExprHandler hLeft = RegManager::get_expr_handler(nLeft);
-    Expr* left              = hLeft(self, nLeft);
+    const TSNode nLeft     = ts_node_child(node, 0);
+    const TSNode nOp       = ts_node_child(node, 1);
+    const std::string op   = util::extract_text(nOp, self->src_str());
+    const ExprMapper hLeft = RegManager::get_expr_mapper(nLeft);
+    Expr* left             = hLeft(self, nLeft);
 
     UnaryOpType opType;
     if (op == "++")
@@ -383,20 +383,20 @@ Expr* SrcCodeVisitor::visit_postfix_unary_opr(
 Expr* SrcCodeVisitor::visit_ref_expr(SrcCodeVisitor* self, const TSNode& node)
 {
     const TSNode nExpr = ts_node_named_child(node, 0);
-    Expr* expr         = RegManager::get_expr_handler(nExpr)(self, nExpr);
+    Expr* expr         = RegManager::get_expr_mapper(nExpr)(self, nExpr);
     return exprFact_.mk_unary_op(UnaryOpType::AddressOf, expr);
 }
 
 Expr* SrcCodeVisitor::visit_binary_opr(SrcCodeVisitor* self, const TSNode& node)
 {
-    const TSNode nLeft       = ts_node_named_child(node, 0);
-    const TSNode nOp         = ts_node_child(node, 1);
-    const TSNode nRight      = ts_node_named_child(node, 1);
-    const ExprHandler hLeft  = RegManager::get_expr_handler(nLeft);
-    const ExprHandler hRight = RegManager::get_expr_handler(nRight);
-    const std::string op     = util::extract_text(nOp, self->src_str());
+    const TSNode nLeft      = ts_node_named_child(node, 0);
+    const TSNode nOp        = ts_node_child(node, 1);
+    const TSNode nRight     = ts_node_named_child(node, 1);
+    const ExprMapper hLeft  = RegManager::get_expr_mapper(nLeft);
+    const ExprMapper hRight = RegManager::get_expr_mapper(nRight);
+    const std::string op    = util::extract_text(nOp, self->src_str());
 
-    const auto opOpt         = RegManager::get_bin_op(op);
+    const auto opOpt        = RegManager::get_bin_op(op);
     if (! opOpt)
     {
         // `a ?? b` same as `a != null ? a : b`
@@ -430,12 +430,12 @@ Expr* SrcCodeVisitor::visit_ternary_expr(
     const TSNode& node
 )
 {
-    const TSNode nCode       = ts_node_named_child(node, 0);
-    const TSNode nTrue       = ts_node_named_child(node, 1);
-    const TSNode nFalse      = ts_node_named_child(node, 2);
-    const ExprHandler hCond  = RegManager::get_expr_handler(nCode);
-    const ExprHandler htrue  = RegManager::get_expr_handler(nTrue);
-    const ExprHandler hfalse = RegManager::get_expr_handler(nFalse);
+    const TSNode nCode      = ts_node_named_child(node, 0);
+    const TSNode nTrue      = ts_node_named_child(node, 1);
+    const TSNode nFalse     = ts_node_named_child(node, 2);
+    const ExprMapper hCond  = RegManager::get_expr_mapper(nCode);
+    const ExprMapper htrue  = RegManager::get_expr_mapper(nTrue);
+    const ExprMapper hfalse = RegManager::get_expr_mapper(nFalse);
 
     return exprFact_
         .mk_if(hCond(self, nCode), htrue(self, nTrue), hfalse(self, nFalse));
@@ -446,8 +446,8 @@ Expr* SrcCodeVisitor::visit_parenthesized_expr(
     const TSNode& node
 )
 {
-    const TSNode nExpr      = ts_node_named_child(node, 0);
-    const ExprHandler hExpr = RegManager::get_expr_handler(nExpr);
+    const TSNode nExpr     = ts_node_named_child(node, 0);
+    const ExprMapper hExpr = RegManager::get_expr_mapper(nExpr);
     return exprFact_.mk_bracket(hExpr(self, nExpr));
 }
 
@@ -457,7 +457,7 @@ Expr* SrcCodeVisitor::visit_const_pattern(
 )
 {
     const TSNode nInside = ts_node_child(node, 0);
-    return RegManager::get_expr_handler(nInside)(self, nInside);
+    return RegManager::get_expr_mapper(nInside)(self, nInside);
 }
 
 } // namespace astfri::csharp

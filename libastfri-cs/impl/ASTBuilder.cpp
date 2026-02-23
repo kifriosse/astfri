@@ -4,7 +4,7 @@
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -92,7 +92,7 @@ TranslationUnit* ASTBuilder::mk_ast(const SDKProfile profile)
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
 
     SymbolTable symbTable;
-    SymbolTableBuilder symbTableBuilder(srcs_, symbTable);
+    SymbTableBuilder symbTableBuilder(srcs_, symbTable);
 
     // std::cout << "Phase 1: Symbol Table Building\n"
     //           << "Discovering user defined types..." << std::endl;
@@ -100,6 +100,7 @@ TranslationUnit* ASTBuilder::mk_ast(const SDKProfile profile)
     // start = std::chrono::high_resolution_clock::now();
 
     symbTableBuilder.reg_user_types();
+    // symbTableBuilder.collect_types();
     // std::cout << "Loading using directives...\n";
     symbTableBuilder.load_implicit_usings(profile);
     symbTableBuilder.reg_using_directives();
@@ -152,8 +153,9 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path)
     FileContext context;
     if (! ts_node_is_null(nNms))
     {
-        const TSNode nNmsName = util::child_by_field_name(nNms, "name");
-        context.fileNms       = util::extract_text(nNmsName, src);
+        const TSNode nNmsName       = util::child_by_field_name(nNms, "name");
+        const std::string nmsQualif = util::extract_text(nNmsName, src);
+        context.fileNms             = util::mk_scope(nmsQualif);
     }
     srcs_.emplace_back(
         std::make_unique<SourceFile>(std::move(context), std::move(src), tree)

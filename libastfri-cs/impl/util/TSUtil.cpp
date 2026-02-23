@@ -170,6 +170,11 @@ TSNode unwrap_parantheses(const TSNode& node)
 
 bool is_type_decl(const TSNode& node)
 {
+    return is_type_decl(ts_node_symbol(node));
+}
+
+bool is_type_decl(const TSSymbol symbol)
+{
     static const std::unordered_set sTypeDecls{
         RegManager::get_symbol(NodeType::ClassDecl),
         RegManager::get_symbol(NodeType::InterfaceDecl),
@@ -177,7 +182,7 @@ bool is_type_decl(const TSNode& node)
         RegManager::get_symbol(NodeType::RecordDecl),
         RegManager::get_symbol(NodeType::DelegateDecl)
     };
-    return sTypeDecls.contains(ts_node_symbol(node));
+    return sTypeDecls.contains(symbol);
 }
 
 } // namespace astfri::csharp::util

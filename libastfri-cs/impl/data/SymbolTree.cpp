@@ -62,6 +62,11 @@ std::span<const TypeBinding> Nms::get_static_usings(SourceFile* src) const
     return {};
 }
 
+const std::string& Nms::get_name() const
+{
+    return name_;
+}
+
 ScopeNode::ScopeNode(NodeData content, ScopeNode* parent) :
     data_(std::move(content)),
     parent_(parent)
@@ -81,16 +86,12 @@ ScopeNode* ScopeNode::find_child(const std::string_view childName) const
     return it != children_.end() ? it->second.get() : nullptr;
 }
 
-ScopeNode* ScopeNode::add_child(
-    std::string name,
-    NodeData content,
-    ScopeNode* parent
-)
+ScopeNode* ScopeNode::add_child(std::string name, NodeData content)
 {
     auto [it, inserted] = children_.try_emplace(std::move(name));
     if (inserted)
     {
-        it->second = std::make_unique<ScopeNode>(std::move(content), parent);
+        it->second = std::make_unique<ScopeNode>(std::move(content), this);
     }
     return it->second.get();
 }
@@ -115,7 +116,7 @@ ScopeNode* SymbolTree::add_scope(const Scope& scope)
     ScopeNode* current = root();
     for (const std::string& str : scope.names_)
     {
-        current = current->add_child(str, Nms(str), current);
+        current = current->add_child(str, Nms(str));
     }
     return current;
 }
@@ -131,7 +132,7 @@ ScopeNode* SymbolTree::add_type(
         .def  = def,
     };
     ScopeNode* last    = add_scope(scope);
-    ScopeNode* newNode = last->add_child(type->name_, binding, last);
+    ScopeNode* newNode = last->add_child(type->name_, binding);
     return newNode;
 }
 
@@ -194,7 +195,7 @@ TypeBinding* type_from_alias(const Alias& alias)
     if (const auto* nodeHandle = std::get_if<ScopeNode*>(&alias))
     {
         ScopeNode* node = *nodeHandle;
-        if (auto* binding = node->has_data<TypeBinding>())
+        if (auto* binding = node->is_a<TypeBinding>())
         {
             return binding;
         }

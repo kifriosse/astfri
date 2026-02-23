@@ -6,7 +6,7 @@ namespace astfri::csharp
 
 template<typename T>
 requires requires(ScopeNode::NodeData v) { std::get_if<T>(&v); }
-T* ScopeNode::has_data()
+T* ScopeNode::is_a()
 {
     return std::get_if<T>(&data_);
 }

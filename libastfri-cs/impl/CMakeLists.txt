@@ -3,8 +3,6 @@ add_library(astfri-cs SHARED)
 target_sources(astfri-cs PRIVATE
     ASTBuilder.cpp
     SemanticContext.cpp
-    visitors/SymbolTableBuilder.cpp
-    visitors/TypeTranslator.cpp
     CSFwd.hpp
 )
 

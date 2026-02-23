@@ -38,7 +38,7 @@ Type RegManager::get_or_default(
 
 template<class RetType>
 std::optional<RetType> RegManager::get_opt(
-    const RegistryStrMap<RetType>& map,
+    const RegistryStrViewMap<RetType>& map,
     std::string_view name
 )
 {

@@ -43,7 +43,7 @@ public:
     SymbolTable(const SymbolTable& other)            = delete;
     SymbolTable& operator=(const SymbolTable& other) = delete;
 
-    const SymbolTree& symbTree();
+    const SymbolTree& symb_tree();
 
     void add_glob_using(ScopeNode* node);
     void add_glob_static_using(const TypeBinding& type);

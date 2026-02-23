@@ -28,9 +28,11 @@ struct ParamSignature
     std::vector<ParamMetadata> metadata;
 };
 
-Scope mk_scope(const TSNode& node, const SourceFile& src_file);
+Scope mk_scope(const TSNode& node, const SourceFile& currentSrc);
 
 Scope mk_scope(std::string_view qualifier);
+
+Scope mk_scope(ScopeNode* start, SourceFile& currentSrc);
 
 /**
  * @brief Creates a ParamVarDefStmt from the given TSNode.
@@ -41,7 +43,7 @@ Scope mk_scope(std::string_view qualifier);
  * @note Creates a ParamVarDefStmt but without initialization expression -
  * needs to be handled by the caller
  */
-ParamVarDefStmt* make_param_def(
+ParamVarDefStmt* mk_param_def(
     const TSNode& node,
     std::string_view src,
     TypeTranslator& typeTrs

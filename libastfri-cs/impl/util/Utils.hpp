@@ -3,9 +3,9 @@
 
 #include <libastfri-cs/impl/util/Common.hpp>
 
+#include <deque>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace astfri::csharp::util
 {
@@ -32,8 +32,8 @@ IntSuffix get_suffix_type(std::string_view suffix);
 bool almost_equal(double a, double b, double epsilon = 1e-9);
 
 void split_namespace(
-    std::vector<std::string>& scopeStr,
-    std::string_view nmsQualifier
+    std::deque<std::string>& qualifs,
+    std::string_view nmsQualif
 );
 
 bool is_interface_name(std::string_view name);

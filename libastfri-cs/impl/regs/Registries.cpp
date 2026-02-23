@@ -201,16 +201,18 @@ Handlers::Handlers() :
         {FuncPointerType, TypeTranslator::visit_func_pointer},
         {ScopedType, TypeTranslator::visit_wrapper},
     }),
-    symbolRegs({
-        {ClassDecl, SymbolTableBuilder::visit_class},
-        {StructDecl, SymbolTableBuilder::visit_class},
-        {InterfaceDecl, SymbolTableBuilder::visit_interface},
-        {EnumDecl, SymbolTableBuilder::visit_enum},
-        {DelegateDecl, SymbolTableBuilder::visit_delegate},
-        {RecordDecl, SymbolTableBuilder::visit_record},
-        {MemberVarDef, SymbolTableBuilder::visit_memb_var},
-        {PropertyDecl, SymbolTableBuilder::visit_property},
-        {MethodDecl, SymbolTableBuilder::visit_method},
+    typeCollectors({
+        {ClassDecl, SymbTableBuilder::visit_class},
+        {StructDecl, SymbTableBuilder::visit_class},
+        {InterfaceDecl, SymbTableBuilder::visit_interface},
+        {EnumDecl, SymbTableBuilder::visit_enum},
+        {DelegateDecl, SymbTableBuilder::visit_delegate},
+        {RecordDecl, SymbTableBuilder::visit_record},
+    }),
+    symbCollectors({
+        {MemberVarDef, SymbTableBuilder::visit_memb_var},
+        {PropertyDecl, SymbTableBuilder::visit_property},
+        {MethodDecl, SymbTableBuilder::visit_method},
     })
 {
 }
@@ -339,53 +341,64 @@ regs::Types RegManager::types_;
 regs::Modifiers RegManager::modifiers_;
 regs::NodeTypes RegManager::nodeTypes_;
 
-StmtHandler RegManager::get_stmt_handler(const TSNode& node)
+StmtMapper RegManager::get_stmt_mapper(const TSNode& node)
 {
-    return get_stmt_handler(nodeTypes_.get_node_type(node));
+    return get_stmt_mapper(nodeTypes_.get_node_type(node));
 }
 
-ExprHandler RegManager::get_expr_handler(const TSNode& node)
-{
-    return get_expr_handler(nodeTypes_.get_node_type(node));
-}
-
-TypeHandler RegManager::get_type_handler(const TSNode& node)
-{
-    return get_type_handler(nodeTypes_.get_node_type(node));
-}
-
-RegHandler RegManager::get_reg_handler(const TSNode& node)
-{
-    return get_reg_handler(nodeTypes_.get_node_type(node));
-}
-
-StmtHandler RegManager::get_stmt_handler(const NodeType nodeType)
+StmtMapper RegManager::get_stmt_mapper(const NodeType nodeType)
 {
     // todo redo this when the typo is fixed
     // std::cerr << "Entering statement handler: " << nodeType << "\n";
-    StmtHandler def = default_stmt_visit;
+    StmtMapper def = default_stmt_visit;
     return get_or_default(handlers_.stmts, nodeType, std::move(def));
 }
 
-ExprHandler RegManager::get_expr_handler(const NodeType nodeType)
+ExprMapper RegManager::get_expr_mapper(const TSNode& node)
+{
+    return get_expr_mapper(nodeTypes_.get_node_type(node));
+}
+
+ExprMapper RegManager::get_expr_mapper(const NodeType nodeType)
 {
     // std::cerr << "Entering expression handler: " << nodeType << "\n";
-    ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
+    ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, std::move(def));
 }
 
-TypeHandler RegManager::get_type_handler(const NodeType nodeType)
+TypeMapper RegManager::get_type_mapper(const TSNode& node)
+{
+    return get_type_mapper(nodeTypes_.get_node_type(node));
+}
+
+TypeMapper RegManager::get_type_mapper(const NodeType nodeType)
 {
     // std::cerr << "Entering type handler: " << nodeType << "\n";
-    TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
+    TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, std::move(def));
 }
 
-RegHandler RegManager::get_reg_handler(const NodeType nodeType)
+TypeCollector RegManager::get_type_collector(const TSNode& node)
+{
+    return get_type_collector(nodeTypes_.get_node_type(node));
+}
+
+TypeCollector RegManager::get_type_collector(const NodeType nodeType)
+{
+    TypeCollector def = [](auto*, const auto&) { return nullptr; };
+    return get_or_default(handlers_.typeCollectors, nodeType, std::move(def));
+}
+
+SymbCollector RegManager::get_symb_collector(const TSNode& node)
+{
+    return get_symb_collector(nodeTypes_.get_node_type(node));
+}
+
+SymbCollector RegManager::get_symb_collector(const NodeType nodeType)
 {
     // std::cerr << "Entering registration handler: " << nodeType << "\n";
-    RegHandler def = [](auto*, const auto&) { };
-    return get_or_default(handlers_.symbolRegs, nodeType, std::move(def));
+    SymbCollector def = [](auto*, const auto&) { };
+    return get_or_default(handlers_.symbCollectors, nodeType, std::move(def));
 }
 
 std::optional<UnaryOpType> RegManager::get_prefix_unary_op(

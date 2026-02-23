@@ -57,10 +57,11 @@ public:
 
 struct Handlers
 {
-    const RegistryMap<StmtHandler> stmts;
-    const RegistryMap<ExprHandler> exprs;
-    const RegistryMap<TypeHandler> types;
-    const RegistryMap<RegHandler> symbolRegs;
+    const RegistryMap<StmtMapper> stmts;
+    const RegistryMap<ExprMapper> exprs;
+    const RegistryMap<TypeMapper> types;
+    const RegistryMap<TypeCollector> typeCollectors;
+    const RegistryMap<SymbCollector> symbCollectors;
     Handlers();
 
 private:
@@ -76,21 +77,21 @@ private:
 
 struct Operations
 {
-    const RegistryStrMap<UnaryOpType> prefixUnaryOps;
-    const RegistryStrMap<BinOpType> binaryOps;
+    const RegistryStrViewMap<UnaryOpType> prefixUnaryOps;
+    const RegistryStrViewMap<BinOpType> binaryOps;
     Operations();
 };
 
 struct Types
 {
     TypeFactory& typeFact;
-    const RegistryStrMap<Type*> types;
+    const RegistryStrViewMap<Type*> types;
     Types();
 };
 
 struct Modifiers
 {
-    const RegistryStrMap<CSModifier> modifiers;
+    const RegistryStrViewMap<CSModifier> modifiers;
     Modifiers();
 };
 } // namespace regs
@@ -105,14 +106,16 @@ private:
     static regs::NodeTypes nodeTypes_;
 
 public:
-    static StmtHandler get_stmt_handler(const TSNode& node);
-    static ExprHandler get_expr_handler(const TSNode& node);
-    static TypeHandler get_type_handler(const TSNode& node);
-    static RegHandler get_reg_handler(const TSNode& node);
-    static StmtHandler get_stmt_handler(NodeType nodeType);
-    static ExprHandler get_expr_handler(NodeType nodeType);
-    static TypeHandler get_type_handler(NodeType nodeType);
-    static RegHandler get_reg_handler(NodeType nodeType);
+    static StmtMapper get_stmt_mapper(const TSNode& node);
+    static StmtMapper get_stmt_mapper(NodeType nodeType);
+    static ExprMapper get_expr_mapper(const TSNode& node);
+    static ExprMapper get_expr_mapper(NodeType nodeType);
+    static TypeMapper get_type_mapper(const TSNode& node);
+    static TypeMapper get_type_mapper(NodeType nodeType);
+    static TypeCollector get_type_collector(const TSNode& node);
+    static TypeCollector get_type_collector(NodeType nodeType);
+    static SymbCollector get_symb_collector(const TSNode& node);
+    static SymbCollector get_symb_collector(NodeType nodeType);
     static std::optional<UnaryOpType> get_prefix_unary_op(std::string_view op);
     static std::optional<BinOpType> get_bin_op(std::string_view op);
     static std::optional<Type*> get_type(std::string_view nodeType);
