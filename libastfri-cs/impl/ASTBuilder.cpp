@@ -1,4 +1,3 @@
-#include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
@@ -16,6 +15,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
+#include "libastfri-cs/impl/data/SymbolTable.hpp"
 
 namespace astfri::csharp
 {
@@ -114,7 +115,7 @@ TranslationUnit* ASTBuilder::mk_ast(const SDKProfile profile)
     //           << std::endl;
 
     SemanticContext semanticContext(symbTable);
-    SrcCodeVisitor srcVisitor(srcs_, semanticContext, symbTable);
+    SrcCodeVisitor srcVisitor(semanticContext, symbTable);
 
     // std::cout << "Phase 2: Building of AST" << std::endl;
     // start = std::chrono::high_resolution_clock::now();
@@ -147,18 +148,18 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path)
     TSNode nNms{};
     util::for_each_match(
         ts_tree_root_node(tree),
-        regs::QueryType::FileNamespace,
+        maps::QueryType::FileNamespace,
         [&nNms](const TSQueryMatch& match) { nNms = match.captures[0].node; }
     );
-    FileContext context;
+    Scope fileNms{};
     if (! ts_node_is_null(nNms))
     {
         const TSNode nNmsName       = util::child_by_field_name(nNms, "name");
         const std::string nmsQualif = util::extract_text(nNmsName, src);
-        context.fileNms             = util::mk_scope(nmsQualif);
+        fileNms                     = util::mk_scope(nmsQualif);
     }
     srcs_.emplace_back(
-        std::make_unique<SourceFile>(std::move(context), std::move(src), tree)
+        std::make_unique<SourceFile>(std::move(src), tree, std::move(fileNms))
     );
     ts_parser_reset(parser_);
 }

@@ -36,7 +36,7 @@ void TypeTranslator::set_current_namespace(ScopeNode* node)
 Type* TypeTranslator::visit_predefined(TypeTranslator* self, const TSNode& node)
 {
     const std::string name = util::extract_text(node, self->src_str());
-    const auto result      = RegManager::get_type(name);
+    const auto result      = MapManager::get_type(name);
     return result ? *result : typeFact_.mk_unknown();
 }
 
@@ -109,7 +109,7 @@ Type* TypeTranslator::visit_implicit(
 Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node)
 {
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = RegManager::get_type_mapper(nType);
+    const TypeMapper th = MapManager::get_type_mapper(nType);
     return th(self, nType);
 }
 
@@ -117,7 +117,7 @@ Type* TypeTranslator::visit_inderect(TypeTranslator* self, const TSNode& node)
 {
     // todo add handling of readonly
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = RegManager::get_type_mapper(nType);
+    const TypeMapper th = MapManager::get_type_mapper(nType);
     return typeFact_.mk_indirect(th(self, nType));
 }
 
@@ -157,7 +157,6 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     const TSNode& nQualif,
     const util::SearchScope searchScope,
     ScopeNode* start
-    // todo might need src parameter
 ) const
 {
     /*
@@ -177,7 +176,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
      * * Checks only external aliases
      */
     static const TSSymbol sQualifName
-        = RegManager::get_symbol(NodeType::QualifName);
+        = MapManager::get_symbol(NodeType::QualifName);
 
     const std::string_view srcStr = src_str();
     TSNode nCurrent               = nQualif;
@@ -194,7 +193,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     const SymbolTree& symbTree = symbTable_.symb_tree();
     ScopeNode* entryPoint      = start;
     bool hasExplicitAlias      = false;
-    if (sCurrent == RegManager::get_symbol(NodeType::AliasQualifName))
+    if (sCurrent == MapManager::get_symbol(NodeType::AliasQualifName))
     {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         const TSNode nAlias = util::child_by_field_name(nCurrent, "alias");
@@ -219,7 +218,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
                 entryPoint = *node;
             else
             {
-                extMarkNode_.data<ExternalMarker>().fqn
+                extMarkNode_.data<ExternalMarker>().qualifiedName
                     = util::extract_text(nQualif, srcStr);
                 return &extMarkNode_;
             }
@@ -243,7 +242,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     {
         if (! currentNode)
         {
-            extMarkNode_.data<ExternalMarker>().fqn
+            extMarkNode_.data<ExternalMarker>().qualifiedName
                 = util::extract_text(nQualif, srcStr);
             return &extMarkNode_;
         }
@@ -350,7 +349,7 @@ ScopeNode* TypeTranslator::find_entry_point(
                 return node;
         }
         // check file scoped using directives
-        for (const auto* usingDirective : src->fileContext.usings)
+        for (const auto* usingDirective : src->usings)
         {
             if (ScopeNode* node = usingDirective->find_child(qualif))
                 return node;
@@ -474,16 +473,16 @@ ScopeNode* TypeTranslator::search_parents(
     return nullptr;
 }
 
+std::string_view TypeTranslator::src_str() const
+{
+    return src()->srcStr;
+}
+
 SourceFile* TypeTranslator::src() const
 {
     return currentSrc_
              ? currentSrc_
              : throw std::logic_error("Current source code is not set");
-}
-
-std::string_view TypeTranslator::src_str() const
-{
-    return src()->srcStr;
 }
 
 } // namespace astfri::csharp

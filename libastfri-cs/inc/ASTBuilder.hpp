@@ -12,6 +12,10 @@
 namespace astfri::csharp
 {
 
+/**
+ * @brief Class responsible for loading C# source code and building AST from it.
+ * @note This class isn't copyable or movable
+ */
 class ASTBuilder
 {
 private:
@@ -29,22 +33,31 @@ public:
     ASTBuilder& operator=(ASTBuilder&&) = delete;
 
     /**
-     * Loads souce code of a project into AST Builder
+     * @brief Loads souce code of a project into AST Builder
      * @param projectDir path to directory that contains C# source code
      */
     void load_src(const path& projectDir);
     /**
-     * Loads souce code from a stream
+     * @brief Loads souce code from a stream into AST Builder
      * @param inputStream stream containing source code
      */
     void load_src(std::istream& inputStream);
     /**
-     * Makes AST from loaded source code
+     * @brief Makes AST from loaded source code
+     * @param profile SDK profile to determine with standard implicit using to
+     * use. Default value is \c SDKProfile::NET which corresponds to .NET SDK
+     * profile.
      * @return AST from loaded source code
      */
     TranslationUnit* mk_ast(SDKProfile profile = SDKProfile::NET);
 
 private:
+    /**
+     * @brief Loads source code from a stream into AST Builder
+     * @param inputStream stream containing source code
+     * @param path path to source file being loaded. Used for error reporting.
+     * Optional parameter, default value is empty path.
+     */
     void load_from_stream(std::istream& inputStream, const path& path = {});
 };
 

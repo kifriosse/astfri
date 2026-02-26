@@ -29,13 +29,23 @@ struct StringHash
  */
 IntSuffix get_suffix_type(std::string_view suffix);
 
-bool almost_equal(double a, double b, double epsilon = 1e-9);
-
+/**
+ * @brief Splits a dot-separated namespace qualifier string into its components
+ * and stores them in the deque parameter.
+ * @param qualifs deque to store the split components of the namespace qualifier
+ * @param nmsQualif dot-separated namespace qualifier string to split
+ */
 void split_namespace(
     std::deque<std::string>& qualifs,
     std::string_view nmsQualif
 );
 
+/**
+ * @brief Checks if the given name is a interface name according to C# naming
+ * conventions (starts with 'I' followed by an uppercase letter).
+ * @param name name of the type
+ * @return true if the name is a valid interface name, false otherwise
+ */
 bool is_interface_name(std::string_view name);
 
 /**

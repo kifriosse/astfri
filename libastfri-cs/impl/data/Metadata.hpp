@@ -98,16 +98,39 @@ private:
     TypeBinding tb_;
 
 public:
-    explicit TypeMetadata(TypeBinding tb);
-    void add_def(TSNode node, SourceFile* src);
+    explicit TypeMetadata(const TypeBinding& tb);
+    void add_def(const TSNode& node, SourceFile* src);
     void add_def(TypeDefLoc defLocation);
     void add_method(MethodId id, MethodMetadata methodMetadata);
     bool add_property(std::string name, PropertyNode prop);
-    bool add_memb_var(std::string name, MemberVarMetadata membMetadata);
+    bool add_memb_var(std::string name, const MemberVarMetadata& membMetadata);
 
+    /**
+     * @brief Returns span of locations of type definitions in source code.
+     * @return span of type defintion locations for this type
+     */
     std::span<const TypeDefLoc> defs();
+    /**
+     * @brief Finds method with given id. If there are multiple methods with the
+     * same id, it will return nullptr.
+     * @param id method id to search for
+     * @return pointer to method metadata if there is exactly one method with
+     * given id, nullptr otherwise
+     */
     MethodMetadata* find_method(const MethodId& id);
+    /**
+     * @brief Finds member variable with given name.
+     * @param name name of member variable to search for
+     * @return pointer to member variable metadata if there is member variable
+     * with given name, nullptr otherwise
+     */
     MemberVarMetadata* find_memb_var(std::string_view name);
+    /**
+     * @brief Finds property with given name.
+     * @param name name of property to search for
+     * @return pointer to property node if there is property with given name,
+     * nullptr otherwise
+     */
     PropertyNode* find_property(std::string_view name);
     TypeBinding& type_binding();
 };

@@ -31,15 +31,15 @@ class SymbTableBuilder
 {
 
 private:
-    friend regs::Handlers;
+    friend maps::Mappers;
 
     static StmtFactory& stmtFact_;
-    static regs::QueryReg& queryReg_;
+    static maps::QueryReg& queryReg_;
 
-    std::vector<std::unique_ptr<SourceFile>>& srcs_;
     TypeContext typeContext_;
     TypeTranslator typeTrs_;
     SymbolTable& symbTable_;
+    std::vector<std::unique_ptr<SourceFile>>& srcs_;
     SourceFile* currentSrc_{nullptr};
     ScopeNode* currentParent_{nullptr};
     const TSLanguage* lang_;
@@ -57,10 +57,26 @@ public:
         SymbolTable& symbTable
     );
 
+    /**
+     * @brief Registers all user defined types in loaded source files into
+     * symbol table.
+     */
     void reg_user_types();
+    /**
+     * @brief Registers all using directives in loaded source files into symbol
+     * table.
+     */
     void reg_using_directives();
-    void collect_types(const TSTree* tree);
+    /**
+     * @brief Loads global implicit using directives for the given SDK profile
+     * into symbol table.
+     * @param profile profile for which to load implicit usings
+     */
     void load_implicit_usings(SDKProfile profile);
+    /**
+     * @brief Registers members of user defined types in loaded source file
+     * into symbol table
+     */
     void reg_members();
 
 private:
@@ -79,10 +95,39 @@ private:
     static void visit_property(SymbTableBuilder* self, const TSNode& node);
     static void visit_method(SymbTableBuilder* self, const TSNode& node);
 
+    /**
+     * @brief Registers a single using directive.
+     * @param nUsingDirective TSNode representing the using directive to
+     * register
+     */
     void reg_using_directive(const TSNode& nUsingDirective);
+    /**
+     * Collects/Registers types defined in the given tree-sitter tree into
+     * symbol table.
+     * @param tree tree-sitter tree to collect types from
+     */
+    void collect_types(const TSTree* tree);
+    /**
+     * @brief General visit function for registering user defined types.
+     * @param node TSNode representing the type definition
+     * @param typeKind kind of the type definition (class, interface, struct,
+     * enum or delegate)
+     * @return pointer to the ScopeNode created for the that Type
+     */
     ScopeNode* visit_type_def(const TSNode& node, util::TypeKind typeKind);
-    [[nodiscard]] SourceFile* src() const;
+
+    /**
+     * @brief Gets the source code currently being visited.
+     * @return string view of current source code
+     * @throws std::logic_error if source file is not set
+     */
     [[nodiscard]] std::string_view src_str() const;
+    /**
+     * @brief Gets the source file currently being visited.
+     * @return pointer to current source file
+     * @throws std::logic_error if source file is not set
+     */
+    [[nodiscard]] SourceFile* src() const;
 };
 
 } // namespace astfri::csharp

@@ -3,19 +3,19 @@
 namespace astfri::csharp
 {
 
-TypeMetadata::TypeMetadata(TypeBinding tb) :
-    tb_(std::move(tb))
+TypeMetadata::TypeMetadata(const TypeBinding& tb) :
+    tb_(tb)
 {
 }
 
-void TypeMetadata::add_def(TSNode node, SourceFile* src)
+void TypeMetadata::add_def(const TSNode& node, SourceFile* src)
 {
-    add_def(TypeDefLoc{.nType = std::move(node), .src = src});
+    add_def(TypeDefLoc{.nType = node, .src = src});
 }
 
 void TypeMetadata::add_def(TypeDefLoc defLocation)
 {
-    defs_.emplace_back(std::move(defLocation));
+    defs_.emplace_back(defLocation);
 }
 
 void TypeMetadata::add_method(MethodId id, MethodMetadata methodMetadata)
@@ -36,13 +36,13 @@ bool TypeMetadata::add_property(std::string name, PropertyNode prop)
 
 bool TypeMetadata::add_memb_var(
     std::string name,
-    MemberVarMetadata membMetadata
+    const MemberVarMetadata& membMetadata
 )
 {
     auto [it, inserted] = memberVars_.try_emplace(std::move(name));
     if (inserted)
     {
-        it->second = std::move(membMetadata);
+        it->second = membMetadata;
     }
     return inserted;
 }
@@ -72,7 +72,7 @@ MemberVarMetadata* TypeMetadata::find_memb_var(const std::string_view name)
     return nullptr;
 }
 
-PropertyNode* TypeMetadata::find_property(std::string_view name)
+PropertyNode* TypeMetadata::find_property(const std::string_view name)
 {
     const auto it = properties_.find(name);
     if (it != properties_.end())

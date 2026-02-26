@@ -34,7 +34,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
     auto processBaseList = [&](const TSNode& current) -> void
     {
         std::string name    = util::extract_text(current, self->src_str());
-        const TypeMapper th = RegManager::get_type_mapper(current);
+        const TypeMapper th = MapManager::get_type_mapper(current);
         Type* type          = th(&self->typeTrs_, current);
         if (first)
         {
@@ -65,15 +65,15 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == RegManager::get_symbol(BaseList))
+        if (sCurrent == MapManager::get_symbol(BaseList))
         {
             util::for_each_child_node(current, processBaseList);
         }
-        else if (sCurrent == RegManager::get_symbol(TypeParamList))
+        else if (sCurrent == MapManager::get_symbol(TypeParamList))
         {
             classDef->tparams_ = util::make_generic_params(current, src);
         }
-        else if (sCurrent == RegManager::get_symbol(TypeParamConstrClause))
+        else if (sCurrent == MapManager::get_symbol(TypeParamConstrClause))
         {
             // util::for_each_child_node(current, processGenericConstraints);
         }
@@ -89,7 +89,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
     {
         if (util::is_type_decl(nMember))
             return;
-        const StmtMapper hMemb = RegManager::get_stmt_mapper(nMember);
+        const StmtMapper hMemb = MapManager::get_stmt_mapper(nMember);
         Stmt* membStmt         = hMemb(self, nMember);
 
         if (const auto varDef = as_a<MemberVarDefStmt>(membStmt))
@@ -123,7 +123,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(
     // handling of interface implementations
     auto processBaseList = [&](const TSNode& current) -> void
     {
-        const TypeMapper th = RegManager::get_type_mapper(current);
+        const TypeMapper th = MapManager::get_type_mapper(current);
         Type* type          = th(&self->typeTrs_, current);
 
         if (const auto tInterface = as_a<InterfaceType>(type))
@@ -143,15 +143,15 @@ Stmt* SrcCodeVisitor::visit_interface_def(
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == RegManager::get_symbol(BaseList))
+        if (sCurrent == MapManager::get_symbol(BaseList))
         {
             util::for_each_child_node(current, processBaseList);
         }
-        else if (sCurrent == RegManager::get_symbol(TypeParamList))
+        else if (sCurrent == MapManager::get_symbol(TypeParamList))
         {
             intfDef->tparams_ = util::make_generic_params(current, src);
         }
-        else if (sCurrent == RegManager::get_symbol(TypeParamConstrClause))
+        else if (sCurrent == MapManager::get_symbol(TypeParamConstrClause))
         {
             // util::for_each_child_node(current, processGenericConstraints);
         }
@@ -165,7 +165,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(
 
     auto processMembs = [intfDef, self](const TSNode& nMember) -> void
     {
-        const StmtMapper hMemb = RegManager::get_stmt_mapper(nMember);
+        const StmtMapper hMemb = MapManager::get_stmt_mapper(nMember);
         Stmt* membStmt         = hMemb(self, nMember);
 
         if ([[maybe_unused]] const auto varDef
@@ -216,7 +216,7 @@ Stmt* SrcCodeVisitor::visit_param_def(SrcCodeVisitor* self, const TSNode& node)
         = util::mk_param_def(node, self->src_str(), self->typeTrs_);
     if (! ts_node_is_null(nInit))
     {
-        const ExprMapper hInit = RegManager::get_expr_mapper(nInit);
+        const ExprMapper hInit = MapManager::get_expr_mapper(nInit);
         param->initializer_    = hInit(self, nInit);
     }
     self->semanticContext_.reg_param(param);
@@ -247,16 +247,16 @@ Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node)
     constrDef->params_      = self->make_param_list(nParamList, false);
 
     const CSModifiers modifs
-        = CSModifiers::handle_memb_modifs(node, self->src_str());
+        = CSModifiers::parser_method_modifs(node, self->src_str());
     constrDef->access_
         = modifs.get_access_mod().value_or(AccessModifier::Private);
 
-    const StmtMapper hBody = RegManager::get_stmt_mapper(nBody);
+    const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
     constrDef->body_       = as_a<CompoundStmt>(hBody(self, nBody));
 
     if (! ts_node_is_null(nInit))
     {
-        const StmtMapper hBaseInit = RegManager::get_stmt_mapper(nInit);
+        const StmtMapper hBaseInit = MapManager::get_stmt_mapper(nInit);
         Stmt* initStmt             = hBaseInit(self, nInit);
         if (const auto baseInit = as_a<BaseInitializerStmt>(initStmt))
             constrDef->baseInit_.push_back(baseInit);
@@ -311,7 +311,7 @@ Stmt* SrcCodeVisitor::visit_destr_def(SrcCodeVisitor* self, const TSNode& node)
 {
     self->semanticContext_.reg_return(typeFact_.mk_void());
     const TSNode nBody     = util::child_by_field_name(node, "body");
-    const StmtMapper hBody = RegManager::get_stmt_mapper(nBody);
+    const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
     Stmt* body             = hBody(self, nBody);
     const auto currentType = self->semanticContext_.current_type();
 
@@ -333,7 +333,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
 
     const TSNode nParams = util::child_by_field_name(node, "parameters");
     const CSModifiers modifs
-        = CSModifiers::handle_memb_modifs(node, self->src_str());
+        = CSModifiers::parser_method_modifs(node, self->src_str());
     const TSNode nName          = util::child_by_field_name(node, "name");
     const bool isVariadic       = util::has_variadic_param(nParams, nullptr);
     const size_t cNamedChildren = ts_node_named_child_count(nParams);
@@ -359,7 +359,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
         {
             if (! ts_node_is_null(nInit))
             {
-                ExprMapper hInit       = RegManager::get_expr_mapper(nInit);
+                ExprMapper hInit       = MapManager::get_expr_mapper(nInit);
                 paramDef->initializer_ = hInit(self, nInit);
             }
             self->semanticContext_.reg_param(paramDef);
@@ -370,7 +370,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
             = util::child_by_field_name(methodMeta->nMethod, "body");
         if (! ts_node_is_null(nBody))
         {
-            const StmtMapper hBody  = RegManager::get_stmt_mapper(nBody);
+            const StmtMapper hBody  = MapManager::get_stmt_mapper(nBody);
             methodDef->func_->body_ = as_a<CompoundStmt>(hBody(self, nBody));
         }
 
@@ -406,14 +406,14 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
         const TSNode nInit = paramMeta.nInit;
         if (! ts_node_is_null(nInit))
         {
-            ExprMapper hInit = RegManager::get_expr_mapper(nInit);
+            ExprMapper hInit = MapManager::get_expr_mapper(nInit);
             paramMeta.paramDef->initializer_ = hInit(self, nInit);
         }
         self->semanticContext_.reg_param(paramMeta.paramDef);
     }
 
     const TSNode nBody       = util::child_by_field_name(node, "body");
-    const StmtMapper hBody   = RegManager::get_stmt_mapper(nBody);
+    const StmtMapper hBody   = MapManager::get_stmt_mapper(nBody);
     funcMeta->funcDef->body_ = as_a<CompoundStmt>(hBody(self, nBody));
     self->semanticContext_.leave_scope();
     self->semanticContext_.unregister_return_type();

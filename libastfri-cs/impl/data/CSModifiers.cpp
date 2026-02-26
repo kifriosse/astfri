@@ -10,8 +10,8 @@
 
 namespace astfri::csharp
 {
-CSModifiers CSModifiers::handle_memb_modifs(
-    const TSNode& nMemb,
+CSModifiers CSModifiers::parser_method_modifs(
+    const TSNode& nMethod,
     const std::string_view src
 )
 {
@@ -21,20 +21,20 @@ CSModifiers CSModifiers::handle_memb_modifs(
         for (CaptureId i = 0; i < match.capture_count; ++i)
         {
             const TSNode nModif = match.captures[i].node;
-            modifs.add_modifier(RegManager::get_modifier(nModif, src));
+            modifs.add_modifier(MapManager::get_modifier(nModif, src));
         }
     };
-    util::for_each_match(nMemb, regs::QueryType::ParamModif, process);
+    util::for_each_match(nMethod, maps::QueryType::MethodModif, process);
     return modifs;
 }
 
-CSModifiers CSModifiers::handle_var_modifs(
+CSModifiers CSModifiers::parse_var_modifs(
     const TSNode& nVar,
     const std::string_view src,
     TSNode* nVarDecl
 )
 {
-    using namespace regs;
+    using namespace maps;
 
     static constexpr auto q_type = QueryType::VarDecl;
 
@@ -51,14 +51,14 @@ CSModifiers CSModifiers::handle_var_modifs(
             if (index == decl_id && nVarDecl)
                 *nVarDecl = nCurrent;
             else if (index == modif_id)
-                modifs.add_modifier(RegManager::get_modifier(nCurrent, src));
+                modifs.add_modifier(MapManager::get_modifier(nCurrent, src));
         }
     };
     util::for_each_match(nVar, q_type, process);
     return modifs;
 }
 
-CSModifiers CSModifiers::handle_param_modifs(
+CSModifiers CSModifiers::parse_param_modifs(
     const TSNode& nParam,
     std::string_view src
 )
@@ -69,10 +69,10 @@ CSModifiers CSModifiers::handle_param_modifs(
         for (uint32_t i = 0; i < match.capture_count; ++i)
         {
             const TSNode n_modif = match.captures[i].node;
-            paramMod.add_modifier(RegManager::get_modifier(n_modif, src));
+            paramMod.add_modifier(MapManager::get_modifier(n_modif, src));
         }
     };
-    util::for_each_match(nParam, regs::QueryType::ParamModif, process);
+    util::for_each_match(nParam, maps::QueryType::ParamModif, process);
     return paramMod;
 }
 

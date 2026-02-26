@@ -29,7 +29,8 @@ struct TypeContext
 };
 
 /**
- * @brief Context for tracking scopes for resolving variable references
+ * @brief Context for tracking scopes for resolving variable references and
+ * local functions
  */
 struct ScopeContext
 {
@@ -84,9 +85,8 @@ public:
         std::string_view name,
         UserTypeDefStmt* owner
     ) const;
-    CallType find_invoc_type(
+    InvocationType find_invoc_type(
         InvocationId id,
-        // todo redo this into an InvocationID
         access::Qualifier quelifier
     ) const;
 };

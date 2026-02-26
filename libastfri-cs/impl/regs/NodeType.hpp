@@ -6,6 +6,9 @@
 namespace astfri::csharp
 {
 
+/**
+ * @brief Enum for representing tree-sitter node type
+ */
 enum class NodeType : TSSymbol
 {
     Unknown,
@@ -67,8 +70,13 @@ enum class NodeType : TSSymbol
     BinaryOpr,
     TernaryOpr,
     Assignment,
+
     // Patterns
+    /**
+     * @brief Node for constant patterns in switch, e.g. \code case 5: \endcode
+     */
     ConstPattern,
+
     // other expr
     This,
     RefExpr,
@@ -90,14 +98,24 @@ enum class NodeType : TSSymbol
     TupleType,
     FuncPointerType,
     ScopedType,
+
     // Other
     Modifier,
     Identifier,
+    /**
+     * @brief Node for \code global\endcode keyword inside global using
+     * directives
+     */
     Global,
     /**
-     * @brief Node for static keyword inside static using directives
+     * @brief Node for \code static\endcode keyword inside static using
+     * directives
      */
     Static,
+    /**
+     * @brief Node for explicit alias in qualified name, e.g.
+     * \code global::System.Console\endcode
+     */
     AliasQualifName,
     /**
      * @brief Node for list of bases and implemented interfaces
@@ -111,6 +129,9 @@ enum class NodeType : TSSymbol
      * @brief Node for list of constrains for generic parameters
      */
     TypeParamConstrClause,
+    /**
+     * @brief Node for single generic parameter constraint
+     */
     TypeParamConstraint,
 
     ERROR,

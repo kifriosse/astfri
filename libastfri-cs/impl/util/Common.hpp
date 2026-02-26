@@ -6,13 +6,17 @@
 #ifndef CSHARP_COMMON_HPP
 #define CSHARP_COMMON_HPP
 
-#include <cstddef>
+// #include <cstddef>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <functional>
 
 namespace astfri::csharp::util
 {
 
+/**
+ * @brief Enum for identifying different kinds of user defined types in C#.
+ * @note C# structs are identified as classes
+ */
 enum class TypeKind
 {
     Class,
@@ -22,6 +26,9 @@ enum class TypeKind
     Delegate
 };
 
+/**
+ * @brief Enum for identifying different kind of variable definitions in C#.
+ */
 enum class VarDefType
 {
     Local,

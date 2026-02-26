@@ -18,12 +18,10 @@ StmtFactory& SrcCodeVisitor::stmtFact_ = StmtFactory::get_instance();
 TypeFactory& SrcCodeVisitor::typeFact_ = TypeFactory::get_instance();
 
 SrcCodeVisitor::SrcCodeVisitor(
-    std::vector<std::unique_ptr<SourceFile>>& srcCodes,
     SemanticContext& semanticContext,
     SymbolTable& symbTable
 ) :
     typeTrs_(symbTable),
-    srcCodes_(srcCodes),
     semanticContext_(semanticContext),
     lang_(tree_sitter_c_sharp())
 {
@@ -42,7 +40,7 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
 
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-             StmtMapper hStmt = RegManager::get_stmt_mapper(node);
+             StmtMapper hStmt = MapManager::get_stmt_mapper(node);
             Stmt* stmt       = hStmt(this, node);
             if (added)
                 continue;

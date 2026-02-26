@@ -60,15 +60,15 @@ constexpr std::string_view wpfSdkExclude[]{"System.IO", "System.Net.Http"};
 struct SourceFile;
 
 StmtFactory& SymbTableBuilder::stmtFact_    = StmtFactory::get_instance();
-regs::QueryReg& SymbTableBuilder::queryReg_ = regs::QueryReg::get();
+maps::QueryReg& SymbTableBuilder::queryReg_ = maps::QueryReg::get();
 
 SymbTableBuilder::SymbTableBuilder(
     std::vector<std::unique_ptr<SourceFile>>& srcs,
     SymbolTable& symbTable
 ) :
-    srcs_(srcs),
     typeTrs_(symbTable),
     symbTable_(symbTable),
+    srcs_(srcs),
     lang_(tree_sitter_c_sharp())
 {
 }
@@ -98,52 +98,10 @@ void SymbTableBuilder::reg_using_directives()
         typeTrs_.set_current_src(src.get());
         currentSrc_       = src.get();
         const TSNode root = ts_tree_root_node(src->tree);
-        util::for_each_match(root, regs::QueryType::Using, process);
+        util::for_each_match(root, maps::QueryType::Using, process);
     }
     currentSrc_ = nullptr;
     typeTrs_.set_current_src(nullptr);
-}
-
-void SymbTableBuilder::collect_types(const TSTree* tree)
-{
-    struct State
-    {
-        TSNode nBody;
-        ScopeNode* parentNode;
-    };
-
-    std::vector<State> stack;
-    ScopeNode* const root = symbTable_.symb_tree().root();
-    stack.emplace_back(ts_tree_root_node(tree), root);
-
-    auto process = [this, &stack](const TSNode& node)
-    {
-        const TSSymbol sCurrent = ts_node_symbol(node);
-        TSNode body             = util::child_by_field_name(node, "body");
-        if (util::is_type_decl(sCurrent))
-        {
-            const TypeCollector handler = RegManager::get_type_collector(node);
-            if (ScopeNode* scopeNode = handler(this, node))
-                stack.emplace_back(body, scopeNode);
-        }
-        else if (sCurrent == RegManager::get_symbol(NodeType::NamespaceDecl))
-        {
-            const TSNode nName = util::child_by_field_name(node, "name");
-            std::string name   = util::extract_text(nName, src_str());
-            Nms nms(name);
-            if (ScopeNode* scopeNode
-                = currentParent_->add_child(std::move(name), std::move(nms)))
-                stack.emplace_back(body, scopeNode);
-        }
-    };
-
-    while (! stack.empty())
-    {
-        const auto& [nBody, parent] = stack.back();
-        currentParent_              = parent;
-        stack.pop_back();
-        util::for_each_child_node(nBody, process, true);
-    }
 }
 
 void SymbTableBuilder::reg_members()
@@ -153,7 +111,7 @@ void SymbTableBuilder::reg_members()
         if (util::is_type_decl(current))
             return;
 
-        const SymbCollector handler = RegManager::get_symb_collector(current);
+        const SymbCollector handler = MapManager::get_symb_collector(current);
         handler(this, current);
     };
 
@@ -196,7 +154,7 @@ ScopeNode* SymbTableBuilder::visit_record(
     [[maybe_unused]] const TSNode& node
 )
 {
-    return self->visit_type_def(node, util::TypeKind::Record);
+    return self->visit_type_def(node, util::TypeKind::Interface);
 }
 
 ScopeNode* SymbTableBuilder::visit_enum(
@@ -223,11 +181,10 @@ void SymbTableBuilder::visit_memb_var(
     const std::string_view src = self->src_str();
 
     TSNode nVarDecl;
-    const CSModifiers modifs
-        = CSModifiers::handle_var_modifs(node, src, &nVarDecl);
-    const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
-    const TypeMapper th    = RegManager::get_type_mapper(nType);
-    Type* type             = th(&self->typeTrs_, nType);
+    const auto modifs   = CSModifiers::parse_var_modifs(node, src, &nVarDecl);
+    const TSNode nType  = util::child_by_field_name(nVarDecl, "type");
+    const TypeMapper th = MapManager::get_type_mapper(nType);
+    Type* type          = th(&self->typeTrs_, nType);
     TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(
         self->typeContext_.typeStack.back()->def
     );
@@ -256,7 +213,7 @@ void SymbTableBuilder::visit_memb_var(
         };
         typeMeta->add_memb_var(varDef->name_, membVarMeta);
     };
-    util::for_each_match(nVarDecl, regs::QueryType::VarDecltor, process);
+    util::for_each_match(nVarDecl, maps::QueryType::VarDecltor, process);
 }
 
 void SymbTableBuilder::visit_property(
@@ -266,10 +223,7 @@ void SymbTableBuilder::visit_property(
 {
 }
 
-void SymbTableBuilder::visit_method(
-    SymbTableBuilder* self,
-    const TSNode& node
-)
+void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node)
 {
     const auto currentType = self->typeContext_.typeStack.back();
 
@@ -278,13 +232,13 @@ void SymbTableBuilder::visit_method(
         throw std::logic_error("Type wasn't discovered yet");
 
     const std::string_view srcStr = self->src_str();
-    const CSModifiers modifs    = CSModifiers::handle_memb_modifs(node, srcStr);
+    const CSModifiers modifs = CSModifiers::parser_method_modifs(node, srcStr);
 
-    const TSNode nRetType       = util::child_by_field_name(node, "returns");
-    const TSNode nFuncName      = util::child_by_field_name(node, "name");
-    const TSNode nParams        = util::child_by_field_name(node, "parameters");
+    const TSNode nRetType    = util::child_by_field_name(node, "returns");
+    const TSNode nFuncName   = util::child_by_field_name(node, "name");
+    const TSNode nParams     = util::child_by_field_name(node, "parameters");
 
-    const bool isVariadic       = util::has_variadic_param(nParams);
+    const bool isVariadic    = util::has_variadic_param(nParams);
     const size_t cNamedChildren = ts_node_named_child_count(nParams);
     const size_t cParam = isVariadic ? cNamedChildren - 1 : cNamedChildren;
     std::string name    = util::extract_text(nFuncName, srcStr);
@@ -297,7 +251,7 @@ void SymbTableBuilder::visit_method(
     auto [params, paramsMeta]
         = util::discover_params(nParams, srcStr, self->typeTrs_);
 
-    const TypeMapper th      = RegManager::get_type_mapper(nRetType);
+    const TypeMapper th      = MapManager::get_type_mapper(nRetType);
     MethodDefStmt* methodDef = stmtFact_.mk_method_def(
         currentType->def,
         stmtFact_.mk_function_def(
@@ -381,9 +335,9 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
     auto process  = [&isGlobal, &isStatic](const TSNode& current)
     {
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == RegManager::get_symbol(NodeType::Static))
+        if (sCurrent == MapManager::get_symbol(NodeType::Static))
             isGlobal = true;
-        else if (sCurrent == RegManager::get_symbol(NodeType::Global))
+        else if (sCurrent == MapManager::get_symbol(NodeType::Global))
             isStatic = true;
     };
 
@@ -423,7 +377,7 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
             if (isGlobal)
                 symbTable_.add_glob_using(node);
             else
-                src->fileContext.usings.push_back(node);
+                src->usings.push_back(node);
         }
     }
     else
@@ -435,7 +389,7 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
         if (node)
         {
             auto* ext   = node->is_a<ExternalMarker>();
-            Alias alias = ext ? Alias{std::move(ext->fqn)} : Alias{node};
+            Alias alias = ext ? Alias{std::move(ext->qualifiedName)} : Alias{node};
             std::string aliasName = util::extract_text(nAliasName, srcStr);
 
             if (isGlobal)
@@ -451,6 +405,51 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
                 nms.add_alias(std::move(aliasName), src, std::move(alias));
             }
         }
+    }
+}
+
+void SymbTableBuilder::collect_types(const TSTree* tree)
+{
+    struct State
+    {
+        TSNode nBody;
+        ScopeNode* parentNode;
+    };
+
+    std::vector<State> stack;
+    ScopeNode* const root = symbTable_.symb_tree().root();
+    stack.emplace_back(ts_tree_root_node(tree), root);
+
+    auto process = [this, &stack](const TSNode& node)
+    {
+        const TSSymbol sCurrent = ts_node_symbol(node);
+        TSNode body             = util::child_by_field_name(node, "body");
+        if (ts_node_is_null(body))
+            return;
+
+        if (util::is_type_decl(sCurrent))
+        {
+            const TypeCollector handler = MapManager::get_type_collector(node);
+            if (ScopeNode* scopeNode = handler(this, node))
+                stack.emplace_back(body, scopeNode);
+        }
+        else if (sCurrent == MapManager::get_symbol(NodeType::NamespaceDecl))
+        {
+            const TSNode nName = util::child_by_field_name(node, "name");
+            std::string name   = util::extract_text(nName, src_str());
+            Nms nms(name);
+            if (ScopeNode* scopeNode
+                = currentParent_->add_child(std::move(name), std::move(nms)))
+                stack.emplace_back(body, scopeNode);
+        }
+    };
+
+    while (! stack.empty())
+    {
+        const auto& [nBody, parent] = stack.back();
+        currentParent_              = parent;
+        stack.pop_back();
+        util::for_each_child_node(nBody, process, true);
     }
 }
 
@@ -495,16 +494,16 @@ ScopeNode* SymbTableBuilder::visit_type_def(
     return nullptr;
 }
 
+std::string_view SymbTableBuilder::src_str() const
+{
+    return src()->srcStr;
+}
+
 SourceFile* SymbTableBuilder::src() const
 {
     return currentSrc_
              ? currentSrc_
              : throw std::logic_error("Current source code is not set");
-}
-
-std::string_view SymbTableBuilder::src_str() const
-{
-    return src()->srcStr;
 }
 
 } // namespace astfri::csharp

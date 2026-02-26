@@ -2,7 +2,7 @@
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
@@ -10,19 +10,33 @@
 
 // #include <iostream>
 #include <tree_sitter/tree-sitter-c-sharp.h>
-
 #include <optional>
 #include <string>
 
 namespace astfri::csharp
 {
 
-namespace regs
+class SrcCodeVisitor;
+class SymbTableBuilder;
+class TypeTranslator;
+
+namespace maps
 {
 
 namespace
 {
 using enum NodeType;
+
+/**
+ * @brief Helper struct for mapping tree-sitter node names to NodeType enum
+ * values
+ */
+struct MappingRule
+{
+    std::string_view nodeName;
+    NodeType nodeType;
+    bool isNamed;
+};
 
 constexpr MappingRule mappingRules_[] = {
     {"compilation_unit",                  CompilationUnit,       true },
@@ -132,7 +146,7 @@ NodeType NodeTypes::get_node_type(const TSNode& node) const
     return nodeTypeMap_.at(ts_node_symbol(node));
 }
 
-Handlers::Handlers() :
+Mappers::Mappers() :
     stmts({
         {ClassDecl,       SrcCodeVisitor::visit_class_def    },
         {StructDecl,      SrcCodeVisitor::visit_class_def    },
@@ -335,18 +349,18 @@ Types::Types() :
 
 } // namespace regs
 
-regs::Handlers RegManager::handlers_;
-regs::Operations RegManager::operations_;
-regs::Types RegManager::types_;
-regs::Modifiers RegManager::modifiers_;
-regs::NodeTypes RegManager::nodeTypes_;
+maps::Mappers MapManager::handlers_;
+maps::Operations MapManager::operations_;
+maps::Types MapManager::types_;
+maps::Modifiers MapManager::modifiers_;
+maps::NodeTypes MapManager::nodeTypes_;
 
-StmtMapper RegManager::get_stmt_mapper(const TSNode& node)
+StmtMapper MapManager::get_stmt_mapper(const TSNode& node)
 {
     return get_stmt_mapper(nodeTypes_.get_node_type(node));
 }
 
-StmtMapper RegManager::get_stmt_mapper(const NodeType nodeType)
+StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType)
 {
     // todo redo this when the typo is fixed
     // std::cerr << "Entering statement handler: " << nodeType << "\n";
@@ -354,71 +368,71 @@ StmtMapper RegManager::get_stmt_mapper(const NodeType nodeType)
     return get_or_default(handlers_.stmts, nodeType, std::move(def));
 }
 
-ExprMapper RegManager::get_expr_mapper(const TSNode& node)
+ExprMapper MapManager::get_expr_mapper(const TSNode& node)
 {
     return get_expr_mapper(nodeTypes_.get_node_type(node));
 }
 
-ExprMapper RegManager::get_expr_mapper(const NodeType nodeType)
+ExprMapper MapManager::get_expr_mapper(const NodeType nodeType)
 {
     // std::cerr << "Entering expression handler: " << nodeType << "\n";
     ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, std::move(def));
 }
 
-TypeMapper RegManager::get_type_mapper(const TSNode& node)
+TypeMapper MapManager::get_type_mapper(const TSNode& node)
 {
     return get_type_mapper(nodeTypes_.get_node_type(node));
 }
 
-TypeMapper RegManager::get_type_mapper(const NodeType nodeType)
+TypeMapper MapManager::get_type_mapper(const NodeType nodeType)
 {
     // std::cerr << "Entering type handler: " << nodeType << "\n";
     TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, std::move(def));
 }
 
-TypeCollector RegManager::get_type_collector(const TSNode& node)
+TypeCollector MapManager::get_type_collector(const TSNode& node)
 {
     return get_type_collector(nodeTypes_.get_node_type(node));
 }
 
-TypeCollector RegManager::get_type_collector(const NodeType nodeType)
+TypeCollector MapManager::get_type_collector(const NodeType nodeType)
 {
     TypeCollector def = [](auto*, const auto&) { return nullptr; };
     return get_or_default(handlers_.typeCollectors, nodeType, std::move(def));
 }
 
-SymbCollector RegManager::get_symb_collector(const TSNode& node)
+SymbCollector MapManager::get_symb_collector(const TSNode& node)
 {
     return get_symb_collector(nodeTypes_.get_node_type(node));
 }
 
-SymbCollector RegManager::get_symb_collector(const NodeType nodeType)
+SymbCollector MapManager::get_symb_collector(const NodeType nodeType)
 {
     // std::cerr << "Entering registration handler: " << nodeType << "\n";
     SymbCollector def = [](auto*, const auto&) { };
     return get_or_default(handlers_.symbCollectors, nodeType, std::move(def));
 }
 
-std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
+std::optional<UnaryOpType> MapManager::get_prefix_unary_op(
     const std::string_view op
 )
 {
     return get_opt(operations_.prefixUnaryOps, op);
 }
 
-std::optional<BinOpType> RegManager::get_bin_op(const std::string_view op)
+std::optional<BinOpType> MapManager::get_bin_op(const std::string_view op)
 {
     return get_opt(operations_.binaryOps, op);
 }
 
-std::optional<Type*> RegManager::get_type(const std::string_view nodeType)
+std::optional<Type*> MapManager::get_type(const std::string_view nodeType)
 {
     return get_opt(types_.types, nodeType);
 }
 
-CSModifier RegManager::get_modifier(
+CSModifier MapManager::get_modifier(
     const TSNode& node,
     const std::string_view src
 )
@@ -426,32 +440,32 @@ CSModifier RegManager::get_modifier(
     return get_modifier(util::extract_text(node, src));
 }
 
-CSModifier RegManager::get_modifier(const std::string_view modifs)
+CSModifier MapManager::get_modifier(const std::string_view modifs)
 {
     return get_opt(modifiers_.modifiers, modifs).value_or(CSModifier::None);
 }
 
-bool RegManager::is_expr(const TSNode& node)
+bool MapManager::is_expr(const TSNode& node)
 {
     return handlers_.exprs.contains(nodeTypes_.get_node_type(node));
 }
 
-bool RegManager::is_stmt(const TSNode& node)
+bool MapManager::is_stmt(const TSNode& node)
 {
     return handlers_.stmts.contains(nodeTypes_.get_node_type(node));
 }
 
-NodeType RegManager::get_node_type(const TSNode& node)
+NodeType MapManager::get_node_type(const TSNode& node)
 {
     return nodeTypes_.get_node_type(node);
 }
 
-TSSymbol RegManager::get_symbol(const NodeType type)
+TSSymbol MapManager::get_symbol(const NodeType type)
 {
     return nodeTypes_.get_symbol(type);
 }
 
-Stmt* RegManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&)
+Stmt* MapManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&)
 {
     // todo remove this when type is fixed
     return StmtFactory::get_instance().mk_uknown();

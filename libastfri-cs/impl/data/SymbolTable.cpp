@@ -53,11 +53,6 @@ TypeMetadata* SymbolTable::get_type_metadata(UserTypeDefStmt* def)
     return it != userTypeMetadata_.end() ? &it->second : nullptr;
 }
 
-std::span<UserTypeDefStmt* const> SymbolTable::get_user_types()
-{
-    return userTypes_;
-}
-
 SymbolTable::span<const ScopeNode* const> SymbolTable::get_glob_usings()
 {
     return globUsings_;

@@ -46,11 +46,6 @@ IntSuffix get_suffix_type(const std::string_view suffix)
     return IntSuffix::None;
 }
 
-bool almost_equal(const double a, const double b, const double epsilon)
-{
-    return std::fabs(a - b) < epsilon;
-}
-
 void split_namespace(
     std::deque<std::string>& qualifs,
     const std::string_view nmsQualif

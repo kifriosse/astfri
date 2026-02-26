@@ -25,7 +25,7 @@ Scope mk_scope(const TSNode& node, const SourceFile& currentSrc)
 
     while (! ts_node_is_null(nParent))
     {
-        const NodeType type = RegManager::get_node_type(nParent);
+        const NodeType type = MapManager::get_node_type(nParent);
         nCurrent            = nParent;
         nParent             = ts_node_parent(nCurrent);
 
@@ -47,12 +47,11 @@ Scope mk_scope(const TSNode& node, const SourceFile& currentSrc)
 
             if (qualifs.empty())
             {
-                return currentSrc.fileContext.fileNms;
+                return currentSrc.fileNms;
             }
 
-            const auto reverseFileNms = std::ranges::views::reverse(
-                currentSrc.fileContext.fileNms.names_
-            );
+            const auto reverseFileNms
+                = std::ranges::views::reverse(currentSrc.fileNms.names_);
             for (const auto& nmsQualif : reverseFileNms)
             {
                 qualifs.push_front(nmsQualif);
@@ -103,7 +102,7 @@ Scope mk_scope(const std::string_view qualifier)
     return scope;
 }
 
-Scope mk_scope(ScopeNode* start, SourceFile& currentSrc)
+Scope mk_scope(ScopeNode* start, const SourceFile& currentSrc)
 {
     std::deque<std::string> scope;
     ScopeNode* current = start;
@@ -122,12 +121,11 @@ Scope mk_scope(ScopeNode* start, SourceFile& currentSrc)
     }
     if (scope.empty())
     {
-        return currentSrc.fileContext.fileNms;
+        return currentSrc.fileNms;
     }
 
-    const auto reverseFileNms
-        = std::ranges::views::reverse(currentSrc.fileContext.fileNms.names_);
-    for (const auto& nmsQualif : reverseFileNms)
+    const auto reverse = std::ranges::views::reverse(currentSrc.fileNms.names_);
+    for (const auto& nmsQualif : reverse)
     {
         scope.push_front(nmsQualif);
     }
@@ -146,8 +144,8 @@ ParamVarDefStmt* mk_param_def(
 {
     const TSNode nType         = child_by_field_name(node, "type");
     const TSNode nName         = child_by_field_name(node, "name");
-    const TypeMapper th        = RegManager::get_type_mapper(nType);
-    const CSModifiers paramMod = CSModifiers::handle_param_modifs(node, src);
+    const TypeMapper th        = MapManager::get_type_mapper(nType);
+    const CSModifiers paramMod = CSModifiers::parse_param_modifs(node, src);
     Type* tParam = paramMod.get_indirection_type(th(&typeTrs, nType));
 
     return StmtFactory::get_instance()
@@ -185,7 +183,7 @@ FuncMetadata make_func_metadata(
     const TSNode nRet         = child_by_field_name(node, "type");
     const TSNode nParams      = child_by_field_name(node, "parameters");
     std::string name          = extract_text(nName, src);
-    const TypeMapper th       = RegManager::get_type_mapper(nRet);
+    const TypeMapper th       = MapManager::get_type_mapper(nRet);
     Type* retType             = th(&typeTrs, nRet);
     auto [params, paramsMeta] = discover_params(nParams, src, typeTrs);
     return FuncMetadata{

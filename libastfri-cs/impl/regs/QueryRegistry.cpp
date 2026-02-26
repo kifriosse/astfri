@@ -8,7 +8,7 @@
 #include <ranges>
 #include <string>
 
-namespace astfri::csharp::regs
+namespace astfri::csharp::maps
 {
 
 Query::Query(const TSLanguage* lang, const std::string_view query)

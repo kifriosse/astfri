@@ -68,7 +68,7 @@ std::string remove_comments(
     const std::filesystem::path& path
 )
 {
-    using namespace regs;
+    using namespace maps;
     static constexpr auto qType      = QueryType::CommentError;
     static const auto& queryReg      = QueryReg::get();
     static const Query* const query  = queryReg.get_query(qType);
@@ -132,13 +132,13 @@ bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate)
 {
     using enum NodeType;
     const TSNode nCast = unwrap_parantheses(node);
-    if (ts_node_symbol(nCast) != RegManager::get_symbol(CastExpr))
+    if (ts_node_symbol(nCast) != MapManager::get_symbol(CastExpr))
         return false;
 
     const TSNode nValue  = child_by_field_name(nCast, "value");
     const TSNode nLambda = unwrap_parantheses(nValue);
 
-    if (ts_node_symbol(nLambda) != RegManager::get_symbol(LambdaExpr))
+    if (ts_node_symbol(nLambda) != MapManager::get_symbol(LambdaExpr))
         return false;
 
     if (lambda)
@@ -157,7 +157,7 @@ TSNode unwrap_parantheses(const TSNode& node)
 {
     using enum NodeType;
     static const TSSymbol sBracketExpr
-        = RegManager::get_symbol(ParenthesizedExpr);
+        = MapManager::get_symbol(ParenthesizedExpr);
 
     TSNode current = node;
     while (! ts_node_is_null(current)
@@ -176,11 +176,11 @@ bool is_type_decl(const TSNode& node)
 bool is_type_decl(const TSSymbol symbol)
 {
     static const std::unordered_set sTypeDecls{
-        RegManager::get_symbol(NodeType::ClassDecl),
-        RegManager::get_symbol(NodeType::InterfaceDecl),
-        RegManager::get_symbol(NodeType::EnumDecl),
-        RegManager::get_symbol(NodeType::RecordDecl),
-        RegManager::get_symbol(NodeType::DelegateDecl)
+        MapManager::get_symbol(NodeType::ClassDecl),
+        MapManager::get_symbol(NodeType::InterfaceDecl),
+        MapManager::get_symbol(NodeType::EnumDecl),
+        MapManager::get_symbol(NodeType::RecordDecl),
+        MapManager::get_symbol(NodeType::DelegateDecl)
     };
     return sTypeDecls.contains(symbol);
 }

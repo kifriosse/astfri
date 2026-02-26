@@ -64,9 +64,9 @@ using Qualifier = std::variant<None, Instance, Static, Base, Unknown>;
 
 // todo redo this into a std::variant like MemberAccessType
 /**
- * @brief Type of a function call
+ * @brief Type of invocation
  */
-enum class CallType
+enum class InvocationType
 {
     Unknown,
     Method,

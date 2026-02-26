@@ -4,11 +4,11 @@
 namespace astfri::csharp
 {
 
-namespace regs
+namespace maps
 {
 
 template<class Self, class RetType>
-RetType Handlers::visit_error(Self*, const TSNode& node)
+RetType Mappers::visit_error(Self*, const TSNode& node)
 {
     const auto [row, column] = ts_node_start_point(node);
     throw std::runtime_error(
@@ -20,13 +20,13 @@ RetType Handlers::visit_error(Self*, const TSNode& node)
 } // namespace regs
 
 template<class Factory, class Self, class RetType>
-RetType RegManager::default_visit(Self*, const TSNode&)
+RetType MapManager::default_visit(Self*, const TSNode&)
 {
     return Factory::get_instance().mk_unknown();
 }
 
 template<class Type>
-Type RegManager::get_or_default(
+Type MapManager::get_or_default(
     const RegistryMap<Type>& map,
     NodeType nodeType,
     Type nDefVal
@@ -37,7 +37,7 @@ Type RegManager::get_or_default(
 }
 
 template<class RetType>
-std::optional<RetType> RegManager::get_opt(
+std::optional<RetType> MapManager::get_opt(
     const RegistryStrViewMap<RetType>& map,
     std::string_view name
 )

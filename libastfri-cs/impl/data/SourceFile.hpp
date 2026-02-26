@@ -13,19 +13,29 @@ namespace astfri::csharp
 {
 class ScopeNode;
 
-struct FileContext
+/**
+ * @brief Represents a source file
+ * @note SourceFile is not copyable
+ */
+struct SourceFile
 {
     std::vector<ScopeNode*> usings{};
     Scope fileNms{};
-};
-
-struct SourceFile
-{
-    FileContext fileContext{};
     std::string srcStr;
     TSTree* tree{nullptr};
 
-    explicit SourceFile(FileContext context, std::string src, TSTree* tree);
+    /**
+     * @brief Constructs SourceFile
+     * @param src source code of current file
+     * @param tree tree-sitter syntax tree for current file
+     * @param fileNms file scoped namespace in current file - default value is
+     * empty
+     */
+    explicit SourceFile(
+        std::string src,
+        TSTree* tree,
+        Scope fileNms = {}
+    );
     ~SourceFile();
 
     SourceFile(const SourceFile&)            = delete;

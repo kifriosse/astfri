@@ -1,9 +1,13 @@
+/**
+ * @file Queries.h
+ * @brief header file containing tree-sitter queries for C# language
+ */
 #ifndef CSHARP_QUERIES_HPP
 #define CSHARP_QUERIES_HPP
 
 #include <string_view>
 
-namespace astfri::csharp::regs::queries
+namespace astfri::csharp::maps::queries
 {
 inline static constexpr std::string_view qTopLevelStmts =
     R"(
@@ -51,6 +55,6 @@ inline static constexpr std::string_view qCommentError =
 inline static constexpr std::string_view qUsingDir
     = "(using_directive) @directive";
 
-} // namespace astfri::csharp::regs::queries
+} // namespace astfri::csharp::maps::queries
 
 #endif // CSHARP_QUERIES_HPP

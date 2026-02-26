@@ -22,24 +22,21 @@ struct Stmt;
 struct Expr;
 
 class TypeFactory;
-
 } // namespace astfri
 
 namespace astfri::csharp
 {
+
 enum class CSModifier : MaskType;
 class SrcCodeVisitor;
 
-namespace regs
+namespace maps
 {
 
-struct MappingRule
-{
-    std::string_view nodeName;
-    NodeType nodeType;
-    bool isNamed;
-};
-
+/**
+ * @brief Class holding mapping of tree-sitter symbols to NodeType enum values
+ * and vice versa.
+ */
 class NodeTypes
 {
 public:
@@ -55,14 +52,17 @@ public:
     [[nodiscard]] NodeType get_node_type(const TSNode& node) const;
 };
 
-struct Handlers
+/**
+ * @brief Struct holding all mapping to visit functions for tree-sitter nodes.
+ */
+struct Mappers
 {
     const RegistryMap<StmtMapper> stmts;
     const RegistryMap<ExprMapper> exprs;
     const RegistryMap<TypeMapper> types;
     const RegistryMap<TypeCollector> typeCollectors;
     const RegistryMap<SymbCollector> symbCollectors;
-    Handlers();
+    Mappers();
 
 private:
     /**
@@ -75,6 +75,10 @@ private:
     static RetType visit_error(Self*, const TSNode& node);
 };
 
+/**
+ * @brief Struct holding mappings of C# operations to AST FRI Operation type
+ * enum
+ */
 struct Operations
 {
     const RegistryStrViewMap<UnaryOpType> prefixUnaryOps;
@@ -82,6 +86,10 @@ struct Operations
     Operations();
 };
 
+/**
+ * @brief Struct holding mapping of C# primitive types (in string form) to
+ * AST FRI Type
+ */
 struct Types
 {
     TypeFactory& typeFact;
@@ -89,6 +97,10 @@ struct Types
     Types();
 };
 
+/**
+ * @brief Struct holding mapping of C# modifiers (in string form) to CSModifier
+ * enum
+ */
 struct Modifiers
 {
     const RegistryStrViewMap<CSModifier> modifiers;
@@ -96,14 +108,17 @@ struct Modifiers
 };
 } // namespace regs
 
-class RegManager
+/**
+ * @brief Class responsible for managing all C# maps
+ */
+class MapManager
 {
 private:
-    static regs::Handlers handlers_;
-    static regs::Operations operations_;
-    static regs::Types types_;
-    static regs::Modifiers modifiers_;
-    static regs::NodeTypes nodeTypes_;
+    static maps::Mappers handlers_;
+    static maps::Operations operations_;
+    static maps::Types types_;
+    static maps::Modifiers modifiers_;
+    static maps::NodeTypes nodeTypes_;
 
 public:
     static StmtMapper get_stmt_mapper(const TSNode& node);

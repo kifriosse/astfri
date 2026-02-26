@@ -9,7 +9,7 @@ target_sources(astfri-cs PRIVATE
 add_subdirectory(data)
 add_subdirectory(regs)
 add_subdirectory(util)
-add_subdirectory(visitors/src_code)
+add_subdirectory(visitors)
 
 target_link_directories(astfri-cs PUBLIC
     ${TREE_SITTER_LIBRARY_DIRS}

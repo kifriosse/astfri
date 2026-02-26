@@ -52,11 +52,11 @@ void process_param_list(const TSNode& node, F collector)
 }
 
 template<std::invocable<const TSQueryMatch&> F>
-void for_each_match(const TSNode& root, const regs::QueryType type, F process)
+void for_each_match(const TSNode& root, const maps::QueryType type, F process)
 {
-    static auto& query_reg = regs::QueryReg::get();
+    static auto& query_reg = maps::QueryReg::get();
 
-    if (const regs::Query* query = query_reg.get_query(type))
+    if (const maps::Query* query = query_reg.get_query(type))
     {
         TSQueryCursor* cursor = ts_query_cursor_new();
         ts_query_cursor_exec(cursor, query->get(), root);

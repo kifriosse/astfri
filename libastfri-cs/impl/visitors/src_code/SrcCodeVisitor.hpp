@@ -14,28 +14,39 @@
 namespace astfri::csharp
 {
 
+/**
+ * @brief Visitor class for constructing AST from tree-sitter tree.
+ */
 class SrcCodeVisitor
 {
 private:
-    friend regs::Handlers;
+    friend maps::Mappers;
 
     static ExprFactory& exprFact_;
     static StmtFactory& stmtFact_;
     static TypeFactory& typeFact_;
 
     TypeTranslator typeTrs_;
-    std::vector<std::unique_ptr<SourceFile>>& srcCodes_;
     SemanticContext& semanticContext_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
+    /**
+     * @brief Constructor for SrcCodeVisitor
+     * @param semanticContext semantic context of the project
+     * @param symbTable symbol table of the project (should be same as the used
+     * inside semantic context)
+     */
     SrcCodeVisitor(
-        std::vector<std::unique_ptr<SourceFile>>& srcCodes,
         SemanticContext& semanticContext,
         SymbolTable& symbTable
     );
-    // compilation unit/translation unit
+    /**
+     * @brief Visits the root node of a tree-sitter tree and fills up
+     * TranslationUnit argument with top level definitions and statements.
+     * @param trUnit
+     */
     void visit_comp_unit(TranslationUnit& trUnit);
 
 private:
@@ -143,19 +154,25 @@ private:
     static Stmt* visit_return(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_throw(SrcCodeVisitor* self, const TSNode& node);
 
-    Stmt* visit_var_def_stmt(
-        const TSNode& node,
-        util::VarDefType defType
-    ); // general var def stmt handler
-
+    /**
+     * @brief General visit function for variable definition statements.
+     * @param node varaible definition node
+     * @param defType type of variable definition
+     * @return variable definition statement.
+     */
+    Stmt* visit_var_def_stmt(const TSNode& node, util::VarDefType defType);
+    /**
+     * @brief General visit function for while and do-while loops
+     * @param node loop node
+     * @param isWhile true if it's a while loop, false if it's a do-while loop
+     * @return while or do-while statement depending on \code isWhile\endcode
+     * parameter
+     */
     Stmt* make_while_loop(const TSNode& node, bool isWhile);
-    FunctionDefStmt* make_func_stmt(
-        const TSNode& node,
-        bool isMethod
-    ); // todo move this
+    FunctionDefStmt* make_func_stmt(const TSNode& node, bool isMethod);
 
     /**
-     * Turns an expression list into a chained comma operator expression
+     * @brief Turns an expression list into a chained comma operator expression
      * @param nStart node from which to start
      * @param nEnd node at which to end (exclusive). If nullptr, ends when
      * there aren't other siblings
@@ -166,7 +183,7 @@ private:
     Expr* expr_list_to_comma_op(const TSNode& nStart, const TSNode* nEnd);
 
     /**
-     * Makes a list of parameter variable definition statements from the given
+     * @brief Makes a list of parameter variable definition statements from the given
      * parameter list node
      * @param node parameter list node
      * @param makeShallow if true, makes shallow parameter definitions (without
@@ -177,11 +194,33 @@ private:
         const TSNode& node,
         bool makeShallow
     );
+    /**
+     * @brief Makes a list of parameter defintion expressions from the given
+     * argument list node
+     * @param node argument list node
+     * @return vector of parameter defintion expressions
+     */
     std::vector<Expr*> visit_arg_list(const TSNode& node);
+    /**
+     * @brief Visit function for for-loop initializer variable definition.
+     * @param node for-loop initializer variable definition node (first part of
+     * for-loop)
+     * @return variable definition statement or chained comma operator
+     * expression
+     */
     Stmt* visit_for_init_var_def(const TSNode& node);
 
-private:
+    /**
+     * @brief Gets the source code currently being visited.
+     * @return string view of current source code
+     * @throws std::logic_error if source file is not set
+     */
     [[nodiscard]] std::string_view src_str() const;
+    /**
+     * @brief Gets the source file currently being visited.
+     * @return pointer to current source file
+     * @throws std::logic_error if source file is not set
+     */
     [[nodiscard]] SourceFile* src() const;
 };
 
