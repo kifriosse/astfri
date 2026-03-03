@@ -54,9 +54,9 @@ internal class Options {
         'e',
         "exclude",
         SetName = "Directory",
-        HelpText = "Exclusion patterns"
+        HelpText = "List of exclusion patterns"
     )]
-    public IEnumerable<string> Excludes { get; set; } = ["Microsoft.Extensions."];
+    public IEnumerable<string> Excludes { get; set; } = ["Microsoft.Extensions.*"];
 
     [Option(
         'p',
@@ -105,8 +105,6 @@ internal static class Program {
     private static IEnumerable<TypeMetadata> GetTypeMetadata(Options opt) {
         Assembly coreAssembly = typeof(object).Assembly;
         
-        const string dllPattern = "*.dll";
-        
         string coreDir = Path.GetDirectoryName(coreAssembly.Location)!;
         string version = Path.GetFileName(coreDir);
         string sharedRoot = Path.GetFullPath(Path.Combine(coreDir, "..", ".."));
@@ -132,23 +130,24 @@ internal static class Program {
 
         List<string> allDlls = [];
         List<string>? exportDlls = null;
-        string[] frameworkDlls = Directory.GetFiles(frameworkPath, dllPattern);
+        List<string> frameworkDlls = GetAllDlls(frameworkPath).ToList();
         allDlls.AddRange(frameworkDlls);
         
         if (opt.Profile is not FrameworkProfile.Core)
-            allDlls.AddRange(Directory.GetFiles(coreDir, dllPattern));
+            allDlls.AddRange(GetAllDlls(coreDir));
         
         if (! string.IsNullOrWhiteSpace(opt.InputDllFile) && ! string.IsNullOrWhiteSpace(opt.DependencyDir)) {
             exportDlls = [opt.InputDllFile];
             allDlls.Add(opt.InputDllFile);
-            allDlls.AddRange(Directory.GetFiles(opt.DependencyDir, dllPattern));
+            allDlls.AddRange(GetAllDlls(opt.DependencyDir));
         }
         else if (! string.IsNullOrWhiteSpace(opt.InputDllDir)) {
+            List<string> fileContent = GetAllDlls(opt.InputDllDir).ToList();
+            allDlls.AddRange(fileContent);
             Regex exclude = BuildFilter(opt.Excludes);
-            exportDlls = Directory.GetFiles(opt.InputDllDir, dllPattern)
+            exportDlls = fileContent
                 .Where(path => ! exclude.IsMatch(Path.GetFileName(path)))
                 .ToList();
-            allDlls.AddRange(exportDlls);
         }
         else if (
             string.IsNullOrWhiteSpace(opt.InputDllFile) &&
@@ -232,12 +231,16 @@ internal static class Program {
 
     private static Regex BuildFilter(IEnumerable<string> globPatterns) {
         IEnumerable<string> regexParts = globPatterns.Select(glob => {
-            string pattern = Regex.Escape(glob)
-                .Replace(@"\*", ".*")
-                .Replace(@"\*", ".");
+            string pattern = Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\*", ".");
             return $"({pattern})";
         });
 
         return new Regex($"{string.Join("|", regexParts)}^");
+    }
+
+    private static IEnumerable<string> GetAllDlls(string dir) {
+        const string dllExtension = ".dll";
+        IEnumerable<string> files = Directory.GetFiles(dir);
+        return files.Where(f => Path.GetExtension(f).Equals(dllExtension));
     }
 }
