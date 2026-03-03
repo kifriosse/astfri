@@ -56,7 +56,7 @@ internal class Options {
         SetName = "Directory",
         HelpText = "List of exclusion patterns"
     )]
-    public IEnumerable<string> Excludes { get; set; } = ["Microsoft.Extensions.*"];
+    public IEnumerable<string> Excludes { get; set; }
 
     [Option(
         'p',
@@ -142,9 +142,10 @@ internal static class Program {
             allDlls.AddRange(GetAllDlls(opt.DependencyDir));
         }
         else if (! string.IsNullOrWhiteSpace(opt.InputDllDir)) {
+            List<string> defaultExcludes = [ "Microsoft.Extensions.*" ];
             List<string> fileContent = GetAllDlls(opt.InputDllDir).ToList();
             allDlls.AddRange(fileContent);
-            Regex exclude = BuildFilter(opt.Excludes);
+            Regex exclude = BuildFilter(opt.Excludes.Any() ? opt.Excludes : defaultExcludes);
             exportDlls = fileContent
                 .Where(path => ! exclude.IsMatch(Path.GetFileName(path)))
                 .ToList();
@@ -235,12 +236,14 @@ internal static class Program {
             return $"({pattern})";
         });
 
-        return new Regex($"{string.Join("|", regexParts)}^");
+        return new Regex($"^{string.Join("|", regexParts)}$");
     }
 
     private static IEnumerable<string> GetAllDlls(string dir) {
         const string dllExtension = ".dll";
         IEnumerable<string> files = Directory.GetFiles(dir);
-        return files.Where(f => Path.GetExtension(f).Equals(dllExtension));
+        return files.Where(f => 
+            Path.GetExtension(f).ToLower().Equals(dllExtension)
+        );
     }
 }

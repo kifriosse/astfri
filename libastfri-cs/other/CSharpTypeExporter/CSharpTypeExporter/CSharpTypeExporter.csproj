@@ -12,5 +12,11 @@
       <PackageReference Include="CommandLiners" Version="1.0.45" />
       <PackageReference Include="System.Reflection.MetadataLoadContext" Version="10.0.3" />
     </ItemGroup>
+    
+<!--    <ItemGroup>-->
+<!--        <Content Include="resources/*">-->
+<!--            <CopyToOutputDirectory>Always</CopyToOutputDirectory>-->
+<!--        </Content>-->
+<!--    </ItemGroup>-->
 
 </Project>
