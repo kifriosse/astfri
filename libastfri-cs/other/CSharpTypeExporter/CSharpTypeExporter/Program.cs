@@ -56,7 +56,7 @@ internal class Options {
         SetName = "Directory",
         HelpText = "List of exclusion patterns"
     )]
-    public IEnumerable<string> Excludes { get; set; }
+    public required IEnumerable<string> Excludes { get; set; }
 
     [Option(
         'p',
@@ -83,23 +83,35 @@ internal static class Program {
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
+    private static readonly List<string> DefaultExcludes = [ "Microsoft.Extensions.*" ]; 
 
     private static ParserResult<Options>? _result;
     
     public static void Main(string[] args) {
         _result = Parser.Default.ParseArguments<Options>(args);
-        _result.WithParsed(Main);
+        _result.WithParsed(Run);
     }
 
-    private static void Main(Options opt) {
+    private static void Run(Options opt) {
         IEnumerable<TypeMetadata> metadata = GetTypeMetadata(opt);
         
         string? directoryPath = Path.GetDirectoryName(opt.OutputPath);
         if (!string.IsNullOrWhiteSpace(directoryPath)) {
             Directory.CreateDirectory(directoryPath);
         }
-        using FileStream stream = File.Create(opt.OutputPath);
-        JsonSerializer.Serialize(stream, metadata, JsonOptions);
+        
+        if (Path.Exists(opt.OutputPath) && File.GetAttributes(opt.OutputPath).HasFlag(FileAttributes.Directory)) {
+            Console.Error.WriteLine($"Invalid input. Input DLL file path '{opt.OutputPath}' is directory");
+            Environment.Exit(1);
+        }
+            
+        try {
+            using FileStream stream = File.Create(opt.OutputPath);
+            JsonSerializer.Serialize(stream, metadata, JsonOptions);
+        }
+        catch (Exception e) {
+            Console.Error.WriteLine($"{e.Message}");
+        }
     }
 
     private static IEnumerable<TypeMetadata> GetTypeMetadata(Options opt) {
@@ -129,7 +141,7 @@ internal static class Program {
         }
 
         List<string> allDlls = [];
-        List<string>? exportDlls = null;
+        List<string> exportDlls = [];
         List<string> frameworkDlls = GetAllDlls(frameworkPath).ToList();
         allDlls.AddRange(frameworkDlls);
         
@@ -137,15 +149,46 @@ internal static class Program {
             allDlls.AddRange(GetAllDlls(coreDir));
         
         if (! string.IsNullOrWhiteSpace(opt.InputDllFile) && ! string.IsNullOrWhiteSpace(opt.DependencyDir)) {
+            if (! Path.Exists(opt.InputDllFile)) {
+                Console.Error.WriteLine($"Invalid input. Input path '{opt.InputDllFile}' doesn't exist");
+                Environment.Exit(1);
+            } 
+            if (File.GetAttributes(opt.InputDllFile).HasFlag(FileAttributes.Directory)) {
+                Console.Error.WriteLine($"Invalid input. Input DLL file path '{opt.InputDllFile}' is directory");
+                Environment.Exit(1);
+            } 
+            if (! Path.GetExtension(opt.InputDllFile).ToLower().Equals(".dll")) {
+                Console.Error.WriteLine($"Invalid input. Input file '{opt.InputDllFile}' is not a DLL file");
+                Environment.Exit(1);
+            }
+            
+            if (! Path.Exists(opt.DependencyDir)) {
+                Console.Error.WriteLine($"Invalid input. Input path '{opt.DependencyDir}' doesn't exist");
+                Environment.Exit(1);
+            }
+            if (! File.GetAttributes(opt.DependencyDir).HasFlag(FileAttributes.Directory)) {
+                Console.Error.WriteLine($"Invalid input. Dependency directory path '{opt.DependencyDir}' is a file");
+                Environment.Exit(1);
+            }
+            
             exportDlls = [opt.InputDllFile];
             allDlls.Add(opt.InputDllFile);
             allDlls.AddRange(GetAllDlls(opt.DependencyDir));
         }
         else if (! string.IsNullOrWhiteSpace(opt.InputDllDir)) {
-            List<string> defaultExcludes = [ "Microsoft.Extensions.*" ];
+            
+            if (! Path.Exists(opt.InputDllDir)) {
+                Console.Error.WriteLine($"Invalid input. Input path '{opt.DependencyDir}' doesn't exist");
+                Environment.Exit(1);
+            }
+            if (! File.GetAttributes(opt.InputDllDir).HasFlag(FileAttributes.Directory)) {
+                Console.Error.WriteLine($"Invalid input. Input directory path '{opt.InputDllDir}' is a file");
+                Environment.Exit(1);
+            }
+            
             List<string> fileContent = GetAllDlls(opt.InputDllDir).ToList();
             allDlls.AddRange(fileContent);
-            Regex exclude = BuildFilter(opt.Excludes.Any() ? opt.Excludes : defaultExcludes);
+            Regex exclude = BuildFilter(opt.Excludes.Any() ? opt.Excludes : DefaultExcludes);
             exportDlls = fileContent
                 .Where(path => ! exclude.IsMatch(Path.GetFileName(path)))
                 .ToList();
@@ -173,7 +216,7 @@ internal static class Program {
         PathAssemblyResolver resolver = new(allDlls);
         using MetadataLoadContext context = new(resolver);
         
-        foreach (string dllPath in exportDlls!) {
+        foreach (string dllPath in exportDlls) {
             Assembly assembly = context.LoadFromAssemblyPath(dllPath);
             IEnumerable<TypeMetadata?> types = assembly
                 .GetExportedTypes()
