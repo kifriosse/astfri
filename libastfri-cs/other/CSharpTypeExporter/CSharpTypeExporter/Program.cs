@@ -23,7 +23,8 @@ internal enum DeclType {
     RecordClass,
     RecordStruct,
     Delegate,
-    Unknow
+    Primitive,
+    Unknown,
 }
 
 internal class Options {
@@ -262,8 +263,8 @@ internal static class Program {
     private static DeclType GetDeclType(Type type) {
         if (type.IsInterface) return DeclType.Interface;
         if (type.IsEnum) return DeclType.Enum;
-        if (type is { IsValueType: true, IsPrimitive: false }) return DeclType.Struct;
-
+        if (type.IsValueType)
+            return type.IsPrimitive ? DeclType.Primitive : DeclType.Struct;
         bool isRecord = type.GetMethods().Any(m => m.Name == "<Clone>$");
         if (typeof(Delegate).IsAssignableFrom(type)) 
             return isRecord ? DeclType.RecordStruct : DeclType.Delegate;

@@ -15111,13 +15111,13 @@
     "Name": "Boolean",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "Byte",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "CannotUnloadAppDomainException",
@@ -15129,7 +15129,7 @@
     "Name": "Char",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "CharEnumerator",
@@ -15231,7 +15231,7 @@
     "Name": "Double",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "DuplicateWaitObjectException",
@@ -15537,19 +15537,19 @@
     "Name": "Int16",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "Int32",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "Int64",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "Int128",
@@ -15561,7 +15561,7 @@
     "Name": "IntPtr",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "InvalidCastException",
@@ -15879,7 +15879,7 @@
     "Name": "SByte",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "SerializableAttribute",
@@ -15891,7 +15891,7 @@
     "Name": "Single",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "Span",
@@ -16107,19 +16107,19 @@
     "Name": "UInt16",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "UInt32",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "UInt64",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "UInt128",
@@ -16131,7 +16131,7 @@
     "Name": "UIntPtr",
     "Nms": "System",
     "Arity": 0,
-    "Type": "Unknow"
+    "Type": "Primitive"
   },
   {
     "Name": "UnauthorizedAccessException",
