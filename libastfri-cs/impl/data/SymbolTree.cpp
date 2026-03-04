@@ -121,19 +121,20 @@ ScopeNode* SymbolTree::add_scope(const Scope& scope)
     return current;
 }
 
-ScopeNode* SymbolTree::add_type(
-    const Scope& scope,
-    ScopedType* type,
-    UserTypeDefStmt* def
+ScopeNode* SymbolTree::add_type(const Scope& scope, const TypeBinding& tb)
+{
+    ScopeNode* last    = add_scope(scope);
+    return last->add_child(tb.type->name_, tb);
+}
+
+ScopeNode* SymbolTree::add_primitive(
+    const std::string& name,
+    CSPrimitiveType primitive
 )
 {
-    TypeBinding binding{
-        .type = type,
-        .def  = def,
-    };
-    ScopeNode* last    = add_scope(scope);
-    ScopeNode* newNode = last->add_child(type->name_, binding);
-    return newNode;
+    static const Scope systemScope = mk_scope("System");
+    ScopeNode* last    = add_scope(systemScope);
+    return last->add_child(name, primitive);
 }
 
 ScopeNode* SymbolTree::find_node(const Scope& scope) const

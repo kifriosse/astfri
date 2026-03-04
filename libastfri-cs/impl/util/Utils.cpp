@@ -4,6 +4,8 @@
 #include <cctype>
 #include <cmath>
 #include <deque>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -132,6 +134,26 @@ std::string escape_string(const std::string_view str, const bool isVerbatim)
         }
     }
     return escapedStr;
+}
+
+std::optional<TypeKind> get_type_kind(const std::string_view typeKind)
+{
+    using enum TypeKind;
+    static const std::unordered_map<std::string_view, TypeKind> typeKindMap = {
+        {"Class",        Class    },
+        {"Struct",       Class    },
+        {"RecordStruct", Record   },
+        {"RecordClass",  Record   },
+        {"Interface",    Interface},
+        {"Enum",         Enum     },
+        {"Delegate",     Delegate },
+        {"Primitive",    Primitive}
+    };
+    const auto it = typeKindMap.find(typeKind);
+    if (it != typeKindMap.end())
+        return it->second;
+
+    return {};
 }
 
 } // namespace astfri::csharp::util

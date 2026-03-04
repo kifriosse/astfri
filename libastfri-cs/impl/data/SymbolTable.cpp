@@ -39,12 +39,24 @@ ScopeNode* SymbolTable::add_type(
     auto [it, inserted] = userTypeMetadata_.try_emplace(tb.def, tb);
     if (inserted)
     {
-        it->second.type_binding().treeNode
-            = symbTree_.add_type(tb.type->scope_, tb.type, tb.def);
+        it->second.type_binding().treeNode = add_type(tb);
         userTypes_.push_back(tb.def);
     }
     it->second.add_def(node, src);
     return it->second.type_binding().treeNode;
+}
+
+ScopeNode* SymbolTable::add_type(const TypeBinding& tb)
+{
+    return symbTree_.add_type(tb.type->scope_, tb);
+}
+
+ScopeNode* SymbolTable::add_primitive(
+    std::string name,
+    CSPrimitiveType primitive
+)
+{
+    return symbTree_.add_primitive(name, primitive);
 }
 
 TypeMetadata* SymbolTable::get_type_metadata(UserTypeDefStmt* def)

@@ -1,3 +1,4 @@
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
@@ -10,16 +11,34 @@
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
+#include <rapidjson/document.h>
+
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
 
-#include "libastfri-cs/impl/data/SymbolTable.hpp"
-
 namespace astfri::csharp
 {
+
+namespace fs = std::filesystem;
+
+namespace
+{
+const fs::path extTypesRoot = ASTFRI_CS_RESOURCES;
+const fs::path core         = extTypesRoot / "core.json";
+const fs::path winDesktop   = extTypesRoot / "win-desktop.json";
+
+const std::unordered_map<SDKProfile, fs::path> profileMap = {
+    {SDKProfile::None,     core                        },
+    {SDKProfile::Core,     core                        },
+    {SDKProfile::Worker,   core                        },
+    {SDKProfile::Web,      extTypesRoot / "aspnet.json"},
+    {SDKProfile::WinForms, winDesktop                  },
+    {SDKProfile::WPF,      winDesktop                  }
+};
+} // namespace
 
 ASTBuilder::ASTBuilder() :
     lang_(tree_sitter_c_sharp()),
@@ -87,13 +106,37 @@ void ASTBuilder::load_src(std::istream& inputStream)
     load_from_stream(inputStream);
 }
 
-TranslationUnit* ASTBuilder::mk_ast(const SDKProfile profile)
+void ASTBuilder::load_source_of_external_types(const path& jsonPath)
+{
+    externalTypeSources_.push_back(jsonPath);
+}
+
+TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
 {
     // using milli          = std::chrono::milliseconds;
-    TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
+    const auto it = profileMap.find(profile);
+    if (it == profileMap.end())
+        throw std::runtime_error(
+            "Profile " + std::to_string(static_cast<size_t>(profile))
+            + "doesn't have implemented path"
+        );
+    load_source_of_external_types(profileMap.at(profile));
+    if (profile != SDKProfile::None && profile != SDKProfile::Core
+        && profile != SDKProfile::Worker)
+    {
+        load_source_of_external_types(profileMap.at(SDKProfile::Core));
+    }
 
+
+
+    TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(srcs_, symbTable);
+
+    for (auto& extTypeSource : externalTypeSources_)
+    {
+        symbTableBuilder.load_external_types(extTypeSource);
+    }
 
     // std::cout << "Phase 1: Symbol Table Building\n"
     //           << "Discovering user defined types..." << std::endl;

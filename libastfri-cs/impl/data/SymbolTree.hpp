@@ -13,6 +13,7 @@
 namespace astfri
 {
 // forward declaration
+struct PrimitiveType;
 struct Scope;
 struct UserTypeDefStmt;
 struct ScopedType;
@@ -41,6 +42,15 @@ struct TypeBinding
 struct ExternalMarker
 {
     std::string qualifiedName;
+};
+
+/**
+ * @brief wrapper struct for primitive types
+ */
+struct CSPrimitiveType
+{
+    // todo rafactor to `PrimitiveType*`
+    Type* primitiveType;
 };
 
 /**
@@ -112,7 +122,8 @@ private:
     /**
      * @brief Content of the node. Can be namespace, type or external marker.
      */
-    using NodeData = std::variant<Nms, TypeBinding, ExternalMarker>;
+    using NodeData
+        = std::variant<Nms, TypeBinding, ExternalMarker, CSPrimitiveType>;
     NodeData data_;
     IdentifierMap<std::unique_ptr<ScopeNode>> children_{};
     ScopeNode* parent_;
@@ -190,14 +201,11 @@ public:
     /**
      * @brief Adds a type to the symbol tree under the given scope
      * @param scope scope/namespace under which to add the type
-     * @param type type to add
-     * @param def definition of the type
+     * @param tb
      */
-    ScopeNode* add_type(
-        const Scope& scope,
-        ScopedType* type,
-        UserTypeDefStmt* def
-    );
+    ScopeNode* add_type(const Scope& scope, const TypeBinding& tb);
+
+    ScopeNode* add_primitive(const std::string& name, CSPrimitiveType primitive);
 
     /**
      * @brief Finds a node in the symbol tree by its scope.
@@ -216,6 +224,7 @@ public:
         const Scope& start,
         const Scope& end
     ) const;
+
 };
 
 // todo probably can be removed

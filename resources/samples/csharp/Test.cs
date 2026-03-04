@@ -1,5 +1,7 @@
 // extern alias MyExternalAlias;
 
+using System.Drawing;
+
 public delegate void MyDelegate(int x);
 
 public record struct MyRecordStruct(int X, int Y);
@@ -49,9 +51,29 @@ public class Logger : StreamWriter
     }
 }
 
+
+public class ColorTest
+{
+    Color Color { get; set; }
+
+    public void Method()
+    {
+        _ = System.Drawing.Color.Red.R;
+        //    ^
+        // Class Ref
+        _ = Color.FromArgb(0,0,0);
+        //    ^
+        // Class Ref
+        _ = Color.R;
+        //    ^
+        // Property
+    }
+} 
+
 public class Test : TestBase
 {
     protected new int shadowedField = 2;
+    
     public override void VirtualMethod()
     {
         base.VirtualMethod();
@@ -144,8 +166,8 @@ public partial class TestClass
         Func<bool> localFunc = LocalFunc;
 
         var vector = new Vector2(3.5f, 4.5f);
-        string x = CreateVector(3.5f, 4.5f).X.ToString();
-        float y = vector.Y;
+        System.String x = CreateVector(3.5f, 4.5f).X.ToString();
+        System.Single y = vector.Y;
         string z = localFunc().ToString();
 
         // string w = LocalFunc().ToString();

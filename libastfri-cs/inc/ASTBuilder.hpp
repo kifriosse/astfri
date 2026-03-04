@@ -23,6 +23,7 @@ private:
     const TSLanguage* lang_;
     TSParser* parser_;
     std::vector<std::unique_ptr<SourceFile>> srcs_;
+    std::vector<std::filesystem::path> externalTypeSources_;
 
 public:
     ASTBuilder();
@@ -43,13 +44,18 @@ public:
      */
     void load_src(std::istream& inputStream);
     /**
+     * @brief Loads a path to JSON with external types into AST Builder
+     * @param jsonPath path to JSON file with external types
+     */
+    void load_source_of_external_types(const path& jsonPath);
+    /**
      * @brief Makes AST from loaded source code
      * @param profile SDK profile to determine with standard implicit using to
      * use. Default value is \c SDKProfile::NET which corresponds to .NET SDK
      * profile.
      * @return AST from loaded source code
      */
-    TranslationUnit* mk_ast(SDKProfile profile = SDKProfile::NET);
+    TranslationUnit* mk_ast(SDKProfile profile = SDKProfile::Core);
 
 private:
     /**

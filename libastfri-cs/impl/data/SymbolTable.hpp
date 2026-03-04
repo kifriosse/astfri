@@ -69,7 +69,7 @@ public:
     void add_glob_alias(std::string name, Alias alias);
     /**
      * @brief Adds type to symbol table and symbol tree and retuns pointer to
-     * scope node of added type in symbol tree
+     * scope node of added type.
      * @param tb type binding of type to be added
      * @param node tree-sitter node of type definition
      * @param src source file where type is defined
@@ -80,6 +80,21 @@ public:
         const TSNode& node,
         SourceFile* src
     );
+    /**
+     * @brief Adds type only to symbol tree and returns scope node of added type
+     * @param tb type binding of type to be added
+     * @return pointer to scope node of added type in symbol tree
+     * @note Used for adding external types
+     */
+    ScopeNode* add_type(const TypeBinding& tb);
+    /**
+     * @brief Adds primitive type to symbol tree and returns scope node of added
+     * type
+     * @param name name of primitive type
+     * @param primitive primitive type
+     * @return scope node of added type
+     */
+    ScopeNode* add_primitive(std::string name, CSPrimitiveType primitive);
 
     /**
      * @brief Returns a view of pointers to type metadata of user defined type
@@ -90,7 +105,6 @@ public:
      * View won't contain nullpointers
      */
     auto get_type_metadata();
-
     /**
      * @brief Returns pointer to type metadata of given user defined type
      * @param def user defined type definition statement

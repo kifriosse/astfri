@@ -23,7 +23,8 @@ enum class TypeKind
     Interface,
     Record,
     Enum,
-    Delegate
+    Delegate,
+    Primitive
 };
 
 /**

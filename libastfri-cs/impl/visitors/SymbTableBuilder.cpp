@@ -2,6 +2,7 @@
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
+#include <libastfri-cs/impl/util/RapidJsonUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
@@ -9,6 +10,10 @@
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
+#include <rapidjson/document.h>
+
+#include <fstream>
+#include <iostream>
 #include <ranges>
 #include <string>
 #include <vector>
@@ -299,7 +304,7 @@ void SymbTableBuilder::load_implicit_usings(const SDKProfile profile)
         addToScope(qualif);
     }
 
-    if (profile == NET || profile == WPF)
+    if (profile == Core || profile == WPF)
         return;
 
     std::span<const std::string_view> usings{};
@@ -320,6 +325,71 @@ void SymbTableBuilder::load_implicit_usings(const SDKProfile profile)
     for (const auto& qualif : usings)
     {
         addToScope(qualif);
+    }
+}
+
+void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath)
+{
+    using namespace rapidjson;
+    if (! exists(jsonPath))
+    {
+        std::cerr << "File '" << jsonPath << "' wasn't found " << std::endl;
+        return;
+    }
+
+    std::ifstream fileStream(jsonPath, std::ios::binary);
+    std::string jsonContent(
+        (std::istreambuf_iterator(fileStream)),
+        std::istreambuf_iterator<char>()
+    );
+    Document d;
+    d.Parse(jsonContent.data());
+    if (! d.IsArray())
+        return;
+
+    for (SizeType i = 0; i < d.Size(); ++i)
+    {
+        const Value& item = d[i];
+        if (! item.IsObject())
+            continue;
+
+        if (util::has_all(item, "Name", "Nms", "Arity", "Type"))
+        {
+            const Value& vName  = item["Name"];
+            const Value& vNms   = item["Nms"];
+            const Value& vArity = item["Arity"];
+            const Value& vType  = item["Type"];
+            if (! vName.IsString() || ! vNms.IsString() || ! vArity.IsInt()
+                || ! vType.IsString())
+            {
+                continue;
+            }
+            std::string name = item["Name"].GetString();
+            Scope scope      = util::mk_scope(item["Nms"].GetString());
+            // int arity        = item["Arity"].GetInt();
+            // std::string type =
+            auto typeOpt = util::get_type_kind(item["Type"].GetString());
+
+            if (! typeOpt)
+                continue;
+
+            if (*typeOpt == util::TypeKind::Primitive)
+            {
+                Type* type = MapManager::get_primitive_type(name);
+                symbTable_.add_primitive(name, CSPrimitiveType{type});
+                continue;
+            }
+
+            TypeBinding tb
+                = mk_type_binding(*typeOpt, std::move(scope), std::move(name));
+
+            if (tb.type)
+                symbTable_.add_type(tb);
+        }
+        else
+        {
+            throw std::logic_error("Invalid JSON");
+        }
     }
 }
 
@@ -388,8 +458,9 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective)
             = typeTrs_.resolve_qualif_name(nQualif, seachScope, searchStart);
         if (node)
         {
-            auto* ext   = node->is_a<ExternalMarker>();
-            Alias alias = ext ? Alias{std::move(ext->qualifiedName)} : Alias{node};
+            auto* ext = node->is_a<ExternalMarker>();
+            Alias alias
+                = ext ? Alias{std::move(ext->qualifiedName)} : Alias{node};
             std::string aliasName = util::extract_text(nAliasName, srcStr);
 
             if (isGlobal)
@@ -455,38 +526,15 @@ void SymbTableBuilder::collect_types(const TSTree* tree)
 
 ScopeNode* SymbTableBuilder::visit_type_def(
     const TSNode& node,
-    const util::TypeKind typeKind
+    const util::TypeKind type
 )
 {
     const TSNode nName = util::child_by_field_name(node, "name");
     std::string name   = util::extract_text(nName, src_str());
-    TypeBinding tb{nullptr, nullptr, nullptr};
 
-    Scope scope = util::mk_scope(currentParent_, *currentSrc_);
-    switch (typeKind)
-    {
-    case util::TypeKind::Class:
-    {
-        ClassDefStmt* classDef
-            = stmtFact_.mk_class_def(std::move(name), std::move(scope));
-        tb.def  = classDef;
-        tb.type = classDef->type_;
-        break;
-    }
-    case util::TypeKind::Interface:
-    {
-        InterfaceDefStmt* intfDef
-            = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
-        tb.def  = intfDef;
-        tb.type = intfDef->m_type;
-        break;
-    }
-    case util::TypeKind::Record:
-    case util::TypeKind::Enum:
-    case util::TypeKind::Delegate:
-        // todo add registration for other types
-        break;
-    }
+    Scope scope        = util::mk_scope(currentParent_, *currentSrc_);
+    const TypeBinding tb
+        = mk_type_binding(type, std::move(scope), std::move(name));
 
     if (tb.def && tb.type)
         return symbTable_.add_type(tb, node, src());
@@ -504,6 +552,41 @@ SourceFile* SymbTableBuilder::src() const
     return currentSrc_
              ? currentSrc_
              : throw std::logic_error("Current source code is not set");
+}
+
+TypeBinding SymbTableBuilder::mk_type_binding(
+    const util::TypeKind type,
+    Scope scope,
+    std::string name
+)
+{
+    TypeBinding tb{nullptr, nullptr, nullptr};
+    switch (type)
+    {
+    case util::TypeKind::Class:
+    {
+        ClassDefStmt* classDef
+            = stmtFact_.mk_class_def(std::move(name), std::move(scope));
+        tb.def  = classDef;
+        tb.type = classDef->type_;
+        break;
+    }
+    case util::TypeKind::Interface:
+    {
+        InterfaceDefStmt* intDef
+            = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
+        tb.def  = intDef;
+        tb.type = intDef->m_type;
+        break;
+    }
+    case util::TypeKind::Record:
+    case util::TypeKind::Delegate:
+    case util::TypeKind::Enum:
+    case util::TypeKind::Primitive:
+        break;
+    }
+
+    return tb;
 }
 
 } // namespace astfri::csharp

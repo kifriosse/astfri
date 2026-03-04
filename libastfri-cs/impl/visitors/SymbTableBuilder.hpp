@@ -77,6 +77,10 @@ public:
      * @brief Registers members of user defined types in loaded source file
      * into symbol table
      */
+    void load_external_types(std::filesystem::path& jsonPath);
+    /**
+     * @brief Register all members of registered types in current project
+     */
     void reg_members();
 
 private:
@@ -110,11 +114,11 @@ private:
     /**
      * @brief General visit function for registering user defined types.
      * @param node TSNode representing the type definition
-     * @param typeKind kind of the type definition (class, interface, struct,
+     * @param type kind of the type definition (class, interface, struct,
      * enum or delegate)
      * @return pointer to the ScopeNode created for the that Type
      */
-    ScopeNode* visit_type_def(const TSNode& node, util::TypeKind typeKind);
+    ScopeNode* visit_type_def(const TSNode& node, util::TypeKind type);
 
     /**
      * @brief Gets the source code currently being visited.
@@ -128,6 +132,19 @@ private:
      * @throws std::logic_error if source file is not set
      */
     [[nodiscard]] SourceFile* src() const;
+
+    /**
+     * @brief Makes type binding of defined type kind
+     * @param type type of user defined type
+     * @param scope scope of the type
+     * @param name name of the type
+     * @return type binding for that type
+     */
+    [[nodiscard]] static TypeBinding mk_type_binding(
+        util::TypeKind type,
+        Scope scope,
+        std::string name
+    );
 };
 
 } // namespace astfri::csharp

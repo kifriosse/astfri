@@ -23,7 +23,7 @@ enum class SDKProfile
      * - \code System.Threading\endcode
      * - \code System.Threading.Tasks\endcode
      */
-    NET,
+    Core,
     /**
      * @brief Microsoft.NET.Sdk.Web profile. Includes all usings from
      * \c SDKProfile::NET profile and following additional usings:

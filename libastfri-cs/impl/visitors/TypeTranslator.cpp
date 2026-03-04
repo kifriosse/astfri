@@ -36,8 +36,8 @@ void TypeTranslator::set_current_namespace(ScopeNode* node)
 Type* TypeTranslator::visit_predefined(TypeTranslator* self, const TSNode& node)
 {
     const std::string name = util::extract_text(node, self->src_str());
-    const auto result      = MapManager::get_type(name);
-    return result ? *result : typeFact_.mk_unknown();
+    const auto result      = MapManager::get_primitive_type(name);
+    return result ? result : typeFact_.mk_unknown();
 }
 
 Type* TypeTranslator::visit_identitifier(
@@ -45,10 +45,15 @@ Type* TypeTranslator::visit_identitifier(
     const TSNode& node
 )
 {
+    const auto primitive = MapManager::get_primitive_type(
+        util::extract_text(node, self->src_str())
+    );
+    if (primitive)
+        return primitive;
+
     // look up order form language specification
     // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#781-general
 
-    // return typeFact_.mk_unknown();
     const ScopeNode* typeNode = self->resolve_qualif_name(
         node,
         util::SearchScope::UserTypeRef,
@@ -59,11 +64,12 @@ Type* TypeTranslator::visit_identitifier(
     {
         util::Overloaded overloaded{
             [](const TypeBinding& b) -> Type* { return b.type; },
+            [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
             [](const ExternalMarker&) -> Type*
             {
                 return typeFact_.mk_unknown(); // todo change to incomplete type
-            }
+            },
         };
         return std::visit(overloaded, typeNode->data());
     }
@@ -86,6 +92,7 @@ Type* TypeTranslator::visit_qualified_name(
     {
         util::Overloaded overloaded{
             [](const TypeBinding& b) -> Type* { return b.type; },
+            [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
             [](const ExternalMarker&) -> Type*
             {

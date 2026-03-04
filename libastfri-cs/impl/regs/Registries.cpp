@@ -7,9 +7,8 @@
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
-
-// #include <iostream>
 #include <tree_sitter/tree-sitter-c-sharp.h>
+
 #include <optional>
 #include <string>
 
@@ -310,17 +309,17 @@ Types::Types() :
         {"ushort", typeFact.mk_int()}, // TODO: implement `ushort` type
         {"int", typeFact.mk_int()},
         {"uint", typeFact.mk_int()}, // TODO: implement `uint` type
-        {"long", typeFact.mk_unknown()}, // TODO: implement `long` type
-        {"ulong", typeFact.mk_unknown()}, // TODO: implement `ulong` type
+        {"long", typeFact.mk_int()}, // TODO: implement `long` type
+        {"ulong", typeFact.mk_int()}, // TODO: implement `ulong` type
 
         {"float", typeFact.mk_float()},
-        {"double", typeFact.mk_unknown()}, // TODO: implement `double` type
+        {"double", typeFact.mk_float()}, // TODO: implement `double` type
         {"decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
 
+        {"nuint", typeFact.mk_int()}, // TODO: implement `nuint` type
         {"void", typeFact.mk_void()},
         {"dynamic", typeFact.mk_dynamic()},
 
-        // todo put into  symbol tree
         {"Boolean", typeFact.mk_bool()},
         {"Byte", typeFact.mk_int()}, // TODO: implement `Byte` type
         {"SByte", typeFact.mk_int()}, // TODO: implement `SByte` type
@@ -332,14 +331,17 @@ Types::Types() :
         {"UInt32", typeFact.mk_int()}, // TODO: implement `UInt32` type
         {"UInt64", typeFact.mk_unknown()}, // TODO: implement `UInt64` type
 
+        {"UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
+        {"System.UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
+
         {"Single", typeFact.mk_float()},
         {"Double", typeFact.mk_unknown()}, // TODO: implement `double` type
         {"Decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
 
-        {"object", typeFact.mk_class("object", {{"System"}})},
-        {"Object", typeFact.mk_class("object", {{"System"}})},
-        {"string", typeFact.mk_class("string", {{"System"}})},
-        {"String", typeFact.mk_class("string", {{"System"}})},
+        {"object", typeFact.mk_class("Object", {{"System"}})},
+        {"Object", typeFact.mk_class("Object", {{"System"}})},
+        {"string", typeFact.mk_class("String", {{"System"}})},
+        {"String", typeFact.mk_class("String", {{"System"}})},
 
         {"var", typeFact.mk_unknown()}, // todo handle var type
         {"_", typeFact.mk_unknown()}, // todo handle discard type
@@ -347,7 +349,7 @@ Types::Types() :
 {
 }
 
-} // namespace regs
+} // namespace maps
 
 maps::Mappers MapManager::handlers_;
 maps::Operations MapManager::operations_;
@@ -427,9 +429,9 @@ std::optional<BinOpType> MapManager::get_bin_op(const std::string_view op)
     return get_opt(operations_.binaryOps, op);
 }
 
-std::optional<Type*> MapManager::get_type(const std::string_view nodeType)
+Type* MapManager::get_primitive_type(const std::string_view nodeType)
 {
-    return get_opt(types_.types, nodeType);
+    return get_opt(types_.types, nodeType).value_or(nullptr);
 }
 
 CSModifier MapManager::get_modifier(
