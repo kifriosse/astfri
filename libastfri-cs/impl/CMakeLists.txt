@@ -1,5 +1,3 @@
-add_library(astfri-cs SHARED)
-
 target_sources(astfri-cs PRIVATE
     ASTBuilder.cpp
     SemanticContext.cpp
@@ -14,6 +12,7 @@ add_subdirectory(visitors)
 target_link_directories(astfri-cs PUBLIC
     ${TREE_SITTER_LIBRARY_DIRS}
     ${TREE_SITTER_C_SHARP_LIBRARY_DIRS}
+    ${RAPIDJSON_INCLUDE_DIRS}
 )
 
 target_link_libraries(astfri-cs PUBLIC
