@@ -227,19 +227,6 @@ public:
 
 };
 
-// todo probably can be removed
-class SymbolTreeCursor
-{
-private:
-    ScopeNode* current_;
-
-public:
-    explicit SymbolTreeCursor(ScopeNode& root);
-    ScopeNode* current();
-    bool go_to_parent();
-    bool go_to_child(std::string_view childName);
-};
-
 /**
  * @brief Converts alias to type binding
  * @param alias alias to convert

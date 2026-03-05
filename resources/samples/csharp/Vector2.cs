@@ -4,7 +4,11 @@ global using Cons = global::System.Console;
 using global::System.Security.Cryptography.X509Certificates;
 using Generics = System.Collections.Generic;
 
-public class Vector2 : IComparable<Vector2>, IEquatable<Vector2>
+public interface MyInterface {
+    public void Method();
+}
+
+public class Vector2 : IComparable<Vector2>, IEquatable<Vector2>, MyInterface
 {
 
     public static Vector2 Zero = new Vector2();
@@ -15,6 +19,10 @@ public class Vector2 : IComparable<Vector2>, IEquatable<Vector2>
     {
         this.X = x;
         this.Y = y;
+    }
+
+    public void Method() {
+
     }
 
     public Vector2() : this(0, 0)

@@ -144,13 +144,16 @@ ScopeNode* SymbolTree::find_node(const Scope& scope) const
 
 ScopeNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
 {
-    SymbolTreeCursor cursor(*root_);
-    auto process = [&cursor](const Scope& scope) -> bool
+    ScopeNode* current = root_.get();
+    auto process = [&current](const Scope& scope) -> bool
     {
         for (const std::string_view qualif : scope.names_)
         {
-            if (! cursor.go_to_child(qualif))
+            ScopeNode* child = current->find_child(qualif);
+            if (! child)
                 return false;
+
+            current = child;
         }
         return true;
     };
@@ -158,37 +161,7 @@ ScopeNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
     if (! process(start) || ! process(end))
         return nullptr;
 
-    return cursor.current();
-}
-
-SymbolTreeCursor::SymbolTreeCursor(ScopeNode& root) :
-    current_(&root)
-{
-}
-
-ScopeNode* SymbolTreeCursor::current()
-{
-    return current_;
-}
-
-bool SymbolTreeCursor::go_to_parent()
-{
-    if (current_->parent())
-    {
-        current_ = current_->parent();
-        return true;
-    }
-    return false;
-}
-
-bool SymbolTreeCursor::go_to_child(const std::string_view childName)
-{
-    if (ScopeNode* child = current_->find_child(childName))
-    {
-        current_ = child;
-        return true;
-    }
-    return false;
+    return current;
 }
 
 TypeBinding* type_from_alias(const Alias& alias)

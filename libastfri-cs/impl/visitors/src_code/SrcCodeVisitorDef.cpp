@@ -41,15 +41,31 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
             first = false;
             if (const auto class_t = as_a<ClassType>(type))
                 classDef->bases_.push_back(class_t->m_def);
+            if (const auto interface_t = as_a<InterfaceType>(type))
+            {
+                classDef->interfaces_.push_back(interface_t->m_def);
+            }
+            else if (util::is_interface_name(name))
+            {
+                classDef->interfaces_.push_back(
+                    stmtFact_.mk_interface_def(std::move(name), {})
+                );
+                // todo might be useless if external types are imported
+            }
             return;
         }
 
         if (const auto interface_t = as_a<InterfaceType>(type))
+        {
             classDef->interfaces_.push_back(interface_t->m_def);
+        }
         else if (util::is_interface_name(name))
+        {
             classDef->interfaces_.push_back(
                 stmtFact_.mk_interface_def(std::move(name), {})
             );
+            // todo might be useless if external types are imported
+        }
         else
         {
             // todo incomplete type
