@@ -271,7 +271,7 @@ internal static class Program {
         if (type.IsClass) 
             return isRecord ? DeclType.RecordClass : DeclType.Class;
 
-        return DeclType.Unknow;
+        return DeclType.Unknown;
     }
 
     private static Regex BuildFilter(IEnumerable<string> globPatterns) {
