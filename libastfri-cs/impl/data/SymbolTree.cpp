@@ -123,7 +123,7 @@ ScopeNode* SymbolTree::add_scope(const Scope& scope)
 
 ScopeNode* SymbolTree::add_type(const Scope& scope, const TypeBinding& tb)
 {
-    ScopeNode* last    = add_scope(scope);
+    ScopeNode* last = add_scope(scope);
     return last->add_child(tb.type->name_, tb);
 }
 
@@ -133,7 +133,7 @@ ScopeNode* SymbolTree::add_primitive(
 )
 {
     static const Scope systemScope = mk_scope("System");
-    ScopeNode* last    = add_scope(systemScope);
+    ScopeNode* last                = add_scope(systemScope);
     return last->add_child(name, primitive);
 }
 
@@ -145,7 +145,7 @@ ScopeNode* SymbolTree::find_node(const Scope& scope) const
 ScopeNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
 {
     ScopeNode* current = root_.get();
-    auto process = [&current](const Scope& scope) -> bool
+    auto process       = [&current](const Scope& scope) -> bool
     {
         for (const std::string_view qualif : scope.names_)
         {

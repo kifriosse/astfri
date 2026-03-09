@@ -8,7 +8,7 @@ namespace astfri::csharp::util
 template<typename... Args>
 bool has_all(const rapidjson::Value& val, Args... args);
 
-} // namespace astfri::csharp
+} // namespace astfri::csharp::util
 
 #include <libastfri-cs/impl/util/RapidJsonUtil.inl>
 

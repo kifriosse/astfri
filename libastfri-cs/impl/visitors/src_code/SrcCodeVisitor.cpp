@@ -40,7 +40,7 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
 
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-             StmtMapper hStmt = MapManager::get_stmt_mapper(node);
+            StmtMapper hStmt = MapManager::get_stmt_mapper(node);
             Stmt* stmt       = hStmt(this, node);
             if (added)
                 continue;

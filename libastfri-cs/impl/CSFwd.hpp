@@ -63,7 +63,7 @@ using StmtMapper = TSNodeProcessor<Stmt*, SrcCodeVisitor>;
  * @brief Alias for type translator visit functions used for mapping tree-sitter
  * type nodes to AST FRI types
  */
-using TypeMapper    = TSNodeProcessor<Type*, TypeTranslator>;
+using TypeMapper = TSNodeProcessor<Type*, TypeTranslator>;
 /**
  * @brief Alias for symbol table builder visit functions used for collecting
  * type definitions. Function return pointer to ScopeNode representing location

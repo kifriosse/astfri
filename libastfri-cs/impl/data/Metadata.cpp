@@ -36,13 +36,13 @@ bool TypeMetadata::add_property(std::string name, PropertyNode prop)
 
 bool TypeMetadata::add_memb_var(
     std::string name,
-    const MemberVarMetadata& membMetadata
+    const MemberVarMetadata& membVar
 )
 {
     auto [it, inserted] = memberVars_.try_emplace(std::move(name));
     if (inserted)
     {
-        it->second = membMetadata;
+        it->second = membVar;
     }
     return inserted;
 }

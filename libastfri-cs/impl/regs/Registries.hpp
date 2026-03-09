@@ -106,7 +106,19 @@ struct Modifiers
     const RegistryStrViewMap<CSModifier> modifiers;
     Modifiers();
 };
-} // namespace regs
+} // namespace maps
+
+/**
+ * @brief Ensures a class follows the Astfri Factory pattern.
+ * * Requirements:
+ * - Must have a static \c get_instance() returning \c Factory&.
+ * - Must have \c mk_unknown() returning \c RetType.
+ */
+template<typename Factory, typename RetType>
+concept is_valid_factory = requires(Factory f) {
+    { Factory::get_instance() } -> std::same_as<Factory&>;
+    { Factory::get_instance().mk_unknown() } -> std::convertible_to<RetType>;
+};
 
 /**
  * @brief Class responsible for managing all C# maps
@@ -115,10 +127,10 @@ class MapManager
 {
 private:
     static maps::Mappers handlers_;
-    static maps::Operations operations_;
-    static maps::Types types_;
     static maps::Modifiers modifiers_;
+    static maps::Operations operations_;
     static maps::NodeTypes nodeTypes_;
+    static maps::Types types_;
 
 public:
     static StmtMapper get_stmt_mapper(const TSNode& node);
@@ -152,6 +164,7 @@ private:
      * @return unknown instance of \code RetType\endcode
      */
     template<class Factory, class Self, class RetType>
+    requires is_valid_factory<Factory, RetType>
     static RetType default_visit(Self*, const TSNode&);
 
     /**
@@ -177,7 +190,7 @@ private:
      */
     template<class Type>
     static std::optional<Type> get_opt(
-        const std::unordered_map<std::string_view, Type>& map,
+        const RegistryStrViewMap<Type>& map,
         std::string_view name
     );
 };

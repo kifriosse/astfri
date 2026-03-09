@@ -234,7 +234,8 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node)
 
     const auto typeMeta = self->symbTable_.get_type_metadata(currentType->def);
     if (! typeMeta)
-        throw std::logic_error("Type wasn't discovered yet");
+        return;
+    // throw std::logic_error("Type wasn't discovered yet");
 
     const std::string_view srcStr = self->src_str();
     const CSModifiers modifs = CSModifiers::parser_method_modifs(node, srcStr);
@@ -387,9 +388,7 @@ void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath)
                 symbTable_.add_type(tb);
         }
         else
-        {
             throw std::logic_error("Invalid JSON");
-        }
     }
 }
 

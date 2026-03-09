@@ -103,7 +103,7 @@ public:
     void add_def(TypeDefLoc defLocation);
     void add_method(MethodId id, MethodMetadata methodMetadata);
     bool add_property(std::string name, PropertyNode prop);
-    bool add_memb_var(std::string name, const MemberVarMetadata& membMetadata);
+    bool add_memb_var(std::string name, const MemberVarMetadata& membVar);
 
     /**
      * @brief Returns span of locations of type definitions in source code.

@@ -49,7 +49,6 @@ struct ExternalMarker
  */
 struct CSPrimitiveType
 {
-    // todo rafactor to `PrimitiveType*`
     Type* primitiveType;
 };
 
@@ -205,7 +204,10 @@ public:
      */
     ScopeNode* add_type(const Scope& scope, const TypeBinding& tb);
 
-    ScopeNode* add_primitive(const std::string& name, CSPrimitiveType primitive);
+    ScopeNode* add_primitive(
+        const std::string& name,
+        CSPrimitiveType primitive
+    );
 
     /**
      * @brief Finds a node in the symbol tree by its scope.
@@ -224,7 +226,6 @@ public:
         const Scope& start,
         const Scope& end
     ) const;
-
 };
 
 /**

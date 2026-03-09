@@ -46,7 +46,7 @@ public:
      */
     Query(const TSLanguage* lang, std::string_view query);
     ~Query();
-    Query(const Query& other) = delete;
+    Query(const Query& other)            = delete;
     Query& operator=(const Query& other) = delete;
     Query(Query&& other) noexcept;
     Query& operator=(Query&& other) noexcept;
@@ -95,6 +95,6 @@ public:
      */
     const Query* get_query(QueryType type) const;
 };
-} // namespace astfri::csharp::regs
+} // namespace astfri::csharp::maps
 
 #endif // CSHARP_QUERY_REGISTRY_HPP

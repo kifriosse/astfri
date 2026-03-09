@@ -133,9 +133,10 @@ Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node)
     if (ts_node_is_null(nType))
     {
         // todo handle deconstruction syntax
-        throw std::logic_error(
-            "Foreach loop with deconstruction syntax is not supported yet"
-        );
+        // throw std::logic_error(
+        //     "Foreach loop with deconstruction syntax is not supported yet"
+        // );
+        return stmtFact_.mk_uknown();
     }
 
     std::string name        = util::extract_text(hLeft, self->src_str());
@@ -203,7 +204,7 @@ Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
 Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node)
 {
     if (ts_node_child_count(node) < 2)
-        throw std::logic_error("Not a try-catch node");
+        return stmtFact_.mk_uknown();
 
     const TSNode nBody     = util::child_by_field_name(node, "body");
     const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);

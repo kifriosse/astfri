@@ -7,7 +7,6 @@
 
 #include <filesystem>
 #include <iostream>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <unordered_set>
@@ -77,7 +76,7 @@ std::string remove_comments(
     bool hasErr                      = false;
     auto process                     = [&](const TSQueryMatch& match) -> void
     {
-        for (CaptureId id = 0; id < match.capture_count; ++id)
+        for (uint32_t id = 0; id < match.capture_count; ++id)
         {
             auto& [node, index] = match.captures[id];
             if (index == errorId)

@@ -31,11 +31,7 @@ struct SourceFile
      * @param fileNms file scoped namespace in current file - default value is
      * empty
      */
-    explicit SourceFile(
-        std::string src,
-        TSTree* tree,
-        Scope fileNms = {}
-    );
+    explicit SourceFile(std::string src, TSTree* tree, Scope fileNms = {});
     ~SourceFile();
 
     SourceFile(const SourceFile&)            = delete;

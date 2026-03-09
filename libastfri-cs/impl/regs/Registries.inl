@@ -12,14 +12,15 @@ RetType Mappers::visit_error(Self*, const TSNode& node)
 {
     const auto [row, column] = ts_node_start_point(node);
     throw std::runtime_error(
-        "Invalid C# syntax in source code at: row" + std::to_string(row)
+        "Invalid C# syntax in source code at row" + std::to_string(row)
         + "and column " + std::to_string(column)
     );
 }
 
-} // namespace regs
+} // namespace maps
 
 template<class Factory, class Self, class RetType>
+requires is_valid_factory<Factory, RetType>
 RetType MapManager::default_visit(Self*, const TSNode&)
 {
     return Factory::get_instance().mk_unknown();

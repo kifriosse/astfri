@@ -21,6 +21,7 @@ struct StringHash
     size_t operator()(std::string_view str) const noexcept;
     size_t operator()(const std::string& str) const noexcept;
 };
+
 /**
  * @brief Gets the C# integer suffix type from the given suffix string
  * @param suffix suffix string to analyze

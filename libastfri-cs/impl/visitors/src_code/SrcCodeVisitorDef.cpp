@@ -247,13 +247,15 @@ Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node)
 
     const auto currentType        = self->semanticContext_.current_type();
     if (! currentType)
-        throw std::logic_error("Owner type not found");
+        return stmtFact_.mk_uknown();
+    // throw std::logic_error("Owner type not found");
 
     const auto currentClass = as_a<ClassDefStmt>(currentType->def);
     if (! currentClass)
-        throw std::logic_error(
-            "Constructor can only be defined for class type"
-        );
+        return stmtFact_.mk_uknown();
+    // throw std::logic_error(
+    //     "Constructor can only be defined for class type"
+    // );
 
     const TSNode nParamList = util::child_by_field_name(node, "parameters");
     const TSNode nBody      = util::child_by_field_name(node, "body");
@@ -307,14 +309,16 @@ Stmt* SrcCodeVisitor::visit_constr_init(
 
     const auto currentType = self->semanticContext_.current_type();
     if (! currentType)
-        throw std::logic_error("Owner type not found");
+        return stmtFact_.mk_uknown();
+    // throw std::logic_error("Owner type not found");
 
     const auto* owner = as_a<ClassDefStmt>(currentType->def);
     // todo add records
     if (! owner)
-        throw std::logic_error(
-            "Constructor can only be defined for class type"
-        );
+        return stmtFact_.mk_uknown();
+    // throw std::logic_error(
+    //     "Constructor can only be defined for class type"
+    // );
 
     // todo fix this for Incomplete types
     if (owner->bases_.empty())
@@ -332,10 +336,13 @@ Stmt* SrcCodeVisitor::visit_destr_def(SrcCodeVisitor* self, const TSNode& node)
     const auto currentType = self->semanticContext_.current_type();
 
     if (! currentType)
-        throw std::logic_error("Owner type not found");
+        // throw std::logic_error("Owner type not found");
+        return stmtFact_.mk_uknown();
     auto* owner = as_a<ClassDefStmt>(currentType->def);
     if (! owner)
-        throw std::logic_error("Destructor can only be defined for class type");
+        // throw std::logic_error("Destructor can only be defined for class
+        // type");
+        return stmtFact_.mk_uknown();
 
     self->semanticContext_.unregister_return_type();
     return stmtFact_.mk_destructor_def(owner, as_a<CompoundStmt>(body));
@@ -345,7 +352,8 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
 {
     const auto currentType = self->semanticContext_.current_type();
     if (! currentType)
-        throw std::logic_error("Owner type not found");
+        return stmtFact_.mk_uknown();
+    // throw std::logic_error("Owner type not found");
 
     const TSNode nParams = util::child_by_field_name(node, "parameters");
     const CSModifiers modifs
@@ -410,7 +418,8 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node)
     const std::string name       = util::extract_text(nName, self->src_str());
     const FuncMetadata* funcMeta = self->semanticContext_.find_func(name);
     if (! funcMeta)
-        throw std::logic_error("Local function \'" + name + "\' not found");
+        return stmtFact_.mk_uknown();
+    // throw std::logic_error("Local function \'" + name + "\' not found");
 
     if (! funcMeta->funcDef)
         return self->make_func_stmt(node, false);

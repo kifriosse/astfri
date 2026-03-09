@@ -127,8 +127,6 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
         load_source_of_external_types(profileMap.at(SDKProfile::Core));
     }
 
-
-
     TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(srcs_, symbTable);

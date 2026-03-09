@@ -8,8 +8,10 @@ inline auto SymbolTable::get_type_metadata()
 {
     auto transform = [this](UserTypeDefStmt* const def)
     { return this->get_type_metadata(def); };
+
     auto filter = [](const TypeMetadata* metadata) -> bool
     { return metadata != nullptr; };
+
     return userTypes_ | std::views::transform(transform)
          | std::views::filter(filter);
 }

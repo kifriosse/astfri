@@ -38,10 +38,7 @@ public:
      * @param symbTable symbol table of the project (should be same as the used
      * inside semantic context)
      */
-    SrcCodeVisitor(
-        SemanticContext& semanticContext,
-        SymbolTable& symbTable
-    );
+    SrcCodeVisitor(SemanticContext& semanticContext, SymbolTable& symbTable);
     /**
      * @brief Visits the root node of a tree-sitter tree and fills up
      * TranslationUnit argument with top level definitions and statements.
@@ -183,8 +180,8 @@ private:
     Expr* expr_list_to_comma_op(const TSNode& nStart, const TSNode* nEnd);
 
     /**
-     * @brief Makes a list of parameter variable definition statements from the given
-     * parameter list node
+     * @brief Makes a list of parameter variable definition statements from the
+     * given parameter list node
      * @param node parameter list node
      * @param makeShallow if true, makes shallow parameter definitions (without
      * default values), if false, makes full parameter definitions

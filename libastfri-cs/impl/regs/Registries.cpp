@@ -352,10 +352,10 @@ Types::Types() :
 } // namespace maps
 
 maps::Mappers MapManager::handlers_;
-maps::Operations MapManager::operations_;
-maps::Types MapManager::types_;
 maps::Modifiers MapManager::modifiers_;
 maps::NodeTypes MapManager::nodeTypes_;
+maps::Operations MapManager::operations_;
+maps::Types MapManager::types_;
 
 StmtMapper MapManager::get_stmt_mapper(const TSNode& node)
 {

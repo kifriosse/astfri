@@ -5,11 +5,7 @@
 namespace astfri::csharp
 {
 
-SourceFile::SourceFile(
-    std::string src,
-    TSTree* tree,
-    Scope fileNms
-) :
+SourceFile::SourceFile(std::string src, TSTree* tree, Scope fileNms) :
     fileNms(std::move(fileNms)),
     srcStr(std::move(src)),
     tree(tree)

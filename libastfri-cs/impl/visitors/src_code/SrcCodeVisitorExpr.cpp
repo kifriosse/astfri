@@ -59,41 +59,46 @@ Expr* SrcCodeVisitor::visit_int_lit(SrcCodeVisitor* self, const TSNode& node)
     }
 
     // todo handeling of long and unsigned long
-    throw std::logic_error("This integer type is not implemented");
+    // throw std::logic_error("This integer type is not implemented");
+    return exprFact_.mk_unknown();
 }
 
 Expr* SrcCodeVisitor::visit_float_lit(SrcCodeVisitor* self, const TSNode& node)
 {
-    std::string floatStr = util::extract_text(node, self->src_str());
+    std::string rawStr = util::extract_text(node, self->src_str());
     const char suffix
-        = static_cast<char>(std::tolower(floatStr[floatStr.length() - 1]));
+        = static_cast<char>(std::tolower(rawStr[rawStr.length() - 1]));
 
-    std::erase(floatStr, '_');
+    std::erase(rawStr, '_');
     const bool doubleSuffix = suffix == 'd';
     if (! std::isalpha(suffix) || doubleSuffix)
     {
         if (doubleSuffix)
-            floatStr.pop_back();
+            rawStr.pop_back();
 
         // todo handle double
-        throw std::logic_error(
-            "Handling of double floating point numbers is not implemented"
-        );
+        // throw std::logic_error(
+        //     "Handling of double floating point numbers is not implemented"
+        // );
+        return exprFact_.mk_unknown();
     }
 
-    floatStr.pop_back();
+    rawStr.pop_back();
     switch (suffix)
     {
     case 'f':
-        return exprFact_.mk_float_literal(std::stof(floatStr));
+        return exprFact_.mk_float_literal(std::stof(rawStr));
     case 'm':
         // decimal - 128-bit precision integer - uses base 10, not base 2
         // todo handle decimal
-        throw std::logic_error("Handling of Decimal literal not implemented");
+        // throw std::logic_error("Handling of Decimal literal not
+        // implemented");
+        return exprFact_.mk_unknown();
     default:
-        throw std::logic_error(
-            "Suffix \"" + std::to_string(suffix) + "\" Not Implemented"
-        );
+        // throw std::logic_error(
+        //     "Suffix \"" + std::to_string(suffix) + "\" Not Implemented"
+        // );
+        return exprFact_.mk_unknown();
     }
 }
 
@@ -110,7 +115,8 @@ Expr* SrcCodeVisitor::visit_char_lit(SrcCodeVisitor* self, const TSNode& node)
     if (charStr.length() > 1)
     {
         // todo handle 16-bit unicode characters
-        throw std::logic_error("Unicode characters not implemented");
+        // throw std::logic_error("Unicode characters not implemented");
+        return exprFact_.mk_unknown();
     }
     return exprFact_.mk_char_literal(charStr[0]);
 }
@@ -171,7 +177,8 @@ Expr* SrcCodeVisitor::visit_interpolated_str_lit(
     [[maybe_unused]] const TSNode& node
 )
 {
-    throw std::logic_error("Interpolated string literal not implemented");
+    // throw std::logic_error("Interpolated string literal not implemented");
+    return exprFact_.mk_unknown();
 }
 
 Expr* SrcCodeVisitor::visit_identifier(SrcCodeVisitor* self, const TSNode& node)
@@ -293,10 +300,11 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node)
                 .paramCount = argList.size(),
             };
 
-            const InvocationType invocType = self->semanticContext_.find_invoc_type(
-                std::move(id),
-                access::Instance{}
-            );
+            const InvocationType invocType
+                = self->semanticContext_.find_invoc_type(
+                    std::move(id),
+                    access::Instance{}
+                );
 
             switch (invocType)
             {
@@ -344,7 +352,9 @@ Expr* SrcCodeVisitor::visit_prefix_unary_opr(
 
     const auto res = MapManager::get_prefix_unary_op(op);
     if (! res)
-        throw std::runtime_error("Operation \"" + op + "\" is not implemented");
+        // throw std::runtime_error("Operation \"" + op + "\" is not
+        // implemented");
+        return exprFact_.mk_unknown();
 
     const UnaryOpType opType = *res;
     const ExprMapper hRight  = MapManager::get_expr_mapper(nRight);
@@ -371,9 +381,10 @@ Expr* SrcCodeVisitor::visit_postfix_unary_opr(
     else if (op == "!")
         return left;
     else
-        throw std::runtime_error(
-            "Unary prefix operation \"" + op + "\" is not implemented"
-        );
+        // throw std::runtime_error(
+        //     "Unary prefix operation \"" + op + "\" is not implemented"
+        // );
+        return exprFact_.mk_unknown();
 
     return exprFact_.mk_unary_op(opType, left);
 }
@@ -416,7 +427,9 @@ Expr* SrcCodeVisitor::visit_binary_opr(SrcCodeVisitor* self, const TSNode& node)
             return exprFact_.mk_bin_on(left, BinOpType::Assign, ternary);
         }
 
-        throw std::runtime_error("Operation \"" + op + "\" is not implemented");
+        // throw std::runtime_error("Operation \"" + op + "\" is not
+        // implemented");
+        return exprFact_.mk_unknown();
     }
 
     return exprFact_

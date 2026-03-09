@@ -94,12 +94,13 @@ Query& Query::operator=(Query&& other) noexcept
 CaptureId Query::id(const std::string_view name) const
 {
     const auto it = captureIds.find(name);
-    return it != captureIds.end()
-             ? it->second
-             : throw std::out_of_range(
-                   "Query: Capture id not found for name: \""
-                   + std::string(name) + "\""
-               );
+    if (it == captureIds.end())
+        throw std::out_of_range(
+            "Query: Capture id not found for name: \"" + std::string(name)
+            + "\""
+        );
+
+    return it->second;
 }
 
 TSQuery* Query::get() const
@@ -116,9 +117,9 @@ QueryReg& QueryReg::get()
 const Query* QueryReg::get_query(const QueryType type) const
 {
     const auto it = queries_.find(type);
-    return it != queries_.end()
-             ? &it->second
-             : throw std::out_of_range("QueryReg: Query not found");
+    if (it == queries_.end())
+        throw std::out_of_range("QueryReg: Query not found");
+    return &it->second;
 }
 
 QueryReg::QueryReg()
@@ -143,4 +144,4 @@ QueryReg::QueryReg()
     }
 }
 
-} // namespace astfri::csharp::regs
+} // namespace astfri::csharp::maps
