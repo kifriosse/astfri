@@ -35,7 +35,6 @@
 #define EXIT_INPUT_LIB_ERROR 20
 #define EXIT_OUTPUT_LIB_ERROR 30
 
-
 #pragma region INPUT ENUM
 enum class InputType
 {
@@ -220,17 +219,18 @@ int main(int argc, const char** argv)
     }
     case InputType::Csharp:
     {
-        astfri::csharp::ASTBuilder ast_builder;
-        ast_builder.load_src(input_file);
+        astfri::csharp::ASTBuilder astBuilder;
+        std::ifstream stream(input_file);
+        astBuilder.load_src(stream);
 
-        tu = *(ast_builder.mk_ast());
+        tu = *(astBuilder.mk_ast());
         break;
     }
     case InputType::Java:
     {
         astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 
-        std::string sourceCode       = tb->load_directory(input_file);
+        std::string sourceCode       = tb->load_file(input_file);
         TSTree* tree                 = tb->make_syntax_tree(sourceCode);
         astfri::TranslationUnit* tu_ptr
             = tb->get_translation_unit(tree, sourceCode);
@@ -281,7 +281,7 @@ int main(int argc, const char** argv)
             break;
         }
 
-        manager.visit_and_export(tu);
+        manager.visit_and_export(tu, std::cout);
         break;
     }
     case OutputType::UML:
@@ -294,12 +294,17 @@ int main(int argc, const char** argv)
         {
             if (! config.parse_json(output_config_file.c_str()))
             {
-                config.use_default_values();
-                if (mode_verbose)
-                {
-                    std::cout << "Unable to parse JSON config. Using default "
-                                 "values.\n";
-                }
+                std::cerr << "Unable to parse JSON config file: " << output_config_file
+                          << std::endl;
+                    exit(EXIT_OUTPUT_LIB_ERROR); // TODO - debata ci exitovat nebo pokračovat s def. konfiguraciou
+
+
+                // config.use_default_values();
+                // if (mode_verbose)
+                // {
+                //     std::cout << "Unable to parse JSON config. Using default "
+                //                  "values.\n";
+                // }
             }
         }
 
