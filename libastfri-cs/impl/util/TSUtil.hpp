@@ -89,11 +89,52 @@ std::string remove_comments(
  */
 bool has_variadic_param(const TSNode& node, TSNode* nType = nullptr);
 
+/**
+ * @brief Checks if the given node represents an anonymouse lambda. Anonymous
+ * lambda call expression in C# looks like this:
+ *  \code
+ * ((Func<int, bool>)(x) => false; )(1)
+ * \endcode
+ * @param node node representing left side of invocation
+ * @param lambda output parameter that will hold node to the lambda node is
+ * anonymous lambda.
+ * @param delegate output parameter that will hold node to the delegate type if
+ * node is a anonymous lambda
+ * @return true if the node parameter represents lambda
+ */
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate);
 
+/**
+ * @brief Wrapper function for ts_parser_parse_string that creates a TSTree
+ * from the given source code string using the provided parser.
+ * @param parser pointer to the TSParser to use for parsing the source code
+ * @param str source code string to parse into a TSTree
+ * @return pointer to the created TSTree
+ */
 TSTree* make_tree(TSParser* parser, std::string_view str);
 
+/**
+ * @brief Unwraps parentheses expression and extracts the inner expression.
+ * @param node tree-sitter node containing parentheses expression
+ * @return TSNode representing the inner expression without parentheses
+ */
 TSNode unwrap_parantheses(const TSNode& node);
+
+/**
+ * @brief Checks if the given node is a type declaration (class, interface,
+ * struct, enum or delegate declaration).
+ * @param node TSNode to check
+ * @return true if the node is a type declaration, false otherwise
+ */
+bool is_type_decl(const TSNode& node);
+
+/**
+ * @brief Checks if the given symbol is a type declaration (class, interface,
+ * struct, enum or delegate declaration).
+ * @param symbol TSSymbol to check
+ * @return true if the node is a type declaration, false otherwise
+ */
+bool is_type_decl(TSSymbol symbol);
 
 /**
  * @brief Iterates over each child node of the given TSNode and applies the
@@ -129,7 +170,7 @@ void process_param_list(const TSNode& node, F collector);
  * @param process Function to apply to each capture match.
  */
 template<std::invocable<const TSQueryMatch&> F>
-void for_each_match(const TSNode& root, regs::QueryType type, F process);
+void for_each_match(const TSNode& root, maps::QueryType type, F process);
 
 } // namespace astfri::csharp::util
 

@@ -17,58 +17,45 @@ SemanticContext::SemanticContext(SymbolTable& symbTable) :
 {
 }
 
-std::span<UserTypeDefStmt*> SemanticContext::get_user_types() const
+void SemanticContext::enter_type(TypeBinding* tb)
 {
-    return symbTable_.userTypeKeys;
-}
-
-TypeMetadata* SemanticContext::get_type_metadata(
-    UserTypeDefStmt* userType
-) const
-{
-    const auto& it = symbTable_.userTypeMetadata.find(userType);
-    return it != symbTable_.userTypeMetadata.end() ? &it->second : nullptr;
-}
-
-void SemanticContext::enter_type(UserTypeDefStmt* def)
-{
-    typeContext_.typeStack.push(def);
+    typeContext_.typeStack.push_back(tb);
     enter_scope();
 }
 
 void SemanticContext::enter_scope()
 {
-    scopeContext_.scopeStack.emplace();
+    scopeContext_.scopeStack.emplace_back();
 }
 
 void SemanticContext::reg_local_var(LocalVarDefStmt* varDef)
 {
-    scopeContext_.scopeStack.top().push_back(varDef);
+    scopeContext_.scopeStack.back().push_back(varDef);
     scopeContext_.localVars.emplace(varDef->name_, varDef);
 }
 
 void SemanticContext::reg_param(ParamVarDefStmt* varDef)
 {
-    scopeContext_.scopeStack.top().push_back(varDef);
+    scopeContext_.scopeStack.back().push_back(varDef);
     scopeContext_.params.emplace(varDef->name_, varDef);
 }
 
 void SemanticContext::reg_local_func(FuncMetadata funcMeta)
 {
     const auto funcDef = funcMeta.funcDef;
-    scopeContext_.scopeStack.top().push_back(funcDef);
+    scopeContext_.scopeStack.back().push_back(funcDef);
     scopeContext_.functions.emplace(funcDef->name_, std::move(funcMeta));
 }
 
 void SemanticContext::reg_return(Type* returnType)
 {
-    retTypeContext_.push(returnType);
+    retTypeContext_.push_back(returnType);
 }
 
 void SemanticContext::leave_type()
 {
-    if (typeContext_.typeStack.empty())
-        typeContext_.typeStack.pop();
+    if (! typeContext_.typeStack.empty())
+        typeContext_.typeStack.pop_back();
     leave_scope();
 }
 
@@ -77,7 +64,7 @@ void SemanticContext::leave_scope()
     if (scopeContext_.scopeStack.empty())
         return;
 
-    for (const auto scopeMemb : scopeContext_.scopeStack.top())
+    for (const auto scopeMemb : scopeContext_.scopeStack.back())
     {
         if (const auto param = as_a<ParamVarDefStmt>(scopeMemb))
             scopeContext_.params.erase(param->name_);
@@ -88,24 +75,24 @@ void SemanticContext::leave_scope()
             scopeContext_.functions.erase(func->name_);
         }
     }
-    scopeContext_.scopeStack.pop();
+    scopeContext_.scopeStack.pop_back();
 }
 
 void SemanticContext::unregister_return_type()
 {
     if (! retTypeContext_.empty())
-        retTypeContext_.pop();
+        retTypeContext_.pop_back();
 }
 
-UserTypeDefStmt* SemanticContext::current_type() const
+TypeBinding* SemanticContext::current_type() const
 {
     auto& typeStack = typeContext_.typeStack;
-    return typeStack.empty() ? nullptr : typeStack.top();
+    return typeStack.empty() ? nullptr : typeStack.back();
 }
 
 Type* SemanticContext::current_return_type() const
 {
-    return retTypeContext_.empty() ? nullptr : retTypeContext_.top();
+    return retTypeContext_.empty() ? nullptr : retTypeContext_.back();
 }
 
 VarDefStmt* SemanticContext::find_var(
@@ -127,25 +114,21 @@ VarDefStmt* SemanticContext::find_var(
                 return itParam->second;
 
             // member variables - includes both static and instance members
-            UserTypeDefStmt* currentType = this->current_type();
+            const TypeBinding* currentType = current_type();
 
             if (! currentType)
                 return nullptr;
 
-            const auto& metadata = symbTable_.userTypeMetadata;
-            const auto itType    = metadata.find(currentType);
-            if (itType != symbTable_.userTypeMetadata.end())
+            if (auto* typeMeta = symbTable_.get_type_metadata(currentType->def))
             {
-                const auto& membVars = itType->second.memberVars;
-                const auto& itMemb   = membVars.find(name);
-                if (itMemb != membVars.end())
-                    return itMemb->second.varDef;
+                if (const auto* varMeta = typeMeta->find_memb_var(name))
+                    return varMeta->varDef;
             }
             return nullptr;
         },
         [&](const access::Instance&) -> VarDefStmt*
         {
-            auto currentType = as_a<ClassDefStmt>(this->current_type());
+            auto currentType = as_a<ClassDefStmt>(current_type()->def);
 
             while (currentType)
             {
@@ -189,35 +172,30 @@ const MethodMetadata* SemanticContext::find_method(
     UserTypeDefStmt* owner
 ) const
 {
-
-    auto& userTypes = symbTable_.userTypeMetadata;
-    if (auto* current = as_a<ClassDefStmt>(owner))
+    if (auto* classDef = as_a<ClassDefStmt>(owner))
     {
+        ClassDefStmt* current = classDef;
         while (current)
         {
-            const auto itTypeMetadata = userTypes.find(current);
-            if (itTypeMetadata == userTypes.end())
+            TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+            if (! typeMeta)
                 return nullptr;
 
-            auto& [_, typeMetadata] = *itTypeMetadata;
-            const auto itMethod     = typeMetadata.methods.find(methodId);
-            if (itMethod != typeMetadata.methods.end())
-                return &itMethod->second;
+            if (const auto* methodMeta = typeMeta->find_method(methodId))
+                return methodMeta;
 
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
         }
     }
-    else if (is_a<InterfaceDefStmt>(owner))
+    else if (auto* intDef = as_a<InterfaceDefStmt>(owner))
     {
-        const auto itTypeMeta = userTypes.find(owner);
-        if (itTypeMeta == userTypes.end())
+        TypeMetadata* typeMeta = symbTable_.get_type_metadata(intDef);
+        if (! typeMeta)
             return nullptr;
 
-        auto& [_, typeMeta] = *itTypeMeta;
-        const auto itMethod = typeMeta.methods.find(methodId);
-        if (itMethod != typeMeta.methods.end())
-            return &itMethod->second;
+        if (const auto* methodMeta = typeMeta->find_method(methodId))
+            return methodMeta;
     }
 
     return nullptr;
@@ -228,21 +206,17 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     UserTypeDefStmt* owner
 ) const
 {
-    auto& userTypes = symbTable_.userTypeMetadata;
     // todo add handling of records
     if (auto* current = as_a<ClassDefStmt>(owner))
     {
         while (current)
         {
-            const auto& itTypeMeta = userTypes.find(current);
-            if (itTypeMeta == userTypes.end())
-                continue;
+            TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+            if (! typeMeta)
+                return nullptr;
 
-            auto& membVars     = itTypeMeta->second.memberVars;
-
-            const auto& itVars = membVars.find(name);
-            if (itVars != membVars.end())
-                return &itVars->second;
+            if (auto* varMeta = typeMeta->find_memb_var(name))
+                return varMeta;
 
             current
                 = ! current->bases_.empty() ? current->bases_.front() : nullptr;
@@ -250,21 +224,16 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     }
     else if (is_a<InterfaceDefStmt>(owner))
     {
-        const auto& itTypeMeta = userTypes.find(owner);
-        if (itTypeMeta == userTypes.end())
+        TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+        if (! typeMeta)
             return nullptr;
-
-        auto& membVars    = itTypeMeta->second.memberVars;
-
-        const auto& itVar = membVars.find(name);
-        if (itVar != membVars.end())
-            return &itVar->second;
+        return typeMeta->find_memb_var(name);
     }
 
     return nullptr;
 }
 
-CallType SemanticContext::find_invoc_type(
+InvocationType SemanticContext::find_invoc_type(
     InvocationId id,
     access::Qualifier quelifier
 ) const
@@ -276,15 +245,15 @@ CallType SemanticContext::find_invoc_type(
          * this should probably be something else like a delegate invocation
          * since delegate variables dont have to be only lambdas
          */
-        return CallType::Delegate;
+        return InvocationType::Delegate;
     }
 
     util::Overloaded overloaded{
-        [&](const access::None&) -> CallType
+        [&](const access::None&) -> InvocationType
         {
             if ([[maybe_unused]] const FuncMetadata* metadata
                 = find_func(id.name))
-                return CallType::LocalFunc;
+                return InvocationType::LocalFunc;
 
             MethodId methodId{
                 .name       = std::move(id.name),
@@ -294,21 +263,21 @@ CallType SemanticContext::find_invoc_type(
 
             const auto currentType = this->current_type();
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType))
+                = find_method(methodId, currentType->def))
             {
-                return CallType::Method;
+                return InvocationType::Method;
             }
 
             methodId.isStatic = true;
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType))
+                = find_method(methodId, currentType->def))
             {
-                return CallType::StaticMethod;
+                return InvocationType::StaticMethod;
             }
 
-            return CallType::Unknown;
+            return InvocationType::Unknown;
         },
-        [&](const access::Instance&) -> CallType
+        [&](const access::Instance&) -> InvocationType
         {
             const auto currentType = this->current_type();
             const MethodId methodId{
@@ -318,14 +287,14 @@ CallType SemanticContext::find_invoc_type(
             };
 
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType))
+                = find_method(methodId, currentType->def))
             {
-                return CallType::Method;
+                return InvocationType::Method;
             }
 
-            return CallType::Unknown;
+            return InvocationType::Unknown;
         },
-        [&](const access::Static& staticMemb) -> CallType
+        [&](const access::Static& staticMemb) -> InvocationType
         {
             const MethodId methodId{
                 .name       = std::move(id.name),
@@ -334,11 +303,11 @@ CallType SemanticContext::find_invoc_type(
             };
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(methodId, staticMemb.owner))
-                return CallType::StaticMethod;
+                return InvocationType::StaticMethod;
 
-            return CallType::Unknown;
+            return InvocationType::Unknown;
         },
-        [&](const access::Base& base) -> CallType
+        [&](const access::Base& base) -> InvocationType
         {
             const MethodId methodId{
                 .name       = std::move(id.name),
@@ -348,14 +317,14 @@ CallType SemanticContext::find_invoc_type(
             if ([[maybe_unused]] const MethodMetadata* metadata
                 = find_method(methodId, base.parent))
             {
-                return CallType::Method;
+                return InvocationType::Method;
             }
-            return CallType::Unknown;
+            return InvocationType::Unknown;
         },
-        [](const access::Unknown&) -> CallType
+        [](const access::Unknown&) -> InvocationType
         {
             // todo this should be some universal invocation expression
-            return CallType::Unknown;
+            return InvocationType::Unknown;
         }
     };
     return std::visit(overloaded, quelifier);

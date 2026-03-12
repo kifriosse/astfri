@@ -1,4 +1,5 @@
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 
 #include <tree_sitter/api.h>
@@ -6,9 +7,9 @@
 
 #include <filesystem>
 #include <iostream>
-#include <ranges>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 namespace astfri::csharp::util
 {
@@ -66,7 +67,7 @@ std::string remove_comments(
     const std::filesystem::path& path
 )
 {
-    using namespace regs;
+    using namespace maps;
     static constexpr auto qType      = QueryType::CommentError;
     static const auto& queryReg      = QueryReg::get();
     static const Query* const query  = queryReg.get_query(qType);
@@ -75,7 +76,7 @@ std::string remove_comments(
     bool hasErr                      = false;
     auto process                     = [&](const TSQueryMatch& match) -> void
     {
-        for (CaptureId id = 0; id < match.capture_count; ++id)
+        for (uint32_t id = 0; id < match.capture_count; ++id)
         {
             auto& [node, index] = match.captures[id];
             if (index == errorId)
@@ -128,17 +129,15 @@ bool has_variadic_param(const TSNode& node, TSNode* nType)
 
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate)
 {
-    static const TSSymbol sCastExpr = symbol_for_name("cast_expr", true);
-    static const TSSymbol sLambda = symbol_for_name("lambda_expression", true);
-
-    const TSNode nCast            = unwrap_parantheses(node);
-    if (ts_node_symbol(nCast) != sCastExpr)
+    using enum NodeType;
+    const TSNode nCast = unwrap_parantheses(node);
+    if (ts_node_symbol(nCast) != MapManager::get_symbol(CastExpr))
         return false;
 
     const TSNode nValue  = child_by_field_name(nCast, "value");
     const TSNode nLambda = unwrap_parantheses(nValue);
 
-    if (ts_node_symbol(nLambda) != sLambda)
+    if (ts_node_symbol(nLambda) != MapManager::get_symbol(LambdaExpr))
         return false;
 
     if (lambda)
@@ -155,8 +154,9 @@ TSTree* make_tree(TSParser* parser, const std::string_view str)
 
 TSNode unwrap_parantheses(const TSNode& node)
 {
+    using enum NodeType;
     static const TSSymbol sBracketExpr
-        = symbol_for_name("parenthesized_expression", true);
+        = MapManager::get_symbol(ParenthesizedExpr);
 
     TSNode current = node;
     while (! ts_node_is_null(current)
@@ -165,6 +165,23 @@ TSNode unwrap_parantheses(const TSNode& node)
         current = ts_node_named_child(current, 0);
     }
     return current;
+}
+
+bool is_type_decl(const TSNode& node)
+{
+    return is_type_decl(ts_node_symbol(node));
+}
+
+bool is_type_decl(const TSSymbol symbol)
+{
+    static const std::unordered_set sTypeDecls{
+        MapManager::get_symbol(NodeType::ClassDecl),
+        MapManager::get_symbol(NodeType::InterfaceDecl),
+        MapManager::get_symbol(NodeType::EnumDecl),
+        MapManager::get_symbol(NodeType::RecordDecl),
+        MapManager::get_symbol(NodeType::DelegateDecl)
+    };
+    return sTypeDecls.contains(symbol);
 }
 
 } // namespace astfri::csharp::util

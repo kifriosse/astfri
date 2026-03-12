@@ -4,8 +4,8 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 
-#include <stack>
 #include <unordered_map>
 #include <vector>
 
@@ -20,23 +20,21 @@ struct UserTypeDefStmt;
 
 namespace astfri::csharp
 {
-// Forward declaration
-struct SymbolTable;
-
 /**
  * @brief Context for tracking current type during semantic analysis
  */
 struct TypeContext
 {
-    std::stack<UserTypeDefStmt*> typeStack;
+    std::vector<TypeBinding*> typeStack;
 };
 
 /**
- * @brief Context for tracking scopes for resolving variable references
+ * @brief Context for tracking scopes for resolving variable references and
+ * local functions
  */
 struct ScopeContext
 {
-    std::stack<std::vector<Stmt*>> scopeStack{};
+    std::vector<std::vector<Stmt*>> scopeStack{};
     IdentifierMap<ParamVarDefStmt*> params{};
     IdentifierMap<LocalVarDefStmt*> localVars{};
     IdentifierMap<FuncMetadata> functions{};
@@ -52,21 +50,15 @@ class SemanticContext
 private:
     ScopeContext scopeContext_{};
     TypeContext typeContext_{};
-    std::stack<Type*> retTypeContext_{};
+    std::vector<Type*> retTypeContext_{};
     SymbolTable& symbTable_;
 
 public:
     explicit SemanticContext(SymbolTable& symbTable);
 
-    /**
-     * @brief Type for iterating over keys of user types in symbol table
-     * @return An iterable view over user types in symbol table
-     * @note Keys will be in order of their insertion into symbol table
-     */
-    std::span<UserTypeDefStmt*> get_user_types() const;
-    TypeMetadata* get_type_metadata(UserTypeDefStmt* userType) const;
+    auto get_type_metadata() const;
 
-    void enter_type(UserTypeDefStmt* def);
+    void enter_type(TypeBinding* tb);
     void enter_scope();
 
     void reg_return(Type* returnType);
@@ -78,7 +70,7 @@ public:
     void leave_scope();
     void unregister_return_type();
 
-    UserTypeDefStmt* current_type() const;
+    TypeBinding* current_type() const;
     Type* current_return_type() const;
     VarDefStmt* find_var(
         std::string_view name,
@@ -93,12 +85,14 @@ public:
         std::string_view name,
         UserTypeDefStmt* owner
     ) const;
-    CallType find_invoc_type(
+    InvocationType find_invoc_type(
         InvocationId id,
-        // todo redo this into an InvocationID
         access::Qualifier quelifier
     ) const;
 };
+
 } // namespace astfri::csharp
+
+#include <libastfri-cs/impl/SemanticContext.inl>
 
 #endif // CSHARP_SEMANTIC_CONTEXT_HPP

@@ -18,12 +18,10 @@ StmtFactory& SrcCodeVisitor::stmtFact_ = StmtFactory::get_instance();
 TypeFactory& SrcCodeVisitor::typeFact_ = TypeFactory::get_instance();
 
 SrcCodeVisitor::SrcCodeVisitor(
-    std::vector<std::unique_ptr<SourceFile>>& srcCodes,
     SemanticContext& semanticContext,
     SymbolTable& symbTable
 ) :
     typeTrs_(symbTable),
-    srcCodes_(srcCodes),
     semanticContext_(semanticContext),
     lang_(tree_sitter_c_sharp())
 {
@@ -31,23 +29,19 @@ SrcCodeVisitor::SrcCodeVisitor(
 
 void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
 {
-    for (auto& defStmt : this->semanticContext_.get_user_types())
+    for (const auto metadata : this->semanticContext_.get_type_metadata())
     {
-        const auto typeMetaOpt = semanticContext_.get_type_metadata(defStmt);
-        if (! typeMetaOpt)
-            continue;
-
-        typeTrs_.set_current_namespace(typeMetaOpt->typeNms);
+        typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         bool added = false;
-        for (auto& [node, src] : typeMetaOpt->defs)
+        for (auto& [node, src] : metadata->defs())
         {
             if (! src)
                 continue;
 
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-            StmtHandler hStmt = RegManager::get_stmt_handler(node);
-            Stmt* stmt        = hStmt(this, node);
+            StmtMapper hStmt = MapManager::get_stmt_mapper(node);
+            Stmt* stmt       = hStmt(this, node);
             if (added)
                 continue;
 

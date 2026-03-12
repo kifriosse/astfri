@@ -1,22 +1,44 @@
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
+#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
+#include <rapidjson/document.h>
+
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-// #include <iostream>
 #include <string>
 #include <vector>
 
 namespace astfri::csharp
 {
+
+namespace fs = std::filesystem;
+
+namespace
+{
+const fs::path extTypesRoot = ASTFRI_CS_RESOURCES;
+const fs::path core         = extTypesRoot / "core.json";
+const fs::path winDesktop   = extTypesRoot / "win-desktop.json";
+
+const std::unordered_map<SDKProfile, fs::path> profileMap = {
+    {SDKProfile::None,     core                        },
+    {SDKProfile::Core,     core                        },
+    {SDKProfile::Worker,   core                        },
+    {SDKProfile::Web,      extTypesRoot / "aspnet.json"},
+    {SDKProfile::WinForms, winDesktop                  },
+    {SDKProfile::WPF,      winDesktop                  }
+};
+} // namespace
 
 ASTBuilder::ASTBuilder() :
     lang_(tree_sitter_c_sharp()),
@@ -33,14 +55,24 @@ ASTBuilder::~ASTBuilder()
 
 void ASTBuilder::load_src(const path& projectDir)
 {
-    std::stack<std::filesystem::path> dirs;
+    if (is_regular_file(projectDir))
+    {
+        if (projectDir.extension() == ".cs")
+        {
+            std::ifstream fileStream(projectDir, std::ios::binary);
+            load_from_stream(fileStream, projectDir);
+        }
+        return;
+    }
+
+    std::vector<std::filesystem::path> dirs;
     const std::filesystem::path& rootPath{projectDir};
-    dirs.emplace(rootPath);
+    dirs.emplace_back(rootPath);
 
     while (! dirs.empty())
     {
-        auto dirIt = std::filesystem::directory_iterator(dirs.top());
-        dirs.pop();
+        auto dirIt = std::filesystem::directory_iterator(dirs.back());
+        dirs.pop_back();
         for (auto& dirEntry : dirIt)
         {
             auto& entryPath            = dirEntry.path();
@@ -53,7 +85,7 @@ void ASTBuilder::load_src(const path& projectDir)
                 {
                     continue;
                 }
-                dirs.push(entryPath);
+                dirs.push_back(entryPath);
             }
             else if (entryPath.extension() == ".cs")
             {
@@ -74,23 +106,35 @@ void ASTBuilder::load_src(std::istream& inputStream)
     load_from_stream(inputStream);
 }
 
-TranslationUnit* ASTBuilder::mk_ast()
+void ASTBuilder::load_source_of_external_types(const path& jsonPath)
+{
+    externalTypeSources_.push_back(jsonPath);
+}
+
+TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
 {
     // using milli          = std::chrono::milliseconds;
-    TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
-    // std::cout << "Preprocessing Phase: \n"
-    //           << "Gathering souce files and removing comments..." <<
-    //           std::endl;
-    // auto start = std::chrono::high_resolution_clock::now();
-    // auto end      = std::chrono::high_resolution_clock::now();
-    // auto duration = std::chrono::duration_cast<milli>(end - start);
-    // auto total    = duration;
-    // std::cout << "Preprocesing complete.\n"
-    //           << "Preprocessing took " << duration.count() << " ms"
-    //           << std::endl;
+    const auto it = profileMap.find(profile);
+    if (it == profileMap.end())
+        throw std::runtime_error(
+            "Profile " + std::to_string(static_cast<size_t>(profile))
+            + "doesn't have implemented path"
+        );
+    load_source_of_external_types(profileMap.at(profile));
+    if (profile != SDKProfile::None && profile != SDKProfile::Core
+        && profile != SDKProfile::Worker)
+    {
+        load_source_of_external_types(profileMap.at(SDKProfile::Core));
+    }
 
+    TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     SymbolTable symbTable;
-    SymbolTableBuilder symbTableBuilder(srcs_, symbTable);
+    SymbTableBuilder symbTableBuilder(srcs_, symbTable);
+
+    for (auto& extTypeSource : externalTypeSources_)
+    {
+        symbTableBuilder.load_external_types(extTypeSource);
+    }
 
     // std::cout << "Phase 1: Symbol Table Building\n"
     //           << "Discovering user defined types..." << std::endl;
@@ -98,7 +142,9 @@ TranslationUnit* ASTBuilder::mk_ast()
     // start = std::chrono::high_resolution_clock::now();
 
     symbTableBuilder.reg_user_types();
+    // symbTableBuilder.collect_types();
     // std::cout << "Loading using directives...\n";
+    symbTableBuilder.load_implicit_usings(profile);
     symbTableBuilder.reg_using_directives();
     // std::cout << "Discovering members of user defined types...\n";
     symbTableBuilder.reg_members();
@@ -110,7 +156,7 @@ TranslationUnit* ASTBuilder::mk_ast()
     //           << std::endl;
 
     SemanticContext semanticContext(symbTable);
-    SrcCodeVisitor srcVisitor(srcs_, semanticContext, symbTable);
+    SrcCodeVisitor srcVisitor(semanticContext, symbTable);
 
     // std::cout << "Phase 2: Building of AST" << std::endl;
     // start = std::chrono::high_resolution_clock::now();
@@ -143,18 +189,20 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path)
     TSNode nNms{};
     util::for_each_match(
         ts_tree_root_node(tree),
-        regs::QueryType::FileNamespace,
+        maps::QueryType::FileNamespace,
         [&nNms](const TSQueryMatch& match) { nNms = match.captures[0].node; }
     );
-    FileContext context;
+    Scope fileNms{};
     if (! ts_node_is_null(nNms))
     {
-        const TSNode nNmsName = util::child_by_field_name(nNms, "name");
-        context.fileNms       = util::extract_text(nNmsName, src);
+        const TSNode nNmsName       = util::child_by_field_name(nNms, "name");
+        const std::string nmsQualif = util::extract_text(nNmsName, src);
+        fileNms                     = util::mk_scope(nmsQualif);
     }
     srcs_.emplace_back(
-        std::make_unique<SourceFile>(std::move(context), std::move(src), tree)
+        std::make_unique<SourceFile>(std::move(src), tree, std::move(fileNms))
     );
     ts_parser_reset(parser_);
 }
+
 } // namespace astfri::csharp

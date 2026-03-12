@@ -3,13 +3,13 @@
 
 #include <libastfri-cs/impl/util/Common.hpp>
 
-#include <stack>
+#include <deque>
+#include <optional>
 #include <string>
 #include <string_view>
 
 namespace astfri::csharp::util
 {
-
 /**
  * @brief Hash struct that allows hashing both std::string and std::string_view
  * @note Source:
@@ -28,16 +28,23 @@ struct StringHash
  * @return corresponding IntSuffix enum value
  */
 IntSuffix get_suffix_type(std::string_view suffix);
-
-bool almost_equal(double a, double b, double epsilon = 1e-9);
-
+/**
+ * @brief Splits a dot-separated namespace qualifier string into its components
+ * and stores them in the deque parameter.
+ * @param qualifs deque to store the split components of the namespace qualifier
+ * @param nmsQualif dot-separated namespace qualifier string to split
+ */
 void split_namespace(
-    std::stack<std::string>& scopeStr,
-    std::string_view nmsQualifier
+    std::deque<std::string>& qualifs,
+    std::string_view nmsQualif
 );
-
+/**
+ * @brief Checks if the given name is a interface name according to C# naming
+ * conventions (starts with 'I' followed by an uppercase letter).
+ * @param name name of the type
+ * @return true if the name is a valid interface name, false otherwise
+ */
 bool is_interface_name(std::string_view name);
-
 /**
  * @brief Escapes special characters in verbatim and raw C# strings.
  * @param str input string to escape
@@ -45,6 +52,14 @@ bool is_interface_name(std::string_view name);
  * @return escaped string
  */
 std::string escape_string(std::string_view str, bool isVerbatim);
+/**
+ * @brief Mapping function from string representation
+ * @param typeKind string representation of \c TypeKind
+ * @return TypeKind enum value coresponsing to the string representation. If
+ * invalid string representation is passed in, function will return empty
+ * optional
+ */
+std::optional<TypeKind> get_type_kind(std::string_view typeKind);
 
 } // namespace astfri::csharp::util
 

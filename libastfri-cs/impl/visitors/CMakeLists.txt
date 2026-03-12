@@ -1,5 +1,5 @@
 target_sources(astfri-cs PRIVATE
-    SymbolTableBuilder.cpp
+    SymbTableBuilder.cpp
     TypeTranslator.cpp
 )
 

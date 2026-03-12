@@ -2,11 +2,12 @@
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <libastfri-cs/impl/visitors/SymbolTableBuilder.hpp>
+#include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
 #include <tree_sitter/api.h>
+#include <tree_sitter/tree-sitter-c-sharp.h>
 
 #include <optional>
 #include <string>
@@ -14,99 +15,218 @@
 namespace astfri::csharp
 {
 
-namespace regs
+class SrcCodeVisitor;
+class SymbTableBuilder;
+class TypeTranslator;
+
+namespace maps
 {
 
-Handlers::Handlers() :
+namespace
+{
+using enum NodeType;
+
+/**
+ * @brief Helper struct for mapping tree-sitter node names to NodeType enum
+ * values
+ */
+struct MappingRule
+{
+    std::string_view nodeName;
+    NodeType nodeType;
+    bool isNamed;
+};
+
+constexpr MappingRule mappingRules_[] = {
+    {"compilation_unit",                  CompilationUnit,       true },
+    {"namespace_declaration",             NamespaceDecl,         true },
+    {"class_declaration",                 ClassDecl,             true },
+    {"struct_declaration",                StructDecl,            true },
+    {"interface_declaration",             InterfaceDecl,         true },
+    {"enum_declaration",                  EnumDecl,              true },
+    {"delegate_declaration",              DelegateDecl,          true },
+    {"record_declaration",                RecordDecl,            true },
+    {"constructor_declaration",           ConstructorDecl,       true },
+    {"constructor_initializer",           ConstructorInit,       true },
+    {"destructor_declaration",            DestructorDecl,        true },
+    {"method_declaration",                MethodDecl,            true },
+    {"field_declaration",                 MemberVarDef,          true },
+    {"property_declaration",              PropertyDecl,          true },
+    {"indexer_declaration",               IndexerDecl,           true },
+    {"operator_declaration",              OprDecl,               true },
+    {"conversion_operator_declaration",   CastOprDecl,           true },
+    {"local_function_statement",          LocalFuncDecl,         true },
+    {"parameter",                         ParameterDecl,         true },
+    {"local_declaration_statement",       LocalVarDef,           true },
+    {"block",                             Block,                 true },
+    {"arrow_expression_clause",           ArrowExprClaus,        true },
+    {"do_statement",                      DoWhileLoop,           true },
+    {"while_statement",                   WhileLoop,             true },
+    {"for_statement",                     ForLoop,               true },
+    {"foreach_statement",                 ForeachLoop,           true },
+    {"break_statement",                   BreakStmt,             true },
+    {"continue_statement",                ContinueStmt,          true },
+    {"if_statement",                      IfStmt,                true },
+    {"switch_statement",                  SwitchStmt,            true },
+    {"switch_section",                    SwitchSection,         true },
+    {"try_statement",                     TryStmt,               true },
+    {"catch_clause",                      CatchClause,           true },
+    {"finally_clause",                    FinallyClause,         true },
+    {"catch_declaration",                 CatchDecl,             true },
+    {"expression_statement",              ExprStmt,              true },
+    {"return_statement",                  ReturnStmt,            true },
+    {"throw_statement",                   ThrowStmt,             true },
+    {"integer_literal",                   IntLit,                true },
+    {"real_literal",                      RealLit,               true },
+    {"boolean_literal",                   BoolLit,               true },
+    {"character_literal",                 CharLit,               true },
+    {"string_literal",                    StrLit,                true },
+    {"verbatim_string_literal",           VerbatimStrLit,        true },
+    {"raw_string_literal",                RawStrLit,             true },
+    {"null_literal",                      NullLit,               true },
+    {"prefix_unary_expression",           PrefixUnOpr,           true },
+    {"postfix_unary_expression",          PostfixUnOpr,          true },
+    {"binary_expression",                 BinaryOpr,             true },
+    {"conditional_expression",            TernaryOpr,            true },
+    {"assignment_expression",             Assignment,            true },
+    {"constant_pattern",                  ConstPattern,          true },
+    {"this",                              This,                  false},
+    {"ref_expression",                    RefExpr,               true },
+    {"parenthesized_expression",          ParenthesizedExpr,     true },
+    {"member_access_expression",          MemberAccess,          true },
+    {"invocation_expression",             Invocation,            true },
+    {"cast_expression",                   CastExpr,              true },
+    {"lambda_expression",                 LambdaExpr,            true },
+    {"predefined_type",                   PredefinedType,        true },
+    {"qualified_name",                    QualifName,            true },
+    {"implicit_type",                     ImplicitType,          true },
+    {"nullable_type",                     NullableType,          true },
+    {"pointer_type",                      PointerType,           true },
+    {"ref_type",                          RefType,               true },
+    {"array_type",                        ArrayType,             true },
+    {"generic_name",                      GenericType,           true },
+    {"tuple_type",                        TupleType,             true },
+    {"function_pointer_type",             FuncPointerType,       true },
+    {"scoped_type",                       ScopedType,            true },
+    {"modifier",                          Modifier,              true },
+    {"identifier",                        Identifier,            true },
+    {"global",                            Global,                false},
+    {"static",                            Static,                false},
+    {"alias_qualified_name",              AliasQualifName,       true },
+    {"base_list",                         BaseList,              true },
+    {"type_parameter_list",               TypeParamList,         true },
+    {"type_parameter_constraints_clause", TypeParamConstrClause, true },
+    {"type_parameter_constraint",         TypeParamConstraint,   true },
+};
+
+} // namespace
+
+NodeTypes::NodeTypes()
+{
+    const TSLanguage* lang = tree_sitter_c_sharp();
+    const uint32_t size    = ts_language_symbol_count(lang);
+    nodeTypeMap_.assign(size, Unknown);
+    symbolMap_.assign(size, INVALID_SYMBOL);
+    for (const auto& [nodeName, nodeType, isNamed] : mappingRules_)
+    {
+        const TSSymbol s = util::symbol_for_name(nodeName, isNamed);
+        nodeTypeMap_[s]  = nodeType;
+        symbolMap_[static_cast<TSSymbol>(nodeType)] = s;
+    }
+}
+
+TSSymbol NodeTypes::get_symbol(const NodeType type) const
+{
+    return symbolMap_.at(static_cast<TSSymbol>(type));
+}
+
+NodeType NodeTypes::get_node_type(const TSNode& node) const
+{
+    return nodeTypeMap_.at(ts_node_symbol(node));
+}
+
+Mappers::Mappers() :
     stmts({
-        {"class_declaration", SrcCodeVisitor::visit_class_def_stmt},
-        {"struct_declaration", SrcCodeVisitor::visit_class_def_stmt},
-        {"interface_declaration", SrcCodeVisitor::visit_interface_def_stmt},
-        {"destructor_declaration", SrcCodeVisitor::visit_destr_def_stmt},
-        {"constructor_declaration", SrcCodeVisitor::visit_constr_def_stmt},
-        {"parameter", SrcCodeVisitor::visit_param_def_stmt},
-        {"field_declaration", SrcCodeVisitor::visit_memb_var_def_stmt},
-        {"constructor_initializer", SrcCodeVisitor::visit_construct_init},
-        {"method_declaration", SrcCodeVisitor::visit_method_def_stmt},
-        {"local_function_statement", SrcCodeVisitor::visit_func_stmt},
-        {"block", SrcCodeVisitor::visit_block_stmt},
-        {"arrow_expression_clause", SrcCodeVisitor::visit_arrow_stmt},
-        {"local_declaration_statement",
-         SrcCodeVisitor::visit_local_var_def_stmt},
-        {"do_statement", SrcCodeVisitor::visit_do_while_loop},
-        {"while_statement", SrcCodeVisitor::visit_while_loop},
-        {"for_statement", SrcCodeVisitor::visit_for_loop},
-        {"break_statement", SrcCodeVisitor::visit_break},
-        {"continue_statement", SrcCodeVisitor::visit_continue},
-        {"return_statement", SrcCodeVisitor::visit_return},
-        {"throw_statement", SrcCodeVisitor::visit_throw},
-        {"foreach_statement", SrcCodeVisitor::visit_for_each_loop},
-        {"if_statement", SrcCodeVisitor::visit_if_stmt},
-        {"try_statement", SrcCodeVisitor::visit_try_stmt},
-        {"catch_clause", SrcCodeVisitor::visit_catch_clause},
-        {"finally_clause", SrcCodeVisitor::visit_finally},
-        {"catch_declaration", SrcCodeVisitor::visit_catch_decl},
-        {"switch_statement", SrcCodeVisitor::visit_switch_stmt},
-        {"switch_section", SrcCodeVisitor::visit_case_stmt},
-        {"expression_statement", SrcCodeVisitor::visit_expr_stmt},
-        {"ERROR", visit_error<SrcCodeVisitor, Stmt*>}
+        {ClassDecl,       SrcCodeVisitor::visit_class_def    },
+        {StructDecl,      SrcCodeVisitor::visit_class_def    },
+        {InterfaceDecl,   SrcCodeVisitor::visit_interface_def},
+        {ConstructorDecl, SrcCodeVisitor::visit_constr_def   },
+        {ConstructorInit, SrcCodeVisitor::visit_constr_init  },
+        {MethodDecl,      SrcCodeVisitor::visit_method_def   },
+        {DestructorDecl,  SrcCodeVisitor::visit_destr_def    },
+        {MemberVarDef,    SrcCodeVisitor::visit_memb_var_def },
+        {LocalFuncDecl,   SrcCodeVisitor::visit_func_stmt    },
+        {ParameterDecl,   SrcCodeVisitor::visit_param_def    },
+        {LocalVarDef,     SrcCodeVisitor::visit_local_var_def},
+        {Block,           SrcCodeVisitor::visit_block        },
+        {ArrowExprClaus,  SrcCodeVisitor::visit_arrow_body   },
+        {DoWhileLoop,     SrcCodeVisitor::visit_do_while     },
+        {WhileLoop,       SrcCodeVisitor::visit_while        },
+        {ForLoop,         SrcCodeVisitor::visit_for_loop     },
+        {ForeachLoop,     SrcCodeVisitor::visit_for_each     },
+        {BreakStmt,       SrcCodeVisitor::visit_break        },
+        {ContinueStmt,    SrcCodeVisitor::visit_continue     },
+        {IfStmt,          SrcCodeVisitor::visit_if           },
+        {TryStmt,         SrcCodeVisitor::visit_try          },
+        {CatchClause,     SrcCodeVisitor::visit_catch        },
+        {FinallyClause,   SrcCodeVisitor::visit_finally      },
+        {CatchDecl,       SrcCodeVisitor::visit_catch_decl   },
+        {SwitchStmt,      SrcCodeVisitor::visit_switch       },
+        {SwitchSection,   SrcCodeVisitor::visit_case_stmt    },
+        {ExprStmt,        SrcCodeVisitor::visit_expr_stmt    },
+        {ReturnStmt,      SrcCodeVisitor::visit_return       },
+        {ThrowStmt,       SrcCodeVisitor::visit_throw        },
 }),
-    exprs(
-        {{"integer_literal", SrcCodeVisitor::visit_int_lit},
-         {"real_literal", SrcCodeVisitor::visit_float_lit},
-         {"boolean_literal", SrcCodeVisitor::visit_bool_lit},
-         {"character_literal", SrcCodeVisitor::visit_char_lit},
-         {"string_literal", SrcCodeVisitor::visit_str_lit},
-         {"null_literal", SrcCodeVisitor::visit_null_lit},
-         {"verbatim_string_literal", SrcCodeVisitor::visit_verbatim_str_lit},
-         {"raw_string_literal", SrcCodeVisitor::visit_raw_str_lit},
-         {"this_expression", SrcCodeVisitor::visit_this_expr},
-         {"this", SrcCodeVisitor::visit_this_expr},
-         {"conditional_expression", SrcCodeVisitor::visit_ternary_expr},
-         {"prefix_unary_expression",
-          SrcCodeVisitor::visit_prefix_unary_op_expr},
-         {"ref_expression", SrcCodeVisitor::visit_ref_expr},
-         {"postfix_unary_expression",
-          SrcCodeVisitor::visit_postfix_unary_op_expr},
-         {"binary_expression", SrcCodeVisitor::visit_binary_op_expr},
-         {"assignment_expression", SrcCodeVisitor::visit_binary_op_expr},
-         {"parenthesized_expression", SrcCodeVisitor::visit_parenthesized_expr},
-         {"identifier", SrcCodeVisitor::visit_identifier},
-         {"member_access_expression", SrcCodeVisitor::visit_memb_access_expr},
-         {"invocation_expression", SrcCodeVisitor::visit_invoc_expr},
-         {"constant_pattern", SrcCodeVisitor::visit_const_pattern},
-         {"ERROR", visit_error<SrcCodeVisitor, Expr*>}}
-    ),
-    types(
-        {{"predefined_type", TypeTranslator::visit_predefined},
-         {"identifier", TypeTranslator::visit_identitifier},
-         {"qualified_name",
-          TypeTranslator::visit_qualified_name}, // type with namespace
-         {"implicit_type", TypeTranslator::visit_qualified_name}, // var
-         {"nullable_type", TypeTranslator::visit_wrapper},
-         {"pointer_type", TypeTranslator::visit_inderect},
-         {"ref_type", TypeTranslator::visit_inderect},
-         {"array_type", TypeTranslator::visit_array},
-         {"generic_name", TypeTranslator::visit_generic_name},
-         {"tuple_type", TypeTranslator::visit_tuple},
-         {"function_pointer_type",
-          TypeTranslator::visit_func_pointer}, // function pointer - not
-                                               // delegate
-         {"scoped_type", TypeTranslator::visit_wrapper},
-         {"ERROR", visit_error<TypeTranslator, Type*>}}
-    ),
-    symbolRegs(
-        {{"class_declaration", SymbolTableBuilder::visit_class},
-         {"struct_declaration", SymbolTableBuilder::visit_class},
-         {"interface_declaration", SymbolTableBuilder::visit_interface},
-         {"enum_declaration", SymbolTableBuilder::visit_enum},
-         {"delegate_declaration", SymbolTableBuilder::visit_delegate},
-         {"record_declaration", SymbolTableBuilder::visit_record},
-         {"field_declaration", SymbolTableBuilder::visit_memb_var},
-         {"property_declaration", SymbolTableBuilder::visit_property},
-         {"method_declaration", SymbolTableBuilder::visit_method},
-         {"ERROR", visit_error<SymbolTableBuilder, void>}}
-    )
+    exprs({
+        {IntLit, SrcCodeVisitor::visit_int_lit},
+        {RealLit, SrcCodeVisitor::visit_float_lit},
+        {BoolLit, SrcCodeVisitor::visit_bool_lit},
+        {CharLit, SrcCodeVisitor::visit_char_lit},
+        {StrLit, SrcCodeVisitor::visit_str_lit},
+        {NullLit, SrcCodeVisitor::visit_null_lit},
+        {VerbatimStrLit, SrcCodeVisitor::visit_verbatim_str_lit},
+        {RawStrLit, SrcCodeVisitor::visit_raw_str_lit},
+        {This, SrcCodeVisitor::visit_this_expr},
+        {PrefixUnOpr, SrcCodeVisitor::visit_prefix_unary_opr},
+        {PostfixUnOpr, SrcCodeVisitor::visit_postfix_unary_opr},
+        {BinaryOpr, SrcCodeVisitor::visit_binary_opr},
+        {TernaryOpr, SrcCodeVisitor::visit_ternary_expr},
+        {RefExpr, SrcCodeVisitor::visit_ref_expr},
+        {Assignment, SrcCodeVisitor::visit_binary_opr},
+        {ParenthesizedExpr, SrcCodeVisitor::visit_parenthesized_expr},
+        {Identifier, SrcCodeVisitor::visit_identifier},
+        {MemberAccess, SrcCodeVisitor::visit_memb_access},
+        {Invocation, SrcCodeVisitor::visit_invoc},
+        {ConstPattern, SrcCodeVisitor::visit_const_pattern},
+    }),
+    types({
+        {PredefinedType, TypeTranslator::visit_predefined},
+        {Identifier, TypeTranslator::visit_identitifier},
+        {QualifName, TypeTranslator::visit_qualified_name},   // FQN, PQN
+        {ImplicitType, TypeTranslator::visit_qualified_name}, // var
+        {NullableType, TypeTranslator::visit_wrapper},
+        {PointerType, TypeTranslator::visit_inderect},
+        {RefType, TypeTranslator::visit_inderect},
+        {ArrayType, TypeTranslator::visit_array},
+        {GenericType, TypeTranslator::visit_generic_name},
+        {TupleType, TypeTranslator::visit_tuple},
+        // function pointer - not delegate
+        {FuncPointerType, TypeTranslator::visit_func_pointer},
+        {ScopedType, TypeTranslator::visit_wrapper},
+    }),
+    typeCollectors({
+        {ClassDecl, SymbTableBuilder::visit_class},
+        {StructDecl, SymbTableBuilder::visit_class},
+        {InterfaceDecl, SymbTableBuilder::visit_interface},
+        {EnumDecl, SymbTableBuilder::visit_enum},
+        {DelegateDecl, SymbTableBuilder::visit_delegate},
+        {RecordDecl, SymbTableBuilder::visit_record},
+    }),
+    symbCollectors({
+        {MemberVarDef, SymbTableBuilder::visit_memb_var},
+        {PropertyDecl, SymbTableBuilder::visit_property},
+        {MethodDecl, SymbTableBuilder::visit_method},
+    })
 {
 }
 
@@ -189,13 +309,14 @@ Types::Types() :
         {"ushort", typeFact.mk_int()}, // TODO: implement `ushort` type
         {"int", typeFact.mk_int()},
         {"uint", typeFact.mk_int()}, // TODO: implement `uint` type
-        {"long", typeFact.mk_unknown()}, // TODO: implement `long` type
-        {"ulong", typeFact.mk_unknown()}, // TODO: implement `ulong` type
+        {"long", typeFact.mk_int()}, // TODO: implement `long` type
+        {"ulong", typeFact.mk_int()}, // TODO: implement `ulong` type
 
         {"float", typeFact.mk_float()},
-        {"double", typeFact.mk_unknown()}, // TODO: implement `double` type
+        {"double", typeFact.mk_float()}, // TODO: implement `double` type
         {"decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
 
+        {"nuint", typeFact.mk_int()}, // TODO: implement `nuint` type
         {"void", typeFact.mk_void()},
         {"dynamic", typeFact.mk_dynamic()},
 
@@ -210,14 +331,17 @@ Types::Types() :
         {"UInt32", typeFact.mk_int()}, // TODO: implement `UInt32` type
         {"UInt64", typeFact.mk_unknown()}, // TODO: implement `UInt64` type
 
+        {"UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
+        {"System.UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
+
         {"Single", typeFact.mk_float()},
         {"Double", typeFact.mk_unknown()}, // TODO: implement `double` type
         {"Decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
 
-        {"object", typeFact.mk_class("object", {{"System"}})},
-        {"Object", typeFact.mk_class("object", {{"System"}})},
-        {"string", typeFact.mk_class("string", {{"System"}})},
-        {"String", typeFact.mk_class("string", {{"System"}})},
+        {"object", typeFact.mk_class("Object", {{"System"}})},
+        {"Object", typeFact.mk_class("Object", {{"System"}})},
+        {"string", typeFact.mk_class("String", {{"System"}})},
+        {"String", typeFact.mk_class("String", {{"System"}})},
 
         {"var", typeFact.mk_unknown()}, // todo handle var type
         {"_", typeFact.mk_unknown()}, // todo handle discard type
@@ -225,76 +349,92 @@ Types::Types() :
 {
 }
 
-} // namespace regs
+} // namespace maps
 
-regs::Handlers RegManager::handlers_;
-regs::Operations RegManager::operations_;
-regs::Types RegManager::types_;
-regs::Modifiers RegManager::modifiers_;
+maps::Mappers MapManager::handlers_;
+maps::Modifiers MapManager::modifiers_;
+maps::NodeTypes MapManager::nodeTypes_;
+maps::Operations MapManager::operations_;
+maps::Types MapManager::types_;
 
-StmtHandler RegManager::get_stmt_handler(const TSNode& node)
+StmtMapper MapManager::get_stmt_mapper(const TSNode& node)
 {
-    return get_stmt_handler(ts_node_type(node));
+    return get_stmt_mapper(nodeTypes_.get_node_type(node));
 }
 
-ExprHandler RegManager::get_expr_handler(const TSNode& node)
-{
-    return get_expr_handler(ts_node_type(node));
-}
-
-TypeHandler RegManager::get_type_handler(const TSNode& node)
-{
-    return get_type_handler(ts_node_type(node));
-}
-
-RegHandler RegManager::get_reg_handler(const TSNode& node)
-{
-    return get_reg_handler(ts_node_type(node));
-}
-
-StmtHandler RegManager::get_stmt_handler(const std::string_view nodeType)
+StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType)
 {
     // todo redo this when the typo is fixed
-    StmtHandler def = default_stmt_visit;
+    // std::cerr << "Entering statement handler: " << nodeType << "\n";
+    StmtMapper def = default_stmt_visit;
     return get_or_default(handlers_.stmts, nodeType, std::move(def));
 }
 
-ExprHandler RegManager::get_expr_handler(const std::string_view nodeType)
+ExprMapper MapManager::get_expr_mapper(const TSNode& node)
 {
-    ExprHandler def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
+    return get_expr_mapper(nodeTypes_.get_node_type(node));
+}
+
+ExprMapper MapManager::get_expr_mapper(const NodeType nodeType)
+{
+    // std::cerr << "Entering expression handler: " << nodeType << "\n";
+    ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, std::move(def));
 }
 
-TypeHandler RegManager::get_type_handler(const std::string_view nodeType)
+TypeMapper MapManager::get_type_mapper(const TSNode& node)
 {
-    TypeHandler def = default_visit<TypeFactory, TypeTranslator, Type*>;
+    return get_type_mapper(nodeTypes_.get_node_type(node));
+}
+
+TypeMapper MapManager::get_type_mapper(const NodeType nodeType)
+{
+    // std::cerr << "Entering type handler: " << nodeType << "\n";
+    TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, std::move(def));
 }
 
-RegHandler RegManager::get_reg_handler(const std::string_view nodeType)
+TypeCollector MapManager::get_type_collector(const TSNode& node)
 {
-    RegHandler def = [](auto*, const auto&) { };
-    return get_or_default(handlers_.symbolRegs, nodeType, std::move(def));
+    return get_type_collector(nodeTypes_.get_node_type(node));
 }
 
-std::optional<UnaryOpType> RegManager::get_prefix_unary_op(
+TypeCollector MapManager::get_type_collector(const NodeType nodeType)
+{
+    TypeCollector def = [](auto*, const auto&) { return nullptr; };
+    return get_or_default(handlers_.typeCollectors, nodeType, std::move(def));
+}
+
+SymbCollector MapManager::get_symb_collector(const TSNode& node)
+{
+    return get_symb_collector(nodeTypes_.get_node_type(node));
+}
+
+SymbCollector MapManager::get_symb_collector(const NodeType nodeType)
+{
+    // std::cerr << "Entering registration handler: " << nodeType << "\n";
+    SymbCollector def = [](auto*, const auto&) { };
+    return get_or_default(handlers_.symbCollectors, nodeType, std::move(def));
+}
+
+std::optional<UnaryOpType> MapManager::get_prefix_unary_op(
     const std::string_view op
 )
 {
     return get_opt(operations_.prefixUnaryOps, op);
 }
 
-std::optional<BinOpType> RegManager::get_bin_op(const std::string_view op)
+std::optional<BinOpType> MapManager::get_bin_op(const std::string_view op)
 {
     return get_opt(operations_.binaryOps, op);
 }
 
-std::optional<Type*> RegManager::get_type(const std::string_view nodeType)
+Type* MapManager::get_primitive_type(const std::string_view nodeType)
 {
-    return get_opt(types_.types, nodeType);
+    return get_opt(types_.types, nodeType).value_or(nullptr);
 }
 
-CSModifier RegManager::get_modifier(
+CSModifier MapManager::get_modifier(
     const TSNode& node,
     const std::string_view src
 )
@@ -302,22 +442,32 @@ CSModifier RegManager::get_modifier(
     return get_modifier(util::extract_text(node, src));
 }
 
-CSModifier RegManager::get_modifier(const std::string_view modifs)
+CSModifier MapManager::get_modifier(const std::string_view modifs)
 {
     return get_opt(modifiers_.modifiers, modifs).value_or(CSModifier::None);
 }
 
-bool RegManager::is_expr(const TSNode& node)
+bool MapManager::is_expr(const TSNode& node)
 {
-    return handlers_.exprs.contains(ts_node_type(node));
+    return handlers_.exprs.contains(nodeTypes_.get_node_type(node));
 }
 
-bool RegManager::is_stmt(const TSNode& node)
+bool MapManager::is_stmt(const TSNode& node)
 {
-    return handlers_.stmts.contains(ts_node_type(node));
+    return handlers_.stmts.contains(nodeTypes_.get_node_type(node));
 }
 
-Stmt* RegManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&)
+NodeType MapManager::get_node_type(const TSNode& node)
+{
+    return nodeTypes_.get_node_type(node);
+}
+
+TSSymbol MapManager::get_symbol(const NodeType type)
+{
+    return nodeTypes_.get_symbol(type);
+}
+
+Stmt* MapManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&)
 {
     // todo remove this when type is fixed
     return StmtFactory::get_instance().mk_uknown();
