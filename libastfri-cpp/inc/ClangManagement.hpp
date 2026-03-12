@@ -53,6 +53,7 @@ private:
 };
 
 int fill_translation_unit(astfri::TranslationUnit& tu, std::string const& file_path);
+int fill_translation_unit(astfri::TranslationUnit& tu, std::istream& is);
 
 } // namespace astfri::astfri_cpp
 #endif // CLANGMANAGEMENT_HPP

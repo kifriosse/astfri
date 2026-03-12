@@ -51,6 +51,9 @@ std::unique_ptr<clang::FrontendAction> CppFrontendActionFactory::create()
     return std::make_unique<CppFrontendAction>(tu);
 }
 
+/**
+    Funkcia, ktorá naplní translation zo zdrojáku na disku, potrebuje cestu k súboru
+ */
 int fill_translation_unit(astfri::TranslationUnit& tu, std::string const& file_path)
 {
     // kompilacne argumenty
@@ -60,8 +63,30 @@ int fill_translation_unit(astfri::TranslationUnit& tu, std::string const& file_p
     // spustenie ClangTool
     clang::tooling::ClangTool Tool(Compilations, {file_path});
     return Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+}
 
-    return 0;
+
+// Funkcia posiela virtuálny súbor Clang-u, ktorý sa načíta do stringu
+int fill_translation_unit(astfri::TranslationUnit& tu, std::istream& is)
+{
+    // Načítanie súboru do stringu, toto by sa mohlo optimalizovať tak,
+    // aby sa dopredu zistila veľkosť zdrojáku a rovno sa pripravilo 
+    // toľko pamäťe pre string, nech sa zbytočne neprealokováva, keď mu dojde pamäť
+    std::string content((std::istreambuf_iterator<char>(is)),
+                         std::istreambuf_iterator<char>());
+    std::string virtual_file_name = "input_from_stream.cpp";
+
+    // Kompilačné argumenty
+    std::vector<std::string> compilations = {}; 
+    clang::tooling::FixedCompilationDatabase Compilations(".", compilations);
+
+    // Inicializacia ClangTool
+    clang::tooling::ClangTool Tool(Compilations, {virtual_file_name});
+
+    // Toto zabezpečí, že Clang nebude hľadať súbor na disku.
+    Tool.mapVirtualFile(virtual_file_name, content);
+
+    return Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
 }
 
 } // namespace astfri::astfri_cpp
