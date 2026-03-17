@@ -4,22 +4,18 @@
 #include <libastfri/inc/Expr.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
 
+#include <functional>
 #include <map>
 #include <memory>
-#include <functional>
 #include <string>
 #include <vector>
 
-
-namespace astfri
-{
-
+namespace astfri {
 
 /**
  * @brief Singleton expression factory.
  */
-class ExprFactory
-{
+class ExprFactory {
 public:
     /**
      * @brief Returns the singleton instance.
@@ -34,7 +30,7 @@ public:
 
     CharLiteralExpr* mk_char_literal(char val);
 
-    StringLiteralExpr* mk_string_literal(std::string const& val);
+    StringLiteralExpr* mk_string_literal(const std::string& val);
 
     BoolLiteralExpr* mk_bool_literal(bool val);
 
@@ -85,22 +81,22 @@ public:
     /**
      * @brief Deleted copy constructor.
      */
-    ExprFactory(const ExprFactory &other) = delete;
+    ExprFactory(const ExprFactory& other) = delete;
 
     /**
      * @brief Explicitly deleted move constructor.
      */
-    ExprFactory(ExprFactory &&other) = delete;
+    ExprFactory(ExprFactory&& other) = delete;
 
     /**
      * @brief Deleted copy-assignment.
      */
-    void operator=(const ExprFactory &other) = delete;
+    void operator=(const ExprFactory& other) = delete;
 
     /**
      * @brief Explicitly deleted copy-assignment.
      */
-    void operator=(ExprFactory &&other) = delete;
+    void operator=(ExprFactory&& other) = delete;
 
 private:
     /**
@@ -109,7 +105,7 @@ private:
     ExprFactory();
 
 private:
-    TypeFactory *m_typeFactory;
+    TypeFactory* m_typeFactory;
     std::vector<std::unique_ptr<Expr>> m_otherExpressions;
     std::map<int, IntLiteralExpr> m_intLiterals;
     std::map<char, CharLiteralExpr> m_charLiterals;
@@ -121,7 +117,6 @@ private:
     ThisExpr m_thisExpr;
     UnknownExpr m_unknownExpr;
 };
-
 
 } // namespace astfri
 

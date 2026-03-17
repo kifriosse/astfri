@@ -14,16 +14,14 @@
 #include <functional>
 #include <string_view>
 
-namespace astfri
-{
+namespace astfri {
 // Forward declarations
 struct Type;
 struct Stmt;
 struct Expr;
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 // Forward declarations
 class ScopeNode;
 class TypeTranslator;
@@ -96,8 +94,7 @@ using RegistryStrViewMap = std::unordered_map<std::string_view, Value>;
  * https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
  */
 template<typename Value>
-using IdentifierMap
-    = std::unordered_map<std::string, Value, util::StringHash, std::equal_to<>>;
+using IdentifierMap = std::unordered_map<std::string, Value, util::StringHash, std::equal_to<>>;
 
 } // namespace astfri::csharp
 

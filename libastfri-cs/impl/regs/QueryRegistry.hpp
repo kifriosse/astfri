@@ -7,14 +7,12 @@
 
 #include <unordered_map>
 
-namespace astfri::csharp::maps
-{
+namespace astfri::csharp::maps {
 
 /**
  * @brief Enum for identifying different types of queries in the registry
  */
-enum class QueryType
-{
+enum class QueryType {
     TopLevel,
     VarDecltor,
     VarDecl,
@@ -31,8 +29,7 @@ enum class QueryType
  * easy access.
  * @note Query is not copyable
  */
-class Query
-{
+class Query {
 private:
     TSQuery* query_;
     IdentifierMap<CaptureId> captureIds;
@@ -69,8 +66,7 @@ public:
  * @brief Registry for tree-sitter queries.
  * @note Uses singleton pattern which makes it not copyable and not movable.
  */
-class QueryReg
-{
+class QueryReg {
 private:
     std::unordered_map<QueryType, const Query> queries_{};
     QueryReg();

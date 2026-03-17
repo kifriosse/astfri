@@ -3,16 +3,19 @@
 
 #include <sstream>
 
-namespace astfri::text
-{
-    class PlainTextExporter
-    {
-    public:
-        PlainTextExporter(int rowCount, std::stringstream* const& text);
-    private:
-        void execute(int rowCount, std::stringstream* const& text);
-        void write_pseudocode_into_file(int r, std::stringstream* const& text, std::string const& fullfilepath);
-    };
-}
+namespace astfri::text {
+class PlainTextExporter {
+public:
+    PlainTextExporter(int rowCount, std::stringstream* const& text);
+
+private:
+    void execute(int rowCount, std::stringstream* const& text);
+    void write_pseudocode_into_file(
+        int r,
+        std::stringstream* const& text,
+        const std::string& fullfilepath
+    );
+};
+} // namespace astfri::text
 
 #endif

@@ -4,10 +4,8 @@
 #include <libastfri-uml/impl/ClassVisitor.hpp>
 #include <libastfri-uml/impl/PlantUMLOutputter.hpp>
 
-namespace astfri::uml
-{
-class UMLLibWrapper
-{
+namespace astfri::uml {
+class UMLLibWrapper {
 private:
     ClassVisitor classVisitor_;
 

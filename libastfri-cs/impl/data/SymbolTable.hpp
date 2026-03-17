@@ -9,14 +9,12 @@
 #include <unordered_map>
 #include <vector>
 
-namespace astfri
-{
+namespace astfri {
 // forward declaration
 struct UserTypeDefStmt;
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 // forward declaration
 class TypeMetadata;
 struct TypeBinding;
@@ -25,8 +23,7 @@ struct TypeBinding;
  * @brief Symbol table containing metadata about user defined types
  * @note SymbolTable is not copyable
  */
-class SymbolTable
-{
+class SymbolTable {
 private:
     template<typename T>
     using span = std::span<T>;
@@ -75,11 +72,7 @@ public:
      * @param src source file where type is defined
      * @return pointer to scope node of added type in symbol tree
      */
-    ScopeNode* add_type(
-        const TypeBinding& tb,
-        const TSNode& node,
-        SourceFile* src
-    );
+    ScopeNode* add_type(const TypeBinding& tb, const TSNode& node, SourceFile* src);
     /**
      * @brief Adds type only to symbol tree and returns scope node of added type
      * @param tb type binding of type to be added

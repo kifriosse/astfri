@@ -12,14 +12,11 @@
 #include <string_view>
 #include <vector>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
-Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node) {
     self->semanticContext_.enter_scope();
-    auto discoverFunc = [self](const TSNode& current) -> void
-    {
+    auto discoverFunc = [self](const TSNode& current) -> void {
         using enum NodeType;
         if (! ts_node_is_named(current)
             || ts_node_symbol(current) != MapManager::get_symbol(LocalFuncDecl))
@@ -33,10 +30,8 @@ Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node)
     util::for_each_child_node(node, discoverFunc);
 
     std::vector<Stmt*> stmts;
-    auto processBody = [self, &stmts](const TSNode& nCurrent) -> void
-    {
-        if (ts_node_is_named(nCurrent))
-        {
+    auto processBody = [self, &stmts](const TSNode& nCurrent) -> void {
+        if (ts_node_is_named(nCurrent)) {
             const StmtMapper hStmt = MapManager::get_stmt_mapper(nCurrent);
             stmts.push_back(hStmt(self, nCurrent));
         }
@@ -48,8 +43,7 @@ Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_compound(std::move(stmts));
 }
 
-Stmt* SrcCodeVisitor::visit_arrow_body(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_arrow_body(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nBody     = ts_node_named_child(node, 0);
     const ExprMapper hBody = MapManager::get_expr_mapper(nBody);
     Type* returnType       = self->semanticContext_.current_return_type();
@@ -64,18 +58,15 @@ Stmt* SrcCodeVisitor::visit_arrow_body(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_compound({body});
 }
 
-Stmt* SrcCodeVisitor::visit_while(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_while(SrcCodeVisitor* self, const TSNode& node) {
     return self->make_while_loop(node, true);
 }
 
-Stmt* SrcCodeVisitor::visit_do_while(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_do_while(SrcCodeVisitor* self, const TSNode& node) {
     return self->make_while_loop(node, false);
 }
 
-Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node) {
     self->semanticContext_.enter_scope();
     const TSNode nInit  = util::child_by_field_name(node, "initializer");
     const TSNode nCond  = util::child_by_field_name(node, "condition");
@@ -87,10 +78,8 @@ Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
     Expr* cond          = nullptr;
     Stmt* step          = nullptr;
 
-    if (! ts_node_is_null(nInit))
-    {
-        if (MapManager::is_expr(nInit))
-        {
+    if (! ts_node_is_null(nInit)) {
+        if (MapManager::is_expr(nInit)) {
             const TSNode* nEnd = &nBody;
             if (! condNull)
                 nEnd = &nCond;
@@ -99,20 +88,17 @@ Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
 
             init = stmtFact_.mk_expr(self->expr_list_to_comma_op(nInit, nEnd));
         }
-        else
-        {
+        else {
             init = self->visit_for_init_var_def(nInit);
         }
     }
 
-    if (! condNull)
-    {
+    if (! condNull) {
         const ExprMapper hCond = MapManager::get_expr_mapper(nCond);
         cond                   = hCond(self, nCond);
     }
 
-    if (! stepNull)
-    {
+    if (! stepNull) {
         step = stmtFact_.mk_expr(self->expr_list_to_comma_op(nStep, &nBody));
     }
 
@@ -122,16 +108,14 @@ Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_for(init, cond, step, body);
 }
 
-Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node) {
     self->semanticContext_.enter_scope();
     const TSNode nType  = util::child_by_field_name(node, "type");
     const TSNode hLeft  = util::child_by_field_name(node, "left");
     const TSNode nRight = util::child_by_field_name(node, "right");
     const TSNode nBody  = util::child_by_field_name(node, "body");
 
-    if (ts_node_is_null(nType))
-    {
+    if (ts_node_is_null(nType)) {
         // todo handle deconstruction syntax
         // throw std::logic_error(
         //     "Foreach loop with deconstruction syntax is not supported yet"
@@ -144,8 +128,7 @@ Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node)
     const StmtMapper hBody  = MapManager::get_stmt_mapper(nBody);
     const TypeMapper th     = MapManager::get_type_mapper(nType);
     Type* type              = th(&self->typeTrs_, nType);
-    LocalVarDefStmt* left
-        = stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
+    LocalVarDefStmt* left   = stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
     self->semanticContext_.reg_local_var(left);
     Expr* right = hRight(self, nRight);
     Stmt* body  = hBody(self, nBody);
@@ -153,18 +136,15 @@ Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_for_each(left, right, body);
 }
 
-Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node) {
     static constexpr std::string_view falseSw = "alternative";
 
     std::vector<TSNode> nIfs;
     nIfs.push_back(node);
     TSNode nCurrent    = util::child_by_field_name(node, falseSw);
     const TSSymbol sIf = ts_node_symbol(node);
-    TSSymbol sCurrent
-        = ts_node_is_null(nCurrent) ? 0 : ts_node_symbol(nCurrent);
-    while (sCurrent == sIf)
-    {
+    TSSymbol sCurrent  = ts_node_is_null(nCurrent) ? 0 : ts_node_symbol(nCurrent);
+    while (sCurrent == sIf) {
         nIfs.push_back(nCurrent);
         nCurrent = util::child_by_field_name(nCurrent, falseSw);
         if (ts_node_is_null(nCurrent))
@@ -177,14 +157,12 @@ Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
     const TSNode nElse = util::child_by_field_name(nIfs.back(), falseSw);
 
     Stmt* currentElse  = nullptr;
-    if (! ts_node_is_null(nElse))
-    {
+    if (! ts_node_is_null(nElse)) {
         const StmtMapper hElse = MapManager::get_stmt_mapper(nElse);
         currentElse            = hElse(self, nElse);
     }
 
-    while (! nIfs.empty())
-    {
+    while (! nIfs.empty()) {
         const TSNode ifNode = nIfs.back();
         nIfs.pop_back();
         const TSNode nTrue = util::child_by_field_name(ifNode, "consequence");
@@ -201,8 +179,7 @@ Stmt* SrcCodeVisitor::visit_if(SrcCodeVisitor* self, const TSNode& node)
     return currentElse;
 }
 
-Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node) {
     if (ts_node_child_count(node) < 2)
         return stmtFact_.mk_uknown();
 
@@ -212,8 +189,7 @@ Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node)
     Stmt* finally          = nullptr;
     std::vector<CatchStmt*> catchStmts;
 
-    auto process = [&](const TSNode& current) -> void
-    {
+    auto process = [&](const TSNode& current) -> void {
         if (ts_node_eq(current, nBody))
             return;
 
@@ -232,23 +208,19 @@ Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_try(hBody(self, nBody), finally, std::move(catchStmts));
 }
 
-Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node) {
     self->semanticContext_.enter_scope();
 
     LocalVarDefStmt* catchVar = nullptr;
     Stmt* body                = nullptr;
-    auto process              = [&](const TSNode& n_current) -> void
-    {
+    auto process              = [&](const TSNode& n_current) -> void {
         const StmtMapper hCurrent = MapManager::get_stmt_mapper(n_current);
         Stmt* currentStmt         = hCurrent(self, n_current);
-        if (const auto var = as_a<LocalVarDefStmt>(currentStmt))
-        {
+        if (const auto var = as_a<LocalVarDefStmt>(currentStmt)) {
             catchVar = var;
             self->semanticContext_.reg_local_var(catchVar);
         }
-        else if (is_a<CompoundStmt>(currentStmt))
-        {
+        else if (is_a<CompoundStmt>(currentStmt)) {
             body = currentStmt;
         }
     };
@@ -258,34 +230,29 @@ Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_catch(catchVar, body);
 }
 
-Stmt* SrcCodeVisitor::visit_finally(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_finally(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nBody = ts_node_named_child(node, 0);
     return MapManager::get_stmt_mapper(nBody)(self, nBody);
 }
 
-Stmt* SrcCodeVisitor::visit_catch_decl(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_catch_decl(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nType  = util::child_by_field_name(node, "type");
     const TSNode nName  = util::child_by_field_name(node, "name");
     const TypeMapper th = MapManager::get_type_mapper(nType);
     Type* type          = th(&self->typeTrs_, nType);
-    std::string name    = ts_node_is_null(nName)
-                            ? std::string{}
-                            : util::extract_text(nName, self->src_str());
+    std::string name
+        = ts_node_is_null(nName) ? std::string{} : util::extract_text(nName, self->src_str());
     return stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
 }
 
-Stmt* SrcCodeVisitor::visit_switch(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_switch(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nValue      = util::child_by_field_name(node, "value");
     const TSNode nSwitchBody = util::child_by_field_name(node, "body");
     const ExprMapper hValue  = MapManager::get_expr_mapper(nValue);
     Expr* value              = hValue(self, nValue);
 
     std::vector<CaseBaseStmt*> cases;
-    auto process = [self, &cases](const TSNode& nCurrent) -> void
-    {
+    auto process = [self, &cases](const TSNode& nCurrent) -> void {
         const StmtMapper hStmt = MapManager::get_stmt_mapper(nCurrent);
         Stmt* stmt             = hStmt(self, nCurrent);
         if (auto* caseStmt = as_a<CaseBaseStmt>(stmt))
@@ -295,16 +262,13 @@ Stmt* SrcCodeVisitor::visit_switch(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_switch(value, std::move(cases));
 }
 
-Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node) {
     TSTreeCursor cursor = ts_tree_cursor_new(node);
-    if (ts_tree_cursor_goto_first_child(&cursor))
-    {
+    if (ts_tree_cursor_goto_first_child(&cursor)) {
         std::vector<Stmt*> bodyStmts;
         Expr* pattern = nullptr;
         TSNode nCurrent;
-        do
-        {
+        do {
             nCurrent = ts_tree_cursor_current_node(&cursor);
             if (std::strcmp(ts_node_type(nCurrent), ":") == 0)
                 break;
@@ -314,10 +278,10 @@ Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
             // todo handle more complex patterns
             const ExprMapper hParrent = MapManager::get_expr_mapper(nCurrent);
             pattern                   = hParrent(self, nCurrent);
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+        }
+        while (ts_tree_cursor_goto_next_sibling(&cursor));
 
-        while (ts_tree_cursor_goto_next_sibling(&cursor))
-        {
+        while (ts_tree_cursor_goto_next_sibling(&cursor)) {
             nCurrent = ts_tree_cursor_current_node(&cursor);
             if (! ts_node_is_named(nCurrent))
                 continue;
@@ -329,10 +293,9 @@ Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
 
         ts_tree_cursor_delete(&cursor);
 
-        Stmt* body
-            = bodyStmts.size() == 1 && is_a<CompoundStmt>(bodyStmts.back())
-                ? bodyStmts.back()
-                : stmtFact_.mk_compound(std::move(bodyStmts));
+        Stmt* body = bodyStmts.size() == 1 && is_a<CompoundStmt>(bodyStmts.back())
+                       ? bodyStmts.back()
+                       : stmtFact_.mk_compound(std::move(bodyStmts));
 
         if (pattern)
             return stmtFact_.mk_case(pattern, body);
@@ -344,8 +307,7 @@ Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_uknown();
 }
 
-Stmt* SrcCodeVisitor::visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nExpr     = ts_node_child(node, 0);
     const ExprMapper hExpr = MapManager::get_expr_mapper(nExpr);
     return stmtFact_.mk_expr(hExpr(self, nExpr));
@@ -354,24 +316,20 @@ Stmt* SrcCodeVisitor::visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node)
 Stmt* SrcCodeVisitor::visit_continue(
     [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode& node
-)
-{
+) {
     return stmtFact_.mk_continue();
 }
 
 Stmt* SrcCodeVisitor::visit_break(
     [[maybe_unused]] SrcCodeVisitor* self,
     [[maybe_unused]] const TSNode& node
-)
-{
+) {
     return stmtFact_.mk_break();
 }
 
-Stmt* SrcCodeVisitor::visit_return(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_return(SrcCodeVisitor* self, const TSNode& node) {
     Expr* expr = nullptr;
-    if (ts_node_named_child_count(node) > 0)
-    {
+    if (ts_node_named_child_count(node) > 0) {
         const TSNode nExpr     = ts_node_named_child(node, 0);
         const ExprMapper hExpr = MapManager::get_expr_mapper(nExpr);
         expr                   = hExpr(self, nExpr);
@@ -379,11 +337,9 @@ Stmt* SrcCodeVisitor::visit_return(SrcCodeVisitor* self, const TSNode& node)
     return stmtFact_.mk_return(expr);
 }
 
-Stmt* SrcCodeVisitor::visit_throw(SrcCodeVisitor* self, const TSNode& node)
-{
+Stmt* SrcCodeVisitor::visit_throw(SrcCodeVisitor* self, const TSNode& node) {
     Expr* expr = nullptr;
-    if (ts_node_named_child_count(node) > 0)
-    {
+    if (ts_node_named_child_count(node) > 0) {
         const TSNode nExpr      = ts_node_named_child(node, 0);
         const ExprMapper hhExpr = MapManager::get_expr_mapper(nExpr);
         expr                    = hhExpr(self, nExpr);

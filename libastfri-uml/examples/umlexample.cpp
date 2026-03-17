@@ -2,28 +2,28 @@
 
 #include <vector>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     auto& statements = astfri::StmtFactory::get_instance();
     // auto& expressions = astfri::ExprFactory::get_instance();
-    auto& types                                   = astfri::TypeFactory::get_instance();
+    auto& types                       = astfri::TypeFactory::get_instance();
 
-    astfri::Scope scope = astfri::mk_scope("Global");
+    astfri::Scope scope               = astfri::mk_scope("Global");
 
-    astfri::ClassDefStmt* classFoo                = statements.mk_class_def("Foo", scope);
-    astfri::ClassDefStmt* classBar                = statements.mk_class_def("Bar", scope);
-    astfri::ClassDefStmt* classParent             = statements.mk_class_def("Parent", scope);
-    astfri::InterfaceDefStmt* interfaceIVisitable = statements.mk_interface_def("IVisitable", scope);
+    astfri::ClassDefStmt* classFoo    = statements.mk_class_def("Foo", scope);
+    astfri::ClassDefStmt* classBar    = statements.mk_class_def("Bar", scope);
+    astfri::ClassDefStmt* classParent = statements.mk_class_def("Parent", scope);
+    astfri::InterfaceDefStmt* interfaceIVisitable
+        = statements.mk_interface_def("IVisitable", scope);
 
-    astfri::ClassType* classTypeFoo = types.mk_class("Foo", scope);
-    astfri::ClassType* classTypeBar = types.mk_class("Bar", scope);
+    astfri::ClassType* classTypeFoo    = types.mk_class("Foo", scope);
+    astfri::ClassType* classTypeBar    = types.mk_class("Bar", scope);
     astfri::ClassType* classTypeParent = types.mk_class("Parent", scope);
-    //astfri::InterfaceType* interfaceTypeIVisitable = types.mk_interface("IVisitable", scope);
+    // astfri::InterfaceType* interfaceTypeIVisitable = types.mk_interface("IVisitable", scope);
 
-    classFoo->type = classTypeFoo;
-    classBar->type = classTypeBar;
+    classFoo->type    = classTypeFoo;
+    classBar->type    = classTypeBar;
     classParent->type = classTypeParent;
-    //interfaceIVisitable->type_ = interfaceTypeIVisitable;
+    // interfaceIVisitable->type_ = interfaceTypeIVisitable;
 
     std::vector<astfri::GenericParam*> genericParamsFoo;
     genericParamsFoo.push_back(statements.mk_generic_param("", "T"));
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     classBar->bases = basesBar;
 
     std::vector<astfri::ConstructorDefStmt*> constructorsBar;
-    auto cnstrBar     = statements.mk_constructor_def();
+    auto cnstrBar    = statements.mk_constructor_def();
     cnstrBar->access = astfri::AccessModifier::Public;
     cnstrBar->owner  = classBar;
     constructorsBar.push_back(cnstrBar);
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     ));
     classFoo->vars = fieldsFoo;
 
-    auto func       = statements.mk_function_def();
+    auto func      = statements.mk_function_def();
     func->name     = "foo";
     func->retType  = types.mk_indirect(types.mk_class("Bar", astfri::mk_scope()));
     std::vector<astfri::ParamVarDefStmt*> params;
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     func->params = params;
 
     std::vector<astfri::MethodDefStmt*> methodsFoo;
-    auto methodFooOne         = statements.mk_method_def();
+    auto methodFooOne        = statements.mk_method_def();
     methodFooOne->access     = astfri::AccessModifier::Public;
     methodFooOne->owner      = (classFoo);
     methodFooOne->virtuality = astfri::Virtuality::NotVirtual;
@@ -101,20 +101,17 @@ int main(int argc, char** argv)
     tu.interfaces = interfaces;
 
     std::string config_file;
-    if (argc > 1)
-    {
+    if (argc > 1) {
         config_file = argv[1];
     }
-    else
-    {
+    else {
         config_file = "../libastfri-uml/examples/default_config.json";
     }
 
     astfri::uml::Config conf;
-    if (! conf.parse_json(config_file.c_str()))
-    {
+    if (! conf.parse_json(config_file.c_str())) {
         conf.use_default_values();
-        //std::cout << "Unable to parse JSON config. Using default values.\n";
+        // std::cout << "Unable to parse JSON config. Using default values.\n";
     }
     // config can be changed at any point before calling run
     // either by directly accessing its member variables

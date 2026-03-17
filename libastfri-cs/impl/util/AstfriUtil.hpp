@@ -15,15 +15,13 @@
 #include <string_view>
 #include <vector>
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 
 /**
  * @brief Helper struct to hold discovered parameter definitions and their
  * metadata.
  */
-struct ParamSignature
-{
+struct ParamSignature {
     std::vector<ParamVarDefStmt*> defs;
     std::vector<ParamMetadata> metadata;
 };
@@ -63,11 +61,7 @@ Scope mk_scope(ScopeNode* start, const SourceFile& currentSrc);
  * @note Creates a ParamVarDefStmt but without initialization expression -
  * needs to be handled by the caller
  */
-ParamVarDefStmt* mk_param_def(
-    const TSNode& node,
-    std::string_view src,
-    TypeTranslator& typeTrs
-);
+ParamVarDefStmt* mk_param_def(const TSNode& node, std::string_view src, TypeTranslator& typeTrs);
 
 /**
  * @brief Discovers parameters from the given TSNode representing a parameter
@@ -77,22 +71,11 @@ ParamVarDefStmt* mk_param_def(
  * @param typeTrs TypeTranslator instance for translating type nodes
  * @return ParamSignature containing parameter definitions and metadata
  */
-ParamSignature discover_params(
-    const TSNode& node,
-    std::string_view src,
-    TypeTranslator& typeTrs
-);
+ParamSignature discover_params(const TSNode& node, std::string_view src, TypeTranslator& typeTrs);
 
-FuncMetadata make_func_metadata(
-    const TSNode& node,
-    std::string_view src,
-    TypeTranslator& typeTrs
-);
+FuncMetadata make_func_metadata(const TSNode& node, std::string_view src, TypeTranslator& typeTrs);
 
-std::vector<GenericParam*> make_generic_params(
-    const TSNode& node,
-    std::string_view src
-);
+std::vector<GenericParam*> make_generic_params(const TSNode& node, std::string_view src);
 
 } // namespace astfri::csharp::util
 

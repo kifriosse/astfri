@@ -8,15 +8,13 @@
 #include <string>
 #include <string_view>
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 /**
  * @brief Hash struct that allows hashing both std::string and std::string_view
  * @note Source:
  * https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
  */
-struct StringHash
-{
+struct StringHash {
     using is_transparent = void;
     size_t operator()(std::string_view str) const noexcept;
     size_t operator()(const std::string& str) const noexcept;
@@ -34,10 +32,7 @@ IntSuffix get_suffix_type(std::string_view suffix);
  * @param qualifs deque to store the split components of the namespace qualifier
  * @param nmsQualif dot-separated namespace qualifier string to split
  */
-void split_namespace(
-    std::deque<std::string>& qualifs,
-    std::string_view nmsQualif
-);
+void split_namespace(std::deque<std::string>& qualifs, std::string_view nmsQualif);
 /**
  * @brief Checks if the given name is a interface name according to C# naming
  * conventions (starts with 'I' followed by an uppercase letter).

@@ -9,16 +9,14 @@
 #include <string>
 #include <vector>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 class ScopeNode;
 
 /**
  * @brief Represents a source file
  * @note SourceFile is not copyable
  */
-struct SourceFile
-{
+struct SourceFile {
     std::vector<ScopeNode*> usings{};
     Scope fileNms{};
     std::string srcStr;

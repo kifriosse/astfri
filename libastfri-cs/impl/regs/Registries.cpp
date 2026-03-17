@@ -12,26 +12,22 @@
 #include <optional>
 #include <string>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 class SrcCodeVisitor;
 class SymbTableBuilder;
 class TypeTranslator;
 
-namespace maps
-{
+namespace maps {
 
-namespace
-{
+namespace {
 using enum NodeType;
 
 /**
  * @brief Helper struct for mapping tree-sitter node names to NodeType enum
  * values
  */
-struct MappingRule
-{
+struct MappingRule {
     std::string_view nodeName;
     NodeType nodeType;
     bool isNamed;
@@ -121,27 +117,23 @@ constexpr MappingRule mappingRules_[] = {
 
 } // namespace
 
-NodeTypes::NodeTypes()
-{
+NodeTypes::NodeTypes() {
     const TSLanguage* lang = tree_sitter_c_sharp();
     const uint32_t size    = ts_language_symbol_count(lang);
     nodeTypeMap_.assign(size, Unknown);
     symbolMap_.assign(size, INVALID_SYMBOL);
-    for (const auto& [nodeName, nodeType, isNamed] : mappingRules_)
-    {
-        const TSSymbol s = util::symbol_for_name(nodeName, isNamed);
-        nodeTypeMap_[s]  = nodeType;
+    for (const auto& [nodeName, nodeType, isNamed] : mappingRules_) {
+        const TSSymbol s                            = util::symbol_for_name(nodeName, isNamed);
+        nodeTypeMap_[s]                             = nodeType;
         symbolMap_[static_cast<TSSymbol>(nodeType)] = s;
     }
 }
 
-TSSymbol NodeTypes::get_symbol(const NodeType type) const
-{
+TSSymbol NodeTypes::get_symbol(const NodeType type) const {
     return symbolMap_.at(static_cast<TSSymbol>(type));
 }
 
-NodeType NodeTypes::get_node_type(const TSNode& node) const
-{
+NodeType NodeTypes::get_node_type(const TSNode& node) const {
     return nodeTypeMap_.at(ts_node_symbol(node));
 }
 
@@ -226,8 +218,7 @@ Mappers::Mappers() :
         {MemberVarDef, SymbTableBuilder::visit_memb_var},
         {PropertyDecl, SymbTableBuilder::visit_property},
         {MethodDecl, SymbTableBuilder::visit_method},
-    })
-{
+    }) {
 }
 
 Operations::Operations() :
@@ -271,8 +262,7 @@ Operations::Operations() :
          {"&=", BinOpType::BitAndAssign},
          {"|=", BinOpType::BitOrAssign},
          {"^=", BinOpType::BitXorAssign}}
-    )
-{
+    ) {
 }
 
 Modifiers::Modifiers() :
@@ -295,8 +285,7 @@ Modifiers::Modifiers() :
         {"out",       CSModifier::Out      },
         {"in",        CSModifier::In       },
         {"ref",       CSModifier::Ref      },
-})
-{
+}) {
 }
 
 Types::Types() :
@@ -345,8 +334,7 @@ Types::Types() :
 
         {"var", typeFact.mk_unknown()}, // todo handle var type
         {"_", typeFact.mk_unknown()}, // todo handle discard type
-})
-{
+}) {
 }
 
 } // namespace maps
@@ -357,118 +345,93 @@ maps::NodeTypes MapManager::nodeTypes_;
 maps::Operations MapManager::operations_;
 maps::Types MapManager::types_;
 
-StmtMapper MapManager::get_stmt_mapper(const TSNode& node)
-{
+StmtMapper MapManager::get_stmt_mapper(const TSNode& node) {
     return get_stmt_mapper(nodeTypes_.get_node_type(node));
 }
 
-StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType)
-{
+StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType) {
     // todo redo this when the typo is fixed
     // std::cerr << "Entering statement handler: " << nodeType << "\n";
     StmtMapper def = default_stmt_visit;
     return get_or_default(handlers_.stmts, nodeType, std::move(def));
 }
 
-ExprMapper MapManager::get_expr_mapper(const TSNode& node)
-{
+ExprMapper MapManager::get_expr_mapper(const TSNode& node) {
     return get_expr_mapper(nodeTypes_.get_node_type(node));
 }
 
-ExprMapper MapManager::get_expr_mapper(const NodeType nodeType)
-{
+ExprMapper MapManager::get_expr_mapper(const NodeType nodeType) {
     // std::cerr << "Entering expression handler: " << nodeType << "\n";
     ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, std::move(def));
 }
 
-TypeMapper MapManager::get_type_mapper(const TSNode& node)
-{
+TypeMapper MapManager::get_type_mapper(const TSNode& node) {
     return get_type_mapper(nodeTypes_.get_node_type(node));
 }
 
-TypeMapper MapManager::get_type_mapper(const NodeType nodeType)
-{
+TypeMapper MapManager::get_type_mapper(const NodeType nodeType) {
     // std::cerr << "Entering type handler: " << nodeType << "\n";
     TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, std::move(def));
 }
 
-TypeCollector MapManager::get_type_collector(const TSNode& node)
-{
+TypeCollector MapManager::get_type_collector(const TSNode& node) {
     return get_type_collector(nodeTypes_.get_node_type(node));
 }
 
-TypeCollector MapManager::get_type_collector(const NodeType nodeType)
-{
+TypeCollector MapManager::get_type_collector(const NodeType nodeType) {
     TypeCollector def = [](auto*, const auto&) { return nullptr; };
     return get_or_default(handlers_.typeCollectors, nodeType, std::move(def));
 }
 
-SymbCollector MapManager::get_symb_collector(const TSNode& node)
-{
+SymbCollector MapManager::get_symb_collector(const TSNode& node) {
     return get_symb_collector(nodeTypes_.get_node_type(node));
 }
 
-SymbCollector MapManager::get_symb_collector(const NodeType nodeType)
-{
+SymbCollector MapManager::get_symb_collector(const NodeType nodeType) {
     // std::cerr << "Entering registration handler: " << nodeType << "\n";
     SymbCollector def = [](auto*, const auto&) { };
     return get_or_default(handlers_.symbCollectors, nodeType, std::move(def));
 }
 
-std::optional<UnaryOpType> MapManager::get_prefix_unary_op(
-    const std::string_view op
-)
-{
+std::optional<UnaryOpType> MapManager::get_prefix_unary_op(const std::string_view op) {
     return get_opt(operations_.prefixUnaryOps, op);
 }
 
-std::optional<BinOpType> MapManager::get_bin_op(const std::string_view op)
-{
+std::optional<BinOpType> MapManager::get_bin_op(const std::string_view op) {
     return get_opt(operations_.binaryOps, op);
 }
 
-Type* MapManager::get_primitive_type(const std::string_view nodeType)
-{
+Type* MapManager::get_primitive_type(const std::string_view nodeType) {
     return get_opt(types_.types, nodeType).value_or(nullptr);
 }
 
-CSModifier MapManager::get_modifier(
-    const TSNode& node,
-    const std::string_view src
-)
-{
+CSModifier MapManager::get_modifier(const TSNode& node, const std::string_view src) {
     return get_modifier(util::extract_text(node, src));
 }
 
-CSModifier MapManager::get_modifier(const std::string_view modifs)
-{
+CSModifier MapManager::get_modifier(const std::string_view modifs) {
     return get_opt(modifiers_.modifiers, modifs).value_or(CSModifier::None);
 }
 
-bool MapManager::is_expr(const TSNode& node)
-{
+bool MapManager::is_expr(const TSNode& node) {
     return handlers_.exprs.contains(nodeTypes_.get_node_type(node));
 }
 
-bool MapManager::is_stmt(const TSNode& node)
-{
+bool MapManager::is_stmt(const TSNode& node) {
     return handlers_.stmts.contains(nodeTypes_.get_node_type(node));
 }
 
-NodeType MapManager::get_node_type(const TSNode& node)
-{
+NodeType MapManager::get_node_type(const TSNode& node) {
     return nodeTypes_.get_node_type(node);
 }
 
-TSSymbol MapManager::get_symbol(const NodeType type)
-{
+TSSymbol MapManager::get_symbol(const NodeType type) {
     return nodeTypes_.get_symbol(type);
 }
 
-Stmt* MapManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&)
-{
+Stmt* MapManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&) {
     // todo remove this when type is fixed
     return StmtFactory::get_instance().mk_uknown();
 }

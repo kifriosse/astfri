@@ -6,8 +6,7 @@
 #include <memory>
 #include <utility>
 
-namespace astfri::details
-{
+namespace astfri::details {
 
 /**
  * @brief TODO
@@ -33,11 +32,9 @@ concept vector_like = requires(Vector v, typename Vector::value_type x) { v.push
  * constructed from @p args
  */
 template<typename Val, map_like Map, typename Key, typename... Args>
-Val* emplace_get(Key&& key, Map& map, Args&&... args)
-{
-    auto const it = map.find(key);
-    if (it != map.end())
-    {
+Val* emplace_get(Key&& key, Map& map, Args&&... args) {
+    const auto it = map.find(key);
+    if (it != map.end()) {
         return &it->second;
     }
     return &map.try_emplace(std::move(key), std::forward<Args>(args)...).first->second;
@@ -50,8 +47,7 @@ Val* emplace_get(Key&& key, Map& map, Args&&... args)
  * @return Pointer to the new @c T instance.
  */
 template<typename T, vector_like Vector, typename... Args>
-T* emplace_get(Vector& store, Args&&... args)
-{
+T* emplace_get(Vector& store, Args&&... args) {
     auto e = std::make_unique<T>(std::forward<Args>(args)...);
     store.push_back(std::move(e));
     return static_cast<T*>(store.back().get());

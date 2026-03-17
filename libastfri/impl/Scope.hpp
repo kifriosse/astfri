@@ -10,8 +10,7 @@ namespace astfri {
 /**
  * @brief TODO
  */
-struct Scope
-{
+struct Scope {
     std::vector<std::string> names;
 };
 
@@ -26,7 +25,7 @@ Scope mk_scope(String... parts);
  * The name is used for an internal bookeeping.
  * It is not intended for display purposes.
  */
-std::string mk_fqn(const Scope &scope, std::string_view name);
+std::string mk_fqn(const Scope& scope, std::string_view name);
 
 } // namespace astfri
 

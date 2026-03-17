@@ -12,20 +12,18 @@
 // to co je treba na moje
 #include <libastfri-cpp/inc/ClangManagement.hpp>
 
-int main(int argc, char const** argv)
-{
+int main(int argc, const char** argv) {
     (void)argc;
     astfri::TranslationUnit tu;
     // if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
-    if (astfri::astfri_cpp::fill_translation_unit(tu, std::cin) != 0)
-    {
+    if (astfri::astfri_cpp::fill_translation_unit(tu, std::cin) != 0) {
         std::cout << "chyba pri fill_translation_unit\n";
         return 1;
     }
     // koniec mojho
     // std::cout << "Ill be back!" << std::endl;
     // AST Visitor - nice
-    
+
     // ako toto rozbehať?
     astfri::text::TextLibManager& man = astfri::text::TextLibManager::get_instance();
     man.visit_and_export(tu);

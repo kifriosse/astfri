@@ -14,10 +14,8 @@
 #include <clang/Tooling/Tooling.h>
 #include <memory>
 
-namespace astfri::astfri_cpp
-{
-class CppASTConsumer : public clang::ASTConsumer
-{
+namespace astfri::astfri_cpp {
+class CppASTConsumer : public clang::ASTConsumer {
 public:
     CppASTConsumer(astfri::TranslationUnit& _tu);
     void HandleTranslationUnit(clang::ASTContext& Context) override;
@@ -27,8 +25,7 @@ private:
 };
 
 // Frontend Action
-class CppFrontendAction : public clang::ASTFrontendAction
-{
+class CppFrontendAction : public clang::ASTFrontendAction {
 public:
     CppFrontendAction(astfri::TranslationUnit& _tu);
     std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
@@ -41,8 +38,7 @@ private:
 };
 
 // Custom Frontend Action Factory
-class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory
-{
+class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 public:
     CppFrontendActionFactory(astfri::TranslationUnit& _tu);
 
@@ -52,7 +48,7 @@ private:
     astfri::TranslationUnit& tu;
 };
 
-int fill_translation_unit(astfri::TranslationUnit& tu, std::string const& file_path);
+int fill_translation_unit(astfri::TranslationUnit& tu, const std::string& file_path);
 int fill_translation_unit(astfri::TranslationUnit& tu, std::istream& is);
 
 } // namespace astfri::astfri_cpp

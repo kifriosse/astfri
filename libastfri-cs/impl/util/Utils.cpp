@@ -9,59 +9,44 @@
 #include <string>
 #include <string_view>
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 
-size_t StringHash::operator()(const std::string_view str) const noexcept
-{
+size_t StringHash::operator()(const std::string_view str) const noexcept {
     return std::hash<std::string_view>()(str);
 }
 
-size_t StringHash::operator()(const std::string& str) const noexcept
-{
+size_t StringHash::operator()(const std::string& str) const noexcept {
     return std::hash<std::string>()(str);
 }
 
-IntSuffix get_suffix_type(const std::string_view suffix)
-{
+IntSuffix get_suffix_type(const std::string_view suffix) {
     if (suffix.empty())
         return IntSuffix::None;
 
     const char first  = static_cast<char>(std::tolower(suffix[0]));
-    const char second = static_cast<char>(
-        suffix.length() == 2 ? std::tolower(suffix[1]) : '\0'
-    );
+    const char second = static_cast<char>(suffix.length() == 2 ? std::tolower(suffix[1]) : '\0');
 
     // considering that we can't get stuff like UU or LL or L1 or U1
-    if ((first == 'u' && second == 'l') || (first == 'l' && second == 'u'))
-    {
+    if ((first == 'u' && second == 'l') || (first == 'l' && second == 'u')) {
         return IntSuffix::UL;
     }
-    if (first == 'l' || first == 'u')
-    {
+    if (first == 'l' || first == 'u') {
         return first == 'l' ? IntSuffix::L : IntSuffix::U;
     }
-    if (second == 'l' || second == 'u')
-    {
+    if (second == 'l' || second == 'u') {
         return second == 'l' ? IntSuffix::L : IntSuffix::U;
     }
     return IntSuffix::None;
 }
 
-void split_namespace(
-    std::deque<std::string>& qualifs,
-    const std::string_view nmsQualif
-)
-{
+void split_namespace(std::deque<std::string>& qualifs, const std::string_view nmsQualif) {
     if (nmsQualif.empty())
         return;
 
     size_t end = nmsQualif.length();
-    while (true)
-    {
+    while (true) {
         const size_t dotPos = nmsQualif.find_last_of('.', end - 1);
-        if (dotPos == std::string::npos)
-        {
+        if (dotPos == std::string::npos) {
             qualifs.emplace_front(nmsQualif.substr(0, end));
             break;
         }
@@ -70,18 +55,14 @@ void split_namespace(
     }
 }
 
-bool is_interface_name(const std::string_view name)
-{
+bool is_interface_name(const std::string_view name) {
     return name.size() >= 2 && name[0] == 'I' && std::isupper(name[1]);
 }
 
-std::string escape_string(const std::string_view str, const bool isVerbatim)
-{
+std::string escape_string(const std::string_view str, const bool isVerbatim) {
     std::string escapedStr;
-    for (size_t i = 0; i < str.length(); ++i)
-    {
-        switch (const char c = str[i])
-        {
+    for (size_t i = 0; i < str.length(); ++i) {
+        switch (const char c = str[i]) {
         case '\n':
             escapedStr += "\\n";
             break;
@@ -91,17 +72,14 @@ std::string escape_string(const std::string_view str, const bool isVerbatim)
         case '\r':
             escapedStr += "\\r";
             break;
-        case '\"':
-        {
-            if (! isVerbatim)
-            {
+        case '\"': {
+            if (! isVerbatim) {
                 escapedStr += "\\\"";
                 break;
             }
 
             const size_t next = i + 1;
-            if (next < str.length() && str.at(next) == '\"')
-            {
+            if (next < str.length() && str.at(next) == '\"') {
                 escapedStr += "\\\"";
                 i += 1;
             }
@@ -136,8 +114,7 @@ std::string escape_string(const std::string_view str, const bool isVerbatim)
     return escapedStr;
 }
 
-std::optional<TypeKind> get_type_kind(const std::string_view typeKind)
-{
+std::optional<TypeKind> get_type_kind(const std::string_view typeKind) {
     using enum TypeKind;
     static const std::unordered_map<std::string_view, TypeKind> typeKindMap = {
         {"Class",        Class    },

@@ -9,8 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace astfri
-{
+namespace astfri {
 // Forward declarations
 struct VarDefStmt;
 struct LocalVarDefStmt;
@@ -18,13 +17,11 @@ struct Stmt;
 struct UserTypeDefStmt;
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 /**
  * @brief Context for tracking current type during semantic analysis
  */
-struct TypeContext
-{
+struct TypeContext {
     std::vector<TypeBinding*> typeStack;
 };
 
@@ -32,8 +29,7 @@ struct TypeContext
  * @brief Context for tracking scopes for resolving variable references and
  * local functions
  */
-struct ScopeContext
-{
+struct ScopeContext {
     std::vector<std::vector<Stmt*>> scopeStack{};
     IdentifierMap<ParamVarDefStmt*> params{};
     IdentifierMap<LocalVarDefStmt*> localVars{};
@@ -45,8 +41,7 @@ struct ScopeContext
  * @note Class contains reference to SymbolTable. SymbolTable's lifetime
  * must exceed or be same as SemanticContext's lifetime.
  */
-class SemanticContext
-{
+class SemanticContext {
 private:
     ScopeContext scopeContext_{};
     TypeContext typeContext_{};
@@ -72,23 +67,11 @@ public:
 
     TypeBinding* current_type() const;
     Type* current_return_type() const;
-    VarDefStmt* find_var(
-        std::string_view name,
-        access::Qualifier qualifier
-    ) const;
+    VarDefStmt* find_var(std::string_view name, access::Qualifier qualifier) const;
     const FuncMetadata* find_func(std::string_view funcName) const;
-    const MethodMetadata* find_method(
-        const MethodId& methodId,
-        UserTypeDefStmt* owner
-    ) const;
-    MemberVarMetadata* find_memb_var(
-        std::string_view name,
-        UserTypeDefStmt* owner
-    ) const;
-    InvocationType find_invoc_type(
-        InvocationId id,
-        access::Qualifier quelifier
-    ) const;
+    const MethodMetadata* find_method(const MethodId& methodId, UserTypeDefStmt* owner) const;
+    MemberVarMetadata* find_memb_var(std::string_view name, UserTypeDefStmt* owner) const;
+    InvocationType find_invoc_type(InvocationId id, access::Qualifier quelifier) const;
 };
 
 } // namespace astfri::csharp

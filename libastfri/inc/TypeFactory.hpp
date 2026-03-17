@@ -7,19 +7,14 @@
 #include <memory>
 #include <string>
 
-
-namespace astfri
-{
-
+namespace astfri {
 
 class ExprFactory;
-
 
 /**
  * @brief Singleton type factory.
  */
-class TypeFactory
-{
+class TypeFactory {
 public:
     friend class ExprFactory;
 
@@ -87,7 +82,7 @@ public:
      * @param scope Scope of the class.
      * @return unique @c ClassType for class @p name in scope @p scope.
      */
-    ClassType *mk_class(const std::string &name, const Scope &scope);
+    ClassType* mk_class(const std::string& name, const Scope& scope);
 
     /**
      * @brief Returns unique @c ClassType for class @p name in scope @p scope.
@@ -97,7 +92,7 @@ public:
      * @param def Definition of the class.
      * @return unique @c ClassType for class @p name in scope @p scope.
      */
-    ClassType *mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def);
+    ClassType* mk_class(const std::string& name, const Scope& scope, ClassDefStmt* def);
 
     /**
      * @brief Returns unique @c InterfaceType for interface @p name in scope @p scope.
@@ -106,7 +101,7 @@ public:
      * @param scope Scope of the interface.
      * @return unique @c InterfaceType for interface @p name in scope @p scope.
      */
-    InterfaceType *mk_interface(const std::string &name, const Scope &scope);
+    InterfaceType* mk_interface(const std::string& name, const Scope& scope);
 
     /**
      * @brief Returns unique @c InterfaceType for interface @p name in scope @p scope.
@@ -116,7 +111,7 @@ public:
      * @param def Definition of the interface.
      * @return unique @c InterfaceType for interface @p name in scope @p scope.
      */
-    InterfaceType *mk_interface(const std::string &name, const Scope &scope, InterfaceDefStmt *def);
+    InterfaceType* mk_interface(const std::string& name, const Scope& scope, InterfaceDefStmt* def);
 
     /**
      * @brief Returns unique instance of @c DeducedType for @p realType.
@@ -124,20 +119,20 @@ public:
      * @param realType Real type deduced by a compiler.
      * @return Unique instance of @c DeducedType for @p realType.
      */
-    DeducedType *mk_deduced(Type* realType);
+    DeducedType* mk_deduced(Type* realType);
 
     /**
      * @brief Returns unique instance of @c IncompleteType per @p name.
      * @param name Name of the type.
      * @returns Unique instance of @c IncompleteType for @p name.
      */
-    IncompleteType *mk_incomplete(const std::string &name);
+    IncompleteType* mk_incomplete(const std::string& name);
 
 public:
     /**
      * @brief Deleted copy constructor.
      */
-    TypeFactory(TypeFactory const& other) = delete;
+    TypeFactory(const TypeFactory& other) = delete;
 
     /**
      * @brief Explicitly deleted move constructor.
@@ -147,7 +142,7 @@ public:
     /**
      * @brief Deleted copy-assignment.
      */
-    void operator=(TypeFactory const& other) = delete;
+    void operator=(const TypeFactory& other) = delete;
 
     /**
      * @brief Explicitly deleted copy-assignment.
@@ -167,7 +162,7 @@ private:
      * @param def Definition of the lambda function.
      * @return Newly constructure instace of @c LambdaType.
      */
-    LambdaType *mk_lambda(std::string name, LambdaExpr *def);
+    LambdaType* mk_lambda(std::string name, LambdaExpr* def);
 
 private:
     IntType m_intType;
@@ -184,7 +179,6 @@ private:
     std::map<std::string, IncompleteType> m_incompleteTypeMap;
     std::vector<std::unique_ptr<Type>> m_otherTypes;
 };
-
 
 } // namespace astfri
 

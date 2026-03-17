@@ -4,16 +4,14 @@ using namespace astfri::text;
 
 AbstractTextBuilder::AbstractTextBuilder() :
     configurator_(&TextConfigurator::get_instance()),
-    rowCount_(1)
-{
+    rowCount_(1) {
 }
 
 //
 // SET_UP
 //
 
-void AbstractTextBuilder::reset_builder()
-{
+void AbstractTextBuilder::reset_builder() {
     rowCount_ = 1;
     AbstractBuilder::reset_builder();
 }
@@ -22,16 +20,12 @@ void AbstractTextBuilder::reset_builder()
 // GENERAL_TEXT
 //
 
-void AbstractTextBuilder::append_text(std::string const& text)
-{
-    if (isEmptyLine_)
-    {
-        for (int i = 0; i < configurator_->text_margin_left_len(); ++i)
-        {
+void AbstractTextBuilder::append_text(const std::string& text) {
+    if (isEmptyLine_) {
+        for (int i = 0; i < configurator_->text_margin_left_len(); ++i) {
             append_space();
         }
-        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i)
-        {
+        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i) {
             append_space();
         }
         isEmptyLine_ = false;
@@ -39,14 +33,11 @@ void AbstractTextBuilder::append_text(std::string const& text)
     *buildedText_ << text;
 }
 
-void AbstractTextBuilder::write_opening_curl_bracket()
-{
-    if (configurator_->new_line_curl_bracket())
-    {
+void AbstractTextBuilder::write_opening_curl_bracket() {
+    if (configurator_->new_line_curl_bracket()) {
         append_new_line();
     }
-    else
-    {
+    else {
         append_space();
     }
     write_left_bracket("{");
@@ -54,14 +45,11 @@ void AbstractTextBuilder::write_opening_curl_bracket()
     ++indentationLevel_;
 }
 
-void AbstractTextBuilder::write_opening_else_word()
-{
-    if (configurator_->new_line_curl_bracket())
-    {
+void AbstractTextBuilder::write_opening_else_word() {
+    if (configurator_->new_line_curl_bracket()) {
         append_new_line();
     }
-    else
-    {
+    else {
         append_space();
     }
     write_else_word();

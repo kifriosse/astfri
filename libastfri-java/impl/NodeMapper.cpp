@@ -1,16 +1,15 @@
 #include "NodeMapper.hpp"
 
-namespace astfri::java
-{
+namespace astfri::java {
 NodeMapper::NodeMapper() :
     typeFactory(astfri::TypeFactory::get_instance()),
     stmtFactory(astfri::StmtFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
     typeMap({
-        {"byte",    typeFactory.mk_int()},
-        {"short",   typeFactory.mk_int()},
-        {"int",     typeFactory.mk_int()},
-        {"long",    typeFactory.mk_int()},
+        {"byte",    typeFactory.mk_int()  },
+        {"short",   typeFactory.mk_int()  },
+        {"int",     typeFactory.mk_int()  },
+        {"long",    typeFactory.mk_int()  },
         {"float",   typeFactory.mk_float()},
         {"double",  typeFactory.mk_float()},
         {"char",    typeFactory.mk_char() },
@@ -61,27 +60,22 @@ NodeMapper::NodeMapper() :
         {"private", astfri::AccessModifier::Private},
         {"protected", astfri::AccessModifier::Protected},
         {"internal", astfri::AccessModifier::Internal},
-    })
-{
+    }) {
 }
 
-std::map<std::string, astfri::Type*> NodeMapper::get_typeMap()
-{
+std::map<std::string, astfri::Type*> NodeMapper::get_typeMap() {
     return this->typeMap;
 }
 
-std::map<std::string, astfri::BinOpType> NodeMapper::get_binOpMap()
-{
+std::map<std::string, astfri::BinOpType> NodeMapper::get_binOpMap() {
     return this->binOpMap;
 }
 
-std::map<std::string, astfri::UnaryOpType> NodeMapper::get_unaryOpMap()
-{
+std::map<std::string, astfri::UnaryOpType> NodeMapper::get_unaryOpMap() {
     return this->unaryOpMap;
 }
 
-std::map<std::string, astfri::AccessModifier> NodeMapper::get_modMap()
-{
+std::map<std::string, astfri::AccessModifier> NodeMapper::get_modMap() {
     return this->modMap;
 }
 } // namespace astfri::java

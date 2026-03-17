@@ -9,8 +9,7 @@
 #include <optional>
 #include <string_view>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Macro used for creating bitmask for enums
@@ -23,8 +22,7 @@ namespace astfri::csharp
  * @note Enum doesn't include \code new\endcode and \code unsafe\endcode
  * modifiers
  */
-enum class CSModifier : MaskType
-{
+enum class CSModifier : MaskType {
     None      = 0,
     Public    = BIT(0),
     Private   = BIT(1),
@@ -52,8 +50,7 @@ enum class CSModifier : MaskType
  * @brief Class representing modifiers of C# members, variables and parameters.
  * It uses bitmask to store multiple modifiers.
  */
-class CSModifiers
-{
+class CSModifiers {
 private:
     MaskType modifier_mask{0};
 
@@ -65,10 +62,7 @@ public:
      * @param src source code of the file containing the member declaration
      * @return CSModifiers object with modifiers of the method declaration
      */
-    static CSModifiers parser_method_modifs(
-        const TSNode& nMethod,
-        std::string_view src
-    );
+    static CSModifiers parser_method_modifs(const TSNode& nMethod, std::string_view src);
     /**
      * @brief Factory method for parsing/extrating modifiers of variable
      * declarations
@@ -79,11 +73,7 @@ public:
      * declarator
      * @return CSModifiers object with modifiers of the variable declaration
      */
-    static CSModifiers parse_var_modifs(
-        const TSNode& nVar,
-        std::string_view src,
-        TSNode* nVarDecl
-    );
+    static CSModifiers parse_var_modifs(const TSNode& nVar, std::string_view src, TSNode* nVarDecl);
     /**
      * @brief Factory method for parsing/extracing modifiers of parameter
      * declarations
@@ -91,10 +81,7 @@ public:
      * @param src source code of the file containing the parameter declaration
      * @return CSModifiers object with modifiers of the parameter declaration
      */
-    static CSModifiers parse_param_modifs(
-        const TSNode& nParam,
-        std::string_view src
-    );
+    static CSModifiers parse_param_modifs(const TSNode& nParam, std::string_view src);
 
     /**
      * @brief Checks if given modifier is present

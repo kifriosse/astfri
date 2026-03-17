@@ -6,8 +6,7 @@
 
 #include <tree_sitter/api.h>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 struct SourceFile;
 
 /**
@@ -17,8 +16,7 @@ struct SourceFile;
  * @note This class contains reference to symbol table. User needs to ensure
  * that symbol table lives longer than TypeTranslator instance.
  */
-class TypeTranslator
-{
+class TypeTranslator {
 private:
     friend maps::Mappers;
 
@@ -56,10 +54,7 @@ public:
      * @param scope scope in which to look for.
      * @return pointer to TypeBinding if type is found, otherwise nullptr.
      */
-    [[nodiscard]] TypeBinding* get_type(
-        std::string_view name,
-        const Scope& scope
-    ) const;
+    [[nodiscard]] TypeBinding* get_type(std::string_view name, const Scope& scope) const;
     /**
      * @brief Resolves given node representing qualified name to ScopeNode
      * representing type or namespace
@@ -163,10 +158,8 @@ private:
      * @note parent class in this context mean base classes not the nesting
      * class.
      */
-    [[nodiscard]] ScopeNode* search_parents(
-        std::string_view qualif,
-        const TypeBinding& start
-    ) const;
+    [[nodiscard]] ScopeNode* search_parents(std::string_view qualif, const TypeBinding& start)
+        const;
 
     /**
      * @brief Gets the source code currently being visited.

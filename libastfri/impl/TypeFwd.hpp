@@ -1,6 +1,5 @@
 
-namespace astfri
-{
+namespace astfri {
 
 struct Type;
 struct DynamicType;

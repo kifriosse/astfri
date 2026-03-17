@@ -8,22 +8,17 @@
 #include <ranges>
 #include <string>
 
-namespace astfri::csharp::maps
-{
+namespace astfri::csharp::maps {
 
-Query::Query(const TSLanguage* lang, const std::string_view query)
-{
+Query::Query(const TSLanguage* lang, const std::string_view query) {
     TSQueryError err;
     uint32_t offset;
     query_ = ts_query_new(lang, query.data(), query.length(), &offset, &err);
 
-    if (err != TSQueryErrorNone)
-    {
-        std::cerr << "Error while creating query at offset " << offset
-                  << "\nError code " << err;
+    if (err != TSQueryErrorNone) {
+        std::cerr << "Error while creating query at offset " << offset << "\nError code " << err;
 
-        switch (err)
-        {
+        switch (err) {
         case TSQueryErrorSyntax:
             std::cerr << " : Syntax error in query.\n";
             break;
@@ -43,18 +38,15 @@ Query::Query(const TSLanguage* lang, const std::string_view query)
             std::cerr << " : Unknown error.\n";
         }
 
-        if (offset < query.length())
-        {
+        if (offset < query.length()) {
             const size_t start = offset >= 10 ? offset - 10 : 0;
             const size_t end   = std::min<size_t>(offset + 10, query.size());
             std::cerr << "Query snippet around error:\n"
                       << query.substr(start, end - start) << '\n';
         }
     }
-    else
-    {
-        for (CaptureId i = 0; i < ts_query_capture_count(query_); ++i)
-        {
+    else {
+        for (CaptureId i = 0; i < ts_query_capture_count(query_); ++i) {
             uint32_t len;
             const char* name = ts_query_capture_name_for_id(query_, i, &len);
             captureIds.try_emplace({name, len}, i);
@@ -62,10 +54,8 @@ Query::Query(const TSLanguage* lang, const std::string_view query)
     }
 }
 
-Query::~Query()
-{
-    if (query_)
-    {
+Query::~Query() {
+    if (query_) {
         ts_query_delete(query_);
         query_ = nullptr;
     }
@@ -73,15 +63,12 @@ Query::~Query()
 
 Query::Query(Query&& other) noexcept :
     query_(other.query_),
-    captureIds(std::move(other.captureIds))
-{
+    captureIds(std::move(other.captureIds)) {
     other.query_ = nullptr;
 }
 
-Query& Query::operator=(Query&& other) noexcept
-{
-    if (this != &other)
-    {
+Query& Query::operator=(Query&& other) noexcept {
+    if (this != &other) {
         if (query_)
             ts_query_delete(query_);
         query_       = other.query_;
@@ -91,39 +78,33 @@ Query& Query::operator=(Query&& other) noexcept
     return *this;
 }
 
-CaptureId Query::id(const std::string_view name) const
-{
+CaptureId Query::id(const std::string_view name) const {
     const auto it = captureIds.find(name);
     if (it == captureIds.end())
         throw std::out_of_range(
-            "Query: Capture id not found for name: \"" + std::string(name)
-            + "\""
+            "Query: Capture id not found for name: \"" + std::string(name) + "\""
         );
 
     return it->second;
 }
 
-TSQuery* Query::get() const
-{
+TSQuery* Query::get() const {
     return query_;
 }
 
-QueryReg& QueryReg::get()
-{
+QueryReg& QueryReg::get() {
     static QueryReg instance;
     return instance;
 }
 
-const Query* QueryReg::get_query(const QueryType type) const
-{
+const Query* QueryReg::get_query(const QueryType type) const {
     const auto it = queries_.find(type);
     if (it == queries_.end())
         throw std::out_of_range("QueryReg: Query not found");
     return &it->second;
 }
 
-QueryReg::QueryReg()
-{
+QueryReg::QueryReg() {
     using enum QueryType;
     const std::pair<QueryType, std::string_view> mapping[] = {
         {TopLevel,      queries::qTopLevelStmts},
@@ -138,8 +119,7 @@ QueryReg::QueryReg()
 
     const TSLanguage* lang = tree_sitter_c_sharp();
 
-    for (const auto& [type, strQuery] : mapping)
-    {
+    for (const auto& [type, strQuery] : mapping) {
         queries_.try_emplace(type, lang, strQuery);
     }
 }

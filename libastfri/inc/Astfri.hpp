@@ -1,6 +1,7 @@
 #ifndef LIBASTFRI_ASTFRI_HPP
 #define LIBASTFRI_ASTFRI_HPP
 
+#include <libastfri/impl/Scope.hpp>
 #include <libastfri/inc/Expr.hpp>
 #include <libastfri/inc/ExprFactory.hpp>
 #include <libastfri/inc/Stmt.hpp>
@@ -9,6 +10,5 @@
 #include <libastfri/inc/TypeFactory.hpp>
 #include <libastfri/inc/TypeInfo.hpp>
 #include <libastfri/inc/Visitor.hpp>
-#include <libastfri/impl/Scope.hpp>
 
 #endif

@@ -4,24 +4,19 @@
 #include <libastfri/inc/Stmt.hpp>
 #include <libastfri/inc/TypeFactory.hpp>
 
+#include <functional>
 #include <map>
 #include <memory>
-#include <functional>
 #include <vector>
 
-
-namespace astfri
-{
-
+namespace astfri {
 
 class TypeFactory;
-
 
 /**
  * @brief Singleton statement factory.
  */
-class StmtFactory
-{
+class StmtFactory {
 public:
     /**
      * @brief Returns the singleton instance.
@@ -71,17 +66,23 @@ public:
         AccessModifier access
     );
 
-    [[deprecated]] BaseInitializerStmt* mak_base_initializer(std::string base, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt* mak_base_initializer(
+        std::string base,
+        std::vector<Expr*> args
+    );
 
     /**
      * TODO ako so scopom base? nemal by tu byť pointer na base class type alebo def?
      */
-    [[deprecated]] BaseInitializerStmt* mk_base_initializer(std::string base, std::vector<Expr*> args);
-    BaseInitializerStmt* mk_base_initializer(ClassType *type, std::vector<Expr*> args);
+    [[deprecated]] BaseInitializerStmt* mk_base_initializer(
+        std::string base,
+        std::vector<Expr*> args
+    );
+    BaseInitializerStmt* mk_base_initializer(ClassType* type, std::vector<Expr*> args);
 
-    SelfInitializerStmt *mk_self_initializer(std::vector<Expr*> args);
+    SelfInitializerStmt* mk_self_initializer(std::vector<Expr*> args);
 
-    MemberInitializerStmt *mk_member_initializer(MemberVarDefStmt *member, Expr *arg);
+    MemberInitializerStmt* mk_member_initializer(MemberVarDefStmt* member, Expr* arg);
 
     DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
@@ -98,7 +99,7 @@ public:
      */
     InterfaceDefStmt* mk_interface_def(std::string name, Scope scope);
 
-    ClassDefStmt *get_class_def(std::string_view name, const Scope &scope);
+    ClassDefStmt* get_class_def(std::string_view name, const Scope& scope);
 
     /**
      * @brief TODO
@@ -126,13 +127,13 @@ public:
 
     ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
 
-    ForEachStmt* mk_for_each(LocalVarDefStmt *var, Expr *container, Stmt *body);
+    ForEachStmt* mk_for_each(LocalVarDefStmt* var, Expr* container, Stmt* body);
 
     ThrowStmt* mk_throw(Expr* val);
 
-    CatchStmt *mk_catch(LocalVarDefStmt *param, Stmt *body);
+    CatchStmt* mk_catch(LocalVarDefStmt* param, Stmt* body);
 
-    TryStmt *mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
+    TryStmt* mk_try(Stmt* body, Stmt* finally, std::vector<CatchStmt*> catches);
 
     ContinueStmt* mk_continue();
 
@@ -153,22 +154,22 @@ public:
     /**
      * @brief Deleted copy constructor.
      */
-    StmtFactory(const StmtFactory &other) = delete;
+    StmtFactory(const StmtFactory& other) = delete;
 
     /**
      * @brief Explicitly deleted move constructor.
      */
-    StmtFactory(StmtFactory &&other) = delete;
+    StmtFactory(StmtFactory&& other) = delete;
 
     /**
      * @brief Deleted copy-assignment.
      */
-    StmtFactory& operator=(const StmtFactory &other) = delete;
+    StmtFactory& operator=(const StmtFactory& other) = delete;
 
     /**
      * @brief Explicitly deleted copy-assignment.
      */
-    StmtFactory& operator=(StmtFactory &&other) = delete;
+    StmtFactory& operator=(StmtFactory&& other) = delete;
 
 private:
     /**
@@ -177,7 +178,7 @@ private:
     StmtFactory();
 
 private:
-    TypeFactory *m_typeFactory;
+    TypeFactory* m_typeFactory;
     std::vector<std::unique_ptr<Stmt>> m_otherStmts;
     std::map<std::string, InterfaceDefStmt, std::less<>> m_interfaceDefMap;
     std::map<std::string, ClassDefStmt, std::less<>> m_classDefMap;

@@ -11,8 +11,7 @@
 
 #include <functional>
 
-class AstFriDeSerializer
-{
+class AstFriDeSerializer {
 public:
     static AstFriDeSerializer& get_instance();
     astfri::Visitable* deserialize(std::string filePath);
@@ -111,10 +110,8 @@ private:
         std::vector<T>& vector,
         rapidjson::Value& value,
         std::function<T(rapidjson::Value&)> function
-    )
-    {
-        for (auto& element : value.GetArray())
-        {
+    ) {
+        for (auto& element : value.GetArray()) {
             vector.push_back(function(element));
         }
     }

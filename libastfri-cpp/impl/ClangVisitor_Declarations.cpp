@@ -1,31 +1,26 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp
-{
-bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND)
-{
+namespace astfri::astfri_cpp {
+bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND) {
     (void)ND; // aby nevyskakoval warning o unused premennej
     // std::cout << "Traversing namespace: " << ND->getNameAsString() << "\n";
     return true; // Pokračujeme v prechádzaní poduzlov
 }
 
-bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
-{
+bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor) {
     // aby sa viac krat nevytvaral
-    if (! Ctor->isFirstDecl())
-    {
+    if (! Ctor->isFirstDecl()) {
         return true;
     }
-    
+
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
-    
+
     // akcia na tomto vrchole
     // ziskanie ownera
     auto owner = this->get_existing_class(Ctor->getParent()->getNameAsString());
-    if (Ctor->hasBody())
-    {
+    if (Ctor->hasBody()) {
         // vytvorenie konstruktora
         auto new_ctor = this->stmt_factory_->mk_constructor_def(
             owner,
@@ -35,7 +30,7 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
             this->getAccessModifier(Ctor)
         );
         owner->constructors.push_back(new_ctor);
-        
+
         TraverseStmt(Ctor->getBody());
         new_ctor->body = (CompoundStmt*)this->astfri_location.stmt_;
 
@@ -43,16 +38,13 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
         // pouzica sa na to, aby sa novy = stmt vlozil na spravne miesto,
         // inak by boli opacne vkladane (posledny by bol prvy)
         int place_in_vector = 0;
-        for (auto init : Ctor->inits())
-        {
+        for (auto init : Ctor->inits()) {
 
             // ak je to base init
-            if (init->isBaseInitializer())
-            {
+            if (init->isBaseInitializer()) {
                 std::vector<Expr*> args{};
                 auto ce = llvm::dyn_cast<clang::CXXConstructExpr>(init->getInit());
-                for (auto arg : ce->arguments())
-                {
+                for (auto arg : ce->arguments()) {
                     TraverseStmt(arg);
                     args.push_back(this->astfri_location.expr_);
                 }
@@ -81,8 +73,7 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
             place_in_vector++;
         }
 
-        for (auto parm : Ctor->parameters())
-        {
+        for (auto parm : Ctor->parameters()) {
             TraverseDecl(parm);
             new_ctor->params.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
         }
@@ -95,11 +86,9 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor)
     return true;
 }
 
-bool ClangVisitor::TraverseCXXDestructorDecl(clang::CXXDestructorDecl* Dtor)
-{
+bool ClangVisitor::TraverseCXXDestructorDecl(clang::CXXDestructorDecl* Dtor) {
     // ak nema telo tak sa znova skipne
-    if (! Dtor->isFirstDecl())
-    {
+    if (! Dtor->isFirstDecl()) {
         return true;
     }
 
@@ -123,11 +112,9 @@ bool ClangVisitor::TraverseCXXDestructorDecl(clang::CXXDestructorDecl* Dtor)
     return true;
 }
 
-bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl* FD)
-{
+bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl* FD) {
     // ak nema telo (je to len declaracia), tak sa skipne, vytvori sa az ked pride na jej definiciu
-    if (! FD->isFirstDecl())
-    {
+    if (! FD->isFirstDecl()) {
         return true;
     }
 
@@ -151,8 +138,7 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl* FD)
     this->clang_location.decl_  = FD;
 
     // parametre
-    for (auto parm : FD->parameters())
-    {
+    for (auto parm : FD->parameters()) {
         TraverseDecl(parm);
         new_function->params.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
     }
@@ -171,11 +157,9 @@ bool ClangVisitor::TraverseFunctionDecl(clang::FunctionDecl* FD)
     return true;
 }
 
-bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD)
-{
+bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD) {
     // ak nema telo (je to len declaracia), tak sa skipne, vytvori sa az ked pride na jej definiciu
-    if (! MD->isFirstDecl())
-    {
+    if (! MD->isFirstDecl()) {
         return true;
     }
 
@@ -183,8 +167,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD)
     auto owner      = this->get_existing_class(MD->getParent()->getNameAsString());
 
     auto virtuality = Virtuality::NotVirtual;
-    if (MD->isVirtual())
-    {
+    if (MD->isVirtual()) {
         virtuality = Virtuality::Virtual;
     }
 
@@ -210,8 +193,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD)
     this->clang_location.decl_  = MD;
 
     // parametre
-    for (auto parm : MD->parameters())
-    {
+    for (auto parm : MD->parameters()) {
         TraverseDecl(parm);
         new_method->func->params.push_back((ParamVarDefStmt*)this->astfri_location.stmt_);
     }
@@ -226,17 +208,16 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD)
     return true;
 }
 
-bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
-{
+bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD) {
     // ak je to trieda, ktorú vygenerovala lambda, tak skipnem
     if (RD->isLambda()) {
         return true;
     }
-    
+
     // akcia na vrchole
     // vytvorí sa scope
     std::vector<std::string> layers = {};
-    clang::DeclContext* context = RD->getDeclContext();
+    clang::DeclContext* context     = RD->getDeclContext();
     while (context) {
         if (auto named = llvm::dyn_cast<clang::NamedDecl>(context)) {
             layers.push_back(named->getNameAsString());
@@ -244,44 +225,42 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
         context = context->getParent();
     }
     layers = {layers.rbegin(), layers.rend()};
-    
+
     // vytvorenie triedy
     auto new_class = this->stmt_factory_->mk_class_def(
         RD->getNameAsString(),
-        {{layers.rbegin(), layers.rend()}});
+        {
+            {layers.rbegin(), layers.rend()}
+    }
+    );
     this->tu_->classes.push_back(new_class);
-    
+
     // nastavenie bases
-    for (auto base : RD->bases())
-    {
+    for (auto base : RD->bases()) {
         new_class->bases.push_back(
             this->get_existing_class(base.getType().getBaseTypeIdentifier()->getName().str())
         );
     }
-    
+
     // zapamatanie si predoslich location
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
-    
+
     // prepisanie AST location
     this->astfri_location.stmt_ = new_class;
     this->clang_location.decl_  = RD;
-    
-    for (auto field : RD->fields())
-    {
+
+    for (auto field : RD->fields()) {
         TraverseDecl(field);
     }
-    
-    for (auto method : RD->methods())
-    {
+
+    for (auto method : RD->methods()) {
         TraverseDecl(method);
     }
-    
-    if (auto tparams = RD->getDescribedTemplateParams())
-    {
+
+    if (auto tparams = RD->getDescribedTemplateParams()) {
         // std::cout << "Som v triede ktorá má template\n";
-        for (unsigned int i = 0; i < tparams->size(); i++)
-        {
+        for (unsigned int i = 0; i < tparams->size(); i++) {
             new_class->tparams.push_back(
                 this->stmt_factory_->mk_generic_param("", tparams->getParam(i)->getNameAsString())
             );
@@ -296,20 +275,17 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD)
     return true;
 }
 
-bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD)
-{
+bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD) {
     // akcia na tomto vrchole
     Type* type          = this->get_astfri_type(VD->getType());
 
     VarDefStmt* new_var = nullptr;
-    if (this->astfri_location.stmt_)
-    {
+    if (this->astfri_location.stmt_) {
         // premenna v compounde
         new_var = this->stmt_factory_->mk_local_var_def(VD->getNameAsString(), type, nullptr);
         ((DefStmt*)this->astfri_location.stmt_)->defs.push_back(new_var);
     }
-    else
-    {
+    else {
         // globalna premenna
         new_var = this->stmt_factory_->mk_global_var_def(VD->getNameAsString(), type, nullptr);
         this->tu_->globals.push_back((GlobalVarDefStmt*)new_var);
@@ -323,8 +299,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD)
     this->astfri_location.stmt_ = new_var;
     this->clang_location.decl_  = VD;
 
-    if (auto init = VD->getInit())
-    {
+    if (auto init = VD->getInit()) {
         TraverseStmt(init);
         new_var->initializer = this->astfri_location.expr_;
     }
@@ -336,8 +311,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD)
     return true;
 }
 
-bool ClangVisitor::TraverseParmVarDecl(clang::ParmVarDecl* PVD)
-{
+bool ClangVisitor::TraverseParmVarDecl(clang::ParmVarDecl* PVD) {
     // akcia na tomto vrchole
     ParamVarDefStmt* new_par = this->stmt_factory_->mk_param_var_def(
         PVD->getNameAsString(),
@@ -346,8 +320,7 @@ bool ClangVisitor::TraverseParmVarDecl(clang::ParmVarDecl* PVD)
     );
 
     // ak ma inicializator
-    if (auto init = PVD->getInit())
-    {
+    if (auto init = PVD->getInit()) {
         TraverseStmt(init);
         new_par->initializer = this->astfri_location.expr_;
     }
@@ -358,8 +331,7 @@ bool ClangVisitor::TraverseParmVarDecl(clang::ParmVarDecl* PVD)
     return true;
 }
 
-bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD)
-{
+bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD) {
     // akcia na tomto node
     // vytvorenie premennej triedy
     astfri::AccessModifier access = this->getAccessModifier(FD);
@@ -380,8 +352,7 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD)
     this->clang_location.decl_  = FD;
 
     // ak ma inicializator
-    if (auto init = FD->getInClassInitializer())
-    {
+    if (auto init = FD->getInClassInitializer()) {
         TraverseStmt(init);
         new_member->initializer = this->astfri_location.expr_;
     }
@@ -392,4 +363,4 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD)
 
     return true;
 }
-}
+} // namespace astfri::astfri_cpp

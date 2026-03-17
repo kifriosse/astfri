@@ -1,132 +1,110 @@
 #include "ExpressionTransformer.hpp"
 
 #include <libastfri-java/impl/StatementTransformer.hpp>
+
 #include <cctype>
 #include <cstdint>
 #include <cstring>
 #include <ranges>
 #include <string>
 
-namespace astfri::java
-{
+namespace astfri::java {
 ExpressionTransformer::ExpressionTransformer(StatementTransformer* stmtTr) :
     typeFactory(astfri::TypeFactory::get_instance()),
     exprFactory(astfri::ExprFactory::get_instance()),
     nodeMapper(new NodeMapper()),
-    stmtTr(stmtTr)
-{
+    stmtTr(stmtTr) {
 }
 
-ExpressionTransformer::~ExpressionTransformer()
-{
+ExpressionTransformer::~ExpressionTransformer() {
     delete this->nodeMapper;
 }
 
-std::string ExpressionTransformer::get_node_text(TSNode const& node, std::string const& sourceCode)
-{
+std::string ExpressionTransformer::get_node_text(
+    const TSNode& node,
+    const std::string& sourceCode
+) {
     uint32_t start = ts_node_start_byte(node);
     uint32_t end   = ts_node_end_byte(node);
     return sourceCode.substr(start, end - start);
 }
 
-astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& sourceCode)
-{
+astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, const std::string& sourceCode) {
     std::string nodeType = ts_node_type(tsNode);
     std::string nodeText = get_node_text(tsNode, sourceCode);
-    astfri::Expr* expr = nullptr;
-    if (nodeType == "decimal_integer_literal")
-    {
+    astfri::Expr* expr   = nullptr;
+    if (nodeType == "decimal_integer_literal") {
         expr = exprFactory.mk_int_literal(atoi(nodeText.c_str()));
     }
-    else if (nodeType == "decimal_floating_point_literal")
-    {
+    else if (nodeType == "decimal_floating_point_literal") {
         expr = exprFactory.mk_float_literal(atof(nodeText.c_str()));
     }
-    else if (nodeType == "character_literal")
-    {
+    else if (nodeType == "character_literal") {
         expr = exprFactory.mk_char_literal(nodeText[0]);
     }
-    else if (nodeType == "string_literal")
-    {
+    else if (nodeType == "string_literal") {
         expr = exprFactory.mk_string_literal(nodeText);
     }
-    else if (nodeType == "true")
-    {
+    else if (nodeType == "true") {
         expr = exprFactory.mk_bool_literal(true);
     }
-    else if (nodeType == "false")
-    {
+    else if (nodeType == "false") {
         expr = exprFactory.mk_bool_literal(false);
     }
-    else if (nodeType == "null_literal")
-    {
+    else if (nodeType == "null_literal") {
         expr = exprFactory.mk_null_literal();
     }
-    else if (nodeType == "this")
-    {
+    else if (nodeType == "this") {
         expr = exprFactory.mk_this();
     }
-    else if (nodeType == "field_access")
-    {
-        if (this->get_node_text(ts_node_named_child(tsNode, 0), sourceCode) == "this")
-        {
+    else if (nodeType == "field_access") {
+        if (this->get_node_text(ts_node_named_child(tsNode, 0), sourceCode) == "this") {
             expr = this->exprFactory.mk_member_var_ref(
                 this->exprFactory.mk_this(),
                 get_node_text(ts_node_named_child(tsNode, 1), sourceCode)
             );
         }
-        else
-        {
+        else {
             expr = this->transform_ref_expr_node(ts_node_named_child(tsNode, 1), sourceCode);
         }
     }
 
-    else if (nodeType == "identifier")
-    {
+    else if (nodeType == "identifier") {
         expr = this->transform_ref_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "binary_expression")
-    {
+    else if (nodeType == "binary_expression") {
         expr = this->transform_bin_op_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "assignment_expression")
-    {
+    else if (nodeType == "assignment_expression") {
         expr = this->transform_bin_op_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "unary_expression")
-    {
+    else if (nodeType == "unary_expression") {
         expr = this->transform_un_op_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "update_expression")
-    {
+    else if (nodeType == "update_expression") {
         expr = this->transform_un_op_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "object_creation_expression")
-    {
+    else if (nodeType == "object_creation_expression") {
         expr = this->transform_new_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "method_invocation")
-    {
+    else if (nodeType == "method_invocation") {
         expr = this->transform_method_call_node(tsNode, sourceCode);
     }
-    else if (nodeType == "parenthesized_expression")
-    {
-        expr = this->exprFactory.mk_bracket(this->get_expr(ts_node_named_child(tsNode, 0), sourceCode));
+    else if (nodeType == "parenthesized_expression") {
+        expr = this->exprFactory.mk_bracket(
+            this->get_expr(ts_node_named_child(tsNode, 0), sourceCode)
+        );
     }
-    else if (nodeType == "ternary_expression")
-    {
+    else if (nodeType == "ternary_expression") {
         expr = this->transform_ternary_expr_node(tsNode, sourceCode);
     }
-    else if (nodeType == "line_comment" || nodeType == "block_comment")
-    {
+    else if (nodeType == "line_comment" || nodeType == "block_comment") {
         expr = this->exprFactory.mk_string_literal(this->get_node_text(tsNode, sourceCode));
     }
-    else if (nodeType == "lambda_expression")
-    {
+    else if (nodeType == "lambda_expression") {
         return this->stmtTr->transform_lambda_expr_node(tsNode, sourceCode);
     }
-    else
-    {
+    else {
         expr = exprFactory.mk_unknown();
     }
     return expr;
@@ -134,9 +112,8 @@ astfri::Expr* ExpressionTransformer::get_expr(TSNode tsNode, std::string const& 
 
 astfri::BinOpExpr* ExpressionTransformer::transform_bin_op_expr_node(
     TSNode tsNode,
-    std::string const& sourceCode
-)
-{
+    const std::string& sourceCode
+) {
     astfri::Expr* leftExpr        = nullptr;
     astfri::BinOpType binOperator = astfri::BinOpType::Add;
     astfri::Expr* rightExpr       = nullptr;
@@ -145,20 +122,17 @@ astfri::BinOpExpr* ExpressionTransformer::transform_bin_op_expr_node(
     TSNode binOperatorNode;
     TSNode rightOperandNode;
 
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 0)))
-    {
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 0))) {
         leftOperandNode             = ts_node_named_child(tsNode, 0);
         std::string leftOperandType = ts_node_type(leftOperandNode);
         leftExpr                    = this->get_expr(leftOperandNode, sourceCode);
     }
-    if (! ts_node_is_null(ts_node_named_child(tsNode, 1)))
-    {
+    if (! ts_node_is_null(ts_node_named_child(tsNode, 1))) {
         rightOperandNode             = ts_node_named_child(tsNode, 1);
         std::string rightOperandType = ts_node_type(rightOperandNode);
         rightExpr                    = this->get_expr(rightOperandNode, sourceCode);
     }
-    if (! ts_node_is_null(ts_node_child(tsNode, 1)))
-    {
+    if (! ts_node_is_null(ts_node_child(tsNode, 1))) {
         binOperatorNode             = ts_node_child(tsNode, 1);
         std::string binOperatorName = get_node_text(binOperatorNode, sourceCode);
         binOperator = this->nodeMapper->get_binOpMap().find(binOperatorName)->second;
@@ -169,35 +143,29 @@ astfri::BinOpExpr* ExpressionTransformer::transform_bin_op_expr_node(
 
 astfri::UnaryOpExpr* ExpressionTransformer::transform_un_op_expr_node(
     TSNode tsNode,
-    std::string const& sourceCode
-)
-{
+    const std::string& sourceCode
+) {
     astfri::Expr* expr             = nullptr;
     astfri::UnaryOpType unOperator = astfri::UnaryOpType::Plus;
 
     TSNode firstNode;
     TSNode secondNode;
 
-    if (! ts_node_is_null(ts_node_child(tsNode, 0)))
-    {
+    if (! ts_node_is_null(ts_node_child(tsNode, 0))) {
         firstNode                 = ts_node_child(tsNode, 0);
         std::string firstNodeType = ts_node_type(firstNode);
         std::string firstNodeText = get_node_text(firstNode, sourceCode);
-        if (! ts_node_is_null(ts_node_child(tsNode, 1)))
-        {
+        if (! ts_node_is_null(ts_node_child(tsNode, 1))) {
             secondNode                 = ts_node_child(tsNode, 1);
             std::string secondNodeType = ts_node_type(secondNode);
             std::string secondNodeText = get_node_text(secondNode, sourceCode);
-            for (std::string op : std::views::keys(this->nodeMapper->get_unaryOpMap()))
-            {
-                if (op == firstNodeText)
-                {
+            for (std::string op : std::views::keys(this->nodeMapper->get_unaryOpMap())) {
+                if (op == firstNodeText) {
                     unOperator = this->nodeMapper->get_unaryOpMap().find(firstNodeText)->second;
                     expr       = this->get_expr(secondNode, sourceCode);
                     break;
                 }
-                else
-                {
+                else {
                     expr       = this->get_expr(firstNode, sourceCode);
                     unOperator = this->nodeMapper->get_unaryOpMap().find(secondNodeText)->second;
                 }
@@ -207,11 +175,10 @@ astfri::UnaryOpExpr* ExpressionTransformer::transform_un_op_expr_node(
     return exprFactory.mk_unary_op(unOperator, expr);
 }
 
-Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string const& sourceCode)
-{
+Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, const std::string& sourceCode) {
     std::string referanceName = get_node_text(tsNode, sourceCode);
 
-    char const* queryString   = "(local_variable_declaration type: (_) declarator: "
+    const char* queryString   = "(local_variable_declaration type: (_) declarator: "
                                 "(variable_declarator name: (identifier) @local_var_name value: "
                                 "(_)?)) (formal_parameter type: (_) name: (identifier) @param_name) "
                                 "(field_declaration (modifiers) type: (_) declarator: "
@@ -222,8 +189,7 @@ Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string 
     TSQueryError errorType;
 
     TSNode checkNode = tsNode;
-    while (! ts_node_is_null(ts_node_parent(checkNode)))
-    {
+    while (! ts_node_is_null(ts_node_parent(checkNode))) {
         TSQuery* tsQuery = ts_query_new(
             tree_sitter_java(),
             queryString,
@@ -236,10 +202,8 @@ Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string 
         ts_query_cursor_exec(tsCursor, tsQuery, checkNode);
         TSQueryMatch tsMatch;
 
-        while (ts_query_cursor_next_match(tsCursor, &tsMatch))
-        {
-            for (uint32_t i = 0; i < tsMatch.capture_count; ++i)
-            {
+        while (ts_query_cursor_next_match(tsCursor, &tsMatch)) {
+            for (uint32_t i = 0; i < tsMatch.capture_count; ++i) {
                 uint32_t index           = 0;
                 TSQueryCapture tsCapture = tsMatch.captures[index];
                 ++index;
@@ -248,36 +212,30 @@ Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string 
                     = ts_query_capture_name_for_id(tsQuery, tsCapture.index, &length);
                 std::string nodeText = get_node_text(tsCapture.node, sourceCode);
 
-                if (captureName == "local_var_name" && referanceName == nodeText)
-                {
+                if (captureName == "local_var_name" && referanceName == nodeText) {
                     ts_query_cursor_delete(tsCursor);
                     ts_query_delete(tsQuery);
                     return exprFactory.mk_local_var_ref(referanceName);
                 }
-                if (captureName == "param_name" && referanceName == nodeText)
-                {
+                if (captureName == "param_name" && referanceName == nodeText) {
                     ts_query_cursor_delete(tsCursor);
                     ts_query_delete(tsQuery);
                     return exprFactory.mk_param_var_ref(referanceName);
                 }
-                if (captureName == "attr_name" && referanceName == nodeText)
-                {
+                if (captureName == "attr_name" && referanceName == nodeText) {
                     ts_query_cursor_delete(tsCursor);
                     ts_query_delete(tsQuery);
                     return exprFactory.mk_member_var_ref(exprFactory.mk_this(), referanceName);
                 }
-                else
-                {
+                else {
                     TSNode fieldAccessNode          = ts_node_parent(tsNode);
                     std::string fieldAccessNodeType = ts_node_type(fieldAccessNode);
 
-                    if (fieldAccessNodeType == "field_access")
-                    {
+                    if (fieldAccessNodeType == "field_access") {
                         TSNode objectNode;
                         std::string objectNodeText;
 
-                        if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0)))
-                        {
+                        if (! ts_node_is_null(ts_node_child(fieldAccessNode, 0))) {
                             objectNode     = ts_node_child(fieldAccessNode, 0);
                             objectNodeText = get_node_text(objectNode, sourceCode);
                         }
@@ -302,91 +260,74 @@ Expr* ExpressionTransformer::transform_ref_expr_node(TSNode tsNode, std::string 
 
 astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
     TSNode tsNode,
-    std::string const& sourceCode
-)
-{
+    const std::string& sourceCode
+) {
     astfri::Expr* owner = nullptr;
     std::string name;
     std::vector<astfri::Expr*> arguments;
     uint32_t childCount = ts_node_named_child_count(tsNode);
     uint32_t childIndex = 0;
 
-    for (uint32_t i = 0; i < childCount; i++)
-    {
+    for (uint32_t i = 0; i < childCount; i++) {
         TSNode child          = ts_node_named_child(tsNode, i);
         std::string childType = ts_node_type(child);
-        char const* fieldName = ts_node_field_name_for_child(tsNode, childIndex);
+        const char* fieldName = ts_node_field_name_for_child(tsNode, childIndex);
 
-        while (! fieldName)
-        {
+        while (! fieldName) {
             fieldName = ts_node_field_name_for_child(tsNode, ++childIndex);
         }
 
-        if (childType == "field_access")
-        {
+        if (childType == "field_access") {
             TSNode objectNode;
-            if (! ts_node_is_null(ts_node_named_child(child, 0)))
-            {
+            if (! ts_node_is_null(ts_node_named_child(child, 0))) {
                 objectNode = ts_node_named_child(child, 0);
             }
 
             TSNode fieldNode;
-            if (! ts_node_is_null(ts_node_named_child(child, 1)))
-            {
+            if (! ts_node_is_null(ts_node_named_child(child, 1))) {
                 fieldNode = ts_node_named_child(child, 1);
             }
 
             std::string objectNodeText = this->get_node_text(objectNode, sourceCode);
-            if (isupper(objectNodeText[0]))
-            {
+            if (isupper(objectNodeText[0])) {
                 owner = this->exprFactory.mk_member_var_ref(
                     this->exprFactory.mk_class_ref(get_node_text(objectNode, sourceCode)),
                     get_node_text(fieldNode, sourceCode)
                 );
             }
         }
-        else if (strcmp(fieldName, "object") == 0)
-        {
+        else if (strcmp(fieldName, "object") == 0) {
             std::string nodeText = get_node_text(child, sourceCode);
-            if (isupper(nodeText[0]))
-            {
+            if (isupper(nodeText[0])) {
                 owner = this->exprFactory.mk_class_ref(get_node_text(child, sourceCode));
             }
-            else if (nodeText == "this")
-            {
+            else if (nodeText == "this") {
                 owner = this->exprFactory.mk_this();
             }
-            else
-            {
+            else {
                 astfri::Expr* expr = this->transform_ref_expr_node(child, sourceCode);
 
                 if (astfri::MemberVarRefExpr* memVarExpr
-                    = dynamic_cast<astfri::MemberVarRefExpr*>(expr))
-                {
+                    = dynamic_cast<astfri::MemberVarRefExpr*>(expr)) {
                     memVarExpr->owner = this->exprFactory.mk_this();
-                    owner              = memVarExpr;
+                    owner             = memVarExpr;
                 }
                 else if (astfri::LocalVarRefExpr* localVarExpr
-                         = dynamic_cast<astfri::LocalVarRefExpr*>(expr))
-                {
+                         = dynamic_cast<astfri::LocalVarRefExpr*>(expr)) {
                     owner = localVarExpr;
                 }
                 else if (astfri::ParamVarRefExpr* paramVarExpr
-                         = dynamic_cast<astfri::ParamVarRefExpr*>(expr))
-                {
+                         = dynamic_cast<astfri::ParamVarRefExpr*>(expr)) {
                     owner = paramVarExpr;
                 }
             }
         }
-        else if (strcmp(fieldName, "name") == 0)
-        {
+        else if (strcmp(fieldName, "name") == 0) {
             name = get_node_text(child, sourceCode);
         }
-        else if (strcmp(fieldName, "arguments") == 0)
-        {
+        else if (strcmp(fieldName, "arguments") == 0) {
             uint32_t argCount = ts_node_named_child_count(child);
-            for (uint32_t j = 0; j < argCount; j++)
-            {
+            for (uint32_t j = 0; j < argCount; j++) {
                 TSNode argNode          = ts_node_named_child(child, j);
                 std::string argNodeType = ts_node_type(argNode);
                 arguments.push_back(get_expr(argNode, sourceCode));
@@ -400,17 +341,15 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
 
 astfri::NewExpr* ExpressionTransformer::transform_new_expr_node(
     TSNode tsNode,
-    std::string const& sourceCode
-)
-{
+    const std::string& sourceCode
+) {
     TSNode typeNode      = ts_node_named_child(tsNode, 0);
     std::string typeName = get_node_text(typeNode, sourceCode);
     astfri::Type* type   = typeFactory.mk_class(typeName, {});
     std::vector<astfri::Expr*> arguments;
     TSNode argumentsListNode = ts_node_named_child(tsNode, 1);
     uint32_t argsCount       = ts_node_named_child_count(argumentsListNode);
-    for (uint32_t j = 0; j < argsCount; j++)
-    {
+    for (uint32_t j = 0; j < argsCount; j++) {
         TSNode argNode = ts_node_named_child(argumentsListNode, j);
         arguments.push_back(get_expr(argNode, sourceCode));
     }
@@ -419,9 +358,8 @@ astfri::NewExpr* ExpressionTransformer::transform_new_expr_node(
 
 astfri::IfExpr* ExpressionTransformer::transform_ternary_expr_node(
     TSNode tsNode,
-    std::string const& sourceCode
-)
-{
+    const std::string& sourceCode
+) {
     astfri::Expr* cond    = this->get_expr(ts_node_named_child(tsNode, 0), sourceCode);
     astfri::Expr* iftrue  = this->get_expr(ts_node_named_child(tsNode, 1), sourceCode);
     astfri::Expr* iffalse = this->get_expr(ts_node_named_child(tsNode, 2), sourceCode);

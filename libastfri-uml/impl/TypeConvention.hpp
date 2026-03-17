@@ -3,22 +3,19 @@
 
 #include <string>
 
-namespace astfri::uml
-{
-enum class TypeConventions
-{
+namespace astfri::uml {
+enum class TypeConventions {
     TYPE_BEFORE_IDENTIFIER = 0,
     TYPE_AFTER_IDENTIFIER
 };
 
-class TypeConvention
-{
+class TypeConvention {
 public:
     static std::string get_string(
-            std::string type,
-            std::string identifier,
-            std::string separator,
-            TypeConventions conv
+        std::string type,
+        std::string identifier,
+        std::string separator,
+        TypeConventions conv
     );
 
     TypeConvention() = delete;

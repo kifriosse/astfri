@@ -7,97 +7,92 @@
 
 #include <stdexcept>
 
-
-namespace astfri
-{
-
+namespace astfri {
 
 /**
  * @brief TODO
  */
-struct Visitor
-{
-    virtual void visit(DynamicType const& type)         = 0;
-    virtual void visit(IntType const& type)             = 0;
-    virtual void visit(FloatType const& type)           = 0;
-    virtual void visit(CharType const& type)            = 0;
-    virtual void visit(BoolType const& type)            = 0;
-    virtual void visit(VoidType const& type)            = 0;
-    virtual void visit(IndirectionType const& type)     = 0;
-    virtual void visit(ClassType const& type)           = 0;
-    virtual void visit(InterfaceType const& type)       = 0;
-    virtual void visit(LambdaType const& type)          = 0;
-    virtual void visit(IncompleteType const& type)      = 0;
-    virtual void visit(DeducedType const& type)         = 0;
-    virtual void visit(UnknownType const& type)         = 0;
+struct Visitor {
+    virtual void visit(const DynamicType& type)           = 0;
+    virtual void visit(const IntType& type)               = 0;
+    virtual void visit(const FloatType& type)             = 0;
+    virtual void visit(const CharType& type)              = 0;
+    virtual void visit(const BoolType& type)              = 0;
+    virtual void visit(const VoidType& type)              = 0;
+    virtual void visit(const IndirectionType& type)       = 0;
+    virtual void visit(const ClassType& type)             = 0;
+    virtual void visit(const InterfaceType& type)         = 0;
+    virtual void visit(const LambdaType& type)            = 0;
+    virtual void visit(const IncompleteType& type)        = 0;
+    virtual void visit(const DeducedType& type)           = 0;
+    virtual void visit(const UnknownType& type)           = 0;
 
-    virtual void visit(IntLiteralExpr const& expr)      = 0;
-    virtual void visit(FloatLiteralExpr const& expr)    = 0;
-    virtual void visit(CharLiteralExpr const& expr)     = 0;
-    virtual void visit(StringLiteralExpr const& expr)   = 0;
-    virtual void visit(BoolLiteralExpr const& expr)     = 0;
-    virtual void visit(NullLiteralExpr const& expr)     = 0;
-    virtual void visit(IfExpr const& expr)              = 0;
-    virtual void visit(BinOpExpr const& expr)           = 0;
-    virtual void visit(UnaryOpExpr const& expr)         = 0;
-    virtual void visit(ParamVarRefExpr const& expr)     = 0;
-    virtual void visit(LocalVarRefExpr const& expr)     = 0;
-    virtual void visit(MemberVarRefExpr const& expr)    = 0;
-    virtual void visit(GlobalVarRefExpr const& expr)    = 0;
-    virtual void visit(ClassRefExpr const& expr)        = 0;
-    virtual void visit(FunctionCallExpr const& expr)    = 0;
-    virtual void visit(MethodCallExpr const& expr)      = 0;
-    virtual void visit(LambdaCallExpr const& expr)      = 0;
-    virtual void visit(LambdaExpr const& expr)          = 0;
-    virtual void visit(ThisExpr const& expr)            = 0;
-    virtual void visit(ConstructorCallExpr const& expr) = 0;
-    virtual void visit(NewExpr const& expr)             = 0;
-    virtual void visit(DeleteExpr const& expr)          = 0;
-    virtual void visit(BracketExpr const& expr)         = 0;
-    virtual void visit(UnknownExpr const& expr)         = 0;
+    virtual void visit(const IntLiteralExpr& expr)        = 0;
+    virtual void visit(const FloatLiteralExpr& expr)      = 0;
+    virtual void visit(const CharLiteralExpr& expr)       = 0;
+    virtual void visit(const StringLiteralExpr& expr)     = 0;
+    virtual void visit(const BoolLiteralExpr& expr)       = 0;
+    virtual void visit(const NullLiteralExpr& expr)       = 0;
+    virtual void visit(const IfExpr& expr)                = 0;
+    virtual void visit(const BinOpExpr& expr)             = 0;
+    virtual void visit(const UnaryOpExpr& expr)           = 0;
+    virtual void visit(const ParamVarRefExpr& expr)       = 0;
+    virtual void visit(const LocalVarRefExpr& expr)       = 0;
+    virtual void visit(const MemberVarRefExpr& expr)      = 0;
+    virtual void visit(const GlobalVarRefExpr& expr)      = 0;
+    virtual void visit(const ClassRefExpr& expr)          = 0;
+    virtual void visit(const FunctionCallExpr& expr)      = 0;
+    virtual void visit(const MethodCallExpr& expr)        = 0;
+    virtual void visit(const LambdaCallExpr& expr)        = 0;
+    virtual void visit(const LambdaExpr& expr)            = 0;
+    virtual void visit(const ThisExpr& expr)              = 0;
+    virtual void visit(const ConstructorCallExpr& expr)   = 0;
+    virtual void visit(const NewExpr& expr)               = 0;
+    virtual void visit(const DeleteExpr& expr)            = 0;
+    virtual void visit(const BracketExpr& expr)           = 0;
+    virtual void visit(const UnknownExpr& expr)           = 0;
 
-    virtual void visit(TranslationUnit const& stmt)     = 0;
-    virtual void visit(CompoundStmt const& stmt)        = 0;
-    virtual void visit(ReturnStmt const& stmt)          = 0;
-    virtual void visit(ExprStmt const& stmt)            = 0;
-    virtual void visit(IfStmt const& stmt)              = 0;
-    virtual void visit(CaseStmt const& stmt)            = 0;
-    virtual void visit(DefaultCaseStmt const& stmt)     = 0;
-    virtual void visit(SwitchStmt const& stmt)          = 0;
-    virtual void visit(WhileStmt const& stmt)           = 0;
-    virtual void visit(DoWhileStmt const& stmt)         = 0;
-    virtual void visit(ForStmt const& stmt)             = 0;
-    virtual void visit(ForEachStmt const& stmt)         = 0;
-    virtual void visit(ThrowStmt const& stmt)           = 0;
-    virtual void visit(CatchStmt const& stmt)           = 0;
-    virtual void visit(TryStmt const& stmt)             = 0;
-    virtual void visit(UnknownStmt const& stmt)         = 0;
-    virtual void visit(LocalVarDefStmt const& stmt)     = 0;
-    virtual void visit(ParamVarDefStmt const& stmt)     = 0;
-    virtual void visit(MemberVarDefStmt const& stmt)    = 0;
-    virtual void visit(GlobalVarDefStmt const& stmt)    = 0;
-    virtual void visit(FunctionDefStmt const& stmt)     = 0;
-    virtual void visit(DefStmt const& stmt)             = 0;
-    virtual void visit(MethodDefStmt const& stmt)       = 0;
-    virtual void visit(BaseInitializerStmt const& stmt) = 0;
-    virtual void visit(SelfInitializerStmt const& stmt) = 0;
-    virtual void visit(MemberInitializerStmt const& stmt) = 0;
-    virtual void visit(ConstructorDefStmt const& stmt)  = 0;
-    virtual void visit(DestructorDefStmt const& stmt)   = 0;
-    virtual void visit(GenericParam const& stmt)        = 0;
-    virtual void visit(InterfaceDefStmt const& stmt)    = 0;
-    virtual void visit(ClassDefStmt const& stmt)        = 0;
-    virtual void visit(ContinueStmt const& stmt)        = 0;
-    virtual void visit(BreakStmt const& stmt)           = 0;
+    virtual void visit(const TranslationUnit& stmt)       = 0;
+    virtual void visit(const CompoundStmt& stmt)          = 0;
+    virtual void visit(const ReturnStmt& stmt)            = 0;
+    virtual void visit(const ExprStmt& stmt)              = 0;
+    virtual void visit(const IfStmt& stmt)                = 0;
+    virtual void visit(const CaseStmt& stmt)              = 0;
+    virtual void visit(const DefaultCaseStmt& stmt)       = 0;
+    virtual void visit(const SwitchStmt& stmt)            = 0;
+    virtual void visit(const WhileStmt& stmt)             = 0;
+    virtual void visit(const DoWhileStmt& stmt)           = 0;
+    virtual void visit(const ForStmt& stmt)               = 0;
+    virtual void visit(const ForEachStmt& stmt)           = 0;
+    virtual void visit(const ThrowStmt& stmt)             = 0;
+    virtual void visit(const CatchStmt& stmt)             = 0;
+    virtual void visit(const TryStmt& stmt)               = 0;
+    virtual void visit(const UnknownStmt& stmt)           = 0;
+    virtual void visit(const LocalVarDefStmt& stmt)       = 0;
+    virtual void visit(const ParamVarDefStmt& stmt)       = 0;
+    virtual void visit(const MemberVarDefStmt& stmt)      = 0;
+    virtual void visit(const GlobalVarDefStmt& stmt)      = 0;
+    virtual void visit(const FunctionDefStmt& stmt)       = 0;
+    virtual void visit(const DefStmt& stmt)               = 0;
+    virtual void visit(const MethodDefStmt& stmt)         = 0;
+    virtual void visit(const BaseInitializerStmt& stmt)   = 0;
+    virtual void visit(const SelfInitializerStmt& stmt)   = 0;
+    virtual void visit(const MemberInitializerStmt& stmt) = 0;
+    virtual void visit(const ConstructorDefStmt& stmt)    = 0;
+    virtual void visit(const DestructorDefStmt& stmt)     = 0;
+    virtual void visit(const GenericParam& stmt)          = 0;
+    virtual void visit(const InterfaceDefStmt& stmt)      = 0;
+    virtual void visit(const ClassDefStmt& stmt)          = 0;
+    virtual void visit(const ContinueStmt& stmt)          = 0;
+    virtual void visit(const BreakStmt& stmt)             = 0;
 
-    virtual ~Visitor()                                  = default;
+    virtual ~Visitor()                                    = default;
 };
 
 /**
  * @brief TODO
  */
-struct Visitable
-{
+struct Visitable {
     virtual void accept(Visitor& visitor) = 0;
     virtual ~Visitable()                  = default;
 };
@@ -105,667 +100,517 @@ struct Visitable
 /**
  * @brief TODO
  */
-struct VisitorAdapter : Visitor
-{
-    void visit(DynamicType const& /*type*/) override
-    {
+struct VisitorAdapter : Visitor {
+    void visit(const DynamicType& /*type*/) override {
     }
 
-    void visit(IntType const& /*type*/) override
-    {
+    void visit(const IntType& /*type*/) override {
     }
 
-    void visit(FloatType const& /*type*/) override
-    {
+    void visit(const FloatType& /*type*/) override {
     }
 
-    void visit(CharType const& /*type*/) override
-    {
+    void visit(const CharType& /*type*/) override {
     }
 
-    void visit(BoolType const& /*type*/) override
-    {
+    void visit(const BoolType& /*type*/) override {
     }
 
-    void visit(VoidType const& /*type*/) override
-    {
+    void visit(const VoidType& /*type*/) override {
     }
 
-    void visit(IndirectionType const& /*type*/) override
-    {
+    void visit(const IndirectionType& /*type*/) override {
     }
 
-    void visit(ClassType const& /*type*/) override
-    {
+    void visit(const ClassType& /*type*/) override {
     }
 
-    void visit(InterfaceType const& /*type*/) override
-    {
+    void visit(const InterfaceType& /*type*/) override {
     }
 
-    void visit(LambdaType const& /*type*/) override
-    {
+    void visit(const LambdaType& /*type*/) override {
     }
 
-    void visit(IncompleteType const& /*type*/) override
-    {
+    void visit(const IncompleteType& /*type*/) override {
     }
 
-    void visit(DeducedType const& /*type*/) override
-    {
+    void visit(const DeducedType& /*type*/) override {
     }
 
-    void visit(UnknownType const& /*type*/) override
-    {
+    void visit(const UnknownType& /*type*/) override {
     }
 
-    void visit(IntLiteralExpr const& /*expr*/) override
-    {
+    void visit(const IntLiteralExpr& /*expr*/) override {
     }
 
-    void visit(FloatLiteralExpr const& /*expr*/) override
-    {
+    void visit(const FloatLiteralExpr& /*expr*/) override {
     }
 
-    void visit(CharLiteralExpr const& /*expr*/) override
-    {
+    void visit(const CharLiteralExpr& /*expr*/) override {
     }
 
-    void visit(StringLiteralExpr const& /*expr*/) override
-    {
+    void visit(const StringLiteralExpr& /*expr*/) override {
     }
 
-    void visit(BoolLiteralExpr const& /*expr*/) override
-    {
+    void visit(const BoolLiteralExpr& /*expr*/) override {
     }
 
-    void visit(NullLiteralExpr const& /*expr*/) override
-    {
+    void visit(const NullLiteralExpr& /*expr*/) override {
     }
 
-    void visit(IfExpr const& /*expr*/) override
-    {
+    void visit(const IfExpr& /*expr*/) override {
     }
 
-    void visit(BinOpExpr const& /*expr*/) override
-    {
+    void visit(const BinOpExpr& /*expr*/) override {
     }
 
-    void visit(UnaryOpExpr const& /*expr*/) override
-    {
+    void visit(const UnaryOpExpr& /*expr*/) override {
     }
 
-    void visit(ParamVarRefExpr const& /*expr*/) override
-    {
+    void visit(const ParamVarRefExpr& /*expr*/) override {
     }
 
-    void visit(LocalVarRefExpr const& /*expr*/) override
-    {
+    void visit(const LocalVarRefExpr& /*expr*/) override {
     }
 
-    void visit(MemberVarRefExpr const& /*expr*/) override
-    {
+    void visit(const MemberVarRefExpr& /*expr*/) override {
     }
 
-    void visit(GlobalVarRefExpr const& /*expr*/) override
-    {
+    void visit(const GlobalVarRefExpr& /*expr*/) override {
     }
 
-    void visit(ClassRefExpr const& /*expr*/) override
-    {
+    void visit(const ClassRefExpr& /*expr*/) override {
     }
 
-    void visit(FunctionCallExpr const& /*expr*/) override
-    {
+    void visit(const FunctionCallExpr& /*expr*/) override {
     }
 
-    void visit(MethodCallExpr const& /*expr*/) override
-    {
+    void visit(const MethodCallExpr& /*expr*/) override {
     }
 
-    void visit(LambdaCallExpr const& /*expr*/) override
-    {
+    void visit(const LambdaCallExpr& /*expr*/) override {
     }
 
-    void visit(LambdaExpr const& /*expr*/) override
-    {
+    void visit(const LambdaExpr& /*expr*/) override {
     }
 
-    void visit(ThisExpr const& /*expr*/) override
-    {
+    void visit(const ThisExpr& /*expr*/) override {
     }
 
-    void visit(ConstructorCallExpr const& /*expr*/) override
-    {
+    void visit(const ConstructorCallExpr& /*expr*/) override {
     }
 
-    void visit(NewExpr const& /*expr*/) override
-    {
+    void visit(const NewExpr& /*expr*/) override {
     }
 
-    void visit(DeleteExpr const& /*expr*/) override
-    {
+    void visit(const DeleteExpr& /*expr*/) override {
     }
 
-    void visit(BracketExpr const& /*expr*/) override
-    {
+    void visit(const BracketExpr& /*expr*/) override {
     }
 
-    void visit(UnknownExpr const& /*expr*/) override
-    {
+    void visit(const UnknownExpr& /*expr*/) override {
     }
 
-    void visit(TranslationUnit const& /*stmt*/) override
-    {
+    void visit(const TranslationUnit& /*stmt*/) override {
     }
 
-    void visit(CompoundStmt const& /*stmt*/) override
-    {
+    void visit(const CompoundStmt& /*stmt*/) override {
     }
 
-    void visit(ReturnStmt const& /*stmt*/) override
-    {
+    void visit(const ReturnStmt& /*stmt*/) override {
     }
 
-    void visit(ExprStmt const& /*stmt*/) override
-    {
+    void visit(const ExprStmt& /*stmt*/) override {
     }
 
-    void visit(IfStmt const& /*stmt*/) override
-    {
+    void visit(const IfStmt& /*stmt*/) override {
     }
 
-    void visit(CaseStmt const& /*stmt*/) override
-    {
+    void visit(const CaseStmt& /*stmt*/) override {
     }
 
-    void visit(DefaultCaseStmt const& /*stmt*/) override
-    {
+    void visit(const DefaultCaseStmt& /*stmt*/) override {
     }
 
-    void visit(SwitchStmt const& /*stmt*/) override
-    {
+    void visit(const SwitchStmt& /*stmt*/) override {
     }
 
-    void visit(WhileStmt const& /*stmt*/) override
-    {
+    void visit(const WhileStmt& /*stmt*/) override {
     }
 
-    void visit(DoWhileStmt const& /*stmt*/) override
-    {
+    void visit(const DoWhileStmt& /*stmt*/) override {
     }
 
-    void visit(ForStmt const& /*stmt*/) override
-    {
+    void visit(const ForStmt& /*stmt*/) override {
     }
 
-    void visit(ForEachStmt const& /*stmt*/) override
-    {
+    void visit(const ForEachStmt& /*stmt*/) override {
     }
 
-    void visit(ThrowStmt const& /*stmt*/) override
-    {
+    void visit(const ThrowStmt& /*stmt*/) override {
     }
 
-    void visit(CatchStmt const& /*stmt*/) override
-    {
+    void visit(const CatchStmt& /*stmt*/) override {
     }
 
-    void visit(TryStmt const& /*stmt*/) override
-    {
+    void visit(const TryStmt& /*stmt*/) override {
     }
 
-    void visit(UnknownStmt const& /*stmt*/) override
-    {
+    void visit(const UnknownStmt& /*stmt*/) override {
     }
 
-    void visit(LocalVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const LocalVarDefStmt& /*stmt*/) override {
     }
 
-    void visit(ParamVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const ParamVarDefStmt& /*stmt*/) override {
     }
 
-    void visit(MemberVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const MemberVarDefStmt& /*stmt*/) override {
     }
 
-    void visit(GlobalVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const GlobalVarDefStmt& /*stmt*/) override {
     }
 
-    void visit(FunctionDefStmt const& /*stmt*/) override
-    {
+    void visit(const FunctionDefStmt& /*stmt*/) override {
     }
 
-    void visit(DefStmt const& /*stmt*/) override
-    {
+    void visit(const DefStmt& /*stmt*/) override {
     }
 
-    void visit(MethodDefStmt const& /*stmt*/) override
-    {
+    void visit(const MethodDefStmt& /*stmt*/) override {
     }
 
-    void visit(BaseInitializerStmt const& /*stmt*/) override
-    {
+    void visit(const BaseInitializerStmt& /*stmt*/) override {
     }
 
-    void visit(SelfInitializerStmt const& /*stmt*/) override
-    {
+    void visit(const SelfInitializerStmt& /*stmt*/) override {
     }
 
-    void visit(MemberInitializerStmt const& /*stmt*/) override
-    {
+    void visit(const MemberInitializerStmt& /*stmt*/) override {
     }
 
-    void visit(ConstructorDefStmt const& /*stmt*/) override
-    {
+    void visit(const ConstructorDefStmt& /*stmt*/) override {
     }
 
-    void visit(DestructorDefStmt const& /*stmt*/) override
-    {
+    void visit(const DestructorDefStmt& /*stmt*/) override {
     }
 
-    void visit(GenericParam const& /*stmt*/) override
-    {
+    void visit(const GenericParam& /*stmt*/) override {
     }
 
-    void visit(InterfaceDefStmt const& /*stmt*/) override
-    {
+    void visit(const InterfaceDefStmt& /*stmt*/) override {
     }
 
-    void visit(ClassDefStmt const& /*stmt*/) override
-    {
+    void visit(const ClassDefStmt& /*stmt*/) override {
     }
 
-    void visit(ContinueStmt const& /*stmt*/) override
-    {
+    void visit(const ContinueStmt& /*stmt*/) override {
     }
 
-    void visit(BreakStmt const& /*stmt*/) override
-    {
+    void visit(const BreakStmt& /*stmt*/) override {
     }
 };
-
 
 /**
  * @brief TODO
  */
-struct ThrowingVisitorAdapter : Visitor
-{
-    void visit(DynamicType const& /*type*/) override
-    {
+struct ThrowingVisitorAdapter : Visitor {
+    void visit(const DynamicType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(IntType const& /*type*/) override
-    {
+    void visit(const IntType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(FloatType const& /*type*/) override
-    {
+    void visit(const FloatType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(CharType const& /*type*/) override
-    {
+    void visit(const CharType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(BoolType const& /*type*/) override
-    {
+    void visit(const BoolType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(VoidType const& /*type*/) override
-    {
+    void visit(const VoidType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(IndirectionType const& /*type*/) override
-    {
+    void visit(const IndirectionType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ClassType const& /*type*/) override
-    {
+    void visit(const ClassType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(InterfaceType const& /*type*/) override
-    {
+    void visit(const InterfaceType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(LambdaType const& /*type*/) override
-    {
+    void visit(const LambdaType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(IncompleteType const& /*type*/) override
-    {
+    void visit(const IncompleteType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(DeducedType const& /*type*/) override
-    {
+    void visit(const DeducedType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(UnknownType const& /*type*/) override
-    {
+    void visit(const UnknownType& /*type*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(IntLiteralExpr const& /*expr*/) override
-    {
+    void visit(const IntLiteralExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(FloatLiteralExpr const& /*expr*/) override
-    {
+    void visit(const FloatLiteralExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(CharLiteralExpr const& /*expr*/) override
-    {
+    void visit(const CharLiteralExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(StringLiteralExpr const& /*expr*/) override
-    {
+    void visit(const StringLiteralExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(BoolLiteralExpr const& /*expr*/) override
-    {
+    void visit(const BoolLiteralExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(NullLiteralExpr const& /*expr*/) override
-    {
+    void visit(const NullLiteralExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(IfExpr const& /*expr*/) override
-    {
+    void visit(const IfExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(BinOpExpr const& /*expr*/) override
-    {
+    void visit(const BinOpExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(UnaryOpExpr const& /*expr*/) override
-    {
+    void visit(const UnaryOpExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ParamVarRefExpr const& /*expr*/) override
-    {
+    void visit(const ParamVarRefExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(LocalVarRefExpr const& /*expr*/) override
-    {
+    void visit(const LocalVarRefExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(MemberVarRefExpr const& /*expr*/) override
-    {
+    void visit(const MemberVarRefExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(GlobalVarRefExpr const& /*expr*/) override
-    {
+    void visit(const GlobalVarRefExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ClassRefExpr const& /*expr*/) override
-    {
+    void visit(const ClassRefExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(FunctionCallExpr const& /*expr*/) override
-    {
+    void visit(const FunctionCallExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(MethodCallExpr const& /*expr*/) override
-    {
+    void visit(const MethodCallExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(LambdaCallExpr const& /*expr*/) override
-    {
+    void visit(const LambdaCallExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(LambdaExpr const& /*expr*/) override
-    {
+    void visit(const LambdaExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ThisExpr const& /*expr*/) override
-    {
+    void visit(const ThisExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ConstructorCallExpr const& /*expr*/) override
-    {
+    void visit(const ConstructorCallExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(NewExpr const& /*expr*/) override
-    {
+    void visit(const NewExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(DeleteExpr const& /*expr*/) override
-    {
+    void visit(const DeleteExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(BracketExpr const& /*expr*/) override
-    {
+    void visit(const BracketExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(UnknownExpr const& /*expr*/) override
-    {
+    void visit(const UnknownExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(TranslationUnit const& /*stmt*/) override
-    {
+    void visit(const TranslationUnit& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(CompoundStmt const& /*stmt*/) override
-    {
+    void visit(const CompoundStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ReturnStmt const& /*stmt*/) override
-    {
+    void visit(const ReturnStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ExprStmt const& /*stmt*/) override
-    {
+    void visit(const ExprStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(IfStmt const& /*stmt*/) override
-    {
+    void visit(const IfStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(CaseStmt const& /*stmt*/) override
-    {
+    void visit(const CaseStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(DefaultCaseStmt const& /*stmt*/) override
-    {
+    void visit(const DefaultCaseStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(SwitchStmt const& /*stmt*/) override
-    {
+    void visit(const SwitchStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(WhileStmt const& /*stmt*/) override
-    {
+    void visit(const WhileStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(DoWhileStmt const& /*stmt*/) override
-    {
+    void visit(const DoWhileStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ForStmt const& /*stmt*/) override
-    {
+    void visit(const ForStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ForEachStmt const& /*stmt*/) override
-    {
+    void visit(const ForEachStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ThrowStmt const& /*stmt*/) override
-    {
+    void visit(const ThrowStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(CatchStmt const& /*stmt*/) override
-    {
+    void visit(const CatchStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(TryStmt const& /*stmt*/) override
-    {
+    void visit(const TryStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(UnknownStmt const& /*stmt*/) override
-    {
+    void visit(const UnknownStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(LocalVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const LocalVarDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ParamVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const ParamVarDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(MemberVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const MemberVarDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(GlobalVarDefStmt const& /*stmt*/) override
-    {
+    void visit(const GlobalVarDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(FunctionDefStmt const& /*stmt*/) override
-    {
+    void visit(const FunctionDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(DefStmt const& /*stmt*/) override
-    {
+    void visit(const DefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(MethodDefStmt const& /*stmt*/) override
-    {
+    void visit(const MethodDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(BaseInitializerStmt const& /*stmt*/) override
-    {
+    void visit(const BaseInitializerStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(SelfInitializerStmt const& /*stmt*/) override
-    {
+    void visit(const SelfInitializerStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(MemberInitializerStmt const& /*stmt*/) override
-    {
+    void visit(const MemberInitializerStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ConstructorDefStmt const& /*stmt*/) override
-    {
+    void visit(const ConstructorDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(DestructorDefStmt const& /*stmt*/) override
-    {
+    void visit(const DestructorDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(GenericParam const& /*stmt*/) override
-    {
+    void visit(const GenericParam& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(InterfaceDefStmt const& /*stmt*/) override
-    {
+    void visit(const InterfaceDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ClassDefStmt const& /*stmt*/) override
-    {
+    void visit(const ClassDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(ContinueStmt const& /*stmt*/) override
-    {
+    void visit(const ContinueStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(BreakStmt const& /*stmt*/) override
-    {
+    void visit(const BreakStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 };
 
-
-namespace details
-{
-
+namespace details {
 
 /**
  * @brief CRTP mixin that makes @c This child class visitable.
  * @tparam This Type of the child class.
  */
 template<typename This>
-struct MkVisitable : virtual Visitable
-{
-    void accept(Visitor& visitor) override
-    {
-        visitor.visit(static_cast<This const&>(*this));
+struct MkVisitable : virtual Visitable {
+    void accept(Visitor& visitor) override {
+        visitor.visit(static_cast<const This&>(*this));
     }
 };
 
-
 } // namespace details
-
 
 } // namespace astfri
 

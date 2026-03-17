@@ -1,21 +1,22 @@
 #ifndef STATEMENT_TRANSFORMER_CLASS_HPP
 #define STATEMENT_TRANSFORMER_CLASS_HPP
 
-#include <libastfri/inc/Astfri.hpp>
 #include <libastfri-java/impl/ExpressionTransformer.hpp>
 #include <libastfri-java/impl/NodeMapper.hpp>
+#include <libastfri/inc/Astfri.hpp>
+
+#include <tree_sitter/api.h>
+#include <tree_sitter/tree-sitter-java.h>
 
 #include <cstdint>
 #include <cstring>
 #include <string>
-#include <tree_sitter/api.h>
-#include <tree_sitter/tree-sitter-java.h>
 #include <unordered_map>
 #include <vector>
+
 #include "libastfri/inc/Stmt.hpp"
 
-namespace astfri::java
-{
+namespace astfri::java {
 
 class ExpressionTransformer;
 
@@ -27,8 +28,7 @@ using FunctionType = std::tuple<
     std::vector<astfri::BaseInitializerStmt*>,
     astfri::CompoundStmt*>;
 
-class StatementTransformer
-{
+class StatementTransformer {
 private:
     astfri::StmtFactory& stmtFactory;
     ExpressionTransformer* exprTransformer;
@@ -46,91 +46,78 @@ private:
     std::unordered_map<std::string, std::vector<astfri::MethodDefStmt*>> methodsByName;
 
     uint32_t lambdaID{0};
-    
-    astfri::Stmt* get_stmt(TSNode tsNode, std::string const& sourceCode);
 
-    astfri::AccessModifier get_access_modifier(TSNode tsNode, std::string const& sourceCode);
+    astfri::Stmt* get_stmt(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::Type* get_return_type(TSNode tsNode, std::string const& sourceCode);
+    astfri::AccessModifier get_access_modifier(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::ParamVarDefStmt* transform_param_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::Type* get_return_type(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::LocalVarDefStmt* transform_local_var_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::ParamVarDefStmt* transform_param_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::ExprStmt* transform_expr_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::LocalVarDefStmt* transform_local_var_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::IfStmt* transform_if_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::ExprStmt* transform_expr_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::TryStmt* transform_try_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::IfStmt* transform_if_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::CatchStmt* transform_catch_clause_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::TryStmt* transform_try_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::SwitchStmt* transform_switch_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::CatchStmt* transform_catch_clause_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::ForStmt* transform_for_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::SwitchStmt* transform_switch_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::WhileStmt* transform_while_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::ForStmt* transform_for_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::DoWhileStmt* transform_do_while_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::WhileStmt* transform_while_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::ForEachStmt* transform_foreach_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::DoWhileStmt* transform_do_while_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::ReturnStmt* transform_return_stmt_node(TSNode tsNode, std::string const& sourceCode);
+    astfri::ForEachStmt* transform_foreach_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::CompoundStmt* transform_body_node(TSNode tsNode, std::string const& sourceCode);
-    
-    FunctionType transform_function(TSNode tsNode, std::string const& sourceCode);
-    
-    astfri::MethodDefStmt* transform_method_node(TSNode tsNode, std::string const& sourceCode);
-    
+    astfri::ReturnStmt* transform_return_stmt_node(TSNode tsNode, const std::string& sourceCode);
+
+    astfri::CompoundStmt* transform_body_node(TSNode tsNode, const std::string& sourceCode);
+
+    FunctionType transform_function(TSNode tsNode, const std::string& sourceCode);
+
+    astfri::MethodDefStmt* transform_method_node(TSNode tsNode, const std::string& sourceCode);
+
     astfri::ConstructorDefStmt* transform_constructor_node(
         TSNode tsNode,
-        std::string const& sourceCode
+        const std::string& sourceCode
     );
-    
+
     astfri::MemberVarDefStmt* transform_attribute_node(
         TSNode tsNode,
-        std::string const& sourceCode
+        const std::string& sourceCode
     );
-    
-    astfri::GenericParam* transform_tparam_node(
-        TSNode tsNode, 
-        std::string const& sourceCode);
 
-    astfri::Scope get_scope(
-        TSNode tsNode,
-        std::string const& sourceCode);
+    astfri::GenericParam* transform_tparam_node(TSNode tsNode, const std::string& sourceCode);
 
-    astfri::ClassDefStmt* transform_class(
-        TSNode tsNode,
-        std::string const& sourceCode
-    );
+    astfri::Scope get_scope(TSNode tsNode, const std::string& sourceCode);
+
+    astfri::ClassDefStmt* transform_class(TSNode tsNode, const std::string& sourceCode);
 
     std::vector<astfri::ClassDefStmt*> transform_classes(
         TSTree* tree,
-        std::string const& sourceCode
+        const std::string& sourceCode
     );
 
-    astfri::InterfaceDefStmt* transform_interface(
-        TSNode tsNode,
-        std::string const& sourceCode
-    );
-    
+    astfri::InterfaceDefStmt* transform_interface(TSNode tsNode, const std::string& sourceCode);
+
     std::vector<astfri::InterfaceDefStmt*> transform_interfaces(
         TSTree* tree,
-        std::string const& sourceCode
+        const std::string& sourceCode
     );
-    
-    public:
+
+public:
     StatementTransformer();
     ~StatementTransformer();
 
-    astfri::LambdaExpr* transform_lambda_expr_node(
-    TSNode tsNode,
-    std::string const& sourceCode
-    );
-    
-    astfri::TranslationUnit* fill_translation_unit(TSTree* tree, std::string const& sourceCode);
+    astfri::LambdaExpr* transform_lambda_expr_node(TSNode tsNode, const std::string& sourceCode);
+
+    astfri::TranslationUnit* fill_translation_unit(TSTree* tree, const std::string& sourceCode);
 };
 
 } // namespace astfri::java

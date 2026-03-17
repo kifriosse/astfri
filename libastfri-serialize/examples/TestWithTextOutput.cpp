@@ -3,16 +3,14 @@
 
 #include <iostream>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 
     if (argc < 2)
         throw std::runtime_error("No file name given!!");
-    AstFriDeSerializer& serializer      = AstFriDeSerializer::get_instance();
+    AstFriDeSerializer& serializer        = AstFriDeSerializer::get_instance();
 
-    astfri::Visitable* node            = serializer.deserialize(argv[1]);
+    astfri::Visitable* node               = serializer.deserialize(argv[1]);
     astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
-
 
     // visitor.visit(*node);
 

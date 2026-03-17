@@ -11,14 +11,12 @@
 #include <string_view>
 #include <vector>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Visitor class for constructing AST from tree-sitter tree.
  */
-class SrcCodeVisitor
-{
+class SrcCodeVisitor {
 private:
     friend maps::Mappers;
 
@@ -60,15 +58,10 @@ private:
     static Expr* visit_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_null_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_this_expr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_verbatim_str_lit(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Expr* visit_verbatim_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_raw_str_lit(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_interpolated_str_lit(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    ); // todo
+    static Expr* visit_interpolated_str_lit(SrcCodeVisitor* self,
+                                            const TSNode& node); // todo
 
     // Reference Expersions
     static Expr* visit_identifier(SrcCodeVisitor* self, const TSNode& node);
@@ -76,22 +69,13 @@ private:
     static Expr* visit_invoc(SrcCodeVisitor* self, const TSNode& node);
 
     // Operations
-    static Expr* visit_prefix_unary_opr(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
-    static Expr* visit_postfix_unary_opr(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Expr* visit_prefix_unary_opr(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_postfix_unary_opr(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_ref_expr(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_binary_opr(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_ternary_expr(SrcCodeVisitor* self, const TSNode& node);
 
-    static Expr* visit_parenthesized_expr(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Expr* visit_parenthesized_expr(SrcCodeVisitor* self, const TSNode& node);
 
     // switch patterns
     static Expr* visit_const_pattern(SrcCodeVisitor* self, const TSNode& node);
@@ -103,27 +87,16 @@ private:
     // Variable Definitions
     static Stmt* visit_memb_var_def(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_local_var_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_global_var_def_stmt(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    );
+    static Stmt* visit_global_var_def_stmt(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_param_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_constr_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    ); // constructor def stmt
-    static Stmt* visit_constr_init(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    ); // base initializer
-    static Stmt* visit_destr_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    ); // destructor def stmt
-    static Stmt* visit_method_def(
-        SrcCodeVisitor* self,
-        const TSNode& node
-    ); // method def stmt
+    static Stmt* visit_constr_def(SrcCodeVisitor* self,
+                                  const TSNode& node); // constructor def stmt
+    static Stmt* visit_constr_init(SrcCodeVisitor* self,
+                                   const TSNode& node); // base initializer
+    static Stmt* visit_destr_def(SrcCodeVisitor* self,
+                                 const TSNode& node); // destructor def stmt
+    static Stmt* visit_method_def(SrcCodeVisitor* self,
+                                  const TSNode& node); // method def stmt
 
     static Stmt* visit_block(SrcCodeVisitor* self, const TSNode& node);
     static Stmt* visit_arrow_body(SrcCodeVisitor* self, const TSNode& node);
@@ -187,10 +160,7 @@ private:
      * default values), if false, makes full parameter definitions
      * @return vector of parameter variable definition statements
      */
-    std::vector<ParamVarDefStmt*> make_param_list(
-        const TSNode& node,
-        bool makeShallow
-    );
+    std::vector<ParamVarDefStmt*> make_param_list(const TSNode& node, bool makeShallow);
     /**
      * @brief Makes a list of parameter defintion expressions from the given
      * argument list node

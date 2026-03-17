@@ -1,9 +1,7 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp
-{
-bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator* CAO)
-{
+namespace astfri::astfri_cpp {
+bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator* CAO) {
     BinOpExpr* bin_op = nullptr;
 
     bin_op            = this->expr_factory_
@@ -19,8 +17,7 @@ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator*
 
     // ak je expr_as_stmt flag true, nech sa pre ostatne vypne
     bool expr_as_stmt_changed = false;
-    if (this->expr_as_stmt)
-    {
+    if (this->expr_as_stmt) {
         this->expr_as_stmt   = false;
         expr_as_stmt_changed = true;
     }
@@ -33,8 +30,7 @@ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator*
     bin_op->right = this->astfri_location.expr_;
 
     // vratenie expr_as_stmt naspat ak je toto node ktory ho zmenil
-    if (expr_as_stmt_changed)
-    {
+    if (expr_as_stmt_changed) {
         this->expr_as_stmt = true;
     }
 
@@ -42,8 +38,7 @@ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator*
     this->astfri_location = astfri_temp;
     this->clang_location  = clang_temp;
 
-    if (this->expr_as_stmt)
-    {
+    if (this->expr_as_stmt) {
         ((CompoundStmt*)this->astfri_location.stmt_)
             ->stmts.push_back(this->stmt_factory_->mk_expr(bin_op));
     }
@@ -51,8 +46,7 @@ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator*
     return true;
 }
 
-bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
-{
+bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO) {
     BinOpExpr* bin_op = nullptr;
 
     bin_op            = this->expr_factory_
@@ -68,8 +62,7 @@ bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
 
     // ak je expr_as_stmt flag true, nech sa pre ostatne vypne
     bool expr_as_stmt_changed = false;
-    if (this->expr_as_stmt)
-    {
+    if (this->expr_as_stmt) {
         this->expr_as_stmt   = false;
         expr_as_stmt_changed = true;
     }
@@ -82,8 +75,7 @@ bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
     bin_op->right = this->astfri_location.expr_;
 
     // vratenie expr_as_stmt naspat ak je toto node ktory ho zmenil
-    if (expr_as_stmt_changed)
-    {
+    if (expr_as_stmt_changed) {
         this->expr_as_stmt = true;
     }
 
@@ -91,8 +83,7 @@ bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
     this->astfri_location = astfri_temp;
     this->clang_location  = clang_temp;
 
-    if (this->expr_as_stmt)
-    {
+    if (this->expr_as_stmt) {
         ((CompoundStmt*)this->astfri_location.stmt_)
             ->stmts.push_back(this->stmt_factory_->mk_expr(bin_op));
     }
@@ -100,8 +91,7 @@ bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
     return true;
 }
 
-bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator* UO)
-{
+bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator* UO) {
     // akcia na tomto vrchole
     UnaryOpType op = this->get_astfri_un_op_type(UO->getOpcode());
 
@@ -113,8 +103,7 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator* UO)
     UnaryOpExpr* un_op = this->expr_factory_->mk_unary_op(op, arg);
 
     // ak je expression nad compound stmt, tak sa vytvori ako stmt a nie expr a rovno sa tam vlozi
-    if (this->expr_as_stmt)
-    {
+    if (this->expr_as_stmt) {
         ((CompoundStmt*)this->astfri_location.stmt_)
             ->stmts.push_back(this->stmt_factory_->mk_expr(un_op));
     }
@@ -124,4 +113,4 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator* UO)
 
     return true;
 }
-}
+} // namespace astfri::astfri_cpp

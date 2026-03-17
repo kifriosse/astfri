@@ -1,116 +1,95 @@
 #include <libastfri/inc/Expr.hpp>
 
-namespace astfri
-{
+namespace astfri {
 IntLiteralExpr::IntLiteralExpr(int val) :
-    Literal(val)
-{
+    Literal(val) {
 }
 
 FloatLiteralExpr::FloatLiteralExpr(float val) :
-    Literal(val)
-{
+    Literal(val) {
 }
 
 CharLiteralExpr::CharLiteralExpr(char val) :
-    Literal(val)
-{
+    Literal(val) {
 }
 
 StringLiteralExpr::StringLiteralExpr(std::string val) :
-    Literal(std::move(val))
-{
+    Literal(std::move(val)) {
 }
 
 BoolLiteralExpr::BoolLiteralExpr(bool val) :
-    Literal(val)
-{
+    Literal(val) {
 }
 
 IfExpr::IfExpr(Expr* cond, Expr* iftrue, Expr* iffalse) :
     cond(cond),
     iftrue(iftrue),
-    iffalse(iffalse)
-{
+    iffalse(iffalse) {
 }
 
 BinOpExpr::BinOpExpr(Expr* left, BinOpType op, Expr* right) :
     left(left),
     op(op),
-    right(right)
-{
+    right(right) {
 }
 
 UnaryOpExpr::UnaryOpExpr(UnaryOpType op, Expr* arg) :
     op(op),
-    arg(arg)
-{
+    arg(arg) {
 }
 
 ParamVarRefExpr::ParamVarRefExpr(std::string param) :
-    param(std::move(param))
-{
+    param(std::move(param)) {
 }
 
 LocalVarRefExpr::LocalVarRefExpr(std::string var) :
-    var(std::move(var))
-{
+    var(std::move(var)) {
 }
 
 MemberVarRefExpr::MemberVarRefExpr(Expr* owner, std::string member) :
     owner(owner),
-    member(std::move(member))
-{
+    member(std::move(member)) {
 }
 
 GlobalVarRefExpr::GlobalVarRefExpr(std::string global) :
-    global(std::move(global))
-{
+    global(std::move(global)) {
 }
 
 ClassRefExpr::ClassRefExpr(std::string name) :
-    name(std::move(name))
-{
+    name(std::move(name)) {
 }
 
 FunctionCallExpr::FunctionCallExpr(std::string name, std::vector<Expr*> args) :
     name(std::move(name)),
-    args(std::move(args))
-{
+    args(std::move(args)) {
 }
 
 MethodCallExpr::MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args) :
     owner(owner),
     name(std::move(name)),
-    args(std::move(args))
-{
+    args(std::move(args)) {
 }
 
 LambdaExpr::LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body) :
     params(std::move(params)),
-    body(body)
-{
+    body(body) {
 }
 
 ConstructorCallExpr::ConstructorCallExpr(Type* type, std::vector<Expr*> args) :
     type(type),
-    args(std::move(args))
-{
+    args(std::move(args)) {
 }
 
 NewExpr::NewExpr(ConstructorCallExpr* init) :
-    init(init)
-{
+    init(init) {
 }
 
 BracketExpr::BracketExpr(Expr* e) :
-    expr(e)
-{
+    expr(e) {
 }
 
 DeleteExpr::DeleteExpr(Expr* arg) :
-    arg(arg)
-{
+    arg(arg) {
 }
 
 } // namespace astfri

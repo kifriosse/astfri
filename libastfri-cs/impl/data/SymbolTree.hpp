@@ -10,8 +10,7 @@
 #include <variant>
 #include <vector>
 
-namespace astfri
-{
+namespace astfri {
 // forward declaration
 struct PrimitiveType;
 struct Scope;
@@ -19,8 +18,7 @@ struct UserTypeDefStmt;
 struct ScopedType;
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 struct SourceFile;
 class ScopeNode;
 
@@ -28,8 +26,7 @@ class ScopeNode;
  * @brief Helper struct to group type and its definition statement.
  * Also contains pointer to node in symbol tree where type is stored.
  */
-struct TypeBinding
-{
+struct TypeBinding {
     ScopeNode* treeNode{nullptr};
     ScopedType* type;
     UserTypeDefStmt* def;
@@ -39,16 +36,14 @@ struct TypeBinding
  * @brief Helper struct for storing temporary string representation of a
  * qualified name. Used whne qualified name can't be resolved
  */
-struct ExternalMarker
-{
+struct ExternalMarker {
     std::string qualifiedName;
 };
 
 /**
  * @brief wrapper struct for primitive types
  */
-struct CSPrimitiveType
-{
+struct CSPrimitiveType {
     Type* primitiveType;
 };
 
@@ -61,8 +56,7 @@ using Alias = std::variant<std::string, ScopeNode*>;
 /**
  * @brief Class for representing namespace
  */
-class Nms
-{
+class Nms {
 private:
     std::string name_{};
     std::unordered_map<SourceFile*, std::vector<TypeBinding>> staticUsings_{};
@@ -115,14 +109,12 @@ public:
  * a namespace, type or external marker.
  * @node Node is not copyable or movable
  */
-class ScopeNode
-{
+class ScopeNode {
 private:
     /**
      * @brief Content of the node. Can be namespace, type or external marker.
      */
-    using NodeData
-        = std::variant<Nms, TypeBinding, ExternalMarker, CSPrimitiveType>;
+    using NodeData = std::variant<Nms, TypeBinding, ExternalMarker, CSPrimitiveType>;
     NodeData data_;
     IdentifierMap<std::unique_ptr<ScopeNode>> children_{};
     ScopeNode* parent_;
@@ -178,8 +170,7 @@ public:
  * @brief Class for representing symbol (type) tree.
  * @note SymbolTree is not copyable or movable
  */
-class SymbolTree
-{
+class SymbolTree {
 private:
     std::unique_ptr<ScopeNode> root_;
 
@@ -204,10 +195,7 @@ public:
      */
     ScopeNode* add_type(const Scope& scope, const TypeBinding& tb);
 
-    ScopeNode* add_primitive(
-        const std::string& name,
-        CSPrimitiveType primitive
-    );
+    ScopeNode* add_primitive(const std::string& name, CSPrimitiveType primitive);
 
     /**
      * @brief Finds a node in the symbol tree by its scope.
@@ -222,10 +210,7 @@ public:
      * @param end scope of the node to find
      * @return pointer to the node if found, nullptr otherwise
      */
-    [[nodiscard]] ScopeNode* find_node(
-        const Scope& start,
-        const Scope& end
-    ) const;
+    [[nodiscard]] ScopeNode* find_node(const Scope& start, const Scope& end) const;
 };
 
 /**

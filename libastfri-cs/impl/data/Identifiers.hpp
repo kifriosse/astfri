@@ -8,15 +8,13 @@
 #include <functional>
 #include <string>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Identifier for invocations - method call, local function call,
  * delegate call, etc.
  */
-struct InvocationId
-{
+struct InvocationId {
     std::string name;
     size_t paramCount{0};
 };
@@ -24,8 +22,7 @@ struct InvocationId
 /**
  * @brief Identifier for method definitions
  */
-struct MethodId
-{
+struct MethodId {
     std::string name;
     size_t paramCount{0};
     bool isStatic;
