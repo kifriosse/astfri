@@ -5,10 +5,11 @@
 
 #include <string>
 #include <vector>
-#include "libastfri/inc/Visitor.hpp"
 
 namespace astfri
 {
+
+
 /**
  * @brief TODO
  */
@@ -141,6 +142,9 @@ enum class BinOpType
 
     // {lhs} >> {rhs}
     BitShiftRight,
+
+    // {lhs} >>> {rhs}
+    BitShiftRightUnsigned,
 
     // {lhs} << {rhs}
     BitShiftLeft,
@@ -406,6 +410,8 @@ struct BracketExpr : Expr, details::MkVisitable<BracketExpr> {
 struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr>
 {
 };
+
+
 } // namespace astfri
 
 #include <libastfri/impl/Expr.inl>
