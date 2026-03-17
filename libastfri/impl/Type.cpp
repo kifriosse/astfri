@@ -3,6 +3,7 @@
 namespace astfri
 {
 
+
 IndirectionType::IndirectionType(Type* const indirect) :
     indirect_(indirect)
 {
@@ -31,5 +32,16 @@ LambdaType::LambdaType(std::string name, LambdaExpr *def) :
     m_def(def)
 {
 }
+
+DeducedType::DeducedType(Type* realType) :
+    realType(realType)
+{
+}
+
+IncompleteType::IncompleteType(std::string name) :
+    name(name)
+{
+}
+
 
 } // namespace astfri

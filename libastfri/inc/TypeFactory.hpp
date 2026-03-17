@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 
+
 namespace astfri
 {
 
@@ -117,6 +118,21 @@ public:
      */
     InterfaceType *mk_interface(const std::string &name, const Scope &scope, InterfaceDefStmt *def);
 
+    /**
+     * @brief Returns unique instance of @c DeducedType for @p realType.
+     * The same instace is shared if @p realType is null.
+     * @param realType Real type deduced by a compiler.
+     * @return Unique instance of @c DeducedType for @p realType.
+     */
+    DeducedType *mk_deduced(Type* realType);
+
+    /**
+     * @brief Returns unique instance of @c IncompleteType per @p name.
+     * @param name Name of the type.
+     * @returns Unique instance of @c IncompleteType for @p name.
+     */
+    IncompleteType *mk_incomplete(const std::string &name);
+
 public:
     /**
      * @brief Deleted copy constructor.
@@ -162,8 +178,10 @@ private:
     UnknownType m_unknownType;
     DynamicType m_dynamicType;
     std::map<Type*, IndirectionType> m_indirectTypeMap;
+    std::map<Type*, DeducedType> m_deducedTypeMap;
     std::map<std::string, ClassType> m_classTypeMap;
     std::map<std::string, InterfaceType> m_interfaceTypeMap;
+    std::map<std::string, IncompleteType> m_incompleteTypeMap;
     std::vector<std::unique_ptr<Type>> m_otherTypes;
 };
 

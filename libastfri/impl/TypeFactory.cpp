@@ -3,6 +3,7 @@
 
 #include <cassert>
 
+
 namespace astfri
 {
 
@@ -114,6 +115,16 @@ LambdaType* TypeFactory::mk_lambda(std::string name, LambdaExpr *def)
         m_otherTypes,
         std::move(name),
         def);
+}
+
+DeducedType *TypeFactory::mk_deduced(Type* realType)
+{
+    return details::emplace_get<DeducedType>(realType, m_deducedTypeMap, realType);
+}
+
+IncompleteType *TypeFactory::mk_incomplete(const std::string &name)
+{
+    return details::emplace_get<IncompleteType>(name, m_incompleteTypeMap, name);
 }
 
 

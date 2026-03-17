@@ -9,6 +9,7 @@
 namespace astfri
 {
 
+
 /**
  * @brief TODO
  */
@@ -114,11 +115,22 @@ struct LambdaType : Type, details::MkVisitable<LambdaType>
 };
 
 /**
- * @brief TODO
+ * @brief Represents type deduced by compiler.
+ * Not to be confused with @c DynamicType. Can be used as type of variables declared using
+ * keywords such as @c var, @c auto, @c let, ...
  */
 struct DeducedType : Type, details::MkVisitable<DeducedType>
 {
+    /**
+     * @brief Real type if available, otherwise @c Type::NULL.
+     */
     Type *realType;
+
+    /**
+     * @brief Constructor.
+     * @param realType Real type if available, otherwise @c Type::NULL.
+     */
+    explicit DeducedType(Type* realType);
 };
 
 // /**
@@ -146,12 +158,20 @@ struct DeducedType : Type, details::MkVisitable<DeducedType>
 
 
 /**
- * @brief TODO
+ * @brief Represents type that is unknown. Only its name is available.
  */
 struct IncompleteType : Type, details::MkVisitable<IncompleteType>
 {
-    // TODO flyweight
+    /**
+     * @brief Name of the type.
+     */
     std::string name;
+
+    /**
+     * @brief Constructor, initializes the name.
+     * @param name Name of the type.
+     */
+    explicit IncompleteType(std::string name);
 };
 
 /**
@@ -160,6 +180,7 @@ struct IncompleteType : Type, details::MkVisitable<IncompleteType>
 struct UnknownType : PrimitiveType, details::MkVisitable<VoidType>
 {
 };
+
 
 } // namespace astfri
 
