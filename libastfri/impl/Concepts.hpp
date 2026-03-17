@@ -7,17 +7,16 @@
 #include "StmtFwd.hpp"
 #include "libastfri/inc/Stmt.hpp"
 
-
-namespace astfri
-{
-
-
 namespace rapidjson
 {
 
 class Value;
 
 } // namespace rapidjson
+
+
+namespace astfri
+{
 
 
 /**
