@@ -114,7 +114,7 @@ ScopeNode* SymbolTree::root() const
 ScopeNode* SymbolTree::add_scope(const Scope& scope)
 {
     ScopeNode* current = root();
-    for (const std::string& str : scope.names_)
+    for (const std::string& str : scope.names)
     {
         current = current->add_child(str, Nms(str));
     }
@@ -147,7 +147,7 @@ ScopeNode* SymbolTree::find_node(const Scope& start, const Scope& end) const
     ScopeNode* current = root_.get();
     auto process       = [&current](const Scope& scope) -> bool
     {
-        for (const std::string_view qualif : scope.names_)
+        for (const std::string_view qualif : scope.names)
         {
             ScopeNode* child = current->find_child(qualif);
             if (! child)

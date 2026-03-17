@@ -39,9 +39,9 @@ void JavaCodeBuilder::create_java_file(std::string const& name, Scope const& sco
 {
     std::string folder = OutputFileManager::get_instance().build_folder_path();
     folder.append("src/");
-    for (size_t i = 0; i < scope.names_.size(); ++i)
+    for (size_t i = 0; i < scope.names.size(); ++i)
     {
-        folder.append(scope.names_.at(i) + "/");
+        folder.append(scope.names.at(i) + "/");
     }
     folder.append(name + ".java");
     std::ofstream(folder) << buildedText_->str();

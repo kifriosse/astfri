@@ -16,13 +16,13 @@ ScopedType::ScopedType(std::string name, Scope scope) :
 
 ClassType::ClassType(std::string name, Scope scope, ClassDefStmt *def) :
     ScopedType(name, scope),
-    m_def(def)
+    def(def)
 {
 }
 
 InterfaceType::InterfaceType(std::string name, Scope scope, InterfaceDefStmt *def) :
     ScopedType(name, scope),
-    m_def(def)
+    def(def)
 {
 }
 

@@ -12,7 +12,7 @@ namespace astfri {
  */
 struct Scope
 {
-    std::vector<std::string> names_;
+    std::vector<std::string> names;
 };
 
 /**

@@ -40,10 +40,10 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
         {
             first = false;
             if (const auto class_t = as_a<ClassType>(type))
-                classDef->bases_.push_back(class_t->m_def);
+                classDef->bases_.push_back(class_t->def);
             if (const auto interface_t = as_a<InterfaceType>(type))
             {
-                classDef->interfaces_.push_back(interface_t->m_def);
+                classDef->interfaces_.push_back(interface_t->def);
             }
             else if (util::is_interface_name(name))
             {
@@ -57,7 +57,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node)
 
         if (const auto interface_t = as_a<InterfaceType>(type))
         {
-            classDef->interfaces_.push_back(interface_t->m_def);
+            classDef->interfaces_.push_back(interface_t->def);
         }
         else if (util::is_interface_name(name))
         {
@@ -143,7 +143,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(
         Type* type          = th(&self->typeTrs_, current);
 
         if (const auto tInterface = as_a<InterfaceType>(type))
-            intfDef->bases_.push_back(tInterface->m_def);
+            intfDef->bases_.push_back(tInterface->def);
         else
         {
             // todo incomplete type

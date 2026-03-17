@@ -90,7 +90,7 @@ struct ScopedType : Type
  */
 struct ClassType : ScopedType, details::MkVisitable<ClassType>
 {
-    ClassDefStmt *m_def;
+    ClassDefStmt *def;
     ClassType(std::string name, Scope scope, ClassDefStmt *def);
 };
 
@@ -99,7 +99,7 @@ struct ClassType : ScopedType, details::MkVisitable<ClassType>
  */
 struct InterfaceType : ScopedType, details::MkVisitable<InterfaceType>
 {
-    InterfaceDefStmt *m_def;
+    InterfaceDefStmt *def;
     InterfaceType(std::string name, Scope scope, InterfaceDefStmt *def);
 };
 

@@ -6,6 +6,7 @@
 namespace astfri
 {
 
+
 TypeFactory& TypeFactory::get_instance()
 {
     static TypeFactory instance;
@@ -14,100 +15,106 @@ TypeFactory& TypeFactory::get_instance()
 
 IntType* TypeFactory::mk_int()
 {
-    return &int_;
+    return &m_intType;
 }
 
 FloatType* TypeFactory::mk_float()
 {
-    return &float_;
+    return &m_floatType;
 }
 
 CharType* TypeFactory::mk_char()
 {
-    return &char_;
+    return &m_charType;
 }
 
 BoolType* TypeFactory::mk_bool()
 {
-    return &bool_;
+    return &m_boolType;
 }
 
 VoidType* TypeFactory::mk_void()
 {
-    return &void_;
+    return &m_voidType;
 }
 
 UnknownType* TypeFactory::mk_unknown()
 {
-    return &unknown_;
+    return &m_unknownType;
 }
 
 DynamicType* TypeFactory::mk_dynamic()
 {
-    return &dynamic_;
+    return &m_dynamicType;
 }
 
 IndirectionType* TypeFactory::mk_indirect(Type* type)
 {
     assert(type != nullptr);
-    return details::emplace_get<IndirectionType>(type, indirect_, type);
+    return details::emplace_get<IndirectionType>(type, m_indirectTypeMap, type);
 }
-
-// UserType* TypeFactory::mk_user(std::string const& name)
-// {
-    // return details::emplace_get<UserType>(name, user_, name);
-// }
 
 ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope)
 {
-    return mk_class(name, scope, nullptr);
+    return this->mk_class(name, scope, nullptr);
 }
 
 ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def)
 {
     ClassType *t = details::emplace_get<ClassType>(
         mk_fqn(scope, name),
-        m_classes,
+        m_classTypeMap,
         name,
         scope,
         def);
-    if (!t->m_def && def) {
-        t->m_def = def;
+
+    if (!t->def && def) {
+        t->def = def;
     }
-    if (t->m_def && def) {
-        assert(t->m_def == def);
+
+#ifndef NDEBUG
+    if (t->def && def) {
+        assert(t->def == def);
     }
+#endif
+
     return t;
 }
 
 InterfaceType *TypeFactory::mk_interface(const std::string &name, const Scope &scope)
 {
-    return mk_interface(name, scope, nullptr);
+    return this->mk_interface(name, scope, nullptr);
 }
 
 InterfaceType *TypeFactory::mk_interface(const std::string &name, const Scope &scope, InterfaceDefStmt *def)
 {
     InterfaceType *i = details::emplace_get<InterfaceType>(
         mk_fqn(scope, name),
-        m_interfaces,
+        m_interfaceTypeMap,
         name,
         scope,
         def);
-    if (!i->m_def && def) {
-        i->m_def = def;
+
+    if (!i->def && def) {
+        i->def = def;
     }
-    if (i->m_def && def) {
-        assert(i->m_def == def);
+
+#ifndef NDEBUG
+    if (i->def && def) {
+        assert(i->def == def);
     }
+#endif
+
     return i;
 }
 
 LambdaType* TypeFactory::mk_lambda(std::string name, LambdaExpr *def)
 {
     return details::emplace_get<LambdaType>(
-        m_types,
+        m_otherTypes,
         std::move(name),
         def);
 }
+
 
 } // namespace astfri

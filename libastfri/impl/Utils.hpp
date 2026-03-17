@@ -44,8 +44,10 @@ Val* emplace_get(Key&& key, Map& map, Args&&... args)
 }
 
 /**
- * @brief Creates new @c T from @p args , stores it in @p store and returns the
- * created object
+ * @brief Creates new instance of @c T from @p args and stores it in @p store.
+ * @param store Vector-like container for storing unique pointers to @c T
+ * @param args Param pack used to construct an instance of @c T
+ * @return Pointer to the new @c T instance.
  */
 template<typename T, vector_like Vector, typename... Args>
 T* emplace_get(Vector& store, Args&&... args)

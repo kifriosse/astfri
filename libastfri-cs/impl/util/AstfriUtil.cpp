@@ -51,7 +51,7 @@ Scope mk_scope(const TSNode& node, const SourceFile& currentSrc)
             }
 
             const auto reverseFileNms
-                = std::ranges::views::reverse(currentSrc.fileNms.names_);
+                = std::ranges::views::reverse(currentSrc.fileNms.names);
             for (const auto& nmsQualif : reverseFileNms)
             {
                 qualifs.push_front(nmsQualif);
@@ -88,7 +88,7 @@ Scope mk_scope(const std::string_view qualifier)
     {
         if (*current == '.')
         {
-            scope.names_.emplace_back(sliceBegin, current);
+            scope.names.emplace_back(sliceBegin, current);
             sliceBegin = current + 1;
         }
         ++current;
@@ -96,7 +96,7 @@ Scope mk_scope(const std::string_view qualifier)
 
     if (sliceBegin != itEnd)
     {
-        scope.names_.emplace_back(sliceBegin, current);
+        scope.names.emplace_back(sliceBegin, current);
     }
 
     return scope;
@@ -124,7 +124,7 @@ Scope mk_scope(ScopeNode* start, const SourceFile& currentSrc)
         return currentSrc.fileNms;
     }
 
-    const auto reverse = std::ranges::views::reverse(currentSrc.fileNms.names_);
+    const auto reverse = std::ranges::views::reverse(currentSrc.fileNms.names);
     for (const auto& nmsQualif : reverse)
     {
         scope.push_front(nmsQualif);

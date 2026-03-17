@@ -914,7 +914,7 @@ astfri::Scope StatementTransformer::get_scope(TSNode tsNode, std::string const& 
             {
                 if (std::string(ts_node_type(ts_node_named_child(child, j))) == "identifier")
                 {
-                    scope.names_.push_back(
+                    scope.names.push_back(
                         this->exprTransformer->get_node_text(
                             ts_node_named_child(child, j), sourceCode
                         )

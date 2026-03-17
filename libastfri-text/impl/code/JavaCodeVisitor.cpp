@@ -411,15 +411,15 @@ void JavaCodeVisitor::process_unclassified(
 
 void JavaCodeVisitor::process_package(Scope const& scope)
 {
-    if (scope.names_.empty())
+    if (scope.names.empty())
     {
         return;
     }
     builder_->append_text("package ");
-    for (size_t i = 0; i < scope.names_.size(); ++i)
+    for (size_t i = 0; i < scope.names.size(); ++i)
     {
-        builder_->append_text(scope.names_.at(i));
-        if (i < scope.names_.size() - 1)
+        builder_->append_text(scope.names.at(i));
+        if (i < scope.names.size() - 1)
         {
             builder_->append_text(".");
         }
