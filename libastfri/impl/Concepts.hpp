@@ -7,6 +7,7 @@
 #include "StmtFwd.hpp"
 #include "libastfri/inc/Stmt.hpp"
 
+
 namespace rapidjson
 {
 

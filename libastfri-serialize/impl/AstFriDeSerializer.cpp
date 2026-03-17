@@ -16,7 +16,7 @@ AstFriDeSerializer::AstFriDeSerializer() :
 {
 }
 
-astfri::IVisitable* AstFriDeSerializer::deserialize(std::string filePath)
+astfri::Visitable* AstFriDeSerializer::deserialize(std::string filePath)
 {
 
     std::ifstream file(filePath);
@@ -541,29 +541,29 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
 
     for (auto& attribute : value["attributes"].GetArray())
     {
-        classDefStmt->vars_.push_back(this->deserialize_member_var_def_stmt(attribute));
+        classDefStmt->vars.push_back(this->deserialize_member_var_def_stmt(attribute));
     }
 
     for (auto& genericParam : value["generic_parameters"].GetArray())
     {
-        classDefStmt->tparams_.push_back(this->deserialize_generic_param(genericParam));
+        classDefStmt->tparams.push_back(this->deserialize_generic_param(genericParam));
     }
 
     for (auto& method : value["methods"].GetArray())
     {
-        classDefStmt->methods_.push_back(this->deserialize_method_def_stmt(method, classDefStmt));
+        classDefStmt->methods.push_back(this->deserialize_method_def_stmt(method, classDefStmt));
     }
 
     for (auto& constructor : value["constructors"].GetArray())
     {
-        classDefStmt->constructors_.push_back(
+        classDefStmt->constructors.push_back(
             this->deserialize_constructor_def_stmt(constructor, classDefStmt)
         );
     }
 
     for (auto& destructor : value["destructors"].GetArray())
     {
-        classDefStmt->destructors_.push_back(
+        classDefStmt->destructors.push_back(
             this->deserialize_destructor_def_stmt(destructor, classDefStmt)
         );
     }
@@ -580,11 +580,11 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
         {
             astfri::InterfaceDefStmt* interface    = this->statementMaker_.mk_interface_def(name);
             nameWithInterfaceDefStmtMapping_[name] = interface;
-            classDefStmt->interfaces_.push_back(interface);
+            classDefStmt->interfaces.push_back(interface);
         }
         else
         {
-            classDefStmt->interfaces_.push_back(it->second);
+            classDefStmt->interfaces.push_back(it->second);
         }
     }
 
@@ -601,11 +601,11 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
         }
         else
         {
-            classDefStmt->bases_.push_back(it->second);
+            classDefStmt->bases.push_back(it->second);
         }
     }
 
-    nameWithClassDefStmtMapping_[classDefStmt->name_] = classDefStmt;
+    nameWithClassDefStmtMapping_[classDefStmt->name] = classDefStmt;
     return classDefStmt;
 }
 
@@ -734,10 +734,10 @@ astfri::TranslationUnit* AstFriDeSerializer::deserialize_translation_unit(rapidj
     }
 
     astfri::TranslationUnit* tu = this->statementMaker_.mk_translation_unit();
-    tu->classes_                = std::move(clasdeses);
-    tu->functions_              = std::move(functions);
-    tu->globals_                = std::move(globals);
-    tu->interfaces_             = std::move(interfaces);
+    tu->classes                = std::move(clasdeses);
+    tu->functions              = std::move(functions);
+    tu->globals                = std::move(globals);
+    tu->interfaces             = std::move(interfaces);
     return tu;
 }
 
@@ -837,21 +837,21 @@ astfri::InterfaceDefStmt* AstFriDeSerializer::deserialize_interface_def_stmt(rap
         }
         else
         {
-            interfDefStmt->bases_.push_back(it->second);
+            interfDefStmt->bases.push_back(it->second);
         }
     }
 
     for (auto& method : value["methods"].GetArray())
     {
-        interfDefStmt->methods_.push_back(this->deserialize_method_def_stmt(method, interfDefStmt));
+        interfDefStmt->methods.push_back(this->deserialize_method_def_stmt(method, interfDefStmt));
     }
 
     for (auto& genericParam : value["generic_parameters"].GetArray())
     {
-        interfDefStmt->tparams_.push_back(this->deserialize_generic_param(genericParam));
+        interfDefStmt->tparams.push_back(this->deserialize_generic_param(genericParam));
     }
 
-    nameWithInterfaceDefStmtMapping_[interfDefStmt->name_] = interfDefStmt;
+    nameWithInterfaceDefStmtMapping_[interfDefStmt->name] = interfDefStmt;
     return interfDefStmt;
 }
 
@@ -873,14 +873,14 @@ void AstFriDeSerializer::resolve_class_def_stmts()
                 = this->statementMaker_.mk_class_def(std::move(name), astfri::mk_scope());
             for (auto& clsDefStmt : it.second)
             {
-                clsDefStmt->bases_.push_back(classDefStmt);
+                clsDefStmt->bases.push_back(classDefStmt);
             }
         }
         else
         {
             for (auto& clsDefStmt : it.second)
             {
-                clsDefStmt->bases_.push_back(itResolvedClassStmt->second);
+                clsDefStmt->bases.push_back(itResolvedClassStmt->second);
             }
         }
     }
@@ -901,7 +901,7 @@ void AstFriDeSerializer::resolve_interface_def_stmts()
                 = this->statementMaker_.mk_interface_def(std::move(name));
             for (auto& interfaceDefStmt : it.second)
             {
-                interfaceDefStmt->bases_.push_back(newInterfDefStmt);
+                interfaceDefStmt->bases.push_back(newInterfDefStmt);
             }
         }
         else
@@ -909,7 +909,7 @@ void AstFriDeSerializer::resolve_interface_def_stmts()
             astfri::InterfaceDefStmt* resolvedInterfDefStmt = itResolvedInterfaceStmt->second;
             for (auto& interfDefStmt : it.second)
             {
-                interfDefStmt->bases_.push_back(resolvedInterfDefStmt);
+                interfDefStmt->bases.push_back(resolvedInterfDefStmt);
             }
         }
     }

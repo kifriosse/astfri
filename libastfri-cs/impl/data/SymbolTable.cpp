@@ -48,7 +48,7 @@ ScopeNode* SymbolTable::add_type(
 
 ScopeNode* SymbolTable::add_type(const TypeBinding& tb)
 {
-    return symbTree_.add_type(tb.type->scope_, tb);
+    return symbTree_.add_type(tb.type->scope, tb);
 }
 
 ScopeNode* SymbolTable::add_primitive(

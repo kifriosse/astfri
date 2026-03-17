@@ -6,7 +6,7 @@ bool ClangVisitor::TraverseDeclStmt(clang::DeclStmt* DS)
 {
     // akcia na tomto vrchole
     auto new_def_stmt = this->stmt_factory_->mk_def();
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_def_stmt);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_def_stmt);
 
     // zapamatanie si AST Location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -56,7 +56,7 @@ bool ClangVisitor::TraverseCompoundStmt(clang::CompoundStmt* CS)
         else if (llvm::dyn_cast<clang::Expr>(stmt))
         {
             TraverseStmt(stmt);
-            new_compound->stmts_.push_back(this->stmt_factory_->mk_expr(this->astfri_location.expr_)
+            new_compound->stmts.push_back(this->stmt_factory_->mk_expr(this->astfri_location.expr_)
             );
         }
         else
@@ -72,7 +72,7 @@ bool ClangVisitor::TraverseReturnStmt(clang::ReturnStmt* RS)
 {
     // akcia na tomto vrchole
     ReturnStmt* new_return = this->stmt_factory_->mk_return(nullptr);
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_return);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_return);
 
     // zapamatanie AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -84,7 +84,7 @@ bool ClangVisitor::TraverseReturnStmt(clang::ReturnStmt* RS)
 
     TraverseStmt(RS->getRetValue()); // ->IgnoreCasts()
     // naplnenie return stmt
-    new_return->val_ = this->astfri_location.expr_;
+    new_return->val = this->astfri_location.expr_;
 
     // vratenie ast location
     this->astfri_location = astfri_temp;
@@ -99,7 +99,7 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt* IS)
     auto new_if = this->stmt_factory_->mk_if(nullptr, nullptr, nullptr);
 
     // TODO: prepoklada sa ze je v compounde a nie v else vetve
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_if);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_if);
 
     // zapamatanie AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -111,11 +111,11 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt* IS)
 
     // priradenie podmienky
     TraverseStmt(IS->getCond());
-    new_if->cond_ = this->astfri_location.expr_;
+    new_if->cond = this->astfri_location.expr_;
 
     // priradenie true vetvy
     TraverseStmt(IS->getThen());
-    new_if->iftrue_ = this->astfri_location.stmt_;
+    new_if->iftrue = this->astfri_location.stmt_;
 
     // else vetva
     if (auto else_stmt = IS->getElse())
@@ -124,7 +124,7 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt* IS)
         if (auto compound = llvm::dyn_cast<clang::CompoundStmt>(IS->getElse()))
         {
             TraverseStmt(compound);
-            new_if->iffalse_ = this->astfri_location.stmt_;
+            new_if->iffalse = this->astfri_location.stmt_;
         }
         else
         {
@@ -132,7 +132,7 @@ bool ClangVisitor::TraverseIfStmt(clang::IfStmt* IS)
             CompoundStmt* tempCmpd      = this->stmt_factory_->mk_compound(std::vector<Stmt*>{});
             this->astfri_location.stmt_ = tempCmpd;
             TraverseStmt(else_stmt);
-            new_if->iffalse_ = tempCmpd->stmts_[0];
+            new_if->iffalse = tempCmpd->stmts[0];
         }
     }
 
@@ -147,7 +147,7 @@ bool ClangVisitor::TraverseForStmt(clang::ForStmt* FS)
 {
     // akcia na tomto vrchole
     auto new_for = this->stmt_factory_->mk_for(nullptr, nullptr, nullptr, nullptr);
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_for);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_for);
 
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -159,21 +159,21 @@ bool ClangVisitor::TraverseForStmt(clang::ForStmt* FS)
 
     // naplnenie new_for
     TraverseStmt(FS->getCond());
-    new_for->cond_ = this->astfri_location.expr_;
+    new_for->cond = this->astfri_location.expr_;
 
     // naplnenie tela
     TraverseStmt(FS->getBody());
-    new_for->body_ = (CompoundStmt*)this->astfri_location.stmt_;
+    new_for->body = (CompoundStmt*)this->astfri_location.stmt_;
 
     // vytvorim si compound stmt a do toho pojdu init statementy, potom ich hodim do vardef
     auto init_compound          = this->stmt_factory_->mk_compound(std::vector<Stmt*>{});
     this->astfri_location.stmt_ = init_compound;
     TraverseStmt(FS->getInit());
-    new_for->init_ = ((CompoundStmt*)this->astfri_location.stmt_)->stmts_[0];
+    new_for->init = ((CompoundStmt*)this->astfri_location.stmt_)->stmts[0];
 
     auto step      = FS->getInc();
     TraverseStmt(step);
-    new_for->step_ = this->stmt_factory_->mk_expr(this->astfri_location.expr_);
+    new_for->step = this->stmt_factory_->mk_expr(this->astfri_location.expr_);
 
     // vratenie AST location
     this->astfri_location = astfri_temp;
@@ -186,7 +186,7 @@ bool ClangVisitor::TraverseWhileStmt(clang::WhileStmt* WS)
 {
     // akcia na tomto vrchole
     auto new_while = this->stmt_factory_->mk_while(nullptr, nullptr);
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_while);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_while);
 
     // zapamatanie si AST Location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -198,9 +198,9 @@ bool ClangVisitor::TraverseWhileStmt(clang::WhileStmt* WS)
 
     // naplnenie new_while
     TraverseStmt(WS->getCond());
-    new_while->cond_ = this->astfri_location.expr_;
+    new_while->cond = this->astfri_location.expr_;
     TraverseStmt(WS->getBody());
-    new_while->body_ = (CompoundStmt*)this->astfri_location.stmt_;
+    new_while->body = (CompoundStmt*)this->astfri_location.stmt_;
 
     // vratenie AST Location
     this->astfri_location = astfri_temp;
@@ -213,7 +213,7 @@ bool ClangVisitor::TraverseDoStmt(clang::DoStmt* DS)
 {
     // akcia na tomto vrchole
     auto new_do_while = this->stmt_factory_->mk_do_while(nullptr, nullptr);
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_do_while);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_do_while);
 
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -225,9 +225,9 @@ bool ClangVisitor::TraverseDoStmt(clang::DoStmt* DS)
 
     // naplnenie new_do_while
     TraverseStmt(DS->getCond());
-    new_do_while->cond_ = this->astfri_location.expr_;
+    new_do_while->cond = this->astfri_location.expr_;
     TraverseStmt(DS->getBody());
-    new_do_while->body_ = (CompoundStmt*)this->astfri_location.stmt_;
+    new_do_while->body = (CompoundStmt*)this->astfri_location.stmt_;
 
     // vratenie AST location
     this->astfri_location = astfri_temp;
@@ -240,7 +240,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS)
 {
     // akcia na tomto vrchole
     auto new_switch = this->stmt_factory_->mk_switch(nullptr, std::vector<CaseBaseStmt*>{});
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_switch);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_switch);
 
     // zapamatanie si AST location
     AstfriASTLocation astfri_temp = this->astfri_location;
@@ -266,14 +266,14 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS)
             // naplnenie case-u
             auto case_cond = case_stmt->getLHS(); //->IgnoreCasts()
             TraverseStmt(case_cond);
-            new_case->exprs_.push_back(this->astfri_location.expr_);
+            new_case->exprs.push_back(this->astfri_location.expr_);
 
             auto case_body = case_stmt->getSubStmt();
             // ak je v compounde
             if (auto CS_body = llvm::dyn_cast<clang::CompoundStmt>(case_body))
             {
                 TraverseStmt(CS_body);
-                new_case->body_ = this->astfri_location.stmt_;
+                new_case->body = this->astfri_location.stmt_;
             }
             else
             {
@@ -281,10 +281,10 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS)
                 auto temp_compund = this->stmt_factory_->mk_compound(std::vector<Stmt*>{});
                 this->astfri_location.stmt_ = temp_compund;
                 TraverseStmt(case_body);
-                if (! ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.empty())
-                    new_case->body_ = temp_compund->stmts_[0];
+                if (! ((CompoundStmt*)this->astfri_location.stmt_)->stmts.empty())
+                    new_case->body = temp_compund->stmts[0];
             }
-            new_switch->cases_.push_back(new_case);
+            new_switch->cases.push_back(new_case);
         }
         else if (auto default_stmt = llvm::dyn_cast<clang::DefaultStmt>(sw_case))
         {
@@ -296,7 +296,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS)
             if (auto CS_body = llvm::dyn_cast<clang::CompoundStmt>(default_body))
             {
                 TraverseStmt(CS_body);
-                new_default->body_ = this->astfri_location.stmt_;
+                new_default->body = this->astfri_location.stmt_;
             }
             else
             {
@@ -304,10 +304,10 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS)
                 auto temp_compund = this->stmt_factory_->mk_compound(std::vector<Stmt*>{});
                 this->astfri_location.stmt_ = temp_compund;
                 TraverseStmt(default_body);
-                if (! ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.empty())
-                    new_default->body_ = temp_compund->stmts_[0];
+                if (! ((CompoundStmt*)this->astfri_location.stmt_)->stmts.empty())
+                    new_default->body = temp_compund->stmts[0];
             }
-            new_switch->cases_.push_back(new_default);
+            new_switch->cases.push_back(new_default);
         }
     }
 
@@ -322,7 +322,7 @@ bool ClangVisitor::TraverseContinueStmt([[maybe_unused]] clang::ContinueStmt* CS
 {
     // akcia na tomto vrchole
     auto new_continue = this->stmt_factory_->mk_continue();
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_continue);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_continue);
 
     return true;
 }
@@ -331,7 +331,7 @@ bool ClangVisitor::TraverseBreakStmt([[maybe_unused]] clang::BreakStmt* BS)
 {
     // akcia na tomto vrchole
     auto new_break = this->stmt_factory_->mk_break();
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_break);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_break);
 
     return true;
 }

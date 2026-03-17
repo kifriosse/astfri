@@ -363,7 +363,7 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
                 if (astfri::MemberVarRefExpr* memVarExpr
                     = dynamic_cast<astfri::MemberVarRefExpr*>(expr))
                 {
-                    memVarExpr->owner_ = this->exprFactory.mk_this();
+                    memVarExpr->owner = this->exprFactory.mk_this();
                     owner              = memVarExpr;
                 }
                 else if (astfri::LocalVarRefExpr* localVarExpr

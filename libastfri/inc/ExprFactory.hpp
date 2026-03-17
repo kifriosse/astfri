@@ -10,19 +10,24 @@
 #include <string>
 #include <vector>
 
+
 namespace astfri
 {
+
+
 /**
- * @brief TODO
+ * @brief Singleton expression factory.
  */
 class ExprFactory
 {
 public:
+    /**
+     * @brief Returns the singleton instance.
+     * @return Singleton instance.
+     */
     static ExprFactory& get_instance();
 
 public:
-    ~ExprFactory() = default;
-
     IntLiteralExpr* mk_int_literal(int val);
 
     FloatLiteralExpr* mk_float_literal(float val);
@@ -76,30 +81,48 @@ public:
 
     UnknownExpr* mk_unknown();
 
+public:
+    /**
+     * @brief Deleted copy constructor.
+     */
+    ExprFactory(const ExprFactory &other) = delete;
+
+    /**
+     * @brief Explicitly deleted move constructor.
+     */
+    ExprFactory(ExprFactory &&other) = delete;
+
+    /**
+     * @brief Deleted copy-assignment.
+     */
+    void operator=(const ExprFactory &other) = delete;
+
+    /**
+     * @brief Explicitly deleted copy-assignment.
+     */
+    void operator=(ExprFactory &&other) = delete;
+
 private:
+    /**
+     * @brief Private deafult constructor.
+     */
     ExprFactory();
-    ExprFactory(const ExprFactory &) = delete;
-    ExprFactory(ExprFactory &&) = delete;
-    void operator=(const ExprFactory &) = delete;
-    void operator=(ExprFactory &&) = delete;
 
 private:
-    TypeFactory *m_types;
-
-    std::vector<std::unique_ptr<Expr>> exprs_;
-
-    std::map<int, IntLiteralExpr> ints_;
-    std::map<char, CharLiteralExpr> chars_;
-    std::map<std::string, StringLiteralExpr, std::less<>> strings_;
-    std::map<std::string, LambdaExpr, std::less<>> m_lambdas;
-
-    NullLiteralExpr null_;
-    BoolLiteralExpr false_{false};
-    BoolLiteralExpr true_{true};
-
-    ThisExpr this_;
-    UnknownExpr unknown_;
+    TypeFactory *m_typeFactory;
+    std::vector<std::unique_ptr<Expr>> m_otherExpressions;
+    std::map<int, IntLiteralExpr> m_intLiterals;
+    std::map<char, CharLiteralExpr> m_charLiterals;
+    std::map<std::string, StringLiteralExpr, std::less<>> m_stringLiterals;
+    std::map<std::string, LambdaExpr, std::less<>> m_lambdaExprs;
+    NullLiteralExpr m_nullLiteral;
+    BoolLiteralExpr m_falseLiteral{false};
+    BoolLiteralExpr m_trueLiteral{true};
+    ThisExpr m_thisExpr;
+    UnknownExpr m_unknownExpr;
 };
+
+
 } // namespace astfri
 
 #endif

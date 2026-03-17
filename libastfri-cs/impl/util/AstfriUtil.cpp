@@ -112,7 +112,7 @@ Scope mk_scope(ScopeNode* start, const SourceFile& currentSrc)
         if (const Nms* nms = current->is_a<Nms>())
             name = nms->get_name();
         else if (const auto* tb = current->is_a<TypeBinding>())
-            name = tb->type->name_;
+            name = tb->type->name;
 
         if (! name.empty())
             scope.emplace_front(std::move(name));

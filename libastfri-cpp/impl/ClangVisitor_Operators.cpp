@@ -27,10 +27,10 @@ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator*
 
     // lavy operator
     TraverseStmt(CAO->getLHS());
-    bin_op->left_ = this->astfri_location.expr_;
+    bin_op->left = this->astfri_location.expr_;
     // pravy operator
     TraverseStmt(CAO->getRHS());
-    bin_op->right_ = this->astfri_location.expr_;
+    bin_op->right = this->astfri_location.expr_;
 
     // vratenie expr_as_stmt naspat ak je toto node ktory ho zmenil
     if (expr_as_stmt_changed)
@@ -45,7 +45,7 @@ bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator*
     if (this->expr_as_stmt)
     {
         ((CompoundStmt*)this->astfri_location.stmt_)
-            ->stmts_.push_back(this->stmt_factory_->mk_expr(bin_op));
+            ->stmts.push_back(this->stmt_factory_->mk_expr(bin_op));
     }
 
     return true;
@@ -76,10 +76,10 @@ bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
 
     // lavy operator
     TraverseStmt(BO->getLHS());
-    bin_op->left_ = this->astfri_location.expr_;
+    bin_op->left = this->astfri_location.expr_;
     // pravy operator
     TraverseStmt(BO->getRHS());
-    bin_op->right_ = this->astfri_location.expr_;
+    bin_op->right = this->astfri_location.expr_;
 
     // vratenie expr_as_stmt naspat ak je toto node ktory ho zmenil
     if (expr_as_stmt_changed)
@@ -94,7 +94,7 @@ bool ClangVisitor::TraverseBinaryOperator(clang::BinaryOperator* BO)
     if (this->expr_as_stmt)
     {
         ((CompoundStmt*)this->astfri_location.stmt_)
-            ->stmts_.push_back(this->stmt_factory_->mk_expr(bin_op));
+            ->stmts.push_back(this->stmt_factory_->mk_expr(bin_op));
     }
 
     return true;
@@ -116,7 +116,7 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator* UO)
     if (this->expr_as_stmt)
     {
         ((CompoundStmt*)this->astfri_location.stmt_)
-            ->stmts_.push_back(this->stmt_factory_->mk_expr(un_op));
+            ->stmts.push_back(this->stmt_factory_->mk_expr(un_op));
     }
 
     this->astfri_location.expr_ = un_op;

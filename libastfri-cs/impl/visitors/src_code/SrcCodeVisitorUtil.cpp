@@ -56,7 +56,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(
                 );
 
                 varDef               = varMeta->varDef;
-                varDef->initializer_ = init;
+                varDef->initializer = init;
                 break;
             }
             case util::VarDefType::Local:
@@ -122,10 +122,10 @@ FunctionDefStmt* SrcCodeVisitor::make_func_stmt(
 
     semanticContext_.reg_return(retType);
 
-    funcDef->retType_ = retType;
-    funcDef->name_    = util::extract_text(nName, src_str());
-    funcDef->params_  = make_param_list(nParam, false);
-    funcDef->body_    = as_a<CompoundStmt>(hBody(this, nBody));
+    funcDef->retType = retType;
+    funcDef->name    = util::extract_text(nName, src_str());
+    funcDef->params  = make_param_list(nParam, false);
+    funcDef->body    = as_a<CompoundStmt>(hBody(this, nBody));
 
     semanticContext_.leave_scope();
     semanticContext_.unregister_return_type();

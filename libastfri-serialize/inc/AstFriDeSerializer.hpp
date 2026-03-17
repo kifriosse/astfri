@@ -15,7 +15,7 @@ class AstFriDeSerializer
 {
 public:
     static AstFriDeSerializer& get_instance();
-    astfri::IVisitable* deserialize(std::string filePath);
+    astfri::Visitable* deserialize(std::string filePath);
 
 private:
     AstFriDeSerializer();

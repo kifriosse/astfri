@@ -31,20 +31,20 @@ void SemanticContext::enter_scope()
 void SemanticContext::reg_local_var(LocalVarDefStmt* varDef)
 {
     scopeContext_.scopeStack.back().push_back(varDef);
-    scopeContext_.localVars.emplace(varDef->name_, varDef);
+    scopeContext_.localVars.emplace(varDef->name, varDef);
 }
 
 void SemanticContext::reg_param(ParamVarDefStmt* varDef)
 {
     scopeContext_.scopeStack.back().push_back(varDef);
-    scopeContext_.params.emplace(varDef->name_, varDef);
+    scopeContext_.params.emplace(varDef->name, varDef);
 }
 
 void SemanticContext::reg_local_func(FuncMetadata funcMeta)
 {
     const auto funcDef = funcMeta.funcDef;
     scopeContext_.scopeStack.back().push_back(funcDef);
-    scopeContext_.functions.emplace(funcDef->name_, std::move(funcMeta));
+    scopeContext_.functions.emplace(funcDef->name, std::move(funcMeta));
 }
 
 void SemanticContext::reg_return(Type* returnType)
@@ -67,12 +67,12 @@ void SemanticContext::leave_scope()
     for (const auto scopeMemb : scopeContext_.scopeStack.back())
     {
         if (const auto param = as_a<ParamVarDefStmt>(scopeMemb))
-            scopeContext_.params.erase(param->name_);
+            scopeContext_.params.erase(param->name);
         else if (const auto var = as_a<LocalVarDefStmt>(scopeMemb))
-            scopeContext_.localVars.erase(var->name_);
+            scopeContext_.localVars.erase(var->name);
         else if (const auto func = as_a<FunctionDefStmt>(scopeMemb))
         {
-            scopeContext_.functions.erase(func->name_);
+            scopeContext_.functions.erase(func->name);
         }
     }
     scopeContext_.scopeStack.pop_back();
@@ -136,8 +136,8 @@ VarDefStmt* SemanticContext::find_var(
                 {
                     return metadata->varDef;
                 }
-                currentType = ! currentType->bases_.empty()
-                                ? currentType->bases_.front()
+                currentType = ! currentType->bases.empty()
+                                ? currentType->bases.front()
                                 : nullptr;
             }
             // todo handle properties
@@ -185,7 +185,7 @@ const MethodMetadata* SemanticContext::find_method(
                 return methodMeta;
 
             current
-                = ! current->bases_.empty() ? current->bases_.front() : nullptr;
+                = ! current->bases.empty() ? current->bases.front() : nullptr;
         }
     }
     else if (auto* intDef = as_a<InterfaceDefStmt>(owner))
@@ -219,7 +219,7 @@ MemberVarMetadata* SemanticContext::find_memb_var(
                 return varMeta;
 
             current
-                = ! current->bases_.empty() ? current->bases_.front() : nullptr;
+                = ! current->bases.empty() ? current->bases.front() : nullptr;
         }
     }
     else if (is_a<InterfaceDefStmt>(owner))

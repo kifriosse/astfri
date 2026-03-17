@@ -13,7 +13,7 @@ namespace astfri
 /**
  * @brief TODO
  */
-struct Type : virtual IVisitable // TODO just Visitable
+struct Type : virtual Visitable
 {
     virtual ~Type() = default;
 };
@@ -72,7 +72,7 @@ struct VoidType : PrimitiveType, details::MkVisitable<VoidType>
  */
 struct IndirectionType : Type, details::MkVisitable<IndirectionType>
 {
-    Type* indirect_;
+    Type* indirect;
     explicit IndirectionType(Type* indirect);
 };
 
@@ -81,8 +81,8 @@ struct IndirectionType : Type, details::MkVisitable<IndirectionType>
  */
 struct ScopedType : Type
 {
-    std::string name_;
-    Scope scope_;
+    std::string name;
+    Scope scope;
     ScopedType(std::string name, Scope scope);
 };
 
@@ -109,8 +109,8 @@ struct InterfaceType : ScopedType, details::MkVisitable<InterfaceType>
  */
 struct LambdaType : Type, details::MkVisitable<LambdaType>
 {
-    std::string m_name;
-    LambdaExpr *m_def;
+    std::string name;
+    LambdaExpr *def;
     LambdaType(std::string name, LambdaExpr *def);
 };
 

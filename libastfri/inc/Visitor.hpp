@@ -7,13 +7,15 @@
 
 #include <stdexcept>
 
+
 namespace astfri
 {
+
 
 /**
  * @brief TODO
  */
-struct IVisitor
+struct Visitor
 {
     virtual void visit(DynamicType const& type)         = 0;
     virtual void visit(IntType const& type)             = 0;
@@ -88,22 +90,22 @@ struct IVisitor
     virtual void visit(ContinueStmt const& stmt)        = 0;
     virtual void visit(BreakStmt const& stmt)           = 0;
 
-    virtual ~IVisitor()                                 = default;
+    virtual ~Visitor()                                  = default;
 };
 
 /**
  * @brief TODO
  */
-struct IVisitable
+struct Visitable
 {
-    virtual void accept(IVisitor& visitor) = 0;
-    virtual ~IVisitable()                  = default;
+    virtual void accept(Visitor& visitor) = 0;
+    virtual ~Visitable()                  = default;
 };
 
 /**
  * @brief TODO
  */
-struct VisitorAdapter : IVisitor
+struct VisitorAdapter : Visitor
 {
     void visit(DynamicType const& /*type*/) override
     {
@@ -390,7 +392,7 @@ struct VisitorAdapter : IVisitor
 /**
  * @brief TODO
  */
-struct ThrowingVisitorAdapter : IVisitor
+struct ThrowingVisitorAdapter : Visitor
 {
     void visit(DynamicType const& /*type*/) override
     {
@@ -747,20 +749,23 @@ struct ThrowingVisitorAdapter : IVisitor
 namespace details
 {
 
+
 /**
  * @brief CRTP mixin that makes @c This child class visitable.
  * @tparam This Type of the child class.
  */
 template<typename This>
-struct MkVisitable : virtual IVisitable
+struct MkVisitable : virtual Visitable
 {
-    void accept(IVisitor& visitor) override
+    void accept(Visitor& visitor) override
     {
         visitor.visit(static_cast<This const&>(*this));
     }
 };
 
+
 } // namespace details
+
 
 } // namespace astfri
 

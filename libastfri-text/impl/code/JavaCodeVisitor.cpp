@@ -36,7 +36,7 @@ void JavaCodeVisitor::visit(BoolType const& /*type*/)
 
 void JavaCodeVisitor::visit(IndirectionType const& type)
 {
-    if (!try_accept_node(type.indirect_))
+    if (!try_accept_node(type.indirect))
     {
         builder_->write_invalid_type();
     }
@@ -44,7 +44,7 @@ void JavaCodeVisitor::visit(IndirectionType const& type)
 
 void JavaCodeVisitor::visit(LambdaType const& type)
 {
-    builder_->append_text(type.m_name);
+    builder_->append_text(type.name);
 }
 
 // -----
@@ -56,42 +56,42 @@ void JavaCodeVisitor::visit(NullLiteralExpr const& /*expr*/)
 
 void JavaCodeVisitor::visit(MemberVarRefExpr const& expr)
 {
-    if (!try_accept_node(expr.owner_))
+    if (!try_accept_node(expr.owner))
     {
         builder_->append_text("this");
     }
     builder_->append_text(".");
-    builder_->append_text(expr.member_);
+    builder_->append_text(expr.member);
 }
 
 void JavaCodeVisitor::visit(GlobalVarRefExpr const& expr)
 {
-    builder_->append_text("UnclassifiedElements." + expr.global_);
+    builder_->append_text("UnclassifiedElements." + expr.global);
 }
 
 void JavaCodeVisitor::visit(FunctionCallExpr const& expr)
 {
-    builder_->append_text("UnclassifiedElements." + expr.name_);
-    process_pargs(expr.args_, false);
+    builder_->append_text("UnclassifiedElements." + expr.name);
+    process_pargs(expr.args, false);
 }
 
 void JavaCodeVisitor::visit(MethodCallExpr const& expr)
 {
-    if (!try_accept_node(expr.owner_))
+    if (!try_accept_node(expr.owner))
     {
         builder_->append_text("this");
     }
     builder_->append_text(".");
-    builder_->append_text(expr.name_);
-    process_pargs(expr.args_, false);
+    builder_->append_text(expr.name);
+    process_pargs(expr.args, false);
 }
 
 void JavaCodeVisitor::visit(LambdaCallExpr const& expr)
 {
-    process_pargs(expr.args_, false);
+    process_pargs(expr.args, false);
     builder_->append_text(" ->");
     builder_->write_opening_curl_bracket();
-    if (!try_accept_node(expr.lambda_))
+    if (!try_accept_node(expr.lambda))
     {
         builder_->write_invalid_expr();
     }
@@ -104,15 +104,15 @@ void JavaCodeVisitor::visit(LambdaCallExpr const& expr)
 
 void JavaCodeVisitor::visit(TranslationUnit const& stmt)
 {
-    process_unclassified(stmt.functions_, stmt.globals_);
-    for (auto* const& cds : stmt.classes_)
+    process_unclassified(stmt.functions, stmt.globals);
+    for (auto* const& cds : stmt.classes)
     {
         if (!try_accept_node(cds))
         {
             builder_->write_invalid_stmt();
         }
     }
-    for (auto* const& ids : stmt.interfaces_)
+    for (auto* const& ids : stmt.interfaces)
     {
         if (!try_accept_node(ids))
         {
@@ -123,16 +123,16 @@ void JavaCodeVisitor::visit(TranslationUnit const& stmt)
 
 void JavaCodeVisitor::visit(MemberVarDefStmt const& stmt)
 {
-    process_access_mod(stmt.access_);
-    if (!try_accept_node(stmt.type_))
+    process_access_mod(stmt.access);
+    if (!try_accept_node(stmt.type))
     {
         builder_->write_invalid_type();
     }
-    builder_->append_text(" " + stmt.name_);
-    if (stmt.initializer_)
+    builder_->append_text(" " + stmt.name);
+    if (stmt.initializer)
     {
         builder_->append_text(" = ");
-        try_accept_node(stmt.initializer_);
+        try_accept_node(stmt.initializer);
     }
     builder_->append_text(";");
 }
@@ -140,29 +140,29 @@ void JavaCodeVisitor::visit(MemberVarDefStmt const& stmt)
 void JavaCodeVisitor::visit(GlobalVarDefStmt const& stmt)
 {
     builder_->append_text("public static ");
-    if (!try_accept_node(stmt.type_))
+    if (!try_accept_node(stmt.type))
     {
         builder_->write_invalid_type();
     }
-    builder_->append_text(" " + stmt.name_);
-    if (stmt.initializer_)
+    builder_->append_text(" " + stmt.name);
+    if (stmt.initializer)
     {
         builder_->append_text(" = ");
-        try_accept_node(stmt.initializer_);
+        try_accept_node(stmt.initializer);
     }
     builder_->append_text(";");
 }
 
 void JavaCodeVisitor::visit(FunctionDefStmt const& stmt)
 {
-    if (!try_accept_node(stmt.retType_))
+    if (!try_accept_node(stmt.retType))
     {
         builder_->write_invalid_type();
     }
-    builder_->append_text(" " + stmt.name_);
-    process_pargs(stmt.params_, false);
+    builder_->append_text(" " + stmt.name);
+    process_pargs(stmt.params, false);
     builder_->write_opening_curl_bracket();
-    if (!try_accept_node(stmt.body_))
+    if (!try_accept_node(stmt.body))
     {
         builder_->write_invalid_type();
     }
@@ -173,24 +173,24 @@ void JavaCodeVisitor::visit(FunctionDefStmt const& stmt)
 
 void JavaCodeVisitor::visit(DefStmt const& stmt)
 {
-    if (stmt.defs_.empty())
+    if (stmt.defs.empty())
     {
         builder_->write_invalid_stmt();
         return;
     }
-    if (!try_accept_node(stmt.defs_.at(0)->type_))
+    if (!try_accept_node(stmt.defs.at(0)->type))
     {
         builder_->write_invalid_type();
     }
-    for (size_t i = 0; i < stmt.defs_.size(); ++i)
+    for (size_t i = 0; i < stmt.defs.size(); ++i)
     {
-        builder_->append_text(" " + stmt.defs_.at(i)->name_);
-        if (stmt.defs_.at(i)->initializer_)
+        builder_->append_text(" " + stmt.defs.at(i)->name);
+        if (stmt.defs.at(i)->initializer)
         {
             builder_->append_text(" = ");
-            try_accept_node(stmt.defs_.at(i)->initializer_);
+            try_accept_node(stmt.defs.at(i)->initializer);
         }
-        if (i < stmt.defs_.size() - 1)
+        if (i < stmt.defs.size() - 1)
         {
             builder_->append_text(",");
         }
@@ -199,8 +199,8 @@ void JavaCodeVisitor::visit(DefStmt const& stmt)
 
 void JavaCodeVisitor::visit(MethodDefStmt const& stmt)
 {
-    process_access_mod(stmt.access_);
-    if (!try_accept_node(stmt.func_))
+    process_access_mod(stmt.access);
+    if (!try_accept_node(stmt.func))
     {
         builder_->write_invalid_stmt();
     }
@@ -209,31 +209,31 @@ void JavaCodeVisitor::visit(MethodDefStmt const& stmt)
 void JavaCodeVisitor::visit(BaseInitializerStmt const& stmt)
 {
     builder_->append_text("super");
-    process_pargs(stmt.args_, false);
+    process_pargs(stmt.args, false);
     builder_->append_text(";");
     builder_->append_new_line();
 }
 
 void JavaCodeVisitor::visit(ConstructorDefStmt const& stmt)
 {
-    process_access_mod(stmt.access_);
+    process_access_mod(stmt.access);
     //builder_->append_text(stmt.owner_->name_);
-    builder_->append_text(stmt.owner_->type_->name_); // TODO check
-    process_pargs(stmt.params_, false);
+    builder_->append_text(stmt.owner->type->name); // TODO check
+    process_pargs(stmt.params, false);
     builder_->write_opening_curl_bracket();
-    if (!stmt.baseInit_.empty())
+    if (!stmt.baseInit.empty())
     {
-        if (!try_accept_node(stmt.baseInit_.at(0)))
+        if (!try_accept_node(stmt.baseInit.at(0)))
         {
             builder_->write_invalid_expr();
         }
-        if (stmt.baseInit_.size() > 1)
+        if (stmt.baseInit.size() > 1)
         {
             builder_->append_text("ERROR - ONLY ONE SUPER CALL POSSIBLE");
             builder_->append_new_line();
         }
     }
-    if (!try_accept_node(stmt.body_))
+    if (!try_accept_node(stmt.body))
     {
         builder_->write_invalid_stmt();
     }
@@ -244,41 +244,41 @@ void JavaCodeVisitor::visit(ConstructorDefStmt const& stmt)
 
 void JavaCodeVisitor::visit(GenericParam const& stmt)
 {
-    builder_->append_text(stmt.name_);
-    if (stmt.constraint_ != "")
+    builder_->append_text(stmt.name);
+    if (stmt.constraint != "")
     {
-        builder_->append_text(" extends " + stmt.constraint_);
+        builder_->append_text(" extends " + stmt.constraint);
     }
 }
 
 void JavaCodeVisitor::visit(InterfaceDefStmt const& stmt)
 {
-    Scope const& scope = stmt.m_type->scope_;
+    Scope const& scope = stmt.type->scope;
     process_package(scope);
     //builder_->append_text("public interface " + stmt.name_);
-    builder_->append_text("public interface " + stmt.m_type->name_); // TODO check
-    if (!stmt.tparams_.empty())
+    builder_->append_text("public interface " + stmt.type->name); // TODO check
+    if (!stmt.tparams.empty())
     {
-        process_pargs(stmt.tparams_, true);
+        process_pargs(stmt.tparams, true);
     }
     builder_->append_space();
-    process_supertypes(stmt.bases_, true, false);
+    process_supertypes(stmt.bases, true, false);
     builder_->append_text("{");
     builder_->append_new_line();
     builder_->append_new_line();
     builder_->increase_indentation();
-    for (size_t i = 0; i < stmt.methods_.size(); ++i)
+    for (size_t i = 0; i < stmt.methods.size(); ++i)
     {
-        if (!try_accept_node(stmt.methods_.at(i)->func_->retType_))
+        if (!try_accept_node(stmt.methods.at(i)->func->retType))
         {
             builder_->write_invalid_type();
         }
         builder_->append_space();
-        builder_->append_text(stmt.methods_.at(i)->func_->name_);
-        process_pargs(stmt.methods_.at(i)->func_->params_, false);
+        builder_->append_text(stmt.methods.at(i)->func->name);
+        process_pargs(stmt.methods.at(i)->func->params, false);
         builder_->append_text(";");
         builder_->append_new_line();
-        if (i < stmt.methods_.size() - 1)
+        if (i < stmt.methods.size() - 1)
         {
             builder_->append_new_line();
         }
@@ -286,31 +286,31 @@ void JavaCodeVisitor::visit(InterfaceDefStmt const& stmt)
     builder_->decrease_indentation();
     builder_->append_text("}");
     //static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.name_, scope);
-    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.m_type->name_, scope); // TODO check
+    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.type->name, scope); // TODO check
 }
 
 void JavaCodeVisitor::visit(ClassDefStmt const& stmt)
 {
-    Scope const& scope = stmt.type_->scope_;
+    Scope const& scope = stmt.type->scope;
     process_package(scope);
     //builder_->append_text("public class " + stmt.name_);
-    builder_->append_text("public class " + stmt.type_->name_); // TODO check
-    if (!stmt.tparams_.empty())
+    builder_->append_text("public class " + stmt.type->name); // TODO check
+    if (!stmt.tparams.empty())
     {
-        process_pargs(stmt.tparams_, true);
+        process_pargs(stmt.tparams, true);
     }
     builder_->append_space();
-    process_supertypes(stmt.bases_, true, true);
-    process_supertypes(stmt.interfaces_, false, false);
+    process_supertypes(stmt.bases, true, true);
+    process_supertypes(stmt.interfaces, false, false);
     builder_->append_text("{");
     builder_->append_new_line();
     builder_->append_new_line();
     builder_->increase_indentation();
-    if (!stmt.vars_.empty())
+    if (!stmt.vars.empty())
     {
-        for (size_t i = 0; i < stmt.vars_.size(); ++i)
+        for (size_t i = 0; i < stmt.vars.size(); ++i)
         {
-            if (!try_accept_node(stmt.vars_.at(i)))
+            if (!try_accept_node(stmt.vars.at(i)))
             {
                 builder_->write_invalid_expr();
             }
@@ -319,36 +319,36 @@ void JavaCodeVisitor::visit(ClassDefStmt const& stmt)
         builder_->append_new_line();
     }
     bool tmp = false;
-    if (!stmt.constructors_.empty())
+    if (!stmt.constructors.empty())
     {
         tmp = true;
-        for (size_t i = 0; i < stmt.constructors_.size(); ++i)
+        for (size_t i = 0; i < stmt.constructors.size(); ++i)
         {
-            if (!try_accept_node(stmt.constructors_.at(i)))
+            if (!try_accept_node(stmt.constructors.at(i)))
             {
                 builder_->write_invalid_stmt();
             }
             builder_->append_new_line();
-            if (i < stmt.constructors_.size() - 1)
+            if (i < stmt.constructors.size() - 1)
             {
                 builder_->append_new_line();
             }
         }
     }
-    if (!stmt.methods_.empty())
+    if (!stmt.methods.empty())
     {
         if (tmp)
         {
             builder_->append_new_line();
         }
-        for (size_t i = 0; i < stmt.methods_.size(); ++i)
+        for (size_t i = 0; i < stmt.methods.size(); ++i)
         {
-            if (!try_accept_node(stmt.methods_.at(i)))
+            if (!try_accept_node(stmt.methods.at(i)))
             {
                 builder_->write_invalid_stmt();
             }
             builder_->append_new_line();
-            if (i < stmt.methods_.size() - 1)
+            if (i < stmt.methods.size() - 1)
             {
                 builder_->append_new_line();
             }
@@ -357,7 +357,7 @@ void JavaCodeVisitor::visit(ClassDefStmt const& stmt)
     builder_->decrease_indentation();
     builder_->append_text("}");
     //static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.name_, scope);
-    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.type_->name_, scope); // TODO check
+    static_cast<JavaCodeBuilder*>(builder_)->create_java_file(stmt.type->name, scope); // TODO check
 }
 
 // --------------------------------------------------------------------------------------------- //

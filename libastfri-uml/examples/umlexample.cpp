@@ -20,31 +20,31 @@ int main(int argc, char** argv)
     astfri::ClassType* classTypeParent = types.mk_class("Parent", scope);
     //astfri::InterfaceType* interfaceTypeIVisitable = types.mk_interface("IVisitable", scope);
 
-    classFoo->type_ = classTypeFoo;
-    classBar->type_ = classTypeBar;
-    classParent->type_ = classTypeParent;
+    classFoo->type = classTypeFoo;
+    classBar->type = classTypeBar;
+    classParent->type = classTypeParent;
     //interfaceIVisitable->type_ = interfaceTypeIVisitable;
 
     std::vector<astfri::GenericParam*> genericParamsFoo;
     genericParamsFoo.push_back(statements.mk_generic_param("", "T"));
     genericParamsFoo.push_back(statements.mk_generic_param("", "E"));
-    classFoo->tparams_ = genericParamsFoo;
+    classFoo->tparams = genericParamsFoo;
 
     std::vector<astfri::ClassDefStmt*> basesBar;
     basesBar.push_back(classParent);
-    classBar->bases_ = basesBar;
+    classBar->bases = basesBar;
 
     std::vector<astfri::ConstructorDefStmt*> constructorsBar;
     auto cnstrBar     = statements.mk_constructor_def();
-    cnstrBar->access_ = astfri::AccessModifier::Public;
-    cnstrBar->owner_  = classBar;
+    cnstrBar->access = astfri::AccessModifier::Public;
+    cnstrBar->owner  = classBar;
     constructorsBar.push_back(cnstrBar);
-    classBar->constructors_ = constructorsBar;
+    classBar->constructors = constructorsBar;
 
     std::vector<astfri::DestructorDefStmt*> descructorsBar;
     auto dstrctrBar = statements.mk_destructor_def(classBar, nullptr);
     descructorsBar.push_back(dstrctrBar);
-    classBar->destructors_ = descructorsBar;
+    classBar->destructors = descructorsBar;
 
     std::vector<astfri::MemberVarDefStmt*> fieldsBar;
     auto memberBar = statements.mk_member_var_def(
@@ -54,11 +54,11 @@ int main(int argc, char** argv)
         astfri::AccessModifier::Private
     );
     fieldsBar.push_back(memberBar);
-    classBar->vars_ = fieldsBar;
+    classBar->vars = fieldsBar;
 
     std::vector<astfri::InterfaceDefStmt*> interfacesFoo;
     interfacesFoo.push_back(interfaceIVisitable);
-    classFoo->interfaces_ = interfacesFoo;
+    classFoo->interfaces = interfacesFoo;
 
     std::vector<astfri::MemberVarDefStmt*> fieldsFoo;
     fieldsFoo.push_back(
@@ -71,23 +71,23 @@ int main(int argc, char** argv)
         nullptr,
         astfri::AccessModifier::Private
     ));
-    classFoo->vars_ = fieldsFoo;
+    classFoo->vars = fieldsFoo;
 
     auto func       = statements.mk_function_def();
-    func->name_     = "foo";
-    func->retType_  = types.mk_indirect(types.mk_class("Bar", astfri::mk_scope()));
+    func->name     = "foo";
+    func->retType  = types.mk_indirect(types.mk_class("Bar", astfri::mk_scope()));
     std::vector<astfri::ParamVarDefStmt*> params;
     params.push_back(statements.mk_param_var_def("number", types.mk_int(), nullptr));
-    func->params_ = params;
+    func->params = params;
 
     std::vector<astfri::MethodDefStmt*> methodsFoo;
     auto methodFooOne         = statements.mk_method_def();
-    methodFooOne->access_     = astfri::AccessModifier::Public;
-    methodFooOne->owner_      = (classFoo);
-    methodFooOne->virtuality_ = astfri::Virtuality::NotVirtual;
-    methodFooOne->func_       = func;
+    methodFooOne->access     = astfri::AccessModifier::Public;
+    methodFooOne->owner      = (classFoo);
+    methodFooOne->virtuality = astfri::Virtuality::NotVirtual;
+    methodFooOne->func       = func;
     methodsFoo.push_back(methodFooOne);
-    classFoo->methods_ = methodsFoo;
+    classFoo->methods = methodsFoo;
 
     astfri::TranslationUnit tu;
     std::vector<astfri::ClassDefStmt*> classes;
@@ -97,8 +97,8 @@ int main(int argc, char** argv)
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     interfaces.push_back(interfaceIVisitable);
 
-    tu.classes_    = classes;
-    tu.interfaces_ = interfaces;
+    tu.classes    = classes;
+    tu.interfaces = interfaces;
 
     std::string config_file;
     if (argc > 1)

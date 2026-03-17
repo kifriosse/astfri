@@ -142,9 +142,9 @@ astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl)
 
 astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name)
 {
-    for (auto cls : this->tu_->classes_)
+    for (auto cls : this->tu_->classes)
     {
-        if (cls->type_->name_.compare(name) == 0)
+        if (cls->type->name.compare(name) == 0)
         {
             return cls;
         }

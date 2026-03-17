@@ -216,7 +216,7 @@ void SymbTableBuilder::visit_memb_var(
             .nVar   = nDecltor,
             .nInit  = ts_node_named_child(nDecltor, 1) // right side
         };
-        typeMeta->add_memb_var(varDef->name_, membVarMeta);
+        typeMeta->add_memb_var(varDef->name, membVarMeta);
     };
     util::for_each_match(nVarDecl, maps::QueryType::VarDecltor, process);
 }
@@ -567,7 +567,7 @@ TypeBinding SymbTableBuilder::mk_type_binding(
         ClassDefStmt* classDef
             = stmtFact_.mk_class_def(std::move(name), std::move(scope));
         tb.def  = classDef;
-        tb.type = classDef->type_;
+        tb.type = classDef->type;
         break;
     }
     case util::TypeKind::Interface:
@@ -575,7 +575,7 @@ TypeBinding SymbTableBuilder::mk_type_binding(
         InterfaceDefStmt* intDef
             = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
         tb.def  = intDef;
-        tb.type = intDef->m_type;
+        tb.type = intDef->type;
         break;
     }
     case util::TypeKind::Record:

@@ -461,9 +461,9 @@ ScopeNode* TypeTranslator::search_parents(
 
     while (current)
     {
-        if (! current->bases_.empty())
+        if (! current->bases.empty())
         {
-            current             = current->bases_.back();
+            current             = current->bases.back();
             const auto metadata = symbTable_.get_type_metadata(current);
             if (! metadata)
                 continue;

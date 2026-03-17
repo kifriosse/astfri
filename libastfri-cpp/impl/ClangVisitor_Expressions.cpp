@@ -11,12 +11,12 @@ bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor)
 
     // treba nastaviť typ
     // TODO: je to momentálne len pre ClassDefStmt, mne sa neda použiť is_a (dyn_cast), tak bude treba niećo vymyslieť
-    new_ctor_expr->type_ = ((astfri::ClassDefStmt*)this->astfri_location.stmt_)->type_;
+    new_ctor_expr->type = ((astfri::ClassDefStmt*)this->astfri_location.stmt_)->type;
 
     for (auto arg : Ctor->arguments())
     {
         TraverseStmt(arg);
-        new_ctor_expr->args_.push_back(this->astfri_location.expr_);
+        new_ctor_expr->args.push_back(this->astfri_location.expr_);
     }
 
     this->astfri_location.expr_ = new_ctor_expr;
@@ -109,7 +109,7 @@ bool ClangVisitor::TraverseCallExpr(clang::CallExpr* CE)
         for (auto arg : CE->arguments())
         {
             TraverseStmt(arg);
-            new_method_call->args_.push_back(this->astfri_location.expr_);
+            new_method_call->args.push_back(this->astfri_location.expr_);
         }
 
         this->astfri_location.expr_ = new_method_call;
@@ -123,7 +123,7 @@ bool ClangVisitor::TraverseCallExpr(clang::CallExpr* CE)
         for (auto arg : CE->arguments())
         {
             TraverseStmt(arg);
-            fun->args_.push_back(this->astfri_location.expr_);
+            fun->args.push_back(this->astfri_location.expr_);
         }
         this->astfri_location.expr_ = fun;
     }
@@ -223,7 +223,7 @@ bool ClangVisitor::TraverseCXXThrowExpr(clang::CXXThrowExpr* TE)
     // akcia na tomto vrchole
     TraverseStmt(TE->getSubExpr());
     auto new_throw = this->stmt_factory_->mk_throw(this->astfri_location.expr_);
-    ((CompoundStmt*)this->astfri_location.stmt_)->stmts_.push_back(new_throw);
+    ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_throw);
 
     return true;
 }

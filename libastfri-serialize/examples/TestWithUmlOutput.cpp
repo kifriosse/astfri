@@ -10,7 +10,7 @@ int main(int argc, char** argv)
         throw std::runtime_error("No file name given!!");
     AstFriDeSerializer& serializer = AstFriDeSerializer::get_instance();
 
-    astfri::IVisitable* node       = serializer.deserialize(argv[1]);
+    astfri::Visitable* node       = serializer.deserialize(argv[1]);
 
     astfri::TranslationUnit* tu    = dynamic_cast<astfri::TranslationUnit*>(node);
 

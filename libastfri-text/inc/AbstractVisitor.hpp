@@ -11,7 +11,7 @@ namespace astfri::text
     concept astfri_node =
         requires(Node& node)
         {
-            { node.accept(std::declval<IVisitor&>()) } -> std::same_as<void>;
+            { node.accept(std::declval<Visitor&>()) } -> std::same_as<void>;
         };
 
     // -----
@@ -127,7 +127,7 @@ namespace astfri::text
         found.clear();
         for (size_t i = 0; i < all.size(); ++i)
         {
-            if (all.at(i) && all.at(i)->access_ == mod)
+            if (all.at(i) && all.at(i)->access == mod)
             {
                 found.push_back(all.at(i));
             }

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+
 namespace astfri
 {
 
@@ -13,7 +14,7 @@ namespace astfri
 /**
  * @brief TODO
  */
-struct Expr : virtual IVisitable
+struct Expr : virtual Visitable
 {
     virtual ~Expr() = default;
 };
@@ -24,8 +25,8 @@ struct Expr : virtual IVisitable
 template<typename T>
 struct Literal : Expr
 {
-    T val_;
-    Literal(T val);
+    T val;
+    explicit Literal(T val);
 };
 
 /**
@@ -80,9 +81,9 @@ struct NullLiteralExpr : Expr, details::MkVisitable<NullLiteralExpr>
  */
 struct IfExpr : Expr, details::MkVisitable<IfExpr>
 {
-    Expr* cond_;
-    Expr* iftrue_;
-    Expr* iffalse_;
+    Expr* cond;
+    Expr* iftrue;
+    Expr* iffalse;
 
     IfExpr(Expr* cond, Expr* iftrue, Expr* iffalse);
 };
@@ -203,9 +204,9 @@ enum class BinOpType
  */
 struct BinOpExpr : Expr, details::MkVisitable<BinOpExpr>
 {
-    Expr* left_;
-    BinOpType op_;
-    Expr* right_;
+    Expr* left;
+    BinOpType op;
+    Expr* right;
 
     BinOpExpr(Expr* left, BinOpType op, Expr* right);
 };
@@ -251,8 +252,8 @@ enum class UnaryOpType
  */
 struct UnaryOpExpr : Expr, details::MkVisitable<UnaryOpExpr>
 {
-    UnaryOpType op_;
-    Expr* arg_;
+    UnaryOpType op;
+    Expr* arg;
 
     UnaryOpExpr(UnaryOpType op, Expr* arg);
 };
@@ -263,7 +264,7 @@ struct UnaryOpExpr : Expr, details::MkVisitable<UnaryOpExpr>
 struct ParamVarRefExpr : Expr, details::MkVisitable<ParamVarRefExpr>
 {
     // TODO later this should be a pointer to ParamVarDef
-    std::string param_;
+    std::string param;
 
     explicit ParamVarRefExpr(std::string param);
 };
@@ -274,7 +275,7 @@ struct ParamVarRefExpr : Expr, details::MkVisitable<ParamVarRefExpr>
 struct LocalVarRefExpr : Expr, details::MkVisitable<LocalVarRefExpr>
 {
     // TODO later this should be a pointer to LocalVarDef
-    std::string var_;
+    std::string var;
 
     explicit LocalVarRefExpr(std::string var);
 };
@@ -284,9 +285,9 @@ struct LocalVarRefExpr : Expr, details::MkVisitable<LocalVarRefExpr>
  */
 struct MemberVarRefExpr : Expr, details::MkVisitable<MemberVarRefExpr>
 {
-    Expr* owner_;
+    Expr* owner;
     // TODO later this should be a pointer to MemberVarDef
-    std::string member_;
+    std::string member;
 
     MemberVarRefExpr(Expr* expr, std::string member);
 };
@@ -297,7 +298,7 @@ struct MemberVarRefExpr : Expr, details::MkVisitable<MemberVarRefExpr>
 struct GlobalVarRefExpr : Expr, details::MkVisitable<GlobalVarRefExpr>
 {
     // TODO later this should be a pointer to GlobalVarDef
-    std::string global_;
+    std::string global;
 
     explicit GlobalVarRefExpr(std::string global);
 };
@@ -309,7 +310,7 @@ struct GlobalVarRefExpr : Expr, details::MkVisitable<GlobalVarRefExpr>
 struct ClassRefExpr : Expr, details::MkVisitable<ClassRefExpr>
 {
     // TODO later this could point to ClassDefStmt
-    std::string name_;
+    std::string name;
 
     ClassRefExpr(std::string name);
 };
@@ -320,8 +321,8 @@ struct ClassRefExpr : Expr, details::MkVisitable<ClassRefExpr>
 struct FunctionCallExpr : Expr, details::MkVisitable<FunctionCallExpr>
 {
     // TODO later this sould be a pointer to FunctionDecl
-    std::string name_;
-    std::vector<Expr*> args_;
+    std::string name;
+    std::vector<Expr*> args;
 
     FunctionCallExpr(std::string name, std::vector<Expr*> args);
 };
@@ -331,10 +332,10 @@ struct FunctionCallExpr : Expr, details::MkVisitable<FunctionCallExpr>
  */
 struct MethodCallExpr : Expr, details::MkVisitable<MethodCallExpr>
 {
-    Expr* owner_;
+    Expr* owner;
     // TODO later this sould be a pointer to MethodDecl
-    std::string name_;
-    std::vector<Expr*> args_;
+    std::string name;
+    std::vector<Expr*> args;
 
     MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args);
 };
@@ -344,8 +345,8 @@ struct MethodCallExpr : Expr, details::MkVisitable<MethodCallExpr>
  */
 struct LambdaCallExpr : Expr, details::MkVisitable<LambdaCallExpr>
 {
-    Expr* lambda_{nullptr};
-    std::vector<Expr*> args_;
+    Expr* lambda{nullptr};
+    std::vector<Expr*> args;
 };
 
 /**
@@ -353,10 +354,10 @@ struct LambdaCallExpr : Expr, details::MkVisitable<LambdaCallExpr>
  */
 struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr>
 {
-    LambdaType *m_type;
-    Type *m_returnType;
-    std::vector<ParamVarDefStmt*> params_;
-    Stmt* body_;
+    LambdaType *type;
+    Type *returnType;
+    std::vector<ParamVarDefStmt*> params;
+    Stmt* body;
     LambdaExpr() = default;
     LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body);
 };
@@ -373,8 +374,8 @@ struct ThisExpr : Expr, details::MkVisitable<ThisExpr>
  */
 struct ConstructorCallExpr : Expr, details::MkVisitable<ConstructorCallExpr>
 {
-    Type* type_;
-    std::vector<Expr*> args_;
+    Type* type;
+    std::vector<Expr*> args;
     ConstructorCallExpr(Type* type, std::vector<Expr*> args);
 };
 
@@ -383,7 +384,7 @@ struct ConstructorCallExpr : Expr, details::MkVisitable<ConstructorCallExpr>
  */
 struct NewExpr : Expr, details::MkVisitable<NewExpr>
 {
-    ConstructorCallExpr* init_;
+    ConstructorCallExpr* init;
     NewExpr(ConstructorCallExpr* init);
 };
 
@@ -392,7 +393,7 @@ struct NewExpr : Expr, details::MkVisitable<NewExpr>
  */
 struct DeleteExpr : Expr, details::MkVisitable<DeleteExpr>
 {
-    Expr* arg_;
+    Expr* arg;
     DeleteExpr(Expr* arg);
 };
 

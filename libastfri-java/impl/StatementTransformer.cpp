@@ -98,7 +98,7 @@ astfri::Stmt* StatementTransformer::get_stmt(TSNode tsNode, std::string const& s
         std::string baseClassName = exprTransformer->get_node_text(ts_node_named_child(tsNode, 0), sourceCode);
         astfri::ClassDefStmt* classDef = this->classesByName.at(baseClassName).front();
 
-        return stmtFactory.mk_base_initializer(classDef->type_, args);
+        return stmtFactory.mk_base_initializer(classDef->type, args);
     }
     else
     {
@@ -141,7 +141,7 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string c
         if (this->classesByName.contains(typeNodeText))
         {
             astfri::ClassDefStmt* c = this->classesByName.at(typeNodeText).front();
-            std::string className = c->type_->name_;
+            std::string className = c->type->name;
             if (this->classScope.contains(c))
             {
                 astfri::Scope scope = this->classScope.at(c);
@@ -151,7 +151,7 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string c
         else if (this->interfacesByName.contains(typeNodeText))
         {
             astfri::InterfaceDefStmt* i = this->interfacesByName.at(typeNodeText).front();
-            std::string interfaceName = i->m_type->name_;
+            std::string interfaceName = i->type->name;
             if (this->interfaceScope.contains(i))
             {
                 astfri::Scope scope = this->interfaceScope.at(i);
@@ -791,7 +791,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
             for (auto i : this->functionalInterfaces)
             {
                 std::string typeName = exprTransformer->get_node_text(typeNode, sourceCode);
-                if (i->m_type->name_ == typeName)
+                if (i->type->name == typeName)
                 {
                     funcInterface = i;
                     break;
@@ -812,13 +812,13 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
                 if (this->methodsByName.contains(methodName))
                 {
                     astfri::MethodDefStmt* method = this->methodsByName.at(methodName).front();
-                    for (auto p : method->func_->params_)
+                    for (auto p : method->func->params)
                     {
-                        if (astfri::ClassType* ct = dynamic_cast<astfri::ClassType*>(p->type_))
+                        if (astfri::ClassType* ct = dynamic_cast<astfri::ClassType*>(p->type))
                         {
                             for (auto i : this->functionalInterfaces)
                             {
-                                if (i->m_type->name_ == ct->name_)
+                                if (i->type->name == ct->name)
                                 {
                                     funcInterface = i;
                                     break;
@@ -832,11 +832,11 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
 
         if (funcInterface != nullptr)
                 {
-                    for (auto m : funcInterface->methods_)
+                    for (auto m : funcInterface->methods)
                     {
-                        if (m->func_->body_ == nullptr)
+                        if (m->func->body == nullptr)
                         {
-                            for (auto p : m->func_->params_)
+                            for (auto p : m->func->params)
                             {
                                 funcInterfaceParams.push_back(p);
                             }
@@ -858,7 +858,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
                 TSNode parameterNode = ts_node_named_child(lambdaChild, j);
                 lambdaParams.push_back(stmtFactory.mk_param_var_def(
                                         exprTransformer->get_node_text(parameterNode, sourceCode),
-                                        funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[j]->type_, 
+                                        funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[j]->type, 
                                         nullptr));
             }
             continue;
@@ -867,7 +867,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
         {
             lambdaParams.push_back(stmtFactory.mk_param_var_def(
                                     exprTransformer->get_node_text(lambdaChild, sourceCode), 
-                                    funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[0]->type_, 
+                                    funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[0]->type, 
                                     nullptr));
             continue;
         }
@@ -1015,24 +1015,24 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
         }
 
         astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, scope);
-        classDef->type_->name_         = className;
-        classDef->vars_                = attributes;
-        classDef->methods_             = methods;
-        classDef->constructors_        = constructors;
-        classDef->tparams_             = tparams;
-        classDef->bases_               = bases;
-        classDef->interfaces_          = interfaces;
+        classDef->type->name         = className;
+        classDef->vars                = attributes;
+        classDef->methods             = methods;
+        classDef->constructors        = constructors;
+        classDef->tparams             = tparams;
+        classDef->bases               = bases;
+        classDef->interfaces          = interfaces;
 
         this->classScope.emplace(classDef, scope);
-        this->classesByName[classDef->type_->name_].push_back(classDef);
+        this->classesByName[classDef->type->name].push_back(classDef);
 
         for (astfri::MethodDefStmt* method : methods)
         {
-            method->owner_ = classDef;
+            method->owner = classDef;
         }
         for (astfri::ConstructorDefStmt* constructor : constructors)
         {
-            constructor->owner_ = classDef;
+            constructor->owner = classDef;
         }
 
     return classDef;
@@ -1121,14 +1121,14 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
     }
 
     astfri::InterfaceDefStmt* interfaceDef = stmtFactory.mk_interface_def(interfaceName, scope);
-    interfaceDef->m_type->name_            = interfaceName;
-    interfaceDef->methods_                 = methods;
-    interfaceDef->tparams_                 = tparams;
-    interfaceDef->bases_                   = bases;
+    interfaceDef->type->name            = interfaceName;
+    interfaceDef->methods                 = methods;
+    interfaceDef->tparams                 = tparams;
+    interfaceDef->bases                   = bases;
     interfaces.push_back(interfaceDef);
 
     this->interfaceScope.emplace(interfaceDef, scope);
-    this->interfacesByName[interfaceDef->m_type->name_].push_back(interfaceDef);
+    this->interfacesByName[interfaceDef->type->name].push_back(interfaceDef);
 
     if (funcInterface)
     {
@@ -1138,7 +1138,7 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
 
     for (astfri::MethodDefStmt* method : methods)
     {
-        method->owner_ = interfaceDef;
+        method->owner = interfaceDef;
     }
 
     return interfaceDef;
@@ -1186,8 +1186,8 @@ astfri::TranslationUnit* StatementTransformer::fill_translation_unit(
 )
 {
     astfri::TranslationUnit* tu = this->stmtFactory.mk_translation_unit();
-    tu->interfaces_             = this->transform_interfaces(tree, sourceCode);
-    tu->classes_                = this->transform_classes(tree, sourceCode);
+    tu->interfaces             = this->transform_interfaces(tree, sourceCode);
+    tu->classes                = this->transform_classes(tree, sourceCode);
     return tu;
 }
 } // namespace astfri::java

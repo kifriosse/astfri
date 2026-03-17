@@ -154,9 +154,9 @@ namespace astfri::text
                     //builder_->write_class_name(vrel.at(i)->m_type_->name_);
                     builder_->write_class_name("TEMPORARY SOLUTION"); // TODO ask for change
                 }
-                if (!vrel.at(i)->tparams_.empty())
+                if (!vrel.at(i)->tparams.empty())
                 {
-                    process_pargs(vrel.at(i)->tparams_, false);
+                    process_pargs(vrel.at(i)->tparams, false);
                 }
             }
             else

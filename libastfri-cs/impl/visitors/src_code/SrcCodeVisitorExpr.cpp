@@ -275,7 +275,7 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node)
             const auto* current = self->semanticContext_.current_type();
             // todo add static method call handling
             return exprFact_.mk_method_call(
-                exprFact_.mk_class_ref(current->type->name_),
+                exprFact_.mk_class_ref(current->type->name),
                 std::move(name),
                 std::move(argList)
             );

@@ -82,26 +82,26 @@ void ClassVisitor::visit(astfri::VoidType const& /*type*/)
 
 void ClassVisitor::visit(astfri::ClassType const& type)
 {
-    if (type.name_.compare(this->currentClass_.name_) != 0)
+    if (type.name.compare(this->currentClass_.name_) != 0)
     {
-        this->create_relation(type.name_, RelationType::ASSOCIATION);
+        this->create_relation(type.name, RelationType::ASSOCIATION);
     }
-    this->currentVariable_.type_ = type.name_;
+    this->currentVariable_.type_ = type.name;
 }
 
 void ClassVisitor::visit(astfri::InterfaceType const& type)
 {
-    if (type.name_.compare(this->currentClass_.name_) != 0)
+    if (type.name.compare(this->currentClass_.name_) != 0)
     {
-        this->create_relation(type.name_, RelationType::ASSOCIATION);
+        this->create_relation(type.name, RelationType::ASSOCIATION);
     }
-    this->currentVariable_.type_ = type.name_;
+    this->currentVariable_.type_ = type.name;
 }
 
 void ClassVisitor::visit(astfri::IndirectionType const& type)
 {
     this->currentVariable_.isIndirect_ = true;
-    type.indirect_->accept(*this);
+    type.indirect->accept(*this);
 }
 
 void ClassVisitor::visit(astfri::IncompleteType const& type)
@@ -111,18 +111,18 @@ void ClassVisitor::visit(astfri::IncompleteType const& type)
 
 void ClassVisitor::visit(astfri::ParamVarDefStmt const& stmt)
 {
-    stmt.type_->accept(*this);
-    this->currentVariable_.name_ = stmt.name_;
+    stmt.type->accept(*this);
+    this->currentVariable_.name_ = stmt.name;
     // TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
 }
 
 void ClassVisitor::visit(astfri::MemberVarDefStmt const& stmt)
 {
-    if (! this->config_->innerView_ && stmt.access_ == astfri::AccessModifier::Private)
+    if (! this->config_->innerView_ && stmt.access == astfri::AccessModifier::Private)
         return;
-    stmt.type_->accept(*this);
-    this->currentVariable_.name_      = stmt.name_;
-    this->currentVariable_.accessMod_ = stmt.access_;
+    stmt.type->accept(*this);
+    this->currentVariable_.name_      = stmt.name;
+    this->currentVariable_.accessMod_ = stmt.access;
     // TODO - if (stmt.initializer_) stmt.initializer_->accept(*this);
     this->outputter_->add_data_member(this->currentVariable_);
     this->currentVariable_.reset();
@@ -130,11 +130,11 @@ void ClassVisitor::visit(astfri::MemberVarDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::FunctionDefStmt const& stmt)
 {
-    stmt.retType_->accept(*this);
+    stmt.retType->accept(*this);
     this->currentMethod_.retType_          = this->currentVariable_.type_;
     this->currentMethod_.returnIsIndirect_ = this->currentVariable_.isIndirect_;
-    this->currentMethod_.name_             = stmt.name_;
-    for (astfri::ParamVarDefStmt* p : stmt.params_)
+    this->currentMethod_.name_             = stmt.name;
+    for (astfri::ParamVarDefStmt* p : stmt.params)
     {
         p->accept(*this);
         this->currentMethod_.params_.push_back(this->currentVariable_);
@@ -144,19 +144,19 @@ void ClassVisitor::visit(astfri::FunctionDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::MethodDefStmt const& stmt)
 {
-    if (! this->config_->innerView_ && stmt.access_ == astfri::AccessModifier::Private)
+    if (! this->config_->innerView_ && stmt.access == astfri::AccessModifier::Private)
         return;
-    stmt.func_->accept(*this);
-    this->currentMethod_.accessMod_ = stmt.access_;
+    stmt.func->accept(*this);
+    this->currentMethod_.accessMod_ = stmt.access;
     this->outputter_->add_function_member(this->currentMethod_);
     this->currentMethod_.reset();
 }
 
 void ClassVisitor::visit(astfri::ConstructorDefStmt const& stmt)
 {
-    this->currentConstructor_.class_ = stmt.owner_->type_->name_;
-    this->currentConstructor_.accessMod_ = stmt.access_;
-    for (astfri::ParamVarDefStmt* p : stmt.params_)
+    this->currentConstructor_.class_ = stmt.owner->type->name;
+    this->currentConstructor_.accessMod_ = stmt.access;
+    for (astfri::ParamVarDefStmt* p : stmt.params)
     {
         p->accept(*this);
         this->currentConstructor_.params_.push_back(this->currentVariable_);
@@ -168,48 +168,48 @@ void ClassVisitor::visit(astfri::ConstructorDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::DestructorDefStmt const& stmt)
 {
-    this->currentDestructor_.class_ = stmt.owner_->type_->name_;
+    this->currentDestructor_.class_ = stmt.owner->type->name;
     this->outputter_->add_destructor(currentDestructor_);
     this->currentDestructor_.reset();
 }
 
 void ClassVisitor::visit(astfri::GenericParam const& stmt)
 {
-    this->currentClass_.genericParams_.push_back(stmt.name_);
+    this->currentClass_.genericParams_.push_back(stmt.name);
 }
 
 void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 {
-    this->currentClass_.name_ = stmt.type_->name_;
+    this->currentClass_.name_ = stmt.type->name;
     if (this->config_->handleNamespaces_)
     {
-        this->currentClass_.namespace_ = astfri::mk_fqn(stmt.type_->scope_, this->currentClass_.name_);
+        this->currentClass_.namespace_ = astfri::mk_fqn(stmt.type->scope, this->currentClass_.name_);
     }
     this->currentClass_.type_ = UserDefinedType::CLASS;
 
-    for (astfri::GenericParam* gp : stmt.tparams_)
+    for (astfri::GenericParam* gp : stmt.tparams)
     {
         gp->accept(*this);
     }
 
     this->outputter_->open_user_type(this->currentClass_);
 
-    for (astfri::ConstructorDefStmt* constructor : stmt.constructors_)
+    for (astfri::ConstructorDefStmt* constructor : stmt.constructors)
     {
         constructor->accept(*this);
     }
 
-    for (astfri::DestructorDefStmt* destructor : stmt.destructors_)
+    for (astfri::DestructorDefStmt* destructor : stmt.destructors)
     {
         destructor->accept(*this);
     }
 
-    for (astfri::MemberVarDefStmt* var : stmt.vars_)
+    for (astfri::MemberVarDefStmt* var : stmt.vars)
     {
         var->accept(*this);
     }
 
-    for (astfri::MethodDefStmt* method : stmt.methods_)
+    for (astfri::MethodDefStmt* method : stmt.methods)
     {
         method->accept(*this);
     }
@@ -220,17 +220,17 @@ void ClassVisitor::visit(astfri::ClassDefStmt const& stmt)
 
 void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt)
 {
-    this->currentClass_.name_ = stmt.m_type->name_;
+    this->currentClass_.name_ = stmt.type->name;
     this->currentClass_.type_ = UserDefinedType::INTERFACE;
 
-    for (astfri::GenericParam* gp : stmt.tparams_)
+    for (astfri::GenericParam* gp : stmt.tparams)
     {
-        this->currentClass_.genericParams_.push_back(gp->name_);
+        this->currentClass_.genericParams_.push_back(gp->name);
     }
 
     this->outputter_->open_user_type(this->currentClass_);
 
-    for (astfri::MethodDefStmt* method : stmt.methods_)
+    for (astfri::MethodDefStmt* method : stmt.methods)
     {
         method->accept(*this);
     }
@@ -242,50 +242,50 @@ void ClassVisitor::visit(astfri::InterfaceDefStmt const& stmt)
 void ClassVisitor::visit(astfri::TranslationUnit const& stmt)
 {
     // insert names of all classes in the TU into a set
-    for (astfri::ClassDefStmt* c : stmt.classes_)
+    for (astfri::ClassDefStmt* c : stmt.classes)
     {
-        this->classes_.insert(c->type_->name_);
+        this->classes_.insert(c->type->name);
     }
 
     // insert names of all interfaces in the TU into a set
-    for (astfri::InterfaceDefStmt* i : stmt.interfaces_)
+    for (astfri::InterfaceDefStmt* i : stmt.interfaces)
     {
-        this->interfaces_.insert(i->m_type->name_);
+        this->interfaces_.insert(i->type->name);
     }
 
     // go through every class in the TU and create realations for it's base classes and interfaces
-    for (astfri::ClassDefStmt* c : stmt.classes_)
+    for (astfri::ClassDefStmt* c : stmt.classes)
     {
-        this->currentClass_.name_ = c->type_->name_;
-        for (astfri::ClassDefStmt* base : c->bases_)
+        this->currentClass_.name_ = c->type->name;
+        for (astfri::ClassDefStmt* base : c->bases)
         {
-            this->create_relation(base->type_->name_, RelationType::EXTENSION);
+            this->create_relation(base->type->name, RelationType::EXTENSION);
         }
 
-        for (astfri::InterfaceDefStmt* i : c->interfaces_)
+        for (astfri::InterfaceDefStmt* i : c->interfaces)
         {
-            this->create_relation(i->m_type->name_, RelationType::IMPLEMENTATION);
+            this->create_relation(i->type->name, RelationType::IMPLEMENTATION);
         }
         this->currentClass_.reset();
     }
 
     // go through every interface in the TU and create relations for it's base interfaces
-    for (astfri::InterfaceDefStmt* i : stmt.interfaces_)
+    for (astfri::InterfaceDefStmt* i : stmt.interfaces)
     {
-        this->currentClass_.name_ = i->m_type->name_;
-        for (astfri::InterfaceDefStmt* base : i->bases_)
+        this->currentClass_.name_ = i->type->name;
+        for (astfri::InterfaceDefStmt* base : i->bases)
         {
-            this->create_relation(base->m_type->name_, RelationType::EXTENSION);
+            this->create_relation(base->type->name, RelationType::EXTENSION);
         }
         this->currentClass_.reset();
     }
 
-    for (astfri::ClassDefStmt* c : stmt.classes_)
+    for (astfri::ClassDefStmt* c : stmt.classes)
     {
         c->accept(*this);
     }
 
-    for (astfri::InterfaceDefStmt* i : stmt.interfaces_)
+    for (astfri::InterfaceDefStmt* i : stmt.interfaces)
     {
         i->accept(*this);
     }

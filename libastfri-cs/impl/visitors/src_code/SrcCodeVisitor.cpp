@@ -46,9 +46,9 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit)
                 continue;
 
             if (is_a<ClassDefStmt>(stmt))
-                trUnit.classes_.push_back(as_a<ClassDefStmt>(stmt));
+                trUnit.classes.push_back(as_a<ClassDefStmt>(stmt));
             else if (is_a<InterfaceDefStmt>(stmt))
-                trUnit.interfaces_.push_back(as_a<InterfaceDefStmt>(stmt));
+                trUnit.interfaces.push_back(as_a<InterfaceDefStmt>(stmt));
 
             added = true;
         }

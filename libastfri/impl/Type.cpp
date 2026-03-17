@@ -1,17 +1,18 @@
 #include <libastfri/inc/Type.hpp>
 
+
 namespace astfri
 {
 
 
 IndirectionType::IndirectionType(Type* const indirect) :
-    indirect_(indirect)
+    indirect(indirect)
 {
 }
 
 ScopedType::ScopedType(std::string name, Scope scope) :
-    name_(std::move(name)),
-    scope_(std::move(scope))
+    name(std::move(name)),
+    scope(std::move(scope))
 {
 }
 
@@ -28,8 +29,8 @@ InterfaceType::InterfaceType(std::string name, Scope scope, InterfaceDefStmt *de
 }
 
 LambdaType::LambdaType(std::string name, LambdaExpr *def) :
-    m_name(std::move(name)),
-    m_def(def)
+    name(std::move(name)),
+    def(def)
 {
 }
 

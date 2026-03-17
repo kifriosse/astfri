@@ -124,7 +124,7 @@ ScopeNode* SymbolTree::add_scope(const Scope& scope)
 ScopeNode* SymbolTree::add_type(const Scope& scope, const TypeBinding& tb)
 {
     ScopeNode* last = add_scope(scope);
-    return last->add_child(tb.type->name_, tb);
+    return last->add_child(tb.type->name, tb);
 }
 
 ScopeNode* SymbolTree::add_primitive(
