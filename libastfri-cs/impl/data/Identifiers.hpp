@@ -11,12 +11,19 @@
 namespace astfri::csharp
 {
 
+/**
+ * @brief Identifier for invocations - method call, local function call,
+ * delegate call, etc.
+ */
 struct InvocationId
 {
     std::string name;
     size_t paramCount{0};
 };
 
+/**
+ * @brief Identifier for method definitions
+ */
 struct MethodId
 {
     std::string name;

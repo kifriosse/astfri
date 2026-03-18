@@ -1,24 +1,6 @@
 // extern alias MyExternalAlias;
 
-global using S = System;
-global using A = AnotherNamespace.SubNamespace;
-global using MyTypeAlias = AnotherNamespace.SubNamespace.TestClass;
-using MyNamespace = System.Collections;
-
 using System.Drawing;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using MyAlias = System.Collections.Generic.Dictionary<string, int>;
-
-
-namespace AnotherNamespace.SubNamespace
-{
-    using SingleNamespace = System;
-    public class TestClass
-    {
-        
-    }
-};
 
 public delegate void MyDelegate(int x);
 
@@ -69,9 +51,29 @@ public class Logger : StreamWriter
     }
 }
 
+
+public class ColorTest
+{
+    Color Color { get; set; }
+
+    public void Method()
+    {
+        _ = System.Drawing.Color.Red.R;
+        //    ^
+        // Class Ref
+        _ = Color.FromArgb(0,0,0);
+        //    ^
+        // Class Ref
+        _ = Color.R;
+        //    ^
+        // Property
+    }
+} 
+
 public class Test : TestBase
 {
     protected new int shadowedField = 2;
+    
     public override void VirtualMethod()
     {
         base.VirtualMethod();
@@ -147,6 +149,8 @@ public partial class TestClass
         Vector2.X = 0f;
         Vector2.Zero = new Vector2(0, 0);
 
+        dynamic dyn = 1;
+
         void test(int x)
         {
             
@@ -162,16 +166,14 @@ public partial class TestClass
         Func<bool> localFunc = LocalFunc;
 
         var vector = new Vector2(3.5f, 4.5f);
-        string x = CreateVector(3.5f, 4.5f).X.ToString();
-        float y = vector.Y;
+        System.String x = CreateVector(3.5f, 4.5f).X.ToString();
+        System.Single y = vector.Y;
         string z = localFunc().ToString();
 
         // string w = LocalFunc().ToString();
         System.Collections.Generic.List<int> l = new System.Collections.Generic.List<int>();
         Console.WriteLine($"Vector components: X = {x}, Y = {y}");
         System.Collections.Generic.IReadOnlyList<int>.Equals(list, list);
-
-        MyTypeAlias testClassInstance = new MyTypeAlias();
 
         ((Func<int, bool>)((x) => { return false; }))(1);
     //  ^   ^           ^          ^             ^

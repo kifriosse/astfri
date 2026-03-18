@@ -8,6 +8,7 @@
 #include "libastfri/inc/Expr.hpp"
 #include "libastfri/inc/Stmt.hpp"
 #include "libastfri/inc/Type.hpp"
+#include "tree_sitter/api.h"
 
 namespace astfri::java
 {
@@ -41,6 +42,10 @@ astfri::Stmt* StatementTransformer::get_stmt(TSNode tsNode, std::string const& s
     else if (nodeType == "if_statement")
     {
         return this->transform_if_stmt_node(tsNode, sourceCode);
+    }
+    else if (nodeType == "try_statement")
+    {
+        return this->transform_try_stmt_node(tsNode, sourceCode);
     }
     else if (nodeType == "switch_expression")
     {
@@ -153,6 +158,10 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, std::string c
                 type = astfri::TypeFactory::get_instance().mk_class(interfaceName, scope);
             }
         }
+        else 
+        {
+            type = astfri::TypeFactory::get_instance().mk_unknown();
+        }
     }
 
     return type;
@@ -198,32 +207,31 @@ astfri::LocalVarDefStmt* StatementTransformer::transform_local_var_node(
     std::string tsNodeType = ts_node_type(tsNode);
     uint32_t childCount    = ts_node_named_child_count(tsNode);
 
-    for (uint32_t j = 0; j < childCount; j++)
+    for (uint32_t i = 0; i < childCount; i++)
     {
-        TSNode varNode          = ts_node_named_child(tsNode, j);
-        std::string varNodeType = ts_node_type(varNode);
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+        char const* fieldName = ts_node_field_name_for_named_child(tsNode, i);
 
-        if (varNodeType.find("type") != std::string::npos)
+        if (fieldName != nullptr && std::strcmp(fieldName, "type") == 0)
         {
-            type = this->get_return_type(varNode, sourceCode);
+            type = this->get_return_type(child, sourceCode);
         }
-        else if (varNodeType == "variable_declarator")
+        else if (fieldName != nullptr && std::strcmp(fieldName, "declarator") == 0)
         {
-            uint32_t declaratorChildCount = ts_node_named_child_count(varNode);
-            for (uint32_t k = 0; k < declaratorChildCount; k++)
+            uint32_t declaratorChildCount = ts_node_named_child_count(child);
+            if (declaratorChildCount > 0)
             {
-                TSNode declaratorChild          = ts_node_named_child(varNode, k);
-                std::string declaratorChildType = ts_node_type(declaratorChild);
-
-                if (declaratorChildType == "identifier" && k == 0)
-                {
-                    name = exprTransformer->get_node_text(declaratorChild, sourceCode);
-                }
-                else
-                {
-                    init = exprTransformer->get_expr(declaratorChild, sourceCode);
-                }
+                name = exprTransformer->get_node_text(ts_node_named_child(child, 0), sourceCode);
             }
+            if (declaratorChildCount > 1)
+            {
+                init = exprTransformer->get_expr(ts_node_named_child(child, 1), sourceCode);
+            }
+        }
+        else if (fieldName != nullptr && std::strcmp(fieldName, "name") == 0)
+        {
+            name = exprTransformer->get_node_text(child, sourceCode);
         }
     }
     return stmtFactory.mk_local_var_def(name, type, init);
@@ -253,39 +261,92 @@ astfri::IfStmt* StatementTransformer::transform_if_stmt_node(
     astfri::Stmt* iffalse   = nullptr;
 
     uint32_t childCount     = ts_node_named_child_count(tsNode);
-    for (uint32_t j = 0; j < childCount; j++)
+    for (uint32_t i = 0; i < childCount; i++)
     {
-        TSNode child          = ts_node_named_child(tsNode, j);
+        TSNode child          = ts_node_named_child(tsNode, i);
         std::string childType = ts_node_type(child);
-        TSNode conditionNode  = ts_node_named_child(child, 0);
-        TSNode iftrueNode;
-        TSNode iffalseNode;
-        if (childType == "parenthesized_expression")
+        char const* fieldName = ts_node_field_name_for_named_child(tsNode, i);
+        if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0)
         {
-            std::string conditionNodeType = ts_node_type(conditionNode);
-            condition                     = exprTransformer->get_expr(conditionNode, sourceCode);
+            condition = exprTransformer->get_expr(child, sourceCode);
         }
-        else if ((childType == "block" && j == 1))
+        else if (fieldName != nullptr && std::strcmp(fieldName, "consequence") == 0)
         {
-            iftrueNode                 = child;
-            std::string iftrueNodeType = ts_node_type(iftrueNode);
-            iftrue                     = this->transform_body_node(iftrueNode, sourceCode);
+            iftrue = this->transform_body_node(child, sourceCode);
         }
-        else if (childType == "block" && j == 2)
+        else if (fieldName != nullptr && std::strcmp(fieldName, "alternative") == 0)
         {
-            iffalseNode                 = child;
-            std::string iffalseNodeType = ts_node_type(iffalseNode);
-            iffalse                     = this->transform_body_node(iffalseNode, sourceCode);
-        }
-        else if (childType == "if_statement")
-        {
-            iffalseNode                 = child;
-            std::string iffalseNodeType = ts_node_type(iffalseNode);
-            iffalse                     = this->transform_if_stmt_node(iffalseNode, sourceCode);
+            if (childType == "block")
+            {
+                iffalse = this->transform_body_node(child, sourceCode);
+            }
+            else if (childType == "if_statement")
+            {
+                iffalse = this->transform_if_stmt_node(child, sourceCode);
+            }
         }
     }
 
     return stmtFactory.mk_if(condition, iftrue, iffalse);
+}
+
+astfri::TryStmt* StatementTransformer::transform_try_stmt_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    astfri::Stmt* body = nullptr;
+    astfri::Stmt* finally = nullptr;
+    std::vector<astfri::CatchStmt*> catches = {};
+
+    uint32_t tryNodeChildCount = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < tryNodeChildCount; i++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+
+        if (childType == "block")
+        {
+            body = this->transform_body_node(child, sourceCode);
+        }
+        else if (childType == "catch_clause")
+        {
+            catches.push_back(this->transform_catch_clause_node(child, sourceCode));
+        }
+        else if (childType == "finally_clause")
+        {
+            finally = this->transform_body_node(child, sourceCode);
+        }
+    }
+
+    return this->stmtFactory.mk_try(body, finally, catches);
+}
+
+astfri::CatchStmt* StatementTransformer::transform_catch_clause_node(
+    TSNode tsNode,
+    std::string const& sourceCode
+)
+{
+    LocalVarDefStmt* param = nullptr;
+    Stmt* body = nullptr;
+
+    uint32_t catchNodeChildCount = ts_node_named_child_count(tsNode);
+    for (uint32_t i = 0; i < catchNodeChildCount; i++)
+    {
+        TSNode child          = ts_node_named_child(tsNode, i);
+        std::string childType = ts_node_type(child);
+
+        if (childType == "catch_formal_parameter")
+        {
+            param = this->transform_local_var_node(child, sourceCode);
+        }
+        else if (childType == "block")
+        {
+            body = this->transform_body_node(child, sourceCode);
+        }
+    }
+
+    return this->stmtFactory.mk_catch(param, body);
 }
 
 astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(

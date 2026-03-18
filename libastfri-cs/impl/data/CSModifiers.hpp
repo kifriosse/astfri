@@ -12,8 +12,17 @@
 namespace astfri::csharp
 {
 
+/**
+ * @brief Macro used for creating bitmask for enums
+ * @param x number of bits to bitshift to left
+ */
 #define BIT(x) (static_cast<MaskType>(1) << (x))
 
+/**
+ * @brief Enum representing C# modifiers
+ * @note Enum doesn't include \code new\endcode and \code unsafe\endcode
+ * modifiers
+ */
 enum class CSModifier : MaskType
 {
     None      = 0,
@@ -39,28 +48,69 @@ enum class CSModifier : MaskType
 
 #undef BIT
 
+/**
+ * @brief Class representing modifiers of C# members, variables and parameters.
+ * It uses bitmask to store multiple modifiers.
+ */
 class CSModifiers
 {
 private:
     MaskType modifier_mask{0};
 
 public:
-    static CSModifiers handle_memb_modifs(
-        const TSNode& nMemb,
+    /**
+     * @brief Factory method for parsing/extrating modifiers of method
+     * declarations (including constructors, operators etc.)
+     * @param nMethod Tree-sitter node of method declaration
+     * @param src source code of the file containing the member declaration
+     * @return CSModifiers object with modifiers of the method declaration
+     */
+    static CSModifiers parser_method_modifs(
+        const TSNode& nMethod,
         std::string_view src
     );
-    static CSModifiers handle_var_modifs(
+    /**
+     * @brief Factory method for parsing/extrating modifiers of variable
+     * declarations
+     * @param nVar Tree-sitter node of variable declaration - field or local
+     * variable
+     * @param src source code of the file containing the variable declaration
+     * @param nVarDecl output parameter - tree-sitter node of the first variable
+     * declarator
+     * @return CSModifiers object with modifiers of the variable declaration
+     */
+    static CSModifiers parse_var_modifs(
         const TSNode& nVar,
         std::string_view src,
         TSNode* nVarDecl
     );
-    static CSModifiers handle_param_modifs(
+    /**
+     * @brief Factory method for parsing/extracing modifiers of parameter
+     * declarations
+     * @param nParam Tree-sitter node of parameter declaration
+     * @param src source code of the file containing the parameter declaration
+     * @return CSModifiers object with modifiers of the parameter declaration
+     */
+    static CSModifiers parse_param_modifs(
         const TSNode& nParam,
         std::string_view src
     );
 
+    /**
+     * @brief Checks if given modifier is present
+     * @param mod modifier to check
+     * @return true if modifier is present, false otherwise
+     */
     [[nodiscard]] bool has(CSModifier mod) const;
+    /**
+     * @brief Adds given modifier
+     * @param mod modifier to add
+     */
     void add_modifier(CSModifier mod);
+    /**
+     * @brief Removes given modifier
+     * @param mod modifier to remove
+     */
     void remove_modifier(CSModifier mod);
     /**
      * returns access modifier based on modifiers stored in this object

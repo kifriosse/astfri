@@ -1,31 +1,37 @@
 #ifndef CSHARP_SOURCE_HPP
 #define CSHARP_SOURCE_HPP
 
-#include <libastfri/inc/Astfri.hpp>
+#include <libastfri/impl/Scope.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <vector>
 
 namespace astfri::csharp
 {
+class ScopeNode;
 
-struct FileContext
-{
-    std::vector<Scope> usings{};
-    std::optional<std::string> fileNms{};
-};
-
+/**
+ * @brief Represents a source file
+ * @note SourceFile is not copyable
+ */
 struct SourceFile
 {
-    FileContext fileContext{};
+    std::vector<ScopeNode*> usings{};
+    Scope fileNms{};
     std::string srcStr;
     TSTree* tree{nullptr};
 
-    explicit SourceFile(FileContext context, std::string src, TSTree* tree);
+    /**
+     * @brief Constructs SourceFile
+     * @param src source code of current file
+     * @param tree tree-sitter syntax tree for current file
+     * @param fileNms file scoped namespace in current file - default value is
+     * empty
+     */
+    explicit SourceFile(std::string src, TSTree* tree, Scope fileNms = {});
     ~SourceFile();
 
     SourceFile(const SourceFile&)            = delete;

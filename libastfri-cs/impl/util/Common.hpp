@@ -6,27 +6,80 @@
 #ifndef CSHARP_COMMON_HPP
 #define CSHARP_COMMON_HPP
 
-#include <cstddef>
+// #include <cstddef>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <functional>
 
 namespace astfri::csharp::util
 {
 
+/**
+ * @brief Enum for identifying different kinds of user defined types in C#.
+ * @note C# structs are identified as classes
+ */
 enum class TypeKind
 {
     Class,
     Interface,
     Record,
     Enum,
-    Delegate
+    Delegate,
+    Primitive
 };
 
+/**
+ * @brief Enum for identifying different kind of variable definitions in C#.
+ */
 enum class VarDefType
 {
     Local,
     Member,
     Global
+};
+
+/**
+ * @brief Search scope for type resolution. This is used to determine where to
+ * look for a name when resolving an identifier
+ */
+enum class SearchScope
+{
+    /**
+     * @brief local alias in C#
+     */
+    LocalAlias,
+    /**
+     * @brief static using in C#
+     */
+    LocalStaticUsing,
+    /**
+     * @brief reference to user defined type inside a type member.
+     * This includes:
+     * - Methods - body, parameters, return type
+     * - Member variable definitions
+     * - Properties
+     * - Indexers
+     * - Intehitance/implementation
+     *
+     * or delegate definition e.g. \code Func<int, int>\endcode
+     */
+    UserTypeRef,
+    /**
+     * @brief basic using directive in C#. For example,
+     * \code using System;\endcode
+     */
+    FileUsing,
+    /**
+     * @brief global alias in C#.
+     */
+    GlobAlias,
+    /**
+     * @brief global static using in C#.
+     */
+    GlobStaticUsing,
+    /**
+     * @brief global using directive in C#.
+     */
+    GlobUsing
 };
 
 /**

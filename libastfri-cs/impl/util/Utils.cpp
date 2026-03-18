@@ -3,7 +3,9 @@
 
 #include <cctype>
 #include <cmath>
-#include <stack>
+#include <deque>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -46,35 +48,25 @@ IntSuffix get_suffix_type(const std::string_view suffix)
     return IntSuffix::None;
 }
 
-bool almost_equal(const double a, const double b, const double epsilon)
-{
-    return std::fabs(a - b) < epsilon;
-}
-
 void split_namespace(
-    std::stack<std::string>& scopeStr,
-    const std::string_view nmsQualifier
+    std::deque<std::string>& qualifs,
+    const std::string_view nmsQualif
 )
 {
-    const auto rBegin = std::make_reverse_iterator(nmsQualifier.end());
-    const auto rEnd   = std::make_reverse_iterator(nmsQualifier.begin());
-    auto it           = rBegin;
-    auto sliceEnd     = nmsQualifier.end();
+    if (nmsQualif.empty())
+        return;
 
-    while (it != rEnd)
+    size_t end = nmsQualif.length();
+    while (true)
     {
-        if (*it == '.')
+        const size_t dotPos = nmsQualif.find_last_of('.', end - 1);
+        if (dotPos == std::string::npos)
         {
-            auto sliceStart = it.base();
-            scopeStr.emplace(sliceStart, sliceEnd);
-            sliceEnd = sliceStart - 1;
+            qualifs.emplace_front(nmsQualif.substr(0, end));
+            break;
         }
-        ++it;
-    }
-
-    if (! nmsQualifier.empty())
-    {
-        scopeStr.emplace(nmsQualifier.begin(), sliceEnd);
+        qualifs.emplace_front(nmsQualif.substr(dotPos + 1, end - (dotPos + 1)));
+        end = dotPos;
     }
 }
 
@@ -142,6 +134,26 @@ std::string escape_string(const std::string_view str, const bool isVerbatim)
         }
     }
     return escapedStr;
+}
+
+std::optional<TypeKind> get_type_kind(const std::string_view typeKind)
+{
+    using enum TypeKind;
+    static const std::unordered_map<std::string_view, TypeKind> typeKindMap = {
+        {"Class",        Class    },
+        {"Struct",       Class    },
+        {"RecordStruct", Record   },
+        {"RecordClass",  Record   },
+        {"Interface",    Interface},
+        {"Enum",         Enum     },
+        {"Delegate",     Delegate },
+        {"Primitive",    Primitive}
+    };
+    const auto it = typeKindMap.find(typeKind);
+    if (it != typeKindMap.end())
+        return it->second;
+
+    return {};
 }
 
 } // namespace astfri::csharp::util

@@ -4,41 +4,42 @@
 namespace astfri::csharp
 {
 
-namespace regs
+namespace maps
 {
 
 template<class Self, class RetType>
-RetType Handlers::visit_error(Self*, const TSNode& node)
+RetType Mappers::visit_error(Self*, const TSNode& node)
 {
     const auto [row, column] = ts_node_start_point(node);
     throw std::runtime_error(
-        "Invalid C# syntax in source code at: row" + std::to_string(row)
+        "Invalid C# syntax in source code at row" + std::to_string(row)
         + "and column " + std::to_string(column)
     );
 }
 
-} // namespace regs
+} // namespace maps
 
 template<class Factory, class Self, class RetType>
-RetType RegManager::default_visit(Self*, const TSNode&)
+requires is_valid_factory<Factory, RetType>
+RetType MapManager::default_visit(Self*, const TSNode&)
 {
     return Factory::get_instance().mk_unknown();
 }
 
 template<class Type>
-Type RegManager::get_or_default(
+Type MapManager::get_or_default(
     const RegistryMap<Type>& map,
-    std::string_view name,
+    NodeType nodeType,
     Type nDefVal
 )
 {
-    const auto it = map.find(name);
+    const auto it = map.find(nodeType);
     return it != map.end() ? it->second : nDefVal;
 }
 
 template<class RetType>
-std::optional<RetType> RegManager::get_opt(
-    const RegistryMap<RetType>& map,
+std::optional<RetType> MapManager::get_opt(
+    const RegistryStrViewMap<RetType>& map,
     std::string_view name
 )
 {

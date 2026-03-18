@@ -1,34 +1,23 @@
+/**
+ * @file Queries.h
+ * @brief header file containing tree-sitter queries for C# language
+ */
 #ifndef CSHARP_QUERIES_HPP
 #define CSHARP_QUERIES_HPP
 
 #include <string_view>
 
-namespace astfri::csharp::regs::queries
+namespace astfri::csharp::maps::queries
 {
 inline static constexpr std::string_view qTopLevelStmts =
     R"(
-    (namespace_declaration
-        body: (declaration_list
-            [
-                (class_declaration)
-                (interface_declaration)
-                (struct_declaration)
-                (enum_declaration)
-                (delegate_declaration)
-                (record_declaration)
-            ] @top_level_stmt
-        )
-    )
-    (compilation_unit
-        [
-            (class_declaration)
-            (interface_declaration)
-            (struct_declaration)
-            (enum_declaration)
-            (delegate_declaration)
-            (record_declaration)
-        ] @top_level_stmt
-    ))";
+        (class_declaration) @type_stmt
+        (interface_declaration) @type_stmt
+        (struct_declaration) @type_stmt
+        (enum_declaration) @type_stmt
+        (delegate_declaration) @type_stmt
+        (record_declaration) @type_stm
+    )";
 
 inline static constexpr std::string_view qDeclor =
     R"(
@@ -66,6 +55,6 @@ inline static constexpr std::string_view qCommentError =
 inline static constexpr std::string_view qUsingDir
     = "(using_directive) @directive";
 
-} // namespace astfri::csharp::regs::queries
+} // namespace astfri::csharp::maps::queries
 
 #endif // CSHARP_QUERIES_HPP
