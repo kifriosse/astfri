@@ -14,7 +14,7 @@ struct Config
     bool innerView_                = true;
     bool writeToFile_              = false;
     bool drawAccessModIcons_       = true;
-    bool handleNamespaces_         = true;
+    bool handleNamespaces_         = false;
 
     char indirectIndicator_        = '*';
     char destructorIndicator_      = '~';
