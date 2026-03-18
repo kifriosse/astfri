@@ -109,6 +109,7 @@ public:
     bool TraverseCXXDeleteExpr(clang::CXXDeleteExpr* DE);
     bool TraverseCXXThrowExpr(clang::CXXThrowExpr* TE);
     bool TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE);
+    bool TraverseParenExpr(clang::ParenExpr *PE);
     // // Traverse literals
     bool TraverseIntegerLiteral(clang::IntegerLiteral* IL);
     bool TraverseFloatingLiteral(clang::FloatingLiteral* FL);

@@ -247,4 +247,24 @@ bool ClangVisitor::TraverseCXXOperatorCallExpr(clang::CXXOperatorCallExpr *COCE)
     }
     return true;
 }
+
+bool ClangVisitor::TraverseParenExpr(clang::ParenExpr *PE) {
+    
+    // zapamatanie si ast location
+    AstfriASTLocation astfri_temp = this->astfri_location;
+    ClangASTLocation clang_temp = this->clang_location;
+    
+    // akcia na tomto vrchole
+    TraverseStmt(PE->getSubExpr());
+    // teraz by malo byt v astlocation atribute expr co je v zatvorke
+    BracketExpr* bracket = this->expr_factory_->mk_bracket(this->astfri_location.expr_);
+
+    // po tom co su zatvorky prejdene, tak sa povodna
+    // verzia zapise naspat (pre istotu) ale so zatvorkami
+    astfri_temp.expr_ = bracket;
+    this->astfri_location = astfri_temp;
+    this->clang_location  = clang_temp;
+
+    return true;
+}
 }
