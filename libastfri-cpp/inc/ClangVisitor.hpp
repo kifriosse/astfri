@@ -34,35 +34,30 @@
 #include <cstdio>
 #include <iostream> // používa sa v impl súboroch
 
-
 // #include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
 
-namespace astfri::astfri_cpp
-{
-struct ClangASTLocation
-{
-    clang::Decl const* decl_                         = nullptr;
-    clang::Stmt const* stmt_                         = nullptr;
-    clang::Expr const* expr_                         = nullptr;
-    clang::BinaryOperator const* bin_op_             = nullptr;
-    clang::UnaryOperator const* un_op_               = nullptr;
-    clang::IntegerLiteral const* int_lit_            = nullptr;
-    clang::FloatingLiteral const* float_lit_         = nullptr;
-    clang::CXXBoolLiteralExpr const* bool_lit_       = nullptr;
-    clang::StringLiteral const* string_lit_          = nullptr;
-    clang::CharacterLiteral const* char_lit_         = nullptr;
-    clang::CXXNullPtrLiteralExpr const* nullptr_lit_ = nullptr;
+namespace astfri::astfri_cpp {
+struct ClangASTLocation {
+    const clang::Decl* decl_                         = nullptr;
+    const clang::Stmt* stmt_                         = nullptr;
+    const clang::Expr* expr_                         = nullptr;
+    const clang::BinaryOperator* bin_op_             = nullptr;
+    const clang::UnaryOperator* un_op_               = nullptr;
+    const clang::IntegerLiteral* int_lit_            = nullptr;
+    const clang::FloatingLiteral* float_lit_         = nullptr;
+    const clang::CXXBoolLiteralExpr* bool_lit_       = nullptr;
+    const clang::StringLiteral* string_lit_          = nullptr;
+    const clang::CharacterLiteral* char_lit_         = nullptr;
+    const clang::CXXNullPtrLiteralExpr* nullptr_lit_ = nullptr;
 };
 
-struct AstfriASTLocation
-{
+struct AstfriASTLocation {
     Stmt* stmt_ = nullptr;
     Expr* expr_ = nullptr;
     Type* type_ = nullptr;
 };
 
-class ClangVisitor : public clang::RecursiveASTVisitor<ClangVisitor>
-{
+class ClangVisitor : public clang::RecursiveASTVisitor<ClangVisitor> {
 public:
     // filtering includes
     bool isInMainFile(clang::SourceLocation Loc) const;
@@ -134,8 +129,8 @@ private:
     astfri::UnaryOpType get_astfri_un_op_type(clang::UnaryOperatorKind clang_type);
     // types:types :D
     astfri::Type* get_astfri_type(clang::QualType QT); // only this is used in visitor
-    astfri::Type* get_astfri_type_from_clang_builtintype(clang::BuiltinType const* builtin);
-    astfri::Type* get_astfri_pointee(clang::PointerType const* pointer);
+    astfri::Type* get_astfri_type_from_clang_builtintype(const clang::BuiltinType* builtin);
+    astfri::Type* get_astfri_pointee(const clang::PointerType* pointer);
 
     TranslationUnit* tu_;
 

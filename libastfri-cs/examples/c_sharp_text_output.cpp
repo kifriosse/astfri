@@ -2,8 +2,7 @@
 #include <libastfri-text/inc/TextLibManager.hpp>
 #include <libastfri/inc/Astfri.hpp>
 
-int main()
-{
+int main() {
     using namespace astfri;
     csharp::ASTBuilder astBuilder;
     text::TextLibManager& manager = text::TextLibManager::get_instance();

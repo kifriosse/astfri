@@ -7,8 +7,7 @@
  * @note Implicit usings implemented based on C# documentation. Source:
  * https://learn.microsoft.com/en-us/dotnet/core/project-sdk/overview#implicit-using-directives
  */
-enum class SDKProfile
-{
+enum class SDKProfile {
     /**
      * @brief No SDK profile, no standard implicit usings will be used.
      */

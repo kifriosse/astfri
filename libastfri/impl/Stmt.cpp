@@ -1,24 +1,21 @@
 #include <libastfri/inc/Stmt.hpp>
+
 #include <vector>
 
-namespace astfri
-{
+namespace astfri {
 
 VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
-    name_(std::move(name)),
-    type_(type),
-    initializer_(initializer)
-{
+    name(std::move(name)),
+    type(type),
+    initializer(initializer) {
 }
 
 LocalVarDefStmt::LocalVarDefStmt(std::string name, Type* type, Expr* initializer) :
-    VarDefStmt(name, type, initializer)
-{
+    VarDefStmt(name, type, initializer) {
 }
 
 ParamVarDefStmt::ParamVarDefStmt(std::string name, Type* type, Expr* initializer) :
-    VarDefStmt(name, type, initializer)
-{
+    VarDefStmt(name, type, initializer) {
 }
 
 MemberVarDefStmt::MemberVarDefStmt(
@@ -28,18 +25,15 @@ MemberVarDefStmt::MemberVarDefStmt(
     AccessModifier access
 ) :
     VarDefStmt(name, type, initializer),
-    access_(access)
-{
+    access(access) {
 }
 
 GlobalVarDefStmt::GlobalVarDefStmt(std::string name, Type* type, Expr* initializer) :
-    VarDefStmt(name, type, initializer)
-{
+    VarDefStmt(name, type, initializer) {
 }
 
 DefStmt::DefStmt(std::vector<VarDefStmt*> defs) :
-    defs_(std::move(defs))
-{
+    defs(std::move(defs)) {
 }
 
 FunctionDefStmt::FunctionDefStmt(
@@ -48,44 +42,38 @@ FunctionDefStmt::FunctionDefStmt(
     Type* retType,
     CompoundStmt* body
 ) :
-    name_(std::move(name)),
-    params_(std::move(params)),
-    retType_(retType),
-    body_(body)
-{
+    name(std::move(name)),
+    params(std::move(params)),
+    retType(retType),
+    body(body) {
 }
 
 BaseInitializerStmt::BaseInitializerStmt(std::string base, std::vector<Expr*> args) :
     base_(std::move(base)),
-    args_(std::move(args))
-{
+    args(std::move(args)) {
 }
 
-BaseInitializerStmt::BaseInitializerStmt(ClassType *type, std::vector<Expr*> args) :
+BaseInitializerStmt::BaseInitializerStmt(ClassType* type, std::vector<Expr*> args) :
     base_(""),
     type(type),
-    args_(std::move(args))
-{
+    args(std::move(args)) {
 }
 
 SelfInitializerStmt::SelfInitializerStmt(std::vector<Expr*> args) :
-    args(std::move(args))
-{
+    args(std::move(args)) {
 }
 
-MemberInitializerStmt::MemberInitializerStmt(MemberVarDefStmt *member, Expr *arg) :
+MemberInitializerStmt::MemberInitializerStmt(MemberVarDefStmt* member, Expr* arg) :
     member(member),
-    arg(arg)
-{
+    arg(arg) {
 }
 
 ConstructorDefStmt::ConstructorDefStmt() :
-    owner_(nullptr),
-    params_({}),
-    baseInit_({}),
-    body_(nullptr),
-    access_(AccessModifier::Public)
-{
+    owner(nullptr),
+    params({}),
+    baseInit({}),
+    body(nullptr),
+    access(AccessModifier::Public) {
 }
 
 ConstructorDefStmt::ConstructorDefStmt(
@@ -95,116 +83,97 @@ ConstructorDefStmt::ConstructorDefStmt(
     CompoundStmt* body,
     AccessModifier access
 ) :
-    owner_(owner),
-    params_(std::move(params)),
-    baseInit_(std::move(baseInit)), // TODO
-    body_(body),
-    access_(access)
-{
+    owner(owner),
+    params(std::move(params)),
+    baseInit(std::move(baseInit)), // TODO
+    body(body),
+    access(access) {
 }
 
 DestructorDefStmt::DestructorDefStmt(ClassDefStmt* owner, CompoundStmt* body) :
-    owner_(owner),
-    body_(body)
-{
+    owner(owner),
+    body(body) {
 }
 
 GenericParam::GenericParam(std::string constraint, std::string name) :
-    constraint_(std::move(constraint)),
-    name_(std::move(name))
-{
+    constraint(std::move(constraint)),
+    name(std::move(name)) {
 }
 
 CompoundStmt::CompoundStmt(std::vector<Stmt*> stmts) :
-    stmts_(std::move(stmts))
-{
+    stmts(std::move(stmts)) {
 }
 
 ReturnStmt::ReturnStmt(Expr* val) :
-    val_(val)
-{
+    val(val) {
 }
 
 ExprStmt::ExprStmt(Expr* expr) :
-    expr_(expr)
-{
+    expr(expr) {
 }
 
 IfStmt::IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse) :
-    cond_(cond),
-    iftrue_(iftrue),
-    iffalse_(iffalse)
-{
+    cond(cond),
+    iftrue(iftrue),
+    iffalse(iffalse) {
 }
 
 CaseBaseStmt::CaseBaseStmt(Stmt* body) :
-    body_(body)
-{
+    body(body) {
 }
 
 CaseStmt::CaseStmt(std::vector<Expr*> exprs, Stmt* body) :
     CaseBaseStmt(body),
-    exprs_(std::move(exprs))
-{
+    exprs(std::move(exprs)) {
 }
 
 DefaultCaseStmt::DefaultCaseStmt(Stmt* body) :
-    CaseBaseStmt(body)
-{
+    CaseBaseStmt(body) {
 }
 
 SwitchStmt::SwitchStmt(Expr* expr, std::vector<CaseBaseStmt*> cases) :
     expr_(expr),
-    cases_(std::move(cases))
-{
+    cases(std::move(cases)) {
 }
 
 LoopStmt::LoopStmt(Expr* cond, Stmt* body) :
-    cond_(cond),
-    body_(body)
-{
+    cond(cond),
+    body(body) {
 }
 
 WhileStmt::WhileStmt(Expr* cond, Stmt* body) :
-    LoopStmt(cond, body)
-{
+    LoopStmt(cond, body) {
 }
 
 DoWhileStmt::DoWhileStmt(Expr* cond, Stmt* body) :
-    LoopStmt(cond, body)
-{
+    LoopStmt(cond, body) {
 }
 
 ForStmt::ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body) :
     LoopStmt(cond, body),
-    init_(init),
-    step_(step)
-{
+    init(init),
+    step(step) {
 }
 
-ForEachStmt::ForEachStmt(LocalVarDefStmt *var, Expr *container, Stmt *body) :
+ForEachStmt::ForEachStmt(LocalVarDefStmt* var, Expr* container, Stmt* body) :
     var(var),
     container(container),
-    body(body)
-{
+    body(body) {
 }
 
 ThrowStmt::ThrowStmt(Expr* val) :
-    val_(val)
-{
+    val(val) {
 }
 
-CatchStmt::CatchStmt(LocalVarDefStmt *param, Stmt *body) :
+CatchStmt::CatchStmt(LocalVarDefStmt* param, Stmt* body) :
     param(param),
-    body(body)
-{
+    body(body) {
 }
 
-TryStmt::TryStmt(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches) :
+TryStmt::TryStmt(Stmt* body, Stmt* finally, std::vector<CatchStmt*> catches) :
     body(body),
     finally(finally),
-    catches(std::move(catches))
-{
+    catches(std::move(catches)) {
 }
 
 } // namespace astfri

@@ -8,11 +8,9 @@
 #include <unordered_map>
 #include <variant>
 
-namespace astfri_deserialize
-{
+namespace astfri_deserialize {
 
-enum ExprNodeType
-{
+enum ExprNodeType {
     IntLiteralExpr,
     FloatLiteralExpr,
     CharLiteralExpr,
@@ -38,8 +36,7 @@ enum ExprNodeType
     LambdaCallExpr
 };
 
-enum StmtNodeType
-{
+enum StmtNodeType {
     LocalVarDefStmt,
     ParamVarDefStmt,
     MemberVarDefStmt,
@@ -177,8 +174,7 @@ inline std::unordered_map<std::string, astfri::UnaryOpType> unaryOpTypeMapping =
     {"--", astfri::UnaryOpType::PreDecrement}
 };
 
-enum Types
-{
+enum Types {
     IntType,
     FloatType,
     CharType,

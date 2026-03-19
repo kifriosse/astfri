@@ -1,6 +1,5 @@
 
-namespace astfri
-{
+namespace astfri {
 
 struct Type;
 struct DynamicType;
@@ -17,6 +16,7 @@ struct EnumType;
 struct RecordType;
 struct UnionType;
 struct IncompleteType;
+struct DeducedType;
 struct UnknownType;
 
 } // namespace astfri

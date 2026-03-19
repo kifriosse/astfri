@@ -6,119 +6,108 @@
 
 #include <string>
 
-namespace astfri
-{
+namespace astfri {
 
 /**
  * @brief TODO
  */
-struct Type : virtual IVisitable // TODO just Visitable
-{
+struct Type : virtual Visitable {
     virtual ~Type() = default;
 };
 
 /**
  * @brief TODO
  */
-struct DynamicType : Type, details::MkVisitable<DynamicType>
-{
-};
+struct DynamicType : Type, details::MkVisitable<DynamicType> { };
 
 /**
  * @brief TODO
  */
-struct PrimitiveType : Type
-{
-};
+struct PrimitiveType : Type { };
 
 /**
  * @brief TODO
  */
-struct IntType : PrimitiveType, details::MkVisitable<IntType>
-{
-};
+struct IntType : PrimitiveType, details::MkVisitable<IntType> { };
 
 /**
  * @brief TODO
  */
-struct FloatType : PrimitiveType, details::MkVisitable<FloatType>
-{
-};
+struct FloatType : PrimitiveType, details::MkVisitable<FloatType> { };
 
 /**
  * @brief TODO
  */
-struct CharType : PrimitiveType, details::MkVisitable<CharType>
-{
-};
+struct CharType : PrimitiveType, details::MkVisitable<CharType> { };
 
 /**
  * @brief TODO
  */
-struct BoolType : PrimitiveType, details::MkVisitable<BoolType>
-{
-};
+struct BoolType : PrimitiveType, details::MkVisitable<BoolType> { };
 
 /**
  * @brief TODO
  */
-struct VoidType : PrimitiveType, details::MkVisitable<VoidType>
-{
-};
+struct VoidType : PrimitiveType, details::MkVisitable<VoidType> { };
 
 /**
  * @brief TODO
  */
-struct IndirectionType : Type, details::MkVisitable<IndirectionType>
-{
-    Type* indirect_;
+struct IndirectionType : Type, details::MkVisitable<IndirectionType> {
+    Type* indirect;
     explicit IndirectionType(Type* indirect);
 };
 
 /**
  * @brief TODO
  */
-struct ScopedType : Type
-{
-    std::string name_;
-    Scope scope_;
+struct ScopedType : Type {
+    std::string name;
+    Scope scope;
     ScopedType(std::string name, Scope scope);
 };
 
 /**
  * @brief TODO
  */
-struct ClassType : ScopedType, details::MkVisitable<ClassType>
-{
-    ClassDefStmt *m_def;
-    ClassType(std::string name, Scope scope, ClassDefStmt *def);
+struct ClassType : ScopedType, details::MkVisitable<ClassType> {
+    ClassDefStmt* def;
+    ClassType(std::string name, Scope scope, ClassDefStmt* def);
 };
 
 /**
  * @brief TODO
  */
-struct InterfaceType : ScopedType, details::MkVisitable<InterfaceType>
-{
-    InterfaceDefStmt *m_def;
-    InterfaceType(std::string name, Scope scope, InterfaceDefStmt *def);
+struct InterfaceType : ScopedType, details::MkVisitable<InterfaceType> {
+    InterfaceDefStmt* def;
+    InterfaceType(std::string name, Scope scope, InterfaceDefStmt* def);
 };
 
 /**
  * @brief TODO
  */
-struct LambdaType : Type, details::MkVisitable<LambdaType>
-{
-    std::string m_name;
-    LambdaExpr *m_def;
-    LambdaType(std::string name, LambdaExpr *def);
+struct LambdaType : Type, details::MkVisitable<LambdaType> {
+    std::string name;
+    LambdaExpr* def;
+    LambdaType(std::string name, LambdaExpr* def);
 };
 
 /**
- * @brief TODO
+ * @brief Represents type deduced by compiler.
+ * Not to be confused with @c DynamicType. Can be used as type of variables declared using
+ * keywords such as @c var, @c auto, @c let, ...
  */
-struct DeducedType : Type, details::MkVisitable<DeducedType>
-{
-    Type *realType;
+struct DeducedType : Type, details::MkVisitable<DeducedType> {
+    /**
+     * @brief Real type if available, otherwise @c Type::NULL.
+     */
+    Type* realType;
+
+    /**
+     * @brief Constructor.
+     * @param realType Real type if available, otherwise @c Type::NULL.
+     */
+    explicit DeducedType(Type* realType);
 };
 
 // /**
@@ -144,22 +133,26 @@ struct DeducedType : Type, details::MkVisitable<DeducedType>
 //     std::vector<Type*> types_; // TODO otazka ci by mali mat aj typy
 // };
 
-
 /**
- * @brief TODO
+ * @brief Represents type that is unknown. Only its name is available.
  */
-struct IncompleteType : Type, details::MkVisitable<IncompleteType>
-{
-    // TODO flyweight
+struct IncompleteType : Type, details::MkVisitable<IncompleteType> {
+    /**
+     * @brief Name of the type.
+     */
     std::string name;
+
+    /**
+     * @brief Constructor, initializes the name.
+     * @param name Name of the type.
+     */
+    explicit IncompleteType(std::string name);
 };
 
 /**
  * @brief TODO, tento pojde prec, namiesto neho bude nullptr a test to vyhlasi za bug
  */
-struct UnknownType : PrimitiveType, details::MkVisitable<VoidType>
-{
-};
+struct UnknownType : PrimitiveType, details::MkVisitable<VoidType> { };
 
 } // namespace astfri
 

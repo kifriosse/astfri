@@ -10,8 +10,7 @@
 
 #include <unordered_map>
 
-namespace astfri
-{
+namespace astfri {
 
 // forward declarations
 struct MemberVarDefStmt;
@@ -22,14 +21,12 @@ struct UserTypeDefStmt;
 
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Metadata about member variable
  */
-struct MemberVarMetadata
-{
+struct MemberVarMetadata {
     MemberVarDefStmt* varDef{nullptr};
     TSNode nVar{};
     TSNode nInit{}; // right side of assignment
@@ -39,8 +36,7 @@ struct MemberVarMetadata
 /**
  * @brief Metadata about method parameter
  */
-struct ParamMetadata
-{
+struct ParamMetadata {
     ParamVarDefStmt* paramDef{nullptr};
     TSNode nParam{};
     TSNode nInit{}; // right side of assignment
@@ -49,8 +45,7 @@ struct ParamMetadata
 /**
  * @brief Metadata about function
  */
-struct FuncMetadata
-{
+struct FuncMetadata {
     std::vector<ParamMetadata> params{};
     FunctionDefStmt* funcDef{nullptr};
     TSNode nFunc{};
@@ -59,8 +54,7 @@ struct FuncMetadata
 /**
  * @brief Metadata about method
  */
-struct MethodMetadata
-{
+struct MethodMetadata {
     std::vector<ParamMetadata> params{};
     MethodDefStmt* methodDef{nullptr};
     TSNode nMethod{};
@@ -69,8 +63,7 @@ struct MethodMetadata
 /**
  * @brief Metadata about property
  */
-struct PropertyNode
-{
+struct PropertyNode {
     MemberVarMetadata backingField;
     MethodMetadata getter;
     MethodMetadata setter;
@@ -79,8 +72,7 @@ struct PropertyNode
 /**
  * @brief Location of type definition in source code
  */
-struct TypeDefLoc
-{
+struct TypeDefLoc {
     TSNode nType;
     SourceFile* src;
 };
@@ -88,8 +80,7 @@ struct TypeDefLoc
 /**
  * @brief Metadata about user defined type
  */
-class TypeMetadata
-{
+class TypeMetadata {
 private:
     std::unordered_map<MethodId, std::vector<MethodMetadata>> methods_{};
     IdentifierMap<MemberVarMetadata> memberVars_{};

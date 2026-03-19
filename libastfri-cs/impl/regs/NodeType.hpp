@@ -3,14 +3,12 @@
 
 #include <tree_sitter/api.h>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Enum for representing tree-sitter node type
  */
-enum class NodeType : TSSymbol
-{
+enum class NodeType : TSSymbol {
     Unknown,
     CompilationUnit,
     // Definitions

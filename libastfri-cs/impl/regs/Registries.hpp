@@ -11,8 +11,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace astfri
-{
+namespace astfri {
 // forward declarations
 enum class BinOpType;
 enum class UnaryOpType;
@@ -24,21 +23,18 @@ struct Expr;
 class TypeFactory;
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 enum class CSModifier : MaskType;
 class SrcCodeVisitor;
 
-namespace maps
-{
+namespace maps {
 
 /**
  * @brief Class holding mapping of tree-sitter symbols to NodeType enum values
  * and vice versa.
  */
-class NodeTypes
-{
+class NodeTypes {
 public:
     static constexpr TSSymbol INVALID_SYMBOL = UINT16_MAX;
 
@@ -55,8 +51,7 @@ public:
 /**
  * @brief Struct holding all mapping to visit functions for tree-sitter nodes.
  */
-struct Mappers
-{
+struct Mappers {
     const RegistryMap<StmtMapper> stmts;
     const RegistryMap<ExprMapper> exprs;
     const RegistryMap<TypeMapper> types;
@@ -79,8 +74,7 @@ private:
  * @brief Struct holding mappings of C# operations to AST FRI Operation type
  * enum
  */
-struct Operations
-{
+struct Operations {
     const RegistryStrViewMap<UnaryOpType> prefixUnaryOps;
     const RegistryStrViewMap<BinOpType> binaryOps;
     Operations();
@@ -90,8 +84,7 @@ struct Operations
  * @brief Struct holding mapping of C# primitive types (in string form) to
  * AST FRI Type
  */
-struct Types
-{
+struct Types {
     TypeFactory& typeFact;
     const RegistryStrViewMap<Type*> types;
     Types();
@@ -101,8 +94,7 @@ struct Types
  * @brief Struct holding mapping of C# modifiers (in string form) to CSModifier
  * enum
  */
-struct Modifiers
-{
+struct Modifiers {
     const RegistryStrViewMap<CSModifier> modifiers;
     Modifiers();
 };
@@ -123,8 +115,7 @@ concept is_valid_factory = requires(Factory f) {
 /**
  * @brief Class responsible for managing all C# maps
  */
-class MapManager
-{
+class MapManager {
 private:
     static maps::Mappers handlers_;
     static maps::Modifiers modifiers_;
@@ -176,11 +167,7 @@ private:
      * @return value from the map or default value
      */
     template<class Type>
-    static Type get_or_default(
-        const RegistryMap<Type>& map,
-        NodeType nodeType,
-        Type nDefVal
-    );
+    static Type get_or_default(const RegistryMap<Type>& map, NodeType nodeType, Type nDefVal);
     /**
      * Gets optional value from the registry map
      * @tparam Type type of value in the registry map
@@ -189,10 +176,7 @@ private:
      * @return optional value from the map
      */
     template<class Type>
-    static std::optional<Type> get_opt(
-        const RegistryStrViewMap<Type>& map,
-        std::string_view name
-    );
+    static std::optional<Type> get_opt(const RegistryStrViewMap<Type>& map, std::string_view name);
 };
 
 } // namespace astfri::csharp

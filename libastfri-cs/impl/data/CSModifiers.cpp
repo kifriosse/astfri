@@ -8,18 +8,11 @@
 #include <optional>
 #include <string_view>
 
-namespace astfri::csharp
-{
-CSModifiers CSModifiers::parser_method_modifs(
-    const TSNode& nMethod,
-    const std::string_view src
-)
-{
+namespace astfri::csharp {
+CSModifiers CSModifiers::parser_method_modifs(const TSNode& nMethod, const std::string_view src) {
     CSModifiers modifs;
-    auto process = [&modifs, &src](const TSQueryMatch& match)
-    {
-        for (CaptureId i = 0; i < match.capture_count; ++i)
-        {
+    auto process = [&modifs, &src](const TSQueryMatch& match) {
+        for (CaptureId i = 0; i < match.capture_count; ++i) {
             const TSNode nModif = match.captures[i].node;
             modifs.add_modifier(MapManager::get_modifier(nModif, src));
         }
@@ -32,21 +25,18 @@ CSModifiers CSModifiers::parse_var_modifs(
     const TSNode& nVar,
     const std::string_view src,
     TSNode* nVarDecl
-)
-{
+) {
     using namespace maps;
 
     static constexpr auto q_type = QueryType::VarDecl;
 
     CSModifiers modifs;
-    auto process = [&](const TSQueryMatch& match)
-    {
+    auto process = [&](const TSQueryMatch& match) {
         static const Query* const query = QueryReg::get().get_query(q_type);
         static const uint32_t decl_id   = query->id("decl");
         static const uint32_t modif_id  = query->id("modifier");
 
-        for (uint32_t i = 0; i < match.capture_count; ++i)
-        {
+        for (uint32_t i = 0; i < match.capture_count; ++i) {
             auto [nCurrent, index] = match.captures[i];
             if (index == decl_id && nVarDecl)
                 *nVarDecl = nCurrent;
@@ -58,16 +48,10 @@ CSModifiers CSModifiers::parse_var_modifs(
     return modifs;
 }
 
-CSModifiers CSModifiers::parse_param_modifs(
-    const TSNode& nParam,
-    std::string_view src
-)
-{
+CSModifiers CSModifiers::parse_param_modifs(const TSNode& nParam, std::string_view src) {
     CSModifiers paramMod;
-    auto process = [&paramMod, &src](const TSQueryMatch& match)
-    {
-        for (uint32_t i = 0; i < match.capture_count; ++i)
-        {
+    auto process = [&paramMod, &src](const TSQueryMatch& match) {
+        for (uint32_t i = 0; i < match.capture_count; ++i) {
             const TSNode n_modif = match.captures[i].node;
             paramMod.add_modifier(MapManager::get_modifier(n_modif, src));
         }
@@ -76,23 +60,19 @@ CSModifiers CSModifiers::parse_param_modifs(
     return paramMod;
 }
 
-bool CSModifiers::has(CSModifier mod) const
-{
+bool CSModifiers::has(CSModifier mod) const {
     return (static_cast<MaskType>(mod) & modifier_mask) != 0;
 }
 
-void CSModifiers::add_modifier(CSModifier mod)
-{
+void CSModifiers::add_modifier(CSModifier mod) {
     modifier_mask |= static_cast<MaskType>(mod);
 }
 
-void CSModifiers::remove_modifier(CSModifier mod)
-{
+void CSModifiers::remove_modifier(CSModifier mod) {
     modifier_mask &= ~static_cast<MaskType>(mod);
 }
 
-std::optional<AccessModifier> CSModifiers::get_access_mod() const
-{
+std::optional<AccessModifier> CSModifiers::get_access_mod() const {
     if (has(CSModifier::Internal) && has(CSModifier::Protected))
         return AccessModifier::Internal;
     if (has(CSModifier::Private) && has(CSModifier::Protected))
@@ -110,8 +90,7 @@ std::optional<AccessModifier> CSModifiers::get_access_mod() const
     return {};
 }
 
-Virtuality CSModifiers::get_virtuality() const
-{
+Virtuality CSModifiers::get_virtuality() const {
     if (has(CSModifier::Abstract))
         return Virtuality::PureVirtual;
     if (has(CSModifier::Virtual) || has(CSModifier::Override))
@@ -119,13 +98,10 @@ Virtuality CSModifiers::get_virtuality() const
     return Virtuality::NotVirtual;
 }
 
-Type* CSModifiers::get_indirection_type(Type* type) const
-{
+Type* CSModifiers::get_indirection_type(Type* type) const {
     if (has(CSModifier::Ref) || has(CSModifier::Out))
         return TypeFactory::get_instance().mk_indirect(type);
-    if (has(CSModifier::In)
-        || (has(CSModifier::Readonly) && has(CSModifier::Ref)))
-    {
+    if (has(CSModifier::In) || (has(CSModifier::Readonly) && has(CSModifier::Ref))) {
         // todo add handling of readonly ref and in - should be a const
         // reference to const
         return TypeFactory::get_instance().mk_indirect(type);

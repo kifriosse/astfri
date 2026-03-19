@@ -11,15 +11,13 @@
 
 #include <vector>
 
-namespace astfri
-{
+namespace astfri {
 // Forward declarations
 class StmtFactory;
 
 } // namespace astfri
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Scan C# source files and builds a symbol table from them
@@ -27,8 +25,7 @@ namespace astfri::csharp
  * reference to symbol table.
  * Caller has to ensure that both objects live longer than SymbolTableBuilder
  */
-class SymbTableBuilder
-{
+class SymbTableBuilder {
 
 private:
     friend maps::Mappers;
@@ -85,16 +82,10 @@ public:
 
 private:
     static ScopeNode* visit_class(SymbTableBuilder* self, const TSNode& node);
-    static ScopeNode* visit_interface(
-        SymbTableBuilder* self,
-        const TSNode& node
-    );
+    static ScopeNode* visit_interface(SymbTableBuilder* self, const TSNode& node);
     static ScopeNode* visit_record(SymbTableBuilder* self, const TSNode& node);
     static ScopeNode* visit_enum(SymbTableBuilder* self, const TSNode& node);
-    static ScopeNode* visit_delegate(
-        SymbTableBuilder* self,
-        const TSNode& node
-    );
+    static ScopeNode* visit_delegate(SymbTableBuilder* self, const TSNode& node);
     static void visit_memb_var(SymbTableBuilder* self, const TSNode& node);
     static void visit_property(SymbTableBuilder* self, const TSNode& node);
     static void visit_method(SymbTableBuilder* self, const TSNode& node);

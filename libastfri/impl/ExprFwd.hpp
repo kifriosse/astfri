@@ -1,8 +1,7 @@
 #ifndef LIBASTFRI_IMPL_EXPRESSION_FWD_HPP
 #define LIBASTFRI_IMPL_EXPRESSION_FWD_HPP
 
-namespace astfri
-{
+namespace astfri {
 struct Expr;
 struct IntLiteralExpr;
 struct FloatLiteralExpr;

@@ -3,48 +3,48 @@
 
 #include <libastfri-text/inc/code/AbstractCodeVisitor.hpp>
 
-namespace astfri::text
-{
-    class CxxCodeVisitor : public AbstractCodeVisitor
-    {
-    public:
-        static CxxCodeVisitor& get_instance();
-        CxxCodeVisitor(CxxCodeVisitor const&) = delete;
-        CxxCodeVisitor(CxxCodeVisitor&&)      = delete;
-        CxxCodeVisitor& operator=(CxxCodeVisitor const&) = delete;
-        CxxCodeVisitor& operator=(CxxCodeVisitor&&)      = delete;
-    private:
-        explicit CxxCodeVisitor();
-        ~CxxCodeVisitor() = default;
-    public:
-        void visit(DynamicType const& type) override;
-        void visit(FloatType const& type) override;
-        void visit(BoolType const& type) override;
-        void visit(IndirectionType const& type) override;
-        void visit(LambdaType const& type) override;
-        // -----
-        void visit(NullLiteralExpr const& expr) override;
-        void visit(MemberVarRefExpr const& expr) override;
-        void visit(GlobalVarRefExpr const& expr) override;
-        void visit(FunctionCallExpr const& expr) override;
-        void visit(MethodCallExpr const& expr) override;
-        void visit(LambdaCallExpr const& expr) override;
-        void visit(LambdaExpr const& expr) override;
-        void visit(DeleteExpr const& expr) override;
-        // -----
-        void visit(TranslationUnit const& stmt) override;
-        void visit(MemberVarDefStmt const& stmt) override;
-        void visit(GlobalVarDefStmt const& stmt) override;
-        void visit(FunctionDefStmt const& stmt) override;
-        void visit(DefStmt const& stmt) override;
-        void visit(MethodDefStmt const& stmt) override;
-        void visit(BaseInitializerStmt const& stmt) override;
-        void visit(ConstructorDefStmt const& stmt) override;
-        void visit(DestructorDefStmt const& stmt) override;
-        void visit(GenericParam const& stmt) override;
-        void visit(InterfaceDefStmt const& stmt) override;
-        void visit(ClassDefStmt const& stmt) override;
-    };
-}
+namespace astfri::text {
+class CxxCodeVisitor : public AbstractCodeVisitor {
+public:
+    static CxxCodeVisitor& get_instance();
+    CxxCodeVisitor(const CxxCodeVisitor&)            = delete;
+    CxxCodeVisitor(CxxCodeVisitor&&)                 = delete;
+    CxxCodeVisitor& operator=(const CxxCodeVisitor&) = delete;
+    CxxCodeVisitor& operator=(CxxCodeVisitor&&)      = delete;
+
+private:
+    explicit CxxCodeVisitor();
+    ~CxxCodeVisitor() = default;
+
+public:
+    void visit(const DynamicType& type) override;
+    void visit(const FloatType& type) override;
+    void visit(const BoolType& type) override;
+    void visit(const IndirectionType& type) override;
+    void visit(const LambdaType& type) override;
+    // -----
+    void visit(const NullLiteralExpr& expr) override;
+    void visit(const MemberVarRefExpr& expr) override;
+    void visit(const GlobalVarRefExpr& expr) override;
+    void visit(const FunctionCallExpr& expr) override;
+    void visit(const MethodCallExpr& expr) override;
+    void visit(const LambdaCallExpr& expr) override;
+    void visit(const LambdaExpr& expr) override;
+    void visit(const DeleteExpr& expr) override;
+    // -----
+    void visit(const TranslationUnit& stmt) override;
+    void visit(const MemberVarDefStmt& stmt) override;
+    void visit(const GlobalVarDefStmt& stmt) override;
+    void visit(const FunctionDefStmt& stmt) override;
+    void visit(const DefStmt& stmt) override;
+    void visit(const MethodDefStmt& stmt) override;
+    void visit(const BaseInitializerStmt& stmt) override;
+    void visit(const ConstructorDefStmt& stmt) override;
+    void visit(const DestructorDefStmt& stmt) override;
+    void visit(const GenericParam& stmt) override;
+    void visit(const InterfaceDefStmt& stmt) override;
+    void visit(const ClassDefStmt& stmt) override;
+};
+} // namespace astfri::text
 
 #endif

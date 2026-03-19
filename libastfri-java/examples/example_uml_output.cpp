@@ -4,8 +4,7 @@
 // includes for uml output
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
-int main()
-{
+int main() {
     // code for java source code input and making of java syntax tree
     astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 

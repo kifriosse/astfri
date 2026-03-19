@@ -1,6 +1,5 @@
 
-namespace astfri
-{
+namespace astfri {
 
 struct Stmt;
 struct LocalVarDefStmt;

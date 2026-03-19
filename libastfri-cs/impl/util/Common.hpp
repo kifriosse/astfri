@@ -10,15 +10,13 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include <functional>
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 
 /**
  * @brief Enum for identifying different kinds of user defined types in C#.
  * @note C# structs are identified as classes
  */
-enum class TypeKind
-{
+enum class TypeKind {
     Class,
     Interface,
     Record,
@@ -30,8 +28,7 @@ enum class TypeKind
 /**
  * @brief Enum for identifying different kind of variable definitions in C#.
  */
-enum class VarDefType
-{
+enum class VarDefType {
     Local,
     Member,
     Global
@@ -41,8 +38,7 @@ enum class VarDefType
  * @brief Search scope for type resolution. This is used to determine where to
  * look for a name when resolving an identifier
  */
-enum class SearchScope
-{
+enum class SearchScope {
     /**
      * @brief local alias in C#
      */
@@ -85,8 +81,7 @@ enum class SearchScope
 /**
  * @brief Suffix type of integer literal
  */
-enum class IntSuffix
-{
+enum class IntSuffix {
     /**
      * @brief No suffix - basic integer type
      */
@@ -131,8 +126,7 @@ auto visitor = astfri::csharp::util::overloaded{
  * @note Source: https://en.cppreference.com/w/cpp/utility/variant/visit2.html
  */
 template<class... Ts>
-struct Overloaded : Ts...
-{
+struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 

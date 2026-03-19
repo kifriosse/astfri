@@ -1,35 +1,37 @@
 #include <libastfri/inc/Type.hpp>
 
-namespace astfri
-{
+namespace astfri {
 
 IndirectionType::IndirectionType(Type* const indirect) :
-    indirect_(indirect)
-{
+    indirect(indirect) {
 }
 
 ScopedType::ScopedType(std::string name, Scope scope) :
-    name_(std::move(name)),
-    scope_(std::move(scope))
-{
+    name(std::move(name)),
+    scope(std::move(scope)) {
 }
 
-ClassType::ClassType(std::string name, Scope scope, ClassDefStmt *def) :
+ClassType::ClassType(std::string name, Scope scope, ClassDefStmt* def) :
     ScopedType(name, scope),
-    m_def(def)
-{
+    def(def) {
 }
 
-InterfaceType::InterfaceType(std::string name, Scope scope, InterfaceDefStmt *def) :
+InterfaceType::InterfaceType(std::string name, Scope scope, InterfaceDefStmt* def) :
     ScopedType(name, scope),
-    m_def(def)
-{
+    def(def) {
 }
 
-LambdaType::LambdaType(std::string name, LambdaExpr *def) :
-    m_name(std::move(name)),
-    m_def(def)
-{
+LambdaType::LambdaType(std::string name, LambdaExpr* def) :
+    name(std::move(name)),
+    def(def) {
+}
+
+DeducedType::DeducedType(Type* realType) :
+    realType(realType) {
+}
+
+IncompleteType::IncompleteType(std::string name) :
+    name(name) {
 }
 
 } // namespace astfri

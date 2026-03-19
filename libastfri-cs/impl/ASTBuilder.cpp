@@ -19,16 +19,14 @@
 #include <string>
 #include <vector>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 namespace fs = std::filesystem;
 
-namespace
-{
-const fs::path extTypesRoot = ASTFRI_CS_RESOURCES;
-const fs::path core         = extTypesRoot / "core.json";
-const fs::path winDesktop   = extTypesRoot / "win-desktop.json";
+namespace {
+const fs::path extTypesRoot                               = ASTFRI_CS_RESOURCES;
+const fs::path core                                       = extTypesRoot / "core.json";
+const fs::path winDesktop                                 = extTypesRoot / "win-desktop.json";
 
 const std::unordered_map<SDKProfile, fs::path> profileMap = {
     {SDKProfile::None,     core                        },
@@ -42,23 +40,18 @@ const std::unordered_map<SDKProfile, fs::path> profileMap = {
 
 ASTBuilder::ASTBuilder() :
     lang_(tree_sitter_c_sharp()),
-    parser_(ts_parser_new())
-{
+    parser_(ts_parser_new()) {
     ts_parser_set_language(parser_, lang_);
 }
 
-ASTBuilder::~ASTBuilder()
-{
+ASTBuilder::~ASTBuilder() {
     ts_language_delete(lang_);
     ts_parser_delete(parser_);
 }
 
-void ASTBuilder::load_src(const path& projectDir)
-{
-    if (is_regular_file(projectDir))
-    {
-        if (projectDir.extension() == ".cs")
-        {
+void ASTBuilder::load_src(const path& projectDir) {
+    if (is_regular_file(projectDir)) {
+        if (projectDir.extension() == ".cs") {
             std::ifstream fileStream(projectDir, std::ios::binary);
             load_from_stream(fileStream, projectDir);
         }
@@ -69,29 +62,22 @@ void ASTBuilder::load_src(const path& projectDir)
     const std::filesystem::path& rootPath{projectDir};
     dirs.emplace_back(rootPath);
 
-    while (! dirs.empty())
-    {
+    while (! dirs.empty()) {
         auto dirIt = std::filesystem::directory_iterator(dirs.back());
         dirs.pop_back();
-        for (auto& dirEntry : dirIt)
-        {
+        for (auto& dirEntry : dirIt) {
             auto& entryPath            = dirEntry.path();
             const std::string fileName = entryPath.filename().string();
 
-            if (dirEntry.is_directory())
-            {
-                if (fileName == "bin" || fileName == "obj"
-                    || fileName == ".git")
-                {
+            if (dirEntry.is_directory()) {
+                if (fileName == "bin" || fileName == "obj" || fileName == ".git") {
                     continue;
                 }
                 dirs.push_back(entryPath);
             }
-            else if (entryPath.extension() == ".cs")
-            {
+            else if (entryPath.extension() == ".cs") {
                 if (fileName.ends_with(".g.cs") || fileName.ends_with(".i.cs")
-                    || fileName.ends_with(".AssemblyInfo.cs"))
-                {
+                    || fileName.ends_with(".AssemblyInfo.cs")) {
                     continue;
                 }
                 std::ifstream fileStream(entryPath, std::ios::binary);
@@ -101,18 +87,15 @@ void ASTBuilder::load_src(const path& projectDir)
     }
 }
 
-void ASTBuilder::load_src(std::istream& inputStream)
-{
+void ASTBuilder::load_src(std::istream& inputStream) {
     load_from_stream(inputStream);
 }
 
-void ASTBuilder::load_source_of_external_types(const path& jsonPath)
-{
+void ASTBuilder::load_source_of_external_types(const path& jsonPath) {
     externalTypeSources_.push_back(jsonPath);
 }
 
-TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
-{
+TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
     // using milli          = std::chrono::milliseconds;
     const auto it = profileMap.find(profile);
     if (it == profileMap.end())
@@ -122,8 +105,7 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
         );
     load_source_of_external_types(profileMap.at(profile));
     if (profile != SDKProfile::None && profile != SDKProfile::Core
-        && profile != SDKProfile::Worker)
-    {
+        && profile != SDKProfile::Worker) {
         load_source_of_external_types(profileMap.at(SDKProfile::Core));
     }
 
@@ -131,8 +113,7 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(srcs_, symbTable);
 
-    for (auto& extTypeSource : externalTypeSources_)
-    {
+    for (auto& extTypeSource : externalTypeSources_) {
         symbTableBuilder.load_external_types(extTypeSource);
     }
 
@@ -173,12 +154,8 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile)
     return ast;
 }
 
-void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path)
-{
-    std::string src(
-        (std::istreambuf_iterator(inputStream)),
-        std::istreambuf_iterator<char>()
-    );
+void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path) {
+    std::string src((std::istreambuf_iterator(inputStream)), std::istreambuf_iterator<char>());
     TSTree* tree      = util::make_tree(parser_, src);
     const TSNode root = ts_tree_root_node(tree);
     src               = util::remove_comments(root, std::move(src), path);
@@ -193,15 +170,12 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path)
         [&nNms](const TSQueryMatch& match) { nNms = match.captures[0].node; }
     );
     Scope fileNms{};
-    if (! ts_node_is_null(nNms))
-    {
+    if (! ts_node_is_null(nNms)) {
         const TSNode nNmsName       = util::child_by_field_name(nNms, "name");
         const std::string nmsQualif = util::extract_text(nNmsName, src);
         fileNms                     = util::mk_scope(nmsQualif);
     }
-    srcs_.emplace_back(
-        std::make_unique<SourceFile>(std::move(src), tree, std::move(fileNms))
-    );
+    srcs_.emplace_back(std::make_unique<SourceFile>(std::move(src), tree, std::move(fileNms)));
     ts_parser_reset(parser_);
 }
 

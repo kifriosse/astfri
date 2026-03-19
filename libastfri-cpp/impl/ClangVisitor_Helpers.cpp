@@ -1,9 +1,7 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp
-{
-astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type)
-{
+namespace astfri::astfri_cpp {
+astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type) {
     // TODO:
     // ඞ Fakt toto existuje?
     // {lhs} // {rhs}, {lhs} div {rhs}
@@ -20,8 +18,7 @@ astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind
 
     // sú tam aj ďalšie srandy, ale to nepodporuje ASTFRI: .* ->*
 
-    switch (clang_type)
-    {
+    switch (clang_type) {
     case clang::BinaryOperatorKind::BO_Assign:
         return astfri::BinOpType::Assign;
         break; // =
@@ -112,19 +109,15 @@ astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind
     case clang::BinaryOperatorKind::BO_Comma:
         return astfri::BinOpType::Comma;
         break; // ,
-    default:
-    {
+    default: {
         std::cerr << "\n\n\nErrorin finding right Binary operator: astfri_cpp project.\n\n\n";
-    }
-    break;
+    } break;
     }
     return BinOpType::Assign;
 }
 
-astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl)
-{
-    switch (decl->getAccess())
-    {
+astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl) {
+    switch (decl->getAccess()) {
     case clang::AccessSpecifier::AS_public:
         return astfri::AccessModifier::Public;
         break;
@@ -140,22 +133,17 @@ astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl)
     }
 }
 
-astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name)
-{
-    for (auto cls : this->tu_->classes_)
-    {
-        if (cls->type_->name_.compare(name) == 0)
-        {
+astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name) {
+    for (auto cls : this->tu_->classes) {
+        if (cls->type->name.compare(name) == 0) {
             return cls;
         }
     }
     return nullptr;
 }
 
-astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind clang_type)
-{
-    switch (clang_type)
-    {
+astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind clang_type) {
+    switch (clang_type) {
     case clang::UnaryOperatorKind::UO_Plus:
         return UnaryOpType::Plus;
         break;
@@ -186,13 +174,10 @@ astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind
     case clang::UnaryOperatorKind::UO_Not:
         return UnaryOpType::LogicalNot;
         break;
-    default:
-    {
+    default: {
         std::cerr << "\n\n\nError in finding right Unary operator: astfri_cpp project.\n\n\n";
-    }
-    break;
+    } break;
     }
     return UnaryOpType::Plus;
 }
-}
-
+} // namespace astfri::astfri_cpp

@@ -3,8 +3,7 @@
 
 #include <rapidjson/document.h>
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 template<typename... Args>
 bool has_all(const rapidjson::Value& val, Args... args);
 

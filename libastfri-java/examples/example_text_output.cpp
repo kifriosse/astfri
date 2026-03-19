@@ -4,8 +4,7 @@
 // include for text output
 #include <libastfri-text/inc/TextLibManager.hpp>
 
-int main()
-{
+int main() {
     // code for java source code input and making of java syntax tree
     astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 

@@ -14,8 +14,7 @@
 #include <string>
 #include <string_view>
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 
 /**
  * @brief Gets the child node of the given node by field name.
@@ -59,11 +58,7 @@ void print_child_nodes_types(const TSNode& node, bool named = false);
  * @param src source code corresponding to the TSNode.
  * @param named If true, only named child nodes will be printed.
  */
-void print_child_nodes_types(
-    const TSNode& node,
-    std::string_view src,
-    bool named = false
-);
+void print_child_nodes_types(const TSNode& node, std::string_view src, bool named = false);
 
 /**
  * @brief Removes comments from the given source code using the syntax tree.

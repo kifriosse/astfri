@@ -9,15 +9,13 @@
 
 #include <vector>
 
-namespace astfri::csharp
-{
+namespace astfri::csharp {
 
 /**
  * @brief Class responsible for loading C# source code and building AST from it.
  * @note This class isn't copyable or movable
  */
-class ASTBuilder
-{
+class ASTBuilder {
 private:
     using path = std::filesystem::path;
     const TSLanguage* lang_;

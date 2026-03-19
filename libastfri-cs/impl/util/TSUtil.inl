@@ -1,46 +1,38 @@
 #ifndef CSHARP_TS_UTIL_INL
 #define CSHARP_TS_UTIL_INL
 
-namespace astfri::csharp::util
-{
+namespace astfri::csharp::util {
 
 template<std::invocable<const TSNode&> F>
-void for_each_child_node(const TSNode& node, F process, const bool only_named)
-{
+void for_each_child_node(const TSNode& node, F process, const bool only_named) {
     TSTreeCursor cursor = ts_tree_cursor_new(node);
-    if (ts_tree_cursor_goto_first_child(&cursor))
-    {
-        do
-        {
+    if (ts_tree_cursor_goto_first_child(&cursor)) {
+        do {
             TSNode nCurrent = ts_tree_cursor_current_node(&cursor);
             if (only_named && ! ts_node_is_named(nCurrent))
                 continue;
 
             using ResType = std::invoke_result_t<F, const TSNode&>;
-            if constexpr (std::same_as<ResType, bool>)
-            {
+            if constexpr (std::same_as<ResType, bool>) {
                 if (! process(nCurrent))
                     break;
             }
-            else
-            {
+            else {
                 process(nCurrent);
             }
-        } while (ts_tree_cursor_goto_next_sibling(&cursor));
+        }
+        while (ts_tree_cursor_goto_next_sibling(&cursor));
     }
     ts_tree_cursor_delete(&cursor);
 }
 
 template<std::invocable<const TSNode&> F>
-void process_param_list(const TSNode& node, F collector)
-{
+void process_param_list(const TSNode& node, F collector) {
     TSNode nType{};
     const bool isVariadic = has_variadic_param(node, &nType);
 
-    auto process          = [&](const TSNode& current) -> bool
-    {
-        if (isVariadic && ts_node_eq(current, nType))
-        {
+    auto process          = [&](const TSNode& current) -> bool {
+        if (isVariadic && ts_node_eq(current, nType)) {
             collector(node);
             return false;
         }
@@ -52,18 +44,15 @@ void process_param_list(const TSNode& node, F collector)
 }
 
 template<std::invocable<const TSQueryMatch&> F>
-void for_each_match(const TSNode& root, const maps::QueryType type, F process)
-{
+void for_each_match(const TSNode& root, const maps::QueryType type, F process) {
     static auto& queryReg = maps::QueryReg::get();
 
-    if (const maps::Query* query = queryReg.get_query(type))
-    {
+    if (const maps::Query* query = queryReg.get_query(type)) {
         TSQueryCursor* cursor = ts_query_cursor_new();
         ts_query_cursor_exec(cursor, query->get(), root);
 
         TSQueryMatch match;
-        while (ts_query_cursor_next_match(cursor, &match))
-        {
+        while (ts_query_cursor_next_match(cursor, &match)) {
             process(match);
         }
 
