@@ -92,7 +92,7 @@ int main(int argc, const char** argv)
 
     cxxopts::Options options(
         "astfri",
-        "ASTFRI - CLI interface for library astfri"
+        "ASTFRI - CLI interface for library astfri, version " ASTFRI_VERSION
     );
 
     options.add_options()
