@@ -201,8 +201,7 @@ Mappers::Mappers() :
         {RefType, TypeTranslator::visit_inderect},
         {ArrayType, TypeTranslator::visit_array},
         {GenericType, TypeTranslator::visit_generic_name},
-        {TupleType, TypeTranslator::visit_tuple},
-        // function pointer - not delegate
+        {TupleType, TypeTranslator::visit_tuple}, // function pointer - not delegate
         {FuncPointerType, TypeTranslator::visit_func_pointer},
         {ScopedType, TypeTranslator::visit_wrapper},
     }),
@@ -261,7 +260,8 @@ Operations::Operations() :
          {"<<=", BinOpType::BitShiftLeftAssign},
          {"&=", BinOpType::BitAndAssign},
          {"|=", BinOpType::BitOrAssign},
-         {"^=", BinOpType::BitXorAssign}}
+         {"^=", BinOpType::BitXorAssign},
+        {">>>", BinOpType::BitShiftRightUnsigned}}
     ) {
 }
 
@@ -303,7 +303,7 @@ Types::Types() :
 
         {"float", typeFact.mk_float()},
         {"double", typeFact.mk_float()}, // TODO: implement `double` type
-        {"decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
+        {"decimal", typeFact.mk_float()}, // TODO: implement `decimal` type
 
         {"nuint", typeFact.mk_int()}, // TODO: implement `nuint` type
         {"void", typeFact.mk_void()},
@@ -315,24 +315,24 @@ Types::Types() :
         {"Char", typeFact.mk_char()},
         {"Int16", typeFact.mk_int()}, // TODO: implement `Int16` type
         {"Int32", typeFact.mk_int()},
-        {"Int64", typeFact.mk_unknown()}, // TODO: implement `Int64` type
+        {"Int64", typeFact.mk_int()}, // TODO: implement `Int64` type
         {"UInt16", typeFact.mk_int()}, // TODO: implement `UInt16` type
         {"UInt32", typeFact.mk_int()}, // TODO: implement `UInt32` type
-        {"UInt64", typeFact.mk_unknown()}, // TODO: implement `UInt64` type
+        {"UInt64", typeFact.mk_int()}, // TODO: implement `UInt64` type
 
         {"UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
         {"System.UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
 
         {"Single", typeFact.mk_float()},
-        {"Double", typeFact.mk_unknown()}, // TODO: implement `double` type
-        {"Decimal", typeFact.mk_unknown()}, // TODO: implement `decimal` type
+        {"Double", typeFact.mk_float()}, // TODO: implement `double` type
+        {"Decimal", typeFact.mk_float()}, // TODO: implement `decimal` type
 
         {"object", typeFact.mk_class("Object", {{"System"}})},
         {"Object", typeFact.mk_class("Object", {{"System"}})},
         {"string", typeFact.mk_class("String", {{"System"}})},
         {"String", typeFact.mk_class("String", {{"System"}})},
 
-        {"var", typeFact.mk_unknown()}, // todo handle var type
+        {"var", typeFact.mk_deduced(nullptr)}, // todo handle var type
         {"_", typeFact.mk_unknown()}, // todo handle discard type
 }) {
 }

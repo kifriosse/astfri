@@ -1,4 +1,4 @@
 target_sources(astfri-cs PRIVATE
-    Registries.cpp
+    Maps.cpp
     QueryRegistry.cpp
 )
