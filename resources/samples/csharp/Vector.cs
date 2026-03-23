@@ -8,40 +8,41 @@
 
 public class Vector : IComparable<Vector>, IEquatable<Vector> 
 {
-    float[] elements;
+    float[] _elements;
 
-    public int Size => elements.Length;
+    public int Size => _elements.Length;
 
     public Vector(int n)
     {
-        elements = new float[n];
+        _elements = new float[n];
     }
+    
     public Vector(params float[] elements) : this(elements.Length)
     {
-        elements.CopyTo(this.elements);
+        elements.CopyTo(this._elements);
     }
 
     public Vector(Vector other)
     {
-        other.elements.CopyTo(elements);
+        other._elements.CopyTo(_elements);
     }
 
     public float this[uint index]
     {
         get {
-            if (index >= elements.Length)
+            if (index >= _elements.Length)
                 throw new IndexOutOfRangeException(
-                    $"Index: '{index}' out of range for vector of size: '{elements.Length}"
+                    $"Index: '{index}' out of range for vector of size: '{_elements.Length}"
                 );
-            return elements[index];
+            return _elements[index];
         }
         set
         {
-            if (index >= elements.Length)
+            if (index >= _elements.Length)
                 throw new IndexOutOfRangeException(
-                    $"Index: '{index}' out of range for vector of size: '{elements.Length}"
+                    $"Index: '{index}' out of range for vector of size: '{_elements.Length}"
                 );
-            elements[index] = value;
+            _elements[index] = value;
         }
     }
 
@@ -90,14 +91,14 @@ public class Vector : IComparable<Vector>, IEquatable<Vector>
     {
         return other == null 
             ? 1
-            : elements.SequenceCompareTo(other.elements);
+            : _elements.SequenceCompareTo(other._elements);
     }
 
     public bool Equals(Vector? other)
     {
         return other == null 
             ? false
-            : elements.SequenceEqual(other.elements);
+            : _elements.SequenceEqual(other._elements);
     }
 
     private static Vector Sum(Vector first, Vector second, bool subtract)
@@ -105,9 +106,10 @@ public class Vector : IComparable<Vector>, IEquatable<Vector>
         if (first.Size != second.Size)
             throw new ArgumentException("Both vectors need to be have same size");
         Vector result = new(first.Size);
+        int sign = subtract ? -1 : 1;
         for (uint i = 0; i < result.Size; ++i)
         {
-            result[i] = first[i] + (subtract ? -second[i] : second[i]);
+            result[i] = sign * second[i];
         }
         return result;
     }
