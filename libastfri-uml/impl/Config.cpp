@@ -3,6 +3,27 @@
 #include <fstream>
 
 namespace astfri::uml {
+
+Config Config::createFromJson(const rapidjson::Value& node) {
+    (void)node;
+    return *(new Config());
+}
+
+Config Config::createFromJson(const std::filesystem::path& path) {
+    (void)path;
+    return *(new Config());
+}
+
+Config Config::createDefault() {
+    return *(new Config());
+}
+
+Config Config::createFromArgs(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+    return *(new Config());
+}
+
 bool Config::parse_json(const char* path) {
     std::string jsonString;
     std::string line;
