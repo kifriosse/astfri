@@ -158,8 +158,10 @@ private:
      * @note parent class in this context mean base classes not the nesting
      * class.
      */
-    [[nodiscard]] ScopeNode* search_parents(std::string_view qualif, const TypeBinding& start)
-        const;
+    [[nodiscard]] ScopeNode* search_parents(
+        std::string_view qualif,
+        const TypeBinding& start
+    ) const;
 
     /**
      * @brief Gets the source code currently being visited.

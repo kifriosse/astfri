@@ -139,8 +139,10 @@ const FuncMetadata* SemanticContext::find_func(const std::string_view funcName) 
     return itFunc == funcs.end() ? nullptr : &itFunc->second;
 }
 
-const MethodMetadata* SemanticContext::find_method(const MethodId& methodId, UserTypeDefStmt* owner)
-    const {
+const MethodMetadata* SemanticContext::find_method(
+    const MethodId& methodId,
+    UserTypeDefStmt* owner
+) const {
     if (auto* classDef = as_a<ClassDefStmt>(owner)) {
         ClassDefStmt* current = classDef;
         while (current) {
@@ -193,8 +195,10 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     return nullptr;
 }
 
-InvocationType SemanticContext::find_invoc_type(InvocationId id, access::Qualifier quelifier)
-    const {
+InvocationType SemanticContext::find_invoc_type(
+    InvocationId id,
+    access::Qualifier quelifier
+) const {
     // todo static variables
     if ([[maybe_unused]] VarDefStmt* varDef = find_var(id.name, quelifier)) {
         /* todo
