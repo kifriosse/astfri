@@ -37,8 +37,8 @@ struct Config {
 
     std::string outputFilePath_     = "/tmp/class_diagram";
 
-    [[deprecated]] bool parse_json(const char* path);
-    [[deprecated]] void use_default_values();
+    bool parse_json(const char* path);
+    void use_default_values();
 
     static Config createFromJson(const rapidjson::Value& node);
     static Config createFromJson(const std::filesystem::path& path);
