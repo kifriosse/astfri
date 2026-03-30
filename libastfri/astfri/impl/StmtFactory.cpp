@@ -1,8 +1,5 @@
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
-
-#include "libastfri/impl/Scope.hpp"
-#include "libastfri/inc/Stmt.hpp"
+#include <astfri/impl/StmtFactory.hpp>
+#include <astfri/impl/TypeFactory.hpp>
 
 namespace astfri {
 

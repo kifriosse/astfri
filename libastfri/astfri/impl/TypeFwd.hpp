@@ -1,3 +1,5 @@
+#ifndef ASTFRI_IMPL_TYPE_FWD_HPP
+#define ASTFRI_IMPL_TYPE_FWD_HPP
 
 namespace astfri {
 
@@ -20,3 +22,5 @@ struct DeducedType;
 struct UnknownType;
 
 } // namespace astfri
+
+#endif

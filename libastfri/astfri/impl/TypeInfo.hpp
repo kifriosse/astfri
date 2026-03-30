@@ -1,13 +1,15 @@
-#ifndef LIBASTFRI_TYPE_INFO_HPP
-#define LIBASTFRI_TYPE_INFO_HPP
+#ifndef ASTFRI_IMPL_TYPE_INFO_HPP
+#define ASTFRI_IMPL_TYPE_INFO_HPP
 
-#include <libastfri/impl/ExprFwd.hpp>
-#include <libastfri/impl/StmtFwd.hpp>
-#include <libastfri/impl/TypeFwd.hpp>
+#include <astfri/impl/ExprFwd.hpp>
+#include <astfri/impl/StmtFwd.hpp>
+#include <astfri/impl/TypeFwd.hpp>
 
 #include <concepts>
 
+
 namespace astfri {
+
 
 /**
  * @brief returns true if @p t is-a T
@@ -51,8 +53,11 @@ template<typename T>
 requires(std::derived_from<T, Expr>)
 T* as_a(Expr* t);
 
+
 } // namespace astfri
 
-#include <libastfri/impl/TypeInfo.inl>
+
+#include <astfri/impl/TypeInfo.inl>
+
 
 #endif

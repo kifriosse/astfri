@@ -1,8 +1,8 @@
-#ifndef LIBASTFRI_TYPE_HPP
-#define LIBASTFRI_TYPE_HPP
+#ifndef ASTFRI_IMPL_TYPE_HPP
+#define ASTFRI_IMPL_TYPE_HPP
 
-#include <libastfri/impl/Scope.hpp>
-#include <libastfri/inc/Visitor.hpp>
+#include <astfri/impl/Scope.hpp>
+#include <astfri/impl/Visitor.hpp>
 
 #include <string>
 

@@ -1,7 +1,7 @@
 #ifndef NODE_MAPPER_CLASS_HPP
 #define NODE_MAPPER_CLASS_HPP
 
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <map>
 

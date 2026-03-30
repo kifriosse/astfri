@@ -1,6 +1,9 @@
-#include <libastfri/inc/Expr.hpp>
+#include <astfri/impl/Expr.hpp>
+
 
 namespace astfri {
+
+
 IntLiteralExpr::IntLiteralExpr(int val) :
     Literal(val) {
 }
@@ -91,5 +94,6 @@ BracketExpr::BracketExpr(Expr* e) :
 DeleteExpr::DeleteExpr(Expr* arg) :
     arg(arg) {
 }
+
 
 } // namespace astfri

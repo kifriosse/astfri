@@ -20,6 +20,6 @@ target_sources(astfri-text PRIVATE
   TextLibManager.cpp
 )
 
-target_include_directories(astfri-text PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+target_include_directories(astfri-text PUBLIC ${RAPIDJSON_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
 
 target_link_libraries(astfri-text PUBLIC astfri-core)

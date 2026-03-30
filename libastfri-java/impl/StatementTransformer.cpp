@@ -7,10 +7,6 @@
 #include <string>
 #include <sys/types.h>
 
-#include "libastfri/inc/Expr.hpp"
-#include "libastfri/inc/Stmt.hpp"
-#include "libastfri/inc/Type.hpp"
-#include "tree_sitter/api.h"
 
 namespace astfri::java {
 StatementTransformer::StatementTransformer() :

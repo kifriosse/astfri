@@ -1,6 +1,8 @@
-#include <libastfri/inc/Type.hpp>
+#include <astfri/impl/Type.hpp>
+
 
 namespace astfri {
+
 
 IndirectionType::IndirectionType(Type* const indirect) :
     indirect(indirect) {
@@ -33,5 +35,6 @@ DeducedType::DeducedType(Type* realType) :
 IncompleteType::IncompleteType(std::string name) :
     name(name) {
 }
+
 
 } // namespace astfri

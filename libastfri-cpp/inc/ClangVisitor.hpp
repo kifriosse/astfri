@@ -2,7 +2,7 @@
 #define CLANGVISITOR_HPP
 
 // astfri
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 // clang a llvm
 #include <clang/AST/APValue.h>

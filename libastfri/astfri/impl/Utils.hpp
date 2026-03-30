@@ -1,7 +1,7 @@
-#ifndef LIBASTFRI_IMPL_UTILS_HPP
-#define LIBASTFRI_IMPL_UTILS_HPP
+#ifndef ASTFRI_IMPL_UTILS_HPP
+#define ASTFRI_IMPL_UTILS_HPP
 
-#include <libastfri/inc/Visitor.hpp>
+#include <astfri/impl/Visitor.hpp>
 
 #include <memory>
 #include <utility>

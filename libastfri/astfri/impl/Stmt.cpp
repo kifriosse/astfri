@@ -1,8 +1,10 @@
-#include <libastfri/inc/Stmt.hpp>
+#include <astfri/impl/Stmt.hpp>
 
 #include <vector>
 
+
 namespace astfri {
+
 
 VarDefStmt::VarDefStmt(std::string name, Type* type, Expr* initializer) :
     name(std::move(name)),
@@ -175,5 +177,6 @@ TryStmt::TryStmt(Stmt* body, Stmt* finally, std::vector<CatchStmt*> catches) :
     finally(finally),
     catches(std::move(catches)) {
 }
+
 
 } // namespace astfri

@@ -1,7 +1,7 @@
-#ifndef LIBASTFRI_EXPRESSION_HPP
-#define LIBASTFRI_EXPRESSION_HPP
+#ifndef ASTFRI_IMPL_EXPR_HPP
+#define ASTFRI_IMPL_EXPR_HPP
 
-#include <libastfri/impl/Utils.hpp>
+#include <astfri/impl/Utils.hpp>
 
 #include <string>
 #include <vector>
@@ -381,6 +381,6 @@ struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr> { };
 
 } // namespace astfri
 
-#include <libastfri/impl/Expr.inl>
+#include <astfri/impl/Expr.inl>
 
 #endif

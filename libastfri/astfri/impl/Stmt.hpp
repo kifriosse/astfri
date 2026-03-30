@@ -1,9 +1,9 @@
-#ifndef LIBASTFRI_STATEMENT_HPP
-#define LIBASTFRI_STATEMENT_HPP
+#ifndef ASTFRI_IMPL_STMT_HPP
+#define ASTFRI_IMPL_STMT_HPP
 
-#include <libastfri/impl/Scope.hpp>
-#include <libastfri/impl/Utils.hpp>
-#include <libastfri/inc/Type.hpp>
+#include <astfri/impl/Scope.hpp>
+#include <astfri/impl/Utils.hpp>
+#include <astfri/impl/Type.hpp>
 
 #include <string>
 #include <vector>

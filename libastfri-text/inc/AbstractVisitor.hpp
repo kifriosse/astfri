@@ -2,7 +2,7 @@
 #define LIBASTFRI_TEXT_ABSTRACT_VISITOR
 
 #include <libastfri-text/inc/AbstractBuilder.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 namespace astfri::text {
 template<typename Node>

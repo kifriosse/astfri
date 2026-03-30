@@ -1,7 +1,5 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-#include "libastfri/inc/Expr.hpp"
-
 namespace astfri::astfri_cpp {
 // visit expression
 bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor) {

@@ -1,9 +1,9 @@
-#include <libastfri/impl/Utils.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
+#include <astfri/impl/Utils.hpp>
+#include <astfri/impl/ExprFactory.hpp>
 
-#include "libastfri/inc/Expr.hpp"
 
 namespace astfri {
+
 
 ExprFactory& ExprFactory::get_instance() {
     static ExprFactory instance;
@@ -150,5 +150,6 @@ BracketExpr* ExprFactory::mk_bracket(Expr* expr) {
 UnknownExpr* ExprFactory::mk_unknown() {
     return &m_unknownExpr;
 }
+
 
 } // namespace astfri

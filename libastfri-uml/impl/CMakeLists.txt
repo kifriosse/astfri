@@ -10,6 +10,6 @@ target_sources(astfri-uml PRIVATE
     TypeConvention.cpp
 )
 
-target_include_directories(astfri-uml PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+target_include_directories(astfri-uml PUBLIC ${RAPIDJSON_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
 
 target_link_libraries(astfri-uml PUBLIC astfri-core)

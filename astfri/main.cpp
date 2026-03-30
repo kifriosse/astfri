@@ -2,7 +2,7 @@
 #include <iostream>
 
 // astfri headers
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 // ASTFRI visitor
 #include <libastfri-text/inc/TextLibManager.hpp>

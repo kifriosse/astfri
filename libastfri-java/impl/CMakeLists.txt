@@ -18,4 +18,4 @@ target_link_libraries(astfri-java PUBLIC
     ${TREE_SITTER_JAVA_LIBRARIES}
 )
 
-target_include_directories(astfri-java PUBLIC ${TREE_SITTER_JAVA_INCLUDE_DIRS})
+target_include_directories(astfri-java PUBLIC ${TREE_SITTER_JAVA_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})

@@ -1,4 +1,4 @@
-#include <libastfri/impl/Scope.hpp>
+#include <astfri/impl/Scope.hpp>
 
 namespace astfri {
 

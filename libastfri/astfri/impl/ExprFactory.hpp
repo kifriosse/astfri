@@ -1,8 +1,8 @@
-#ifndef LIBASTFRI_EXPRESSION_FACTORY_HPP
-#define LIBASTFRI_EXPRESSION_FACTORY_HPP
+#ifndef ASTFRI_IMPL_EXPR_FACTORY_HPP
+#define ASTFRI_IMPL_EXPR_FACTORY_HPP
 
-#include <libastfri/inc/Expr.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include <astfri/impl/Expr.hpp>
+#include <astfri/impl/TypeFactory.hpp>
 
 #include <functional>
 #include <map>

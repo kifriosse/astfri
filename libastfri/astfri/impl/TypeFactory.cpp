@@ -1,5 +1,5 @@
-#include <libastfri/impl/Utils.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include <astfri/impl/Utils.hpp>
+#include <astfri/impl/TypeFactory.hpp>
 
 #include <cassert>
 

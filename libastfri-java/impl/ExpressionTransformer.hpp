@@ -2,7 +2,7 @@
 #define EXPRESSION_TRANSFORMER_CLASS_HPP
 
 #include <libastfri-java/impl/NodeMapper.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>

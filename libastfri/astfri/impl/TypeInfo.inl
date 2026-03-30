@@ -1,4 +1,4 @@
-#include <libastfri/inc/TypeInfo.hpp>
+#include <astfri/impl/TypeInfo.hpp>
 
 namespace astfri {
 

@@ -1,6 +1,6 @@
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 #include <libastfri-text/inc/TextLibManager.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 int main() {
     using namespace astfri;

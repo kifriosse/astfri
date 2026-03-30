@@ -1,8 +1,6 @@
 #ifndef DATA_HPP
 #define DATA_HPP
-#include <libastfri/inc/Expr.hpp>
-#include <libastfri/inc/Stmt.hpp>
-#include <libastfri/inc/Type.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <string>
 #include <unordered_map>

@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_IMPL_EXPRESSION_FWD_HPP
-#define LIBASTFRI_IMPL_EXPRESSION_FWD_HPP
+#ifndef ASTFRI_IMPL_EXPR_FWD_HPP
+#define ASTFRI_IMPL_EXPR_FWD_HPP
 
 namespace astfri {
 struct Expr;

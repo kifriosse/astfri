@@ -1,9 +1,9 @@
-#ifndef LIBASTFRI_VISITOR_HPP
-#define LIBASTFRI_VISITOR_HPP
+#ifndef ASTFRI_IMPL_VISITOR_HPP
+#define ASTFRI_IMPL_VISITOR_HPP
 
-#include <libastfri/impl/ExprFwd.hpp>
-#include <libastfri/impl/StmtFwd.hpp>
-#include <libastfri/impl/TypeFwd.hpp>
+#include <astfri/impl/ExprFwd.hpp>
+#include <astfri/impl/StmtFwd.hpp>
+#include <astfri/impl/TypeFwd.hpp>
 
 #include <stdexcept>
 

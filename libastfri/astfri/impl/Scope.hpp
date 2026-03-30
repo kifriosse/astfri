@@ -1,5 +1,5 @@
-#ifndef LIBASTFRI_SCOPE_HPP
-#define LIBASTFRI_SCOPE_HPP
+#ifndef ASTFRI_IMPL_SCOPE_HPP
+#define ASTFRI_IMPL_SCOPE_HPP
 
 #include <string>
 #include <string_view>
@@ -29,6 +29,6 @@ std::string mk_fqn(const Scope& scope, std::string_view name);
 
 } // namespace astfri
 
-#include <libastfri/impl/Scope.inl>
+#include <astfri/impl/Scope.inl>
 
 #endif

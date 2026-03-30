@@ -1,3 +1,5 @@
+#ifndef ASTFRI_IMPL_STMT_FWD_HPP
+#define ASTFRI_IMPL_STMT_FWD_HPP
 
 namespace astfri {
 
@@ -39,3 +41,5 @@ struct UnknownStmt;
 struct TranslationUnit;
 
 } // namespace astfri
+
+#endif

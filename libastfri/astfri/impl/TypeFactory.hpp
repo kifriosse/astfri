@@ -1,7 +1,7 @@
-#ifndef LIBASTFRI_TYPE_FACTORY
-#define LIBASTFRI_TYPE_FACTORY
+#ifndef ASTFRI_IMPL_TYPE_FACTORY_HPP
+#define ASTFRI_IMPL_TYPE_FACTORY_HPP
 
-#include <libastfri/inc/Type.hpp>
+#include <astfri/impl/Type.hpp>
 
 #include <map>
 #include <memory>

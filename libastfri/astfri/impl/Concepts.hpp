@@ -1,10 +1,11 @@
-#ifndef LIBASTFRI_IMPL_CONCEPTS_FWD_HPP
-#define LIBASTFRI_IMPL_CONCEPTS_FWD_HPP
+#ifndef ASTFRI_IMPL_CONCEPTS_HPP
+#define ASTFRI_IMPL_CONCEPTS_HPP
+
+#include <astfri/impl/StmtFwd.hpp>
 
 #include <concepts>
 #include <filesystem>
 
-#include "StmtFwd.hpp"
 
 namespace astfri {
 
