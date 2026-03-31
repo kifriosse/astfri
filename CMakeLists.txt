@@ -17,6 +17,12 @@ option(ASTFRI_BUILD_UML_OUTPUT "Build module libastri-uml." OFF)
 
 add_subdirectory(external)
 
+if(TARGET tree-sitter-c-sharp)
+    message(STATUS "Imported target exists!")
+else()
+    message(FATAL_ERROR "Imported target not defined yet")
+endif()
+
 add_subdirectory(libastfri)
 
 if (ASTFRI_BUILD_WRAPPER)

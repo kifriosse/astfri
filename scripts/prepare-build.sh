@@ -48,11 +48,15 @@ if [ "$#" -eq 0 ]; then
   C_COMPILER=gcc
   CXX_COMPILER=g++
   echo "Using defaults -- gcc and g++."
+  { set +x; } 2>/dev/null
+  ok
   echo ""
 elif [ "$#" -eq 2 ]; then
   C_COMPILER=$1
   CXX_COMPILER=$2
   echo "Using ${C_COMPILER} as C compiler and ${CXX_COMPILER} as C++ compiler."
+  { set +x; } 2>/dev/null
+  ok
   echo ""
 else
   error "Invalid arguments."
@@ -63,23 +67,6 @@ fi
 heading "Removing old build files"
 set -x
 rm -rf build
-{ set +x; } 2>/dev/null
-ok
-echo ""
-
-# Initialize and update submodules
-heading "Initializing and updating submodules"
-set -x
-git submodule update --init --recursive
-{ set +x; } 2>/dev/null
-possibly_die "Git submodule update failed"
-ok
-echo ""
-
-# Remove external bin files
-heading "Removing external bin files"
-set -x
-rm -rf external/bin
 { set +x; } 2>/dev/null
 ok
 echo ""
