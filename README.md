@@ -4,6 +4,14 @@ TODO
 # TODO
 submodule commands doc
 
+# Dependencies
+TODO Each subproject contains section on dependencies in its README.
+
+## Submodules
+
+
+
+
 # Modules and build
 The project requires gcc,g++ in version 12 or higher. On Ubuntu 22, they need to be explicitly installed using `apt install gcc-12 g++-12`.
 
@@ -26,10 +34,6 @@ cmake                          \
    ..
 make
 ```
-
-
-# Dependencies
-Each subproject contains section on dependencies in its README.
 
 
 # For Developers

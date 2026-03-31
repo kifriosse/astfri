@@ -19,7 +19,7 @@
 // ASTFRI Java
 #include <libastfri-java/inc/ASTBuilder.hpp>
 
-#include "cxxopts.hpp"
+#include <cxxopts.hpp>
 
 #pragma region DEFINITIONS
 

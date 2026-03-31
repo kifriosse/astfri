@@ -119,3 +119,25 @@ set(
     libtree-sitter-c-sharp.so
   CACHE PATH "tree-sitter-c-sharp library"
 )
+
+###########
+# cxxopts #
+###########
+ExternalProject_Add(cxxopts-external
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/cxxopts
+  BINARY_DIR ${PROJECT_SOURCE_DIR}/external/bin/build/cxxopts
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_DIR}
+    -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCXXOPTS_BUILD_EXAMPLES=OFF
+    -DCXXOPTS_BUILD_TESTS=OFF
+    -DCXXOPTS_ENABLE_INSTALL=ON
+  BUILD_BYPRODUCTS ${EXTERNAL_INSTALL_DIR}
+)
+
+set(
+  CXXOPTS_INCLUDE_DIRS
+    ${EXTERNAL_INSTALL_DIR}/include
+  CACHE PATH "cxxopts include dir"
+)
