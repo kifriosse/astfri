@@ -36,7 +36,7 @@
 
 // #include <llvm-18/llvm/Support/Casting.h> // je to priamo pre 18, moze byt problem asi
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 struct ClangASTLocation {
     const clang::Decl* decl_                         = nullptr;
     const clang::Stmt* stmt_                         = nullptr;
@@ -143,5 +143,5 @@ private:
     AstfriASTLocation astfri_location;
     bool expr_as_stmt;
 };
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp
 #endif // CLANGVISITOR_HPP

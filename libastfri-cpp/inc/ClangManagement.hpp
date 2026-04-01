@@ -1,6 +1,8 @@
 #ifndef CLANGMANAGEMENT_HPP
 #define CLANGMANAGEMENT_HPP
 
+// std
+#include <filesystem>
 // astfri
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 #include <libastfri/inc/Stmt.hpp>
@@ -14,14 +16,14 @@
 #include <clang/Tooling/Tooling.h>
 #include <memory>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 class CppASTConsumer : public clang::ASTConsumer {
 public:
     CppASTConsumer(astfri::TranslationUnit& _tu);
     void HandleTranslationUnit(clang::ASTContext& Context) override;
 
 private:
-    astfri::astfri_cpp::ClangVisitor Visitor;
+    astfri::cpp::ClangVisitor Visitor;
 };
 
 // Frontend Action
@@ -48,8 +50,15 @@ private:
     astfri::TranslationUnit& tu;
 };
 
-int fill_translation_unit(astfri::TranslationUnit& tu, const std::string& file_path);
-int fill_translation_unit(astfri::TranslationUnit& tu, std::istream& is);
 
-} // namespace astfri::astfri_cpp
+struct cpp_in
+{
+    astfri::TranslationUnit load_file(const std::filesystem::path& file_path); //const cpp::Config &cfg
+    astfri::TranslationUnit load_file(std::istream& is); //const cpp::Config &cfg
+    astfri::TranslationUnit load_project(std::filesystem::path& path); //const cpp::Config &cfg
+};
+
+// static_assert(astfri::IsInputLibInterface<cpp_in, cpp::Config>, "");
+
+} // namespace astfri::cpp
 #endif // CLANGMANAGEMENT_HPP

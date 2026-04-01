@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 
 clang::BuiltinType::Kind get_clang_type_from_builtin(const clang::BuiltinType* builtin) {
     // malo by prejst vzdy
@@ -120,4 +120,4 @@ astfri::Type* ClangVisitor::get_astfri_type(clang::QualType QT) {
     return nullptr;
 }
 
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp

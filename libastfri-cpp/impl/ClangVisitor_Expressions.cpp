@@ -2,7 +2,7 @@
 
 #include "libastfri/inc/Expr.hpp"
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 // visit expression
 bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor) {
     // akcia na tomto vrchole
@@ -245,4 +245,4 @@ bool ClangVisitor::TraverseParenExpr(clang::ParenExpr *PE) {
 
     return true;
 }
-}
+} // namespace astfri::cpp

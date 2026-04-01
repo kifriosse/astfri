@@ -205,16 +205,18 @@ int main(int argc, const char** argv)
     {
     case InputType::Cpp:
     {
-        if (astfri::astfri_cpp::fill_translation_unit(tu, input_file) != 0)
-        {
-            if (mode_verbose)
-            {
-                std::cerr
-                    << "Error filling translation unit from C++ source file: "
-                    << input_file << std::endl;
-            }
-            return EXIT_INPUT_LIB_ERROR;
-        }
+        astfri::cpp::cpp_in input;
+        tu = input.load_file(input_file);
+        // if (input.fill_translation_unit(tu, input_file) != 0)
+        // {
+        //     if (mode_verbose)
+        //     {
+        //         std::cerr
+        //             << "Error filling translation unit from C++ source file: "
+        //             << input_file << std::endl;
+        //     }
+        //     return EXIT_INPUT_LIB_ERROR;
+        // }
         break;
     }
     case InputType::Csharp:

@@ -1,6 +1,6 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND) {
     (void)ND; // aby nevyskakoval warning o unused premennej
     // std::cout << "Traversing namespace: " << ND->getNameAsString() << "\n";
@@ -48,7 +48,7 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor) {
                     TraverseStmt(arg);
                     args.push_back(this->astfri_location.expr_);
                 }
-                auto base_init = this->stmt_factory_->mak_base_initializer(
+                auto base_init = this->stmt_factory_->mk_base_initializer(
                     init->getBaseClass()->getAsCXXRecordDecl()->getNameAsString(),
                     args
                 );
@@ -216,22 +216,20 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD) {
 
     // akcia na vrchole
     // vytvorí sa scope
-    std::vector<std::string> layers = {};
-    clang::DeclContext* context     = RD->getDeclContext();
+    std::vector<std::basic_string<char>> scope = {};
+    clang::DeclContext* context    = RD->getDeclContext();
     while (context) {
         if (auto named = llvm::dyn_cast<clang::NamedDecl>(context)) {
-            layers.push_back(named->getNameAsString());
+            scope.push_back(named->getNameAsString());
         }
         context = context->getParent();
     }
-    layers = {layers.rbegin(), layers.rend()};
+    scope = {scope.rbegin(), scope.rend()};
 
     // vytvorenie triedy
     auto new_class = this->stmt_factory_->mk_class_def(
         RD->getNameAsString(),
-        {
-            {layers.rbegin(), layers.rend()}
-    }
+        {scope}
     );
     this->tu_->classes.push_back(new_class);
 
@@ -363,4 +361,4 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD) {
 
     return true;
 }
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp

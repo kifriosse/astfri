@@ -1,6 +1,6 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 bool ClangVisitor::isInMainFile(clang::SourceLocation Loc) const {
     if (Loc.isInvalid())
         return false;
@@ -42,4 +42,4 @@ ClangVisitor::ClangVisitor(TranslationUnit& visitedTranslationUnit, clang::Sourc
     this->type_factory_ = &TypeFactory::get_instance();
     this->expr_as_stmt  = false;
 }
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp

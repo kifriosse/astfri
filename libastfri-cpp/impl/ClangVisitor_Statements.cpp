@@ -1,6 +1,6 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 bool ClangVisitor::TraverseDeclStmt(clang::DeclStmt* DS) {
     // akcia na tomto vrchole
     auto new_def_stmt = this->stmt_factory_->mk_def();
@@ -308,4 +308,4 @@ bool ClangVisitor::TraverseBreakStmt([[maybe_unused]] clang::BreakStmt* BS) {
 
     return true;
 }
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp

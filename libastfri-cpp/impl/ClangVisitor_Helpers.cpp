@@ -1,9 +1,8 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type) {
     // TODO:
-    // ඞ Fakt toto existuje?
     // {lhs} // {rhs}, {lhs} div {rhs}
     // FloorDivide,
 
@@ -15,8 +14,6 @@ astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind
 
     // {lhs} **= {rhs}
     // ExponentiationAssign,
-
-    // sú tam aj ďalšie srandy, ale to nepodporuje ASTFRI: .* ->*
 
     switch (clang_type) {
     case clang::BinaryOperatorKind::BO_Assign:
@@ -180,4 +177,4 @@ astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind
     }
     return UnaryOpType::Plus;
 }
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp

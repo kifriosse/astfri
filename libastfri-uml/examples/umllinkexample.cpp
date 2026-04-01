@@ -7,10 +7,12 @@ int main(int argc, const char** argv) {
     }
     astfri::TranslationUnit tu;
 
-    if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0) {
-        // std::cout << "chyba pri fill_translation_unit\n";
-        return 1;
-    }
+    astfri::cpp::cpp_in input;
+    tu = input.load_file(argv[1]);
+    // if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0) {
+    //     // std::cout << "chyba pri fill_translation_unit\n";
+    //     return 1;
+    // }
 
     astfri::uml::Config conf;
     astfri::uml::PlantUMLOutputter op;

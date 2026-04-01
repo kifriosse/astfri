@@ -1,6 +1,6 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator* CAO) {
     BinOpExpr* bin_op = nullptr;
 
@@ -113,4 +113,4 @@ bool ClangVisitor::TraverseUnaryOperator(clang::UnaryOperator* UO) {
 
     return true;
 }
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp

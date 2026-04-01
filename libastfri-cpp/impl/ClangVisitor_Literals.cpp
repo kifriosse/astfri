@@ -1,6 +1,6 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp {
+namespace astfri::cpp {
 bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral* IL) {
     // akcia na tomto vrchole
     auto int_literal = this->expr_factory_->mk_int_literal(IL->getValue().getSExtValue());
@@ -60,4 +60,4 @@ bool ClangVisitor::TraverseCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr* N
 
     return true;
 }
-} // namespace astfri::astfri_cpp
+} // namespace astfri::cpp
