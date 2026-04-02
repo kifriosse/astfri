@@ -1,7 +1,6 @@
 #include <libastfri-cpp/inc/ClangManagement.hpp>
 
 #include <iostream>
-#include "libastfri/inc/Stmt.hpp"
 
 namespace astfri::cpp {
 CppASTConsumer::CppASTConsumer(astfri::TranslationUnit& _tu) :

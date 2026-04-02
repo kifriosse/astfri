@@ -5,7 +5,7 @@
 
 #include <external/rapidjson/include/rapidjson/document.h>
 
-#include <libastfri/impl/Concepts.hpp>
+#include <astfri/impl/Concepts.hpp>
 
 namespace astfri::uml {
 struct Config {
