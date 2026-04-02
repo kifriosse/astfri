@@ -46,6 +46,7 @@ struct Visitor {
     virtual void visit(const LambdaCallExpr& expr)        = 0;
     virtual void visit(const LambdaExpr& expr)            = 0;
     virtual void visit(const ThisExpr& expr)              = 0;
+    virtual void visit(const BaseExpr& expr)              = 0;
     virtual void visit(const ConstructorCallExpr& expr)   = 0;
     virtual void visit(const NewExpr& expr)               = 0;
     virtual void visit(const DeleteExpr& expr)            = 0;
@@ -195,6 +196,9 @@ struct VisitorAdapter : Visitor {
     }
 
     void visit(const ThisExpr& /*expr*/) override {
+    }
+
+    void visit(const BaseExpr& /*expr*/) override {
     }
 
     void visit(const ConstructorCallExpr& /*expr*/) override {
@@ -441,6 +445,10 @@ struct ThrowingVisitorAdapter : Visitor {
     }
 
     void visit(const ThisExpr& /*expr*/) override {
+        throw std::logic_error("Not Implemented Yet!");
+    }
+
+    void visit(const BaseExpr& /*expr*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 

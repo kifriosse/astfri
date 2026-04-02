@@ -131,6 +131,10 @@ ThisExpr* ExprFactory::mk_this() {
     return &m_thisExpr;
 }
 
+BaseExpr* ExprFactory::mk_base() {
+    return &m_baseExpr;
+}
+
 ConstructorCallExpr* ExprFactory::mk_constructor_call(Type* type, std::vector<Expr*> args) {
     return details::emplace_get<ConstructorCallExpr>(m_otherExpressions, type, std::move(args));
 }

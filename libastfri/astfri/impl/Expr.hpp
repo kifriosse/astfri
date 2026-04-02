@@ -337,9 +337,14 @@ struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Reference to the current instance e.g., `this` or `self` keywords.
  */
 struct ThisExpr : Expr, details::MkVisitable<ThisExpr> { };
+
+/**
+ * @brief Reference to the base class e.g., `super` or `base` keywords.
+ */
+struct BaseExpr : Expr, details::MkVisitable<BaseExpr> { };
 
 /**
  * @brief Constructor call

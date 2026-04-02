@@ -2,6 +2,7 @@
 #define ASTFRI_IMPL_EXPR_FWD_HPP
 
 namespace astfri {
+
 struct Expr;
 struct IntLiteralExpr;
 struct FloatLiteralExpr;
@@ -22,11 +23,13 @@ struct MethodCallExpr;
 struct LambdaCallExpr;
 struct LambdaExpr;
 struct ThisExpr;
+struct BaseExpr;
 struct ConstructorCallExpr;
 struct NewExpr;
 struct DeleteExpr;
 struct BracketExpr;
 struct UnknownExpr;
+
 } // namespace astfri
 
 #endif

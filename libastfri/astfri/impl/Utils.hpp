@@ -6,10 +6,12 @@
 #include <memory>
 #include <utility>
 
+
 namespace astfri::details {
 
 /**
- * @brief TODO
+ * @brief Map-like container that supports @c find, @c begin, @c end, and @c try_emplace.
+ * Semantics of the mentioned operations must match that of @c std::map operations.
  */
 template<typename Map>
 concept map_like = requires(Map m, typename Map::key_type k) {
@@ -20,7 +22,7 @@ concept map_like = requires(Map m, typename Map::key_type k) {
 };
 
 /**
- * @brief TODO
+ * @brief Satisfied by any container that supports @c push_back operation.
  */
 template<typename Vector>
 concept vector_like = requires(Vector v, typename Vector::value_type x) { v.push_back(x); };
