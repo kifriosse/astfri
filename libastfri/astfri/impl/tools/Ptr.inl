@@ -76,5 +76,19 @@ void ReqPtr<T>::check_pointer_except() const {
 }
 
 
+template<typename T>
+OptPtr<T>::OptPtr() : m_ptr(nullptr), m_isExplicitlyInitialized(false) {
+}
+
+template<typename T>
+OptPtr<T>::OptPtr(NullOptPtr) : m_ptr(nullptr), m_isExplicitlyInitialized(true) {
+}
+
+template<typename T>
+OptPtr<T>::OptPtr(T *ptr) : m_ptr(ptr), m_isExplicitlyInitialized(true) {
+}
+
+
+
 } // namespace astfri
 

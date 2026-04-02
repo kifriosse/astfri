@@ -14,7 +14,7 @@ class ReqPtr {
 public:
     ReqPtr();
 
-    ReqPtr(T *ptr);
+    explicit ReqPtr(T *ptr);
 
     T *operator->();
 
@@ -46,13 +46,56 @@ private:
 };
 
 
+/**
+ * @brief Our null literal type for @c OptPtr type.
+ */
+struct NullOptPtr {
+    enum class DummyTokenType { Token };
+    explicit constexpr NullOptPtr(DummyTokenType) noexcept { }
+};
+
+/**
+ * @brief Our null literal for @c OptPtr type.
+ */
+inline constexpr NullOptPtr null { NullOptPtr::DummyTokenType::Token };
+
+
 template<typename T>
 class OptPtr {
 public:
+    OptPtr();
+
+    explicit OptPtr(NullOptPtr);
+
+    explicit OptPtr(T *ptr);
+
+    T *operator->();
+
+    const T *operator->() const;
+
+    OptPtr &operator=(const OptPtr &other);
+
+    OptPtr &operator=(T *ptr);
+
+    OptPtr &operator=(NullOptPtr);
+
+    T &operator*();
+
+    const T &operator*() const;
+
+    operator T*();
+
+    operator const T*() const;
+
+    bool operator==(const OptPtr &other) const noexcept = default;
+
+    bool operator!=(const OptPtr &other) const noexcept = default;
+
 
 
 private:
     T *m_ptr;
+    bool m_isExplicitlyInitialized;
 };
 
 

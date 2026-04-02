@@ -302,9 +302,12 @@ struct ExprStmt : Stmt, details::MkVisitable<ExprStmt> {
  * @brief TODO
  */
 struct IfStmt : Stmt, details::MkVisitable<IfStmt> {
-    ReqPtr<Expr> cond;
-    ReqPtr<Stmt> iftrue;
-    Stmt* iffalse;
+    Expr *cond;
+    Stmt *iftrue;
+    Stmt *iffalse;
+    // ReqPtr<Expr> cond;
+    // ReqPtr<Stmt> iftrue;
+    // OptPtr<Stmt> iffalse;
 
     IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse);
 };
