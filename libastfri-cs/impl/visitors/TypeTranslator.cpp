@@ -376,8 +376,10 @@ ScopeNode* TypeTranslator::bottom_up_search(
     return nullptr;
 }
 
-ScopeNode* TypeTranslator::search_parents(const std::string_view qualif, const TypeBinding& start)
-    const {
+ScopeNode* TypeTranslator::search_parents(
+    const std::string_view qualif,
+    const TypeBinding& start
+) const {
     ClassDefStmt* current = nullptr;
     if (auto* classDef = as_a<ClassDefStmt>(start.def)) {
         current = classDef;

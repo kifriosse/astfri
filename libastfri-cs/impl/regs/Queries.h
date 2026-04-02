@@ -7,8 +7,8 @@
 
 #include <string_view>
 
-namespace astfri::csharp::maps::queries
-{
+namespace astfri::csharp::maps::queries {
+
 inline static constexpr std::string_view qTopLevelStmts =
     R"(
         (class_declaration) @type_stmt
@@ -34,8 +34,7 @@ inline static constexpr std::string_view qVarDecl =
             (variable_declaration) @decl)
     ])";
 
-inline static constexpr std::string_view qParamModif
-    = "(parameter (modifier)* @modifier)";
+inline static constexpr std::string_view qParamModif = "(parameter (modifier)* @modifier)";
 
 inline static constexpr std::string_view qMethodModif =
     R"([
@@ -52,8 +51,7 @@ inline static constexpr std::string_view qCommentError =
         (ERROR) @error
     )";
 
-inline static constexpr std::string_view qUsingDir
-    = "(using_directive) @directive";
+inline static constexpr std::string_view qUsingDir = "(using_directive) @directive";
 
 } // namespace astfri::csharp::maps::queries
 

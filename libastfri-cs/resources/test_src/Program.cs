@@ -183,6 +183,21 @@ public class Literals
         Object? d = null;
         c = d == null ? 1 : a;
     }
+
+    public void IntVarTest() {
+        int integer = 1;
+        long longInteger = 1L;
+        int hexInteger = 0x5A;
+        long hexLong = 0x8BL;
+        uint unsigned = 1u;
+        ulong unsignedLong = 1ul;
+        ulong longUnsigned = 1Lu;
+        ulong hexUnsignedLong = 0xBAuL;
+        int binInt = 0b001101;
+        uint unsgineBinInt = 0b000110u;
+        long binLong = 0b011001L;
+        ulong usignedBinLong = 0b11101uL;
+    }
 }
 
 public class LoopsStmts {

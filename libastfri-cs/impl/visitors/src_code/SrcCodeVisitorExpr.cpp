@@ -10,45 +10,54 @@
 
 #include <tree_sitter/api.h>
 
-#include <cstring>
+#include <charconv>
 #include <stdexcept>
 #include <string>
 
 namespace astfri::csharp {
 
 Expr* SrcCodeVisitor::visit_int_lit(SrcCodeVisitor* self, const TSNode& node) {
-    std::string intStr = util::extract_text(node, self->src_str());
-    std::erase(intStr, '_');
+    std::string rawStr = util::extract_text(node, self->src_str());
+    std::erase(rawStr, '_');
 
-    const size_t len         = intStr.length();
-    const std::string prefix = intStr.substr(0, std::min<size_t>(2, len));
-    const std::string suffix = intStr.substr(len >= 2 ? len - 2 : 0, std::min<size_t>(2, len));
+    const size_t len = rawStr.length();
+    const std::string_view prefix(rawStr.data(), std::min<size_t>(2, len));
 
-    int base                 = 10;
+    std::string_view sv = rawStr;
+    int base            = 10;
     if (prefix == "0x")
         base = 16;
     else if (prefix == "0b")
         base = 2;
 
-    const util::IntSuffix suffixType = util::get_suffix_type(suffix);
+    if (base != 10)
+        sv.remove_prefix(2);
+
+    const util::IntSuffix suffixType
+        = util::get_suffix_type(sv.substr(len >= 2 ? len - 2 : 0, std::min<size_t>(2, len)));
 
     switch (suffixType) {
     case util::IntSuffix::U:
     case util::IntSuffix::L: {
-        intStr.pop_back();
+        sv.remove_suffix(1);
         break;
     }
     case util::IntSuffix::UL: {
-        intStr.erase(intStr.end() - 2, intStr.end());
+        sv.remove_suffix(2);
         break;
     }
     default:
         break;
     }
 
+    int val         = 0;
+    auto [ptr, err] = std::from_chars(sv.data(), sv.data() + rawStr.size(), val, base);
+    if (err != std::error_code{})
+        return exprFact_.mk_unknown();
+
     if (suffixType == util::IntSuffix::None || suffixType == util::IntSuffix::U) {
         // todo add handeling of unsigned integers
-        return exprFact_.mk_int_literal(std::stoi(intStr, nullptr, base));
+        return exprFact_.mk_int_literal(val);
     }
 
     // todo handeling of long and unsigned long
