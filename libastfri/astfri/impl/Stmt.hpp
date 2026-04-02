@@ -1,6 +1,7 @@
 #ifndef ASTFRI_IMPL_STMT_HPP
 #define ASTFRI_IMPL_STMT_HPP
 
+#include <astfri/impl/tools/Ptr.hpp>
 #include <astfri/impl/Scope.hpp>
 #include <astfri/impl/Utils.hpp>
 #include <astfri/impl/Type.hpp>
@@ -301,8 +302,8 @@ struct ExprStmt : Stmt, details::MkVisitable<ExprStmt> {
  * @brief TODO
  */
 struct IfStmt : Stmt, details::MkVisitable<IfStmt> {
-    Expr* cond;
-    Stmt* iftrue;
+    ReqPtr<Expr> cond;
+    ReqPtr<Stmt> iftrue;
     Stmt* iffalse;
 
     IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse);
