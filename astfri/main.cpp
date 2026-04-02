@@ -92,7 +92,7 @@ int main(int argc, const char** argv)
 
     cxxopts::Options options(
         "astfri",
-        "ASTFRI - CLI interface for library astfri"
+        "ASTFRI - CLI interface for library astfri, version " ASTFRI_VERSION
     );
 
     options.add_options()
@@ -144,13 +144,13 @@ int main(int argc, const char** argv)
     {
         std::cerr << "Unknown input library type: " << input_lib_str
                   << std::endl;
-        exit(EXIT_INPUT_LIB_ERROR);
+        exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
     // input file check
     if (result.count("input-file") == 0)
     {
         std::cerr << "Input file not specified!" << std::endl;
-        exit(EXIT_INPUT_LIB_ERROR);
+        exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
     auto input_file = result["input-file"].as<std::string>();
     // verify that input file exists
@@ -160,7 +160,7 @@ int main(int argc, const char** argv)
         {
             std::cerr << "Input file does not exist: " << input_file
                       << std::endl;
-            exit(EXIT_INPUT_LIB_ERROR);
+            exit(EXIT_ASTFRI_WRAPPER_ERROR);
         }
     }
 
@@ -175,7 +175,7 @@ int main(int argc, const char** argv)
     {
         std::cerr << "Unknown output library type: " << output_lib_str
                   << std::endl;
-        exit(EXIT_OUTPUT_LIB_ERROR);
+        exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
     // output config file
     auto output_config_file = result["output-config-file"].as<std::string>();
@@ -187,7 +187,7 @@ int main(int argc, const char** argv)
         {
             std::cerr << "Output config file does not exist: "
                       << output_config_file << std::endl;
-            exit(EXIT_OUTPUT_LIB_ERROR);
+            exit(EXIT_ASTFRI_WRAPPER_ERROR);
         }
     }
 #pragma endregion ARGS
