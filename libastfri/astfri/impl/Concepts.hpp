@@ -32,10 +32,10 @@ concept IsConfigClass = requires(
 template<typename Lib, typename Cfg, typename JsonNode>
 concept IsInputLibInterface
     = requires(Cfg cfg, std::istream& ist, const std::filesystem::path& path) {
-          IsConfigClass<Cfg, JsonNode>;
-          { load_file(cfg, ist) } -> std::same_as<astfri::TranslationUnit>;
-          { load_file(cfg, path) } -> std::same_as<astfri::TranslationUnit>;
-          { load_project(cfg, path) } -> std::same_as<astfri::TranslationUnit>;
+          requires IsConfigClass<Cfg, JsonNode>;
+          { Lib::load_file(cfg, ist) } -> std::same_as<astfri::TranslationUnit>;
+          { Lib::load_file(cfg, path) } -> std::same_as<astfri::TranslationUnit>;
+          { Lib::load_project(cfg, path) } -> std::same_as<astfri::TranslationUnit>;
       };
 
 /**
@@ -44,9 +44,9 @@ concept IsInputLibInterface
 template<typename Lib, typename Cfg, typename JsonNode>
 concept IsOutputLibInterface
     = requires(Cfg cfg, std::ostream& ost, const astfri::TranslationUnit& root) {
-          IsConfigClass<Cfg, JsonNode>;
-          { process_ast(cfg, root) } -> std::same_as<void>;
-          { process_ast(cfg, root, ost) } -> std::same_as<void>;
+          requires IsConfigClass<Cfg, JsonNode>;
+          { Lib::process_ast(cfg, root) } -> std::same_as<void>;
+          { Lib::process_ast(cfg, root, ost) } -> std::same_as<void>;
       };
 
 } // namespace astfri

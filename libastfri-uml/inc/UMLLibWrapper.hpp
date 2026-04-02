@@ -21,8 +21,8 @@ namespace astfri
 {
     struct uml_out
     {
-        void process_ast(uml::Config cfg, const astfri::TranslationUnit& root);
-        void process_ast(uml::Config cfg, const astfri::TranslationUnit& root, std::ostream& ost);
+        static void process_ast(uml::Config cfg, const astfri::TranslationUnit& root);
+        static void process_ast(uml::Config cfg, const astfri::TranslationUnit& root, std::ostream& ost);
     };
 
     static_assert(IsOutputLibInterface<uml_out, uml::Config, rapidjson::Value>);
