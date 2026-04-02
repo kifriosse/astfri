@@ -143,20 +143,16 @@ ExternalProject_Add(Catch2-external
     -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -G ${CMAKE_GENERATOR}
+    -DCATCH_INSTALL_DOCS=OFF
+    -DCATCH_DEVELOPMENT_BUILD=OFF
   BUILD_BYPRODUCTS
     ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libCatch2d.a
     ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libCatch2Maind.a
   UPDATE_COMMAND ""
 )
 
-set(
-  CATCH2_INCLUDE_DIRS
-    ${EXTERNAL_INSTALL_DIR}/include
-  CACHE PATH "Catch2 include dir"
-)
-
-add_library(Catch2 INTERFACE IMPORTED GLOBAL)
-add_library(Catch2Main INTERFACE IMPORTED GLOBAL)
+add_library(Catch2 STATIC IMPORTED GLOBAL)
+add_library(Catch2Main STATIC IMPORTED GLOBAL)
 
 set_target_properties(Catch2 PROPERTIES
     IMPORTED_LOCATION ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libCatch2d.a
@@ -167,5 +163,7 @@ set_target_properties(Catch2Main PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES ${EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-add_dependencies(Catch2 Catch2-external)
+target_link_libraries(Catch2Main INTERFACE Catch2)
+
 add_dependencies(Catch2Main Catch2-external)
+add_dependencies(Catch2 Catch2-external)

@@ -215,6 +215,7 @@ struct GenericParam : Stmt, details::MkVisitable<GenericParam> {
 };
 
 /**
+ * @deprecated
  * @brief Common base for Class and Interface
  * In the future, it could also be used for union or strong type alias
  */

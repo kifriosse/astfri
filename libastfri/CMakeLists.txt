@@ -10,3 +10,5 @@ target_compile_options(astfri-core PUBLIC
 )
 
 target_include_directories(astfri-core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_subdirectory(tests)

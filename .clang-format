@@ -72,16 +72,20 @@ BasedOnStyle: ''
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex:           '^<libastfri/*'
+  - Regex:           '^<astfri/*'
     Priority:        1
-  - Regex:           '^<tree_sitter/*'
+  - Regex:           '^<libastfri/*'
     Priority:        2
-  - Regex:           '^<rapidjson/*'
+  - Regex:           '^<catch2/*'
     Priority:        3
-  - Regex:           '<.+>'
+  - Regex:           '^<tree_sitter/*'
     Priority:        4
-  - Regex:           '".+"'
+  - Regex:           '^<rapidjson/*'
     Priority:        5
+  - Regex:           '<.+>'
+    Priority:        6
+  - Regex:           '".+"'
+    Priority:        7
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
