@@ -33,7 +33,8 @@ public:
         std::string name,
         Type* type,
         Expr* initializer,
-        AccessModifier access
+        AccessModifier access,
+        Staticity staticity
     );
 
     GlobalVarDefStmt* mk_global_var_def(std::string name, Type* type, Expr* initializer);
@@ -50,11 +51,13 @@ public:
     );
 
     MethodDefStmt* mk_method_def();
+
     MethodDefStmt* mk_method_def(
         UserTypeDefStmt* owner,
         FunctionDefStmt* func,
         AccessModifier access,
-        Virtuality virtuality
+        Virtuality virtuality,
+        Staticity staticity
     );
 
     ConstructorDefStmt* mk_constructor_def();

@@ -11,14 +11,20 @@
 namespace astfri {
 
 /**
- * @brief TODO
+ * @brief Base class for all statements.
  */
 struct Stmt : virtual Visitable {
+    /**
+     * @brief Virtual destructor.
+     * Statements are simple structs with no virtual functions.
+     * Having the virtual destructor add vtable which allows us to use dynamic_cast.
+     * If we move to our own type info later, the destructor may be removed.
+     */
     virtual ~Stmt() = default;
 };
 
 /**
- * @brief Defines access modifier of a class member
+ * @brief Defines access modifier of a class member.
  */
 enum class AccessModifier {
     /**
@@ -43,12 +49,21 @@ enum class AccessModifier {
 };
 
 /**
- * @brief Marks method as virtual or not virtual
+ * @brief Marks method as virtual or not virtual.
  */
 enum class Virtuality {
     NotVirtual,
     Virtual,
     PureVirtual
+};
+// TODO Abstractity?
+
+/**
+ * @brief Marks a member either static or non-static.
+ */
+enum class Staticity {
+    NonStatic,
+    Static
 };
 
 /**
@@ -83,8 +98,14 @@ struct ParamVarDefStmt : VarDefStmt, details::MkVisitable<ParamVarDefStmt> {
  */
 struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt> {
     AccessModifier access;
+    Staticity staticity;
 
-    MemberVarDefStmt(std::string name, Type* type, Expr* initializer, AccessModifier access);
+    MemberVarDefStmt(
+        std::string name,
+        Type* type,
+        Expr* initializer,
+        AccessModifier access,
+        Staticity staticity);
 };
 
 /**
@@ -109,7 +130,7 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt> {
      `-IntLiteralExpr(10)
  * @endcode
  */
-struct DefStmt : Stmt, details::MkVisitable<DefStmt> {
+struct DefStmt : Stmt, details::MkVisitable<DefStmt> { // TODO this needs a better name, this is terrible
     std::vector<VarDefStmt*> defs;
 
     explicit DefStmt(std::vector<VarDefStmt*> defs);
@@ -140,6 +161,7 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt> {
     FunctionDefStmt* func{nullptr};
     AccessModifier access{AccessModifier::Public};
     Virtuality virtuality{Virtuality::NotVirtual};
+    Staticity staticity;
 };
 
 /**

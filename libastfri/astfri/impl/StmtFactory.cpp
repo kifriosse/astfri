@@ -24,15 +24,16 @@ MemberVarDefStmt* StmtFactory::mk_member_var_def(
     std::string name,
     Type* type,
     Expr* initializer,
-    AccessModifier access
+    AccessModifier access,
+    Staticity staticity
 ) {
     return details::emplace_get<MemberVarDefStmt>(
         m_otherStmts,
         std::move(name),
         type,
         initializer,
-        access
-    );
+        access,
+        staticity);
 }
 
 GlobalVarDefStmt* StmtFactory::mk_global_var_def(std::string name, Type* type, Expr* initializer) {
@@ -80,13 +81,15 @@ MethodDefStmt* StmtFactory::mk_method_def(
     UserTypeDefStmt* owner,
     FunctionDefStmt* func,
     AccessModifier access,
-    Virtuality virtuality
+    Virtuality virtuality,
+    Staticity staticity
 ) {
     MethodDefStmt* m = this->mk_method_def();
     m->owner         = owner;
     m->func          = func;
     m->access        = access;
     m->virtuality    = virtuality;
+    m->staticity     = staticity;
     return m;
 }
 

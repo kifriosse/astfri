@@ -564,7 +564,7 @@ astfri::MethodDefStmt* StatementTransformer::transform_method_node(
 
     astfri::FunctionDefStmt* func = this->stmtFactory.mk_function_def(name, params, type, body);
     astfri::MethodDefStmt* method
-        = this->stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual);
+        = this->stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual, astfri::Staticity::NonStatic);
 
     this->methodsByName[name].push_back(method);
 
@@ -628,7 +628,7 @@ astfri::MemberVarDefStmt* StatementTransformer::transform_attribute_node(
         }
     }
 
-    return stmtFactory.mk_member_var_def(name, type, init, access);
+    return stmtFactory.mk_member_var_def(name, type, init, access, Staticity::NonStatic);
 }
 
 astfri::GenericParam* StatementTransformer::transform_tparam_node(

@@ -24,10 +24,12 @@ MemberVarDefStmt::MemberVarDefStmt(
     std::string name,
     Type* type,
     Expr* initializer,
-    AccessModifier access
+    AccessModifier access,
+    Staticity staticity
 ) :
     VarDefStmt(name, type, initializer),
-    access(access) {
+    access(access),
+    staticity(staticity) {
 }
 
 GlobalVarDefStmt::GlobalVarDefStmt(std::string name, Type* type, Expr* initializer) :
