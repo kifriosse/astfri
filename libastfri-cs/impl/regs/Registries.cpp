@@ -4,7 +4,7 @@
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>

@@ -2,7 +2,7 @@
 #include <iostream>
 
 // astfri headers
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 // ASTFRI visitor
 #include <libastfri-text/inc/TextLibManager.hpp>
@@ -19,7 +19,7 @@
 // ASTFRI Java
 #include <libastfri-java/inc/ASTBuilder.hpp>
 
-#include "cxxopts.hpp"
+#include <cxxopts.hpp>
 
 #pragma region DEFINITIONS
 

@@ -66,7 +66,7 @@ add_library(astfri-cpp SHARED
 target_compile_options(astfri-cpp PRIVATE ${ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE})
 
 # Set LLVM include as system to avoid warnings from their code.
-target_include_directories(astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS})
+target_include_directories(astfri-cpp SYSTEM PUBLIC ${LLVM_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
 
 # Link the core module and clang libraries.
 target_link_libraries(astfri-cpp PUBLIC

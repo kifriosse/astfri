@@ -1,7 +1,7 @@
 #ifndef CSHARP_SOURCE_HPP
 #define CSHARP_SOURCE_HPP
 
-#include <libastfri/impl/Scope.hpp>
+#include <astfri/impl/Scope.hpp>
 
 #include <tree_sitter/api.h>
 

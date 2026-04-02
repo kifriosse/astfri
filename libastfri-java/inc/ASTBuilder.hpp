@@ -2,7 +2,7 @@
 #define JAVA_SYNTAX_TREE_BUILDER_HPP
 
 #include <libastfri-java/impl/StatementTransformer.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
+#include <astfri/impl/StmtFactory.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>

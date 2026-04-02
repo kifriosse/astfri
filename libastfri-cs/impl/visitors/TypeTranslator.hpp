@@ -2,7 +2,7 @@
 #define CSHARP_TYPE_TRANSLATOR
 
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 

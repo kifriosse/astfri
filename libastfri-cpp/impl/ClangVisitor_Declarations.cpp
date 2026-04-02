@@ -180,7 +180,8 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD) {
             nullptr
         ),
         this->getAccessModifier(MD),
-        virtuality
+        virtuality,
+        Staticity::NonStatic
     );
     owner->methods.push_back(new_method);
 
@@ -337,7 +338,8 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD) {
         FD->getNameAsString(),
         this->get_astfri_type(FD->getType()),
         nullptr,
-        access
+        access,
+        astfri::Staticity::NonStatic
     );
     ((ClassDefStmt*)this->astfri_location.stmt_)->vars.push_back(new_member);
 

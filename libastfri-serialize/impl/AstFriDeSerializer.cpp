@@ -437,7 +437,7 @@ astfri::MemberVarDefStmt* AstFriDeSerializer::deserialize_member_var_def_stmt(
     astfri::AccessModifier modifier = accessModMapping.find(value["access"].GetString())->second;
 
     return this->statementMaker_
-        .mk_member_var_def(std::move(value["name"].GetString()), type, initializer, modifier);
+        .mk_member_var_def(std::move(value["name"].GetString()), type, initializer, modifier, astfri::Staticity::NonStatic);
 }
 
 astfri::FunctionDefStmt* AstFriDeSerializer::deserialize_function_def_stmt(rapidjson::Value& value
@@ -468,7 +468,8 @@ astfri::MethodDefStmt* AstFriDeSerializer::deserialize_method_def_stmt(
         functDefStmt,
         accessMod,
         strcmp(value["virtual"].GetString(), "yes") == 0 ? astfri::Virtuality::Virtual
-                                                         : astfri::Virtuality::NotVirtual
+                                                         : astfri::Virtuality::NotVirtual,
+        astfri::Staticity::NonStatic
     );
 }
 

@@ -3,7 +3,7 @@
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/util/Utils.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 

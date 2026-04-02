@@ -3,9 +3,7 @@
 
 #include <libastfri-serialize/inc/Data.hpp>
 #include <libastfri-serialize/inc/JsonFormatChecker.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <rapidjson/istreamwrapper.h>
 

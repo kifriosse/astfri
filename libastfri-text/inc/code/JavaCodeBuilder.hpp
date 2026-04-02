@@ -2,7 +2,7 @@
 #define LIBASTFRI_TEXT_JAVA_CODE_BUILDER
 
 #include <libastfri-text/inc/code/AbstractCodeBuilder.hpp>
-#include <libastfri/impl/Scope.hpp>
+#include <astfri/impl/Scope.hpp>
 
 namespace astfri::text {
 class JavaCodeBuilder : public AbstractCodeBuilder {

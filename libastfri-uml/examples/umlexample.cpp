@@ -51,7 +51,8 @@ int main(int argc, char** argv) {
         "nameStr_",
         types.mk_class("std::string", astfri::mk_scope()),
         nullptr,
-        astfri::AccessModifier::Private
+        astfri::AccessModifier::Private,
+        astfri::Staticity::NonStatic
     );
     fieldsBar.push_back(memberBar);
     classBar->vars = fieldsBar;
@@ -63,13 +64,14 @@ int main(int argc, char** argv) {
     std::vector<astfri::MemberVarDefStmt*> fieldsFoo;
     fieldsFoo.push_back(
         statements
-            .mk_member_var_def("number_", types.mk_int(), nullptr, astfri::AccessModifier::Private)
+            .mk_member_var_def("number_", types.mk_int(), nullptr, astfri::AccessModifier::Private, astfri::Staticity::NonStatic)
     );
     fieldsFoo.push_back(statements.mk_member_var_def(
         "bar_",
         types.mk_indirect(types.mk_class("Bar", astfri::mk_scope())),
         nullptr,
-        astfri::AccessModifier::Private
+        astfri::AccessModifier::Private,
+        astfri::Staticity::NonStatic
     ));
     classFoo->vars = fieldsFoo;
 

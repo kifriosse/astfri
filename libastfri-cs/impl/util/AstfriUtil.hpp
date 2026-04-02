@@ -8,7 +8,7 @@
 #define CSHARP_ASTFRI_UTIL_H
 
 #include <libastfri-cs/impl/data/Metadata.hpp>
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 

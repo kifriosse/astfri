@@ -1,8 +1,6 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-#include "libastfri/inc/Expr.hpp"
-
-namespace astfri::cpp {
+namespace astfri::astfri_cpp {
 // visit expression
 bool ClangVisitor::TraverseCXXConstructExpr(clang::CXXConstructExpr* Ctor) {
     // akcia na tomto vrchole
