@@ -5,6 +5,8 @@
 
 #include <external/rapidjson/include/rapidjson/document.h>
 
+#include <libastfri/impl/Concepts.hpp>
+
 namespace astfri::uml {
 struct Config {
     // type var, var : type
@@ -38,6 +40,11 @@ struct Config {
     bool parse_json(const char* path);
     void use_default_values();
 
+    static Config createFromJson(const rapidjson::Value& node);
+    static Config createFromJson(const std::filesystem::path& path);
+    static Config createDefault();
+    static Config createFromArgs(int argc, char* argv[]);
+
 private:
     bool parse_file_info(const rapidjson::Value& val);
     bool parse_types_info(const rapidjson::Value& val);
@@ -47,6 +54,8 @@ private:
     bool parse_destructor_info(const rapidjson::Value& val);
     bool parse_namespace_info(const rapidjson::Value& val);
 };
+
+static_assert(IsConfigClass<Config, rapidjson::Value>);
 
 } // namespace astfri::uml
 
