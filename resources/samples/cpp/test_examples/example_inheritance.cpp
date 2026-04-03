@@ -60,11 +60,12 @@ void Audi::ride() {
 class Chrysler : public Auto {
 private:
     int time_;
+    static int count_;
 
 public:
     Chrysler(float speed) :
         Auto(25000, speed) {
-        this->time_ = 500;
+        Chrysler::count_++;
     };
 
     void ride() override {

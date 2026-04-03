@@ -1,4 +1,6 @@
 #include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
+#include <clang/Basic/Specifiers.h>
+#include "astfri/impl/Stmt.hpp"
 
 namespace astfri::cpp {
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND) {
@@ -178,6 +180,12 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD) {
         virtuality = Virtuality::Virtual;
     }
 
+    // zistenie statickosti
+    auto staticity = Staticity::NonStatic;
+    if (MD->isStatic()) {
+        staticity = Staticity::Static;
+    }
+
     auto new_method = this->stmt_factory_->mk_method_def(
         owner,
         this->stmt_factory_->mk_function_def(
@@ -188,7 +196,7 @@ bool ClangVisitor::TraverseCXXMethodDecl(clang::CXXMethodDecl* MD) {
         ),
         this->getAccessModifier(MD),
         virtuality,
-        Staticity::NonStatic
+        staticity
     );
     owner->methods.push_back(new_method);
 
@@ -252,10 +260,39 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD) {
     AstfriASTLocation astfri_temp = this->astfri_location;
     ClangASTLocation clang_temp   = this->clang_location;
 
-    // prepisanie AST location
+    
+    // prejdenie statickych atributov triedy
+    // potrebujem nastavit aby sa ulozili do docasneho def stmt a potom ich odtial vyberiem, clang to tak modeluje
+    this->clang_location.decl_  = RD;
+    // prejdenie vsetkych decls
+    for(auto decl : RD->decls()) {
+        if(auto varDecl = llvm::dyn_cast<clang::VarDecl>(decl)) {
+            // ak nie je staticka, tak preskocim
+            if (!varDecl->isStaticDataMember()) {
+                continue;
+            }
+            // temp def stmt, do ktoreho sa naplni staticky field
+            this->astfri_location.stmt_ = this->stmt_factory_->mk_def();
+            TraverseDecl(varDecl); // clang ich modeluje ako varDecl
+            astfri::AccessModifier access = this->getAccessModifier(varDecl);
+            // vytvorenie statickeho fieldu a naplnenie z temp def stmt
+            // TODO: toto by mohlo byt v cykle, ak je ich viac v jednom def stmt -> static int first, second;
+            // zatial ratam s tym ze je len jeden
+            MemberVarDefStmt* newStaticField = this->stmt_factory_->mk_member_var_def(
+                ((DefStmt*)this->astfri_location.stmt_)->defs[0]->name,
+                ((DefStmt*)this->astfri_location.stmt_)->defs[0]->type,
+                ((DefStmt*)this->astfri_location.stmt_)->defs[0]->initializer,
+                access,
+                Staticity::Static
+            );
+            new_class->vars.push_back(newStaticField);
+        }
+   }
+
+    // prepisanie AST location na triedu
     this->astfri_location.stmt_ = new_class;
     this->clang_location.decl_  = RD;
-
+    
     for (auto field : RD->fields()) {
         TraverseDecl(field);
     }
@@ -287,7 +324,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD) {
 
     VarDefStmt* new_var = nullptr;
     if (this->astfri_location.stmt_) {
-        // premenna v compounde
+        // premenna v defStatemente
         new_var = this->stmt_factory_->mk_local_var_def(VD->getNameAsString(), type, nullptr);
         ((DefStmt*)this->astfri_location.stmt_)->defs.push_back(new_var);
     }
@@ -341,12 +378,14 @@ bool ClangVisitor::TraverseFieldDecl(clang::FieldDecl* FD) {
     // akcia na tomto node
     // vytvorenie premennej triedy
     astfri::AccessModifier access = this->getAccessModifier(FD);
+    auto staticity = Staticity::NonStatic;
+
     auto new_member               = this->stmt_factory_->mk_member_var_def(
         FD->getNameAsString(),
         this->get_astfri_type(FD->getType()),
         nullptr,
         access,
-        astfri::Staticity::NonStatic
+        staticity
     );
     ((ClassDefStmt*)this->astfri_location.stmt_)->vars.push_back(new_member);
 
