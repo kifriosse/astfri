@@ -52,14 +52,14 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-fno-exceptions")
 # Finally, add our library and set its properties.
 add_library(astfri-cpp SHARED
     ClangManagement.cpp
-    ClangVisitor.cpp
-    ClangVisitor_Types.cpp
-    ClangVisitor_Declarations.cpp
-    ClangVisitor_Statements.cpp
-    ClangVisitor_Expressions.cpp
-    ClangVisitor_Helpers.cpp
-    ClangVisitor_Literals.cpp
-    ClangVisitor_Operators.cpp
+    visitor-methods/ClangVisitor.cpp
+    visitor-methods/Types.cpp
+    visitor-methods/Declarations.cpp
+    visitor-methods/Statements.cpp
+    visitor-methods/Expressions.cpp
+    visitor-methods/Helpers.cpp
+    visitor-methods/Literals.cpp
+    visitor-methods/Operators.cpp
 )
 
 # Private compile options.

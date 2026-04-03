@@ -1,4 +1,4 @@
-#include <astfri-cpp/impl/ClangVisitor.hpp>
+#include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 
 #include <iostream>
 

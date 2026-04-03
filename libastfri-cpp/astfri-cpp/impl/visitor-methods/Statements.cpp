@@ -1,4 +1,4 @@
-#include <astfri-cpp/impl/ClangVisitor.hpp>
+#include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 
 namespace astfri::cpp {
 bool ClangVisitor::TraverseDeclStmt(clang::DeclStmt* DS) {

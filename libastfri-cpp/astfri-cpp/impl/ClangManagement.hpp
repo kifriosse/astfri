@@ -4,7 +4,7 @@
 // std
 #include <filesystem>
 // astfri
-#include <astfri-cpp/impl/ClangVisitor.hpp>
+#include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 #include <astfri/Astfri.hpp>
 // clang
 #include <clang/AST/ASTConsumer.h>
