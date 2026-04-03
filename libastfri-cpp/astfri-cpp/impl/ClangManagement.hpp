@@ -4,7 +4,7 @@
 // std
 #include <filesystem>
 // astfri
-#include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include <astfri-cpp/impl/ClangVisitor.hpp>
 #include <astfri/Astfri.hpp>
 // clang
 #include <clang/AST/ASTConsumer.h>
@@ -50,15 +50,21 @@ private:
     astfri::TranslationUnit& tu;
 };
 
-
-struct cpp_in
-{
-    astfri::TranslationUnit load_file(const std::filesystem::path& file_path); //const cpp::Config &cfg
-    astfri::TranslationUnit load_file(std::istream& is); //const cpp::Config &cfg
-    astfri::TranslationUnit load_project(std::filesystem::path& path); //const cpp::Config &cfg
+// do buducna sa moze nastavit, co je treba z ast prejst, zatial prazdne
+class Config {
 };
 
-// static_assert(astfri::IsInputLibInterface<cpp_in, cpp::Config>, "");
-
 } // namespace astfri::cpp
+
+namespace astfri {
+// musi byt v namespace astfri, preto je von z astfri::cpp
+struct cpp_in
+{
+    static astfri::TranslationUnit load_file(const std::filesystem::path& file_path, const astfri::cpp::Config &cfg);
+    static astfri::TranslationUnit load_file(std::istream& is, const astfri::cpp::Config &cfg);
+    static astfri::TranslationUnit load_project(std::filesystem::path& path, const astfri::cpp::Config &cfg);
+};
+// static_assert(astfri::IsInputLibInterface<cpp_in, cpp::Config>, "");
+} // namespace astfri
+
 #endif // CLANGMANAGEMENT_HPP

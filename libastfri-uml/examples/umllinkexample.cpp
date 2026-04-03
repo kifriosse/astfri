@@ -1,4 +1,4 @@
-#include <libastfri-cpp/inc/ClangManagement.hpp>
+#include <astfri-cpp/AstfriCpp.hpp>
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
 int main(int argc, const char** argv) {
@@ -7,8 +7,7 @@ int main(int argc, const char** argv) {
     }
     astfri::TranslationUnit tu;
 
-    astfri::cpp::cpp_in input;
-    tu = input.load_file(argv[1]);
+    tu = astfri::cpp_in::load_file(argv[1], astfri::cpp::Config());
     // if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0) {
     //     // std::cout << "chyba pri fill_translation_unit\n";
     //     return 1;

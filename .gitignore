@@ -3,3 +3,4 @@ build/
 external/bin/
 .clangd
 .vscode/settings.json
+.vscode/launch.json

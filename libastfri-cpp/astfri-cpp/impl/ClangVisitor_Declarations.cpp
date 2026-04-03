@@ -1,4 +1,4 @@
-#include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include <astfri-cpp/impl/ClangVisitor.hpp>
 
 namespace astfri::cpp {
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND) {
@@ -9,7 +9,7 @@ bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND) {
 
 bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor) {
     // aby sa viac krat nevytvaral
-    if (! Ctor->isFirstDecl()) {
+    if (! Ctor->hasBody()) {
         return true;
     }
 
@@ -48,10 +48,17 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor) {
                     TraverseStmt(arg);
                     args.push_back(this->astfri_location.expr_);
                 }
-                auto base_init = this->stmt_factory_->mk_base_initializer(
-                    init->getBaseClass()->getAsCXXRecordDecl()->getNameAsString(),
-                    args
-                );
+
+                // treba ziskat nazov base triedy, podla neho sa najde typ
+                std::string base_class_name;
+                const clang::Type* clang_type = init->getBaseClass();
+                if (clang_type) {
+                    base_class_name = clang::QualType(clang_type, 0).getAsString();
+                }
+                ClassType* type = this->get_existing_class(base_class_name)->type;
+
+                // vytvorenie astfri vrchola base initializer, ked uz mam vsetko
+                auto base_init = this->stmt_factory_->mk_base_initializer(type, args);
                 new_ctor->baseInit.push_back(base_init);
                 continue;
             }
@@ -216,21 +223,21 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD) {
     }
 
     // akcia na vrchole
-    // vytvorí sa scope
-    std::vector<std::basic_string<char>> scope = {};
+    // vytvorí sa scope (linked list, do ktoreho ukladam na zaciatok,
+    // aby bol scope zoradeny od vseobecnych namespaceov prcvych)
+    std::list<std::string> linked_scope = {};
     clang::DeclContext* context    = RD->getDeclContext();
     while (context) {
         if (auto named = llvm::dyn_cast<clang::NamedDecl>(context)) {
-            scope.push_back(named->getNameAsString());
+            linked_scope.push_front(named->getNameAsString());
         }
         context = context->getParent();
     }
-    scope = {scope.rbegin(), scope.rend()};
-
+    
     // vytvorenie triedy
     auto new_class = this->stmt_factory_->mk_class_def(
         RD->getNameAsString(),
-        {scope}
+        {{linked_scope.begin(), linked_scope.end()}}
     );
     this->tu_->classes.push_back(new_class);
 

@@ -1,0 +1,109 @@
+   1.   function main() -> returns int
+   2.   {
+   3.       define Chrysler chr = call constructor INVALID TYPE(130.128006f)
+   4.       define Audi↑ au = new INVALID TYPE(50000)
+   5.       call chr.ride()
+   6.       call au.ride()
+   7.       delete au
+   8.       return 0
+   9.   }
+  10.
+  11.   class Auto
+  12.   {
+  13.       protected attributes
+  14.           define int cost_
+  15.           define float speed_
+  16.       public constructors
+  17.           Auto(int cost, float speed)
+  18.       public methods
+  19.           is virtual -> ride() -> returns void
+  20.       private methods
+  21.           is_good() -> returns bool
+  22.       }
+  23.
+  24.       constructor Auto::Auto(int cost, float speed)
+  25.       {
+  26.           this.cost_ = cost
+  27.           this.speed_ = speed
+  28.       }
+  29.
+  30.       method ::is_good() -> returns bool
+  31.       {
+  32.           return true
+  33.       }
+  34.
+  35.       method ::ride() -> returns void
+  36.       {
+  37.           define int limit = 10
+  38.           for (define int i = 0; i < limit; i++) repeat
+  39.           {
+  40.               limit++
+  41.           }
+  42.       }
+  43.
+  44.
+  45.       class Audi
+  46.        -> extends TEMPORARY SOLUTION
+  47.       {
+  48.           public constructors
+  49.               Audi(int cost)
+  50.           public methods
+  51.               is virtual -> ride() -> returns void
+  52.           private methods
+  53.               nieco_private_void() -> returns int
+  54.           }
+  55.
+  56.           constructor Audi::Audi(int cost)
+  57.            -> call constructor Auto(cost, 200.639999f)
+  58.           {
+  59.               this.cost_ = this.cost_ >> 2
+  60.               define int nieco = 0
+  61.           }
+  62.
+  63.           method ::nieco_private_void() -> returns int
+  64.           {
+  65.               return 5
+  66.           }
+  67.
+  68.           method ::ride() -> returns void
+  69.           {
+  70.               define int time = 300
+  71.               for (define int i = 0; i < time; i++) repeat
+  72.               {
+  73.                   time--
+  74.                   time++
+  75.               }
+  76.           }
+  77.
+  78.
+  79.           class Chrysler
+  80.            -> extends TEMPORARY SOLUTION
+  81.           {
+  82.               private attributes
+  83.                   define int time_
+  84.               public constructors
+  85.                   Chrysler(float speed)
+  86.               public methods
+  87.                   is virtual -> ride() -> returns void
+  88.                   return_intptr() -> returns int↑
+  89.               }
+  90.
+  91.               constructor Chrysler::Chrysler(float speed)
+  92.                -> call constructor Auto(25000, speed)
+  93.               {
+  94.                   this.time_ = 500
+  95.               }
+  96.
+  97.               method ::ride() -> returns void
+  98.               {
+  99.                   while (this.time_ != 0) repeat
+ 100.                   {
+ 101.                       this.time_--
+ 102.                   }
+ 103.               }
+ 104.
+ 105.               method ::return_intptr() -> returns int↑
+ 106.               {
+ 107.                   return NULL
+ 108.               }
+ 109.

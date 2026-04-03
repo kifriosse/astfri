@@ -1,4 +1,4 @@
-#include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include <astfri-cpp/impl/ClangVisitor.hpp>
 
 namespace astfri::cpp {
 astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type) {

@@ -1,5 +1,13 @@
 TODO
 
+## How to load a file and create Translation Unit
+```sh
+#include <astfri-cpp/AstfriCpp.hpp>
+```
+```sh
+astfri::TranslationUnit tu = astfri::cpp_in::load_file(argv[1], astfri::cpp::Config());
+```
+
 ## Dependencies
 ### LLVM and clang
 Versions 15 available in Ubuntu 22 and version 19 available in Void Linux both seem to work.

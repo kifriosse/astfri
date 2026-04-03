@@ -1,7 +1,9 @@
-#include <libastfri-cpp/inc/ClangManagement.hpp>
+#include <astfri-cpp/impl/ClangManagement.hpp>
 
 #include <iostream>
 
+
+#pragma region LLVM_TRAVERSAL_STUFF
 namespace astfri::cpp {
 CppASTConsumer::CppASTConsumer(astfri::TranslationUnit& _tu) :
     Visitor(_tu, nullptr) {
@@ -41,11 +43,16 @@ CppFrontendActionFactory::CppFrontendActionFactory(astfri::TranslationUnit& _tu)
 std::unique_ptr<clang::FrontendAction> CppFrontendActionFactory::create() {
     return std::make_unique<CppFrontendAction>(tu);
 }
+} // namespace astfri::cpp
+#pragma endregion
 
+#pragma region CPP_IN
+namespace astfri {
 /**
     Funkcia, ktorá naplní translation zo zdrojáku na disku, potrebuje cestu k súboru
- */
-astfri::TranslationUnit cpp_in::load_file(const std::filesystem::path& file_path) {
+    */
+astfri::TranslationUnit cpp_in::load_file(const std::filesystem::path& file_path, const cpp::Config& cfg) {
+    (void)cfg;
     astfri::TranslationUnit tu;
     // kompilacne argumenty
     std::vector<std::string> compilations = {}; // {"-nostdinc", "-nostdinc++"};
@@ -53,12 +60,13 @@ astfri::TranslationUnit cpp_in::load_file(const std::filesystem::path& file_path
     clang::tooling::FixedCompilationDatabase Compilations(".", compilations);
     // spustenie ClangTool
     clang::tooling::ClangTool Tool(Compilations, {file_path});
-    Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+    Tool.run(std::make_unique<cpp::CppFrontendActionFactory>(tu).get());
     return tu;
 }
 
 // Funkcia posiela virtuálny súbor Clang-u, ktorý sa načíta do stringu
-astfri::TranslationUnit cpp_in::load_file(std::istream& is) {
+astfri::TranslationUnit cpp_in::load_file(std::istream& is, const cpp::Config& cfg) {
+    (void)cfg;
     astfri::TranslationUnit tu; 
     // Načítanie súboru do stringu, toto by sa mohlo optimalizovať tak,
     // aby sa dopredu zistila veľkosť zdrojáku a rovno sa pripravilo
@@ -76,14 +84,17 @@ astfri::TranslationUnit cpp_in::load_file(std::istream& is) {
     // Toto zabezpečí, že Clang nebude hľadať súbor na disku.
     Tool.mapVirtualFile(virtual_file_name, content);
 
-    Tool.run(std::make_unique<CppFrontendActionFactory>(tu).get());
+    Tool.run(std::make_unique<cpp::CppFrontendActionFactory>(tu).get());
     return tu;
 }
 
-astfri::TranslationUnit cpp_in::load_project(std::filesystem::path& path) {
+astfri::TranslationUnit cpp_in::load_project(std::filesystem::path& path, const cpp::Config& cfg) {
     // not implemented yet
     (void)path;
+    (void)cfg;
+    
     return astfri::TranslationUnit();
 }
 
-} // namespace astfri::cpp
+}
+#pragma endregion

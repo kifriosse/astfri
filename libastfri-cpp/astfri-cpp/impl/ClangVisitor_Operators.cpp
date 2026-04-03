@@ -1,4 +1,4 @@
-#include <libastfri-cpp/inc/ClangVisitor.hpp>
+#include <astfri-cpp/impl/ClangVisitor.hpp>
 
 namespace astfri::cpp {
 bool ClangVisitor::TraverseCompoundAssignOperator(clang::CompoundAssignOperator* CAO) {
