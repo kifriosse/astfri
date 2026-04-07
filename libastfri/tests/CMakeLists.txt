@@ -5,6 +5,8 @@ target_sources(astfri-core-tests PRIVATE
   ExprFactoryTest.cpp
   StmtFactoryTest.cpp
   TypeFactoryTest.cpp
+  OptPtrTest.cpp
+  ReqPtrTest.cpp
 )
 
 target_link_libraries(astfri-core-tests PRIVATE astfri-core Catch2)

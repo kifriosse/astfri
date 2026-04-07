@@ -1,7 +1,8 @@
 #ifndef ASTFRI_IMPL_STMT_HPP
 #define ASTFRI_IMPL_STMT_HPP
 
-#include <astfri/impl/tools/Ptr.hpp>
+#include <astfri/impl/tools/ReqPtr.hpp>
+#include <astfri/impl/tools/OptPtr.hpp>
 #include <astfri/impl/Scope.hpp>
 #include <astfri/impl/Utils.hpp>
 #include <astfri/impl/Type.hpp>
