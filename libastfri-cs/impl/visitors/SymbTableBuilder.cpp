@@ -181,7 +181,7 @@ void SymbTableBuilder::visit_memb_var(SymbTableBuilder* self, const TSNode& node
             type,
             nullptr,
             modifs.get_access_mod().value_or(AccessModifier::Private),
-            Staticity::NonStatic
+            modifs.is_static()
         );
 
         varDefs.push_back(varDef);
@@ -239,7 +239,7 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
         ),
         modifs.get_access_mod().value_or(AccessModifier::Internal),
         modifs.get_virtuality(),
-        Staticity::NonStatic
+        modifs.is_static()
     );
     MethodMetadata methodMetadata{
         .params    = std::move(paramsMeta),

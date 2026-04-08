@@ -116,6 +116,12 @@ public:
      * isn't reference type, original type is returned
      */
     [[nodiscard]] Type* get_indirection_type(Type* type) const;
+
+    /**
+     * @brief Get information if modifiers objekt contains static modifier or not
+     * @return \c Staticity::Static if modifiers contain static else \c Staticity::NonStatic
+     */
+    [[nodiscard]] Staticity is_static() const;
 };
 
 } // namespace astfri::csharp

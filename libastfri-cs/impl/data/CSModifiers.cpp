@@ -109,4 +109,8 @@ Type* CSModifiers::get_indirection_type(Type* type) const {
     return type;
 }
 
+Staticity CSModifiers::is_static() const {
+    return has(CSModifier::Static) ? Staticity::Static : Staticity::NonStatic;
+}
+
 } // namespace astfri::csharp
