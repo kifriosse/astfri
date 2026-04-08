@@ -15,14 +15,14 @@
 namespace astfri::csharp {
 
 Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node) {
-    self->semanticContext_.enter_scope();
+    self->semContext_.enter_scope();
     auto discoverFunc = [self](const TSNode& current) -> void {
         using enum NodeType;
         if (! ts_node_is_named(current)
             || ts_node_symbol(current) != MapManager::get_symbol(LocalFuncDecl))
             return;
 
-        self->semanticContext_.reg_local_func(
+        self->semContext_.reg_local_func(
             util::make_func_metadata(current, self->src_str(), self->typeTrs_)
         );
     };
@@ -38,7 +38,7 @@ Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node) {
     };
     util::for_each_child_node(node, processBody);
 
-    self->semanticContext_.leave_scope();
+    self->semContext_.leave_scope();
 
     return stmtFact_.mk_compound(std::move(stmts));
 }
@@ -46,7 +46,7 @@ Stmt* SrcCodeVisitor::visit_block(SrcCodeVisitor* self, const TSNode& node) {
 Stmt* SrcCodeVisitor::visit_arrow_body(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nBody     = ts_node_named_child(node, 0);
     const ExprMapper hBody = MapManager::get_expr_mapper(nBody);
-    Type* returnType       = self->semanticContext_.current_return_type();
+    Type* returnType       = self->semContext_.current_return_type();
     Expr* expr             = hBody(self, nBody);
     Stmt* body             = nullptr;
 
@@ -67,7 +67,7 @@ Stmt* SrcCodeVisitor::visit_do_while(SrcCodeVisitor* self, const TSNode& node) {
 }
 
 Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node) {
-    self->semanticContext_.enter_scope();
+    self->semContext_.enter_scope();
     const TSNode nInit  = util::child_by_field_name(node, "initializer");
     const TSNode nCond  = util::child_by_field_name(node, "condition");
     const TSNode nStep  = util::child_by_field_name(node, "update");
@@ -104,12 +104,12 @@ Stmt* SrcCodeVisitor::visit_for_loop(SrcCodeVisitor* self, const TSNode& node) {
 
     const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
     Stmt* body             = hBody(self, nBody);
-    self->semanticContext_.leave_scope();
+    self->semContext_.leave_scope();
     return stmtFact_.mk_for(init, cond, step, body);
 }
 
 Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node) {
-    self->semanticContext_.enter_scope();
+    self->semContext_.enter_scope();
     const TSNode nType  = util::child_by_field_name(node, "type");
     const TSNode hLeft  = util::child_by_field_name(node, "left");
     const TSNode nRight = util::child_by_field_name(node, "right");
@@ -129,10 +129,10 @@ Stmt* SrcCodeVisitor::visit_for_each(SrcCodeVisitor* self, const TSNode& node) {
     const TypeMapper th     = MapManager::get_type_mapper(nType);
     Type* type              = th(&self->typeTrs_, nType);
     LocalVarDefStmt* left   = stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
-    self->semanticContext_.reg_local_var(left);
+    self->semContext_.reg_local_var(left);
     Expr* right = hRight(self, nRight);
     Stmt* body  = hBody(self, nBody);
-    self->semanticContext_.leave_scope();
+    self->semContext_.leave_scope();
     return stmtFact_.mk_for_each(left, right, body);
 }
 
@@ -203,13 +203,13 @@ Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node) {
 
     util::for_each_child_node(node, process);
 
-    self->semanticContext_.leave_scope();
+    self->semContext_.leave_scope();
 
     return stmtFact_.mk_try(hBody(self, nBody), finally, std::move(catchStmts));
 }
 
 Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node) {
-    self->semanticContext_.enter_scope();
+    self->semContext_.enter_scope();
 
     LocalVarDefStmt* catchVar = nullptr;
     Stmt* body                = nullptr;
@@ -218,7 +218,7 @@ Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node) {
         Stmt* currentStmt         = hCurrent(self, n_current);
         if (const auto var = as_a<LocalVarDefStmt>(currentStmt)) {
             catchVar = var;
-            self->semanticContext_.reg_local_var(catchVar);
+            self->semContext_.reg_local_var(catchVar);
         }
         else if (is_a<CompoundStmt>(currentStmt)) {
             body = currentStmt;
@@ -226,7 +226,7 @@ Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node) {
     };
     util::for_each_child_node(node, process);
 
-    self->semanticContext_.leave_scope();
+    self->semContext_.leave_scope();
     return stmtFact_.mk_catch(catchVar, body);
 }
 

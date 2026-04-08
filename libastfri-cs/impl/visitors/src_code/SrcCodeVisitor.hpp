@@ -25,7 +25,7 @@ private:
     static TypeFactory& typeFact_;
 
     TypeTranslator typeTrs_;
-    SemanticContext& semanticContext_;
+    SemanticContext& semContext_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
@@ -58,6 +58,7 @@ private:
     static Expr* visit_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_null_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_this_expr(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_base_expr(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_verbatim_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_raw_str_lit(SrcCodeVisitor* self, const TSNode& node);
     static Expr* visit_interpolated_str_lit(SrcCodeVisitor* self,

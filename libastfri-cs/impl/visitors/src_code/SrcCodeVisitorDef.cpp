@@ -24,7 +24,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
     TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
     auto* classDef              = as_a<ClassDefStmt>(tb->def);
 
-    self->semanticContext_.enter_type(tb);
+    self->semContext_.enter_type(tb);
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
     // handling of base class and interface implementations
@@ -101,7 +101,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
     };
     util::for_each_child_node(nClassBody, processMembs);
 
-    self->semanticContext_.leave_type();
+    self->semContext_.leave_type();
     return classDef;
 }
 
@@ -112,7 +112,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
     auto* intfDef              = as_a<InterfaceDefStmt>(tb->def);
-    self->semanticContext_.enter_type(tb);
+    self->semContext_.enter_type(tb);
 
     // handling of interface implementations
     auto processBaseList = [&](const TSNode& current) -> void {
@@ -163,7 +163,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
     };
     util::for_each_child_node(nIntfBody, processMembs);
 
-    self->semanticContext_.leave_type();
+    self->semContext_.leave_type();
     return intfDef;
 }
 
@@ -189,16 +189,16 @@ Stmt* SrcCodeVisitor::visit_param_def(SrcCodeVisitor* self, const TSNode& node) 
         const ExprMapper hInit = MapManager::get_expr_mapper(nInit);
         param->initializer     = hInit(self, nInit);
     }
-    self->semanticContext_.reg_param(param);
+    self->semContext_.reg_param(param);
     return param;
 }
 
 Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node) {
-    self->semanticContext_.enter_scope();
-    self->semanticContext_.reg_return(typeFact_.mk_void());
+    self->semContext_.enter_scope();
+    self->semContext_.reg_return(typeFact_.mk_void());
     ConstructorDefStmt* constrDef = stmtFact_.mk_constructor_def();
 
-    const auto currentType        = self->semanticContext_.current_type();
+    const auto currentType        = self->semContext_.current_type();
     if (! currentType)
         return stmtFact_.mk_uknown();
     // throw std::logic_error("Owner type not found");
@@ -232,8 +232,8 @@ Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node)
             constrDef->selfInitializers.push_back(selfInit);
     }
 
-    self->semanticContext_.leave_scope();
-    self->semanticContext_.unregister_return_type();
+    self->semContext_.leave_scope();
+    self->semContext_.unregister_return_type();
     return constrDef;
 }
 
@@ -248,7 +248,7 @@ Stmt* SrcCodeVisitor::visit_constr_init(SrcCodeVisitor* self, const TSNode& node
     if (thisIt != bracketIt)
         return stmtFact_.mk_self_initializer(std::move(args));
 
-    const auto currentType = self->semanticContext_.current_type();
+    const auto currentType = self->semContext_.current_type();
     if (! currentType)
         return stmtFact_.mk_uknown();
     // throw std::logic_error("Owner type not found");
@@ -269,11 +269,11 @@ Stmt* SrcCodeVisitor::visit_constr_init(SrcCodeVisitor* self, const TSNode& node
 }
 
 Stmt* SrcCodeVisitor::visit_destr_def(SrcCodeVisitor* self, const TSNode& node) {
-    self->semanticContext_.reg_return(typeFact_.mk_void());
+    self->semContext_.reg_return(typeFact_.mk_void());
     const TSNode nBody     = util::child_by_field_name(node, "body");
     const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
     Stmt* body             = hBody(self, nBody);
-    const auto currentType = self->semanticContext_.current_type();
+    const auto currentType = self->semContext_.current_type();
 
     if (! currentType)
         // throw std::logic_error("Owner type not found");
@@ -284,12 +284,12 @@ Stmt* SrcCodeVisitor::visit_destr_def(SrcCodeVisitor* self, const TSNode& node) 
         // type");
         return stmtFact_.mk_uknown();
 
-    self->semanticContext_.unregister_return_type();
+    self->semContext_.unregister_return_type();
     return stmtFact_.mk_destructor_def(owner, as_a<CompoundStmt>(body));
 }
 
 Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node) {
-    const auto currentType = self->semanticContext_.current_type();
+    const auto currentType = self->semContext_.current_type();
     if (! currentType)
         return stmtFact_.mk_uknown();
     // throw std::logic_error("Owner type not found");
@@ -308,20 +308,20 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
     };
 
     const MethodMetadata* methodMeta
-        = self->semanticContext_.find_method(methodId, currentType->def);
+        = self->semContext_.find_method(methodId, currentType->def);
 
     // if method could be resolved
     if (methodMeta && methodMeta->methodDef) {
         auto& methodDef = methodMeta->methodDef;
-        self->semanticContext_.enter_scope();
-        self->semanticContext_.reg_return(methodDef->func->retType);
+        self->semContext_.enter_scope();
+        self->semContext_.reg_return(methodDef->func->retType);
 
         for (auto& [paramDef, nParam, nInit] : methodMeta->params) {
             if (! ts_node_is_null(nInit)) {
                 ExprMapper hInit      = MapManager::get_expr_mapper(nInit);
                 paramDef->initializer = hInit(self, nInit);
             }
-            self->semanticContext_.reg_param(paramDef);
+            self->semContext_.reg_param(paramDef);
             // util::print_child_nodes_types(param_node, self->get_src_code());
         }
 
@@ -331,7 +331,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
             methodDef->func->body  = as_a<CompoundStmt>(hBody(self, nBody));
         }
 
-        self->semanticContext_.leave_scope();
+        self->semContext_.leave_scope();
 
         return methodDef;
     }
@@ -347,7 +347,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
 Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nName           = util::child_by_field_name(node, "name");
     const std::string name       = util::extract_text(nName, self->src_str());
-    const FuncMetadata* funcMeta = self->semanticContext_.find_func(name);
+    const FuncMetadata* funcMeta = self->semContext_.find_func(name);
     if (! funcMeta)
         return stmtFact_.mk_uknown();
     // throw std::logic_error("Local function \'" + name + "\' not found");
@@ -355,22 +355,22 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node) 
     if (! funcMeta->funcDef)
         return self->make_func_stmt(node, false);
 
-    self->semanticContext_.enter_scope();
-    self->semanticContext_.reg_return(funcMeta->funcDef->retType);
+    self->semContext_.enter_scope();
+    self->semContext_.reg_return(funcMeta->funcDef->retType);
     for (const auto& paramMeta : funcMeta->params) {
         const TSNode nInit = paramMeta.nInit;
         if (! ts_node_is_null(nInit)) {
             ExprMapper hInit                = MapManager::get_expr_mapper(nInit);
             paramMeta.paramDef->initializer = hInit(self, nInit);
         }
-        self->semanticContext_.reg_param(paramMeta.paramDef);
+        self->semContext_.reg_param(paramMeta.paramDef);
     }
 
     const TSNode nBody      = util::child_by_field_name(node, "body");
     const StmtMapper hBody  = MapManager::get_stmt_mapper(nBody);
     funcMeta->funcDef->body = as_a<CompoundStmt>(hBody(self, nBody));
-    self->semanticContext_.leave_scope();
-    self->semanticContext_.unregister_return_type();
+    self->semContext_.leave_scope();
+    self->semContext_.unregister_return_type();
     return funcMeta->funcDef;
 }
 

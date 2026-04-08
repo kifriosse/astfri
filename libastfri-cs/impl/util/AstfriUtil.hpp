@@ -15,6 +15,12 @@
 #include <string_view>
 #include <vector>
 
+namespace astfri {
+
+struct GenericParam;
+
+} // namespace astfri
+
 namespace astfri::csharp::util {
 
 /**

@@ -1,3 +1,5 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
@@ -6,7 +8,6 @@
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/util/Utils.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -139,6 +140,13 @@ Expr* SrcCodeVisitor::visit_this_expr(
     return exprFact_.mk_this();
 }
 
+Expr* SrcCodeVisitor::visit_base_expr(
+    [[maybe_unused]] SrcCodeVisitor* self,
+    [[maybe_unused]] const TSNode& node
+) {
+    return exprFact_.mk_base();
+}
+
 Expr* SrcCodeVisitor::visit_verbatim_str_lit(SrcCodeVisitor* self, const TSNode& node) {
     std::string nContent = util::extract_text(node, self->src_str());
     nContent.pop_back();
@@ -165,7 +173,7 @@ Expr* SrcCodeVisitor::visit_interpolated_str_lit(
 
 Expr* SrcCodeVisitor::visit_identifier(SrcCodeVisitor* self, const TSNode& node) {
     std::string name = util::extract_text(node, self->src_str());
-    Stmt* defStmt    = self->semanticContext_.find_var(name, access::None{});
+    Stmt* defStmt    = self->semContext_.find_var(name, access::None{});
     if (! defStmt)
         return exprFact_.mk_unknown();
 
@@ -185,29 +193,29 @@ Expr* SrcCodeVisitor::visit_memb_access(SrcCodeVisitor* self, const TSNode& node
     const ExprMapper hLeft = MapManager::get_expr_mapper(nLeft);
     std::string name       = util::extract_text(nRight, self->src_str());
     Expr* left             = hLeft(self, nLeft);
-    if (is_a<ThisExpr>(left)) {
-        // UserTypeDefStmt* owner = self->semantic_context_.current_type()->def;
-        if ([[maybe_unused]] const auto varDef = // todo for future use
-            self->semanticContext_.find_var(name, access::Instance{})) {
-            return exprFact_.mk_member_var_ref(left, std::move(name));
-        }
-    }
-    else if ([[maybe_unused]] auto classRef = as_a<ClassRefExpr>(left)) {
-        // todo static member access handling
+
+    access::Qualifier qualif;
+    if (is_a<BaseExpr>(left))
+        qualif = access::Base{};
+    else if (is_a<ThisExpr>(left))
+        qualif = access::Instance{};
+    // else if (is_a<ClassRefExpr>(left))
+    //     qualif = access::Static{};
+
+    // todo for future use
+    if ([[maybe_unused]] const auto varDef =
+        self->semContext_.find_var(name, qualif)) {
+        return exprFact_.mk_member_var_ref(left, std::move(name));
     }
     // todo generic member access
-    // return exprFact_.mk_member_var_ref(left, std::move(name));
     return exprFact_.mk_unknown();
 }
 
 Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
-    // std::cout << "Invocation Expression: " << std::endl;
-    // print_child_nodes_types(node, self->get_src_code());
     const TSNode nFunc         = util::child_by_field_name(node, "function");
     const TSNode nArgList      = util::child_by_field_name(node, "arguments");
     std::vector<Expr*> argList = self->visit_arg_list(nArgList);
-    // if it doesn't have a left side - it not a member access node in tree
-    // sitter
+    // if it doesn't have a left side - it is not a member access node in tree sitter
     if (ts_node_symbol(nFunc) == MapManager::get_symbol(NodeType::Identifier)) {
         std::string name = util::extract_text(nFunc, self->src_str());
         InvocationId id{
@@ -215,7 +223,7 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
             .paramCount = argList.size(),
         };
         const InvocationType invocType
-            = self->semanticContext_.find_invoc_type(std::move(id), access::None{});
+            = self->semContext_.find_invoc_type(std::move(id), access::None{});
 
         // name = util::extract_text(n_func, self->src_str());
         switch (invocType) {
@@ -230,7 +238,7 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
             return exprFact_
                 .mk_method_call(exprFact_.mk_this(), std::move(name), std::move(argList));
         case InvocationType::StaticMethod: {
-            const auto* current = self->semanticContext_.current_type();
+            const auto* current = self->semContext_.current_type();
             // todo add static method call handling
             return exprFact_.mk_method_call(
                 exprFact_.mk_class_ref(current->type->name),
@@ -250,37 +258,41 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
         Expr* left             = hLeft(self, nLeft);
         std::string name       = util::extract_text(nName, self->src_str());
         // it's a member of an instance - method or delegate type attribute
-        if (is_a<ThisExpr>(left)) {
-            InvocationId id{
-                .name       = name,
-                .paramCount = argList.size(),
-            };
-
-            const InvocationType invocType
-                = self->semanticContext_.find_invoc_type(std::move(id), access::Instance{});
-
-            switch (invocType) {
-            case InvocationType::Delegate:
-                return exprFact_.mk_lambda_call(
-                    exprFact_.mk_member_var_ref(left, std::move(name)),
-                    std::move(argList)
-                );
-            case InvocationType::Method:
-                return exprFact_.mk_method_call(left, std::move(name), std::move(argList));
-            default:
-                // todo placeholder
-                return exprFact_.mk_unknown();
-            }
-        }
-        // todo accessing of base members
-
+        access::Qualifier qualif;
+        if (is_a<BaseExpr>(left))
+            qualif = access::Base{};
+        else if (is_a<ThisExpr>(left))
+            qualif = access::Instance{};
+        // else if (is_a<ClassRefExpr>(left))
+        //     qualif = access::Static{};
         // todo accessing of static members left side is a Usertype Reference
-        return exprFact_.mk_unknown();
+        else
+            return exprFact_.mk_unknown();
+
+        InvocationId id{
+            .name       = name,
+            .paramCount = argList.size(),
+        };
+
+        switch (self->semContext_.find_invoc_type(std::move(id), qualif)) {
+        case InvocationType::Delegate:
+            return exprFact_.mk_lambda_call(
+                exprFact_.mk_member_var_ref(left, std::move(name)),
+                std::move(argList)
+            );
+        case InvocationType::Method:
+            return exprFact_.mk_method_call(left, std::move(name), std::move(argList));
+        default:
+            // todo placeholder
+            return exprFact_.mk_unknown();
+        }
+
     }
     // left side is a anonymous lambda
     TSNode nLambda;
     TSNode nDelegate;
     if (util::is_anonymous_lambda(nFunc, &nLambda, &nDelegate)) {
+        // todo add lambda parsing
         return exprFact_.mk_lambda_call(exprFact_.mk_unknown(), std::move(argList));
     }
 

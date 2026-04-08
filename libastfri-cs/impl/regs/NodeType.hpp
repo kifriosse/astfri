@@ -77,6 +77,7 @@ enum class NodeType : TSSymbol {
 
     // other expr
     This,
+    Base,
     RefExpr,
     ParenthesizedExpr,
     MemberAccess,

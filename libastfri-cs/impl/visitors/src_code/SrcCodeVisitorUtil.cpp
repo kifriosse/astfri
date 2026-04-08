@@ -40,7 +40,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(const TSNode& node, const util::VarDefT
             switch (defType) {
             case util::VarDefType::Member: {
                 MemberVarMetadata* varMeta
-                    = semanticContext_.find_memb_var(name, semanticContext_.current_type()->def);
+                    = semContext_.find_memb_var(name, semContext_.current_type()->def);
 
                 varDef              = varMeta->varDef;
                 varDef->initializer = init;
@@ -49,7 +49,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(const TSNode& node, const util::VarDefT
             case util::VarDefType::Local:
                 // todo handle const
                 varDef = stmtFact_.mk_local_var_def(std::move(name), type, init);
-                semanticContext_.reg_local_var(as_a<LocalVarDefStmt>(varDef));
+                semContext_.reg_local_var(as_a<LocalVarDefStmt>(varDef));
                 break;
             case util::VarDefType::Global:
                 // todo handle const
@@ -85,7 +85,7 @@ Stmt* SrcCodeVisitor::make_while_loop(const TSNode& node, const bool is_while) {
 }
 
 FunctionDefStmt* SrcCodeVisitor::make_func_stmt(const TSNode& node, const bool isMethod) {
-    semanticContext_.enter_scope();
+    semContext_.enter_scope();
 
     FunctionDefStmt* funcDef = stmtFact_.mk_function_def();
     const TSNode nRetType    = util::child_by_field_name(node, isMethod ? "returns" : "type");
@@ -98,15 +98,15 @@ FunctionDefStmt* SrcCodeVisitor::make_func_stmt(const TSNode& node, const bool i
     const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
     Type* retType          = th(&typeTrs_, nRetType);
 
-    semanticContext_.reg_return(retType);
+    semContext_.reg_return(retType);
 
     funcDef->retType = retType;
     funcDef->name    = util::extract_text(nName, src_str());
     funcDef->params  = make_param_list(nParam, false);
     funcDef->body    = as_a<CompoundStmt>(hBody(this, nBody));
 
-    semanticContext_.leave_scope();
-    semanticContext_.unregister_return_type();
+    semContext_.leave_scope();
+    semContext_.unregister_return_type();
     return funcDef;
 }
 
@@ -158,7 +158,7 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
             init                   = hInit(this, nInit);
         }
         ParamVarDefStmt* paramDef = stmtFact_.mk_param_var_def(std::move(name), type, init);
-        this->semanticContext_.reg_param(paramDef);
+        this->semContext_.reg_param(paramDef);
         params.push_back(paramDef);
     };
     util::process_param_list(node, std::move(collector));
@@ -193,7 +193,7 @@ Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node) {
                 hRight(this, nRight)
             );
             varDefs.push_back(varDef);
-            semanticContext_.reg_local_var(varDef);
+            semContext_.reg_local_var(varDef);
         }
     };
     util::for_each_match(node, maps::QueryType::VarDecltor, proces);

@@ -18,12 +18,12 @@ TypeFactory& SrcCodeVisitor::typeFact_ = TypeFactory::get_instance();
 
 SrcCodeVisitor::SrcCodeVisitor(SemanticContext& semanticContext, SymbolTable& symbTable) :
     typeTrs_(symbTable),
-    semanticContext_(semanticContext),
+    semContext_(semanticContext),
     lang_(tree_sitter_c_sharp()) {
 }
 
 void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit) {
-    for (const auto metadata : this->semanticContext_.get_type_metadata()) {
+    for (const auto metadata : this->semContext_.get_type_metadata()) {
         typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         bool added = false;
         for (auto& [node, src] : metadata->defs()) {

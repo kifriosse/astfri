@@ -1,10 +1,11 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -87,6 +88,7 @@ constexpr MappingRule mappingRules_[] = {
     {"assignment_expression",             Assignment,            true },
     {"constant_pattern",                  ConstPattern,          true },
     {"this",                              This,                  false},
+    {"base",                              Base,                  false},
     {"ref_expression",                    RefExpr,               true },
     {"parenthesized_expression",          ParenthesizedExpr,     true },
     {"member_access_expression",          MemberAccess,          true },
@@ -179,6 +181,7 @@ Mappers::Mappers() :
         {VerbatimStrLit, SrcCodeVisitor::visit_verbatim_str_lit},
         {RawStrLit, SrcCodeVisitor::visit_raw_str_lit},
         {This, SrcCodeVisitor::visit_this_expr},
+        {Base, SrcCodeVisitor::visit_base_expr},
         {PrefixUnOpr, SrcCodeVisitor::visit_prefix_unary_opr},
         {PostfixUnOpr, SrcCodeVisitor::visit_postfix_unary_opr},
         {BinaryOpr, SrcCodeVisitor::visit_binary_opr},
@@ -261,7 +264,7 @@ Operations::Operations() :
          {"&=", BinOpType::BitAndAssign},
          {"|=", BinOpType::BitOrAssign},
          {"^=", BinOpType::BitXorAssign},
-        {">>>", BinOpType::BitShiftRightUnsigned}}
+         {">>>", BinOpType::BitShiftRightUnsigned}}
     ) {
 }
 
