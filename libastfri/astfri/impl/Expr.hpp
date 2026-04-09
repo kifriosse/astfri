@@ -1,6 +1,8 @@
 #ifndef ASTFRI_IMPL_EXPR_HPP
 #define ASTFRI_IMPL_EXPR_HPP
 
+#include <astfri/impl/ExprKind.hpp>
+#include <astfri/impl/Visitor.hpp>
 #include <astfri/impl/Utils.hpp>
 
 #include <string>
@@ -8,12 +10,36 @@
 
 namespace astfri {
 
+
+
 /**
  * @brief TODO
  */
 struct Expr : virtual Visitable {
-    virtual ~Expr() = default;
+    ExprKind kind; // TODO change is_a to use this
+
+    void acceptNew(Visitor &visitor) {
+        accept_ptr(this, visitor); // TODO move defs to .inl
+    }
+
+protected:
+    void(*accept_ptr)(void*, Visitor&); // TODO move this to generic MakeA base
 };
+
+
+template<typename Self>
+struct MakeExpr : Expr {
+    MakeExpr() {
+        // The specialization must exist, otherwise we get a compile error.
+        Expr::kind = KindOf<Self>::value;
+
+        // Implicit conversion of lambda to function pointer.
+        Expr::accept_ptr = +[](void *self, Visitor &visitor){
+            visitor.visit(*static_cast<Self*>(self));
+        };
+    }
+};
+
 
 /**
  * @brief TODO
