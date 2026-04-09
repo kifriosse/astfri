@@ -1,9 +1,8 @@
 #ifndef ASTFRI_IMPL_EXPR_HPP
 #define ASTFRI_IMPL_EXPR_HPP
 
+#include <astfri/impl/ASTNode.hpp>
 #include <astfri/impl/ExprKind.hpp>
-#include <astfri/impl/Visitor.hpp>
-#include <astfri/impl/Utils.hpp>
 
 #include <string>
 #include <vector>
@@ -11,98 +10,77 @@
 namespace astfri {
 
 
+/**
+ * @brief TODO
+ */
+struct Expr : ASTNode<ExprKind> {
+};
+
+/**
+ * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Expr.
+ *
+ * See @c MakeA doc for more details.
+ *
+ * @tparam SelfType child class type.
+ */
+template<typename SelfType>
+using MakeAnExpr = MakeA<Expr, SelfType>;
 
 /**
  * @brief TODO
  */
-struct Expr : virtual Visitable {
-    ExprKind kind; // TODO change is_a to use this
-
-    void acceptNew(Visitor &visitor) {
-        accept_ptr(this, visitor); // TODO move defs to .inl
-    }
-
-protected:
-    void(*accept_ptr)(void*, Visitor&); // TODO move this to generic MakeA base
-};
-
-
-template<typename Self>
-struct MakeExpr : Expr {
-    MakeExpr() {
-        // The specialization must exist, otherwise we get a compile error.
-        Expr::kind = KindOf<Self>::value;
-
-        // Implicit conversion of lambda to function pointer.
-        Expr::accept_ptr = +[](void *self, Visitor &visitor){
-            visitor.visit(*static_cast<Self*>(self));
-        };
-    }
-};
-
-
-/**
- * @brief TODO
- */
-template<typename T>
-struct Literal : Expr {
-    T val;
-    explicit Literal(T val);
+template<typename SelfType, typename T>
+struct Literal : MakeAnExpr<SelfType> {
+    T val{};
 };
 
 /**
  * @brief TODO
  */
-struct IntLiteralExpr : Literal<int>, details::MkVisitable<IntLiteralExpr> {
-    explicit IntLiteralExpr(int val);
+struct IntLiteralExpr : Literal<IntLiteralExpr, int> {
 };
 
 /**
  * @brief TODO
  */
-struct FloatLiteralExpr : Literal<float>, details::MkVisitable<FloatLiteralExpr> {
-    explicit FloatLiteralExpr(float val);
+struct FloatLiteralExpr : Literal<FloatLiteralExpr, float> {
 };
 
 /**
  * @brief TODO
  */
-struct CharLiteralExpr : Literal<char>, details::MkVisitable<CharLiteralExpr> {
-    explicit CharLiteralExpr(char val);
+struct CharLiteralExpr : Literal<CharLiteralExpr, char> {
 };
 
 /**
  * @brief TODO
  */
-struct StringLiteralExpr : Literal<std::string>, details::MkVisitable<StringLiteralExpr> {
-    explicit StringLiteralExpr(std::string val);
+struct StringLiteralExpr : Literal<StringLiteralExpr, std::string> {
 };
 
 /**
  * @brief TODO
  */
-struct BoolLiteralExpr : Literal<bool>, details::MkVisitable<BoolLiteralExpr> {
-    explicit BoolLiteralExpr(bool val);
+struct BoolLiteralExpr : Literal<BoolLiteralExpr, bool> {
 };
 
 /**
  * @brief TODO
  */
-struct NullLiteralExpr : Expr, details::MkVisitable<NullLiteralExpr> { };
+struct NullLiteralExpr : MakeAnExpr<NullLiteralExpr> {
+};
 
 /**
  * @brief TODO
  */
-struct IfExpr : Expr, details::MkVisitable<IfExpr> {
-    Expr* cond;
-    Expr* iftrue;
-    Expr* iffalse;
-
-    IfExpr(Expr* cond, Expr* iftrue, Expr* iffalse);
+struct IfExpr : MakeAnExpr<IfExpr> {
+    Expr *cond{nullptr};
+    Expr *iftrue{nullptr};
+    Expr *iffalse{nullptr};
 };
 
 /**
- * @brief List of binary operators
+ * @brief List of binary operators.
  */
 enum class BinOpType {
     // {lhs} = {rhs}, {lhs} := {rhs}, {lhs} <- {rhs}
@@ -208,22 +186,22 @@ enum class BinOpType {
     BitOrAssign,
 
     // {lhs} ^= {rhs}
-    BitXorAssign
+    BitXorAssign,
+
+    UNINITIALIZED,
 };
 
 /**
  * @brief TODO
  */
-struct BinOpExpr : Expr, details::MkVisitable<BinOpExpr> {
-    Expr* left;
-    BinOpType op;
-    Expr* right;
-
-    BinOpExpr(Expr* left, BinOpType op, Expr* right);
+struct BinOpExpr : MakeAnExpr<BinOpExpr> {
+    Expr *left{nullptr};
+    Expr *right{nullptr};
+    BinOpType op{BinOpType::UNINITIALIZED};
 };
 
 /**
- * @brief List of unary operators
+ * @brief List of unary operators.
  */
 enum class UnaryOpType {
     // !arg, not arg
@@ -254,123 +232,110 @@ enum class UnaryOpType {
     PostDecrement,
 
     // ~arg
-    BitFlip
+    BitFlip,
+
+    UNINITIALIZED,
 };
 
 /**
  * @brief TODO
  */
-struct UnaryOpExpr : Expr, details::MkVisitable<UnaryOpExpr> {
+struct UnaryOpExpr : MakeAnExpr<UnaryOpExpr> {
+    Expr *arg{nullptr};
     UnaryOpType op;
-    Expr* arg;
-
-    UnaryOpExpr(UnaryOpType op, Expr* arg);
 };
 
 /**
  * @brief TODO
  */
-struct ParamVarRefExpr : Expr, details::MkVisitable<ParamVarRefExpr> {
-    // TODO later this should be a pointer to ParamVarDef
+struct ParamVarRefExpr : MakeAnExpr<ParamVarRefExpr> {
+    // TODO this should be Either<ReqPtr<Symbol>, ReqPtr<ParamVarDef>>
     std::string param;
-
-    explicit ParamVarRefExpr(std::string param);
 };
 
 /**
  * @brief TODO
  */
-struct LocalVarRefExpr : Expr, details::MkVisitable<LocalVarRefExpr> {
-    // TODO later this should be a pointer to LocalVarDef
+struct LocalVarRefExpr : MakeAnExpr<LocalVarRefExpr> {
+    // TODO this should be Either<Symbol, LocalVarDef>
     std::string var;
-
-    explicit LocalVarRefExpr(std::string var);
 };
 
 /**
  * @brief TODO
  */
-struct MemberVarRefExpr : Expr, details::MkVisitable<MemberVarRefExpr> {
-    Expr* owner;
-    // TODO later this should be a pointer to MemberVarDef
+struct MemberVarRefExpr : MakeAnExpr<MemberVarRefExpr> {
+    Expr *owner{nullptr};
+    // TODO this should be Either<Symbol, MemberVarDef>
     std::string member;
-
-    MemberVarRefExpr(Expr* expr, std::string member);
 };
 
 /**
  * @brief TODO
  */
-struct GlobalVarRefExpr : Expr, details::MkVisitable<GlobalVarRefExpr> {
-    // TODO later this should be a pointer to GlobalVarDef
+struct GlobalVarRefExpr : MakeAnExpr<GlobalVarRefExpr> {
+    // TODO this should be Either<Symbol, GlobalVarDef>
     std::string global;
-
-    explicit GlobalVarRefExpr(std::string global);
 };
 
 /**
  * @brief Reference to a class object
+ *
  * This type is mainly used as @c owner for static method calls
  */
-struct ClassRefExpr : Expr, details::MkVisitable<ClassRefExpr> {
-    // TODO later this could point to ClassDefStmt
+struct ClassRefExpr : MakeAnExpr<ClassRefExpr> {
+    // TODO this should be Either<Symbol, ClassType>
     std::string name;
-
-    ClassRefExpr(std::string name);
 };
 
 /**
  * @brief TODO
  */
-struct FunctionCallExpr : Expr, details::MkVisitable<FunctionCallExpr> {
-    // TODO later this sould be a pointer to FunctionDecl
+struct FunctionCallExpr : MakeAnExpr<FunctionCallExpr> {
+    // TODO this should be Either<Symbol, FunctionDefStmt>
     std::string name;
     std::vector<Expr*> args;
-
-    FunctionCallExpr(std::string name, std::vector<Expr*> args);
 };
 
 /**
  * @brief TODO
  */
-struct MethodCallExpr : Expr, details::MkVisitable<MethodCallExpr> {
-    Expr* owner;
-    // TODO later this sould be a pointer to MethodDecl
+struct MethodCallExpr : MakeAnExpr<MethodCallExpr> {
+    Expr *owner{nullptr};
+    // TODO this should be Either<Symbol, MethodDefStmt>
     std::string name;
-    std::vector<Expr*> args;
-
-    MethodCallExpr(Expr* owner, std::string name, std::vector<Expr*> args);
+    std::vector<Expr*> args{};
 };
 
 /**
  * @brief TODO
  */
-struct LambdaCallExpr : Expr, details::MkVisitable<LambdaCallExpr> {
+struct LambdaCallExpr : MakeAnExpr<LambdaCallExpr> {
     Expr* lambda{nullptr};
-    std::vector<Expr*> args;
+    std::vector<Expr*> args{};
 };
 
 /**
  * @brief TODO
  */
-struct LambdaExpr : Expr, details::MkVisitable<LambdaExpr> {
-    LambdaType* type;
-    Type* returnType;
-    std::vector<ParamVarDefStmt*> params;
-    Stmt* body;
-    LambdaExpr() = default;
-    LambdaExpr(std::vector<ParamVarDefStmt*> params, Stmt* body);
+struct LambdaExpr : MakeAnExpr<LambdaExpr> {
+    LambdaType *type{nullptr};
+    Type *returnType{nullptr};
+    Stmt *body{nullptr};
+    std::vector<ParamVarDefStmt*> params{};
 };
 
 /**
  * @brief Reference to the current instance e.g., `this` or `self` keywords.
  */
-struct ThisExpr : Expr, details::MkVisitable<ThisExpr> { };
+struct ThisExpr : MakeAnExpr<ThisExpr> {
+};
 
 /**
  * @brief Reference to the base class e.g., `super` or `base` keywords.
  */
-struct BaseExpr : Expr, details::MkVisitable<BaseExpr> { };
+struct BaseExpr : MakeAnExpr<BaseExpr> {
+};
 
 /**
  * @brief Constructor call

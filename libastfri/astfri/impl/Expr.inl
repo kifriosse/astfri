@@ -1,4 +1,4 @@
-#ifndef LIBASTFRI_EXPRESSION_HPP
+#ifndef ASTFRI_IMPL_EXPR_HPP
 #    include <astfri/impl/Expr.hpp>
 #endif
 
