@@ -1,13 +1,11 @@
 #include <libastfri-text/inc/code/JavaCodeBuilder.hpp>
-
 #include <libastfri-text/inc/OutputFileManager.hpp>
 
 #include <fstream>
 
 using namespace astfri::text;
 
-JavaCodeBuilder& JavaCodeBuilder::get_instance()
-{
+JavaCodeBuilder& JavaCodeBuilder::get_instance() {
     static JavaCodeBuilder builder;
     return builder;
 }
@@ -16,16 +14,14 @@ JavaCodeBuilder& JavaCodeBuilder::get_instance()
 // GENERAL_TEXT
 //
 
-void JavaCodeBuilder::write_opening_curl_bracket()
-{
+void JavaCodeBuilder::write_opening_curl_bracket() {
     append_space();
     append_text("{");
     append_new_line();
     ++indentationLevel_;
 }
 
-void JavaCodeBuilder::write_opening_else_word()
-{
+void JavaCodeBuilder::write_opening_else_word() {
     append_space();
     append_text("else");
     write_opening_curl_bracket();
@@ -35,21 +31,18 @@ void JavaCodeBuilder::write_opening_else_word()
 // EXPORT
 //
 
-void JavaCodeBuilder::create_java_file(std::string const& name, Scope const& scope)
-{
+void JavaCodeBuilder::create_java_file(const std::string& name, const Scope& scope) {
     std::string folder = OutputFileManager::get_instance().build_folder_path();
     folder.append("src/");
-    for (size_t i = 0; i < scope.names_.size(); ++i)
-    {
-        folder.append(scope.names_.at(i) + "/");
+    for (size_t i = 0; i < scope.names.size(); ++i) {
+        folder.append(scope.names.at(i) + "/");
     }
     folder.append(name + ".java");
     std::ofstream(folder) << buildedText_->str();
     reset_builder();
 }
 
-void JavaCodeBuilder::create_java_file(std::string const& name)
-{
+void JavaCodeBuilder::create_java_file(const std::string& name) {
     std::string folder = OutputFileManager::get_instance().build_folder_path();
     folder.append("src/");
     folder.append(name + ".java");

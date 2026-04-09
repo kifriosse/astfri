@@ -28,8 +28,7 @@ class Example{
 
 };*/
 
-int main()
-{
+int main() {
     auto& statements  = astfri::StmtFactory::get_instance();
     auto& expressions = astfri::ExprFactory::get_instance();
     auto& types       = astfri::TypeFactory::get_instance();

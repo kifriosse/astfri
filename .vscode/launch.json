@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[cpp] astfri-cpp-examples",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/libastfri-cpp/examples/test_JR",
+            "args": ["./libastfri-cpp/examples/example_scope.cpp"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+
+        },
+        {
+            "name": "[cs] astfri-cs-examples",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/libastfri-cs/examples/astfri-cs-examples",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Test",
+                    "text": "python import sys;sys.path.insert(0, '/usr/share/gcc-14.2.1/python/');from libstdcxx.v6.printers import register_libstdcxx_printers;register_libstdcxx_printers(None)",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

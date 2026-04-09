@@ -48,11 +48,15 @@ if [ "$#" -eq 0 ]; then
   C_COMPILER=gcc
   CXX_COMPILER=g++
   echo "Using defaults -- gcc and g++."
+  { set +x; } 2>/dev/null
+  ok
   echo ""
 elif [ "$#" -eq 2 ]; then
   C_COMPILER=$1
   CXX_COMPILER=$2
   echo "Using ${C_COMPILER} as C compiler and ${CXX_COMPILER} as C++ compiler."
+  { set +x; } 2>/dev/null
+  ok
   echo ""
 else
   error "Invalid arguments."
@@ -63,14 +67,6 @@ fi
 heading "Removing old build files"
 set -x
 rm -rf build
-{ set +x; } 2>/dev/null
-ok
-echo ""
-
-# Remove external bin files
-heading "Removing external bin files"
-set -x
-rm -rf external/bin
 { set +x; } 2>/dev/null
 ok
 echo ""
@@ -91,6 +87,7 @@ cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
       -DCMAKE_BUILD_TYPE=Debug             \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON   \
+      -DASTFRI_BUILD_WRAPPER=ON            \
       -DASTFRI_BUILD_CPP_INPUT=ON          \
       -DASTFRI_BUILD_JAVA_INPUT=ON         \
       -DASTFRI_BUILD_C_SHARP_INPUT=ON      \

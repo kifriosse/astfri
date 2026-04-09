@@ -2,8 +2,7 @@
 
 using namespace astfri::text;
 
-CxxCodeBuilder& CxxCodeBuilder::get_instatnce()
-{
+CxxCodeBuilder& CxxCodeBuilder::get_instatnce() {
     static CxxCodeBuilder builder;
     return builder;
 }
@@ -12,16 +11,14 @@ CxxCodeBuilder& CxxCodeBuilder::get_instatnce()
 // GENERAL_TEXT
 //
 
-void CxxCodeBuilder::write_opening_curl_bracket()
-{
+void CxxCodeBuilder::write_opening_curl_bracket() {
     append_new_line();
     append_text("{");
     append_new_line();
     ++indentationLevel_;
 }
 
-void CxxCodeBuilder::write_opening_else_word()
-{
+void CxxCodeBuilder::write_opening_else_word() {
     append_new_line();
     append_text("else");
     append_new_line();

@@ -10,8 +10,8 @@
         "bool":"bool",
         "void":"void",
         "indirect_indicator":"*",
-        "separator":" ",
-        "type_convention":"TypeBeforeConvention"
+        "separator":" : ",
+        "type_convention":"TypeAfterConvention"
     },
     "ACCESS_MOD":{
         "inner_view":true,
@@ -38,6 +38,7 @@
         "indicator":"~"
     },
     "NAMESPACE":{
-        "do_namespace":true
+        "do_namespace":false,
+        "namespace_separator":"::"
     }
 }

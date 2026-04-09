@@ -3,19 +3,16 @@
 
 #include <libastfri-serialize/inc/Data.hpp>
 #include <libastfri-serialize/inc/JsonFormatChecker.hpp>
-#include <libastfri/inc/ExprFactory.hpp>
-#include <libastfri/inc/StmtFactory.hpp>
-#include <libastfri/inc/TypeFactory.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <rapidjson/istreamwrapper.h>
 
 #include <functional>
 
-class AstFriDeSerializer
-{
+class AstFriDeSerializer {
 public:
     static AstFriDeSerializer& get_instance();
-    astfri::IVisitable* deserialize(std::string filePath);
+    astfri::Visitable* deserialize(std::string filePath);
 
 private:
     AstFriDeSerializer();
@@ -111,10 +108,8 @@ private:
         std::vector<T>& vector,
         rapidjson::Value& value,
         std::function<T(rapidjson::Value&)> function
-    )
-    {
-        for (auto& element : value.GetArray())
-        {
+    ) {
+        for (auto& element : value.GetArray()) {
             vector.push_back(function(element));
         }
     }

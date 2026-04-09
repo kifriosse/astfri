@@ -5,27 +5,28 @@ using namespace astfri::text;
 AbstractBuilder::AbstractBuilder() :
     buildedText_(std::make_unique<std::stringstream>()),
     indentationLevel_(0),
-    isEmptyLine_(true)
-{
+    isEmptyLine_(true) {
+}
+
+// TODO tmp
+std::stringstream* AbstractBuilder::get_builded_text() {
+    return buildedText_.get();
 }
 
 //
 // SET_UP
 //
 
-void AbstractBuilder::increase_indentation()
-{
+void AbstractBuilder::increase_indentation() {
     ++indentationLevel_;
 }
 
-void AbstractBuilder::decrease_indentation()
-{
+void AbstractBuilder::decrease_indentation() {
     --indentationLevel_;
 }
 
-void AbstractBuilder::reset_builder()
-{
-    buildedText_ = std::make_unique<std::stringstream>();
+void AbstractBuilder::reset_builder() {
+    buildedText_      = std::make_unique<std::stringstream>();
     indentationLevel_ = 0;
-    isEmptyLine_ = true;
+    isEmptyLine_      = true;
 }

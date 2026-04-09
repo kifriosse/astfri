@@ -7,6 +7,7 @@ project(
     LANGUAGES   C CXX
 )
 
+option(ASTFRI_BUILD_WRAPPER "Build module astfri-wrapper." OFF)
 option(ASTFRI_BUILD_CPP_INPUT "Build module libastri-cpp." OFF)
 option(ASTFRI_BUILD_JAVA_INPUT "Build module libastri-java." OFF)
 option(ASTFRI_BUILD_C_SHARP_INPUT "Build module libastri-cs." OFF)
@@ -17,6 +18,10 @@ option(ASTFRI_BUILD_UML_OUTPUT "Build module libastri-uml." OFF)
 add_subdirectory(external)
 
 add_subdirectory(libastfri)
+
+if (ASTFRI_BUILD_WRAPPER)
+    add_subdirectory(astfri)
+endif()
 
 if (ASTFRI_BUILD_CPP_INPUT)
     add_subdirectory(libastfri-cpp)

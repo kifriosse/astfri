@@ -1,18 +1,18 @@
 #include <libastfri-cpp/inc/ClangManagement.hpp>
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
-int main(int argc, char const** argv)
-{
+int main(int argc, const char** argv) {
     if (argc != 2) {
         return -1;
     }
     astfri::TranslationUnit tu;
 
-    if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0)
-    {
-        std::cout << "chyba pri fill_translation_unit\n";
-        return 1;
-    }
+    astfri::cpp::cpp_in input;
+    tu = input.load_file(argv[1]);
+    // if (astfri::astfri_cpp::fill_translation_unit(tu, argv[1]) != 0) {
+    //     // std::cout << "chyba pri fill_translation_unit\n";
+    //     return 1;
+    // }
 
     astfri::uml::Config conf;
     astfri::uml::PlantUMLOutputter op;

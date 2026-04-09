@@ -1,9 +1,11 @@
 #ifndef CLANGMANAGEMENT_HPP
 #define CLANGMANAGEMENT_HPP
 
+// std
+#include <filesystem>
 // astfri
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
-#include <libastfri/inc/Stmt.hpp>
+#include <astfri/Astfri.hpp>
 // clang
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
@@ -14,21 +16,18 @@
 #include <clang/Tooling/Tooling.h>
 #include <memory>
 
-namespace astfri::astfri_cpp
-{
-class CppASTConsumer : public clang::ASTConsumer
-{
+namespace astfri::cpp {
+class CppASTConsumer : public clang::ASTConsumer {
 public:
     CppASTConsumer(astfri::TranslationUnit& _tu);
     void HandleTranslationUnit(clang::ASTContext& Context) override;
 
 private:
-    astfri::astfri_cpp::ClangVisitor Visitor;
+    astfri::cpp::ClangVisitor Visitor;
 };
 
 // Frontend Action
-class CppFrontendAction : public clang::ASTFrontendAction
-{
+class CppFrontendAction : public clang::ASTFrontendAction {
 public:
     CppFrontendAction(astfri::TranslationUnit& _tu);
     std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
@@ -41,8 +40,7 @@ private:
 };
 
 // Custom Frontend Action Factory
-class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory
-{
+class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 public:
     CppFrontendActionFactory(astfri::TranslationUnit& _tu);
 
@@ -52,7 +50,15 @@ private:
     astfri::TranslationUnit& tu;
 };
 
-int fill_translation_unit(astfri::TranslationUnit& tu, std::string const& file_path);
 
-} // namespace astfri::astfri_cpp
+struct cpp_in
+{
+    astfri::TranslationUnit load_file(const std::filesystem::path& file_path); //const cpp::Config &cfg
+    astfri::TranslationUnit load_file(std::istream& is); //const cpp::Config &cfg
+    astfri::TranslationUnit load_project(std::filesystem::path& path); //const cpp::Config &cfg
+};
+
+// static_assert(astfri::IsInputLibInterface<cpp_in, cpp::Config>, "");
+
+} // namespace astfri::cpp
 #endif // CLANGMANAGEMENT_HPP

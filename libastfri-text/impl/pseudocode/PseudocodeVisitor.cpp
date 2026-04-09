@@ -1,25 +1,21 @@
-#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
-
-#include <libastfri-text/inc/pseudocode/PlainTextBuilder.hpp>
 #include <libastfri-text/inc/pseudocode/HtmlTextBuilder.hpp>
+#include <libastfri-text/inc/pseudocode/PlainTextBuilder.hpp>
+#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 
 using namespace astfri::text;
 
-constexpr int LOCAL_VAR = 0;
-constexpr int PARAM_VAR = 1;
+constexpr int LOCAL_VAR  = 0;
+constexpr int PARAM_VAR  = 1;
 constexpr int MEMBER_VAR = 2;
 constexpr int GLOBAL_VAR = 3;
 
-PseudocodeVisitor& PseudocodeVisitor::get_instance()
-{
+PseudocodeVisitor& PseudocodeVisitor::get_instance() {
     AbstractTextBuilder* builder;
     TextConfigurator& tc = TextConfigurator::get_instance();
-    if (tc.output_file_format()->view() == "html")
-    {
+    if (tc.output_file_format()->view() == "html") {
         builder = &HtmlTextBuilder::get_instance();
     }
-    else
-    {
+    else {
         builder = &PlainTextBuilder::get_instance();
     }
     builder->reset_builder();
@@ -32,62 +28,50 @@ PseudocodeVisitor::PseudocodeVisitor(AbstractTextBuilder& builder) :
     builder_(&builder),
     configurator_(&TextConfigurator::get_instance()),
     isMethodCall_(false),
-    isConstructorCall_(false)
-{
+    isConstructorCall_(false) {
 }
 
 //
 // -----
 //
 
-void PseudocodeVisitor::export_pseudocode()
-{
+void PseudocodeVisitor::export_pseudocode() {
     static_cast<AbstractTextBuilder*>(builder_)->export_text();
 }
 
-void PseudocodeVisitor::clear_builder()
-{
+void PseudocodeVisitor::clear_builder() {
     builder_->reset_builder();
 }
 
-void PseudocodeVisitor::append_text(std::string const& text)
-{
+void PseudocodeVisitor::append_text(const std::string& text) {
     builder_->append_text(text);
 }
 
-void PseudocodeVisitor::append_new_line()
-{
+void PseudocodeVisitor::append_new_line() {
     builder_->append_new_line();
 }
 
-void PseudocodeVisitor::append_space()
-{
+void PseudocodeVisitor::append_space() {
     builder_->append_space();
 }
 
-void PseudocodeVisitor::update_configuration()
-{
+void PseudocodeVisitor::update_configuration() {
     configurator_->update_configuration();
-    if (configurator_->output_file_format()->view() == "html")
-    {
+    if (configurator_->output_file_format()->view() == "html") {
         builder_ = &HtmlTextBuilder::get_instance();
     }
-    else
-    {
+    else {
         builder_ = &PlainTextBuilder::get_instance();
     }
     builder_->reset_builder();
 }
 
-void PseudocodeVisitor::reload_configuration()
-{
+void PseudocodeVisitor::reload_configuration() {
     configurator_->reload_configuration();
-    if (configurator_->output_file_format()->view() == "html")
-    {
+    if (configurator_->output_file_format()->view() == "html") {
         builder_ = &HtmlTextBuilder::get_instance();
     }
-    else
-    {
+    else {
         builder_ = &PlainTextBuilder::get_instance();
     }
     builder_->reset_builder();
@@ -95,475 +79,405 @@ void PseudocodeVisitor::reload_configuration()
 
 // -----
 
-void PseudocodeVisitor::visit(DynamicType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const DynamicType& /*type*/) {
     builder_->write_dynamic_type_word();
 }
 
-void PseudocodeVisitor::visit(IntType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const IntType& /*type*/) {
     builder_->write_int_type_word();
 }
 
-void PseudocodeVisitor::visit(FloatType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const FloatType& /*type*/) {
     builder_->write_float_type_word();
 }
 
-void PseudocodeVisitor::visit(CharType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const CharType& /*type*/) {
     builder_->write_char_type_word();
 }
 
-void PseudocodeVisitor::visit(BoolType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const BoolType& /*type*/) {
     builder_->write_bool_type_word();
 }
 
-void PseudocodeVisitor::visit(VoidType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const VoidType& /*type*/) {
     builder_->write_void_type_word();
 }
 
-void PseudocodeVisitor::visit(IndirectionType const& type)
-{
-    if (!try_accept_node(type.indirect_))
-    {
+void PseudocodeVisitor::visit(const IndirectionType& type) {
+    if (! try_accept_node(type.indirect)) {
         builder_->write_invalid_type();
     }
     builder_->write_pointer_word();
 }
 
-void PseudocodeVisitor::visit(ClassType const& type)
-{
-    builder_->write_class_type(type.name_);
-}
-
-void PseudocodeVisitor::visit(InterfaceType const& type)
-{
-    builder_->write_interface_type(type.name_);
-}
-
-void PseudocodeVisitor::visit(LambdaType const& type)
-{
-    builder_->write_function_name(type.m_name);
-}
-
-void PseudocodeVisitor::visit(IncompleteType const& type)
-{
+void PseudocodeVisitor::visit(const ClassType& type) {
     builder_->write_class_type(type.name);
 }
 
-void PseudocodeVisitor::visit(UnknownType const& /*type*/)
-{
+void PseudocodeVisitor::visit(const InterfaceType& type) {
+    builder_->write_interface_type(type.name);
+}
+
+void PseudocodeVisitor::visit(const LambdaType& type) {
+    builder_->write_function_name(type.name);
+}
+
+void PseudocodeVisitor::visit(const IncompleteType& type) {
+    builder_->write_class_type(type.name);
+}
+
+void PseudocodeVisitor::visit(const UnknownType& /*type*/) {
     builder_->write_unknown_type();
 }
 
 // -----
 
-void PseudocodeVisitor::visit(IntLiteralExpr const& expr)
-{
-    builder_->write_int_val(expr.val_);
+void PseudocodeVisitor::visit(const IntLiteralExpr& expr) {
+    builder_->write_int_val(expr.val);
 }
 
-void PseudocodeVisitor::visit(FloatLiteralExpr const& expr)
-{
-    builder_->write_float_val(expr.val_);
+void PseudocodeVisitor::visit(const FloatLiteralExpr& expr) {
+    builder_->write_float_val(expr.val);
 }
 
-void PseudocodeVisitor::visit(CharLiteralExpr const& expr)
-{
-    builder_->write_char_val(expr.val_);
+void PseudocodeVisitor::visit(const CharLiteralExpr& expr) {
+    builder_->write_char_val(expr.val);
 }
 
-void PseudocodeVisitor::visit(StringLiteralExpr const& expr)
-{
-    builder_->write_string_val(expr.val_);
+void PseudocodeVisitor::visit(const StringLiteralExpr& expr) {
+    builder_->write_string_val(expr.val);
 }
 
-void PseudocodeVisitor::visit(BoolLiteralExpr const& expr)
-{
-    builder_->write_bool_val(expr.val_);
+void PseudocodeVisitor::visit(const BoolLiteralExpr& expr) {
+    builder_->write_bool_val(expr.val);
 }
 
-void PseudocodeVisitor::visit(NullLiteralExpr const& /*expr*/)
-{
+void PseudocodeVisitor::visit(const NullLiteralExpr& /*expr*/) {
     builder_->write_null_val();
 }
 
-void PseudocodeVisitor::visit(IfExpr const& expr)
-{
+void PseudocodeVisitor::visit(const IfExpr& expr) {
     builder_->write_if_word();
-    process_condition(expr.cond_);
+    process_condition(expr.cond);
     builder_->append_new_line();
     builder_->increase_indentation();
     builder_->write_do_word();
     builder_->append_space();
-    if (!try_accept_node(expr.iftrue_))
-    {
+    if (! try_accept_node(expr.iftrue)) {
         builder_->write_invalid_expr();
     }
     builder_->append_new_line();
     builder_->write_else_word();
     builder_->append_space();
-    if (!try_accept_node(expr.iffalse_))
-    {
+    if (! try_accept_node(expr.iffalse)) {
         builder_->write_invalid_expr();
     }
     builder_->decrease_indentation();
 }
 
-void PseudocodeVisitor::visit(BinOpExpr const& expr)
-{
-    if (!try_accept_node(expr.left_))
-    {
+void PseudocodeVisitor::visit(const BinOpExpr& expr) {
+    if (! try_accept_node(expr.left)) {
         builder_->write_invalid_expr();
     }
     builder_->append_space();
-    switch (expr.op_)
-    {
-        case BinOpType::Assign:
-            builder_->write_assign_operator();
-            break;
-        case BinOpType::Add:
-            builder_->write_operator("+");
-            break;
-        case BinOpType::Subtract:
-            builder_->write_operator("-");
-            break;
-        case BinOpType::Multiply:
-            builder_->write_operator("*");
-            break;
-        case BinOpType::Divide:
-            builder_->write_operator("/");
-            break;
-        case BinOpType::FloorDivide:
-            builder_->write_operator("div");
-            break;
-        case BinOpType::Modulo:
-            builder_->write_modulo_operator();
-            break;
-        case BinOpType::Exponentiation:
-            builder_->write_operator("**");
-            break;
-        case BinOpType::Equal:
-            builder_->write_operator("==");
-            break;
-        case BinOpType::NotEqual:
-            builder_->write_operator("!=");
-            break;
-        case BinOpType::Less:
-            builder_->write_operator("<");
-            break;
-        case BinOpType::LessEqual:
-            builder_->write_operator("<=");
-            break;
-        case BinOpType::Greater:
-            builder_->write_operator(">");
-            break;
-        case BinOpType::GreaterEqual:
-            builder_->write_operator(">=");
-            break;
-        case BinOpType::LogicalAnd:
-            builder_->write_operator("&&");
-            break;
-        case BinOpType::LogicalOr:
-            builder_->write_operator("||");
-            break;
-        case BinOpType::BitShiftRight:
-            builder_->write_operator(">>");
-            break;
-        case BinOpType::BitShiftLeft:
-            builder_->write_operator("<<");
-            break;
-        case BinOpType::BitAnd:
-            builder_->write_operator("&");
-            break;
-        case BinOpType::BitOr:
-            builder_->write_operator("|");
-            break;
-        case BinOpType::BitXor:
-            builder_->write_operator("^");
-            break;
-        case BinOpType::Comma:
-            builder_->write_separator(",");
-            break;
-        case BinOpType::AddAssign:
-            builder_->write_operator("+=");
-            break;
-        case BinOpType::SubtractAssign:
-            builder_->write_operator("-=");
-            break;
-        case BinOpType::MultiplyAssign:
-            builder_->write_operator("*=");
-            break;
-        case BinOpType::DivideAssign:
-            builder_->write_operator("/=");
-            break;
-        case BinOpType::FloorDivideAssign:
-            builder_->write_operator("div=");
-            break;
-        case BinOpType::ModuloAssign:
-            builder_->write_operator("%=");
-            break;
-        case BinOpType::ExponentiationAssign:
-            builder_->write_operator("**=");
-            break;
-        case BinOpType::BitShiftRightAssign:
-            builder_->write_operator(">>=");
-            break;
-        case BinOpType::BitShiftLeftAssign:
-            builder_->write_operator("<<=");
-            break;
-        case BinOpType::BitAndAssign:
-            builder_->write_operator("&=");
-            break;
-        case BinOpType::BitOrAssign:
-            builder_->write_operator("|=");
-            break;
-        case BinOpType::BitXorAssign:
-            builder_->write_operator("^=");
-            break;
+    switch (expr.op) {
+    case BinOpType::Assign:
+        builder_->write_assign_operator();
+        break;
+    case BinOpType::Add:
+        builder_->write_operator("+");
+        break;
+    case BinOpType::Subtract:
+        builder_->write_operator("-");
+        break;
+    case BinOpType::Multiply:
+        builder_->write_operator("*");
+        break;
+    case BinOpType::Divide:
+        builder_->write_operator("/");
+        break;
+    case BinOpType::FloorDivide:
+        builder_->write_operator("div");
+        break;
+    case BinOpType::Modulo:
+        builder_->write_modulo_operator();
+        break;
+    case BinOpType::Exponentiation:
+        builder_->write_operator("**");
+        break;
+    case BinOpType::Equal:
+        builder_->write_operator("==");
+        break;
+    case BinOpType::NotEqual:
+        builder_->write_operator("!=");
+        break;
+    case BinOpType::Less:
+        builder_->write_operator("<");
+        break;
+    case BinOpType::LessEqual:
+        builder_->write_operator("<=");
+        break;
+    case BinOpType::Greater:
+        builder_->write_operator(">");
+        break;
+    case BinOpType::GreaterEqual:
+        builder_->write_operator(">=");
+        break;
+    case BinOpType::LogicalAnd:
+        builder_->write_operator("&&");
+        break;
+    case BinOpType::LogicalOr:
+        builder_->write_operator("||");
+        break;
+    case BinOpType::BitShiftRight:
+        builder_->write_operator(">>");
+        break;
+    case BinOpType::BitShiftLeft:
+        builder_->write_operator("<<");
+        break;
+    case BinOpType::BitAnd:
+        builder_->write_operator("&");
+        break;
+    case BinOpType::BitOr:
+        builder_->write_operator("|");
+        break;
+    case BinOpType::BitXor:
+        builder_->write_operator("^");
+        break;
+    case BinOpType::Comma:
+        builder_->write_separator(",");
+        break;
+    case BinOpType::AddAssign:
+        builder_->write_operator("+=");
+        break;
+    case BinOpType::SubtractAssign:
+        builder_->write_operator("-=");
+        break;
+    case BinOpType::MultiplyAssign:
+        builder_->write_operator("*=");
+        break;
+    case BinOpType::DivideAssign:
+        builder_->write_operator("/=");
+        break;
+    case BinOpType::FloorDivideAssign:
+        builder_->write_operator("div=");
+        break;
+    case BinOpType::ModuloAssign:
+        builder_->write_operator("%=");
+        break;
+    case BinOpType::ExponentiationAssign:
+        builder_->write_operator("**=");
+        break;
+    case BinOpType::BitShiftRightAssign:
+        builder_->write_operator(">>=");
+        break;
+    case BinOpType::BitShiftLeftAssign:
+        builder_->write_operator("<<=");
+        break;
+    case BinOpType::BitAndAssign:
+        builder_->write_operator("&=");
+        break;
+    case BinOpType::BitOrAssign:
+        builder_->write_operator("|=");
+        break;
+    case BinOpType::BitXorAssign:
+        builder_->write_operator("^=");
+        break;
     }
     builder_->append_space();
-    if (!try_accept_node(expr.right_))
-    {
+    if (! try_accept_node(expr.right)) {
         builder_->write_invalid_expr();
     }
 }
 
-void PseudocodeVisitor::visit(UnaryOpExpr const& expr)
-{
-    switch (expr.op_)
-    {
-        case UnaryOpType::LogicalNot:
-            builder_->write_operator("!");
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::Minus:
-            builder_->write_operator("-");
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::Plus:
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::Dereference:
-            builder_->write_deref_operator();
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::AddressOf:
-            builder_->write_address_operator();
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::PreIncrement:
-            builder_->write_operator("++");
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::PostIncrement:
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            builder_->write_operator("++");
-            break;
-        case UnaryOpType::PreDecrement:
-            builder_->write_operator("--");
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
-        case UnaryOpType::PostDecrement:
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            builder_->write_operator("--");
-            break;
-        case UnaryOpType::BitFlip:
-            builder_->write_operator("~");
-            if (!try_accept_node(expr.arg_))
-            {
-                builder_->write_invalid_expr();
-            }
-            break;
+void PseudocodeVisitor::visit(const UnaryOpExpr& expr) {
+    switch (expr.op) {
+    case UnaryOpType::LogicalNot:
+        builder_->write_operator("!");
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::Minus:
+        builder_->write_operator("-");
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::Plus:
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::Dereference:
+        builder_->write_deref_operator();
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::AddressOf:
+        builder_->write_address_operator();
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::PreIncrement:
+        builder_->write_operator("++");
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::PostIncrement:
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        builder_->write_operator("++");
+        break;
+    case UnaryOpType::PreDecrement:
+        builder_->write_operator("--");
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
+    case UnaryOpType::PostDecrement:
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        builder_->write_operator("--");
+        break;
+    case UnaryOpType::BitFlip:
+        builder_->write_operator("~");
+        if (! try_accept_node(expr.arg)) {
+            builder_->write_invalid_expr();
+        }
+        break;
     }
 }
 
-void PseudocodeVisitor::visit(ParamVarRefExpr const& expr)
-{
-    builder_->write_param_var_name(expr.param_);
+void PseudocodeVisitor::visit(const ParamVarRefExpr& expr) {
+    builder_->write_param_var_name(expr.param);
 }
 
-void PseudocodeVisitor::visit(LocalVarRefExpr const& expr)
-{
-    builder_->write_local_var_name(expr.var_);
+void PseudocodeVisitor::visit(const LocalVarRefExpr& expr) {
+    builder_->write_local_var_name(expr.var);
 }
 
-void PseudocodeVisitor::visit(MemberVarRefExpr const& expr)
-{
-    if (try_accept_node(expr.owner_))
-    {
+void PseudocodeVisitor::visit(const MemberVarRefExpr& expr) {
+    if (try_accept_node(expr.owner)) {
         builder_->write_separator(".");
     }
-    builder_->write_member_var_name(expr.member_);
+    builder_->write_member_var_name(expr.member);
 }
 
-void PseudocodeVisitor::visit(GlobalVarRefExpr const& expr)
-{
-    builder_->write_global_var_name(expr.global_);
+void PseudocodeVisitor::visit(const GlobalVarRefExpr& expr) {
+    builder_->write_global_var_name(expr.global);
 }
 
-void PseudocodeVisitor::visit(ClassRefExpr const& expr)
-{
-    builder_->write_class_name(expr.name_);
+void PseudocodeVisitor::visit(const ClassRefExpr& expr) {
+    builder_->write_class_name(expr.name);
 }
 
-void PseudocodeVisitor::visit(FunctionCallExpr const& expr)
-{
-    if (configurator_->sh_other_expr())
-    {
+void PseudocodeVisitor::visit(const FunctionCallExpr& expr) {
+    if (configurator_->sh_other_expr()) {
         builder_->write_call_word();
         builder_->append_space();
     }
-    builder_->write_function_name(expr.name_);
-    process_pargs(expr.args_, false);
+    builder_->write_function_name(expr.name);
+    process_pargs(expr.args, false);
 }
 
-void PseudocodeVisitor::visit(MethodCallExpr const& expr)
-{
-    if (configurator_->sh_other_expr() && !isMethodCall_)
-    {
+void PseudocodeVisitor::visit(const MethodCallExpr& expr) {
+    if (configurator_->sh_other_expr() && ! isMethodCall_) {
         builder_->write_call_word();
         builder_->append_space();
         isMethodCall_ = true;
     }
-    if (!try_accept_node(expr.owner_))
-    {
+    if (! try_accept_node(expr.owner)) {
         builder_->write_this_word();
     }
     builder_->write_separator(".");
     isMethodCall_ = false;
-    builder_->write_method_name(expr.name_);
-    process_pargs(expr.args_, false);
+    builder_->write_method_name(expr.name);
+    process_pargs(expr.args, false);
 }
 
-void PseudocodeVisitor::visit(LambdaCallExpr const& expr)
-{
-    try_accept_node(expr.lambda_);
-    process_pargs(expr.args_, false);
+void PseudocodeVisitor::visit(const LambdaCallExpr& expr) {
+    try_accept_node(expr.lambda);
+    process_pargs(expr.args, false);
 }
 
-void PseudocodeVisitor::visit(LambdaExpr const& expr)
-{
+void PseudocodeVisitor::visit(const LambdaExpr& expr) {
     builder_->write_lambda_word();
-    process_pargs(expr.params_, false);
-    process_body(expr.body_);
+    process_pargs(expr.params, false);
+    process_body(expr.body);
 }
 
-void PseudocodeVisitor::visit(ThisExpr const& /*expr*/)
-{
+void PseudocodeVisitor::visit(const ThisExpr& /*expr*/) {
     builder_->write_this_word();
 }
 
-void PseudocodeVisitor::visit(ConstructorCallExpr const& expr)
-{
-    if (configurator_->sh_other_expr() && !isConstructorCall_)
-    {
+void PseudocodeVisitor::visit(const ConstructorCallExpr& expr) {
+    if (configurator_->sh_other_expr() && ! isConstructorCall_) {
         builder_->write_call_word();
         builder_->append_space();
         builder_->write_constructor_word();
         builder_->append_space();
     }
     isConstructorCall_ = true;
-    if (!try_accept_node(expr.type_))
-    {
+    if (! try_accept_node(expr.type)) {
         builder_->write_invalid_type();
     }
     isConstructorCall_ = false;
-    process_pargs(expr.args_, false);
+    process_pargs(expr.args, false);
 }
 
-void PseudocodeVisitor::visit(NewExpr const& expr)
-{
+void PseudocodeVisitor::visit(const NewExpr& expr) {
     builder_->write_new_word();
     builder_->append_space();
     isConstructorCall_ = true;
-    if (!try_accept_node(expr.init_))
-    {
+    if (! try_accept_node(expr.init)) {
         builder_->write_invalid_expr();
     }
     isConstructorCall_ = false;
 }
 
-void PseudocodeVisitor::visit(DeleteExpr const& expr)
-{
+void PseudocodeVisitor::visit(const DeleteExpr& expr) {
     builder_->write_delete_word();
     builder_->append_space();
-    if (!try_accept_node(expr.arg_))
-    {
+    if (! try_accept_node(expr.arg)) {
         builder_->write_invalid_expr();
     }
 }
 
-void PseudocodeVisitor::visit(BracketExpr const& expr)
-{
+void PseudocodeVisitor::visit(const BracketExpr& expr) {
     builder_->write_left_bracket("(");
-    if (!try_accept_node(expr.expr))
-    {
+    if (! try_accept_node(expr.expr)) {
         builder_->write_invalid_expr();
     }
     builder_->write_right_bracket(")");
 }
 
-void PseudocodeVisitor::visit(UnknownExpr const& /*expr*/)
-{
+void PseudocodeVisitor::visit(const UnknownExpr& /*expr*/) {
     builder_->write_unknown_expr();
 }
 
 // -----
 
-void PseudocodeVisitor::visit(TranslationUnit const& stmt)
-{
+void PseudocodeVisitor::visit(const TranslationUnit& stmt) {
     bool previous = false;
-    if (configurator_->sh_global_vars())
-    {
-        for (GlobalVarDefStmt* a : stmt.globals_)
-        {
-            if (a)
-            {
+    if (configurator_->sh_global_vars()) {
+        for (GlobalVarDefStmt* a : stmt.globals) {
+            if (a) {
                 a->accept(*this);
                 builder_->append_new_line();
                 previous = true;
             }
         }
     }
-    if (configurator_->sh_func_declar())
-    {
-        for (FunctionDefStmt* a : stmt.functions_)
-        {
-            if (a)
-            {
-                if (previous)
-                {
+    if (configurator_->sh_func_declar()) {
+        for (FunctionDefStmt* a : stmt.functions) {
+            if (a) {
+                if (previous) {
                     builder_->append_new_line();
                 }
                 a->accept(*this);
@@ -572,14 +486,10 @@ void PseudocodeVisitor::visit(TranslationUnit const& stmt)
             }
         }
     }
-    if (configurator_->sh_interf_declar())
-    {
-        for (InterfaceDefStmt* a : stmt.interfaces_)
-        {
-            if (a)
-            {
-                if (previous)
-                {
+    if (configurator_->sh_interf_declar()) {
+        for (InterfaceDefStmt* a : stmt.interfaces) {
+            if (a) {
+                if (previous) {
                     builder_->append_new_line();
                 }
                 a->accept(*this);
@@ -588,12 +498,9 @@ void PseudocodeVisitor::visit(TranslationUnit const& stmt)
             }
         }
     }
-    for (ClassDefStmt* a : stmt.classes_)
-    {
-        if (a)
-        {
-            if (previous)
-            {
+    for (ClassDefStmt* a : stmt.classes) {
+        if (a) {
+            if (previous) {
                 builder_->append_new_line();
             }
             a->accept(*this);
@@ -603,71 +510,55 @@ void PseudocodeVisitor::visit(TranslationUnit const& stmt)
     }
 }
 
-void PseudocodeVisitor::visit(CompoundStmt const& stmt)
-{
-    for (size_t i = 0; i < stmt.stmts_.size(); ++i)
-    {
-        if (!try_accept_node(stmt.stmts_.at(i)))
-        {
+void PseudocodeVisitor::visit(const CompoundStmt& stmt) {
+    for (size_t i = 0; i < stmt.stmts.size(); ++i) {
+        if (! try_accept_node(stmt.stmts.at(i))) {
             builder_->write_invalid_stmt();
         }
-        if (i < stmt.stmts_.size() - 1)
-        {
+        if (i < stmt.stmts.size() - 1) {
             builder_->append_new_line();
         }
     }
 }
 
-void PseudocodeVisitor::visit(ReturnStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const ReturnStmt& stmt) {
     builder_->write_return_word();
-    if (stmt.val_)
-    {
+    if (stmt.val) {
         builder_->append_space();
-        try_accept_node(stmt.val_);
+        try_accept_node(stmt.val);
     }
 }
 
-void PseudocodeVisitor::visit(ExprStmt const& stmt)
-{
-    if (!try_accept_node(stmt.expr_))
-    {
+void PseudocodeVisitor::visit(const ExprStmt& stmt) {
+    if (! try_accept_node(stmt.expr)) {
         builder_->write_invalid_stmt();
     }
 }
 
-void PseudocodeVisitor::visit(IfStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const IfStmt& stmt) {
     builder_->write_if_word();
-    process_condition(stmt.cond_);
+    process_condition(stmt.cond);
     builder_->append_space();
     builder_->write_do_word();
-    process_body(stmt.iftrue_);
-    if (stmt.iffalse_)
-    {
+    process_body(stmt.iftrue);
+    if (stmt.iffalse) {
         builder_->write_opening_else_word();
-        process_body(stmt.iffalse_);
+        process_body(stmt.iffalse);
     }
 }
 
-void PseudocodeVisitor::visit(CaseStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const CaseStmt& stmt) {
     builder_->write_case_word();
     builder_->append_space();
-    if (stmt.exprs_.empty())
-    {
+    if (stmt.exprs.empty()) {
         builder_->write_invalid_stmt();
     }
-    else
-    {
-        for (size_t i = 0; i < stmt.exprs_.size(); ++i)
-        {
-            if (!try_accept_node(stmt.exprs_.at(i)))
-            {
+    else {
+        for (size_t i = 0; i < stmt.exprs.size(); ++i) {
+            if (! try_accept_node(stmt.exprs.at(i))) {
                 builder_->write_invalid_stmt();
             }
-            if (i < stmt.exprs_.size() - 1)
-            {
+            if (i < stmt.exprs.size() - 1) {
                 builder_->write_separator(",");
                 builder_->append_space();
             }
@@ -675,31 +566,26 @@ void PseudocodeVisitor::visit(CaseStmt const& stmt)
     }
     builder_->append_space();
     builder_->write_do_word();
-    process_body(stmt.body_);
+    process_body(stmt.body);
 }
 
-void PseudocodeVisitor::visit(DefaultCaseStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const DefaultCaseStmt& stmt) {
     builder_->write_default_word();
     builder_->append_space();
     builder_->write_do_word();
-    process_body(stmt.body_);
+    process_body(stmt.body);
 }
 
-void PseudocodeVisitor::visit(SwitchStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const SwitchStmt& stmt) {
     builder_->write_switch_word();
     process_condition(stmt.expr_);
     builder_->write_opening_curl_bracket();
     builder_->increase_indentation();
-    for (size_t i = 0; i < stmt.cases_.size(); ++i)
-    {
-        if (!try_accept_node(stmt.cases_.at(i)))
-        {
+    for (size_t i = 0; i < stmt.cases.size(); ++i) {
+        if (! try_accept_node(stmt.cases.at(i))) {
             builder_->write_invalid_stmt();
         }
-        if (i < stmt.cases_.size() - 1)
-        {
+        if (i < stmt.cases.size() - 1) {
             builder_->append_new_line();
         }
     }
@@ -708,103 +594,86 @@ void PseudocodeVisitor::visit(SwitchStmt const& stmt)
     builder_->write_right_bracket("}");
 }
 
-void PseudocodeVisitor::visit(WhileStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const WhileStmt& stmt) {
     builder_->write_while_word();
-    process_condition(stmt.cond_);
+    process_condition(stmt.cond);
     builder_->append_space();
     builder_->write_repeat_word();
-    process_body(stmt.body_);
+    process_body(stmt.body);
 }
 
-void PseudocodeVisitor::visit(DoWhileStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const DoWhileStmt& stmt) {
     builder_->write_repeat_word();
-    process_body(stmt.body_);
+    process_body(stmt.body);
     builder_->append_space();
     builder_->write_while_word();
-    process_condition(stmt.cond_);
+    process_condition(stmt.cond);
 }
 
-void PseudocodeVisitor::visit(ForStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const ForStmt& stmt) {
     builder_->write_for_word();
     builder_->append_space();
     builder_->write_left_bracket("(");
-    if (!try_accept_node(stmt.init_))
-    {
+    if (! try_accept_node(stmt.init)) {
         builder_->write_invalid_stmt();
     }
     builder_->write_separator(";");
     builder_->append_space();
-    if (!try_accept_node(stmt.cond_))
-    {
+    if (! try_accept_node(stmt.cond)) {
         builder_->write_invalid_expr();
     }
     builder_->write_separator(";");
     builder_->append_space();
-    if (!try_accept_node(stmt.step_))
-    {
+    if (! try_accept_node(stmt.step)) {
         builder_->write_invalid_stmt();
     }
     builder_->write_right_bracket(")");
     builder_->append_space();
     builder_->write_repeat_word();
-    process_body(stmt.body_);
+    process_body(stmt.body);
 }
 
-void PseudocodeVisitor::visit(ThrowStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const ThrowStmt& stmt) {
     builder_->write_throw_word();
     builder_->append_space();
-    if (!try_accept_node(stmt.val_))
-    {
+    if (! try_accept_node(stmt.val)) {
         builder_->write_invalid_expr();
     }
 }
 
-void PseudocodeVisitor::visit(UnknownStmt const& /*stmt*/)
-{
+void PseudocodeVisitor::visit(const UnknownStmt& /*stmt*/) {
     builder_->write_unknown_stmt();
 }
 
-void PseudocodeVisitor::visit(LocalVarDefStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const LocalVarDefStmt& stmt) {
     process_var_def(stmt, LOCAL_VAR);
 }
 
-void PseudocodeVisitor::visit(ParamVarDefStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const ParamVarDefStmt& stmt) {
     process_var_def(stmt, PARAM_VAR);
 }
 
-void PseudocodeVisitor::visit(MemberVarDefStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const MemberVarDefStmt& stmt) {
     process_var_def(stmt, MEMBER_VAR);
 }
 
-void PseudocodeVisitor::visit(GlobalVarDefStmt const& stmt)
-{
+void PseudocodeVisitor::visit(const GlobalVarDefStmt& stmt) {
     process_var_def(stmt, GLOBAL_VAR);
 }
 
-void PseudocodeVisitor::visit(FunctionDefStmt const& stmt)
-{
-    if (!configurator_->sh_func_declar())
-    {
+void PseudocodeVisitor::visit(const FunctionDefStmt& stmt) {
+    if (! configurator_->sh_func_declar()) {
         return;
     }
-    if (configurator_->sh_other_expr())
-    {
+    if (configurator_->sh_other_expr()) {
         builder_->write_function_word();
         builder_->append_space();
     }
-    builder_->write_function_name(stmt.name_);
-    process_pargs(stmt.params_, false);
-    process_return_type(stmt.retType_);
-    if (configurator_->sh_func_defin())
-    {
-        process_body(stmt.body_);
+    builder_->write_function_name(stmt.name);
+    process_pargs(stmt.params, false);
+    process_return_type(stmt.retType);
+    if (configurator_->sh_func_defin()) {
+        process_body(stmt.body);
         return;
     }
     builder_->append_space();
@@ -812,310 +681,257 @@ void PseudocodeVisitor::visit(FunctionDefStmt const& stmt)
     builder_->write_right_bracket("}");
 }
 
-void PseudocodeVisitor::visit(DefStmt const& stmt)
-{
-    if (stmt.defs_.empty())
-    {
+void PseudocodeVisitor::visit(const DefStmt& stmt) {
+    if (stmt.defs.empty()) {
         builder_->write_invalid_stmt();
         return;
     }
-    if (configurator_->sh_other_expr())
-    {
+    if (configurator_->sh_other_expr()) {
         builder_->write_define_word();
         builder_->append_space();
     }
-    if (!try_accept_node(stmt.defs_.at(0)->type_))
-    {
+    if (! try_accept_node(stmt.defs.at(0)->type)) {
         builder_->write_invalid_type();
     }
-    for (size_t i = 0; i < stmt.defs_.size(); ++i)
-    {
+    for (size_t i = 0; i < stmt.defs.size(); ++i) {
         builder_->append_space();
-        builder_->write_local_var_name(stmt.defs_.at(i)->name_);
-        if (stmt.defs_.at(i)->initializer_)
-        {
+        builder_->write_local_var_name(stmt.defs.at(i)->name);
+        if (stmt.defs.at(i)->initializer) {
             builder_->append_space();
             builder_->write_assign_operator();
             builder_->append_space();
-            if (!try_accept_node(stmt.defs_.at(i)->initializer_))
-            {
+            if (! try_accept_node(stmt.defs.at(i)->initializer)) {
                 builder_->write_invalid_expr();
             }
         }
-        if (i < stmt.defs_.size() - 1)
-        {
+        if (i < stmt.defs.size() - 1) {
             builder_->write_separator(",");
             builder_->append_space();
         }
     }
 }
 
-void PseudocodeVisitor::visit(MethodDefStmt const& stmt)
-{
-    if (!configurator_->sh_con_des_meth_defin() ||
-        (stmt.access_ != AccessModifier::Public && !configurator_->use_inner_view()) ||
-        !stmt.func_
-    )
-    {
+void PseudocodeVisitor::visit(const MethodDefStmt& stmt) {
+    if (! configurator_->sh_con_des_meth_defin()
+        || (stmt.access != AccessModifier::Public && ! configurator_->use_inner_view())
+        || ! stmt.func) {
         return;
     }
-    ClassDefStmt* ownerClass = static_cast<ClassDefStmt*>(stmt.owner_);
-    if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template() && stmt.owner_)
-    {
-        process_generic_params_decl(ownerClass->tparams_);
+    ClassDefStmt* ownerClass = static_cast<ClassDefStmt*>(stmt.owner);
+    if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template()
+        && stmt.owner) {
+        process_generic_params_decl(ownerClass->tparams);
     }
-    if (configurator_->sh_other_expr())
-    {
+    if (configurator_->sh_other_expr()) {
         builder_->write_method_word();
         builder_->append_space();
     }
-    if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
-    {
-        builder_->write_class_name(stmt.owner_->name_);
-        if (!ownerClass->tparams_.empty() && configurator_->sh_con_des_meth_template())
-        {
-            if (configurator_->sh_generic_param())
-            {
-                process_pargs(ownerClass->tparams_, true);
+    if (configurator_->sh_con_des_meth_owner() && stmt.owner) {
+        // builder_->write_class_name(stmt.owner_->name_); // TODO what's next
+        if (! ownerClass->tparams.empty() && configurator_->sh_con_des_meth_template()) {
+            if (configurator_->sh_generic_param()) {
+                process_pargs(ownerClass->tparams, true);
             }
         }
         builder_->write_separator("::");
     }
-    builder_->write_method_name(stmt.func_->name_);
-    process_pargs(stmt.func_->params_, false);
-    process_return_type(stmt.func_->retType_);
-    process_body(stmt.func_->body_);
+    builder_->write_method_name(stmt.func->name);
+    process_pargs(stmt.func->params, false);
+    process_return_type(stmt.func->retType);
+    process_body(stmt.func->body);
 }
 
-void PseudocodeVisitor::visit(BaseInitializerStmt const& stmt)
-{
-    if (configurator_->sh_other_expr())
-    {
+void PseudocodeVisitor::visit(const BaseInitializerStmt& stmt) {
+    if (configurator_->sh_other_expr()) {
         builder_->write_call_word();
         builder_->append_space();
         builder_->write_constructor_word();
         builder_->append_space();
     }
-    builder_->write_class_name(stmt.base_);
-    process_pargs(stmt.args_, false);
+    // builder_->write_class_name(stmt.base_);
+    builder_->write_class_name(stmt.type->name); // TODO check
+    process_pargs(stmt.args, false);
 }
 
-void PseudocodeVisitor::visit(ConstructorDefStmt const& stmt)
-{
-    if (!configurator_->sh_con_des_meth_defin() || (stmt.access_ != AccessModifier::Public && !configurator_->use_inner_view()))
-    {
+void PseudocodeVisitor::visit(const ConstructorDefStmt& stmt) {
+    if (! configurator_->sh_con_des_meth_defin()
+        || (stmt.access != AccessModifier::Public && ! configurator_->use_inner_view())) {
         return;
     }
-    if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template() && stmt.owner_)
-    {
-        if (configurator_->sh_generic_param() && !stmt.owner_->tparams_.empty())
-        {
+    if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template()
+        && stmt.owner) {
+        if (configurator_->sh_generic_param() && ! stmt.owner->tparams.empty()) {
             builder_->write_template_word();
-            process_pargs(stmt.owner_->tparams_, true);
+            process_pargs(stmt.owner->tparams, true);
             builder_->append_new_line();
         }
     }
-    if (configurator_->sh_other_expr())
-    {
+    if (configurator_->sh_other_expr()) {
         builder_->write_constructor_word();
         builder_->append_space();
     }
-    if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
-    {
-        builder_->write_class_name(stmt.owner_->name_);
-        if (!stmt.owner_->tparams_.empty() && configurator_->sh_con_des_meth_template())
-        {
-            process_pargs(stmt.owner_->tparams_, true);
+    if (configurator_->sh_con_des_meth_owner() && stmt.owner) {
+        // builder_->write_class_name(stmt.owner_->name_);
+        builder_->write_class_name(stmt.owner->type->name); // TODO check
+        if (! stmt.owner->tparams.empty() && configurator_->sh_con_des_meth_template()) {
+            process_pargs(stmt.owner->tparams, true);
         }
         builder_->write_separator("::");
     }
-    if (stmt.owner_)
-    {
-        builder_->write_class_name(stmt.owner_->name_);
+    if (stmt.owner) {
+        // builder_->write_class_name(stmt.owner_->name_);
+        builder_->write_class_name(stmt.owner->type->name); // TODO check
     }
-    else
-    {
+    else {
         builder_->write_invalid_expr();
     }
-    process_pargs(stmt.params_, false);
-    if (!stmt.baseInit_.empty())
-    {
-        for (size_t i = 0; i < stmt.baseInit_.size(); ++i)
-        {
+    process_pargs(stmt.params, false);
+    if (! stmt.baseInit.empty()) {
+        for (size_t i = 0; i < stmt.baseInit.size(); ++i) {
             builder_->append_new_line();
             builder_->append_space();
             builder_->write_separator("->");
             builder_->append_space();
-            if (!try_accept_node(stmt.baseInit_.at(i)))
-            {
+            if (! try_accept_node(stmt.baseInit.at(i))) {
                 builder_->write_invalid_stmt();
             }
         }
     }
-    process_body(stmt.body_);
+    process_body(stmt.body);
 }
 
-void PseudocodeVisitor::visit(DestructorDefStmt const& stmt)
-{
-    if (!configurator_->sh_con_des_meth_defin() && !stmt.body_)
-    {
+void PseudocodeVisitor::visit(const DestructorDefStmt& stmt) {
+    if (! configurator_->sh_con_des_meth_defin() && ! stmt.body) {
         return;
     }
-    if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template() && stmt.owner_)
-    {
-        if (configurator_->sh_generic_param() && !stmt.owner_->tparams_.empty())
-        {
+    if (configurator_->sh_con_des_meth_owner() && configurator_->sh_con_des_meth_template()
+        && stmt.owner) {
+        if (configurator_->sh_generic_param() && ! stmt.owner->tparams.empty()) {
             builder_->write_template_word();
-            process_pargs(stmt.owner_->tparams_, true);
+            process_pargs(stmt.owner->tparams, true);
             builder_->append_new_line();
         }
     }
-    if (configurator_->sh_other_expr())
-    {
+    if (configurator_->sh_other_expr()) {
         builder_->write_destructor_word();
         builder_->append_space();
     }
-    if (configurator_->sh_con_des_meth_owner() && stmt.owner_)
-    {
-        builder_->write_class_name(stmt.owner_->name_);
-        if (!stmt.owner_->tparams_.empty() && configurator_->sh_con_des_meth_template())
-        {
-            process_pargs(stmt.owner_->tparams_, true);
+    if (configurator_->sh_con_des_meth_owner() && stmt.owner) {
+        // builder_->write_class_name(stmt.owner_->name_);
+        builder_->write_class_name(stmt.owner->type->name); // TODO check
+        if (! stmt.owner->tparams.empty() && configurator_->sh_con_des_meth_template()) {
+            process_pargs(stmt.owner->tparams, true);
         }
         builder_->write_separator("::");
     }
-    if (stmt.owner_)
-    {
-        builder_->write_class_name("~" + stmt.owner_->name_);
+    if (stmt.owner) {
+        // builder_->write_class_name("~" + stmt.owner_->name_);
+        builder_->write_class_name("~" + stmt.owner->type->name); // TODO check
     }
-    else
-    {
+    else {
         builder_->write_invalid_expr();
     }
     builder_->write_left_bracket("(");
     builder_->write_right_bracket(")");
-    process_body(stmt.body_);
+    process_body(stmt.body);
 }
 
-void PseudocodeVisitor::visit(GenericParam const& stmt)
-{
-    builder_->write_gen_param_name(stmt.name_);
+void PseudocodeVisitor::visit(const GenericParam& stmt) {
+    builder_->write_gen_param_name(stmt.name);
 }
 
-void PseudocodeVisitor::visit(InterfaceDefStmt const& stmt)
-{
-    if (!configurator_->sh_interf_declar())
-    {
+void PseudocodeVisitor::visit(const InterfaceDefStmt& stmt) {
+    if (! configurator_->sh_interf_declar()) {
         return;
     }
-    if (configurator_->sh_generic_param() && !stmt.tparams_.empty())
-    {
+    if (configurator_->sh_generic_param() && ! stmt.tparams.empty()) {
         builder_->write_template_word();
-        process_pargs(stmt.tparams_, true);
+        process_pargs(stmt.tparams, true);
         builder_->append_new_line();
     }
     builder_->write_interface_word();
     builder_->append_space();
-    builder_->write_interface_name(stmt.name_);
-    if (!stmt.bases_.empty())
-    {
-        process_relations(stmt.bases_, true);
+    // builder_->write_interface_name(stmt.name_);
+    builder_->write_interface_name(stmt.type->name); // TODO check
+    if (! stmt.bases.empty()) {
+        process_relations(stmt.bases, true);
     }
     builder_->write_opening_curl_bracket();
-    if (configurator_->sh_interf_defin() && configurator_->sh_con_des_meth_declar() && !stmt.methods_.empty())
-    {
-        process_method_decl(stmt.methods_);
+    if (configurator_->sh_interf_defin() && configurator_->sh_con_des_meth_declar()
+        && ! stmt.methods.empty()) {
+        process_method_decl(stmt.methods);
     }
     builder_->write_right_bracket("}");
     builder_->append_new_line();
 }
 
-void PseudocodeVisitor::visit(ClassDefStmt const& stmt)
-{
-    if (configurator_->sh_class_declar())
-    {
-        if (configurator_->sh_generic_param() && !stmt.tparams_.empty())
-        {
+void PseudocodeVisitor::visit(const ClassDefStmt& stmt) {
+    if (configurator_->sh_class_declar()) {
+        if (configurator_->sh_generic_param() && ! stmt.tparams.empty()) {
             builder_->write_template_word();
-            process_pargs(stmt.tparams_, true);
+            process_pargs(stmt.tparams, true);
             builder_->append_new_line();
         }
         builder_->write_class_word();
         builder_->append_space();
-        builder_->write_class_name(stmt.name_);
-        if (!stmt.interfaces_.empty())
-        {
-            process_relations(stmt.interfaces_, true);
+        // builder_->write_class_name(stmt.name_);
+        builder_->write_class_name(stmt.type->name); // TODO check
+        if (! stmt.interfaces.empty()) {
+            process_relations(stmt.interfaces, true);
         }
-        if (!stmt.bases_.empty())
-        {
-            process_relations(stmt.bases_, false);
+        if (! stmt.bases.empty()) {
+            process_relations(stmt.bases, false);
         }
         builder_->write_opening_curl_bracket();
-        if (configurator_->sh_class_defin())
-        {
-            if (configurator_->sh_member_vars() && !stmt.vars_.empty())
-            {
-                process_member_var_decl(stmt.vars_);
+        if (configurator_->sh_class_defin()) {
+            if (configurator_->sh_member_vars() && ! stmt.vars.empty()) {
+                process_member_var_decl(stmt.vars);
             }
-            if (configurator_->sh_con_des_meth_declar())
-            {
-                if (!stmt.constructors_.empty())
-                {
-                    process_constructor_decl(stmt.constructors_);
+            if (configurator_->sh_con_des_meth_declar()) {
+                if (! stmt.constructors.empty()) {
+                    process_constructor_decl(stmt.constructors);
                 }
-                if (!stmt.destructors_.empty())
-                {
-                    process_destructor_decl(stmt.destructors_);
+                if (! stmt.destructors.empty()) {
+                    process_destructor_decl(stmt.destructors);
                 }
-                if (!stmt.methods_.empty())
-                {
-                    process_method_decl(stmt.methods_);
+                if (! stmt.methods.empty()) {
+                    process_method_decl(stmt.methods);
                 }
             }
         }
         builder_->write_right_bracket("}");
         builder_->append_new_line();
     }
-    if (configurator_->sh_con_des_meth_defin())
-    {
-        for (size_t i = 0; i < stmt.constructors_.size(); ++i)
-        {
-            if (stmt.constructors_.at(i))
-            {
+    if (configurator_->sh_con_des_meth_defin()) {
+        for (size_t i = 0; i < stmt.constructors.size(); ++i) {
+            if (stmt.constructors.at(i)) {
                 builder_->append_new_line();
-                stmt.constructors_.at(i)->accept(*this);
+                stmt.constructors.at(i)->accept(*this);
                 builder_->append_new_line();
             }
         }
-        for (size_t i = 0; i < stmt.destructors_.size(); ++i)
-        {
-            if (stmt.destructors_.at(i) && stmt.destructors_.at(i)->body_)
-            {
+        for (size_t i = 0; i < stmt.destructors.size(); ++i) {
+            if (stmt.destructors.at(i) && stmt.destructors.at(i)->body) {
                 builder_->append_new_line();
-                stmt.destructors_.at(i)->accept(*this);
+                stmt.destructors.at(i)->accept(*this);
                 builder_->append_new_line();
             }
         }
-        for (size_t i = 0; i < stmt.methods_.size(); ++i)
-        {
-            if (stmt.methods_.at(i) && stmt.methods_.at(i)->func_ && stmt.methods_.at(i)->func_->body_)
-            {
+        for (size_t i = 0; i < stmt.methods.size(); ++i) {
+            if (stmt.methods.at(i) && stmt.methods.at(i)->func && stmt.methods.at(i)->func->body) {
                 builder_->append_new_line();
-                stmt.methods_.at(i)->accept(*this);
+                stmt.methods.at(i)->accept(*this);
                 builder_->append_new_line();
             }
         }
     }
 }
 
-void PseudocodeVisitor::visit(ContinueStmt const& /*stmt*/)
-{
+void PseudocodeVisitor::visit(const ContinueStmt& /*stmt*/) {
     builder_->write_continue_word();
 }
 
-void PseudocodeVisitor::visit(BreakStmt const& /*stmt*/)
-{
+void PseudocodeVisitor::visit(const BreakStmt& /*stmt*/) {
     builder_->write_break_word();
 }
 
@@ -1123,110 +939,87 @@ void PseudocodeVisitor::visit(BreakStmt const& /*stmt*/)
 // -----
 //
 
-void PseudocodeVisitor::process_var_def(VarDefStmt const& var, int vartype)
-{
-    if (configurator_->sh_other_expr() && vartype != PARAM_VAR)
-    {
+void PseudocodeVisitor::process_var_def(const VarDefStmt& var, int vartype) {
+    if (configurator_->sh_other_expr() && vartype != PARAM_VAR) {
         builder_->write_define_word();
         builder_->append_space();
     }
-    if (!try_accept_node(var.type_))
-    {
+    if (! try_accept_node(var.type)) {
         builder_->write_invalid_type();
     }
     builder_->append_space();
-    if (vartype == LOCAL_VAR)
-    {
-        builder_->write_local_var_name(var.name_);
+    if (vartype == LOCAL_VAR) {
+        builder_->write_local_var_name(var.name);
     }
-    else if (vartype == PARAM_VAR)
-    {
-        builder_->write_param_var_name(var.name_);
+    else if (vartype == PARAM_VAR) {
+        builder_->write_param_var_name(var.name);
     }
-    else if (vartype == MEMBER_VAR)
-    {
-        builder_->write_member_var_name(var.name_);
+    else if (vartype == MEMBER_VAR) {
+        builder_->write_member_var_name(var.name);
     }
-    else if (vartype == GLOBAL_VAR)
-    {
-        builder_->write_global_var_name(var.name_);
+    else if (vartype == GLOBAL_VAR) {
+        builder_->write_global_var_name(var.name);
     }
-    if (var.initializer_)
-    {
+    if (var.initializer) {
         builder_->append_space();
         builder_->write_assign_operator();
         builder_->append_space();
-        if (!try_accept_node(var.initializer_))
-        {
+        if (! try_accept_node(var.initializer)) {
             builder_->write_invalid_expr();
         }
     }
 }
 
-void PseudocodeVisitor::process_return_type(Type const* const& type)
-{
+void PseudocodeVisitor::process_return_type(const Type* const& type) {
     builder_->append_space();
     builder_->write_separator("->");
     builder_->append_space();
-    if (configurator_->sh_other_expr())
-    {
+    if (configurator_->sh_other_expr()) {
         builder_->write_returns_word();
         builder_->append_space();
     }
-    if (!try_accept_node(type))
-    {
+    if (! try_accept_node(type)) {
         builder_->write_invalid_type();
     }
 }
 
-void PseudocodeVisitor::process_generic_params_decl(std::vector<GenericParam*> const& vgeneric)
-{
-    if (configurator_->sh_generic_param() && !vgeneric.empty())
-    {
+void PseudocodeVisitor::process_generic_params_decl(const std::vector<GenericParam*>& vgeneric) {
+    if (configurator_->sh_generic_param() && ! vgeneric.empty()) {
         builder_->write_template_word();
         process_pargs(vgeneric, true);
         builder_->write_new_word();
     }
 }
 
-void PseudocodeVisitor::process_member_var_decl(std::vector<MemberVarDefStmt*> const& vmembervars)
-{
-    std::vector<MemberVarDefStmt*> vfound {};
-    if (try_find_access_mod(vmembervars, vfound, AccessModifier::Public))
-    {
+void PseudocodeVisitor::process_member_var_decl(const std::vector<MemberVarDefStmt*>& vmembervars) {
+    std::vector<MemberVarDefStmt*> vfound{};
+    if (try_find_access_mod(vmembervars, vfound, AccessModifier::Public)) {
         builder_->write_public_word();
         process_member_var(vfound);
     }
-    if (configurator_->use_inner_view())
-    {
-        if (try_find_access_mod(vmembervars, vfound, AccessModifier::Private))
-        {
+    if (configurator_->use_inner_view()) {
+        if (try_find_access_mod(vmembervars, vfound, AccessModifier::Private)) {
             builder_->write_private_word();
             process_member_var(vfound);
         }
-        if (try_find_access_mod(vmembervars, vfound, AccessModifier::Protected))
-        {
+        if (try_find_access_mod(vmembervars, vfound, AccessModifier::Protected)) {
             builder_->write_protected_word();
             process_member_var(vfound);
         }
-        if (try_find_access_mod(vmembervars, vfound, AccessModifier::Internal))
-        {
+        if (try_find_access_mod(vmembervars, vfound, AccessModifier::Internal)) {
             builder_->write_internal_word();
             process_member_var(vfound);
         }
     }
 }
 
-void PseudocodeVisitor::process_member_var(std::vector<MemberVarDefStmt*>& vmembervars)
-{
+void PseudocodeVisitor::process_member_var(std::vector<MemberVarDefStmt*>& vmembervars) {
     builder_->append_space();
     builder_->write_attributes_word();
     builder_->append_new_line();
     builder_->increase_indentation();
-    for (size_t i = 0; i < vmembervars.size(); ++i)
-    {
-        if (vmembervars.at(i))
-        {
+    for (size_t i = 0; i < vmembervars.size(); ++i) {
+        if (vmembervars.at(i)) {
             vmembervars.at(i)->accept(*this);
             builder_->append_new_line();
         }
@@ -1235,49 +1028,42 @@ void PseudocodeVisitor::process_member_var(std::vector<MemberVarDefStmt*>& vmemb
     vmembervars.clear();
 }
 
-void PseudocodeVisitor::process_constructor_decl(std::vector<ConstructorDefStmt*> const& vconstructors)
-{
-    std::vector<ConstructorDefStmt*> vfound {};
-    if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Public)))
-    {
+void PseudocodeVisitor::process_constructor_decl(
+    const std::vector<ConstructorDefStmt*>& vconstructors
+) {
+    std::vector<ConstructorDefStmt*> vfound{};
+    if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Public))) {
         builder_->write_public_word();
         process_constructor(vfound);
     }
-    if (configurator_->use_inner_view())
-    {
-        if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Private)))
-        {
+    if (configurator_->use_inner_view()) {
+        if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Private))) {
             builder_->write_private_word();
             process_constructor(vfound);
         }
-        if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Protected)))
-        {
+        if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Protected))) {
             builder_->write_protected_word();
             process_constructor(vfound);
         }
-        if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Internal)))
-        {
+        if (try_find_access_mod(vconstructors, vfound, std::move(AccessModifier::Internal))) {
             builder_->write_internal_word();
             process_constructor(vfound);
         }
     }
 }
 
-void PseudocodeVisitor::process_constructor(std::vector<ConstructorDefStmt*>& constr)
-{
+void PseudocodeVisitor::process_constructor(std::vector<ConstructorDefStmt*>& constr) {
     builder_->append_space();
     builder_->write_constructors_word();
     builder_->append_new_line();
     builder_->increase_indentation();
-    for (size_t i = 0; i < constr.size(); ++i)
-    {
-        if (constr.at(i) && constr.at(i)->owner_)
-        {
-            builder_->write_class_name(constr.at(i)->owner_->name_);
-            process_pargs(constr.at(i)->params_, false);
+    for (size_t i = 0; i < constr.size(); ++i) {
+        if (constr.at(i) && constr.at(i)->owner) {
+            // builder_->write_class_name(constr.at(i)->owner_->name_);
+            builder_->write_class_name(constr.at(i)->owner->type->name); // TODO check
+            process_pargs(constr.at(i)->params, false);
         }
-        else
-        {
+        else {
             builder_->write_invalid_stmt();
         }
         builder_->append_new_line();
@@ -1286,21 +1072,19 @@ void PseudocodeVisitor::process_constructor(std::vector<ConstructorDefStmt*>& co
     constr.clear();
 }
 
-void PseudocodeVisitor::process_destructor_decl(std::vector<DestructorDefStmt*> const& vdestructors)
-{
+void PseudocodeVisitor::process_destructor_decl(const std::vector<DestructorDefStmt*>& vdestructors
+) {
     builder_->write_destructors_word();
     builder_->append_new_line();
     builder_->increase_indentation();
-    for (size_t i = 0; i < vdestructors.size(); ++i)
-    {
-        if (vdestructors.at(i) && vdestructors.at(i)->owner_)
-        {
-            builder_->write_class_name("~" + vdestructors.at(i)->owner_->name_);
+    for (size_t i = 0; i < vdestructors.size(); ++i) {
+        if (vdestructors.at(i) && vdestructors.at(i)->owner) {
+            // builder_->write_class_name("~" + vdestructors.at(i)->owner_->name_);
+            builder_->write_class_name("~" + vdestructors.at(i)->owner->type->name); // TODO check
             builder_->write_left_bracket("(");
             builder_->write_right_bracket(")");
         }
-        else
-        {
+        else {
             builder_->write_invalid_stmt();
         }
         builder_->append_new_line();
@@ -1308,63 +1092,50 @@ void PseudocodeVisitor::process_destructor_decl(std::vector<DestructorDefStmt*> 
     builder_->decrease_indentation();
 }
 
-void PseudocodeVisitor::process_method_decl(std::vector<MethodDefStmt*> const& vmethods)
-{
-    std::vector<MethodDefStmt*> vfound {};
-    if (try_find_access_mod(vmethods, vfound, AccessModifier::Public))
-    {
+void PseudocodeVisitor::process_method_decl(const std::vector<MethodDefStmt*>& vmethods) {
+    std::vector<MethodDefStmt*> vfound{};
+    if (try_find_access_mod(vmethods, vfound, AccessModifier::Public)) {
         builder_->write_public_word();
         process_method(vfound);
     }
-    if (configurator_->use_inner_view())
-    {
-        if (try_find_access_mod(vmethods, vfound, AccessModifier::Private))
-        {
+    if (configurator_->use_inner_view()) {
+        if (try_find_access_mod(vmethods, vfound, AccessModifier::Private)) {
             builder_->write_private_word();
             process_method(vfound);
         }
-        if (try_find_access_mod(vmethods, vfound, AccessModifier::Protected))
-        {
+        if (try_find_access_mod(vmethods, vfound, AccessModifier::Protected)) {
             builder_->write_protected_word();
             process_method(vfound);
         }
-        if (try_find_access_mod(vmethods, vfound, AccessModifier::Internal))
-        {
+        if (try_find_access_mod(vmethods, vfound, AccessModifier::Internal)) {
             builder_->write_internal_word();
             process_method(vfound);
         }
     }
 }
 
-void PseudocodeVisitor::process_method(std::vector<MethodDefStmt*>& meth)
-{
+void PseudocodeVisitor::process_method(std::vector<MethodDefStmt*>& meth) {
     builder_->append_space();
     builder_->write_methods_word();
     builder_->append_new_line();
     builder_->increase_indentation();
-    for (size_t i = 0; i < meth.size(); ++i)
-    {
-        if (meth.at(i) && meth.at(i)->func_)
-        {
-            if (meth.at(i)->func_->body_)
-            {
-                if (meth.at(i)->virtuality_ == Virtuality::Virtual)
-                {
+    for (size_t i = 0; i < meth.size(); ++i) {
+        if (meth.at(i) && meth.at(i)->func) {
+            if (meth.at(i)->func->body) {
+                if (meth.at(i)->virtuality == Virtuality::Virtual) {
                     builder_->write_virtual_word();
                     builder_->write_separator(" -> ");
                 }
             }
-            else
-            {
+            else {
                 builder_->write_abstract_word();
                 builder_->write_separator(" -> ");
             }
-            builder_->write_method_name(meth.at(i)->func_->name_);
-            process_pargs(meth.at(i)->func_->params_, false);
-            process_return_type(meth.at(i)->func_->retType_);
+            builder_->write_method_name(meth.at(i)->func->name);
+            process_pargs(meth.at(i)->func->params, false);
+            process_return_type(meth.at(i)->func->retType);
         }
-        else
-        {
+        else {
             builder_->write_invalid_stmt();
         }
         builder_->append_new_line();

@@ -4,85 +4,92 @@
 #include <libastfri-text/inc/AbstractVisitor.hpp>
 #include <libastfri-text/inc/code/AbstractCodeBuilder.hpp>
 
-namespace astfri::text
-{
-    class AbstractCodeVisitor : public AbstractVisitor
-    {
-    protected:
-        AbstractCodeVisitor() = delete;
-        explicit AbstractCodeVisitor(AbstractCodeBuilder& builder);
-        virtual ~AbstractCodeVisitor() = default;
-    public:
-        void visit(DynamicType const& type) override = 0;
-        void visit(IntType const& type) override;
-        void visit(FloatType const& type) override = 0;
-        void visit(CharType const& type) override;
-        void visit(BoolType const& type) override = 0;
-        void visit(VoidType const& type) override;
-        void visit(IndirectionType const& type) override = 0;
-        void visit(ClassType const& type) override;
-        void visit(InterfaceType const& type) override;
-        void visit(LambdaType const& type) override = 0;
-        void visit(IncompleteType const& type) override;
-        void visit(UnknownType const& type) override;
-        // -----
-        void visit(IntLiteralExpr const& expr) override;
-        void visit(FloatLiteralExpr const& expr) override;
-        void visit(CharLiteralExpr const& expr) override;
-        void visit(StringLiteralExpr const& expr) override;
-        void visit(BoolLiteralExpr const& expr) override;
-        void visit(NullLiteralExpr const& expr) override = 0;
-        void visit(IfExpr const& expr) override;
-        void visit(BinOpExpr const& expr) override;
-        void visit(UnaryOpExpr const& expr) override;
-        void visit(ParamVarRefExpr const& expr) override;
-        void visit(LocalVarRefExpr const& expr) override;
-        void visit(MemberVarRefExpr const& expr) override = 0;
-        void visit(GlobalVarRefExpr const& expr) override = 0;
-        void visit(ClassRefExpr const& expr) override;
-        void visit(FunctionCallExpr const& expr) override = 0;
-        void visit(MethodCallExpr const& expr) override = 0;
-        void visit(LambdaCallExpr const& expr) override = 0;
-        void visit(LambdaExpr const& expr) override = 0;
-        void visit(ThisExpr const& expr) override;
-        void visit(ConstructorCallExpr const& expr) override;
-        void visit(NewExpr const& expr) override;
-        void visit(DeleteExpr const& expr) override = 0;
-        void visit(BracketExpr const& expr) override;
-        void visit(UnknownExpr const& expr) override;
-        // -----
-        void visit(TranslationUnit const& stmt) override = 0;
-        void visit(CompoundStmt const& stmt) override;
-        void visit(ReturnStmt const& stmt) override;
-        void visit(ExprStmt const& stmt) override;
-        void visit(IfStmt const& stmt) override;
-        void visit(CaseStmt const& stmt) override;
-        void visit(DefaultCaseStmt const& stmt) override;
-        void visit(SwitchStmt const& stmt) override;
-        void visit(WhileStmt const& stmt) override;
-        void visit(DoWhileStmt const& stmt) override;
-        void visit(ForStmt const& stmt) override;
-        void visit(ForEachStmt const& stmt) override {} // MM: TODO
-        void visit(ThrowStmt const& stmt) override;
-        void visit(CatchStmt const& stmt) override {} // MM: TODO
-        void visit(TryStmt const& stmt) override {} // MM: TODO
-        void visit(UnknownStmt const& stmt) override;
-        void visit(LocalVarDefStmt const& stmt) override;
-        void visit(ParamVarDefStmt const& stmt) override;
-        void visit(MemberVarDefStmt const& stmt) override = 0;
-        void visit(GlobalVarDefStmt const& stmt) override = 0;
-        void visit(FunctionDefStmt const& stmt) override = 0;
-        void visit(DefStmt const& stmt) override = 0;
-        void visit(MethodDefStmt const& stmt) override = 0;
-        void visit(BaseInitializerStmt const& stmt) override = 0;
-        void visit(ConstructorDefStmt const& stmt) override = 0;
-        void visit(DestructorDefStmt const& stmt) override = 0;
-        void visit(GenericParam const& stmt) override = 0;
-        void visit(InterfaceDefStmt const& stmt) override = 0;
-        void visit(ClassDefStmt const& stmt) override = 0;
-        void visit(ContinueStmt const& stmt) override;
-        void visit(BreakStmt const& stmt) override;
-    };
-}
+namespace astfri::text {
+class AbstractCodeVisitor : public AbstractVisitor {
+protected:
+    AbstractCodeVisitor() = delete;
+    explicit AbstractCodeVisitor(AbstractCodeBuilder& builder);
+    virtual ~AbstractCodeVisitor() = default;
+
+public:
+    void visit(const DynamicType& type) override = 0;
+    void visit(const IntType& type) override;
+    void visit(const FloatType& type) override = 0;
+    void visit(const CharType& type) override;
+    void visit(const BoolType& type) override = 0;
+    void visit(const VoidType& type) override;
+    void visit(const IndirectionType& type) override = 0;
+    void visit(const ClassType& type) override;
+    void visit(const InterfaceType& type) override;
+    void visit(const LambdaType& type) override = 0;
+    void visit(const IncompleteType& type) override;
+    void visit(const UnknownType& type) override;
+    // -----
+    void visit(const IntLiteralExpr& expr) override;
+    void visit(const FloatLiteralExpr& expr) override;
+    void visit(const CharLiteralExpr& expr) override;
+    void visit(const StringLiteralExpr& expr) override;
+    void visit(const BoolLiteralExpr& expr) override;
+    void visit(const NullLiteralExpr& expr) override = 0;
+    void visit(const IfExpr& expr) override;
+    void visit(const BinOpExpr& expr) override;
+    void visit(const UnaryOpExpr& expr) override;
+    void visit(const ParamVarRefExpr& expr) override;
+    void visit(const LocalVarRefExpr& expr) override;
+    void visit(const MemberVarRefExpr& expr) override = 0;
+    void visit(const GlobalVarRefExpr& expr) override = 0;
+    void visit(const ClassRefExpr& expr) override;
+    void visit(const FunctionCallExpr& expr) override = 0;
+    void visit(const MethodCallExpr& expr) override   = 0;
+    void visit(const LambdaCallExpr& expr) override   = 0;
+    void visit(const LambdaExpr& expr) override       = 0;
+    void visit(const ThisExpr& expr) override;
+    void visit(const ConstructorCallExpr& expr) override;
+    void visit(const NewExpr& expr) override;
+    void visit(const DeleteExpr& expr) override = 0;
+    void visit(const BracketExpr& expr) override;
+    void visit(const UnknownExpr& expr) override;
+    // -----
+    void visit(const TranslationUnit& stmt) override = 0;
+    void visit(const CompoundStmt& stmt) override;
+    void visit(const ReturnStmt& stmt) override;
+    void visit(const ExprStmt& stmt) override;
+    void visit(const IfStmt& stmt) override;
+    void visit(const CaseStmt& stmt) override;
+    void visit(const DefaultCaseStmt& stmt) override;
+    void visit(const SwitchStmt& stmt) override;
+    void visit(const WhileStmt& stmt) override;
+    void visit(const DoWhileStmt& stmt) override;
+    void visit(const ForStmt& stmt) override;
+
+    void visit(const ForEachStmt& /*stmt*/) override {
+    } // TODO
+
+    void visit(const ThrowStmt& stmt) override;
+
+    void visit(const CatchStmt& /*stmt*/) override {
+    } // TODO
+
+    void visit(const TryStmt& /*stmt*/) override {
+    } // TODO
+
+    void visit(const UnknownStmt& stmt) override;
+    void visit(const LocalVarDefStmt& stmt) override;
+    void visit(const ParamVarDefStmt& stmt) override;
+    void visit(const MemberVarDefStmt& stmt) override    = 0;
+    void visit(const GlobalVarDefStmt& stmt) override    = 0;
+    void visit(const FunctionDefStmt& stmt) override     = 0;
+    void visit(const DefStmt& stmt) override             = 0;
+    void visit(const MethodDefStmt& stmt) override       = 0;
+    void visit(const BaseInitializerStmt& stmt) override = 0;
+    void visit(const ConstructorDefStmt& stmt) override  = 0;
+    void visit(const DestructorDefStmt& stmt) override   = 0;
+    void visit(const GenericParam& stmt) override        = 0;
+    void visit(const InterfaceDefStmt& stmt) override    = 0;
+    void visit(const ClassDefStmt& stmt) override        = 0;
+    void visit(const ContinueStmt& stmt) override;
+    void visit(const BreakStmt& stmt) override;
+};
+} // namespace astfri::text
 
 #endif

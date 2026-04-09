@@ -2,15 +2,33 @@
 
 #include <fstream>
 
-namespace astfri::uml
-{
-bool Config::parse_json(char const* path)
-{
+namespace astfri::uml {
+
+Config Config::createFromJson(const rapidjson::Value& node) {
+    (void)node;
+    return *(new Config());
+}
+
+Config Config::createFromJson(const std::filesystem::path& path) {
+    (void)path;
+    return *(new Config());
+}
+
+Config Config::createDefault() {
+    return *(new Config());
+}
+
+Config Config::createFromArgs(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+    return *(new Config());
+}
+
+bool Config::parse_json(const char* path) {
     std::string jsonString;
     std::string line;
     std::ifstream fstream(path);
-    while (std::getline(fstream, line))
-    {
+    while (std::getline(fstream, line)) {
         jsonString += line;
     }
     fstream.close();
@@ -47,8 +65,7 @@ bool Config::parse_json(char const* path)
     return true;
 }
 
-bool Config::parse_file_info(rapidjson::Value const& val)
-{
+bool Config::parse_file_info(const rapidjson::Value& val) {
     if (! val.HasMember("write_to_file"))
         return false;
     this->writeToFile_ = val["write_to_file"].GetBool();
@@ -58,8 +75,7 @@ bool Config::parse_file_info(rapidjson::Value const& val)
     return true;
 }
 
-bool Config::parse_types_info(rapidjson::Value const& val)
-{
+bool Config::parse_types_info(const rapidjson::Value& val) {
     if (! val.HasMember("int"))
         return false;
     this->intTypeName_ = val["int"].GetString();
@@ -80,7 +96,7 @@ bool Config::parse_types_info(rapidjson::Value const& val)
     this->indirectIndicator_ = val["indirect_indicator"].GetString()[0];
     if (! val.HasMember("separator"))
         return false;
-    this->separator_ = val["separator"].GetString()[0];
+    this->separator_ = val["separator"].GetString();
     if (! val.HasMember("type_convention"))
         return false;
     std::string str = val["type_convention"].GetString();
@@ -91,8 +107,7 @@ bool Config::parse_types_info(rapidjson::Value const& val)
     return true;
 }
 
-bool Config::parse_access_info(rapidjson::Value const& val)
-{
+bool Config::parse_access_info(const rapidjson::Value& val) {
     if (! val.HasMember("inner_view"))
         return false;
     this->innerView_ = val["inner_view"].GetBool();
@@ -114,8 +129,7 @@ bool Config::parse_access_info(rapidjson::Value const& val)
     return true;
 }
 
-bool Config::parse_colors_info(rapidjson::Value const& val)
-{
+bool Config::parse_colors_info(const rapidjson::Value& val) {
     if (! val.HasMember("bg_diagram"))
         return false;
     this->diagramBG_ = val["bg_diagram"].GetString();
@@ -134,8 +148,7 @@ bool Config::parse_colors_info(rapidjson::Value const& val)
     return true;
 }
 
-bool Config::parse_relations_info(rapidjson::Value const& val)
-{
+bool Config::parse_relations_info(const rapidjson::Value& val) {
     if (! val.HasMember("association"))
         return false;
     this->relationArrows_[0] = val["association"].GetString();
@@ -151,25 +164,23 @@ bool Config::parse_relations_info(rapidjson::Value const& val)
     return true;
 }
 
-bool Config::parse_destructor_info(rapidjson::Value const& val)
-{
+bool Config::parse_destructor_info(const rapidjson::Value& val) {
     if (! val.HasMember("indicator"))
         return false;
     this->destructorIndicator_ = val["indicator"].GetString()[0];
     return true;
 }
 
-bool Config::parse_namespace_info(rapidjson::Value const& val)
-{
+bool Config::parse_namespace_info(const rapidjson::Value& val) {
     if (! val.HasMember("do_namespace"))
         return false;
     this->handleNamespaces_ = val["do_namespace"].GetBool();
     return true;
 }
 
-void Config::use_default_values()
-{
+void Config::use_default_values() {
 
+    this->typeConvention_      = TypeConventions::TYPE_AFTER_IDENTIFIER;
     this->innerView_           = true;
     this->writeToFile_         = false;
     this->drawAccessModIcons_  = true;
@@ -177,7 +188,8 @@ void Config::use_default_values()
 
     this->indirectIndicator_   = '*';
     this->destructorIndicator_ = '~';
-    this->separator_           = ' ';
+    this->separator_           = " : ";
+    this->namespaceSeparator_  = "::";
     this->accessPrefix_[0]     = '+';
     this->accessPrefix_[1]     = '-';
     this->accessPrefix_[2]     = '#';

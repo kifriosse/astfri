@@ -1,31 +1,27 @@
 #ifndef LIBASTFRIUML_ELEMENT_STRUCTS_HPP
 #define LIBASTFRIUML_ELEMENT_STRUCTS_HPP
 
-#include <libastfri/inc/Astfri.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <string>
 #include <vector>
 
-namespace astfri::uml
-{
-enum class RelationType
-{
+namespace astfri::uml {
+enum class RelationType {
     ASSOCIATION = 0,
     COMPOSITION,
     EXTENSION,
     IMPLEMENTATION
 };
 
-enum class UserDefinedType
-{
+enum class UserDefinedType {
     CLASS = 0,
     STRUCT,
     INTERFACE,
     ENUM
 };
 
-struct ClassStruct
-{
+struct ClassStruct {
     std::string name_;
     std::string namespace_;
     UserDefinedType type_;
@@ -34,8 +30,7 @@ struct ClassStruct
     void reset();
 };
 
-struct VarStruct
-{
+struct VarStruct {
     std::string name_;
     std::string type_;
     std::string init_;
@@ -45,8 +40,7 @@ struct VarStruct
     void reset();
 };
 
-struct MethodStruct
-{
+struct MethodStruct {
     std::string name_;
     std::string retType_;
     bool returnIsIndirect_ = false;
@@ -56,8 +50,7 @@ struct MethodStruct
     void reset();
 };
 
-struct ConstructorStruct
-{
+struct ConstructorStruct {
     std::string class_;
     std::vector<VarStruct> params_;
     astfri::AccessModifier accessMod_;
@@ -65,15 +58,13 @@ struct ConstructorStruct
     void reset();
 };
 
-struct DestructorStruct
-{
+struct DestructorStruct {
     std::string class_;
 
     void reset();
 };
 
-struct RelationStruct
-{
+struct RelationStruct {
     std::string from_;
     std::string to_;
     RelationType type_;

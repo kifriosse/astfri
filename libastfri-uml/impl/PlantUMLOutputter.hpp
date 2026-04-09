@@ -3,12 +3,10 @@
 
 #include <libastfri-uml/impl/UMLOutputter.hpp>
 
-namespace astfri::uml
-{
-class PlantUMLOutputter : public UMLOutputter
-{
+namespace astfri::uml {
+class PlantUMLOutputter : public UMLOutputter {
 private:
-    void open(ClassStruct const& cs);
+    void open(const ClassStruct& cs);
     void apply_style_from_config();
     void add_tags_and_style();
     virtual std::string assemble_param(VarStruct p) override;

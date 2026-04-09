@@ -1,9 +1,7 @@
 #include <libastfri-cpp/inc/ClangVisitor.hpp>
 
-namespace astfri::astfri_cpp
-{
-bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral* IL)
-{
+namespace astfri::cpp {
+bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral* IL) {
     // akcia na tomto vrchole
     auto int_literal = this->expr_factory_->mk_int_literal(IL->getValue().getSExtValue());
 
@@ -14,8 +12,7 @@ bool ClangVisitor::TraverseIntegerLiteral(clang::IntegerLiteral* IL)
     return true;
 }
 
-bool ClangVisitor::TraverseFloatingLiteral(clang::FloatingLiteral* FL)
-{
+bool ClangVisitor::TraverseFloatingLiteral(clang::FloatingLiteral* FL) {
     // akcia na tomto vrchole
     auto float_literal = this->expr_factory_->mk_float_literal(FL->getValue().convertToFloat());
 
@@ -26,8 +23,7 @@ bool ClangVisitor::TraverseFloatingLiteral(clang::FloatingLiteral* FL)
     return true;
 }
 
-bool ClangVisitor::TraverseStringLiteral(clang::StringLiteral* SL)
-{
+bool ClangVisitor::TraverseStringLiteral(clang::StringLiteral* SL) {
     // akcia na tomto vrchole
     auto string_literal = this->expr_factory_->mk_string_literal(SL->getString().str());
 
@@ -38,8 +34,7 @@ bool ClangVisitor::TraverseStringLiteral(clang::StringLiteral* SL)
     return true;
 }
 
-bool ClangVisitor::TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr* BL)
-{
+bool ClangVisitor::TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr* BL) {
     // akcia na tomto vrchole
     auto bool_literal = this->expr_factory_->mk_bool_literal(BL->getValue());
 
@@ -50,8 +45,7 @@ bool ClangVisitor::TraverseCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr* BL)
     return true;
 }
 
-bool ClangVisitor::TraverseCharacterLiteral(clang::CharacterLiteral* CL)
-{
+bool ClangVisitor::TraverseCharacterLiteral(clang::CharacterLiteral* CL) {
     auto new_char                  = this->expr_factory_->mk_char_literal((char)CL->getValue());
     this->astfri_location.expr_    = new_char;
     this->clang_location.char_lit_ = CL;
@@ -59,12 +53,11 @@ bool ClangVisitor::TraverseCharacterLiteral(clang::CharacterLiteral* CL)
     return true;
 }
 
-bool ClangVisitor::TraverseCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr* NPLE)
-{
+bool ClangVisitor::TraverseCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr* NPLE) {
     auto new_null                     = this->expr_factory_->mk_null_literal();
     this->astfri_location.expr_       = new_null;
     this->clang_location.nullptr_lit_ = NPLE;
 
     return true;
 }
-}
+} // namespace astfri::cpp

@@ -48,7 +48,7 @@ possibly_die() {
 }
 
 # Branches
-BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp dev-ab"
+BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp dev-ab dev-jk"
 
 if [ "$MODE" = "pull" ]; then    # pull
   heading "# Pulling changes"
