@@ -1,9 +1,11 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -97,7 +99,7 @@ Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node) {
     return th(self, nType);
 }
 
-Type* TypeTranslator::visit_inderect(TypeTranslator* self, const TSNode& node) {
+Type* TypeTranslator::visit_indirect(TypeTranslator* self, const TSNode& node) {
     // todo add handling of readonly
     const TSNode nType  = util::child_by_field_name(node, "type");
     const TypeMapper th = MapManager::get_type_mapper(nType);
@@ -277,6 +279,9 @@ ScopeNode* TypeTranslator::find_entry_point(
     ScopeNode* start,
     SourceFile* src
 ) const {
+    if (! start)
+        return nullptr;
+
     ScopeNode* current = start;
     using enum util::SearchScope;
     switch (searchScope) {
@@ -326,9 +331,14 @@ ScopeNode* TypeTranslator::find_entry_point(
     case GlobStaticUsing:
     case GlobAlias:
     case GlobUsing: {
-        if (ScopeNode* node = symbTable_.symb_tree().root()->find_child(qualif))
-            return node;
-        break;
+        auto [names] = util::mk_scope(qualif);
+        current = symbTable_.symb_tree().root();
+        for (const std::string_view name: names) {
+            current = current->find_child(name);
+            if (! current)
+                break;
+        }
+        return current;
     }
     }
 

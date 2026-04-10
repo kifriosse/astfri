@@ -112,10 +112,12 @@ void SymbTableBuilder::reg_members() {
     for (auto* metadata : symbTable_.get_type_metadata()) {
         typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         for (auto& [node, src] : metadata->defs()) {
-            const TSNode nClassBody = util::child_by_field_name(node, "body");
             currentSrc_             = src;
             typeTrs_.set_current_src(src);
             typeContext_.typeStack.push_back(&metadata->type_binding());
+            // processing header - base list and generic param constraints
+            util::for_each_child_node(node, process);
+            const TSNode nClassBody = util::child_by_field_name(node, "body");
             util::for_each_child_node(nClassBody, process);
             typeContext_.typeStack.pop_back();
         }
@@ -249,6 +251,14 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
     typeMeta->add_method(std::move(methodId), std::move(methodMetadata));
 }
 
+void SymbTableBuilder::visit_base_list(SymbTableBuilder* self, const TSNode& node) {
+    UserTypeDefStmt* userType = self->typeContext_.typeStack.back()->def;
+    if (const auto classDef = as_a<ClassDefStmt>(userType))
+        self->visit_base_list_class(node, classDef);
+    else if  (const auto intfDef = as_a<InterfaceDefStmt>(userType))
+        self->visit_base_list_interface(node, intfDef);
+}
+
 void SymbTableBuilder::load_implicit_usings(const SDKProfile profile) {
     using enum SDKProfile;
     if (profile == None)
@@ -266,9 +276,8 @@ void SymbTableBuilder::load_implicit_usings(const SDKProfile profile) {
     };
 
     for (auto qualif : netSdk) {
-        using namespace std::ranges;
         const auto end = std::end(wpfSdkExclude);
-        if (profile == WPF && find(wpfSdkExclude, qualif) != end)
+        if (profile == WPF && std::ranges::find(wpfSdkExclude, qualif) != end)
             continue;
 
         addToScope(qualif);
@@ -469,6 +478,59 @@ ScopeNode* SymbTableBuilder::visit_type_def(const TSNode& node, const util::Type
         return symbTable_.add_type(tb, node, src());
 
     return nullptr;
+}
+
+void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* classDef) {
+    bool first           = true;
+    auto processBaseList = [&](const TSNode& current) -> void {
+        std::string name    = util::extract_text(current, src_str());
+        const TypeMapper th = MapManager::get_type_mapper(current);
+        Type* type          = th(&typeTrs_, current);
+        if (first) {
+            first = false;
+            if (const auto class_t = as_a<ClassType>(type))
+                classDef->bases.push_back(class_t->def);
+            if (const auto interface_t = as_a<InterfaceType>(type)) {
+                classDef->interfaces.push_back(interface_t->def);
+            }
+            else if (util::is_interface_name(name)) {
+                classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
+                // todo might be useless if external types are imported
+            }
+            else {
+                // todo incomplete type
+            }
+            return;
+        }
+
+        if (const auto interface_t = as_a<InterfaceType>(type)) {
+            classDef->interfaces.push_back(interface_t->def);
+        }
+        else if (util::is_interface_name(name)) {
+            classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
+            // todo might be useless if external types are imported
+        }
+        else {
+            // todo incomplete type
+        }
+    };
+
+    util::for_each_child_node(node, processBaseList);
+}
+
+void SymbTableBuilder::visit_base_list_interface(const TSNode& node, InterfaceDefStmt* intfDef) {
+    auto processBaseList = [&](const TSNode& current) -> void {
+        const TypeMapper th = MapManager::get_type_mapper(current);
+        Type* type          = th(&typeTrs_, current);
+
+        if (const auto tInterface = as_a<InterfaceType>(type))
+            intfDef->bases.push_back(tInterface->def);
+        else {
+            // todo incomplete type
+        }
+    };
+
+    util::for_each_child_node(node, processBaseList);
 }
 
 std::string_view SymbTableBuilder::src_str() const {

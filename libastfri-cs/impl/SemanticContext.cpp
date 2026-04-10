@@ -126,7 +126,9 @@ VarDefStmt* SemanticContext::find_var(
         },
         [&](const access::Base& base) -> VarDefStmt* {
             const auto metadata = find_memb_var(name, base.parent);
-            return metadata->varDef;
+            if (metadata)
+                return metadata->varDef;
+            return nullptr;
         },
         [&](const access::Unknown&) -> VarDefStmt* { return nullptr; }
     };

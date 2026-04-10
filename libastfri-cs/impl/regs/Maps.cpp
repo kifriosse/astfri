@@ -200,8 +200,8 @@ Mappers::Mappers() :
         {QualifName, TypeTranslator::visit_qualified_name},   // FQN, PQN
         {ImplicitType, TypeTranslator::visit_qualified_name}, // var
         {NullableType, TypeTranslator::visit_wrapper},
-        {PointerType, TypeTranslator::visit_inderect},
-        {RefType, TypeTranslator::visit_inderect},
+        {PointerType, TypeTranslator::visit_indirect},
+        {RefType, TypeTranslator::visit_indirect},
         {ArrayType, TypeTranslator::visit_array},
         {GenericType, TypeTranslator::visit_generic_name},
         {TupleType, TypeTranslator::visit_tuple}, // function pointer - not delegate
@@ -220,6 +220,7 @@ Mappers::Mappers() :
         {MemberVarDef, SymbTableBuilder::visit_memb_var},
         {PropertyDecl, SymbTableBuilder::visit_property},
         {MethodDecl, SymbTableBuilder::visit_method},
+        {BaseList, SymbTableBuilder::visit_base_list},
     }) {
 }
 

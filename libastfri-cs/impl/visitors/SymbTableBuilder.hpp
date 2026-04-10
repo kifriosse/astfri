@@ -89,6 +89,7 @@ private:
     static void visit_memb_var(SymbTableBuilder* self, const TSNode& node);
     static void visit_property(SymbTableBuilder* self, const TSNode& node);
     static void visit_method(SymbTableBuilder* self, const TSNode& node);
+    static void visit_base_list(SymbTableBuilder* self, const TSNode& node);
 
     /**
      * @brief Registers a single using directive.
@@ -110,6 +111,8 @@ private:
      * @return pointer to the ScopeNode created for the that Type
      */
     ScopeNode* visit_type_def(const TSNode& node, util::TypeKind type);
+    void visit_base_list_class(const TSNode& node, ClassDefStmt* classDef);
+    void visit_base_list_interface(const TSNode& node, InterfaceDefStmt* intfDef);
 
     /**
      * @brief Gets the source code currently being visited.

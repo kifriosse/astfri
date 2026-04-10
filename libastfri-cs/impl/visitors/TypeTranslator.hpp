@@ -110,7 +110,7 @@ private:
      * @return type inside the wrapper
      */
     static Type* visit_wrapper(TypeTranslator* self, const TSNode& node);
-    static Type* visit_inderect(TypeTranslator* self, const TSNode& node);
+    static Type* visit_indirect(TypeTranslator* self, const TSNode& node);
     static Type* visit_array(TypeTranslator* self, const TSNode& node);
     static Type* visit_generic_name(TypeTranslator* self, const TSNode& node);
     static Type* visit_tuple(TypeTranslator* self, const TSNode& node);
