@@ -1,5 +1,6 @@
-#include <libastfri-cs/impl/data/SymbolTree.hpp>
 #include <astfri/Astfri.hpp>
+
+#include <libastfri-cs/impl/data/SymbolTree.hpp>
 
 #include <memory>
 #include <span>

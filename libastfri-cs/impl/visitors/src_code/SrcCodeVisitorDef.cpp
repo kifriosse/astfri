@@ -1,11 +1,11 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
-#include <libastfri-cs/impl/util/Utils.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -27,24 +27,6 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
     self->semContext_.enter_type(tb);
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
-
-    // auto processGenericConstraints = [](const TSNode&) -> void { };
-
-    auto processClassHeader = [&](const TSNode& current) -> bool {
-        using enum NodeType;
-        if (ts_node_eq(current, nClassBody))
-            return false;
-
-        const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == MapManager::get_symbol(TypeParamList)) {
-            classDef->tparams = util::make_generic_params(current, src);
-        }
-        else if (sCurrent == MapManager::get_symbol(TypeParamConstrClause)) {
-            // util::for_each_child_node(current, processGenericConstraints);
-        }
-        return true;
-    };
-    util::for_each_child_node(node, processClassHeader);
 
     // if its partial class doesn't have a body
     if (ts_node_is_null(nClassBody))
@@ -80,7 +62,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
     auto* intfDef              = as_a<InterfaceDefStmt>(tb->def);
     self->semContext_.enter_type(tb);
 
-    const TSNode nIntfBody  = util::child_by_field_name(node, "body");
+    const TSNode nIntfBody      = util::child_by_field_name(node, "body");
     auto processInterfaceHeader = [&](const TSNode& current) -> bool {
         using enum NodeType;
         if (ts_node_eq(current, nIntfBody))
@@ -257,8 +239,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
         .isStatic   = modifs.has(CSModifier::Static)
     };
 
-    const MethodMetadata* methodMeta
-        = self->semContext_.find_method(methodId, currentType->def);
+    const MethodMetadata* methodMeta = self->semContext_.find_method(methodId, currentType->def);
 
     // if method could be resolved
     if (methodMeta && methodMeta->methodDef) {

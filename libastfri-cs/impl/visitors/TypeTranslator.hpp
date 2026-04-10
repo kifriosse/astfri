@@ -1,8 +1,9 @@
 #ifndef CSHARP_TYPE_TRANSLATOR
 #define CSHARP_TYPE_TRANSLATOR
 
-#include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <astfri/Astfri.hpp>
+
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 
 #include <tree_sitter/api.h>
 

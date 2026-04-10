@@ -1,3 +1,5 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
@@ -5,7 +7,6 @@
 #include <libastfri-cs/impl/util/RapidJsonUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -112,7 +113,7 @@ void SymbTableBuilder::reg_members() {
     for (auto* metadata : symbTable_.get_type_metadata()) {
         typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         for (auto& [node, src] : metadata->defs()) {
-            currentSrc_             = src;
+            currentSrc_ = src;
             typeTrs_.set_current_src(src);
             typeContext_.typeStack.push_back(&metadata->type_binding());
             // processing header - base list and generic param constraints
@@ -255,8 +256,15 @@ void SymbTableBuilder::visit_base_list(SymbTableBuilder* self, const TSNode& nod
     UserTypeDefStmt* userType = self->typeContext_.typeStack.back()->def;
     if (const auto classDef = as_a<ClassDefStmt>(userType))
         self->visit_base_list_class(node, classDef);
-    else if  (const auto intfDef = as_a<InterfaceDefStmt>(userType))
+    else if (const auto intfDef = as_a<InterfaceDefStmt>(userType))
         self->visit_base_list_interface(node, intfDef);
+}
+
+void SymbTableBuilder::visit_type_param_constraint(
+    [[maybe_unused]] SymbTableBuilder* self,
+    [[maybe_unused]] const TSNode& node
+) {
+    // todo implement generic constraints
 }
 
 void SymbTableBuilder::load_implicit_usings(const SDKProfile profile) {
@@ -350,7 +358,8 @@ void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath) {
                 continue;
             }
 
-            TypeBinding tb = mk_type_binding(*typeOpt, std::move(scope), std::move(name));
+            // todo generic parameters for external types
+            TypeBinding tb = mk_type_binding(*typeOpt, std::move(scope), std::move(name), {});
 
             if (tb.type)
                 symbTable_.add_type(tb);
@@ -468,14 +477,26 @@ void SymbTableBuilder::collect_types(const TSTree* tree) {
 }
 
 ScopeNode* SymbTableBuilder::visit_type_def(const TSNode& node, const util::TypeKind type) {
-    const TSNode nName   = util::child_by_field_name(node, "name");
-    std::string name     = util::extract_text(nName, src_str());
+    const TSNode nName = util::child_by_field_name(node, "name");
+    std::string name   = util::extract_text(nName, src_str());
 
-    Scope scope          = util::mk_scope(currentParent_, *currentSrc_);
-    const TypeBinding tb = mk_type_binding(type, std::move(scope), std::move(name));
+    std::vector<GenericParam*> genParams;
 
-    if (tb.def && tb.type)
+    auto processClassHeader = [&](const TSNode& current) -> void {
+        const TSSymbol sCurrent = ts_node_symbol(current);
+        if (sCurrent == MapManager::get_symbol(NodeType::TypeParamList)) {
+            genParams = util::make_generic_params(current, src_str());
+        }
+    };
+    util::for_each_child_node(node, processClassHeader);
+
+    Scope scope = util::mk_scope(currentParent_, *currentSrc_);
+    const TypeBinding tb
+        = mk_type_binding(type, std::move(scope), std::move(name), std::move(genParams));
+
+    if (tb.def && tb.type) {
         return symbTable_.add_type(tb, node, src());
+    }
 
     return nullptr;
 }
@@ -544,18 +565,21 @@ SourceFile* SymbTableBuilder::src() const {
 TypeBinding SymbTableBuilder::mk_type_binding(
     const util::TypeKind type,
     Scope scope,
-    std::string name
+    std::string name,
+    std::vector<GenericParam*> genericParams
 ) {
     TypeBinding tb{nullptr, nullptr, nullptr};
     switch (type) {
     case util::TypeKind::Class: {
         ClassDefStmt* classDef = stmtFact_.mk_class_def(std::move(name), std::move(scope));
+        classDef->tparams      = std::move(genericParams);
         tb.def                 = classDef;
         tb.type                = classDef->type;
         break;
     }
     case util::TypeKind::Interface: {
         InterfaceDefStmt* intDef = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
+        intDef->tparams          = std::move(genericParams);
         tb.def                   = intDef;
         tb.type                  = intDef->type;
         break;

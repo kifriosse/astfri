@@ -203,8 +203,7 @@ Expr* SrcCodeVisitor::visit_memb_access(SrcCodeVisitor* self, const TSNode& node
     //     qualif = access::Static{};
 
     // todo for future use
-    if ([[maybe_unused]] const auto varDef =
-        self->semContext_.find_var(name, qualif)) {
+    if ([[maybe_unused]] const auto varDef = self->semContext_.find_var(name, qualif)) {
         return exprFact_.mk_member_var_ref(left, std::move(name));
     }
     // todo generic member access
@@ -286,7 +285,6 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
             // todo placeholder
             return exprFact_.mk_unknown();
         }
-
     }
     // left side is a anonymous lambda
     TSNode nLambda;

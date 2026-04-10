@@ -221,6 +221,7 @@ Mappers::Mappers() :
         {PropertyDecl, SymbTableBuilder::visit_property},
         {MethodDecl, SymbTableBuilder::visit_method},
         {BaseList, SymbTableBuilder::visit_base_list},
+        {TypeParamConstraint, SymbTableBuilder::visit_type_param_constraint},
     }) {
 }
 

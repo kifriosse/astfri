@@ -1,14 +1,14 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <cstring>
-#include <stdexcept>
 #include <string_view>
 #include <vector>
 

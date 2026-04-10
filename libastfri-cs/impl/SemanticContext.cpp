@@ -1,10 +1,11 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/util/Common.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <algorithm>
 #include <string>

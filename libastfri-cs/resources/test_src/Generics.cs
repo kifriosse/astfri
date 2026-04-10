@@ -1,6 +1,6 @@
 
 
-public class GenericClass<T> where T : IComparable<T>, IEquatable<T>
+public class GenericClass<T> : IComparable<GenericClass<T>> where T : IComparable<T>, IEquatable<T>
 {
     private T _value;
 
@@ -17,6 +17,13 @@ public class GenericClass<T> where T : IComparable<T>, IEquatable<T>
     public void SetValue(T value)
     {
         _value = value;
+    }
+
+    public int CompareTo(GenericClass<T>? other)
+    {
+        if (other is null) 
+            return 1;
+        return _value.CompareTo(other._value);
     }
 }
 

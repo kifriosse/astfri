@@ -332,8 +332,8 @@ ScopeNode* TypeTranslator::find_entry_point(
     case GlobAlias:
     case GlobUsing: {
         auto [names] = util::mk_scope(qualif);
-        current = symbTable_.symb_tree().root();
-        for (const std::string_view name: names) {
+        current      = symbTable_.symb_tree().root();
+        for (const std::string_view name : names) {
             current = current->find_child(name);
             if (! current)
                 break;

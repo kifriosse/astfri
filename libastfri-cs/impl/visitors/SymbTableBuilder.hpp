@@ -90,6 +90,7 @@ private:
     static void visit_property(SymbTableBuilder* self, const TSNode& node);
     static void visit_method(SymbTableBuilder* self, const TSNode& node);
     static void visit_base_list(SymbTableBuilder* self, const TSNode& node);
+    static void visit_type_param_constraint(SymbTableBuilder* self, const TSNode& node);
 
     /**
      * @brief Registers a single using directive.
@@ -132,12 +133,15 @@ private:
      * @param type type of user defined type
      * @param scope scope of the type
      * @param name name of the type
+     * @param genericParams
+     * @param genericParams
      * @return type binding for that type
      */
     [[nodiscard]] static TypeBinding mk_type_binding(
         util::TypeKind type,
         Scope scope,
-        std::string name
+        std::string name,
+        std::vector<GenericParam*> genericParams
     );
 };
 

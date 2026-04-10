@@ -1,10 +1,11 @@
 #ifndef CSHARP_SOURCE_CODE_VISITOR_HPP
 #define CSHARP_SOURCE_CODE_VISITOR_HPP
 
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
