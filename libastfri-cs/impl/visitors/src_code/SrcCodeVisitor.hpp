@@ -26,24 +26,22 @@ private:
     static TypeFactory& typeFact_;
 
     TypeTranslator typeTrs_;
-    SemanticContext& semContext_;
+    SemanticContext semContext_;
     SourceFile* currentSrc_{nullptr};
     const TSLanguage* lang_;
 
 public:
     /**
      * @brief Constructor for SrcCodeVisitor
-     * @param semanticContext semantic context of the project
      * @param symbTable symbol table of the project (should be same as the used
      * inside semantic context)
      */
-    SrcCodeVisitor(SemanticContext& semanticContext, SymbolTable& symbTable);
+    explicit SrcCodeVisitor(SymbolTable& symbTable);
     /**
      * @brief Visits the root node of a tree-sitter tree and fills up
      * TranslationUnit argument with top level definitions and statements.
-     * @param trUnit
      */
-    void visit_comp_unit(TranslationUnit& trUnit);
+    TranslationUnit* visit_comp_unit();
 
 private:
     // Expressions

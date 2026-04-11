@@ -56,25 +56,21 @@ std::string remove_comments(
     const std::filesystem::path& path
 ) {
     using namespace maps;
-    static constexpr auto qType      = QueryType::CommentError;
-    static const auto& queryReg      = QueryReg::get();
-    static const Query* const query  = queryReg.get_query(qType);
-    static const CaptureId commentId = query->id("comment");
-    static const CaptureId errorId   = query->id("error");
-    bool hasErr                      = false;
-    auto process                     = [&](const TSQueryMatch& match) -> void {
+    bool hasErr  = false;
+    auto process = [&](const TSQueryMatch& match) -> void {
         for (uint32_t id = 0; id < match.capture_count; ++id) {
-            auto& [node, index] = match.captures[id];
-            if (index == errorId) {
+            const TSNode node = match.captures[id].node;
+            if (ts_node_is_error(node) || ts_node_is_missing(node)) {
                 if (! hasErr) {
-                    std::cerr << "Source code contains syntax errors:\n\n";
+                    std::cerr << "Source code " << std::filesystem::weakly_canonical(path)
+                              << " contains syntax errors:\n";
                     hasErr = true;
                 }
                 const auto& [row, column] = ts_node_start_point(node);
-                std::cerr << "Warning: Syntax error at line " << row + 1 << ", column "
-                          << column + 1 << "\n";
+                std::cerr << "Syntax error at line " << row + 1 << ", column " << column + 1
+                          << '\n';
             }
-            else if (index == commentId && ! hasErr) {
+            else if (ts_node_is_extra(node) && ! hasErr) {
                 const uint32_t start = ts_node_start_byte(node);
                 const uint32_t end   = ts_node_end_byte(node);
                 for (uint32_t i = start; i < end; ++i) {
@@ -85,7 +81,7 @@ std::string remove_comments(
             }
         }
     };
-    for_each_match(root, qType, process);
+    for_each_match(root, QueryType::CommentError, process);
 
     if (hasErr) {
         std::string message = "Source code ";

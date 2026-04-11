@@ -132,31 +132,19 @@ ScopeNode* SymbTableBuilder::visit_class(SymbTableBuilder* self, const TSNode& n
     return self->visit_type_def(node, util::TypeKind::Class);
 }
 
-ScopeNode* SymbTableBuilder::visit_interface(
-    [[maybe_unused]] SymbTableBuilder* self,
-    [[maybe_unused]] const TSNode& node
-) {
+ScopeNode* SymbTableBuilder::visit_interface(SymbTableBuilder* self, const TSNode& node) {
     return self->visit_type_def(node, util::TypeKind::Interface);
 }
 
-ScopeNode* SymbTableBuilder::visit_record(
-    [[maybe_unused]] SymbTableBuilder* self,
-    [[maybe_unused]] const TSNode& node
-) {
+ScopeNode* SymbTableBuilder::visit_record(SymbTableBuilder* self, const TSNode& node) {
     return self->visit_type_def(node, util::TypeKind::Interface);
 }
 
-ScopeNode* SymbTableBuilder::visit_enum(
-    [[maybe_unused]] SymbTableBuilder* self,
-    [[maybe_unused]] const TSNode& node
-) {
+ScopeNode* SymbTableBuilder::visit_enum(SymbTableBuilder* self, const TSNode& node) {
     return self->visit_type_def(node, util::TypeKind::Enum);
 }
 
-ScopeNode* SymbTableBuilder::visit_delegate(
-    [[maybe_unused]] SymbTableBuilder* self,
-    [[maybe_unused]] const TSNode& node
-) {
+ScopeNode* SymbTableBuilder::visit_delegate(SymbTableBuilder* self, const TSNode& node) {
     return self->visit_type_def(node, util::TypeKind::Delegate);
 }
 

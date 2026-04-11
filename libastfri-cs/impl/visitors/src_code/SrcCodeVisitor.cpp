@@ -17,13 +17,14 @@ ExprFactory& SrcCodeVisitor::exprFact_ = ExprFactory::get_instance();
 StmtFactory& SrcCodeVisitor::stmtFact_ = StmtFactory::get_instance();
 TypeFactory& SrcCodeVisitor::typeFact_ = TypeFactory::get_instance();
 
-SrcCodeVisitor::SrcCodeVisitor(SemanticContext& semanticContext, SymbolTable& symbTable) :
+SrcCodeVisitor::SrcCodeVisitor(SymbolTable& symbTable) :
     typeTrs_(symbTable),
-    semContext_(semanticContext),
+    semContext_(symbTable),
     lang_(tree_sitter_c_sharp()) {
 }
 
-void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit) {
+TranslationUnit* SrcCodeVisitor::visit_comp_unit() {
+    TranslationUnit* trUnit = stmtFact_.mk_translation_unit();
     for (const auto metadata : this->semContext_.get_type_metadata()) {
         typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         bool added = false;
@@ -39,13 +40,14 @@ void SrcCodeVisitor::visit_comp_unit(TranslationUnit& trUnit) {
                 continue;
 
             if (is_a<ClassDefStmt>(stmt))
-                trUnit.classes.push_back(as_a<ClassDefStmt>(stmt));
+                trUnit->classes.push_back(as_a<ClassDefStmt>(stmt));
             else if (is_a<InterfaceDefStmt>(stmt))
-                trUnit.interfaces.push_back(as_a<InterfaceDefStmt>(stmt));
+                trUnit->interfaces.push_back(as_a<InterfaceDefStmt>(stmt));
 
             added = true;
         }
     }
+    return trUnit;
 }
 
 } // namespace astfri::csharp
