@@ -16,8 +16,8 @@ SemanticContext::SemanticContext(SymbolTable& symbTable) :
     symbTable_(symbTable) {
 }
 
-void SemanticContext::enter_type(TypeBinding* tb) {
-    typeContext_.typeStack.push_back(tb);
+void SemanticContext::enter_type(TypeBinding& tb) {
+    typeContext_ = tb;
     enter_scope();
 }
 
@@ -46,8 +46,7 @@ void SemanticContext::reg_return(Type* returnType) {
 }
 
 void SemanticContext::leave_type() {
-    if (! typeContext_.typeStack.empty())
-        typeContext_.typeStack.pop_back();
+    typeContext_ = std::nullopt;
     leave_scope();
 }
 
@@ -72,9 +71,8 @@ void SemanticContext::unregister_return_type() {
         retTypeContext_.pop_back();
 }
 
-TypeBinding* SemanticContext::current_type() const {
-    auto& typeStack = typeContext_.typeStack;
-    return typeStack.empty() ? nullptr : typeStack.back();
+std::optional<TypeBinding> SemanticContext::current_type() const {
+    return typeContext_;
 }
 
 Type* SemanticContext::current_return_type() const {
@@ -98,7 +96,7 @@ VarDefStmt* SemanticContext::find_var(
                 return itParam->second;
 
             // member variables - includes both static and instance members
-            const TypeBinding* currentType = current_type();
+            const auto currentType = current_type();
 
             if (! currentType)
                 return nullptr;

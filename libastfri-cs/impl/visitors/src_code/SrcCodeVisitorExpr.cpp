@@ -237,7 +237,7 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
             return exprFact_
                 .mk_method_call(exprFact_.mk_this(), std::move(name), std::move(argList));
         case InvocationType::StaticMethod: {
-            const auto* current = self->semContext_.current_type();
+            const auto current = self->semContext_.current_type();
             // todo add static method call handling
             return exprFact_.mk_method_call(
                 exprFact_.mk_class_ref(current->type->name),

@@ -115,12 +115,12 @@ void SymbTableBuilder::reg_members() {
         for (auto& [node, src] : metadata->defs()) {
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-            typeContext_.typeStack.push_back(&metadata->type_binding());
+            typeContext_ = metadata->type_binding();
             // processing header - base list and generic param constraints
             util::for_each_child_node(node, process);
             const TSNode nClassBody = util::child_by_field_name(node, "body");
             util::for_each_child_node(nClassBody, process);
-            typeContext_.typeStack.pop_back();
+            typeContext_ = std::nullopt;
         }
     }
     typeTrs_.set_current_namespace(nullptr);
@@ -152,12 +152,11 @@ void SymbTableBuilder::visit_memb_var(SymbTableBuilder* self, const TSNode& node
     const std::string_view src = self->src_str();
 
     TSNode nVarDecl;
-    const auto modifs   = CSModifiers::parse_var_modifs(node, src, &nVarDecl);
-    const TSNode nType  = util::child_by_field_name(nVarDecl, "type");
-    const TypeMapper th = MapManager::get_type_mapper(nType);
-    Type* type          = th(&self->typeTrs_, nType);
-    TypeMetadata* typeMeta
-        = self->symbTable_.get_type_metadata(self->typeContext_.typeStack.back()->def);
+    const auto modifs      = CSModifiers::parse_var_modifs(node, src, &nVarDecl);
+    const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
+    const TypeMapper th    = MapManager::get_type_mapper(nType);
+    Type* type             = th(&self->typeTrs_, nType);
+    TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(self->typeContext_->def);
 
     if (! typeMeta)
         return;
@@ -193,9 +192,7 @@ void SymbTableBuilder::visit_property(
 }
 
 void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) {
-    const auto currentType = self->typeContext_.typeStack.back();
-
-    const auto typeMeta    = self->symbTable_.get_type_metadata(currentType->def);
+    const auto typeMeta = self->symbTable_.get_type_metadata(self->typeContext_->def);
     if (! typeMeta)
         return;
     // throw std::logic_error("Type wasn't discovered yet");
@@ -221,7 +218,7 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
     const TypeMapper th       = MapManager::get_type_mapper(nRetType);
     MethodDefStmt* methodDef  = stmtFact_.mk_method_def(
-        currentType->def,
+        self->typeContext_->def,
         stmtFact_.mk_function_def(
             std::move(name),
             std::move(params),
@@ -241,7 +238,7 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 }
 
 void SymbTableBuilder::visit_base_list(SymbTableBuilder* self, const TSNode& node) {
-    UserTypeDefStmt* userType = self->typeContext_.typeStack.back()->def;
+    UserTypeDefStmt* userType = self->typeContext_->def;
     if (const auto classDef = as_a<ClassDefStmt>(userType))
         self->visit_base_list_class(node, classDef);
     else if (const auto intfDef = as_a<InterfaceDefStmt>(userType))
@@ -513,7 +510,16 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
         }
 
         if (const auto interface_t = as_a<InterfaceType>(type)) {
-            classDef->interfaces.push_back(interface_t->def);
+            bool contains = false;
+            for (auto interface : classDef->interfaces) {
+                if (interface == interface_t->def) {
+                    contains = true;
+                    break;
+                }
+            }
+            if (! contains) {
+                classDef->interfaces.push_back(interface_t->def);
+            }
         }
         else if (util::is_interface_name(name)) {
             classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));

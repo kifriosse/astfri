@@ -33,7 +33,7 @@ private:
     static StmtFactory& stmtFact_;
     static maps::QueryReg& queryReg_;
 
-    TypeContext typeContext_;
+    std::optional<TypeBinding> typeContext_;
     TypeTranslator typeTrs_;
     SymbolTable& symbTable_;
     std::vector<std::unique_ptr<SourceFile>>& srcs_;

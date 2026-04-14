@@ -24,7 +24,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
     TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
     auto* classDef              = as_a<ClassDefStmt>(tb->def);
 
-    self->semContext_.enter_type(tb);
+    self->semContext_.enter_type(*tb);
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
 
@@ -60,7 +60,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
     auto* intfDef              = as_a<InterfaceDefStmt>(tb->def);
-    self->semContext_.enter_type(tb);
+    self->semContext_.enter_type(*tb);
 
     const TSNode nIntfBody      = util::child_by_field_name(node, "body");
     auto processInterfaceHeader = [&](const TSNode& current) -> bool {
