@@ -78,6 +78,8 @@ private:
 
     astfri::ReturnStmt* transform_return_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
+    astfri::BaseInitializerStmt* transform_explicit_constructor_invocation(TSNode tsNode, const std::string& sourceCode);
+
     astfri::CompoundStmt* transform_body_node(TSNode tsNode, const std::string& sourceCode);
 
     FunctionType transform_function(TSNode tsNode, const std::string& sourceCode);

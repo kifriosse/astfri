@@ -3,10 +3,10 @@
 #include <tree_sitter/api.h>
 
 #include <cstdint>
-#include <iostream>
 #include <string>
 #include <cstring>
 #include <sys/types.h>
+#include "astfri/impl/Stmt.hpp"
 
 
 namespace astfri::java {
@@ -66,26 +66,7 @@ astfri::Stmt* StatementTransformer::get_stmt(TSNode tsNode, const std::string& s
         return stmtFactory.mk_expr(this->exprTransformer->get_expr(tsNode, sourceCode));
     }
     else if (nodeType == "explicit_constructor_invocation") {
-        std::vector<astfri::Expr*> args;
-        TSNode argumentsListNode = ts_node_named_child(tsNode, 1);
-        uint32_t argsCount       = ts_node_named_child_count(argumentsListNode);
-        for (uint32_t i = 0; i < argsCount; i++) {
-            TSNode argNode          = ts_node_named_child(argumentsListNode, i);
-            std::string argNodeType = ts_node_type(argNode);
-            args.push_back(exprTransformer->get_expr(argNode, sourceCode));
-        }
-        
-        TSNode classNode = ts_node_parent(ts_node_parent(tsNode));
-        std::string className = exprTransformer->get_node_text(ts_node_named_child(classNode, 1), sourceCode);
-
-        //std::string baseClassName
-        //    = exprTransformer->get_node_text(ts_node_named_child(tsNode, 0), sourceCode);
-        std::cout << className << std::endl;
-        std::cout << this->classesByName.size() << std::endl;
-        std::cout << this->classesByName.at(className).front()->bases.size() << std::endl;
-        astfri::ClassDefStmt* classDef = this->classesByName.at(className).front()->bases.front();
-
-        return stmtFactory.mk_base_initializer(classDef->type, args);
+        return this->transform_explicit_constructor_invocation(tsNode, sourceCode);
     }
     else {
         return stmtFactory.mk_uknown();
@@ -478,6 +459,27 @@ astfri::ReturnStmt* StatementTransformer::transform_return_stmt_node(
     return stmtFactory.mk_return(expr);
 }
 
+astfri::BaseInitializerStmt* StatementTransformer::transform_explicit_constructor_invocation(
+    TSNode tsNode,
+    const std::string& sourceCode
+) {
+    std::vector<astfri::Expr*> args;
+        TSNode argumentsListNode = ts_node_named_child(tsNode, 1);
+        uint32_t argsCount       = ts_node_named_child_count(argumentsListNode);
+        for (uint32_t i = 0; i < argsCount; i++) {
+            TSNode argNode          = ts_node_named_child(argumentsListNode, i);
+            std::string argNodeType = ts_node_type(argNode);
+            args.push_back(exprTransformer->get_expr(argNode, sourceCode));
+        }
+        
+        TSNode classNode = ts_node_parent(ts_node_parent(tsNode));
+        std::string className = exprTransformer->get_node_text(ts_node_named_child(classNode, 1), sourceCode);
+
+        astfri::ClassDefStmt* classDef = this->classesByName.at(className).front()->bases.front();
+
+        return stmtFactory.mk_base_initializer(classDef->type, args);
+}
+
 astfri::CompoundStmt* StatementTransformer::transform_body_node(
     TSNode tsNode,
     const std::string& sourceCode
@@ -804,15 +806,12 @@ void StatementTransformer::fill_class(
     std::vector<astfri::MethodDefStmt*> methods;
     std::vector<astfri::ConstructorDefStmt*> constructors;
     std::vector<astfri::GenericParam*> tparams;
-    std::vector<astfri::ClassDefStmt*> bases;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
 
-    std::cout << classDef->type->name << std::endl;
     uint32_t classChildCount = ts_node_named_child_count(classNode);
     for (uint32_t j = 0; j < classChildCount; j++) {
         TSNode classChild          = ts_node_named_child(classNode, j);
         std::string classChildType = ts_node_type(classChild);
-        std::cout << classChildType << std::endl;
 
         if (classChildType == "type_parameters") {
             uint32_t parametersCount = ts_node_named_child_count(classChild);
@@ -871,9 +870,6 @@ void StatementTransformer::fill_class(
     classDef->constructors = constructors;
     classDef->tparams      = tparams;
     classDef->interfaces   = interfaces;
-    classDef->bases        = bases;
-
-    std::cout << bases.size() << std::endl;
 
     for (astfri::MethodDefStmt* method : methods) {
         method->owner = classDef;
