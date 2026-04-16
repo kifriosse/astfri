@@ -1,5 +1,5 @@
-#ifndef ASTFRI_IMPL_EXPR_HPP
-#define ASTFRI_IMPL_EXPR_HPP
+#ifndef ASTFRI_IMPL_EXPR_DEF_HPP
+#define ASTFRI_IMPL_EXPR_DEF_HPP
 
 #include <astfri/impl/ASTNode.hpp>
 #include <astfri/impl/ExprKind.hpp>
@@ -7,11 +7,12 @@
 #include <string>
 #include <vector>
 
+
 namespace astfri {
 
 
 /**
- * @brief TODO
+ * @brief Base for all expressions.
  */
 struct Expr : ASTNode<ExprKind> {
 };
@@ -83,6 +84,8 @@ struct IfExpr : MakeAnExpr<IfExpr> {
  * @brief List of binary operators.
  */
 enum class BinOpType {
+    UNINITIALIZED = 0,
+
     // {lhs} = {rhs}, {lhs} := {rhs}, {lhs} <- {rhs}
     Assign,
 
@@ -187,8 +190,6 @@ enum class BinOpType {
 
     // {lhs} ^= {rhs}
     BitXorAssign,
-
-    UNINITIALIZED,
 };
 
 /**
@@ -204,6 +205,8 @@ struct BinOpExpr : MakeAnExpr<BinOpExpr> {
  * @brief List of unary operators.
  */
 enum class UnaryOpType {
+    UNINITIALIZED = 0,
+
     // !arg, not arg
     LogicalNot,
 
@@ -232,9 +235,7 @@ enum class UnaryOpType {
     PostDecrement,
 
     // ~arg
-    BitFlip,
-
-    UNINITIALIZED,
+    BitFlip
 };
 
 /**
@@ -242,7 +243,7 @@ enum class UnaryOpType {
  */
 struct UnaryOpExpr : MakeAnExpr<UnaryOpExpr> {
     Expr *arg{nullptr};
-    UnaryOpType op;
+    UnaryOpType op{UnaryOpType::UNINITIALIZED};
 };
 
 /**
@@ -340,34 +341,30 @@ struct BaseExpr : MakeAnExpr<BaseExpr> {
 /**
  * @brief Constructor call
  */
-struct ConstructorCallExpr : Expr, details::MkVisitable<ConstructorCallExpr> {
-    Type* type;
-    std::vector<Expr*> args;
-    ConstructorCallExpr(Type* type, std::vector<Expr*> args);
+struct ConstructorCallExpr : MakeAnExpr<ConstructorCallExpr> {
+    Type* type{nullptr};
+    std::vector<Expr*> args{};
 };
 
 /**
  * @brief Operator new that allocates and initializes it using a constructor
  */
-struct NewExpr : Expr, details::MkVisitable<NewExpr> {
-    ConstructorCallExpr* init;
-    NewExpr(ConstructorCallExpr* init);
+struct NewExpr : MakeAnExpr<NewExpr> {
+    ConstructorCallExpr* init{nullptr};
 };
 
 /**
  * @brief Operator delete that frees allocated memory
  */
-struct DeleteExpr : Expr, details::MkVisitable<DeleteExpr> {
-    Expr* arg;
-    DeleteExpr(Expr* arg);
+struct DeleteExpr : MakeAnExpr<DeleteExpr> {
+    Expr* arg{nullptr};
 };
 
 /**
  * @brief Brackets prioritizing part of an expression.
  */
-struct BracketExpr : Expr, details::MkVisitable<BracketExpr> {
-    Expr* expr;
-    BracketExpr(Expr* e);
+struct BracketExpr : MakeAnExpr<BracketExpr> {
+    Expr* expr{nullptr};
 };
 
 
@@ -387,8 +384,7 @@ struct Sink
  */
 struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr> { };
 
-} // namespace astfri
 
-#include <astfri/impl/Expr.inl>
+} // namespace astfri
 
 #endif

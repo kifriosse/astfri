@@ -15,19 +15,47 @@ ExprFactory::ExprFactory() :
 }
 
 IntLiteralExpr* ExprFactory::mk_int_literal(const int val) {
-    return details::emplace_get<IntLiteralExpr>(val, m_intLiterals, val);
+    return details::emplace_get<IntLiteralExpr>(
+        m_intLiterals,
+        val,
+        [val](){
+            IntLiteralExpr l;
+            l.val = val;
+            return l;
+        });
 }
 
 FloatLiteralExpr* ExprFactory::mk_float_literal(float val) {
-    return details::emplace_get<FloatLiteralExpr>(m_otherExpressions, val);
+    return details::emplace_get<FloatLiteralExpr>(
+        m_intLiterals,
+        val,
+        [val](){
+            FloatLiteralExpr l;
+            l.val = val;
+            return l;
+        });
 }
 
 CharLiteralExpr* ExprFactory::mk_char_literal(const char val) {
-    return details::emplace_get<CharLiteralExpr>(val, m_charLiterals, val);
+    return details::emplace_get<CharLiteralExpr>(
+        m_intLiterals,
+        val,
+        [val](){
+            CharLiteralExpr l;
+            l.val = val;
+            return l;
+        });
 }
 
 StringLiteralExpr* ExprFactory::mk_string_literal(const std::string& val) {
-    return details::emplace_get<StringLiteralExpr>(val, m_stringLiterals, val);
+    return details::emplace_get<StringLiteralExpr>(
+        m_intLiterals,
+        val,
+        [val](){
+            StringLiteralExpr l;
+            l.val = val;
+            return l;
+        });
 }
 
 BoolLiteralExpr* ExprFactory::mk_bool_literal(const bool val) {
@@ -39,7 +67,13 @@ NullLiteralExpr* ExprFactory::mk_null_literal() {
 }
 
 IfExpr* ExprFactory::mk_if(Expr* cond, Expr* iftrue, Expr* iffalse) {
-    return details::emplace_get<IfExpr>(m_otherExpressions, cond, iftrue, iffalse);
+    return details::create_store_get<IfExpr>(
+        m_otherExpressions,
+        [=](IfExpr &i){
+            i.cond = cond;
+            i.iftrue = iftrue;
+            i.iffalse = iffalse;
+        });
 }
 
 BinOpExpr* ExprFactory::mk_bin_on(Expr* left, BinOpType op, Expr* right) {

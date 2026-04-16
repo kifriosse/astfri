@@ -1,7 +1,7 @@
 #ifndef ASTFRI_IMPL_EXPR_FACTORY_HPP
 #define ASTFRI_IMPL_EXPR_FACTORY_HPP
 
-#include <astfri/impl/Expr.hpp>
+#include <astfri/impl/ExprDef.hpp>
 #include <astfri/impl/TypeFactory.hpp>
 
 #include <functional>
@@ -10,7 +10,9 @@
 #include <string>
 #include <vector>
 
+
 namespace astfri {
+
 
 /**
  * @brief Singleton expression factory.
