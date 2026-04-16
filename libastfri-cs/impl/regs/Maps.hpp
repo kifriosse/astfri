@@ -8,7 +8,6 @@
 
 #include <optional>
 #include <stdexcept>
-#include <string>
 #include <unordered_map>
 
 namespace astfri {
@@ -75,8 +74,8 @@ private:
  * enum
  */
 struct Operations {
-    const RegistryStrViewMap<UnaryOpType> prefixUnaryOps;
-    const RegistryStrViewMap<BinOpType> binaryOps;
+    const RegistryMap<UnaryOpType> prefixUnaryOps;
+    const RegistryMap<BinOpType> binaryOps;
     Operations();
 };
 
@@ -134,8 +133,8 @@ public:
     static TypeCollector get_type_collector(NodeType nodeType);
     static SymbCollector get_symb_collector(const TSNode& node);
     static SymbCollector get_symb_collector(NodeType nodeType);
-    static std::optional<UnaryOpType> get_prefix_unary_op(std::string_view op);
-    static std::optional<BinOpType> get_bin_op(std::string_view op);
+    static std::optional<UnaryOpType> get_prefix_unary_op(const TSNode& op);
+    static std::optional<BinOpType> get_bin_op(const TSNode& op);
     static Type* get_primitive_type(std::string_view nodeType);
     static CSModifier get_modifier(const TSNode& node, std::string_view src);
     static CSModifier get_modifier(std::string_view modifs);
@@ -169,18 +168,19 @@ private:
     template<class Type>
     static Type get_or_default(const RegistryMap<Type>& map, NodeType nodeType, Type nDefVal);
     /**
-     * Gets optional value from the registry map
-     * @tparam Type type of value in the registry map
-     * @param map map for lookup
-     * @param name name to lookup
+     * @brief Gets optional value from the registry map
+     * @tparam Map map type, needs to implement method find
+     * @param map map to lookup in
+     * @param key key to lookup
      * @return optional value from the map
      */
-    template<class Type>
-    static std::optional<Type> get_opt(const RegistryStrViewMap<Type>& map, std::string_view name);
+    template <typename Map>
+    static auto get_opt(const Map& map, const Map::key_type& key)
+        -> std::optional<typename Map::mapped_type>;
 };
 
 } // namespace astfri::csharp
 
-#include <libastfri-cs/impl/regs/Registries.inl>
+#include <libastfri-cs/impl/regs/Maps.inl>
 
 #endif // CSHARP_REGISTRIES_HPP

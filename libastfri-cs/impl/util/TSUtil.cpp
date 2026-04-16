@@ -1,5 +1,5 @@
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/regs/QueryRegistry.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 
 #include <tree_sitter/api.h>

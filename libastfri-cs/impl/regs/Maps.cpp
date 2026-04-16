@@ -1,7 +1,7 @@
 #include <astfri/Astfri.hpp>
 
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
@@ -20,7 +20,6 @@ class SymbTableBuilder;
 class TypeTranslator;
 
 namespace maps {
-
 namespace {
 using enum NodeType;
 
@@ -35,86 +34,121 @@ struct MappingRule {
 };
 
 constexpr MappingRule mappingRules_[] = {
-    {"compilation_unit",                  CompilationUnit,       true },
-    {"namespace_declaration",             NamespaceDecl,         true },
-    {"class_declaration",                 ClassDecl,             true },
-    {"struct_declaration",                StructDecl,            true },
-    {"interface_declaration",             InterfaceDecl,         true },
-    {"enum_declaration",                  EnumDecl,              true },
-    {"delegate_declaration",              DelegateDecl,          true },
-    {"record_declaration",                RecordDecl,            true },
-    {"constructor_declaration",           ConstructorDecl,       true },
-    {"constructor_initializer",           ConstructorInit,       true },
-    {"destructor_declaration",            DestructorDecl,        true },
-    {"method_declaration",                MethodDecl,            true },
-    {"field_declaration",                 MemberVarDef,          true },
-    {"property_declaration",              PropertyDecl,          true },
-    {"indexer_declaration",               IndexerDecl,           true },
-    {"operator_declaration",              OprDecl,               true },
-    {"conversion_operator_declaration",   CastOprDecl,           true },
-    {"local_function_statement",          LocalFuncDecl,         true },
-    {"parameter",                         ParameterDecl,         true },
-    {"local_declaration_statement",       LocalVarDef,           true },
-    {"block",                             Block,                 true },
-    {"arrow_expression_clause",           ArrowExprClaus,        true },
-    {"do_statement",                      DoWhileLoop,           true },
-    {"while_statement",                   WhileLoop,             true },
-    {"for_statement",                     ForLoop,               true },
-    {"foreach_statement",                 ForeachLoop,           true },
-    {"break_statement",                   BreakStmt,             true },
-    {"continue_statement",                ContinueStmt,          true },
-    {"if_statement",                      IfStmt,                true },
-    {"switch_statement",                  SwitchStmt,            true },
-    {"switch_section",                    SwitchSection,         true },
-    {"try_statement",                     TryStmt,               true },
-    {"catch_clause",                      CatchClause,           true },
-    {"finally_clause",                    FinallyClause,         true },
-    {"catch_declaration",                 CatchDecl,             true },
-    {"expression_statement",              ExprStmt,              true },
-    {"return_statement",                  ReturnStmt,            true },
-    {"throw_statement",                   ThrowStmt,             true },
-    {"integer_literal",                   IntLit,                true },
-    {"real_literal",                      RealLit,               true },
-    {"boolean_literal",                   BoolLit,               true },
-    {"character_literal",                 CharLit,               true },
-    {"string_literal",                    StrLit,                true },
-    {"verbatim_string_literal",           VerbatimStrLit,        true },
-    {"raw_string_literal",                RawStrLit,             true },
-    {"null_literal",                      NullLit,               true },
-    {"prefix_unary_expression",           PrefixUnOpr,           true },
-    {"postfix_unary_expression",          PostfixUnOpr,          true },
-    {"binary_expression",                 BinaryOpr,             true },
-    {"conditional_expression",            TernaryOpr,            true },
-    {"assignment_expression",             Assignment,            true },
-    {"constant_pattern",                  ConstPattern,          true },
-    {"this",                              This,                  false},
-    {"base",                              Base,                  false},
-    {"ref_expression",                    RefExpr,               true },
-    {"parenthesized_expression",          ParenthesizedExpr,     true },
-    {"member_access_expression",          MemberAccess,          true },
-    {"invocation_expression",             Invocation,            true },
-    {"cast_expression",                   CastExpr,              true },
-    {"lambda_expression",                 LambdaExpr,            true },
-    {"predefined_type",                   PredefinedType,        true },
-    {"qualified_name",                    QualifName,            true },
-    {"implicit_type",                     ImplicitType,          true },
-    {"nullable_type",                     NullableType,          true },
-    {"pointer_type",                      PointerType,           true },
-    {"ref_type",                          RefType,               true },
-    {"array_type",                        ArrayType,             true },
-    {"generic_name",                      GenericType,           true },
-    {"tuple_type",                        TupleType,             true },
-    {"function_pointer_type",             FuncPointerType,       true },
-    {"scoped_type",                       ScopedType,            true },
-    {"modifier",                          Modifier,              true },
-    {"identifier",                        Identifier,            true },
-    {"global",                            Global,                false},
-    {"static",                            Static,                false},
-    {"alias_qualified_name",              AliasQualifName,       true },
-    {"base_list",                         BaseList,              true },
-    {"type_parameter_list",               TypeParamList,         true },
-    {"type_parameter_constraints_clause", TypeParamConstrClause, true },
-    {"type_parameter_constraint",         TypeParamConstraint,   true },
+    {"compilation_unit",                  CompilationUnit,             true },
+    {"namespace_declaration",             NamespaceDecl,               true },
+    {"class_declaration",                 ClassDecl,                   true },
+    {"struct_declaration",                StructDecl,                  true },
+    {"interface_declaration",             InterfaceDecl,               true },
+    {"enum_declaration",                  EnumDecl,                    true },
+    {"delegate_declaration",              DelegateDecl,                true },
+    {"record_declaration",                RecordDecl,                  true },
+    {"constructor_declaration",           ConstructorDecl,             true },
+    {"constructor_initializer",           ConstructorInit,             true },
+    {"destructor_declaration",            DestructorDecl,              true },
+    {"method_declaration",                MethodDecl,                  true },
+    {"field_declaration",                 MemberVarDef,                true },
+    {"property_declaration",              PropertyDecl,                true },
+    {"indexer_declaration",               IndexerDecl,                 true },
+    {"operator_declaration",              OprDecl,                     true },
+    {"conversion_operator_declaration",   CastOprDecl,                 true },
+    {"local_function_statement",          LocalFuncDecl,               true },
+    {"parameter",                         ParameterDecl,               true },
+    {"local_declaration_statement",       LocalVarDef,                 true },
+    {"block",                             Block,                       true },
+    {"arrow_expression_clause",           ArrowExprClaus,              true },
+    {"do_statement",                      DoWhileLoop,                 true },
+    {"while_statement",                   WhileLoop,                   true },
+    {"for_statement",                     ForLoop,                     true },
+    {"foreach_statement",                 ForeachLoop,                 true },
+    {"break_statement",                   BreakStmt,                   true },
+    {"continue_statement",                ContinueStmt,                true },
+    {"if_statement",                      IfStmt,                      true },
+    {"switch_statement",                  SwitchStmt,                  true },
+    {"switch_section",                    SwitchSection,               true },
+    {"try_statement",                     TryStmt,                     true },
+    {"catch_clause",                      CatchClause,                 true },
+    {"finally_clause",                    FinallyClause,               true },
+    {"catch_declaration",                 CatchDecl,                   true },
+    {"expression_statement",              ExprStmt,                    true },
+    {"return_statement",                  ReturnStmt,                  true },
+    {"throw_statement",                   ThrowStmt,                   true },
+    {"integer_literal",                   IntLit,                      true },
+    {"real_literal",                      RealLit,                     true },
+    {"boolean_literal",                   BoolLit,                     true },
+    {"character_literal",                 CharLit,                     true },
+    {"string_literal",                    StrLit,                      true },
+    {"verbatim_string_literal",           VerbatimStrLit,              true },
+    {"raw_string_literal",                RawStrLit,                   true },
+    {"null_literal",                      NullLit,                     true },
+    {"prefix_unary_expression",           PrefixUnOpr,                 true },
+    {"postfix_unary_expression",          PostfixUnOpr,                true },
+    {"binary_expression",                 BinaryOpr,                   true },
+    {"conditional_expression",            TernaryOpr,                  true },
+    {"assignment_expression",             Assignment,                  true },
+    {"=",                                 Assign,                      false},
+    {"+",                                 Plus,                        false},
+    {"-",                                 Minus,                       false},
+    {"*",                                 Asterisk,                    false},
+    {"/",                                 Divide,                      false},
+    {"%",                                 Modulo,                      false},
+    {"==",                                Equal,                       false},
+    {"!=",                                NotEqual,                    false},
+    {"<",                                 Less,                        false},
+    {"<=",                                LessEqual,                   false},
+    {">",                                 Greater,                     false},
+    {">=",                                GreaterEqual,                false},
+    {"&&",                                LogicalAnd,                  false},
+    {"||",                                LogicalOr,                   false},
+    {">>",                                BitShiftRight,               false},
+    {">>>",                               BitShiftRightUnsigned,       false},
+    {"<<",                                BitShiftLeft,                false},
+    {"&",                                 Ampersand,                   false},
+    {"|",                                 BitOr,                       false},
+    {"^",                                 BitXor,                      false},
+    {"+=",                                AddAssign,                   false},
+    {"-=",                                SubtractAssign,              false},
+    {"*=",                                MultiplyAssign,              false},
+    {"/=",                                DivideAssign,                false},
+    {"%=",                                ModuloAssign,                false},
+    {">>=",                               BitShiftRightAssign,         false},
+    {">>>=",                              BitShiftRightUnsignedAssign, false},
+    {"<<=",                               BitShiftLeftAssign,          false},
+    {"&=",                                BitAndAssign,                false},
+    {"|=",                                BitOrAssign,                 false},
+    {"^=",                                BitXorAssign,                false},
+    {"++",                                Increment,                   false},
+    {"--",                                Decrement,                   false},
+    {"~",                                 BitFlip,                     false},
+    {"!",                                 LogicalNot,                  false},
+    {"constant_pattern",                  ConstPattern,                true },
+    {"this",                              This,                        false},
+    {"base",                              Base,                        false},
+    {"ref_expression",                    RefExpr,                     true },
+    {"parenthesized_expression",          ParenthesizedExpr,           true },
+    {"member_access_expression",          MemberAccess,                true },
+    {"invocation_expression",             Invocation,                  true },
+    {"cast_expression",                   CastExpr,                    true },
+    {"lambda_expression",                 LambdaExpr,                  true },
+    {"predefined_type",                   PredefinedType,              true },
+    {"qualified_name",                    QualifName,                  true },
+    {"implicit_type",                     ImplicitType,                true },
+    {"nullable_type",                     NullableType,                true },
+    {"pointer_type",                      PointerType,                 true },
+    {"ref_type",                          RefType,                     true },
+    {"array_type",                        ArrayType,                   true },
+    {"generic_name",                      GenericType,                 true },
+    {"tuple_type",                        TupleType,                   true },
+    {"function_pointer_type",             FuncPointerType,             true },
+    {"scoped_type",                       ScopedType,                  true },
+    {"modifier",                          Modifier,                    true },
+    {"identifier",                        Identifier,                  true },
+    {"global",                            Global,                      false},
+    {"static",                            Static,                      false},
+    {"alias_qualified_name",              AliasQualifName,             true },
+    {"base_list",                         BaseList,                    true },
+    {"type_parameter_list",               TypeParamList,               true },
+    {"type_parameter_constraints_clause", TypeParamConstrClause,       true },
+    {"type_parameter_constraint",         TypeParamConstraint,         true },
 };
 
 } // namespace
@@ -227,46 +261,47 @@ Mappers::Mappers() :
 
 Operations::Operations() :
     prefixUnaryOps({
-        {"+",  UnaryOpType::Plus        },
-        {"-",  UnaryOpType::Minus       },
-        {"++", UnaryOpType::PreIncrement},
-        {"--", UnaryOpType::PreDecrement},
-        {"!",  UnaryOpType::LogicalNot  },
-        {"~",  UnaryOpType::BitFlip     },
-        {"*",  UnaryOpType::Dereference },
-        {"&",  UnaryOpType::AddressOf   },
+        {Plus,       UnaryOpType::Plus        },
+        {Minus,      UnaryOpType::Minus       },
+        {Increment,  UnaryOpType::PreIncrement},
+        {Decrement,  UnaryOpType::PreDecrement},
+        {LogicalNot, UnaryOpType::LogicalNot  },
+        {BitFlip,    UnaryOpType::BitFlip     },
+        {Asterisk,   UnaryOpType::Dereference },
+        {Ampersand,  UnaryOpType::AddressOf   },
 }),
     binaryOps(
-        {{"=", BinOpType::Assign},
-         {"+", BinOpType::Add},
-         {"-", BinOpType::Subtract},
-         {"*", BinOpType::Multiply},
-         {"/", BinOpType::Divide},
-         {"%", BinOpType::Modulo},
-         {"==", BinOpType::Equal},
-         {"!=", BinOpType::NotEqual},
-         {"<", BinOpType::Less},
-         {"<=", BinOpType::LessEqual},
-         {">", BinOpType::Greater},
-         {">=", BinOpType::GreaterEqual},
-         {"&&", BinOpType::LogicalAnd},
-         {"||", BinOpType::LogicalOr},
-         {"&", BinOpType::BitAnd},
-         {"|", BinOpType::BitOr},
-         {"^", BinOpType::BitXor},
-         {"<<", BinOpType::BitShiftLeft},
-         {">>", BinOpType::BitShiftRight},
-         {"+=", BinOpType::AddAssign},
-         {"-=", BinOpType::SubtractAssign},
-         {"*=", BinOpType::MultiplyAssign},
-         {"/=", BinOpType::DivideAssign},
-         {"%=", BinOpType::ModuloAssign},
-         {">>=", BinOpType::BitShiftRightAssign},
-         {"<<=", BinOpType::BitShiftLeftAssign},
-         {"&=", BinOpType::BitAndAssign},
-         {"|=", BinOpType::BitOrAssign},
-         {"^=", BinOpType::BitXorAssign},
-         {">>>", BinOpType::BitShiftRightUnsigned}}
+        {{Assign, BinOpType::Assign},
+         {Plus, BinOpType::Add},
+         {Minus, BinOpType::Subtract},
+         {Asterisk, BinOpType::Multiply},
+         {Divide, BinOpType::Divide},
+         {Modulo, BinOpType::Modulo},
+         {Equal, BinOpType::Equal},
+         {NotEqual, BinOpType::NotEqual},
+         {Less, BinOpType::Less},
+         {LessEqual, BinOpType::LessEqual},
+         {Greater, BinOpType::Greater},
+         {GreaterEqual, BinOpType::GreaterEqual},
+         {LogicalAnd, BinOpType::LogicalAnd},
+         {LogicalOr, BinOpType::LogicalOr},
+         {Ampersand, BinOpType::BitAnd},
+         {BitOr, BinOpType::BitOr},
+         {BitXor, BinOpType::BitXor},
+         {BitShiftRight, BinOpType::BitShiftRight},
+         {BitShiftRightUnsigned, BinOpType::BitShiftRightUnsigned},
+         {BitShiftLeft, BinOpType::BitShiftLeft},
+         {AddAssign, BinOpType::AddAssign},
+         {SubtractAssign, BinOpType::SubtractAssign},
+         {MultiplyAssign, BinOpType::MultiplyAssign},
+         {DivideAssign, BinOpType::DivideAssign},
+         {ModuloAssign, BinOpType::ModuloAssign},
+         {BitShiftRightAssign, BinOpType::BitShiftRightAssign},
+         {BitShiftLeftAssign, BinOpType::BitShiftLeftAssign},
+        // todo add right unsigned bit shift assign
+         {BitAndAssign, BinOpType::BitAndAssign},
+         {BitOrAssign, BinOpType::BitOrAssign},
+         {BitXorAssign, BinOpType::BitXorAssign}}
     ) {
 }
 
@@ -310,7 +345,9 @@ Types::Types() :
         {"double", typeFact.mk_float()}, // TODO: implement `double` type
         {"decimal", typeFact.mk_float()}, // TODO: implement `decimal` type
 
+        {"nint", typeFact.mk_int()}, // TODO: implement `nint` type
         {"nuint", typeFact.mk_int()}, // TODO: implement `nuint` type
+
         {"void", typeFact.mk_void()},
         {"dynamic", typeFact.mk_dynamic()},
 
@@ -325,8 +362,8 @@ Types::Types() :
         {"UInt32", typeFact.mk_int()}, // TODO: implement `UInt32` type
         {"UInt64", typeFact.mk_int()}, // TODO: implement `UInt64` type
 
+        {"IntPtr", typeFact.mk_int()}, // TODO: implement IntPtr type
         {"UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
-        {"System.UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
 
         {"Single", typeFact.mk_float()},
         {"Double", typeFact.mk_float()}, // TODO: implement `double` type
@@ -337,7 +374,7 @@ Types::Types() :
         {"string", typeFact.mk_class("String", {{"System"}})},
         {"String", typeFact.mk_class("String", {{"System"}})},
 
-        {"var", typeFact.mk_deduced(nullptr)}, // todo handle var type
+        {"var", typeFact.mk_deduced(nullptr)},
         {"_", typeFact.mk_unknown()}, // todo handle discard type
 }) {
 }
@@ -400,12 +437,12 @@ SymbCollector MapManager::get_symb_collector(const NodeType nodeType) {
     return get_or_default(handlers_.symbCollectors, nodeType, std::move(def));
 }
 
-std::optional<UnaryOpType> MapManager::get_prefix_unary_op(const std::string_view op) {
-    return get_opt(operations_.prefixUnaryOps, op);
+std::optional<UnaryOpType> MapManager::get_prefix_unary_op(const TSNode& op) {
+    return get_opt(operations_.prefixUnaryOps, get_node_type(op));
 }
 
-std::optional<BinOpType> MapManager::get_bin_op(const std::string_view op) {
-    return get_opt(operations_.binaryOps, op);
+std::optional<BinOpType> MapManager::get_bin_op(const TSNode& op) {
+    return get_opt(operations_.binaryOps, get_node_type(op));
 }
 
 Type* MapManager::get_primitive_type(const std::string_view nodeType) {

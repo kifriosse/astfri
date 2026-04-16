@@ -22,6 +22,14 @@ public partial class TestClass
     }
 }
 
+partial class A : IDisposable
+{
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class Person
 {
     private string _firstName;

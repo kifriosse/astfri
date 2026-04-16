@@ -3,7 +3,7 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/Common.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/util/Utils.hpp>
@@ -286,7 +286,7 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
             return exprFact_.mk_unknown();
         }
     }
-    // left side is a anonymous lambda
+    // left side is an anonymous lambda
     TSNode nLambda;
     TSNode nDelegate;
     if (util::is_anonymous_lambda(nFunc, &nLambda, &nDelegate)) {
@@ -300,10 +300,9 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
 Expr* SrcCodeVisitor::visit_prefix_unary_opr(SrcCodeVisitor* self, const TSNode& node) {
     const TSNode nOp     = ts_node_child(node, 0);
     const TSNode nRight  = ts_node_child(node, 1);
-    const std::string op = util::extract_text(nOp, self->src_str());
     // std::erase_if(op, isspace);
 
-    const auto res = MapManager::get_prefix_unary_op(op);
+    const auto res = MapManager::get_prefix_unary_op(nOp);
     if (! res)
         // throw std::runtime_error("Operation \"" + op + "\" is not
         // implemented");
@@ -350,10 +349,10 @@ Expr* SrcCodeVisitor::visit_binary_opr(SrcCodeVisitor* self, const TSNode& node)
     const TSNode nRight     = ts_node_named_child(node, 1);
     const ExprMapper hLeft  = MapManager::get_expr_mapper(nLeft);
     const ExprMapper hRight = MapManager::get_expr_mapper(nRight);
-    const std::string op    = util::extract_text(nOp, self->src_str());
 
-    const auto opOpt        = MapManager::get_bin_op(op);
+    const auto opOpt        = MapManager::get_bin_op(nOp);
     if (! opOpt) {
+        const std::string op    = util::extract_text(nOp, self->src_str());
         // `a ?? b` same as `a != null ? a : b`
         Expr* left = hLeft(self, nLeft);
         BinOpExpr* cond

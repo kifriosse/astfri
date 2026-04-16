@@ -68,13 +68,55 @@ enum class NodeType : TSSymbol {
     BinaryOpr,
     TernaryOpr,
     Assignment,
-
+    // Operators
+    // Binary
+    Assign,
+    Minus,
+    Plus,
+    /**
+     * @brief Used for both multiplication and dereference
+     */
+    Asterisk,
+    Divide,
+    Modulo,
+    Equal,
+    NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    LogicalAnd,
+    LogicalOr,
+    BitShiftRight,
+    BitShiftRightUnsigned,
+    BitShiftLeft,
+    /**
+     * @brief Used for both BitWiseAnd and AddressOff operator
+     */
+    Ampersand,
+    BitOr,
+    BitXor,
+    AddAssign,
+    SubtractAssign,
+    MultiplyAssign,
+    DivideAssign,
+    ModuloAssign,
+    BitShiftRightAssign,
+    BitShiftRightUnsignedAssign,
+    BitShiftLeftAssign,
+    BitAndAssign,
+    BitOrAssign,
+    BitXorAssign,
+    // Unary
+    LogicalNot,
+    Increment,
+    Decrement,
+    BitFlip,
     // Patterns
     /**
      * @brief Node for constant patterns in switch, e.g. \code case 5: \endcode
      */
     ConstPattern,
-
     // other expr
     This,
     Base,

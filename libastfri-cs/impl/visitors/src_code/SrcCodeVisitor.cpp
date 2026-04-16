@@ -3,7 +3,7 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/data/SourceFile.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
 

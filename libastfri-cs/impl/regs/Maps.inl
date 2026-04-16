@@ -28,12 +28,10 @@ Type MapManager::get_or_default(const RegistryMap<Type>& map, NodeType nodeType,
     return it != map.end() ? it->second : nDefVal;
 }
 
-template<class RetType>
-std::optional<RetType> MapManager::get_opt(
-    const RegistryStrViewMap<RetType>& map,
-    std::string_view name
-) {
-    const auto it = map.find(name);
+template <typename Map>
+auto MapManager::get_opt(const Map& map, const typename Map::key_type& key)
+    -> std::optional<typename Map::mapped_type> {
+    const auto it = map.find(key);
     return it != map.end() ? std::optional{it->second} : std::nullopt;
 }
 

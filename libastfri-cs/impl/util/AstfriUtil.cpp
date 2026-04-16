@@ -1,7 +1,7 @@
 #include <astfri/Astfri.hpp>
 
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/util/Utils.hpp>

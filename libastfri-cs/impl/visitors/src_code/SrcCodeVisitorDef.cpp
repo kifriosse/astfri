@@ -2,7 +2,7 @@
 
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>

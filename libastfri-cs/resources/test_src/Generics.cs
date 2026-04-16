@@ -34,6 +34,39 @@ public class MultiGenericClass<T1, T2>
     
 }
 
+
+// Súbor 1
+partial class A : IDisposable
+{
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+// Súbor 2
+partial class A : IComparable, IDisposable
+{
+
+    public int Method<B, C>(B b)
+    {
+        return 1;
+    }
+
+
+    public int Method(int b)
+    {
+        return 1;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+
 public interface IGenericInterface<T>
 {
     T GetItem();
