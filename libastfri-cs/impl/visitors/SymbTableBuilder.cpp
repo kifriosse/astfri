@@ -510,16 +510,16 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
         }
 
         if (const auto interface_t = as_a<InterfaceType>(type)) {
-            bool contains = false;
-            for (auto interface : classDef->interfaces) {
-                if (interface == interface_t->def) {
-                    contains = true;
-                    break;
-                }
-            }
-            if (! contains) {
-                classDef->interfaces.push_back(interface_t->def);
-            }
+            // bool contains = false;
+            // for (auto interface : classDef->interfaces) {
+            //     if (interface == interface_t->def) {
+            //         contains = true;
+            //         break;
+            //     }
+            // }
+            // if (! contains) {
+            classDef->interfaces.push_back(interface_t->def);
+            // }
         }
         else if (util::is_interface_name(name)) {
             classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
