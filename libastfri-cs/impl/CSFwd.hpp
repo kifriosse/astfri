@@ -44,6 +44,7 @@ using CaptureId = uint32_t;
  * @tparam ReturnType return type of the visit function
  * @tparam Owner type of the visitor class that owns the visit function
  */
+
 template<typename ReturnType, typename Owner>
 using TSNodeProcessor = ReturnType (*)(Owner*, const TSNode&);
 
@@ -72,7 +73,7 @@ using TypeCollector = TSNodeProcessor<ScopeNode*, SymbTableBuilder>;
  * @brief Alias for symbol table builder visit functions used for collecting
  * member definitions.
  */
-using SymbCollector = TSNodeProcessor<void, SymbTableBuilder>;
+using MemberCollector = TSNodeProcessor<void, SymbTableBuilder>;
 
 /**
  * @brief Map with NodeType enum as keys

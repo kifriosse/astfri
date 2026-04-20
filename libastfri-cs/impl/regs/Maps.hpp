@@ -55,7 +55,7 @@ struct Mappers {
     const RegistryMap<ExprMapper> exprs;
     const RegistryMap<TypeMapper> types;
     const RegistryMap<TypeCollector> typeCollectors;
-    const RegistryMap<SymbCollector> symbCollectors;
+    const RegistryMap<MemberCollector> symbCollectors;
     Mappers();
 
 private:
@@ -131,8 +131,8 @@ public:
     static TypeMapper get_type_mapper(NodeType nodeType);
     static TypeCollector get_type_collector(const TSNode& node);
     static TypeCollector get_type_collector(NodeType nodeType);
-    static SymbCollector get_symb_collector(const TSNode& node);
-    static SymbCollector get_symb_collector(NodeType nodeType);
+    static MemberCollector get_symb_collector(const TSNode& node);
+    static MemberCollector get_symb_collector(NodeType nodeType);
     static std::optional<UnaryOpType> get_prefix_unary_op(const TSNode& op);
     static std::optional<BinOpType> get_bin_op(const TSNode& op);
     static Type* get_primitive_type(std::string_view nodeType);

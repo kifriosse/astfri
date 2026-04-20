@@ -425,12 +425,12 @@ TypeCollector MapManager::get_type_collector(const NodeType nodeType) {
     return get_or_default(handlers_.typeCollectors, nodeType, def);
 }
 
-SymbCollector MapManager::get_symb_collector(const TSNode& node) {
+MemberCollector MapManager::get_symb_collector(const TSNode& node) {
     return get_symb_collector(nodeTypes_.get_node_type(node));
 }
 
-SymbCollector MapManager::get_symb_collector(const NodeType nodeType) {
-    const SymbCollector def = [](auto*, const auto&) { };
+MemberCollector MapManager::get_symb_collector(const NodeType nodeType) {
+    const MemberCollector def = [](auto*, const auto&) { };
     return get_or_default(handlers_.symbCollectors, nodeType, def);
 }
 

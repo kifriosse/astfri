@@ -106,7 +106,7 @@ void SymbTableBuilder::reg_members() {
         if (util::is_type_decl(current))
             return;
 
-        const SymbCollector handler = MapManager::get_symb_collector(current);
+        const MemberCollector handler = MapManager::get_symb_collector(current);
         handler(this, current);
     };
 
