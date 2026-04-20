@@ -394,8 +394,8 @@ StmtMapper MapManager::get_stmt_mapper(const TSNode& node) {
 StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType) {
     // todo redo this when the typo is fixed
     // std::cerr << "Entering statement handler: " << nodeType << "\n";
-    StmtMapper def = default_stmt_visit;
-    return get_or_default(handlers_.stmts, nodeType, std::move(def));
+    const StmtMapper def = default_stmt_visit;
+    return get_or_default(handlers_.stmts, nodeType, def);
 }
 
 ExprMapper MapManager::get_expr_mapper(const TSNode& node) {
@@ -403,9 +403,8 @@ ExprMapper MapManager::get_expr_mapper(const TSNode& node) {
 }
 
 ExprMapper MapManager::get_expr_mapper(const NodeType nodeType) {
-    // std::cerr << "Entering expression handler: " << nodeType << "\n";
-    ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
-    return get_or_default(handlers_.exprs, nodeType, std::move(def));
+    const ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
+    return get_or_default(handlers_.exprs, nodeType, def);
 }
 
 TypeMapper MapManager::get_type_mapper(const TSNode& node) {
@@ -413,9 +412,8 @@ TypeMapper MapManager::get_type_mapper(const TSNode& node) {
 }
 
 TypeMapper MapManager::get_type_mapper(const NodeType nodeType) {
-    // std::cerr << "Entering type handler: " << nodeType << "\n";
-    TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
-    return get_or_default(handlers_.types, nodeType, std::move(def));
+    const TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
+    return get_or_default(handlers_.types, nodeType, def);
 }
 
 TypeCollector MapManager::get_type_collector(const TSNode& node) {
@@ -423,8 +421,8 @@ TypeCollector MapManager::get_type_collector(const TSNode& node) {
 }
 
 TypeCollector MapManager::get_type_collector(const NodeType nodeType) {
-    TypeCollector def = [](auto*, const auto&) { return nullptr; };
-    return get_or_default(handlers_.typeCollectors, nodeType, std::move(def));
+    const TypeCollector def = [](auto*, const auto &) -> ScopeNode* { return nullptr; };
+    return get_or_default(handlers_.typeCollectors, nodeType, def);
 }
 
 SymbCollector MapManager::get_symb_collector(const TSNode& node) {
@@ -432,9 +430,8 @@ SymbCollector MapManager::get_symb_collector(const TSNode& node) {
 }
 
 SymbCollector MapManager::get_symb_collector(const NodeType nodeType) {
-    // std::cerr << "Entering registration handler: " << nodeType << "\n";
-    SymbCollector def = [](auto*, const auto&) { };
-    return get_or_default(handlers_.symbCollectors, nodeType, std::move(def));
+    const SymbCollector def = [](auto*, const auto&) { };
+    return get_or_default(handlers_.symbCollectors, nodeType, def);
 }
 
 std::optional<UnaryOpType> MapManager::get_prefix_unary_op(const TSNode& op) {

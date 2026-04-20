@@ -77,7 +77,7 @@ ScopeNode* ScopeNode::add_child(std::string name, NodeData content) {
     return it->second.get();
 }
 
-const ScopeNode::NodeData& ScopeNode::data() const {
+ScopeNode::NodeData& ScopeNode::data() {
     return data_;
 }
 

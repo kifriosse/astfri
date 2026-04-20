@@ -137,7 +137,7 @@ public:
      * @brief Returns content of the node
      * @return content of the node
      */
-    [[nodiscard]] const NodeData& data() const;
+    [[nodiscard]] ScopeNode::NodeData& data();
 
     ScopeNode* parent() const;
     ScopeNode* find_child(std::string_view childName) const;

@@ -38,15 +38,14 @@ Type* TypeTranslator::visit_predefined(TypeTranslator* self, const TSNode& node)
 }
 
 Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& node) {
-    const auto primitive
-        = MapManager::get_primitive_type(util::extract_text(node, self->src_str()));
-    if (primitive)
+    if (const auto primitive
+        = MapManager::get_primitive_type(util::extract_text(node, self->src_str())))
         return primitive;
 
     // look up order form language specification
     // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#781-general
 
-    const ScopeNode* typeNode
+    ScopeNode* typeNode
         = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
 
     if (typeNode) {
@@ -54,8 +53,11 @@ Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& nod
             [](const TypeBinding& b) -> Type* { return b.type; },
             [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
-            [](const ExternalMarker&) -> Type* {
-                return typeFact_.mk_unknown(); // todo change to incomplete type
+            [](ExternalMarker& em) -> Type* {
+                if (em.qualifiedName.empty())
+                    return typeFact_.mk_unknown();
+                // move is here only to make the external node empty not to make it more efficient
+                return typeFact_.mk_incomplete(std::move(em.qualifiedName));
             },
         };
         return std::visit(overloaded, typeNode->data());
@@ -68,16 +70,18 @@ Type* TypeTranslator::visit_qualified_name(
     [[maybe_unused]] TypeTranslator* self,
     [[maybe_unused]] const TSNode& node
 ) {
-    const ScopeNode* typeNode
-        = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
+    ScopeNode* typeNode = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
 
     if (typeNode) {
         util::Overloaded overloaded{
             [](const TypeBinding& b) -> Type* { return b.type; },
             [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
-            [](const ExternalMarker&) -> Type* {
-                return typeFact_.mk_unknown(); // todo change to incomplete type
+            [](ExternalMarker& em) -> Type* {
+                if (em.qualifiedName.empty())
+                    return typeFact_.mk_unknown();
+                // move is here only to make the external node empty not to make it more efficient
+                return typeFact_.mk_incomplete(std::move(em.qualifiedName));
             }
         };
         return std::visit(overloaded, typeNode->data());

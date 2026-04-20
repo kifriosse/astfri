@@ -45,7 +45,7 @@ using CaptureId = uint32_t;
  * @tparam Owner type of the visitor class that owns the visit function
  */
 template<typename ReturnType, typename Owner>
-using TSNodeProcessor = std::function<ReturnType(Owner*, const TSNode&)>;
+using TSNodeProcessor = ReturnType (*)(Owner*, const TSNode&);
 
 /**
  * @brief Alias for source code visitor visit functions used for mapping
