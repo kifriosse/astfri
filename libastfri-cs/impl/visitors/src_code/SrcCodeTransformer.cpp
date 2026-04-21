@@ -5,7 +5,7 @@
 #include <libastfri-cs/impl/data/SourceFile.hpp>
 #include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
-#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
@@ -13,17 +13,17 @@
 
 namespace astfri::csharp {
 
-ExprFactory& SrcCodeVisitor::exprFact_ = ExprFactory::get_instance();
-StmtFactory& SrcCodeVisitor::stmtFact_ = StmtFactory::get_instance();
-TypeFactory& SrcCodeVisitor::typeFact_ = TypeFactory::get_instance();
+ExprFactory& SrcCodeTransformer::exprFact_ = ExprFactory::get_instance();
+StmtFactory& SrcCodeTransformer::stmtFact_ = StmtFactory::get_instance();
+TypeFactory& SrcCodeTransformer::typeFact_ = TypeFactory::get_instance();
 
-SrcCodeVisitor::SrcCodeVisitor(SymbolTable& symbTable) :
+SrcCodeTransformer::SrcCodeTransformer(SymbolTable& symbTable) :
     typeTrs_(symbTable),
     semContext_(symbTable),
     lang_(tree_sitter_c_sharp()) {
 }
 
-TranslationUnit* SrcCodeVisitor::visit_comp_unit() {
+TranslationUnit* SrcCodeTransformer::visit_comp_unit() {
     TranslationUnit* trUnit = stmtFact_.mk_translation_unit();
     for (const auto metadata : this->semContext_.get_type_metadata()) {
         typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
@@ -34,8 +34,8 @@ TranslationUnit* SrcCodeVisitor::visit_comp_unit() {
 
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-            StmtMapper hStmt = MapManager::get_stmt_mapper(node);
-            Stmt* stmt       = hStmt(this, node);
+            StmtMapper mStmt = MapManager::get_stmt_mapper(node);
+            Stmt* stmt       = mStmt(this, node);
             if (added)
                 continue;
 

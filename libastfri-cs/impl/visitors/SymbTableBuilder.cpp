@@ -106,8 +106,8 @@ void SymbTableBuilder::reg_members() {
         if (util::is_type_decl(current))
             return;
 
-        const MemberCollector handler = MapManager::get_symb_collector(current);
-        handler(this, current);
+        const MemberCollector collector = MapManager::get_symb_collector(current);
+        collector(this, current);
     };
 
     for (auto* metadata : symbTable_.get_type_metadata()) {
@@ -154,8 +154,8 @@ void SymbTableBuilder::visit_memb_var(SymbTableBuilder* self, const TSNode& node
     TSNode nVarDecl;
     const auto modifs      = CSModifiers::parse_var_modifs(node, src, &nVarDecl);
     const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
-    const TypeMapper th    = MapManager::get_type_mapper(nType);
-    Type* type             = th(&self->typeTrs_, nType);
+    const TypeMapper tm    = MapManager::get_type_mapper(nType);
+    Type* type             = tm(&self->typeTrs_, nType);
     TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(self->typeContext_->def);
 
     if (! typeMeta)
@@ -216,13 +216,13 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
     auto [params, paramsMeta] = util::discover_params(nParams, srcStr, self->typeTrs_);
 
-    const TypeMapper th       = MapManager::get_type_mapper(nRetType);
+    const TypeMapper tm       = MapManager::get_type_mapper(nRetType);
     MethodDefStmt* methodDef  = stmtFact_.mk_method_def(
         self->typeContext_->def,
         stmtFact_.mk_function_def(
             std::move(name),
             std::move(params),
-            th(&self->typeTrs_, nRetType),
+            tm(&self->typeTrs_, nRetType),
             nullptr
         ),
         modifs.get_access_mod().value_or(AccessModifier::Internal),
@@ -440,8 +440,8 @@ void SymbTableBuilder::collect_types(const TSTree* tree) {
             return;
 
         if (util::is_type_decl(sCurrent)) {
-            const TypeCollector handler = MapManager::get_type_collector(node);
-            if (ScopeNode* scopeNode = handler(this, node))
+            const TypeCollector collector = MapManager::get_type_collector(node);
+            if (ScopeNode* scopeNode = collector(this, node))
                 stack.emplace_back(body, scopeNode);
         }
         else if (sCurrent == MapManager::get_symbol(NodeType::NamespaceDecl)) {
@@ -490,8 +490,8 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
     bool first           = true;
     auto processBaseList = [&](const TSNode& current) -> void {
         std::string name    = util::extract_text(current, src_str());
-        const TypeMapper th = MapManager::get_type_mapper(current);
-        Type* type          = th(&typeTrs_, current);
+        const TypeMapper tm = MapManager::get_type_mapper(current);
+        Type* type          = tm(&typeTrs_, current);
         if (first) {
             first = false;
             if (const auto class_t = as_a<ClassType>(type))
@@ -535,8 +535,8 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
 
 void SymbTableBuilder::visit_base_list_interface(const TSNode& node, InterfaceDefStmt* intfDef) {
     auto processBaseList = [&](const TSNode& current) -> void {
-        const TypeMapper th = MapManager::get_type_mapper(current);
-        Type* type          = th(&typeTrs_, current);
+        const TypeMapper tm = MapManager::get_type_mapper(current);
+        Type* type          = tm(&typeTrs_, current);
 
         if (const auto tInterface = as_a<InterfaceType>(type))
             intfDef->bases.push_back(tInterface->def);

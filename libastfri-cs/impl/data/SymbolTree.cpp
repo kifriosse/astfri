@@ -102,10 +102,10 @@ ScopeNode* SymbolTree::add_type(const Scope& scope, const TypeBinding& tb) {
     return last->add_child(tb.type->name, tb);
 }
 
-ScopeNode* SymbolTree::add_primitive(const std::string& name, CSPrimitiveType primitive) {
+ScopeNode* SymbolTree::add_primitive(std::string name, CSPrimitiveType primitive) {
     static const Scope systemScope = mk_scope("System");
     ScopeNode* last                = add_scope(systemScope);
-    return last->add_child(name, primitive);
+    return last->add_child(std::move(name), primitive);
 }
 
 ScopeNode* SymbolTree::find_node(const Scope& scope) const {

@@ -3,7 +3,7 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
-#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
 
@@ -15,7 +15,7 @@
 
 namespace astfri::csharp {
 
-class SrcCodeVisitor;
+class SrcCodeTransformer;
 class SymbTableBuilder;
 class TypeTranslator;
 
@@ -175,58 +175,58 @@ NodeType NodeTypes::get_node_type(const TSNode& node) const {
 
 Mappers::Mappers() :
     stmts({
-        {ClassDecl,       SrcCodeVisitor::visit_class_def    },
-        {StructDecl,      SrcCodeVisitor::visit_class_def    },
-        {InterfaceDecl,   SrcCodeVisitor::visit_interface_def},
-        {ConstructorDecl, SrcCodeVisitor::visit_constr_def   },
-        {ConstructorInit, SrcCodeVisitor::visit_constr_init  },
-        {MethodDecl,      SrcCodeVisitor::visit_method_def   },
-        {DestructorDecl,  SrcCodeVisitor::visit_destr_def    },
-        {MemberVarDef,    SrcCodeVisitor::visit_memb_var_def },
-        {LocalFuncDecl,   SrcCodeVisitor::visit_func_stmt    },
-        {ParameterDecl,   SrcCodeVisitor::visit_param_def    },
-        {LocalVarDef,     SrcCodeVisitor::visit_local_var_def},
-        {Block,           SrcCodeVisitor::visit_block        },
-        {ArrowExprClaus,  SrcCodeVisitor::visit_arrow_body   },
-        {DoWhileLoop,     SrcCodeVisitor::visit_do_while     },
-        {WhileLoop,       SrcCodeVisitor::visit_while        },
-        {ForLoop,         SrcCodeVisitor::visit_for_loop     },
-        {ForeachLoop,     SrcCodeVisitor::visit_for_each     },
-        {BreakStmt,       SrcCodeVisitor::visit_break        },
-        {ContinueStmt,    SrcCodeVisitor::visit_continue     },
-        {IfStmt,          SrcCodeVisitor::visit_if           },
-        {TryStmt,         SrcCodeVisitor::visit_try          },
-        {CatchClause,     SrcCodeVisitor::visit_catch        },
-        {FinallyClause,   SrcCodeVisitor::visit_finally      },
-        {CatchDecl,       SrcCodeVisitor::visit_catch_decl   },
-        {SwitchStmt,      SrcCodeVisitor::visit_switch       },
-        {SwitchSection,   SrcCodeVisitor::visit_case_stmt    },
-        {ExprStmt,        SrcCodeVisitor::visit_expr_stmt    },
-        {ReturnStmt,      SrcCodeVisitor::visit_return       },
-        {ThrowStmt,       SrcCodeVisitor::visit_throw        },
+        {ClassDecl,       SrcCodeTransformer::visit_class_def    },
+        {StructDecl,      SrcCodeTransformer::visit_class_def    },
+        {InterfaceDecl,   SrcCodeTransformer::visit_interface_def},
+        {ConstructorDecl, SrcCodeTransformer::visit_constr_def   },
+        {ConstructorInit, SrcCodeTransformer::visit_constr_init  },
+        {MethodDecl,      SrcCodeTransformer::visit_method_def   },
+        {DestructorDecl,  SrcCodeTransformer::visit_destr_def    },
+        {MemberVarDef,    SrcCodeTransformer::visit_memb_var_def },
+        {LocalFuncDecl,   SrcCodeTransformer::visit_func_stmt    },
+        {ParameterDecl,   SrcCodeTransformer::visit_param_def    },
+        {LocalVarDef,     SrcCodeTransformer::visit_local_var_def},
+        {Block,           SrcCodeTransformer::visit_block        },
+        {ArrowExprClaus,  SrcCodeTransformer::visit_arrow_body   },
+        {DoWhileLoop,     SrcCodeTransformer::visit_do_while     },
+        {WhileLoop,       SrcCodeTransformer::visit_while        },
+        {ForLoop,         SrcCodeTransformer::visit_for_loop     },
+        {ForeachLoop,     SrcCodeTransformer::visit_for_each     },
+        {BreakStmt,       SrcCodeTransformer::visit_break        },
+        {ContinueStmt,    SrcCodeTransformer::visit_continue     },
+        {IfStmt,          SrcCodeTransformer::visit_if           },
+        {TryStmt,         SrcCodeTransformer::visit_try          },
+        {CatchClause,     SrcCodeTransformer::visit_catch        },
+        {FinallyClause,   SrcCodeTransformer::visit_finally      },
+        {CatchDecl,       SrcCodeTransformer::visit_catch_decl   },
+        {SwitchStmt,      SrcCodeTransformer::visit_switch       },
+        {SwitchSection,   SrcCodeTransformer::visit_case_stmt    },
+        {ExprStmt,        SrcCodeTransformer::visit_expr_stmt    },
+        {ReturnStmt,      SrcCodeTransformer::visit_return       },
+        {ThrowStmt,       SrcCodeTransformer::visit_throw        },
 }),
     exprs({
-        {IntLit, SrcCodeVisitor::visit_int_lit},
-        {RealLit, SrcCodeVisitor::visit_float_lit},
-        {BoolLit, SrcCodeVisitor::visit_bool_lit},
-        {CharLit, SrcCodeVisitor::visit_char_lit},
-        {StrLit, SrcCodeVisitor::visit_str_lit},
-        {NullLit, SrcCodeVisitor::visit_null_lit},
-        {VerbatimStrLit, SrcCodeVisitor::visit_verbatim_str_lit},
-        {RawStrLit, SrcCodeVisitor::visit_raw_str_lit},
-        {This, SrcCodeVisitor::visit_this_expr},
-        {Base, SrcCodeVisitor::visit_base_expr},
-        {PrefixUnOpr, SrcCodeVisitor::visit_prefix_unary_opr},
-        {PostfixUnOpr, SrcCodeVisitor::visit_postfix_unary_opr},
-        {BinaryOpr, SrcCodeVisitor::visit_binary_opr},
-        {TernaryOpr, SrcCodeVisitor::visit_ternary_expr},
-        {RefExpr, SrcCodeVisitor::visit_ref_expr},
-        {Assignment, SrcCodeVisitor::visit_binary_opr},
-        {ParenthesizedExpr, SrcCodeVisitor::visit_parenthesized_expr},
-        {Identifier, SrcCodeVisitor::visit_identifier},
-        {MemberAccess, SrcCodeVisitor::visit_memb_access},
-        {Invocation, SrcCodeVisitor::visit_invoc},
-        {ConstPattern, SrcCodeVisitor::visit_const_pattern},
+        {IntLit, SrcCodeTransformer::visit_int_lit},
+        {RealLit, SrcCodeTransformer::visit_float_lit},
+        {BoolLit, SrcCodeTransformer::visit_bool_lit},
+        {CharLit, SrcCodeTransformer::visit_char_lit},
+        {StrLit, SrcCodeTransformer::visit_str_lit},
+        {NullLit, SrcCodeTransformer::visit_null_lit},
+        {VerbatimStrLit, SrcCodeTransformer::visit_verbatim_str_lit},
+        {RawStrLit, SrcCodeTransformer::visit_raw_str_lit},
+        {This, SrcCodeTransformer::visit_this_expr},
+        {Base, SrcCodeTransformer::visit_base_expr},
+        {PrefixUnOpr, SrcCodeTransformer::visit_prefix_unary_opr},
+        {PostfixUnOpr, SrcCodeTransformer::visit_postfix_unary_opr},
+        {BinaryOpr, SrcCodeTransformer::visit_binary_opr},
+        {TernaryOpr, SrcCodeTransformer::visit_ternary_expr},
+        {RefExpr, SrcCodeTransformer::visit_ref_expr},
+        {Assignment, SrcCodeTransformer::visit_binary_opr},
+        {ParenthesizedExpr, SrcCodeTransformer::visit_parenthesized_expr},
+        {Identifier, SrcCodeTransformer::visit_identifier},
+        {MemberAccess, SrcCodeTransformer::visit_memb_access},
+        {Invocation, SrcCodeTransformer::visit_invoc},
+        {ConstPattern, SrcCodeTransformer::visit_const_pattern},
     }),
     types({
         {PredefinedType, TypeTranslator::visit_predefined},
@@ -333,19 +333,20 @@ Types::Types() :
     types({
         {"bool", typeFact.mk_bool()},
         {"byte", typeFact.mk_int()}, // TODO: implement `byte` type
+        {"sbyte", typeFact.mk_int()},
         {"char", typeFact.mk_char()},
-        {"short", typeFact.mk_int()}, // TODO: implement `short` type
+        {"short", typeFact.mk_int()},
         {"ushort", typeFact.mk_int()}, // TODO: implement `ushort` type
         {"int", typeFact.mk_int()},
         {"uint", typeFact.mk_int()}, // TODO: implement `uint` type
-        {"long", typeFact.mk_int()}, // TODO: implement `long` type
+        {"long", typeFact.mk_int()},
         {"ulong", typeFact.mk_int()}, // TODO: implement `ulong` type
 
         {"float", typeFact.mk_float()},
-        {"double", typeFact.mk_float()}, // TODO: implement `double` type
-        {"decimal", typeFact.mk_float()}, // TODO: implement `decimal` type
+        {"double", typeFact.mk_float()},
+        {"decimal", typeFact.mk_float()},
 
-        {"nint", typeFact.mk_int()}, // TODO: implement `nint` type
+        {"nint", typeFact.mk_int()},
         {"nuint", typeFact.mk_int()}, // TODO: implement `nuint` type
 
         {"void", typeFact.mk_void()},
@@ -353,21 +354,21 @@ Types::Types() :
 
         {"Boolean", typeFact.mk_bool()},
         {"Byte", typeFact.mk_int()}, // TODO: implement `Byte` type
-        {"SByte", typeFact.mk_int()}, // TODO: implement `SByte` type
+        {"SByte", typeFact.mk_int()},
         {"Char", typeFact.mk_char()},
-        {"Int16", typeFact.mk_int()}, // TODO: implement `Int16` type
+        {"Int16", typeFact.mk_int()},
         {"Int32", typeFact.mk_int()},
-        {"Int64", typeFact.mk_int()}, // TODO: implement `Int64` type
+        {"Int64", typeFact.mk_int()},
         {"UInt16", typeFact.mk_int()}, // TODO: implement `UInt16` type
         {"UInt32", typeFact.mk_int()}, // TODO: implement `UInt32` type
         {"UInt64", typeFact.mk_int()}, // TODO: implement `UInt64` type
 
-        {"IntPtr", typeFact.mk_int()}, // TODO: implement IntPtr type
+        {"IntPtr", typeFact.mk_int()},
         {"UIntPtr", typeFact.mk_int()}, // TODO: implement UIntPtr type
 
         {"Single", typeFact.mk_float()},
-        {"Double", typeFact.mk_float()}, // TODO: implement `double` type
-        {"Decimal", typeFact.mk_float()}, // TODO: implement `decimal` type
+        {"Double", typeFact.mk_float()},
+        {"Decimal", typeFact.mk_float()},
 
         {"object", typeFact.mk_class("Object", {{"System"}})},
         {"Object", typeFact.mk_class("Object", {{"System"}})},
@@ -393,7 +394,6 @@ StmtMapper MapManager::get_stmt_mapper(const TSNode& node) {
 
 StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType) {
     // todo redo this when the typo is fixed
-    // std::cerr << "Entering statement handler: " << nodeType << "\n";
     const StmtMapper def = default_stmt_visit;
     return get_or_default(handlers_.stmts, nodeType, def);
 }
@@ -403,7 +403,7 @@ ExprMapper MapManager::get_expr_mapper(const TSNode& node) {
 }
 
 ExprMapper MapManager::get_expr_mapper(const NodeType nodeType) {
-    const ExprMapper def = default_visit<ExprFactory, SrcCodeVisitor, Expr*>;
+    const ExprMapper def = default_visit<ExprFactory, SrcCodeTransformer, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, def);
 }
 
@@ -470,7 +470,7 @@ TSSymbol MapManager::get_symbol(const NodeType type) {
     return nodeTypes_.get_symbol(type);
 }
 
-Stmt* MapManager::default_stmt_visit(SrcCodeVisitor*, const TSNode&) {
+Stmt* MapManager::default_stmt_visit(SrcCodeTransformer*, const TSNode&) {
     // todo remove this when type is fixed
     return StmtFactory::get_instance().mk_uknown();
 }

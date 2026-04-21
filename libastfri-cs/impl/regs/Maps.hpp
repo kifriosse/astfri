@@ -25,7 +25,7 @@ class TypeFactory;
 namespace astfri::csharp {
 
 enum class CSModifier : MaskType;
-class SrcCodeVisitor;
+class SrcCodeTransformer;
 
 namespace maps {
 
@@ -144,7 +144,7 @@ public:
     static TSSymbol get_symbol(NodeType type);
 
 private:
-    static Stmt* default_stmt_visit(SrcCodeVisitor*, const TSNode&);
+    static Stmt* default_stmt_visit(SrcCodeTransformer*, const TSNode&);
     /**
      * Default visit function that returns an instance of unknown
      * @tparam Factory Factory class with \c get_instance() and \c mk_unknown()

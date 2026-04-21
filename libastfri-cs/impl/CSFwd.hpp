@@ -25,7 +25,7 @@ namespace astfri::csharp {
 // Forward declarations
 class ScopeNode;
 class TypeTranslator;
-class SrcCodeVisitor;
+class SrcCodeTransformer;
 class SymbTableBuilder;
 class SymbolTable;
 
@@ -52,12 +52,12 @@ using TSNodeProcessor = ReturnType (*)(Owner*, const TSNode&);
  * @brief Alias for source code visitor visit functions used for mapping
  * tree-sitter expression nodes to AST FRI expressions and statements
  */
-using ExprMapper = TSNodeProcessor<Expr*, SrcCodeVisitor>;
+using ExprMapper = TSNodeProcessor<Expr*, SrcCodeTransformer>;
 /**
  * @brief Alias for source code visitor visit functions used for mapping
  * tree-sitter statement nodes to AST FRI statements
  */
-using StmtMapper = TSNodeProcessor<Stmt*, SrcCodeVisitor>;
+using StmtMapper = TSNodeProcessor<Stmt*, SrcCodeTransformer>;
 /**
  * @brief Alias for type translator visit functions used for mapping tree-sitter
  * type nodes to AST FRI types
@@ -88,8 +88,8 @@ using RegistryMap = std::unordered_map<NodeType, Value>;
 template<typename Value>
 using RegistryStrViewMap = std::unordered_map<std::string_view, Value>;
 /**
- * @brief Map with string identifiers as keys, using custom string hash for
- * better performance - this map can also use string_view for lookups
+ * @brief Map with heterogenous/transparent look up with string as keys, to improve perfomence for
+ * string views and string literals when used on this map.
  * @tparam Value value type of the map
  * @note Source:
  * https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers

@@ -17,7 +17,7 @@ namespace astfri::csharp {
 /**
  * @brief Visitor class for constructing AST from tree-sitter tree.
  */
-class SrcCodeVisitor {
+class SrcCodeTransformer {
 private:
     friend maps::Mappers;
 
@@ -36,7 +36,7 @@ public:
      * @param symbTable symbol table of the project (should be same as the used
      * inside semantic context)
      */
-    explicit SrcCodeVisitor(SymbolTable& symbTable);
+    explicit SrcCodeTransformer(SymbolTable& symbTable);
     /**
      * @brief Visits the root node of a tree-sitter tree and fills up
      * TranslationUnit argument with top level definitions and statements.
@@ -47,82 +47,82 @@ private:
     // Expressions
     // Literals
     // todo
-    static Expr* visit_int_lit(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_int_lit(SrcCodeTransformer* self, const TSNode& node);
     // todo
-    static Expr* visit_float_lit(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_bool_lit(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_float_lit(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_bool_lit(SrcCodeTransformer* self, const TSNode& node);
     // todo
-    static Expr* visit_char_lit(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_char_lit(SrcCodeTransformer* self, const TSNode& node);
     // todo
-    static Expr* visit_str_lit(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_null_lit(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_this_expr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_base_expr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_verbatim_str_lit(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_raw_str_lit(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_interpolated_str_lit(SrcCodeVisitor* self,
+    static Expr* visit_str_lit(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_null_lit(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_this_expr(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_base_expr(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_verbatim_str_lit(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_raw_str_lit(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_interpolated_str_lit(SrcCodeTransformer* self,
                                             const TSNode& node); // todo
 
     // Reference Expersions
-    static Expr* visit_identifier(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_memb_access(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_invoc(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_identifier(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_memb_access(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_invoc(SrcCodeTransformer* self, const TSNode& node);
 
     // Operations
-    static Expr* visit_prefix_unary_opr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_postfix_unary_opr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_ref_expr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_binary_opr(SrcCodeVisitor* self, const TSNode& node);
-    static Expr* visit_ternary_expr(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_prefix_unary_opr(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_postfix_unary_opr(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_ref_expr(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_binary_opr(SrcCodeTransformer* self, const TSNode& node);
+    static Expr* visit_ternary_expr(SrcCodeTransformer* self, const TSNode& node);
 
-    static Expr* visit_parenthesized_expr(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_parenthesized_expr(SrcCodeTransformer* self, const TSNode& node);
 
     // switch patterns
-    static Expr* visit_const_pattern(SrcCodeVisitor* self, const TSNode& node);
+    static Expr* visit_const_pattern(SrcCodeTransformer* self, const TSNode& node);
 
     // Statements
     // Type Definitions
-    static Stmt* visit_class_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_interface_def(SrcCodeVisitor* self, const TSNode& node);
+    static Stmt* visit_class_def(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_interface_def(SrcCodeTransformer* self, const TSNode& node);
     // Variable Definitions
-    static Stmt* visit_memb_var_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_local_var_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_global_var_def_stmt(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_param_def(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_constr_def(SrcCodeVisitor* self,
+    static Stmt* visit_memb_var_def(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_local_var_def(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_global_var_def_stmt(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_param_def(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_constr_def(SrcCodeTransformer* self,
                                   const TSNode& node); // constructor def stmt
-    static Stmt* visit_constr_init(SrcCodeVisitor* self,
+    static Stmt* visit_constr_init(SrcCodeTransformer* self,
                                    const TSNode& node); // base initializer
-    static Stmt* visit_destr_def(SrcCodeVisitor* self,
+    static Stmt* visit_destr_def(SrcCodeTransformer* self,
                                  const TSNode& node); // destructor def stmt
-    static Stmt* visit_method_def(SrcCodeVisitor* self,
+    static Stmt* visit_method_def(SrcCodeTransformer* self,
                                   const TSNode& node); // method def stmt
 
-    static Stmt* visit_block(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_arrow_body(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_func_stmt(SrcCodeVisitor* self, const TSNode& node);
+    static Stmt* visit_block(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_arrow_body(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_func_stmt(SrcCodeTransformer* self, const TSNode& node);
 
     // loops
-    static Stmt* visit_while(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_do_while(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_for_loop(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_for_each(SrcCodeVisitor* self, const TSNode& node);
+    static Stmt* visit_while(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_do_while(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_for_loop(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_for_each(SrcCodeTransformer* self, const TSNode& node);
 
     // branching statements
-    static Stmt* visit_if(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_try(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_catch(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_finally(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_catch_decl(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_switch(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_case_stmt(SrcCodeVisitor* self, const TSNode& node);
+    static Stmt* visit_if(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_try(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_catch(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_finally(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_catch_decl(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_switch(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_case_stmt(SrcCodeTransformer* self, const TSNode& node);
 
     // other
-    static Stmt* visit_expr_stmt(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_continue(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_break(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_return(SrcCodeVisitor* self, const TSNode& node);
-    static Stmt* visit_throw(SrcCodeVisitor* self, const TSNode& node);
+    static Stmt* visit_expr_stmt(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_continue(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_break(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_return(SrcCodeTransformer* self, const TSNode& node);
+    static Stmt* visit_throw(SrcCodeTransformer* self, const TSNode& node);
 
     /**
      * @brief General visit function for variable definition statements.

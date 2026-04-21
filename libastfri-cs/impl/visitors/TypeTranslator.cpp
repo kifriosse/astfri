@@ -56,7 +56,7 @@ Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& nod
             [](ExternalMarker& em) -> Type* {
                 if (em.qualifiedName.empty())
                     return typeFact_.mk_unknown();
-                // move is here only to make the external node empty not to make it more efficient
+                // move is here only to empty the external node not to make it more efficient
                 return typeFact_.mk_incomplete(std::move(em.qualifiedName));
             },
         };
@@ -99,15 +99,15 @@ Type* TypeTranslator::visit_implicit(
 
 Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node) {
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = MapManager::get_type_mapper(nType);
-    return th(self, nType);
+    const TypeMapper tm = MapManager::get_type_mapper(nType);
+    return tm(self, nType);
 }
 
 Type* TypeTranslator::visit_indirect(TypeTranslator* self, const TSNode& node) {
     // todo add handling of readonly
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = MapManager::get_type_mapper(nType);
-    return typeFact_.mk_indirect(th(self, nType));
+    const TypeMapper tm = MapManager::get_type_mapper(nType);
+    return typeFact_.mk_indirect(tm(self, nType));
 }
 
 Type* TypeTranslator::visit_array(

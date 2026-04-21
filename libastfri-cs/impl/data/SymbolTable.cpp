@@ -38,8 +38,8 @@ ScopeNode* SymbolTable::add_type(const TypeBinding& tb) {
     return symbTree_.add_type(tb.type->scope, tb);
 }
 
-ScopeNode* SymbolTable::add_primitive(std::string name, CSPrimitiveType primitive) {
-    return symbTree_.add_primitive(name, primitive);
+ScopeNode* SymbolTable::add_primitive(std::string name, const CSPrimitiveType primitive) {
+    return symbTree_.add_primitive(std::move(name), primitive);
 }
 
 TypeMetadata* SymbolTable::get_type_metadata(UserTypeDefStmt* def) {

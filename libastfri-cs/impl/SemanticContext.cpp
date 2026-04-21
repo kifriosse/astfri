@@ -135,6 +135,7 @@ VarDefStmt* SemanticContext::find_var(
 }
 
 const FuncMetadata* SemanticContext::find_func(const std::string_view funcName) const {
+
     auto& funcs       = scopeContext_.functions;
     const auto itFunc = funcs.find(funcName);
     return itFunc == funcs.end() ? nullptr : &itFunc->second;

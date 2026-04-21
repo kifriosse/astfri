@@ -195,7 +195,7 @@ public:
      */
     ScopeNode* add_type(const Scope& scope, const TypeBinding& tb);
 
-    ScopeNode* add_primitive(const std::string& name, CSPrimitiveType primitive);
+    ScopeNode* add_primitive(std::string name, CSPrimitiveType primitive);
 
     /**
      * @brief Finds a node in the symbol tree by its scope.

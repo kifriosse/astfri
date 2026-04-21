@@ -4,7 +4,7 @@
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
 #include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
-#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -15,14 +15,14 @@
 
 namespace astfri::csharp {
 
-Stmt* SrcCodeVisitor::visit_var_def_stmt(const TSNode& node, const util::VarDefType defType) {
+Stmt* SrcCodeTransformer::visit_var_def_stmt(const TSNode& node, const util::VarDefType defType) {
     TSNode nVarDecl{};
 
     [[maybe_unused]] CSModifiers modifs = CSModifiers::parse_var_modifs(node, src_str(), &nVarDecl);
 
     const TSNode nType                  = util::child_by_field_name(nVarDecl, "type");
-    const TypeMapper th                 = MapManager::get_type_mapper(nType);
-    Type* type                          = th(&typeTrs_, nType);
+    const TypeMapper tm                 = MapManager::get_type_mapper(nType);
+    Type* type                          = tm(&typeTrs_, nType);
 
     std::vector<VarDefStmt*> varDefs;
     auto process = [&](const TSQueryMatch& match) {
@@ -33,8 +33,8 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(const TSNode& node, const util::VarDefT
             std::string name          = util::extract_text(n_varName, src_str());
             Expr* init                = nullptr;
             if (! ts_node_is_null(nInit)) {
-                ExprMapper hInit = MapManager::get_expr_mapper(nInit);
-                init             = hInit(this, nInit);
+                ExprMapper mInit = MapManager::get_expr_mapper(nInit);
+                init             = mInit(this, nInit);
             }
 
             VarDefStmt* varDef = nullptr;
@@ -72,20 +72,20 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(const TSNode& node, const util::VarDefT
     return varDefs.front();
 }
 
-Stmt* SrcCodeVisitor::make_while_loop(const TSNode& node, const bool is_while) {
+Stmt* SrcCodeTransformer::make_while_loop(const TSNode& node, const bool is_while) {
     const TSNode nCond     = util::child_by_field_name(node, "condition");
     const TSNode nBody     = util::child_by_field_name(node, "body");
-    const ExprMapper hCond = MapManager::get_expr_mapper(nCond);
-    const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
-    Expr* cond             = hCond(this, nCond);
-    Stmt* body             = hBody(this, nBody);
+    const ExprMapper mCond = MapManager::get_expr_mapper(nCond);
+    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    Expr* cond             = mCond(this, nCond);
+    Stmt* body             = mBody(this, nBody);
 
     if (is_while)
         return stmtFact_.mk_while(cond, body);
     return stmtFact_.mk_do_while(cond, body);
 }
 
-FunctionDefStmt* SrcCodeVisitor::make_func_stmt(const TSNode& node, const bool isMethod) {
+FunctionDefStmt* SrcCodeTransformer::make_func_stmt(const TSNode& node, const bool isMethod) {
     semContext_.enter_scope();
 
     FunctionDefStmt* funcDef = stmtFact_.mk_function_def();
@@ -95,23 +95,23 @@ FunctionDefStmt* SrcCodeVisitor::make_func_stmt(const TSNode& node, const bool i
     const TSNode nBody       = util::child_by_field_name(node, "body");
 
     // todo handle generic parameters
-    const TypeMapper th    = MapManager::get_type_mapper(nRetType);
-    const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
-    Type* retType          = th(&typeTrs_, nRetType);
+    const TypeMapper tm    = MapManager::get_type_mapper(nRetType);
+    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    Type* retType          = tm(&typeTrs_, nRetType);
 
     semContext_.reg_return(retType);
 
     funcDef->retType = retType;
     funcDef->name    = util::extract_text(nName, src_str());
     funcDef->params  = make_param_list(nParam, false);
-    funcDef->body    = as_a<CompoundStmt>(hBody(this, nBody));
+    funcDef->body    = as_a<CompoundStmt>(mBody(this, nBody));
 
     semContext_.leave_scope();
     semContext_.unregister_return_type();
     return funcDef;
 }
 
-Expr* SrcCodeVisitor::expr_list_to_comma_op(const TSNode& nStart, const TSNode* nEnd) {
+Expr* SrcCodeTransformer::expr_list_to_comma_op(const TSNode& nStart, const TSNode* nEnd) {
     std::queue<Expr*> exprs;
     TSNode nNext = nStart;
     while (! ts_node_is_null(nNext)) {
@@ -123,8 +123,8 @@ Expr* SrcCodeVisitor::expr_list_to_comma_op(const TSNode& nStart, const TSNode* 
         if (! ts_node_is_named(nCurrent))
             continue;
 
-        const ExprMapper hExpr = MapManager::get_expr_mapper(nCurrent);
-        exprs.push(hExpr(this, nCurrent));
+        const ExprMapper mExpr = MapManager::get_expr_mapper(nCurrent);
+        exprs.push(mExpr(this, nCurrent));
     }
 
     if (exprs.empty())
@@ -141,7 +141,7 @@ Expr* SrcCodeVisitor::expr_list_to_comma_op(const TSNode& nStart, const TSNode* 
     return initExpr;
 }
 
-std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
+std::vector<ParamVarDefStmt*> SrcCodeTransformer::make_param_list(
     const TSNode& node,
     const bool makeShallow
 ) {
@@ -151,12 +151,12 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
         const TSNode nType  = util::child_by_field_name(current, "type");
         const TSNode nInit  = ts_node_next_named_sibling(nName);
         std::string name    = util::extract_text(nName, src_str());
-        const TypeMapper th = MapManager::get_type_mapper(nType);
-        Type* type          = th(&typeTrs_, nType);
+        const TypeMapper tm = MapManager::get_type_mapper(nType);
+        Type* type          = tm(&typeTrs_, nType);
         Expr* init          = nullptr;
         if (! makeShallow && ! ts_node_is_null(nInit)) {
-            const ExprMapper hInit = MapManager::get_expr_mapper(nInit);
-            init                   = hInit(this, nInit);
+            const ExprMapper mInit = MapManager::get_expr_mapper(nInit);
+            init                   = mInit(this, nInit);
         }
         ParamVarDefStmt* paramDef = stmtFact_.mk_param_var_def(std::move(name), type, init);
         this->semContext_.reg_param(paramDef);
@@ -166,32 +166,32 @@ std::vector<ParamVarDefStmt*> SrcCodeVisitor::make_param_list(
     return params;
 }
 
-std::vector<Expr*> SrcCodeVisitor::visit_arg_list(const TSNode& node) {
+std::vector<Expr*> SrcCodeTransformer::visit_arg_list(const TSNode& node) {
     std::vector<Expr*> exprs;
     auto process = [this, &exprs](const TSNode& current) -> void {
         const TSNode nChild    = ts_node_child(current, 0);
-        const ExprMapper hExpr = MapManager::get_expr_mapper(nChild);
-        exprs.emplace_back(hExpr(this, nChild));
+        const ExprMapper mExpr = MapManager::get_expr_mapper(nChild);
+        exprs.emplace_back(mExpr(this, nChild));
     };
     util::for_each_child_node(node, process);
     return exprs;
 }
 
-Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node) {
+Stmt* SrcCodeTransformer::visit_for_init_var_def(const TSNode& node) {
     std::vector<VarDefStmt*> varDefs;
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = MapManager::get_type_mapper(nType);
+    const TypeMapper tm = MapManager::get_type_mapper(nType);
 
     auto proces         = [&](const TSQueryMatch& match) {
         for (uint32_t i = 0; i < match.capture_count; ++i) {
             const TSNode nDecltor   = match.captures[i].node;
             TSNode nName            = ts_node_named_child(nDecltor, 0);
             TSNode nRight           = ts_node_named_child(nDecltor, 1);
-            ExprMapper hRight       = MapManager::get_expr_mapper(nRight);
+            ExprMapper mRight       = MapManager::get_expr_mapper(nRight);
             LocalVarDefStmt* varDef = stmtFact_.mk_local_var_def(
                 util::extract_text(nName, src_str()),
-                th(&typeTrs_, nType),
-                hRight(this, nRight)
+                tm(&typeTrs_, nType),
+                mRight(this, nRight)
             );
             varDefs.push_back(varDef);
             semContext_.reg_local_var(varDef);
@@ -204,12 +204,12 @@ Stmt* SrcCodeVisitor::visit_for_init_var_def(const TSNode& node) {
     return varDefs.front();
 }
 
-std::string_view SrcCodeVisitor::src_str() const {
+std::string_view SrcCodeTransformer::src_str() const {
     return currentSrc_ ? currentSrc_->srcStr
                        : throw std::logic_error("Current source code is not set");
 }
 
-SourceFile* SrcCodeVisitor::src() const {
+SourceFile* SrcCodeTransformer::src() const {
     return currentSrc_ ? currentSrc_ : throw std::logic_error("Current source code is not set");
 }
 

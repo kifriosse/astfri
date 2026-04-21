@@ -4,7 +4,7 @@
 #include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
-#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
 
@@ -135,7 +135,7 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
     // std::cout << "Symbol Table Building took " << duration.count() << " ms"
     //           << std::endl;
 
-    SrcCodeVisitor srcVisitor(symbTable);
+    SrcCodeTransformer srcVisitor(symbTable);
 
     // std::cout << "Phase 2: Building of AST" << std::endl;
     // start = std::chrono::high_resolution_clock::now();
