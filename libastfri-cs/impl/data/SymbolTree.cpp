@@ -10,6 +10,10 @@
 
 namespace astfri::csharp {
 
+std::string ExternalMarker::takeName() {
+    return std::move(qualifName);
+}
+
 Nms::Nms(std::string name) :
     name_(std::move(name)) {
 }

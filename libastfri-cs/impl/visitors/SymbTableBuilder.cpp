@@ -409,7 +409,7 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective) {
         ScopeNode* node       = typeTrs_.resolve_qualif_name(nQualif, seachScope, searchStart);
         if (node) {
             auto* ext             = node->is_a<ExternalMarker>();
-            Alias alias           = ext ? Alias{std::move(ext->qualifiedName)} : Alias{node};
+            Alias alias           = ext ? Alias{ext->takeName()} : Alias{node};
             std::string aliasName = util::extract_text(nAliasName, srcStr);
 
             if (isGlobal) {

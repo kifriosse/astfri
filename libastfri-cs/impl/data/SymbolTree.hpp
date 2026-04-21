@@ -37,7 +37,13 @@ struct TypeBinding {
  * qualified name. Used whne qualified name can't be resolved
  */
 struct ExternalMarker {
-    std::string qualifiedName;
+    std::string qualifName;
+
+    /**
+     * @brief returns stored qualified name and clears it from the marker
+     * @return stored qualified name
+     */
+    std::string takeName();
 };
 
 /**

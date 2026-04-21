@@ -54,10 +54,9 @@ Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& nod
             [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
             [](ExternalMarker& em) -> Type* {
-                if (em.qualifiedName.empty())
+                if (em.qualifName.empty())
                     return typeFact_.mk_unknown();
-                // move is here only to empty the external node not to make it more efficient
-                return typeFact_.mk_incomplete(std::move(em.qualifiedName));
+                return typeFact_.mk_incomplete(em.takeName());
             },
         };
         return std::visit(overloaded, typeNode->data());
@@ -78,10 +77,9 @@ Type* TypeTranslator::visit_qualified_name(
             [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
             [](ExternalMarker& em) -> Type* {
-                if (em.qualifiedName.empty())
+                if (em.qualifName.empty())
                     return typeFact_.mk_unknown();
-                // move is here only to make the external node empty not to make it more efficient
-                return typeFact_.mk_incomplete(std::move(em.qualifiedName));
+                return typeFact_.mk_incomplete(em.takeName());
             }
         };
         return std::visit(overloaded, typeNode->data());
@@ -191,7 +189,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
             if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
                 entryPoint = *node;
             else {
-                extMarkNode_.data<ExternalMarker>().qualifiedName
+                extMarkNode_.data<ExternalMarker>().qualifName
                     = util::extract_text(nQualif, srcStr);
                 return &extMarkNode_;
             }
@@ -211,7 +209,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     ScopeNode* currentNode = entryPoint;
     for (auto& nCurrentQualif : std::views::reverse(nQualifs)) {
         if (! currentNode) {
-            extMarkNode_.data<ExternalMarker>().qualifiedName = util::extract_text(nQualif, srcStr);
+            extMarkNode_.data<ExternalMarker>().qualifName = util::extract_text(nQualif, srcStr);
             return &extMarkNode_;
         }
         std::string qualifName = util::extract_text(nCurrentQualif, srcStr);
