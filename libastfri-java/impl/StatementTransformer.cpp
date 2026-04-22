@@ -117,7 +117,7 @@ astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, const std::st
             }
         }
         else {
-            type = astfri::TypeFactory::get_instance().mk_unknown();
+            type = astfri::TypeFactory::get_instance().mk_incomplete(typeNodeText);
         }
     }
 
@@ -835,9 +835,10 @@ void StatementTransformer::fill_class(
             classDef->bases.push_back(this->classesByName.at(baseClassName).front());
         }
         else if (classChildType == "super_interfaces") {
-            uint32_t typeListChildCount = ts_node_named_child_count(classChild);
+            TSNode typeListNode = ts_node_named_child(classChild, 0);
+            uint32_t typeListChildCount = ts_node_named_child_count(typeListNode);
             for (uint32_t k = 0; k < typeListChildCount; k++) {
-                TSNode typeListChild = ts_node_named_child(classChild, k);
+                TSNode typeListChild = ts_node_named_child(typeListNode, k);
                 std::string interfaceName =
                     exprTransformer->get_node_text(typeListChild, sourceCode);
                 
@@ -976,6 +977,7 @@ void StatementTransformer::fill_interface(
         method->owner = interfaceDef;
     }
 }
+
 astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
     TSNode interfaceNode,
     const std::string& sourceCode
@@ -1013,7 +1015,6 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
     interfaceDef->methods                  = {};
     interfaceDef->tparams                  = {};
     interfaceDef->bases                    = {};
-    interfaces.push_back(interfaceDef);
 
     this->interfaceScope.emplace(interfaceDef, scope);
     this->interfacesByName[interfaceDef->type->name].push_back(interfaceDef);
