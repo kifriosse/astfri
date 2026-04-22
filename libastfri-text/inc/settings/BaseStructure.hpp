@@ -35,10 +35,12 @@ namespace astfri::text
         void change_to_java_like();
         void change_to_cxx_like();
         //
+        bool try_create_json(std::string_view jsonPath, rapidjson::Document& doc);
         void load_from_file(std::string_view jsonPath);
         void load_from_json(jValue const& json);
         //
         bool is_object(std::string_view name, jValue const& val, jValue const*& val_out);
+        void read_array(std::string_view name, jValue const& val, jValue const*& val_out);
         void read_string(std::string_view name, jValue const& val, std::string& m_string);
         void read_bool(std::string_view name, jValue const& val, bool& m_bool);
         void read_int(std::string_view name, jValue const& val, int& m_int);

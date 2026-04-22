@@ -1,4 +1,4 @@
-#include <libastfri-text/inc/general/OutputFileManager.hpp>
+#include <libastfri-text/inc/settings/OutputFileManager.hpp>
 
 #include <sys/utsname.h>
 #include <filesystem>

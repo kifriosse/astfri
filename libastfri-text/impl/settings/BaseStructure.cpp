@@ -2,7 +2,6 @@
 
 #include <rapidjson/istreamwrapper.h>
 
-#include <filesystem>
 #include <fstream>
 
 using namespace astfri::text;
@@ -56,30 +55,28 @@ void BaseStructure::change_to_cxx_like()
     catchConditionNewLine       = true;
 }
 
-void BaseStructure::load_from_file(std::string_view jsonPath)
+bool BaseStructure::try_create_json(std::string_view jsonPath, rapidjson::Document& doc)
 {
-    std::error_code ec;
-    if (!std::filesystem::is_regular_file(jsonPath, ec) || ec)
-    {
-        return;
-    }
     std::ifstream jsonFile(jsonPath.data());
     if (!jsonFile)
     {
-        return;
+        return false;
     }
     rapidjson::IStreamWrapper wrapper(jsonFile);
-    rapidjson::Document doc;
     doc.ParseStream(wrapper);
-    if (doc.HasParseError())
+    return !doc.HasParseError();
+}
+
+void BaseStructure::load_from_file(std::string_view jsonPath)
+{
+    rapidjson::Document doc;
+    if (try_create_json(jsonPath, doc))
     {
-        return;
-    }
-    //
-    jValue const* baseStructure;
-    if (is_object("BASE_STRUCTURE", doc, baseStructure))
-    {
-        load_from_json(*baseStructure);
+        jValue const* baseStructure;
+        if (is_object("BASE_STRUCTURE", doc, baseStructure))
+        {
+            load_from_json(*baseStructure);
+        }
     }
 }
 
@@ -113,6 +110,12 @@ bool BaseStructure::is_object(std::string_view name, jValue const& val, jValue c
     }
     val_out = &it->value;
     return val_out->IsObject() && !val_out->ObjectEmpty();
+}
+
+void BaseStructure::read_array(std::string_view name, jValue const& val, jValue const*& val_out)
+{
+    auto const& it = val.FindMember(name.data());
+    val_out = (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : nullptr;
 }
 
 void BaseStructure::read_string(std::string_view name, jValue const& val, std::string& m_string)
