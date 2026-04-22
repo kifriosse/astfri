@@ -33,9 +33,6 @@ namespace astfri::text
         virtual void write_unknown_type() = 0;
         virtual void write_unknown_expr() = 0;
         virtual void write_unknown_stmt() = 0;
-        virtual void write_invalid_type() = 0;
-        virtual void write_invalid_expr() = 0;
-        virtual void write_invalid_stmt() = 0;
         // VALUES
         virtual void write_int_val(const int& val)          = 0;
         virtual void write_float_val(const float& val)      = 0;
