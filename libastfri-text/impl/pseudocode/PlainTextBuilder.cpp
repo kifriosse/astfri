@@ -13,7 +13,7 @@ PlainTextBuilder& PlainTextBuilder::get_instance() {
 //
 
 void PlainTextBuilder::export_text() {
-    PlainTextExporter(rowCount_, buildedText_.get());
+    //PlainTextExporter(rowCount_, m_buildedText);
     reset_builder();
 }
 
@@ -21,50 +21,50 @@ void PlainTextBuilder::export_text() {
 // GENERAL_TEXT
 //
 
-void PlainTextBuilder::append_new_line() {
-    *buildedText_ << "\n";
-    isEmptyLine_ = true;
+void PlainTextBuilder::write_new_line() {
+    m_buildedText.append("\n");
+    m_isEmptyLine = true;
     ++rowCount_;
 }
 
-void PlainTextBuilder::append_space() {
-    *buildedText_ << " ";
+void PlainTextBuilder::write_space() {
+    m_buildedText.append(" ");
 }
 
-void PlainTextBuilder::write_separator(const std::string& sep) {
-    append_text(sep);
+void PlainTextBuilder::write_separator(std::string_view sep) {
+    write_text(sep);
 }
 
-void PlainTextBuilder::write_right_bracket(const std::string& br) {
-    append_text(br);
+void PlainTextBuilder::write_right_bracket(std::string_view br) {
+    write_text(br);
 }
 
-void PlainTextBuilder::write_left_bracket(const std::string& br) {
-    append_text(br);
+void PlainTextBuilder::write_left_bracket(std::string_view br) {
+    write_text(br);
 }
 
 //
 // OPERATORS
 //
 
-void PlainTextBuilder::write_operator(const std::string& op) {
-    append_text(op);
+void PlainTextBuilder::write_operator(std::string_view op) {
+    write_text(op);
 }
 
 void PlainTextBuilder::write_assign_operator() {
-    append_text(configurator_->assign_op_word()->str());
+    write_text(configurator_->assignOpWord);
 }
 
 void PlainTextBuilder::write_modulo_operator() {
-    append_text(configurator_->modulo_op_word()->str());
+    write_text(configurator_->moduloOpWord);
 }
 
 void PlainTextBuilder::write_address_operator() {
-    append_text(configurator_->address_op_word()->str());
+    write_text(configurator_->addressOpWord);
 }
 
 void PlainTextBuilder::write_deref_operator() {
-    append_text(configurator_->deref_op_word()->str());
+    write_text(configurator_->derefOpWord);
 }
 
 //
@@ -72,27 +72,15 @@ void PlainTextBuilder::write_deref_operator() {
 //
 
 void PlainTextBuilder::write_unknown_type() {
-    append_text(configurator_->unknown_type_word()->str());
+    write_text(configurator_->unknownTypeWord);
 }
 
 void PlainTextBuilder::write_unknown_expr() {
-    append_text(configurator_->unknown_expr_word()->str());
+    write_text(configurator_->unknownExprWord);
 }
 
 void PlainTextBuilder::write_unknown_stmt() {
-    append_text(configurator_->unknown_stmt_word()->str());
-}
-
-void PlainTextBuilder::write_invalid_type() {
-    append_text(configurator_->invalid_type_word()->str());
-}
-
-void PlainTextBuilder::write_invalid_expr() {
-    append_text(configurator_->invalid_expr_word()->str());
-}
-
-void PlainTextBuilder::write_invalid_stmt() {
-    append_text(configurator_->invalid_stmt_word()->str());
+    write_text(configurator_->unknownStmtWord);
 }
 
 //
@@ -100,35 +88,35 @@ void PlainTextBuilder::write_invalid_stmt() {
 //
 
 void PlainTextBuilder::write_public_word() {
-    append_text(configurator_->public_word()->str());
+    write_text(configurator_->publicWord);
 }
 
 void PlainTextBuilder::write_protected_word() {
-    append_text(configurator_->protected_word()->str());
+    write_text(configurator_->protectedWord);
 }
 
 void PlainTextBuilder::write_private_word() {
-    append_text(configurator_->private_word()->str());
+    write_text(configurator_->privateWord);
 }
 
 void PlainTextBuilder::write_internal_word() {
-    append_text(configurator_->internal_word()->str());
+    write_text(configurator_->internalWord);
 }
 
 void PlainTextBuilder::write_attributes_word() {
-    append_text(configurator_->attributes_word()->str());
+    write_text(configurator_->attributesWord);
 }
 
 void PlainTextBuilder::write_constructors_word() {
-    append_text(configurator_->constructors_word()->str());
+    write_text(configurator_->constructorsWord);
 }
 
 void PlainTextBuilder::write_destructors_word() {
-    append_text(configurator_->destructors_word()->str());
+    write_text(configurator_->destructorsWord);
 }
 
 void PlainTextBuilder::write_methods_word() {
-    append_text(configurator_->methods_word()->str());
+    write_text(configurator_->methodsWord);
 }
 
 //
@@ -136,79 +124,79 @@ void PlainTextBuilder::write_methods_word() {
 //
 
 void PlainTextBuilder::write_dynamic_type_word() {
-    append_text(configurator_->dynamic_type_word()->str());
+    write_text(configurator_->dynamicTypeWord);
 }
 
 void PlainTextBuilder::write_int_type_word() {
-    append_text(configurator_->int_type_word()->str());
+    write_text(configurator_->intTypeWord);
 }
 
 void PlainTextBuilder::write_float_type_word() {
-    append_text(configurator_->float_type_word()->str());
+    write_text(configurator_->floatTypeWord);
 }
 
 void PlainTextBuilder::write_char_type_word() {
-    append_text(configurator_->char_type_word()->str());
+    write_text(configurator_->charTypeWord);
 }
 
 void PlainTextBuilder::write_bool_type_word() {
-    append_text(configurator_->bool_type_word()->str());
+    write_text(configurator_->boolTypeWord);
 }
 
 void PlainTextBuilder::write_void_type_word() {
-    append_text(configurator_->void_type_word()->str());
+    write_text(configurator_->voidTypeWord);
 }
 
-void PlainTextBuilder::write_class_type(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_class_type(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_interface_type(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_interface_type(std::string_view name) {
+    write_text(name);
 }
 
 //
 // REFERENCE_NAMES
 //
 
-void PlainTextBuilder::write_scope_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_scope_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_gen_param_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_gen_param_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_class_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_class_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_interface_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_interface_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_method_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_method_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_function_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_function_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_global_var_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_global_var_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_member_var_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_member_var_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_local_var_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_local_var_name(std::string_view name) {
+    write_text(name);
 }
 
-void PlainTextBuilder::write_param_var_name(const std::string& name) {
-    append_text(name);
+void PlainTextBuilder::write_param_var_name(std::string_view name) {
+    write_text(name);
 }
 
 //
@@ -216,32 +204,33 @@ void PlainTextBuilder::write_param_var_name(const std::string& name) {
 //
 
 void PlainTextBuilder::write_int_val(const int& val) {
-    append_text(std::to_string(val));
+    write_text(std::to_string(val));
 }
 
 void PlainTextBuilder::write_float_val(const float& val) {
-    append_text(std::to_string(val) + "f");
+    write_text(std::to_string(val) + "f");
 }
 
 void PlainTextBuilder::write_char_val(const char& val) {
-    append_text("'" + std::string(1, val) + "'");
+    write_text("'" + std::string(1, val) + "'");
 }
 
-void PlainTextBuilder::write_string_val(const std::string& val) {
-    append_text("\"" + val + "\"");
+void PlainTextBuilder::write_string_val(std::string_view val) {
+    //write_text("\"" + val + "\""); // TODO fix
+    write_text(val);
 }
 
 void PlainTextBuilder::write_bool_val(const bool& val) {
     if (val) {
-        append_text("true");
+        write_text("true");
     }
     else {
-        append_text("false");
+        write_text("false");
     }
 }
 
 void PlainTextBuilder::write_null_val() {
-    append_text(configurator_->null_val_word()->str());
+    write_text(configurator_->nullValWord);
 }
 
 //
@@ -249,103 +238,103 @@ void PlainTextBuilder::write_null_val() {
 //
 
 void PlainTextBuilder::write_scope_word() {
-    append_text(configurator_->scope_word()->str());
+    write_text(configurator_->scopeWord);
 }
 
 void PlainTextBuilder::write_class_word() {
-    append_text(configurator_->class_word()->str());
+    write_text(configurator_->classWord);
 }
 
 void PlainTextBuilder::write_interface_word() {
-    append_text(configurator_->interface_word()->str());
+    write_text(configurator_->interfaceWord);
 }
 
 void PlainTextBuilder::write_implement_word() {
-    append_text(configurator_->implement_word()->str());
+    write_text(configurator_->implementWord);
 }
 
 void PlainTextBuilder::write_extend_word() {
-    append_text(configurator_->extend_word()->str());
+    write_text(configurator_->extendWord);
 }
 
 void PlainTextBuilder::write_this_word() {
-    append_text(configurator_->this_word()->str());
+    write_text(configurator_->thisWord);
 }
 
 void PlainTextBuilder::write_return_word() {
-    append_text(configurator_->return_word()->str());
+    write_text(configurator_->returnWord);
 }
 
 void PlainTextBuilder::write_continue_word() {
-    append_text(configurator_->continue_word()->str());
+    write_text(configurator_->continueWord);
 }
 
 void PlainTextBuilder::write_break_word() {
-    append_text(configurator_->break_word()->str());
+    write_text(configurator_->breakWord);
 }
 
 void PlainTextBuilder::write_throw_word() {
-    append_text(configurator_->throw_word()->str());
+    write_text(configurator_->throwWord);
 }
 
 void PlainTextBuilder::write_if_word() {
-    append_text(configurator_->if_word()->str());
+    write_text(configurator_->ifWord);
 }
 
 void PlainTextBuilder::write_else_word() {
-    append_text(configurator_->else_word()->str());
+    write_text(configurator_->elseWord);
 }
 
 void PlainTextBuilder::write_do_word() {
-    append_text(configurator_->do_word()->str());
+    write_text(configurator_->doWord);
 }
 
 void PlainTextBuilder::write_while_word() {
-    append_text(configurator_->while_word()->str());
+    write_text(configurator_->whileWord);
 }
 
 void PlainTextBuilder::write_for_word() {
-    append_text(configurator_->for_word()->str());
+    write_text(configurator_->forWord);
 }
 
 void PlainTextBuilder::write_switch_word() {
-    append_text(configurator_->switch_word()->str());
+    write_text(configurator_->switchWord);
 }
 
 void PlainTextBuilder::write_case_word() {
-    append_text(configurator_->case_word()->str());
+    write_text(configurator_->caseWord);
 }
 
 void PlainTextBuilder::write_default_word() {
-    append_text(configurator_->default_word()->str());
+    write_text(configurator_->defaultWord);
 }
 
 void PlainTextBuilder::write_new_word() {
-    append_text(configurator_->new_word()->str());
+    write_text(configurator_->newWord);
 }
 
 void PlainTextBuilder::write_delete_word() {
-    append_text(configurator_->delete_word()->str());
+    write_text(configurator_->deleteWord);
 }
 
 void PlainTextBuilder::write_pointer_word() {
-    append_text(configurator_->pointer_word()->str());
+    write_text(configurator_->pointerWord);
 }
 
 void PlainTextBuilder::write_override_word() {
-    append_text(configurator_->override_word()->str());
+    write_text(configurator_->overrideWord);
 }
 
 void PlainTextBuilder::write_virtual_word() {
-    append_text(configurator_->virtual_word()->str());
+    write_text(configurator_->virtualWord);
 }
 
 void PlainTextBuilder::write_abstract_word() {
-    append_text(configurator_->abstract_word()->str());
+    write_text(configurator_->abstractWord);
 }
 
 void PlainTextBuilder::write_template_word() {
-    append_text(configurator_->template_word()->str());
+    write_text(configurator_->templateWord);
 }
 
 //
@@ -353,37 +342,37 @@ void PlainTextBuilder::write_template_word() {
 //
 
 void PlainTextBuilder::write_constructor_word() {
-    append_text(configurator_->constructor_word()->str());
+    write_text(configurator_->constructorWord);
 }
 
 void PlainTextBuilder::write_destructor_word() {
-    append_text(configurator_->destructor_word()->str());
+    write_text(configurator_->destructorWord);
 }
 
 void PlainTextBuilder::write_method_word() {
-    append_text(configurator_->method_word()->str());
+    write_text(configurator_->methodWord);
 }
 
 void PlainTextBuilder::write_function_word() {
-    append_text(configurator_->function_word()->str());
+    write_text(configurator_->functionWord);
 }
 
 void PlainTextBuilder::write_lambda_word() {
-    append_text(configurator_->lambda_word()->str());
+    write_text(configurator_->lambdaWord);
 }
 
 void PlainTextBuilder::write_call_word() {
-    append_text(configurator_->call_word()->str());
+    write_text(configurator_->callWord);
 }
 
 void PlainTextBuilder::write_define_word() {
-    append_text(configurator_->define_word()->str());
+    write_text(configurator_->defineWord);
 }
 
 void PlainTextBuilder::write_returns_word() {
-    append_text(configurator_->returns_word()->str());
+    write_text(configurator_->returnsWord);
 }
 
 void PlainTextBuilder::write_repeat_word() {
-    append_text(configurator_->repeat_word()->str());
+    write_text(configurator_->repeatWord);
 }

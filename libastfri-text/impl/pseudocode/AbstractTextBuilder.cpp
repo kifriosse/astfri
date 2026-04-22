@@ -2,16 +2,12 @@
 
 using namespace astfri::text;
 
-AbstractTextBuilder::AbstractTextBuilder() :
-    configurator_(&TextConfigurator::get_instance()),
-    rowCount_(1) {
-}
-
 //
 // SET_UP
 //
 
-void AbstractTextBuilder::reset_builder() {
+void AbstractTextBuilder::reset_builder()
+{
     rowCount_ = 1;
     AbstractBuilder::reset_builder();
 }
@@ -20,37 +16,45 @@ void AbstractTextBuilder::reset_builder() {
 // GENERAL_TEXT
 //
 
-void AbstractTextBuilder::append_text(const std::string& text) {
-    if (isEmptyLine_) {
-        for (int i = 0; i < configurator_->text_margin_left_len(); ++i) {
-            append_space();
+void AbstractTextBuilder::write_text(std::string_view text)
+{
+    if (m_isEmptyLine)
+    {
+        for (int i = 0; i < configurator_->textMarginLeftLen; ++i)
+        {
+            write_space();
         }
-        for (int i = 0; i < indentationLevel_ * configurator_->tabulator_len(); ++i) {
-            append_space();
+        for (int i = 0; i < m_indentationLevel * configurator_->tabulatorLength; ++i)
+        {
+            write_space();
         }
-        isEmptyLine_ = false;
+        m_isEmptyLine = false;
     }
-    *buildedText_ << text;
+    m_buildedText.append(text);
 }
 
-void AbstractTextBuilder::write_opening_curl_bracket() {
-    if (configurator_->new_line_curl_bracket()) {
-        append_new_line();
+void AbstractTextBuilder::write_opening_curl_bracket()
+{
+    if (true/*configurator_->new_line_curl_bracket()*/) // TODO repair
+    {
+        write_new_line();
     }
     else {
-        append_space();
+        write_space();
     }
     write_left_bracket("{");
-    append_new_line();
-    ++indentationLevel_;
+    write_new_line();
+    ++m_indentationLevel;
 }
 
-void AbstractTextBuilder::write_opening_else_word() {
-    if (configurator_->new_line_curl_bracket()) {
-        append_new_line();
+void AbstractTextBuilder::write_opening_else_word()
+{
+    if (configurator_->elseConditionNewLine) // TODO repair
+    {
+        write_new_line();
     }
     else {
-        append_space();
+        write_space();
     }
     write_else_word();
     write_opening_curl_bracket();

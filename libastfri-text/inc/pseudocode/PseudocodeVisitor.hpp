@@ -1,7 +1,7 @@
 #ifndef LIBASTFRI_TEXT_PSEUDOCODE_VISITOR
 #define LIBASTFRI_TEXT_PSEUDOCODE_VISITOR
 
-#include <libastfri-text/inc/AbstractVisitor.hpp>
+#include <libastfri-text/inc/general/AbstractVisitor.hpp>
 #include <libastfri-text/inc/pseudocode/AbstractTextBuilder.hpp>
 
 namespace astfri::text {
@@ -29,9 +29,9 @@ private:
 public:
     void export_pseudocode();
     void clear_builder();
-    void append_text(const std::string& text);
-    void append_new_line();
-    void append_space();
+    void write_text(const std::string& text);
+    void write_new_line();
+    void write_space();
     void update_configuration();
     void reload_configuration();
     // -----
@@ -136,17 +136,17 @@ private:
 template<typename VectorRelation>
 void PseudocodeVisitor::process_relations(const VectorRelation& vrel, bool ispolym) {
     for (size_t i = 0; i < vrel.size(); ++i) {
-        builder_->append_new_line();
-        builder_->append_space();
+        builder_->write_new_line();
+        builder_->write_space();
         builder_->write_separator("->");
-        builder_->append_space();
+        builder_->write_space();
         if (ispolym) {
             builder_->write_implement_word();
         }
         else {
             builder_->write_extend_word();
         }
-        builder_->append_space();
+        builder_->write_space();
         if (vrel.at(i)) {
             if (ispolym) {
                 // builder_->write_interface_name(vrel.at(i)->name_);
@@ -162,11 +162,8 @@ void PseudocodeVisitor::process_relations(const VectorRelation& vrel, bool ispol
                 process_pargs(vrel.at(i)->tparams, false);
             }
         }
-        else {
-            builder_->write_invalid_expr();
-        }
     }
 }
-} // namespace astfri::text
+}
 
 #endif
