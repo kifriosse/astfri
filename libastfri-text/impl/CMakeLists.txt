@@ -7,16 +7,17 @@ target_sources(astfri-text PRIVATE
   code/CxxCodeVisitor.cpp
   code/JavaCodeBuilder.cpp
   code/JavaCodeVisitor.cpp
+  general/AbstractBuilder.cpp
+  general/AbstractVisitor.cpp
   pseudocode/AbstractTextBuilder.cpp
-  pseudocode/GeneralConfigurator.cpp
   pseudocode/HtmlTextBuilder.cpp
   pseudocode/PlainTextBuilder.cpp
   pseudocode/PlainTextExporter.cpp
   pseudocode/PseudocodeVisitor.cpp
-  pseudocode/TextConfigurator.cpp
-  AbstractBuilder.cpp
-  AbstractVisitor.cpp
-  OutputFileManager.cpp
+  settings/BaseStructure.cpp
+  settings/GeneralConfig.cpp
+  settings/OutputFileManager.cpp
+  settings/TextConfig.cpp
   TextLibManager.cpp
 )
 
