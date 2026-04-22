@@ -9,7 +9,7 @@ int main() {
     astfri::java::ASTBuilder* tb = new astfri::java::ASTBuilder();
 
     std::string sourceCode
-        = tb->load_project("/home/adamk/projects/astfri/libastfri-java/resources/aaus/structures");
+        = tb->load_file("/home/adamk/projects/astfri/resources/samples/java/Main.java");
     TSTree* tree                = tb->make_syntax_tree(sourceCode);
     astfri::TranslationUnit* tu = tb->get_translation_unit(tree, sourceCode);
 
