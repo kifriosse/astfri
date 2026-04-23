@@ -37,7 +37,7 @@ namespace astfri::text
         //
         bool try_create_json(std::string_view jsonPath, rapidjson::Document& doc);
         void load_from_file(std::string_view jsonPath);
-        void load_from_json(jValue const& json);
+        void load_from_json(rapidjson::Document const& doc);
         //
         bool is_object(std::string_view name, jValue const& val, jValue const*& val_out);
         void read_array(std::string_view name, jValue const& val, jValue const*& val_out);

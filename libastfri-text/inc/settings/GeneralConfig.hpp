@@ -6,7 +6,7 @@
 
 namespace astfri::text
 {
-    struct GeneralConfigurator : BaseStructure
+    struct GeneralConfig : BaseStructure
     {
         OutputFileManager& fmanager = OutputFileManager::get_instance();
         // FILE_SETTINGS
@@ -24,16 +24,16 @@ namespace astfri::text
         std::string unknownExprWordStyle = "";
         std::string unknownStmtWordStyle = "";
         // ACCESS_MODIFIERS
-        bool useInnerView               = true;
-        std::string publicWord          = "public";
-        std::string protectedWord       = "protected";
-        std::string privateWord         = "private";
-        std::string internalWord        = "internal";
-        std::string attributesWord      = "attributes";
-        std::string constructorsWord    = "constructors";
-        std::string destructorsWord     = "destructors";
-        std::string methodsWord         = "methods";
-        std::string accessModifierStyle = "";
+        bool useInnerView            = true;
+        std::string publicWord       = "public";
+        std::string protectedWord    = "protected";
+        std::string privateWord      = "private";
+        std::string internalWord     = "internal";
+        std::string attributesWord   = "attributes";
+        std::string constructorsWord = "constructors";
+        std::string destructorsWord  = "destructors";
+        std::string methodsWord      = "methods";
+        std::string accessModifStyle = "";
         // DATA_TYPES
         std::string dynamicTypeWord = "auto";
         std::string intTypeWord     = "int";
@@ -51,45 +51,44 @@ namespace astfri::text
         std::string voidTypeWordStyle    = "";
         std::string userTypeStyle        = "";
         // REFERENCE_NAMES
-        std::string defaultRefNameStyle   = "";
-        std::string genericParamNameStyle = "";
-        std::string classNameStyle        = "";
-        std::string interfaceNameStyle    = "";
-        std::string methodNameStyle       = "";
-        std::string functionNameStyle     = "";
-        std::string defaultVarNameStyle   = "";
-        std::string globalVarNameStyle    = "";
-        std::string memberVarNameStyle    = "";
-        std::string localVarNameStyle     = "";
-        std::string paramVarNameStyle     = "";
+        std::string defaultRefNameStyle = "";
+        std::string templateNameStyle   = "";
+        std::string classNameStyle      = "";
+        std::string interfaceNameStyle  = "";
+        std::string methodNameStyle     = "";
+        std::string functionNameStyle   = "";
+        std::string defaultVarNameStyle = "";
+        std::string globalVarNameStyle  = "";
+        std::string memberVarNameStyle  = "";
+        std::string localVarNameStyle   = "";
+        std::string paramVarNameStyle   = "";
         // OPERATORS
-        std::string assignOpWord  = "=";
-        std::string moduloOpWord  = "%";
-        std::string addressOpWord = "&";
-        std::string derefOpWord   = "*";
-        std::string operatorStyle = "";
+        std::string assignWord  = "=";
+        std::string moduloWord  = "%";
+        std::string addressWord = "&";
+        std::string derefWord   = "*";
+        std::string opWordStyle = "";
         // SEPARATORS
-        std::string separatorStyle = "";
+        std::string sepWordStyle = "";
         // VALUES
-        std::string trueValWord  = "true";
-        std::string falseValWord = "false";
-        std::string nullValWord  = "NULL";
+        std::string trueWord  = "true";
+        std::string falseWord = "false";
+        std::string nullWord  = "NULL";
         // STYLE
         std::string defaultValStyle = "";
+        std::string nullWordStyle   = "";
         std::string intValStyle     = "";
         std::string floatValStyle   = "";
         std::string charValStyle    = "";
         std::string stringValStyle  = "";
         std::string boolValStyle    = "";
-        std::string nullValStyle    = "";
         //
         //
-        virtual ~GeneralConfigurator() = default;
+        virtual ~GeneralConfig() = default;
         //
         void change_to_default();
         //
-        void load_from_json(jValue const& json);
-        //
+        void load_from_json(rapidjson::Document const& doc);
     private:
         void process_file_settings(jValue const& settings);
         void process_unknown_phrases(jValue const& phrases);
