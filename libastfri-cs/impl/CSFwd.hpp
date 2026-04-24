@@ -93,6 +93,7 @@ using RegistryStrViewMap = std::unordered_map<std::string_view, Value>;
  * @tparam Value value type of the map
  * @note Source:
  * https://www.cppstories.com/2021/heterogeneous-access-cpp20/#how-to-enable-it-for-unordered-containers
+ * https://ibob.bg/blog/2022/09/17/transparent-lookups-for-maps-and-sets/
  */
 template<typename Value>
 using IdentifierMap = std::unordered_map<std::string, Value, util::StringHash, std::equal_to<>>;

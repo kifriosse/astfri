@@ -202,9 +202,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     const std::string qualifStr = util::extract_text(nQualifs.back(), srcStr);
     nQualifs.pop_back();
 
-    if (! hasExplicitAlias) {
-        entryPoint = find_entry_point(qualifStr, searchScope, start, src());
-    }
+    entryPoint = find_entry_point(qualifStr, searchScope, entryPoint, src());
 
     ScopeNode* currentNode = entryPoint;
     for (auto& nCurrentQualif : std::views::reverse(nQualifs)) {
@@ -319,9 +317,15 @@ ScopeNode* TypeTranslator::find_entry_point(
         // check current scope for types
         if (ScopeNode* child = current->find_child(qualif))
             return child;
-        // bottom-up search from current scope
-        if (ScopeNode* node = bottom_up_search(qualif, start, src))
+        // bottom-up search from parent scope
+        current = current->parent();
+        if (ScopeNode* node = bottom_up_search(qualif, current, src))
             return node;
+        // check global aliasis
+        if (const auto* alias = symbTable_.get_glob_alias(qualif)) {
+            if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
+                return *node;
+        }
         // check global static usings for nested types
         for (const auto& b : symbTable_.get_glob_static_usings()) {
             if (ScopeNode* node = b.treeNode->find_child(qualif))
@@ -332,16 +336,8 @@ ScopeNode* TypeTranslator::find_entry_point(
     case FileUsing:
     case GlobStaticUsing:
     case GlobAlias:
-    case GlobUsing: {
-        auto [names] = util::mk_scope(qualif);
-        current      = symbTable_.symb_tree().root();
-        for (const std::string_view name : names) {
-            current = current->find_child(name);
-            if (! current)
-                break;
-        }
-        return current;
-    }
+    case GlobUsing:
+        return symbTable_.symb_tree().root()->find_child(qualif);
     }
 
     return nullptr;
@@ -355,14 +351,14 @@ ScopeNode* TypeTranslator::bottom_up_search(
     ScopeNode* current = start;
     // bottom-up search from current namespace to global namespace
     while (current) {
-        // look into siblings - types defined in the same namespace/type
+        // look for types defined in current node
         if (ScopeNode* child = current->find_child(qualif))
             return child;
 
-        // if node contains type look into nested types in parent classes
+        // if node represents type look for nested types in parent classes
         if (const TypeBinding* b = current->is_a<TypeBinding>()) {
-            if (ScopeNode* inheretedChild = search_parents(qualif, *b))
-                return inheretedChild;
+            if (ScopeNode* inheritedChild = search_parents(qualif, *b))
+                return inheritedChild;
         }
         // if node is namespace
         const Nms* nms = current->is_a<Nms>();
@@ -373,9 +369,11 @@ ScopeNode* TypeTranslator::bottom_up_search(
 
         // check aliases in current namespace
         if (const Alias* alias = nms->find_alias(qualif, src)) {
-            ScopeNode* const* node = std::get_if<ScopeNode*>(alias);
-            return node ? *node : nullptr;
-            // todo return external marker instead of nullptr
+            if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
+                return *node;
+
+            extMarkNode_.data<ExternalMarker>().qualifName = std::get<std::string>(*alias);
+            return &extMarkNode_;
         }
 
         // check nested classes in static usings
@@ -393,6 +391,7 @@ ScopeNode* TypeTranslator::search_parents(
     const TypeBinding& start
 ) const {
     ClassDefStmt* current = nullptr;
+    // todo add also support for records
     if (auto* classDef = as_a<ClassDefStmt>(start.def)) {
         current = classDef;
     }
