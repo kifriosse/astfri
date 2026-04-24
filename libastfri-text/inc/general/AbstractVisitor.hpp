@@ -9,55 +9,23 @@ namespace astfri::text
     class AbstractVisitor : public ThrowingVisitorAdapter
     {
     protected:
-        AbstractBuilder* m_builder;
-    protected:
-        explicit AbstractVisitor(AbstractBuilder& builder);
-        virtual ~AbstractVisitor() = default;
+        AbstractBuilder& m_builder;
     public:
-        void process_condition(Expr* expr);
-        void process_body(Stmt* stmt);
+        AbstractVisitor(AbstractBuilder& builder);
+        virtual ~AbstractVisitor() = default;
         //
-        template<typename Vector>
-        void process_pargs(const Vector& pargs, bool useGeneric);
+        void process_condition(Expr* expr);
+        void process_body(Stmt* stmt, bool const& onNewLine);
         //
         template<typename Node>
         void accept_node(Node* node);
         //
         template<typename Vector>
-        bool try_find_access_mod(const Vector& all, Vector& found, AccessModifier mod);
+        void process_pargs(Vector const& pargs, bool useGeneric);
+        //
+        template<typename Vector>
+        bool try_find_access_mod(Vector const& all, Vector& found, AccessModifier mod);
     };
-
-    // -----
-
-    template<typename Vector>
-    void AbstractVisitor::process_pargs(const Vector& pargs, bool useGeneric)
-    {
-        if (useGeneric)
-        {
-            m_builder->write_left_bracket("<");
-        }
-        else
-        {
-            m_builder->write_left_bracket("(");
-        }
-        for (size_t i = 0; i < pargs.size(); ++i)
-        {
-            accept_node(pargs.at(i));
-            if (i < pargs.size() - 1)
-            {
-                m_builder->write_separator(",");
-                m_builder->write_space();
-            }
-        }
-        if (useGeneric)
-        {
-            m_builder->write_right_bracket(">");
-        }
-        else
-        {
-            m_builder->write_right_bracket(")");
-        }
-    }
 
     // -----
 
@@ -70,12 +38,44 @@ namespace astfri::text
     // -----
 
     template<typename Vector>
-    bool AbstractVisitor::try_find_access_mod(const Vector& all, Vector& found, AccessModifier mod)
+    void AbstractVisitor::process_pargs(Vector const& pargs, bool useGeneric)
+    {
+        if (useGeneric)
+        {
+            m_builder.write_left_bracket("<");
+        }
+        else
+        {
+            m_builder.write_left_bracket("(");
+        }
+        for (size_t i = 0; i < pargs.size(); ++i)
+        {
+            accept_node(pargs.at(i));
+            if (i < pargs.size() - 1)
+            {
+                m_builder.write_separator(",");
+                m_builder.write_space();
+            }
+        }
+        if (useGeneric)
+        {
+            m_builder.write_right_bracket(">");
+        }
+        else
+        {
+            m_builder.write_right_bracket(")");
+        }
+    }
+
+    // -----
+
+    template<typename Vector>
+    bool AbstractVisitor::try_find_access_mod(Vector const& all, Vector& found, AccessModifier mod)
     {
         found.clear();
         for (size_t i = 0; i < all.size(); ++i)
         {
-            if (all.at(i) && all.at(i)->access == mod)
+            if (all.at(i)->access == mod)
             {
                 found.push_back(all.at(i));
             }
