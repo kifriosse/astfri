@@ -172,12 +172,10 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
 
     const SymbolTree& symbTree = symbTable_.symb_tree();
     ScopeNode* entryPoint      = start;
-    bool hasExplicitAlias      = false;
     if (sCurrent == MapManager::get_symbol(NodeType::AliasQualifName)) {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         const TSNode nAlias        = util::child_by_field_name(nCurrent, "alias");
         const std::string aliasStr = util::extract_text(nAlias, srcStr);
-        hasExplicitAlias           = true;
         if (aliasStr == "global") {
             entryPoint = symbTree.root();
         }

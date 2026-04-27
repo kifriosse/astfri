@@ -1,6 +1,7 @@
 global using System.Numerics;
 global using static System.Math;
 global using Cons = global::System.Console;
+using System.Runtime.Intrinsics;
 using global::System.Security.Cryptography.X509Certificates;
 using Generics = System.Collections.Generic;
 
@@ -22,7 +23,7 @@ public class Vector2 : IComparable<Vector2>, IEquatable<Vector2>, MyInterface
     }
 
     public void Method() {
-
+        Vector2 vec = new();
     }
 
     public Vector2() : this(0, 0)

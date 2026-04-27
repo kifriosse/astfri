@@ -7,7 +7,6 @@ public delegate void MyDelegate(int x);
 public record struct MyRecordStruct(int X, int Y);
 public record MyRecordClass(string Name, int Age);
 
-
 public class TestBase
 {
     protected int baseField = 0;
@@ -50,7 +49,6 @@ public class Logger : StreamWriter
         Close();
     }
 }
-
 
 public class ColorTest
 {
@@ -139,6 +137,8 @@ public partial class TestClass
         int? nullableInt = null;
         ref int? refNullableInt = ref nullableInt;
         (string, float) tuple = ("STRING", 1.0f);
+
+        // long l = 15L;
         
         List<int>? list = new List<int> { 1, 2, 3 };
         // list!.Add(4);
@@ -153,7 +153,7 @@ public partial class TestClass
 
         void test(int x)
         {
-            
+            sbyte s = 4;
         }
 
         test(1);

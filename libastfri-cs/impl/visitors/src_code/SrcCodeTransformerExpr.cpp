@@ -177,8 +177,17 @@ Expr* SrcCodeTransformer::visit_identifier(SrcCodeTransformer* self, const TSNod
     if (! defStmt)
         return exprFact_.mk_unknown();
 
-    if (is_a<MemberVarDefStmt>(defStmt)) // todo static handling
-        return exprFact_.mk_member_var_ref(exprFact_.mk_this(), std::move(name));
+    if (const auto membVar = as_a<MemberVarDefStmt>(defStmt)) {
+        if (membVar->staticity == Staticity::NonStatic)
+            return exprFact_.mk_member_var_ref(exprFact_.mk_this(), std::move(name));
+
+        if (const auto currentType = self->semContext_.current_type())
+            return exprFact_.mk_member_var_ref(
+                exprFact_.mk_class_ref(currentType->type->name),
+                std::move(name)
+            );
+        return exprFact_.mk_unknown();
+    }
     if (is_a<ParamVarDefStmt>(defStmt))
         return exprFact_.mk_param_var_ref(std::move(name));
     if (is_a<LocalVarDefStmt>(defStmt))
@@ -199,6 +208,8 @@ Expr* SrcCodeTransformer::visit_memb_access(SrcCodeTransformer* self, const TSNo
         qualif = access::Base{};
     else if (is_a<ThisExpr>(left))
         qualif = access::Instance{};
+    else if (is_a<UnknownExpr>(left))
+        return left;
     // else if (is_a<ClassRefExpr>(left))
     //     qualif = access::Static{};
 
@@ -298,8 +309,8 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
 }
 
 Expr* SrcCodeTransformer::visit_prefix_unary_opr(SrcCodeTransformer* self, const TSNode& node) {
-    const TSNode nOp     = ts_node_child(node, 0);
-    const TSNode nRight  = ts_node_child(node, 1);
+    const TSNode nOp    = ts_node_child(node, 0);
+    const TSNode nRight = ts_node_child(node, 1);
     // std::erase_if(op, isspace);
 
     const auto res = MapManager::get_prefix_unary_op(nOp);
@@ -349,7 +360,7 @@ Expr* SrcCodeTransformer::visit_binary_opr(SrcCodeTransformer* self, const TSNod
 
     const auto opOpt        = MapManager::get_bin_op(nOp);
     if (! opOpt) {
-        const std::string op    = util::extract_text(nOp, self->src_str());
+        const std::string op = util::extract_text(nOp, self->src_str());
         // `a ?? b` same as `a != null ? a : b`
         Expr* left = mLeft(self, nLeft);
         BinOpExpr* cond

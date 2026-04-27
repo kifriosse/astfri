@@ -34,7 +34,6 @@ public class MultiGenericClass<T1, T2>
     
 }
 
-
 // Súbor 1
 partial class A : IDisposable
 {
