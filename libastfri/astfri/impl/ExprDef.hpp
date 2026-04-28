@@ -28,7 +28,7 @@ template<typename SelfType>
 using MakeAnExpr = MakeA<Expr, SelfType>;
 
 /**
- * @brief TODO
+ * @brief Base class for expressions representing literal values of type T.
  */
 template<typename SelfType, typename T>
 struct Literal : MakeAnExpr<SelfType> {
@@ -36,43 +36,43 @@ struct Literal : MakeAnExpr<SelfType> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents an integer literal expression.
  */
 struct IntLiteralExpr : Literal<IntLiteralExpr, int> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a floating-point literal expression.
  */
 struct FloatLiteralExpr : Literal<FloatLiteralExpr, float> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a character literal expression.
  */
 struct CharLiteralExpr : Literal<CharLiteralExpr, char> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a string literal expression.
  */
 struct StringLiteralExpr : Literal<StringLiteralExpr, std::string> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a boolean literal expression.
  */
 struct BoolLiteralExpr : Literal<BoolLiteralExpr, bool> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a null literal expression.
  */
 struct NullLiteralExpr : MakeAnExpr<NullLiteralExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a conditional expression (ternary operator).
  */
 struct IfExpr : MakeAnExpr<IfExpr> {
     Expr *cond{nullptr};
@@ -193,7 +193,7 @@ enum class BinOpType {
 };
 
 /**
- * @brief TODO
+ * @brief Represents binary operator expression.
  */
 struct BinOpExpr : MakeAnExpr<BinOpExpr> {
     Expr *left{nullptr};
@@ -239,7 +239,7 @@ enum class UnaryOpType {
 };
 
 /**
- * @brief TODO
+ * @brief Represents unary operator expression.
  */
 struct UnaryOpExpr : MakeAnExpr<UnaryOpExpr> {
     Expr *arg{nullptr};
@@ -247,7 +247,7 @@ struct UnaryOpExpr : MakeAnExpr<UnaryOpExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a reference to a function parameter.
  */
 struct ParamVarRefExpr : MakeAnExpr<ParamVarRefExpr> {
     // TODO this should be Either<ReqPtr<Symbol>, ReqPtr<ParamVarDef>>
@@ -255,7 +255,7 @@ struct ParamVarRefExpr : MakeAnExpr<ParamVarRefExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a reference to a local variable.
  */
 struct LocalVarRefExpr : MakeAnExpr<LocalVarRefExpr> {
     // TODO this should be Either<Symbol, LocalVarDef>
@@ -263,7 +263,7 @@ struct LocalVarRefExpr : MakeAnExpr<LocalVarRefExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a reference to a member variable of an object or class.
  */
 struct MemberVarRefExpr : MakeAnExpr<MemberVarRefExpr> {
     Expr *owner{nullptr};
@@ -272,7 +272,7 @@ struct MemberVarRefExpr : MakeAnExpr<MemberVarRefExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a reference to a global variable.
  */
 struct GlobalVarRefExpr : MakeAnExpr<GlobalVarRefExpr> {
     // TODO this should be Either<Symbol, GlobalVarDef>
@@ -280,7 +280,7 @@ struct GlobalVarRefExpr : MakeAnExpr<GlobalVarRefExpr> {
 };
 
 /**
- * @brief Reference to a class object
+ * @brief Represents a reference to a class object.
  *
  * This type is mainly used as @c owner for static method calls
  */
@@ -290,7 +290,7 @@ struct ClassRefExpr : MakeAnExpr<ClassRefExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a call to a standalone function.
  */
 struct FunctionCallExpr : MakeAnExpr<FunctionCallExpr> {
     // TODO this should be Either<Symbol, FunctionDefStmt>
@@ -299,7 +299,7 @@ struct FunctionCallExpr : MakeAnExpr<FunctionCallExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents a call to a class or object method.
  */
 struct MethodCallExpr : MakeAnExpr<MethodCallExpr> {
     Expr *owner{nullptr};
@@ -309,7 +309,7 @@ struct MethodCallExpr : MakeAnExpr<MethodCallExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents an invocation of a lambda expression.
  */
 struct LambdaCallExpr : MakeAnExpr<LambdaCallExpr> {
     Expr* lambda{nullptr};
@@ -317,7 +317,7 @@ struct LambdaCallExpr : MakeAnExpr<LambdaCallExpr> {
 };
 
 /**
- * @brief TODO
+ * @brief Represents the definition of a lambda expression.
  */
 struct LambdaExpr : MakeAnExpr<LambdaExpr> {
     LambdaType *type{nullptr};
@@ -327,13 +327,13 @@ struct LambdaExpr : MakeAnExpr<LambdaExpr> {
 };
 
 /**
- * @brief Reference to the current instance e.g., `this` or `self` keywords.
+ * @brief Represents a reference to the current instance e.g., `this` or `self` keywords.
  */
 struct ThisExpr : MakeAnExpr<ThisExpr> {
 };
 
 /**
- * @brief Reference to the base class e.g., `super` or `base` keywords.
+ * @brief Represents a reference to the base class e.g., `super` or `base` keywords.
  */
 struct BaseExpr : MakeAnExpr<BaseExpr> {
 };
@@ -354,7 +354,7 @@ struct NewExpr : MakeAnExpr<NewExpr> {
 };
 
 /**
- * @brief Operator delete that frees allocated memory
+ * @brief Operator delete that frees allocated memory.
  */
 struct DeleteExpr : MakeAnExpr<DeleteExpr> {
     Expr* arg{nullptr};
@@ -380,9 +380,9 @@ struct Sink
 };
 
 /**
- * @brief TODO, tento bude moct ist prec, pozri UnknownType
+ * @brief Represents an expression whose content or type is currently unknown.
  */
-struct UnknownExpr : Expr, details::MkVisitable<UnknownExpr> { };
+struct UnknownExpr : MakeAnExpr<UnknownExpr> { };
 
 
 } // namespace astfri

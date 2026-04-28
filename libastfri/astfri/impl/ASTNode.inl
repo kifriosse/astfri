@@ -1,6 +1,4 @@
-#ifndef ASTFRI_IMPL_AST_NODE_HPP
-#    include <astfri/impl/ASTNode.hpp>
-#endif
+#include <astfri/impl/ASTNode.hpp>
 
 
 namespace astfri {

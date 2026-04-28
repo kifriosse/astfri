@@ -1,57 +1,27 @@
 #ifndef ASTFRI_IMPL_TYPE_INFO_HPP
 #define ASTFRI_IMPL_TYPE_INFO_HPP
 
-#include <astfri/impl/ExprFwd.hpp>
-#include <astfri/impl/StmtFwd.hpp>
-#include <astfri/impl/TypeFwd.hpp>
-
-#include <concepts>
+#include <astfri/impl/ASTNode.hpp>
 
 
 namespace astfri {
 
 
 /**
- * @brief returns true if @p t is-a T
+ * @brief Returns true if @p t is @c T.
+ * @param t Node to typecheck.
+ * @return true if @p t is @c T.
  */
-template<typename T>
-requires(std::derived_from<T, Type>)
-bool is_a(Type* t);
+template<typename T, typename KindType>
+bool is_a(ASTNode<KindType> *t);
 
 /**
- * @brief returns @p t casted to T iff T is-a Type, otherwise returns nullptr
+ * @brief Returns @p t casted to @c T iff @p t is @c T, otherwise returns nullptr.
+ * @param t Node to typecheck.
+ * @return Typecasted @p t if @p t is @c T, otherwise nullptr.
  */
-template<typename T>
-requires(std::derived_from<T, Type>)
-T* as_a(Type* t);
-
-/**
- * @brief returns true if @p t is-a T
- */
-template<typename T>
-requires(std::derived_from<T, Stmt>)
-bool is_a(Stmt* t);
-
-/**
- * @brief returns @p t casted to T iff T is-a Stmt, otherwise returns nullptr
- */
-template<typename T>
-requires(std::derived_from<T, Stmt>)
-T* as_a(Stmt* t);
-
-/**
- * @brief returns true if @p t is-a T
- */
-template<typename T>
-requires(std::derived_from<T, Expr>)
-bool is_a(Expr* t);
-
-/**
- * @brief returns @p t casted to T iff T is-a Expr, otherwise returns nullptr
- */
-template<typename T>
-requires(std::derived_from<T, Expr>)
-T* as_a(Expr* t);
+template<typename T, typename KindType>
+T *as_a(ASTNode<KindType> *t);
 
 
 } // namespace astfri

@@ -18,11 +18,10 @@ namespace astfri {
 template<typename KindType>
 struct ASTNode {
     /** @brief Enum value holding kind (type) of this node. */
-    KindType kind; // TODO change is_a to use this
+    KindType kind;
 
     /**
      * @brief Accepts visitor by calling its corresponding @c visit method.
-     *
      * @param visitor Visitor to be accepted.
      */
     void accept(Visitor &visitor);
