@@ -6,6 +6,8 @@
 // using global::System.Security.Cryptography.X509Certificates;
 // using Generics = System.Collections.Generic;
 
+namespace csharp;
+
 public class Vector : IComparable<Vector>, IEquatable<Vector> 
 {
     float[] _elements;
@@ -24,6 +26,7 @@ public class Vector : IComparable<Vector>, IEquatable<Vector>
 
     public Vector(Vector other)
     {
+        _elements = new float[other._elements.Length];
         other._elements.CopyTo(_elements);
     }
 
@@ -94,12 +97,7 @@ public class Vector : IComparable<Vector>, IEquatable<Vector>
             : _elements.SequenceCompareTo(other._elements);
     }
 
-    public bool Equals(Vector? other)
-    {
-        return other == null 
-            ? false
-            : _elements.SequenceEqual(other._elements);
-    }
+    public bool Equals(Vector? other) => other != null && _elements.SequenceEqual(other._elements);
 
     private static Vector Sum(Vector first, Vector second, bool subtract)
     {
