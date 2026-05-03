@@ -50,21 +50,19 @@ public class Logger : StreamWriter
     }
 }
 
-public class ColorTest
+
+public class ColorColor
 {
     Color Color { get; set; }
 
     public void Method()
     {
-        _ = System.Drawing.Color.Red.R;
-        //    ^
-        // Class Ref
+        _ = System.Drawing.Color.Red;
+        //    ^ Class Ref
         _ = Color.FromArgb(0,0,0);
-        //    ^
-        // Class Ref
+        //    ^ Class Ref
         _ = Color.R;
-        //    ^
-        // Property
+        //    ^ Property
     }
 } 
 

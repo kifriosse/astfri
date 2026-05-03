@@ -6,8 +6,8 @@ int main() {
     using namespace astfri;
     csharp::ASTBuilder astBuilder;
     text::TextLibManager& manager = text::TextLibManager::get_instance();
-    astBuilder.load_src("../../../libastfri-cs/resources/test_src");
-    // astBuilder.load_src("/home/andrew/Coding/astfri/resources/samples/csharp/Vector.cs");
+    // astBuilder.load_src("../../../libastfri-cs/resources/test_src/");
+    astBuilder.load_src("../../../resources/samples/csharp/");
     // for loading file from stream
     // astBuilder.load_src(stream);
     const TranslationUnit* ast = astBuilder.mk_ast();

@@ -1,6 +1,6 @@
 ﻿namespace csharp;
 
-public readonly struct Fraction : IEquatable<Fraction> {
+public class Fraction : IEquatable<Fraction> {
     private readonly long _numerator;
     private readonly long _denominator;
 

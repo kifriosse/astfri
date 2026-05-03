@@ -12,6 +12,7 @@
 #include <tree_sitter/api.h>
 
 #include <charconv>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -352,9 +353,13 @@ Expr* SrcCodeTransformer::visit_ref_expr(SrcCodeTransformer* self, const TSNode&
 }
 
 Expr* SrcCodeTransformer::visit_binary_opr(SrcCodeTransformer* self, const TSNode& node) {
-    const TSNode nLeft      = ts_node_named_child(node, 0);
+    util::print_child_nodes_types(node, true);
+    std::cout << std::endl;
+
+    // return exprFact_.mk_unknown();
+    const TSNode nLeft      = ts_node_child(node, 0);
     const TSNode nOp        = ts_node_child(node, 1);
-    const TSNode nRight     = ts_node_named_child(node, 1);
+    const TSNode nRight     = ts_node_child(node, 2);
     const ExprMapper mLeft  = MapManager::get_expr_mapper(nLeft);
     const ExprMapper mRight = MapManager::get_expr_mapper(nRight);
 
