@@ -25,7 +25,9 @@ concept map_like = requires(Map m, typename Map::key_type k) {
  * @brief Satisfied by any container that supports @c push_back operation.
  */
 template<typename Vector>
-concept vector_like = requires(Vector v, typename Vector::value_type x) { v.push_back(x); };
+concept vector_like = requires(Vector v, typename Vector::value_type x) {
+    v.push_back(x);
+};
 
 /**
  * @brief Gets pointer to value from @p map if @p key exists or constructs a new value
@@ -33,7 +35,7 @@ concept vector_like = requires(Vector v, typename Vector::value_type x) { v.push
  * @return Pointer to a value that was already present or pointer to a new value.
  */
 template<typename Val, map_like Map, typename Key, typename Creator>
-Val *emplace_get(Map& map, Key&& key, Creator creator) {
+Val *get_or_emplace(Map& map, Key&& key, Creator creator) {
     const auto it = map.find(key);
     if (it != map.end()) {
         return &it->second;

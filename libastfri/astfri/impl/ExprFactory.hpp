@@ -158,16 +158,6 @@ public:
     LambdaCallExpr* mk_lambda_call(Expr* lambda, std::vector<Expr*> args);
 
     /**
-     * @deprecated
-     */
-    [[deprecated]] LambdaExpr* mk_lambda_expr();
-
-    /**
-     * @deprecated
-     */
-    [[deprecated]] LambdaExpr* mk_lambda_expr(std::vector<ParamVarDefStmt*> params, Stmt* body);
-
-    /**
      * @brief Returns an existing instace of @c LambdaExpr with name @p name or @c nullptr.
      * The instance must have been created before using @c mk_lambda_expr with the same @p name.
      * Otherwise, @c nullptr is returned.
@@ -293,10 +283,10 @@ private:
     NullLiteralExpr m_nullLiteral;
 
     /** @brief Single BoolLiteralExpr instance for value @c false. */
-    BoolLiteralExpr m_falseLiteral{false};
+    BoolLiteralExpr m_falseLiteral;
 
     /** @brief Single BoolLiteralExpr instance for value @c true. */
-    BoolLiteralExpr m_trueLiteral{true};
+    BoolLiteralExpr m_trueLiteral;
 
     /** @brief Single ThisExpr instance. */
     ThisExpr m_thisExpr;

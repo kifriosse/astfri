@@ -1,14 +1,16 @@
 #ifndef ASTFRI_IMPL_STMT_FWD_HPP
 #define ASTFRI_IMPL_STMT_FWD_HPP
 
+
 namespace astfri {
+
 
 struct Stmt;
 struct LocalVarDefStmt;
 struct ParamVarDefStmt;
 struct MemberVarDefStmt;
 struct GlobalVarDefStmt;
-struct DefStmt;
+struct MultiLocalVarDefStmt;
 struct FunctionDefStmt;
 struct MethodDefStmt;
 struct BaseInitializerStmt;
@@ -17,7 +19,6 @@ struct MemberInitializerStmt;
 struct ConstructorDefStmt;
 struct DestructorDefStmt;
 struct GenericParam;
-struct UserTypeDefStmt;
 struct InterfaceDefStmt;
 struct ClassDefStmt;
 struct CompoundStmt;
@@ -39,6 +40,7 @@ struct ContinueStmt;
 struct BreakStmt;
 struct UnknownStmt;
 struct TranslationUnit;
+
 
 } // namespace astfri
 

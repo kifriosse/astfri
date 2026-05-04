@@ -1,34 +1,43 @@
-#ifndef ASTFRI_IMPL_STMT_HPP
-#define ASTFRI_IMPL_STMT_HPP
+#ifndef ASTFRI_IMPL_STMT_DEF_HPP
+#define ASTFRI_IMPL_STMT_DEF_HPP
 
 #include <astfri/impl/tools/ReqPtr.hpp>
 #include <astfri/impl/tools/OptPtr.hpp>
-#include <astfri/impl/Scope.hpp>
-#include <astfri/impl/Utils.hpp>
+#include <astfri/impl/ASTNode.hpp>
+#include <astfri/impl/StmtKind.hpp>
 #include <astfri/impl/Type.hpp>
 
 #include <string>
 #include <vector>
 
+
 namespace astfri {
 
+
 /**
- * @brief Base class for all statements.
+ * @brief Base for all statements.
  */
-struct Stmt : virtual Visitable {
-    /**
-     * @brief Virtual destructor.
-     * Statements are simple structs with no virtual functions.
-     * Having the virtual destructor add vtable which allows us to use dynamic_cast.
-     * If we move to our own type info later, the destructor may be removed.
-     */
-    virtual ~Stmt() = default;
+struct Stmt : virtual ASTNode<StmtKind> {
 };
+
+
+/**
+ * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Stmt.
+ *
+ * See @c MakeA doc for more details.
+ *
+ * @tparam SelfType child class type.
+ */
+template<typename SelfType>
+using MakeAStmt = MakeA<Stmt, SelfType>;
+
 
 /**
  * @brief Defines access modifier of a class member.
  */
 enum class AccessModifier {
+    UNINITIALIZED = 0,
+
     /**
      * Public
      */
@@ -50,72 +59,68 @@ enum class AccessModifier {
     Internal
 };
 
+
 /**
  * @brief Marks method as virtual or not virtual.
  */
 enum class Virtuality {
+    UNINITIALIZED = 0,
     NotVirtual,
     Virtual,
     PureVirtual
 };
-// TODO Abstractity?
+
 
 /**
  * @brief Marks a member either static or non-static.
  */
 enum class Staticity {
+    UNINITIALIZED = 0,
     NonStatic,
     Static
 };
 
+
 /**
  * @brief TODO
  */
-struct VarDefStmt :
-    Stmt // TODO visitable here?
-{
+template<typename SelfType>
+struct VarDefStmt : MakeAStmt<SelfType> {
     std::string name;
     Type* type;
     Expr* initializer;
-
-    VarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 /**
  * @brief TODO
  */
-struct LocalVarDefStmt : VarDefStmt, details::MkVisitable<LocalVarDefStmt> {
-    LocalVarDefStmt(std::string name, Type* type, Expr* initializer);
+struct LocalVarDefStmt : VarDefStmt<LocalVarDefStmt> {
 };
+
 
 /**
  * @brief TODO
  */
-struct ParamVarDefStmt : VarDefStmt, details::MkVisitable<ParamVarDefStmt> {
+struct ParamVarDefStmt : VarDefStmt<ParamVarDefStmt> {
     ParamVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
+
 /**
  * @brief TODO
  */
-struct MemberVarDefStmt : VarDefStmt, details::MkVisitable<MemberVarDefStmt> {
+struct MemberVarDefStmt : VarDefStmt<MemberVarDefStmt> {
     AccessModifier access;
     Staticity staticity;
-
-    MemberVarDefStmt(
-        std::string name,
-        Type* type,
-        Expr* initializer,
-        AccessModifier access,
-        Staticity staticity);
 };
+
 
 /**
  * @brief TODO
  */
-struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt> {
-    GlobalVarDefStmt(std::string name, Type* type, Expr* initializer);
+struct GlobalVarDefStmt : VarDefStmt<GlobalVarDefStmt> {
 };
+
 
 /**
  * @brief Definition statement that may contain multiple variable definitions
@@ -132,33 +137,26 @@ struct GlobalVarDefStmt : VarDefStmt, details::MkVisitable<GlobalVarDefStmt> {
      `-IntLiteralExpr(10)
  * @endcode
  */
-struct DefStmt : Stmt, details::MkVisitable<DefStmt> { // TODO this needs a better name, this is terrible
-    std::vector<VarDefStmt*> defs;
-
-    explicit DefStmt(std::vector<VarDefStmt*> defs);
+struct MultiLocalVarDefStmt : MakeAStmt<MultiLocalVarDefStmt> {
+    std::vector<LocalVarDefStmt*> defs{};
 };
+
 
 /**
  * @brief TODO
  */
-struct FunctionDefStmt : Stmt, details::MkVisitable<FunctionDefStmt> {
-    std::string name;
-    std::vector<ParamVarDefStmt*> params;
-    Type* retType;
-    CompoundStmt* body;
-
-    FunctionDefStmt(
-        std::string name,
-        std::vector<ParamVarDefStmt*> params,
-        Type* retType,
-        CompoundStmt* body
-    );
+struct FunctionDefStmt : MakeAStmt<FunctionDefStmt> {
+    std::string name{};
+    std::vector<ParamVarDefStmt*> params{};
+    Type* retType{nullptr};
+    CompoundStmt* body{nullptr};
 };
+
 
 /**
  * @brief TODO
  */
-struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt> {
+struct MethodDefStmt : MakeAStmt<MethodDefStmt> {
     UserTypeDefStmt* owner{nullptr}; // TODO ClassType or Interface, variant?
     FunctionDefStmt* func{nullptr};
     AccessModifier access{AccessModifier::Public};
@@ -166,128 +164,114 @@ struct MethodDefStmt : Stmt, details::MkVisitable<MethodDefStmt> {
     Staticity staticity;
 };
 
+
 /**
  * @brief Initializer of a base class called at the begining of a constructor
  */
-struct BaseInitializerStmt : Stmt, details::MkVisitable<BaseInitializerStmt> {
-    [[deprecated]] std::string base_; // TODO type
-    ClassType* type;
-    std::vector<Expr*> args;
-
-    [[deprecated]] BaseInitializerStmt(std::string base, std::vector<Expr*> args);
-    BaseInitializerStmt(ClassType* type, std::vector<Expr*> args);
+struct BaseInitializerStmt : MakeAStmt<BaseInitializerStmt> {
+    [[deprecated]] std::string base_{}; // TODO type
+    ClassType* type{nullptr};
+    std::vector<Expr*> args{};
 };
+
 
 /**
  * @brief TODO
  */
-struct SelfInitializerStmt : Stmt, details::MkVisitable<SelfInitializerStmt> {
-    std::vector<Expr*> args;
-    SelfInitializerStmt(std::vector<Expr*> args);
+struct SelfInitializerStmt : MakeAStmt<SelfInitializerStmt> {
+    std::vector<Expr*> args{};
 };
+
 
 /**
  * @brief TODO
  */
-struct MemberInitializerStmt : Stmt, details::MkVisitable<MemberInitializerStmt> {
-    MemberVarDefStmt* member;
-    Expr* arg;
-    MemberInitializerStmt(MemberVarDefStmt* member, Expr* arg);
+struct MemberInitializerStmt : MakeAStmt<MemberInitializerStmt> {
+    MemberVarDefStmt* member{nullptr};
+    Expr* arg{nullptr};
 };
+
 
 /**
  * @brief TODO
  */
-struct ConstructorDefStmt : Stmt, details::MkVisitable<ConstructorDefStmt> {
-    ClassDefStmt* owner;
-    std::vector<ParamVarDefStmt*> params;
-    std::vector<BaseInitializerStmt*> baseInit;
-    std::vector<SelfInitializerStmt*> selfInitializers;
-    std::vector<MemberInitializerStmt*> memberInitializers;
-    CompoundStmt* body;
-    AccessModifier access;
-
-    ConstructorDefStmt();
-    [[deprecated]] ConstructorDefStmt(
-        ClassDefStmt* owner,
-        std::vector<ParamVarDefStmt*> params,
-        std::vector<BaseInitializerStmt*> baseInit,
-        CompoundStmt* body,
-        AccessModifier access
-    );
+struct ConstructorDefStmt : MakeAStmt<ConstructorDefStmt> {
+    ClassDefStmt* owner{nullptr};
+    std::vector<ParamVarDefStmt*> params{};
+    std::vector<BaseInitializerStmt*> baseInit{};
+    std::vector<SelfInitializerStmt*> selfInitializers{};
+    std::vector<MemberInitializerStmt*> memberInitializers{};
+    CompoundStmt* body{nullptr};
+    AccessModifier access{AccessModifier::UNINITIALIZED};
 };
+
 
 /**
  * @brief Definition of a descructor
  */
-struct DestructorDefStmt : Stmt, details::MkVisitable<DestructorDefStmt> {
-    ClassDefStmt* owner;
-    CompoundStmt* body;
-
-    DestructorDefStmt(ClassDefStmt* owner, CompoundStmt* body);
+struct DestructorDefStmt : MakeAStmt<DestructorDefStmt> {
+    ClassDefStmt* owner{nullptr};
+    CompoundStmt* body{nullptr};
 };
+
 
 /**
  * @brief TODO
  */
-struct GenericParam : Stmt, details::MkVisitable<GenericParam> {
+struct GenericParam : MakeAStmt<GenericParam> {
     // TODO later, this could be pointer to a concept
-    std::string constraint;
-    std::string name;
-
-    GenericParam(std::string constraint, std::string name);
+    std::string constraint{};
+    std::string name{};
 };
+
 
 /**
  * @deprecated
  * @brief Common base for Class and Interface
  * In the future, it could also be used for union or strong type alias
  */
-struct UserTypeDefStmt : Stmt {
-    [[deprecated]] std::string name;
+template<typename SelfType>
+struct UserTypeDefStmt : MakeAStmt<SelfType> {
+    [[deprecated]] std::string name{};
 };
 
 /**
  * @brief TODO
  */
-struct InterfaceDefStmt : UserTypeDefStmt, details::MkVisitable<InterfaceDefStmt> {
-    InterfaceType* type;
-    std::vector<MethodDefStmt*> methods;
-    std::vector<GenericParam*> tparams;
-    std::vector<InterfaceDefStmt*> bases;
+struct InterfaceDefStmt : UserTypeDefStmt<InterfaceDefStmt> {
+    InterfaceType* type{nullptr};
+    std::vector<MethodDefStmt*> methods{};
+    std::vector<GenericParam*> tparams{};
+    std::vector<InterfaceDefStmt*> bases{};
 };
 
 /**
  * @brief TODO
  */
-struct ClassDefStmt : UserTypeDefStmt, details::MkVisitable<ClassDefStmt> {
-    ClassType* type;
-    std::vector<MemberVarDefStmt*> vars;
-    std::vector<ConstructorDefStmt*> constructors;
-    std::vector<DestructorDefStmt*> destructors;
-    std::vector<MethodDefStmt*> methods;
-    std::vector<GenericParam*> tparams;
-    std::vector<InterfaceDefStmt*> interfaces; // TODO IntefaceType
-    std::vector<ClassDefStmt*> bases;          // TODO ClassType
+struct ClassDefStmt : UserTypeDefStmt<ClassDefStmt> {
+    ClassType* type{nullptr};
+    std::vector<MemberVarDefStmt*> vars{};
+    std::vector<ConstructorDefStmt*> constructors{};
+    std::vector<DestructorDefStmt*> destructors{};
+    std::vector<MethodDefStmt*> methods{};
+    std::vector<GenericParam*> tparams{};
+    std::vector<InterfaceDefStmt*> interfaces{}; // TODO IntefaceType
+    std::vector<ClassDefStmt*> bases{};          // TODO ClassType
     // TODO incomplete bases
 };
 
 /**
  * @brief TODO
  */
-struct CompoundStmt : Stmt, details::MkVisitable<CompoundStmt> {
-    std::vector<Stmt*> stmts;
-
-    explicit CompoundStmt(std::vector<Stmt*> stmts);
+struct CompoundStmt : MakeAStmt<CompoundStmt> {
+    std::vector<Stmt*> stmts{};
 };
 
 /**
  * @brief TODO
  */
-struct ReturnStmt : Stmt, details::MkVisitable<ReturnStmt> {
-    Expr* val;
-
-    explicit ReturnStmt(Expr* val);
+struct ReturnStmt : MakeAStmt<ReturnStmt> {
+    Expr* val{nullptr};
 };
 
 /**
