@@ -200,7 +200,7 @@ Expr* SrcCodeTransformer::visit_identifier(SrcCodeTransformer* self, const TSNod
 Expr* SrcCodeTransformer::visit_memb_access(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nLeft     = util::child_by_field_name(node, "expression");
     const TSNode nRight    = util::child_by_field_name(node, "name");
-    const ExprMapper mLeft = MapManager::get_expr_mapper(nLeft);
+    const ExprMapper mLeft = mapManager_.get_expr_mapper(nLeft);
     std::string name       = util::extract_text(nRight, self->src_str());
     Expr* left             = mLeft(self, nLeft);
 
@@ -227,7 +227,7 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
     const TSNode nArgList      = util::child_by_field_name(node, "arguments");
     std::vector<Expr*> argList = self->visit_arg_list(nArgList);
     // if it doesn't have a left side - it is not a member access node in tree sitter
-    if (ts_node_symbol(nFunc) == MapManager::get_symbol(NodeType::Identifier)) {
+    if (ts_node_symbol(nFunc) == mapManager_.get_symbol(NodeType::Identifier)) {
         std::string name = util::extract_text(nFunc, self->src_str());
         InvocationId id{
             .name       = name,
@@ -241,7 +241,7 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
         case InvocationType::LocalFunc:
             return exprFact_.mk_function_call(std::move(name), std::move(argList));
         case InvocationType::Delegate: {
-            const ExprMapper mLeft = MapManager::get_expr_mapper(nFunc);
+            const ExprMapper mLeft = mapManager_.get_expr_mapper(nFunc);
             Expr* left             = mLeft(self, nFunc);
             return exprFact_.mk_lambda_call(left, std::move(argList));
         }
@@ -262,10 +262,10 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
         }
     }
     // accessing a member of some variable - also includes `this`
-    if (ts_node_symbol(nFunc) == MapManager::get_symbol(NodeType::MemberAccess)) {
+    if (ts_node_symbol(nFunc) == mapManager_.get_symbol(NodeType::MemberAccess)) {
         const TSNode nName     = util::child_by_field_name(nFunc, "name");
         const TSNode nLeft     = util::child_by_field_name(nFunc, "expression");
-        const ExprMapper mLeft = MapManager::get_expr_mapper(nLeft);
+        const ExprMapper mLeft = mapManager_.get_expr_mapper(nLeft);
         Expr* left             = mLeft(self, nLeft);
         std::string name       = util::extract_text(nName, self->src_str());
         // it's a member of an instance - method or delegate type attribute
@@ -314,14 +314,14 @@ Expr* SrcCodeTransformer::visit_prefix_unary_opr(SrcCodeTransformer* self, const
     const TSNode nRight = ts_node_child(node, 1);
     // std::erase_if(op, isspace);
 
-    const auto res = MapManager::get_prefix_unary_op(nOp);
+    const auto res = mapManager_.get_prefix_unary_op(nOp);
     if (! res)
         // throw std::runtime_error("Operation \"" + op + "\" is not
         // implemented");
         return exprFact_.mk_unknown();
 
     const UnaryOpType opType = *res;
-    const ExprMapper mRight  = MapManager::get_expr_mapper(nRight);
+    const ExprMapper mRight  = mapManager_.get_expr_mapper(nRight);
     Expr* right              = mRight(self, nRight);
     return exprFact_.mk_unary_op(opType, right);
 }
@@ -330,7 +330,7 @@ Expr* SrcCodeTransformer::visit_postfix_unary_opr(SrcCodeTransformer* self, cons
     const TSNode nLeft     = ts_node_child(node, 0);
     const TSNode nOp       = ts_node_child(node, 1);
     const std::string op   = util::extract_text(nOp, self->src_str());
-    const ExprMapper mLeft = MapManager::get_expr_mapper(nLeft);
+    const ExprMapper mLeft = mapManager_.get_expr_mapper(nLeft);
     Expr* left             = mLeft(self, nLeft);
 
     UnaryOpType opType;
@@ -348,7 +348,7 @@ Expr* SrcCodeTransformer::visit_postfix_unary_opr(SrcCodeTransformer* self, cons
 
 Expr* SrcCodeTransformer::visit_ref_expr(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nExpr = ts_node_named_child(node, 0);
-    Expr* expr         = MapManager::get_expr_mapper(nExpr)(self, nExpr);
+    Expr* expr         = mapManager_.get_expr_mapper(nExpr)(self, nExpr);
     return exprFact_.mk_unary_op(UnaryOpType::AddressOf, expr);
 }
 
@@ -360,10 +360,10 @@ Expr* SrcCodeTransformer::visit_binary_opr(SrcCodeTransformer* self, const TSNod
     const TSNode nLeft      = ts_node_child(node, 0);
     const TSNode nOp        = ts_node_child(node, 1);
     const TSNode nRight     = ts_node_child(node, 2);
-    const ExprMapper mLeft  = MapManager::get_expr_mapper(nLeft);
-    const ExprMapper mRight = MapManager::get_expr_mapper(nRight);
+    const ExprMapper mLeft  = mapManager_.get_expr_mapper(nLeft);
+    const ExprMapper mRight = mapManager_.get_expr_mapper(nRight);
 
-    const auto opOpt        = MapManager::get_bin_op(nOp);
+    const auto opOpt        = mapManager_.get_bin_op(nOp);
     if (! opOpt) {
         const std::string op = util::extract_text(nOp, self->src_str());
         // `a ?? b` same as `a != null ? a : b`
@@ -393,22 +393,22 @@ Expr* SrcCodeTransformer::visit_ternary_expr(SrcCodeTransformer* self, const TSN
     const TSNode nTrue      = ts_node_named_child(node, 1);
     const TSNode nFalse     = ts_node_named_child(node, 2);
 
-    const ExprMapper mCond  = MapManager::get_expr_mapper(nCode);
-    const ExprMapper mtrue  = MapManager::get_expr_mapper(nTrue);
-    const ExprMapper mfalse = MapManager::get_expr_mapper(nFalse);
+    const ExprMapper mCond  = mapManager_.get_expr_mapper(nCode);
+    const ExprMapper mtrue  = mapManager_.get_expr_mapper(nTrue);
+    const ExprMapper mfalse = mapManager_.get_expr_mapper(nFalse);
 
     return exprFact_.mk_if(mCond(self, nCode), mtrue(self, nTrue), mfalse(self, nFalse));
 }
 
 Expr* SrcCodeTransformer::visit_parenthesized_expr(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nExpr     = ts_node_named_child(node, 0);
-    const ExprMapper mExpr = MapManager::get_expr_mapper(nExpr);
+    const ExprMapper mExpr = mapManager_.get_expr_mapper(nExpr);
     return exprFact_.mk_bracket(mExpr(self, nExpr));
 }
 
 Expr* SrcCodeTransformer::visit_const_pattern(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nInside = ts_node_child(node, 0);
-    return MapManager::get_expr_mapper(nInside)(self, nInside);
+    return mapManager_.get_expr_mapper(nInside)(self, nInside);
 }
 
 } // namespace astfri::csharp

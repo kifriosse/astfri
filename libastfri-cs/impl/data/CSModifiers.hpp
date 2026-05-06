@@ -12,6 +12,12 @@
 
 namespace astfri::csharp {
 
+namespace maps {
+
+class MapManager;
+
+} // namespace maps
+
 /**
  * @brief Macro used for creating bitmask for enums
  * @param x number of bits to bitshift to left
@@ -54,7 +60,7 @@ enum class CSModifier : MaskType {
 class CSModifiers {
 private:
     MaskType modifier_mask{0};
-
+    static maps::MapManager& mapManager_;
 public:
     /**
      * @brief Factory method for parsing/extrating modifiers of method

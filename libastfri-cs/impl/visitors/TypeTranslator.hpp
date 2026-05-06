@@ -8,6 +8,12 @@
 #include <tree_sitter/api.h>
 
 namespace astfri::csharp {
+namespace maps {
+
+struct Mappers;
+class MapManager;
+
+} // namespace maps
 struct SourceFile;
 
 /**
@@ -22,6 +28,7 @@ private:
     friend maps::Mappers;
 
     static TypeFactory& typeFact_;
+    static maps::MapManager& mapManager_;
     /**
      * @brief Node used for marking types that can't be resolved. It's used as
      * a temporary storage for FQN or PQN type or namespace names that can't be

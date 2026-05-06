@@ -1,9 +1,8 @@
 #ifndef CSHARP_REGISTRIES_INL
 #define CSHARP_REGISTRIES_INL
 
-namespace astfri::csharp {
+namespace astfri::csharp::maps {
 
-namespace maps {
 
 template<class Self, class RetType>
 RetType Mappers::visit_error(Self*, const TSNode& node) {
@@ -13,8 +12,6 @@ RetType Mappers::visit_error(Self*, const TSNode& node) {
         + std::to_string(column)
     );
 }
-
-} // namespace maps
 
 template<class Factory, class Self, class RetType>
 requires is_valid_factory<Factory, RetType>

@@ -21,7 +21,7 @@ Stmt* SrcCodeTransformer::visit_var_def_stmt(const TSNode& node, const util::Var
     [[maybe_unused]] CSModifiers modifs = CSModifiers::parse_var_modifs(node, src_str(), &nVarDecl);
 
     const TSNode nType                  = util::child_by_field_name(nVarDecl, "type");
-    const TypeMapper tm                 = MapManager::get_type_mapper(nType);
+    const TypeMapper tm                 = mapManager_.get_type_mapper(nType);
     Type* type                          = tm(&typeTrs_, nType);
 
     std::vector<VarDefStmt*> varDefs;
@@ -33,7 +33,7 @@ Stmt* SrcCodeTransformer::visit_var_def_stmt(const TSNode& node, const util::Var
             std::string name          = util::extract_text(n_varName, src_str());
             Expr* init                = nullptr;
             if (! ts_node_is_null(nInit)) {
-                ExprMapper mInit = MapManager::get_expr_mapper(nInit);
+                ExprMapper mInit = mapManager_.get_expr_mapper(nInit);
                 init             = mInit(this, nInit);
             }
 
@@ -75,8 +75,8 @@ Stmt* SrcCodeTransformer::visit_var_def_stmt(const TSNode& node, const util::Var
 Stmt* SrcCodeTransformer::make_while_loop(const TSNode& node, const bool is_while) {
     const TSNode nCond     = util::child_by_field_name(node, "condition");
     const TSNode nBody     = util::child_by_field_name(node, "body");
-    const ExprMapper mCond = MapManager::get_expr_mapper(nCond);
-    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    const ExprMapper mCond = mapManager_.get_expr_mapper(nCond);
+    const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
     Expr* cond             = mCond(this, nCond);
     Stmt* body             = mBody(this, nBody);
 
@@ -95,8 +95,8 @@ FunctionDefStmt* SrcCodeTransformer::make_func_stmt(const TSNode& node, const bo
     const TSNode nBody       = util::child_by_field_name(node, "body");
 
     // todo handle generic parameters
-    const TypeMapper tm    = MapManager::get_type_mapper(nRetType);
-    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    const TypeMapper tm    = mapManager_.get_type_mapper(nRetType);
+    const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
     Type* retType          = tm(&typeTrs_, nRetType);
 
     semContext_.reg_return(retType);
@@ -123,7 +123,7 @@ Expr* SrcCodeTransformer::expr_list_to_comma_op(const TSNode& nStart, const TSNo
         if (! ts_node_is_named(nCurrent))
             continue;
 
-        const ExprMapper mExpr = MapManager::get_expr_mapper(nCurrent);
+        const ExprMapper mExpr = mapManager_.get_expr_mapper(nCurrent);
         exprs.push(mExpr(this, nCurrent));
     }
 
@@ -151,11 +151,11 @@ std::vector<ParamVarDefStmt*> SrcCodeTransformer::make_param_list(
         const TSNode nType  = util::child_by_field_name(current, "type");
         const TSNode nInit  = ts_node_next_named_sibling(nName);
         std::string name    = util::extract_text(nName, src_str());
-        const TypeMapper tm = MapManager::get_type_mapper(nType);
+        const TypeMapper tm = mapManager_.get_type_mapper(nType);
         Type* type          = tm(&typeTrs_, nType);
         Expr* init          = nullptr;
         if (! makeShallow && ! ts_node_is_null(nInit)) {
-            const ExprMapper mInit = MapManager::get_expr_mapper(nInit);
+            const ExprMapper mInit = mapManager_.get_expr_mapper(nInit);
             init                   = mInit(this, nInit);
         }
         ParamVarDefStmt* paramDef = stmtFact_.mk_param_var_def(std::move(name), type, init);
@@ -170,7 +170,7 @@ std::vector<Expr*> SrcCodeTransformer::visit_arg_list(const TSNode& node) {
     std::vector<Expr*> exprs;
     auto process = [this, &exprs](const TSNode& current) -> void {
         const TSNode nChild    = ts_node_child(current, 0);
-        const ExprMapper mExpr = MapManager::get_expr_mapper(nChild);
+        const ExprMapper mExpr = mapManager_.get_expr_mapper(nChild);
         exprs.emplace_back(mExpr(this, nChild));
     };
     util::for_each_child_node(node, process);
@@ -180,14 +180,14 @@ std::vector<Expr*> SrcCodeTransformer::visit_arg_list(const TSNode& node) {
 Stmt* SrcCodeTransformer::visit_for_init_var_def(const TSNode& node) {
     std::vector<VarDefStmt*> varDefs;
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper tm = MapManager::get_type_mapper(nType);
+    const TypeMapper tm = mapManager_.get_type_mapper(nType);
 
     auto proces         = [&](const TSQueryMatch& match) {
         for (uint32_t i = 0; i < match.capture_count; ++i) {
             const TSNode nDecltor   = match.captures[i].node;
             TSNode nName            = ts_node_named_child(nDecltor, 0);
             TSNode nRight           = ts_node_named_child(nDecltor, 1);
-            ExprMapper mRight       = MapManager::get_expr_mapper(nRight);
+            ExprMapper mRight       = mapManager_.get_expr_mapper(nRight);
             LocalVarDefStmt* varDef = stmtFact_.mk_local_var_def(
                 util::extract_text(nName, src_str()),
                 tm(&typeTrs_, nType),

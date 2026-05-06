@@ -15,6 +15,7 @@
 namespace astfri::csharp {
 
 TypeFactory& TypeTranslator::typeFact_ = TypeFactory::get_instance();
+maps::MapManager& TypeTranslator::mapManager_ = maps::MapManager::get();
 
 ScopeNode TypeTranslator::extMarkNode_(ExternalMarker{}, nullptr);
 
@@ -33,13 +34,13 @@ void TypeTranslator::set_current_namespace(ScopeNode* node) {
 
 Type* TypeTranslator::visit_predefined(TypeTranslator* self, const TSNode& node) {
     const std::string name = util::extract_text(node, self->src_str());
-    const auto result      = MapManager::get_primitive_type(name);
+    const auto result      = mapManager_.get_primitive_type(name);
     return result ? result : typeFact_.mk_unknown();
 }
 
 Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& node) {
     if (const auto primitive
-        = MapManager::get_primitive_type(util::extract_text(node, self->src_str())))
+        = mapManager_.get_primitive_type(util::extract_text(node, self->src_str())))
         return primitive;
 
     // look up order form language specification
@@ -97,14 +98,14 @@ Type* TypeTranslator::visit_implicit(
 
 Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node) {
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper tm = MapManager::get_type_mapper(nType);
+    const TypeMapper tm = mapManager_.get_type_mapper(nType);
     return tm(self, nType);
 }
 
 Type* TypeTranslator::visit_indirect(TypeTranslator* self, const TSNode& node) {
     // todo add handling of readonly
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper tm = MapManager::get_type_mapper(nType);
+    const TypeMapper tm = mapManager_.get_type_mapper(nType);
     return typeFact_.mk_indirect(tm(self, nType));
 }
 
@@ -157,7 +158,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
      * Global lookup (including file usings)
      * * Checks only external aliases
      */
-    static const TSSymbol sQualifName = MapManager::get_symbol(NodeType::QualifName);
+    static const TSSymbol sQualifName = mapManager_.get_symbol(NodeType::QualifName);
 
     const std::string_view srcStr     = src_str();
     TSNode nCurrent                   = nQualif;
@@ -172,7 +173,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
 
     const SymbolTree& symbTree = symbTable_.symb_tree();
     ScopeNode* entryPoint      = start;
-    if (sCurrent == MapManager::get_symbol(NodeType::AliasQualifName)) {
+    if (sCurrent == mapManager_.get_symbol(NodeType::AliasQualifName)) {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         const TSNode nAlias        = util::child_by_field_name(nCurrent, "alias");
         const std::string aliasStr = util::extract_text(nAlias, srcStr);

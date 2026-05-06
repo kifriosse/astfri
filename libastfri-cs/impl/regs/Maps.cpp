@@ -20,7 +20,9 @@ class SymbTableBuilder;
 class TypeTranslator;
 
 namespace maps {
+
 namespace {
+
 using enum NodeType;
 
 /**
@@ -380,13 +382,11 @@ Types::Types() :
 }) {
 }
 
-} // namespace maps
 
-maps::Mappers MapManager::handlers_;
-maps::Modifiers MapManager::modifiers_;
-maps::NodeTypes MapManager::nodeTypes_;
-maps::Operations MapManager::operations_;
-maps::Types MapManager::types_;
+MapManager& MapManager::get() {
+    static MapManager mapMnger;
+    return mapMnger;
+}
 
 StmtMapper MapManager::get_stmt_mapper(const TSNode& node) {
     return get_stmt_mapper(nodeTypes_.get_node_type(node));
@@ -434,11 +434,11 @@ MemberCollector MapManager::get_symb_collector(const NodeType nodeType) {
     return get_or_default(handlers_.symbCollectors, nodeType, def);
 }
 
-std::optional<UnaryOpType> MapManager::get_prefix_unary_op(const TSNode& op) {
+std::optional<UnaryOpType> MapManager::get_prefix_unary_op(const TSNode& op) const {
     return get_opt(operations_.prefixUnaryOps, get_node_type(op));
 }
 
-std::optional<BinOpType> MapManager::get_bin_op(const TSNode& op) {
+std::optional<BinOpType> MapManager::get_bin_op(const TSNode& op) const {
     return get_opt(operations_.binaryOps, get_node_type(op));
 }
 
@@ -446,15 +446,15 @@ Type* MapManager::get_primitive_type(const std::string_view nodeType) {
     return get_opt(types_.types, nodeType).value_or(nullptr);
 }
 
-CSModifier MapManager::get_modifier(const TSNode& node, const std::string_view src) {
+CSModifier MapManager::get_modifier(const TSNode& node, const std::string_view src) const {
     return get_modifier(util::extract_text(node, src));
 }
 
-CSModifier MapManager::get_modifier(const std::string_view modifs) {
+CSModifier MapManager::get_modifier(const std::string_view modifs) const {
     return get_opt(modifiers_.modifiers, modifs).value_or(CSModifier::None);
 }
 
-bool MapManager::is_expr(const TSNode& node) {
+bool MapManager::is_expr(const TSNode& node) const {
     return handlers_.exprs.contains(nodeTypes_.get_node_type(node));
 }
 
@@ -462,11 +462,11 @@ bool MapManager::is_stmt(const TSNode& node) {
     return handlers_.stmts.contains(nodeTypes_.get_node_type(node));
 }
 
-NodeType MapManager::get_node_type(const TSNode& node) {
+NodeType MapManager::get_node_type(const TSNode& node) const {
     return nodeTypes_.get_node_type(node);
 }
 
-TSSymbol MapManager::get_symbol(const NodeType type) {
+TSSymbol MapManager::get_symbol(const NodeType type) const {
     return nodeTypes_.get_symbol(type);
 }
 
@@ -475,4 +475,5 @@ Stmt* MapManager::default_stmt_visit(SrcCodeTransformer*, const TSNode&) {
     return StmtFactory::get_instance().mk_uknown();
 }
 
+} // namespace maps
 } // namespace astfri::csharp

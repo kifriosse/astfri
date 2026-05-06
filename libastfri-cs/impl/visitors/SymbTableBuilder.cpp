@@ -61,7 +61,9 @@ constexpr std::string_view wpfSdkExclude[]{"System.IO", "System.Net.Http"};
 struct SourceFile;
 
 StmtFactory& SymbTableBuilder::stmtFact_    = StmtFactory::get_instance();
+maps::MapManager& SymbTableBuilder::mapManager_   = maps::MapManager::get();
 maps::QueryReg& SymbTableBuilder::queryReg_ = maps::QueryReg::get();
+
 
 SymbTableBuilder::SymbTableBuilder(
     std::vector<std::unique_ptr<SourceFile>>& srcs,
@@ -106,7 +108,7 @@ void SymbTableBuilder::reg_members() {
         if (util::is_type_decl(current))
             return;
 
-        const MemberCollector collector = MapManager::get_symb_collector(current);
+        const MemberCollector collector = mapManager_.get_symb_collector(current);
         collector(this, current);
     };
 
@@ -154,7 +156,7 @@ void SymbTableBuilder::visit_memb_var(SymbTableBuilder* self, const TSNode& node
     TSNode nVarDecl;
     const auto modifs      = CSModifiers::parse_var_modifs(node, src, &nVarDecl);
     const TSNode nType     = util::child_by_field_name(nVarDecl, "type");
-    const TypeMapper tm    = MapManager::get_type_mapper(nType);
+    const TypeMapper tm    = mapManager_.get_type_mapper(nType);
     Type* type             = tm(&self->typeTrs_, nType);
     TypeMetadata* typeMeta = self->symbTable_.get_type_metadata(self->typeContext_->def);
 
@@ -216,7 +218,7 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
     auto [params, paramsMeta] = util::discover_params(nParams, srcStr, self->typeTrs_);
 
-    const TypeMapper tm       = MapManager::get_type_mapper(nRetType);
+    const TypeMapper tm       = mapManager_.get_type_mapper(nRetType);
     MethodDefStmt* methodDef  = stmtFact_.mk_method_def(
         self->typeContext_->def,
         stmtFact_.mk_function_def(
@@ -338,7 +340,7 @@ void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath) {
                 continue;
 
             if (*typeOpt == util::TypeKind::Primitive) {
-                Type* type = MapManager::get_primitive_type(name);
+                Type* type = mapManager_.get_primitive_type(name);
                 symbTable_.add_primitive(name, CSPrimitiveType{type});
                 continue;
             }
@@ -363,9 +365,9 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective) {
 
     auto process                  = [&isGlobal, &isStatic](const TSNode& current) {
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == MapManager::get_symbol(NodeType::Static))
+        if (sCurrent == mapManager_.get_symbol(NodeType::Static))
             isGlobal = true;
-        else if (sCurrent == MapManager::get_symbol(NodeType::Global))
+        else if (sCurrent == mapManager_.get_symbol(NodeType::Global))
             isStatic = true;
     };
 
@@ -440,11 +442,11 @@ void SymbTableBuilder::collect_types(const TSTree* tree) {
             return;
 
         if (util::is_type_decl(sCurrent)) {
-            const TypeCollector collector = MapManager::get_type_collector(node);
+            const TypeCollector collector = mapManager_.get_type_collector(node);
             if (ScopeNode* scopeNode = collector(this, node))
                 stack.emplace_back(body, scopeNode);
         }
-        else if (sCurrent == MapManager::get_symbol(NodeType::NamespaceDecl)) {
+        else if (sCurrent == mapManager_.get_symbol(NodeType::NamespaceDecl)) {
             const TSNode nName = util::child_by_field_name(node, "name");
             std::string name   = util::extract_text(nName, src_str());
             Nms nms(name);
@@ -469,7 +471,7 @@ ScopeNode* SymbTableBuilder::visit_type_def(const TSNode& node, const util::Type
 
     auto processClassHeader = [&](const TSNode& current) -> void {
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == MapManager::get_symbol(NodeType::TypeParamList)) {
+        if (sCurrent == mapManager_.get_symbol(NodeType::TypeParamList)) {
             genParams = util::make_generic_params(current, src_str());
         }
     };
@@ -490,7 +492,7 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
     bool first           = true;
     auto processBaseList = [&](const TSNode& current) -> void {
         std::string name    = util::extract_text(current, src_str());
-        const TypeMapper tm = MapManager::get_type_mapper(current);
+        const TypeMapper tm = mapManager_.get_type_mapper(current);
         Type* type          = tm(&typeTrs_, current);
         if (first) {
             first = false;
@@ -535,7 +537,7 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
 
 void SymbTableBuilder::visit_base_list_interface(const TSNode& node, InterfaceDefStmt* intfDef) {
     auto processBaseList = [&](const TSNode& current) -> void {
-        const TypeMapper tm = MapManager::get_type_mapper(current);
+        const TypeMapper tm = mapManager_.get_type_mapper(current);
         Type* type          = tm(&typeTrs_, current);
 
         if (const auto tInterface = as_a<InterfaceType>(type))

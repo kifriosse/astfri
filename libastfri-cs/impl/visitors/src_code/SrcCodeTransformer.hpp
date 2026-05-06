@@ -24,6 +24,7 @@ private:
     static ExprFactory& exprFact_;
     static StmtFactory& stmtFact_;
     static TypeFactory& typeFact_;
+    static maps::MapManager& mapManager_;
 
     TypeTranslator typeTrs_;
     SemanticContext semContext_;

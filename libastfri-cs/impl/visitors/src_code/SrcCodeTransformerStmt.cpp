@@ -19,7 +19,7 @@ Stmt* SrcCodeTransformer::visit_block(SrcCodeTransformer* self, const TSNode& no
     auto discoverFunc = [self](const TSNode& current) -> void {
         using enum NodeType;
         if (! ts_node_is_named(current)
-            || ts_node_symbol(current) != MapManager::get_symbol(LocalFuncDecl))
+            || ts_node_symbol(current) != mapManager_.get_symbol(LocalFuncDecl))
             return;
 
         self->semContext_.reg_local_func(
@@ -32,7 +32,7 @@ Stmt* SrcCodeTransformer::visit_block(SrcCodeTransformer* self, const TSNode& no
     std::vector<Stmt*> stmts;
     auto processBody = [self, &stmts](const TSNode& nCurrent) -> void {
         if (ts_node_is_named(nCurrent)) {
-            const StmtMapper mStmt = MapManager::get_stmt_mapper(nCurrent);
+            const StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
             stmts.push_back(mStmt(self, nCurrent));
         }
     };
@@ -45,7 +45,7 @@ Stmt* SrcCodeTransformer::visit_block(SrcCodeTransformer* self, const TSNode& no
 
 Stmt* SrcCodeTransformer::visit_arrow_body(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nBody     = ts_node_named_child(node, 0);
-    const ExprMapper mBody = MapManager::get_expr_mapper(nBody);
+    const ExprMapper mBody = mapManager_.get_expr_mapper(nBody);
     Type* returnType       = self->semContext_.current_return_type();
     Expr* expr             = mBody(self, nBody);
     Stmt* body             = nullptr;
@@ -79,7 +79,7 @@ Stmt* SrcCodeTransformer::visit_for_loop(SrcCodeTransformer* self, const TSNode&
     Stmt* step          = nullptr;
 
     if (! ts_node_is_null(nInit)) {
-        if (MapManager::is_expr(nInit)) {
+        if (mapManager_.is_expr(nInit)) {
             const TSNode* nEnd = &nBody;
             if (! condNull)
                 nEnd = &nCond;
@@ -94,7 +94,7 @@ Stmt* SrcCodeTransformer::visit_for_loop(SrcCodeTransformer* self, const TSNode&
     }
 
     if (! condNull) {
-        const ExprMapper mCond = MapManager::get_expr_mapper(nCond);
+        const ExprMapper mCond = mapManager_.get_expr_mapper(nCond);
         cond                   = mCond(self, nCond);
     }
 
@@ -102,7 +102,7 @@ Stmt* SrcCodeTransformer::visit_for_loop(SrcCodeTransformer* self, const TSNode&
         step = stmtFact_.mk_expr(self->expr_list_to_comma_op(nStep, &nBody));
     }
 
-    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
     Stmt* body             = mBody(self, nBody);
     self->semContext_.leave_scope();
     return stmtFact_.mk_for(init, cond, step, body);
@@ -121,9 +121,9 @@ Stmt* SrcCodeTransformer::visit_for_each(SrcCodeTransformer* self, const TSNode&
     }
 
     std::string name        = util::extract_text(hLeft, self->src_str());
-    const ExprMapper mRight = MapManager::get_expr_mapper(nRight);
-    const StmtMapper mBody  = MapManager::get_stmt_mapper(nBody);
-    const TypeMapper th     = MapManager::get_type_mapper(nType);
+    const ExprMapper mRight = mapManager_.get_expr_mapper(nRight);
+    const StmtMapper mBody  = mapManager_.get_stmt_mapper(nBody);
+    const TypeMapper th     = mapManager_.get_type_mapper(nType);
     Type* type              = th(&self->typeTrs_, nType);
     LocalVarDefStmt* left   = stmtFact_.mk_local_var_def(std::move(name), type, nullptr);
     self->semContext_.reg_local_var(left);
@@ -155,7 +155,7 @@ Stmt* SrcCodeTransformer::visit_if(SrcCodeTransformer* self, const TSNode& node)
 
     Stmt* currentElse  = nullptr;
     if (! ts_node_is_null(nElse)) {
-        const StmtMapper mElse = MapManager::get_stmt_mapper(nElse);
+        const StmtMapper mElse = mapManager_.get_stmt_mapper(nElse);
         currentElse            = mElse(self, nElse);
     }
 
@@ -164,8 +164,8 @@ Stmt* SrcCodeTransformer::visit_if(SrcCodeTransformer* self, const TSNode& node)
         nIfs.pop_back();
         const TSNode nTrue = util::child_by_field_name(ifNode, "consequence");
         const TSNode nCond = util::child_by_field_name(ifNode, "condition");
-        StmtMapper mTrue   = MapManager::get_stmt_mapper(nTrue);
-        ExprMapper mCond   = MapManager::get_expr_mapper(nCond);
+        StmtMapper mTrue   = mapManager_.get_stmt_mapper(nTrue);
+        ExprMapper mCond   = mapManager_.get_expr_mapper(nCond);
 
         Stmt* trueStmt     = mTrue(self, nTrue);
         Expr* condExpr     = mCond(self, nCond);
@@ -181,7 +181,7 @@ Stmt* SrcCodeTransformer::visit_try(SrcCodeTransformer* self, const TSNode& node
         return stmtFact_.mk_uknown();
 
     const TSNode nBody     = util::child_by_field_name(node, "body");
-    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
 
     Stmt* finally          = nullptr;
     std::vector<CatchStmt*> catchStmts;
@@ -190,7 +190,7 @@ Stmt* SrcCodeTransformer::visit_try(SrcCodeTransformer* self, const TSNode& node
         if (ts_node_eq(current, nBody))
             return;
 
-        const StmtMapper mCurrent = MapManager::get_stmt_mapper(current);
+        const StmtMapper mCurrent = mapManager_.get_stmt_mapper(current);
         Stmt* currentStmt         = mCurrent(self, current);
         if (is_a<CompoundStmt>(currentStmt))
             finally = currentStmt;
@@ -211,7 +211,7 @@ Stmt* SrcCodeTransformer::visit_catch(SrcCodeTransformer* self, const TSNode& no
     LocalVarDefStmt* catchVar = nullptr;
     Stmt* body                = nullptr;
     auto process              = [&](const TSNode& n_current) -> void {
-        const StmtMapper mCurrent = MapManager::get_stmt_mapper(n_current);
+        const StmtMapper mCurrent = mapManager_.get_stmt_mapper(n_current);
         Stmt* currentStmt         = mCurrent(self, n_current);
         if (const auto var = as_a<LocalVarDefStmt>(currentStmt)) {
             catchVar = var;
@@ -229,13 +229,13 @@ Stmt* SrcCodeTransformer::visit_catch(SrcCodeTransformer* self, const TSNode& no
 
 Stmt* SrcCodeTransformer::visit_finally(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nBody = ts_node_named_child(node, 0);
-    return MapManager::get_stmt_mapper(nBody)(self, nBody);
+    return mapManager_.get_stmt_mapper(nBody)(self, nBody);
 }
 
 Stmt* SrcCodeTransformer::visit_catch_decl(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nType  = util::child_by_field_name(node, "type");
     const TSNode nName  = util::child_by_field_name(node, "name");
-    const TypeMapper tm = MapManager::get_type_mapper(nType);
+    const TypeMapper tm = mapManager_.get_type_mapper(nType);
     Type* type          = tm(&self->typeTrs_, nType);
     std::string name
         = ts_node_is_null(nName) ? std::string{} : util::extract_text(nName, self->src_str());
@@ -245,12 +245,12 @@ Stmt* SrcCodeTransformer::visit_catch_decl(SrcCodeTransformer* self, const TSNod
 Stmt* SrcCodeTransformer::visit_switch(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nValue      = util::child_by_field_name(node, "value");
     const TSNode nSwitchBody = util::child_by_field_name(node, "body");
-    const ExprMapper mValue  = MapManager::get_expr_mapper(nValue);
+    const ExprMapper mValue  = mapManager_.get_expr_mapper(nValue);
     Expr* value              = mValue(self, nValue);
 
     std::vector<CaseBaseStmt*> cases;
     auto process = [self, &cases](const TSNode& nCurrent) -> void {
-        const StmtMapper mStmt = MapManager::get_stmt_mapper(nCurrent);
+        const StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
         Stmt* stmt             = mStmt(self, nCurrent);
         if (auto* caseStmt = as_a<CaseBaseStmt>(stmt))
             cases.push_back(caseStmt);
@@ -273,7 +273,7 @@ Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode
                 continue;
 
             // todo handle more complex patterns
-            const ExprMapper mParrent = MapManager::get_expr_mapper(nCurrent);
+            const ExprMapper mParrent = mapManager_.get_expr_mapper(nCurrent);
             pattern                   = mParrent(self, nCurrent);
         }
         while (ts_tree_cursor_goto_next_sibling(&cursor));
@@ -283,7 +283,7 @@ Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode
             if (! ts_node_is_named(nCurrent))
                 continue;
 
-            StmtMapper mStmt = MapManager::get_stmt_mapper(nCurrent);
+            StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
             Stmt* stmt       = mStmt(self, nCurrent);
             bodyStmts.push_back(stmt);
         }
@@ -306,7 +306,7 @@ Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode
 
 Stmt* SrcCodeTransformer::visit_expr_stmt(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nExpr     = ts_node_child(node, 0);
-    const ExprMapper mExpr = MapManager::get_expr_mapper(nExpr);
+    const ExprMapper mExpr = mapManager_.get_expr_mapper(nExpr);
     return stmtFact_.mk_expr(mExpr(self, nExpr));
 }
 
@@ -328,7 +328,7 @@ Stmt* SrcCodeTransformer::visit_return(SrcCodeTransformer* self, const TSNode& n
     Expr* expr = nullptr;
     if (ts_node_named_child_count(node) > 0) {
         const TSNode nExpr     = ts_node_named_child(node, 0);
-        const ExprMapper mExpr = MapManager::get_expr_mapper(nExpr);
+        const ExprMapper mExpr = mapManager_.get_expr_mapper(nExpr);
         expr                   = mExpr(self, nExpr);
     }
     return stmtFact_.mk_return(expr);
@@ -338,7 +338,7 @@ Stmt* SrcCodeTransformer::visit_throw(SrcCodeTransformer* self, const TSNode& no
     Expr* expr = nullptr;
     if (ts_node_named_child_count(node) > 0) {
         const TSNode nExpr      = ts_node_named_child(node, 0);
-        const ExprMapper mExpr = MapManager::get_expr_mapper(nExpr);
+        const ExprMapper mExpr = mapManager_.get_expr_mapper(nExpr);
         expr                    = mExpr(self, nExpr);
     }
     return stmtFact_.mk_throw(expr);

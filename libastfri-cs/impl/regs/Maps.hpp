@@ -20,6 +20,7 @@ struct Stmt;
 struct Expr;
 
 class TypeFactory;
+
 } // namespace astfri
 
 namespace astfri::csharp {
@@ -28,6 +29,7 @@ enum class CSModifier : MaskType;
 class SrcCodeTransformer;
 
 namespace maps {
+
 
 /**
  * @brief Class holding mapping of tree-sitter symbols to NodeType enum values
@@ -97,7 +99,6 @@ struct Modifiers {
     const RegistryStrViewMap<CSModifier> modifiers;
     Modifiers();
 };
-} // namespace maps
 
 /**
  * @brief Ensures a class follows the Astfri Factory pattern.
@@ -116,32 +117,41 @@ concept is_valid_factory = requires(Factory f) {
  */
 class MapManager {
 private:
-    static maps::Mappers handlers_;
-    static maps::Modifiers modifiers_;
-    static maps::Operations operations_;
-    static maps::NodeTypes nodeTypes_;
-    static maps::Types types_;
+    const Mappers handlers_;
+    const Modifiers modifiers_;
+    const Operations operations_;
+    const NodeTypes nodeTypes_;
+    const Types types_;
 
+    MapManager() = default;
 public:
-    static StmtMapper get_stmt_mapper(const TSNode& node);
-    static StmtMapper get_stmt_mapper(NodeType nodeType);
-    static ExprMapper get_expr_mapper(const TSNode& node);
-    static ExprMapper get_expr_mapper(NodeType nodeType);
-    static TypeMapper get_type_mapper(const TSNode& node);
-    static TypeMapper get_type_mapper(NodeType nodeType);
-    static TypeCollector get_type_collector(const TSNode& node);
-    static TypeCollector get_type_collector(NodeType nodeType);
-    static MemberCollector get_symb_collector(const TSNode& node);
-    static MemberCollector get_symb_collector(NodeType nodeType);
-    static std::optional<UnaryOpType> get_prefix_unary_op(const TSNode& op);
-    static std::optional<BinOpType> get_bin_op(const TSNode& op);
-    static Type* get_primitive_type(std::string_view nodeType);
-    static CSModifier get_modifier(const TSNode& node, std::string_view src);
-    static CSModifier get_modifier(std::string_view modifs);
-    static bool is_expr(const TSNode& node);
-    static bool is_stmt(const TSNode& node);
-    static NodeType get_node_type(const TSNode& node);
-    static TSSymbol get_symbol(NodeType type);
+
+    MapManager(const MapManager&) = delete;
+    MapManager(MapManager&&) = delete;
+    MapManager& operator=(const MapManager&) = delete;
+    MapManager& operator=(MapManager&&) = delete;
+
+    static MapManager& get();
+
+    StmtMapper get_stmt_mapper(const TSNode& node);
+    StmtMapper get_stmt_mapper(NodeType nodeType);
+    ExprMapper get_expr_mapper(const TSNode& node);
+    ExprMapper get_expr_mapper(NodeType nodeType);
+    TypeMapper get_type_mapper(const TSNode& node);
+    TypeMapper get_type_mapper(NodeType nodeType);
+    TypeCollector get_type_collector(const TSNode& node);
+    TypeCollector get_type_collector(NodeType nodeType);
+    MemberCollector get_symb_collector(const TSNode& node);
+    MemberCollector get_symb_collector(NodeType nodeType);
+    std::optional<UnaryOpType> get_prefix_unary_op(const TSNode& op) const;
+    std::optional<BinOpType> get_bin_op(const TSNode& op) const;
+    Type* get_primitive_type(std::string_view nodeType);
+    CSModifier get_modifier(const TSNode& node, std::string_view src) const;
+    CSModifier get_modifier(std::string_view modifs) const;
+    bool is_expr(const TSNode& node) const;
+    bool is_stmt(const TSNode& node);
+    NodeType get_node_type(const TSNode& node) const;
+    TSSymbol get_symbol(NodeType type) const;
 
 private:
     static Stmt* default_stmt_visit(SrcCodeTransformer*, const TSNode&);
@@ -178,6 +188,8 @@ private:
     static auto get_opt(const Map& map, const Map::key_type& key)
         -> std::optional<typename Map::mapped_type>;
 };
+
+} // namespace maps
 
 } // namespace astfri::csharp
 

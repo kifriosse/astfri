@@ -13,9 +13,10 @@
 
 namespace astfri::csharp {
 
-ExprFactory& SrcCodeTransformer::exprFact_ = ExprFactory::get_instance();
-StmtFactory& SrcCodeTransformer::stmtFact_ = StmtFactory::get_instance();
-TypeFactory& SrcCodeTransformer::typeFact_ = TypeFactory::get_instance();
+ExprFactory& SrcCodeTransformer::exprFact_        = ExprFactory::get_instance();
+StmtFactory& SrcCodeTransformer::stmtFact_        = StmtFactory::get_instance();
+TypeFactory& SrcCodeTransformer::typeFact_        = TypeFactory::get_instance();
+maps::MapManager& SrcCodeTransformer::mapManager_ = maps::MapManager::get();
 
 SrcCodeTransformer::SrcCodeTransformer(SymbolTable& symbTable) :
     typeTrs_(symbTable),
@@ -34,7 +35,7 @@ TranslationUnit* SrcCodeTransformer::visit_comp_unit() {
 
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-            StmtMapper mStmt = MapManager::get_stmt_mapper(node);
+            StmtMapper mStmt = mapManager_.get_stmt_mapper(node);
             Stmt* stmt       = mStmt(this, node);
             if (added)
                 continue;

@@ -11,6 +11,10 @@
 #include <string>
 #include <unordered_set>
 
+namespace {
+    const astfri::csharp::maps::MapManager& mapManager = astfri::csharp::maps::MapManager::get();
+} // namespace
+
 namespace astfri::csharp::util {
 
 TSNode child_by_field_name(const TSNode& node, const std::string_view name) {
@@ -106,13 +110,13 @@ bool has_variadic_param(const TSNode& node, TSNode* nType) {
 bool is_anonymous_lambda(const TSNode& node, TSNode* lambda, TSNode* delegate) {
     using enum NodeType;
     const TSNode nCast = unwrap_parantheses(node);
-    if (ts_node_symbol(nCast) != MapManager::get_symbol(CastExpr))
+    if (ts_node_symbol(nCast) != mapManager.get_symbol(CastExpr))
         return false;
 
     const TSNode nValue  = child_by_field_name(nCast, "value");
     const TSNode nLambda = unwrap_parantheses(nValue);
 
-    if (ts_node_symbol(nLambda) != MapManager::get_symbol(LambdaExpr))
+    if (ts_node_symbol(nLambda) != mapManager.get_symbol(LambdaExpr))
         return false;
 
     if (lambda)
@@ -128,7 +132,7 @@ TSTree* make_tree(TSParser* parser, const std::string_view str) {
 
 TSNode unwrap_parantheses(const TSNode& node) {
     using enum NodeType;
-    static const TSSymbol sBracketExpr = MapManager::get_symbol(ParenthesizedExpr);
+    static const TSSymbol sBracketExpr = mapManager.get_symbol(ParenthesizedExpr);
 
     TSNode current                     = node;
     while (! ts_node_is_null(current) && ts_node_symbol(current) == sBracketExpr) {
@@ -143,11 +147,11 @@ bool is_type_decl(const TSNode& node) {
 
 bool is_type_decl(const TSSymbol symbol) {
     static const std::unordered_set sTypeDecls{
-        MapManager::get_symbol(NodeType::ClassDecl),
-        MapManager::get_symbol(NodeType::InterfaceDecl),
-        MapManager::get_symbol(NodeType::EnumDecl),
-        MapManager::get_symbol(NodeType::RecordDecl),
-        MapManager::get_symbol(NodeType::DelegateDecl)
+        mapManager.get_symbol(NodeType::ClassDecl),
+        mapManager.get_symbol(NodeType::InterfaceDecl),
+        mapManager.get_symbol(NodeType::EnumDecl),
+        mapManager.get_symbol(NodeType::RecordDecl),
+        mapManager.get_symbol(NodeType::DelegateDecl)
     };
     return sTypeDecls.contains(symbol);
 }

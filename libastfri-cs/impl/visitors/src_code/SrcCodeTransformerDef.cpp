@@ -35,7 +35,7 @@ Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode
     auto processMembs = [classDef, self](const TSNode& nMember) -> void {
         if (util::is_type_decl(nMember))
             return;
-        const StmtMapper mMemb = MapManager::get_stmt_mapper(nMember);
+        const StmtMapper mMemb = mapManager_.get_stmt_mapper(nMember);
         Stmt* membStmt         = mMemb(self, nMember);
 
         if (const auto varDef = as_a<MemberVarDefStmt>(membStmt))
@@ -69,10 +69,10 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
             return false;
 
         const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == MapManager::get_symbol(TypeParamList)) {
+        if (sCurrent == mapManager_.get_symbol(TypeParamList)) {
             intfDef->tparams = util::make_generic_params(current, src);
         }
-        else if (sCurrent == MapManager::get_symbol(TypeParamConstrClause)) {
+        else if (sCurrent == mapManager_.get_symbol(TypeParamConstrClause)) {
             // util::for_each_child_node(current, processGenericConstraints);
         }
         return true;
@@ -84,7 +84,7 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
         return intfDef;
 
     auto processMembs = [intfDef, self](const TSNode& nMember) -> void {
-        const StmtMapper mMemb = MapManager::get_stmt_mapper(nMember);
+        const StmtMapper mMemb = mapManager_.get_stmt_mapper(nMember);
         Stmt* membStmt         = mMemb(self, nMember);
 
         if ([[maybe_unused]] const auto varDef = as_a<MemberVarDefStmt>(membStmt)) {
@@ -118,7 +118,7 @@ Stmt* SrcCodeTransformer::visit_param_def(SrcCodeTransformer* self, const TSNode
 
     ParamVarDefStmt* param = util::mk_param_def(node, self->src_str(), self->typeTrs_);
     if (! ts_node_is_null(nInit)) {
-        const ExprMapper mInit = MapManager::get_expr_mapper(nInit);
+        const ExprMapper mInit = mapManager_.get_expr_mapper(nInit);
         param->initializer     = mInit(self, nInit);
     }
     self->semContext_.reg_param(param);
@@ -152,11 +152,11 @@ Stmt* SrcCodeTransformer::visit_constr_def(SrcCodeTransformer* self, const TSNod
     const CSModifiers modifs = CSModifiers::parser_method_modifs(node, self->src_str());
     constrDef->access        = modifs.get_access_mod().value_or(AccessModifier::Private);
 
-    const StmtMapper mBody   = MapManager::get_stmt_mapper(nBody);
+    const StmtMapper mBody   = mapManager_.get_stmt_mapper(nBody);
     constrDef->body          = as_a<CompoundStmt>(mBody(self, nBody));
 
     if (! ts_node_is_null(nInit)) {
-        const StmtMapper mBaseInit = MapManager::get_stmt_mapper(nInit);
+        const StmtMapper mBaseInit = mapManager_.get_stmt_mapper(nInit);
         Stmt* initStmt             = mBaseInit(self, nInit);
         if (const auto baseInit = as_a<BaseInitializerStmt>(initStmt))
             constrDef->baseInit.push_back(baseInit);
@@ -203,7 +203,7 @@ Stmt* SrcCodeTransformer::visit_constr_init(SrcCodeTransformer* self, const TSNo
 Stmt* SrcCodeTransformer::visit_destr_def(SrcCodeTransformer* self, const TSNode& node) {
     self->semContext_.reg_return(typeFact_.mk_void());
     const TSNode nBody     = util::child_by_field_name(node, "body");
-    const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+    const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
     Stmt* body             = mBody(self, nBody);
     const auto currentType = self->semContext_.current_type();
 
@@ -249,7 +249,7 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
 
         for (auto& [paramDef, nParam, nInit] : methodMeta->params) {
             if (! ts_node_is_null(nInit)) {
-                ExprMapper mInit      = MapManager::get_expr_mapper(nInit);
+                ExprMapper mInit      = mapManager_.get_expr_mapper(nInit);
                 paramDef->initializer = mInit(self, nInit);
             }
             self->semContext_.reg_param(paramDef);
@@ -258,7 +258,7 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
 
         const TSNode nBody = util::child_by_field_name(methodMeta->nMethod, "body");
         if (! ts_node_is_null(nBody)) {
-            const StmtMapper mBody = MapManager::get_stmt_mapper(nBody);
+            const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
             methodDef->func->body  = as_a<CompoundStmt>(mBody(self, nBody));
         }
 
@@ -291,14 +291,14 @@ Stmt* SrcCodeTransformer::visit_func_stmt(SrcCodeTransformer* self, const TSNode
     for (const auto& paramMeta : funcMeta->params) {
         const TSNode nInit = paramMeta.nInit;
         if (! ts_node_is_null(nInit)) {
-            ExprMapper mInit                = MapManager::get_expr_mapper(nInit);
+            ExprMapper mInit                = mapManager_.get_expr_mapper(nInit);
             paramMeta.paramDef->initializer = mInit(self, nInit);
         }
         self->semContext_.reg_param(paramMeta.paramDef);
     }
 
     const TSNode nBody      = util::child_by_field_name(node, "body");
-    const StmtMapper mBody  = MapManager::get_stmt_mapper(nBody);
+    const StmtMapper mBody  = mapManager_.get_stmt_mapper(nBody);
     funcMeta->funcDef->body = as_a<CompoundStmt>(mBody(self, nBody));
     self->semContext_.leave_scope();
     self->semContext_.unregister_return_type();

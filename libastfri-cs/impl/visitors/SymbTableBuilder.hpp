@@ -31,6 +31,7 @@ private:
     friend maps::Mappers;
 
     static StmtFactory& stmtFact_;
+    static maps::MapManager& mapManager_;
     static maps::QueryReg& queryReg_;
 
     std::optional<TypeBinding> typeContext_;

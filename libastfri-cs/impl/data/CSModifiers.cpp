@@ -10,12 +10,15 @@
 #include <string_view>
 
 namespace astfri::csharp {
+
+maps::MapManager& CSModifiers::mapManager_ = maps::MapManager::get();
+
 CSModifiers CSModifiers::parser_method_modifs(const TSNode& nMethod, const std::string_view src) {
     CSModifiers modifs;
     auto process = [&modifs, &src](const TSQueryMatch& match) {
         for (CaptureId i = 0; i < match.capture_count; ++i) {
             const TSNode nModif = match.captures[i].node;
-            modifs.add_modifier(MapManager::get_modifier(nModif, src));
+            modifs.add_modifier(mapManager_.get_modifier(nModif, src));
         }
     };
     util::for_each_match(nMethod, maps::QueryType::MethodModif, process);
@@ -42,7 +45,7 @@ CSModifiers CSModifiers::parse_var_modifs(
             if (index == decl_id && nVarDecl)
                 *nVarDecl = nCurrent;
             else if (index == modif_id)
-                modifs.add_modifier(MapManager::get_modifier(nCurrent, src));
+                modifs.add_modifier(mapManager_.get_modifier(nCurrent, src));
         }
     };
     util::for_each_match(nVar, q_type, process);
@@ -54,7 +57,7 @@ CSModifiers CSModifiers::parse_param_modifs(const TSNode& nParam, std::string_vi
     auto process = [&paramMod, &src](const TSQueryMatch& match) {
         for (uint32_t i = 0; i < match.capture_count; ++i) {
             const TSNode n_modif = match.captures[i].node;
-            paramMod.add_modifier(MapManager::get_modifier(n_modif, src));
+            paramMod.add_modifier(mapManager_.get_modifier(n_modif, src));
         }
     };
     util::for_each_match(nParam, maps::QueryType::ParamModif, process);
