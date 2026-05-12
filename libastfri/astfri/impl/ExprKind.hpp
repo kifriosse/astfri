@@ -34,6 +34,7 @@ enum class ExprKind {
     New,
     Delete,
     Bracket,
+    Unknown,
 };
 
 
@@ -131,6 +132,10 @@ template<> struct KindOf<DeleteExpr> {
 
 template<> struct KindOf<BracketExpr> {
     static constexpr ExprKind value{ExprKind::Bracket};
+};
+
+template<> struct KindOf<UnknownExpr> {
+    static constexpr ExprKind value{ExprKind::Unknown};
 };
 
 

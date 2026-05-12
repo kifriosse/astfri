@@ -27,114 +27,117 @@ public:
     static StmtFactory& get_instance();
 
 public:
-    LocalVarDefStmt* mk_local_var_def(std::string name, Type* type, Expr* initializer);
+    LocalVarDefStmt *mk_local_var_def(std::string name, Type *type, Expr *initializer);
 
-    ParamVarDefStmt* mk_param_var_def(std::string name, Type* type, Expr* initializer);
+    ParamVarDefStmt *mk_param_var_def(std::string name, Type *type, Expr *initializer);
 
-    MemberVarDefStmt* mk_member_var_def(
+    MemberVarDefStmt *mk_member_var_def(
         std::string name,
-        Type* type,
-        Expr* initializer,
+        Type *type,
+        Expr *initializer,
         AccessModifier access,
         Staticity staticity
     );
 
-    GlobalVarDefStmt* mk_global_var_def(std::string name, Type* type, Expr* initializer);
+    GlobalVarDefStmt *mk_global_var_def(std::string name, Type *type, Expr *initializer);
 
     // TODO rename
-    MultiLocalVarDefStmt* mk_def();
+    MultiLocalVarDefStmt *mk_def();
 
-    MultiLocalVarDefStmt* mk_def(std::vector<LocalVarDefStmt*> defs);
+    MultiLocalVarDefStmt *mk_def(std::vector<LocalVarDefStmt*> defs);
 
-    FunctionDefStmt* mk_function_def();
+    FunctionDefStmt *mk_function_def();
 
-    FunctionDefStmt* mk_function_def(
+    FunctionDefStmt *mk_function_def(
         std::string name,
         std::vector<ParamVarDefStmt*> params,
-        Type* retType,
-        CompoundStmt* body
+        Type *retType,
+        CompoundStmt *body
     );
 
-    MethodDefStmt* mk_method_def();
+    MethodDefStmt *mk_method_def();
 
-    MethodDefStmt* mk_method_def(
-        Stmt* owner,
-        FunctionDefStmt* func,
+    MethodDefStmt *mk_method_def(
+        Stmt *owner,
+        FunctionDefStmt *func,
         AccessModifier access,
         Virtuality virtuality,
         Staticity staticity
     );
 
-    ConstructorDefStmt* mk_constructor_def();
+    ConstructorDefStmt *mk_constructor_def();
 
-    ConstructorDefStmt* mk_constructor_def(
-        ClassDefStmt* owner,
+    ConstructorDefStmt *mk_constructor_def(
+        ClassDefStmt *owner,
         std::vector<ParamVarDefStmt*> params,
         std::vector<BaseInitializerStmt*> baseInit,
-        CompoundStmt* body,
+        CompoundStmt *body,
         AccessModifier access
     );
 
-    BaseInitializerStmt* mk_base_initializer(ClassType *type, std::vector<Expr*> args);
+    BaseInitializerStmt *mk_base_initializer(ClassType *type, std::vector<Expr*> args);
 
-    SelfInitializerStmt* mk_self_initializer(std::vector<Expr*> args);
+    SelfInitializerStmt *mk_self_initializer(std::vector<Expr*> args);
 
-    MemberInitializerStmt* mk_member_initializer(MemberVarDefStmt *member, std::vector<Expr*> args);
+    MemberInitializerStmt *mk_member_initializer(MemberVarDefStmt *member, std::vector<Expr*> args);
 
-    DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
+    DestructorDefStmt *mk_destructor_def(ClassDefStmt *owner, CompoundStmt *body);
 
-    GenericParam* mk_generic_param(std::string constraint, std::string name);
+    GenericParam *mk_generic_param(std::string constraint, std::string name);
 
-    InterfaceDefStmt* mk_interface_def(const std::string &name, const Scope &scope);
+    InterfaceDefStmt *get_interface_def(std::string_view name, const Scope &scope);
 
-    ClassDefStmt* get_class_def(std::string_view name, const Scope& scope);
+    InterfaceDefStmt *mk_interface_def(const std::string &name, const Scope &scope);
 
-    ClassDefStmt* mk_class_def(const std::string &name, const Scope &scope);
+    ClassDefStmt *get_class_def(std::string_view name, const Scope& scope);
 
-    CompoundStmt* mk_compound(std::vector<Stmt*> stmts);
+    ClassDefStmt *mk_class_def(const std::string &name, const Scope &scope);
 
-    ReturnStmt* mk_return(Expr* val);
+    CompoundStmt *mk_compound(std::vector<Stmt*> stmts);
 
-    ExprStmt* mk_expr(Expr* expr);
+    ReturnStmt *mk_return(Expr *val);
 
-    IfStmt* mk_if(Expr* cond, Stmt* iftrue, Stmt* iffalse);
+    ExprStmt *mk_expr(Expr *expr);
 
-    CaseStmt* mk_case(Expr* expr, Stmt* body);
-    CaseStmt* mk_case(std::vector<Expr*> exprs, Stmt* body);
+    IfStmt *mk_if(Expr *cond, Stmt *iftrue, Stmt *iffalse);
 
-    DefaultCaseStmt* mk_default_case(Stmt* body);
+    CaseStmt *mk_case(Expr *expr, Stmt *body);
 
-    SwitchStmt* mk_switch(Expr* expr, std::vector<CaseStmt*> cases);
+    CaseStmt *mk_case(std::vector<Expr*> exprs, Stmt *body);
 
-    SwitchStmt* mk_switch(Expr* expr, std::vector<CaseStmt*> cases, DefaultCaseStmt *defaultStmt);
+    DefaultCaseStmt *mk_default_case(Stmt *body);
 
-    WhileStmt* mk_while(Expr* cond, Stmt* body);
+    SwitchStmt *mk_switch(Expr *expr, std::vector<CaseStmt*> cases);
 
-    DoWhileStmt* mk_do_while(Expr* cond, Stmt* body);
+    SwitchStmt *mk_switch(Expr *expr, std::vector<CaseStmt*> cases, DefaultCaseStmt *defaultStmt);
 
-    ForStmt* mk_for(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
+    WhileStmt *mk_while(Expr *cond, Stmt *body);
 
-    ForEachStmt* mk_for_each(LocalVarDefStmt* var, Expr* container, Stmt* body);
+    DoWhileStmt *mk_do_while(Expr *cond, Stmt *body);
 
-    ThrowStmt* mk_throw(Expr* val);
+    ForStmt *mk_for(Stmt *init, Expr *cond, Stmt *step, Stmt *body);
 
-    CatchStmt* mk_catch(LocalVarDefStmt* param, Stmt* body);
+    ForEachStmt *mk_for_each(LocalVarDefStmt *var, Expr *container, Stmt *body);
 
-    TryStmt* mk_try(Stmt* body, Stmt* finally, std::vector<CatchStmt*> catches);
+    ThrowStmt *mk_throw(Expr *val);
 
-    ContinueStmt* mk_continue();
+    CatchStmt *mk_catch(LocalVarDefStmt *param, Stmt *body);
 
-    BreakStmt* mk_break();
+    TryStmt *mk_try(Stmt *body, Stmt *finally, std::vector<CatchStmt*> catches);
 
-    UnknownStmt* mk_uknown();
+    ContinueStmt *mk_continue();
 
-    TranslationUnit* mk_translation_unit();
+    BreakStmt *mk_break();
+
+    UnknownStmt *mk_uknown();
+
+    TranslationUnit *mk_translation_unit();
 
 public:
     /**
      * @brief Deleted copy constructor.
      */
-    StmtFactory(const StmtFactory& other) = delete;
+    StmtFactory(const StmtFactory &other) = delete;
 
     /**
      * @brief Explicitly deleted move constructor.

@@ -28,11 +28,9 @@ IntLiteralExpr* ExprFactory::mk_int_literal(const int val) {
 }
 
 FloatLiteralExpr* ExprFactory::mk_float_literal(float val) {
-    return details::get_or_emplace<FloatLiteralExpr>(
-        m_intLiterals,
-        val,
-        [val](){
-            FloatLiteralExpr l;
+    return details::create_store_get<FloatLiteralExpr>(
+        m_otherExpressions,
+        [val](FloatLiteralExpr &l){
             l.val = val;
             return l;
         });
@@ -40,7 +38,7 @@ FloatLiteralExpr* ExprFactory::mk_float_literal(float val) {
 
 CharLiteralExpr* ExprFactory::mk_char_literal(const char val) {
     return details::get_or_emplace<CharLiteralExpr>(
-        m_intLiterals,
+        m_charLiterals,
         val,
         [val](){
             CharLiteralExpr l;
@@ -51,7 +49,7 @@ CharLiteralExpr* ExprFactory::mk_char_literal(const char val) {
 
 StringLiteralExpr* ExprFactory::mk_string_literal(const std::string& val) {
     return details::get_or_emplace<StringLiteralExpr>(
-        m_intLiterals,
+        m_stringLiterals,
         val,
         [val](){
             StringLiteralExpr l;
@@ -165,6 +163,7 @@ LambdaExpr* ExprFactory::mk_lambda_expr(
         l.body = body;
         l.params = std::move(params);
         l.returnType = m_typeFactory->mk_deduced(nullptr); // TODO
+        return l;
     });
     e->type = m_typeFactory->mk_lambda(std::move(name), e);
     return e;
