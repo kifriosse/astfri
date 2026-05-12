@@ -5,7 +5,7 @@
 #include <astfri/impl/tools/OptPtr.hpp>
 #include <astfri/impl/ASTNode.hpp>
 #include <astfri/impl/StmtKind.hpp>
-#include <astfri/impl/Type.hpp>
+#include <astfri/impl/TypeDef.hpp>
 
 #include <string>
 #include <vector>
@@ -86,9 +86,9 @@ enum class Staticity {
  */
 template<typename SelfType>
 struct VarDefStmt : MakeAStmt<SelfType> {
-    std::string name;
-    Type* type;
-    Expr* initializer;
+    std::string name{};
+    Type *type{nullptr};
+    Expr *initializer{nullptr};
 };
 
 /**
@@ -102,7 +102,6 @@ struct LocalVarDefStmt : VarDefStmt<LocalVarDefStmt> {
  * @brief TODO
  */
 struct ParamVarDefStmt : VarDefStmt<ParamVarDefStmt> {
-    ParamVarDefStmt(std::string name, Type* type, Expr* initializer);
 };
 
 
@@ -110,8 +109,8 @@ struct ParamVarDefStmt : VarDefStmt<ParamVarDefStmt> {
  * @brief TODO
  */
 struct MemberVarDefStmt : VarDefStmt<MemberVarDefStmt> {
-    AccessModifier access;
-    Staticity staticity;
+    AccessModifier access{AccessModifier::UNINITIALIZED};
+    Staticity staticity{Staticity::UNINITIALIZED};
 };
 
 
@@ -157,7 +156,7 @@ struct FunctionDefStmt : MakeAStmt<FunctionDefStmt> {
  * @brief TODO
  */
 struct MethodDefStmt : MakeAStmt<MethodDefStmt> {
-    UserTypeDefStmt* owner{nullptr}; // TODO ClassType or Interface, variant?
+    Stmt* owner{nullptr}; // TODO ClassType or Interface, variant?
     FunctionDefStmt* func{nullptr};
     AccessModifier access{AccessModifier::Public};
     Virtuality virtuality{Virtuality::NotVirtual};
@@ -187,8 +186,8 @@ struct SelfInitializerStmt : MakeAStmt<SelfInitializerStmt> {
  * @brief TODO
  */
 struct MemberInitializerStmt : MakeAStmt<MemberInitializerStmt> {
-    MemberVarDefStmt* member{nullptr};
-    Expr* arg{nullptr};
+    MemberVarDefStmt *member{nullptr};
+    std::vector<Expr*> args{nullptr};
 };
 
 
@@ -239,7 +238,7 @@ struct UserTypeDefStmt : MakeAStmt<SelfType> {
  * @brief TODO
  */
 struct InterfaceDefStmt : UserTypeDefStmt<InterfaceDefStmt> {
-    InterfaceType* type{nullptr};
+    InterfaceType *type{nullptr};
     std::vector<MethodDefStmt*> methods{};
     std::vector<GenericParam*> tparams{};
     std::vector<InterfaceDefStmt*> bases{};
@@ -277,159 +276,133 @@ struct ReturnStmt : MakeAStmt<ReturnStmt> {
 /**
  * @brief TODO
  */
-struct ExprStmt : Stmt, details::MkVisitable<ExprStmt> {
-    Expr* expr;
-
-    explicit ExprStmt(Expr* expr);
+struct ExprStmt : MakeAStmt<ExprStmt> {
+    Expr* expr {nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct IfStmt : Stmt, details::MkVisitable<IfStmt> {
-    Expr *cond;
-    Stmt *iftrue;
-    Stmt *iffalse;
+struct IfStmt : MakeAStmt<IfStmt> {
+    Expr *cond{nullptr};
+    Stmt *iftrue{nullptr};
+    Stmt *iffalse{nullptr};
     // ReqPtr<Expr> cond;
     // ReqPtr<Stmt> iftrue;
     // OptPtr<Stmt> iffalse;
-
-    IfStmt(Expr* cond, Stmt* iftrue, Stmt* iffalse);
-};
-
-/**
- * @brief Base for case options in switch statement
- */
-struct CaseBaseStmt :
-    Stmt // variant alebo common base? rovnako pri method ownerovi
-{
-    Stmt* body;
-
-    explicit CaseBaseStmt(Stmt* body);
 };
 
 /**
  * @brief Case option in switch statement
  */
-struct CaseStmt : CaseBaseStmt, details::MkVisitable<CaseStmt> {
-    std::vector<Expr*> exprs;
-
-    CaseStmt(std::vector<Expr*> exprs, Stmt* body);
+struct CaseStmt : MakeAStmt<CaseStmt> {
+    Stmt *body{nullptr};
+    std::vector<Expr*> exprs{};
 };
 
 /**
  * @brief Default option in switch statement
  */
-struct DefaultCaseStmt : CaseBaseStmt, details::MkVisitable<DefaultCaseStmt> {
-    explicit DefaultCaseStmt(Stmt* body);
+struct DefaultCaseStmt : MakeAStmt<DefaultCaseStmt> {
+    Stmt *body{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct SwitchStmt : Stmt, details::MkVisitable<SwitchStmt> {
-    Expr* expr_;
-    std::vector<CaseBaseStmt*> cases;
-
-    SwitchStmt(Expr* expr, std::vector<CaseBaseStmt*> cases);
+struct SwitchStmt : MakeAStmt<SwitchStmt> {
+    Expr *expr{nullptr};
+    DefaultCaseStmt *defaultCase{nullptr};
+    std::vector<CaseStmt*> cases{};
 };
 
 /**
  * @brief TODO
  */
-struct LoopStmt : Stmt {
-    Expr* cond;
-    Stmt* body;
-
-    LoopStmt(Expr* cond, Stmt* body);
+struct WhileStmt : MakeAStmt<WhileStmt> {
+    Expr *cond{nullptr};
+    Stmt *body{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct WhileStmt : LoopStmt, details::MkVisitable<WhileStmt> {
-    WhileStmt(Expr* cond, Stmt* body);
+struct DoWhileStmt : MakeAStmt<DoWhileStmt> {
+    Expr *cond{nullptr};
+    Stmt *body{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct DoWhileStmt : LoopStmt, details::MkVisitable<DoWhileStmt> {
-    DoWhileStmt(Expr* cond, Stmt* body);
+struct ForStmt : MakeAStmt<ForStmt> {
+    Stmt *init{nullptr};
+    Expr *cond{nullptr};
+    Stmt *step{nullptr};
+    Stmt *body{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct ForStmt : LoopStmt, details::MkVisitable<ForStmt> {
-    Stmt* init;
-    Stmt* step;
-
-    ForStmt(Stmt* init, Expr* cond, Stmt* step, Stmt* body);
+struct ForEachStmt : MakeAStmt<ForEachStmt> {
+    LocalVarDefStmt *var{nullptr};
+    Expr *container{nullptr};
+    Stmt *body{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct ForEachStmt : Stmt, details::MkVisitable<ForEachStmt> {
-    LocalVarDefStmt* var;
-    Expr* container;
-    Stmt* body;
-    ForEachStmt(LocalVarDefStmt* var, Expr* container, Stmt* body);
+struct ThrowStmt : MakeAStmt<ThrowStmt> {
+    Expr *val{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct ThrowStmt : Stmt, details::MkVisitable<ThrowStmt> {
-    Expr* val;
-
-    explicit ThrowStmt(Expr* val);
+struct CatchStmt : MakeAStmt<CatchStmt> {
+    LocalVarDefStmt *param{nullptr};
+    Stmt *body{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct CatchStmt : Stmt, details::MkVisitable<CatchStmt> {
-    LocalVarDefStmt* param;
-    Stmt* body;
-    CatchStmt(LocalVarDefStmt* param, Stmt* body);
-};
-
-/**
- * @brief TODO
- */
-struct TryStmt : Stmt, details::MkVisitable<TryStmt> {
-    Stmt* body;
-    Stmt* finally;
-    std::vector<CatchStmt*> catches;
-    TryStmt(Stmt* body, Stmt* finally, std::vector<CatchStmt*> catches);
+struct TryStmt : MakeAStmt<TryStmt> {
+    Stmt *body{nullptr};
+    Stmt *finally{nullptr};
+    std::vector<CatchStmt*> catches{};
 };
 
 /**
  * @brief Break statement used to terminate a loop
  */
-struct BreakStmt : Stmt, details::MkVisitable<BreakStmt> { };
+struct BreakStmt : MakeAStmt<BreakStmt> {
+};
 
 /**
  * @brief Continue statement used to skip rest of a loop
  */
-struct ContinueStmt : Stmt, details::MkVisitable<ContinueStmt> { };
-
-/**
- * @brief TODO
- */
-struct UnknownStmt : Stmt, details::MkVisitable<UnknownStmt> { };
-
-/**
- * @brief TODO
- */
-struct TranslationUnit : Stmt, details::MkVisitable<TranslationUnit> {
-    std::vector<ClassDefStmt*> classes;
-    std::vector<InterfaceDefStmt*> interfaces;
-    std::vector<FunctionDefStmt*> functions;
-    std::vector<GlobalVarDefStmt*> globals;
+struct ContinueStmt : MakeAStmt<ContinueStmt> {
 };
+
+/**
+ * @brief TODO
+ */
+struct UnknownStmt : MakeAStmt<UnknownStmt> {
+};
+
+/**
+ * @brief TODO
+ */
+struct TranslationUnit : MakeAStmt<TranslationUnit> {
+    std::vector<ClassDefStmt*> classes{};
+    std::vector<InterfaceDefStmt*> interfaces{};
+    std::vector<FunctionDefStmt*> functions{};
+    std::vector<GlobalVarDefStmt*> globals{};
+};
+
 
 } // namespace astfri
 

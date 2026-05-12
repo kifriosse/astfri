@@ -1,7 +1,7 @@
 #ifndef ASTFRI_STMT_FACTORY_HPP
 #define ASTFRI_STMT_FACTORY_HPP
 
-#include <astfri/impl/Stmt.hpp>
+#include <astfri/impl/StmtDef.hpp>
 #include <astfri/impl/TypeFactory.hpp>
 
 #include <functional>
@@ -9,7 +9,9 @@
 #include <memory>
 #include <vector>
 
+
 namespace astfri {
+
 
 class TypeFactory;
 
@@ -39,10 +41,13 @@ public:
 
     GlobalVarDefStmt* mk_global_var_def(std::string name, Type* type, Expr* initializer);
 
-    DefStmt* mk_def();
-    DefStmt* mk_def(std::vector<VarDefStmt*> defs);
+    // TODO rename
+    MultiLocalVarDefStmt* mk_def();
+
+    MultiLocalVarDefStmt* mk_def(std::vector<LocalVarDefStmt*> defs);
 
     FunctionDefStmt* mk_function_def();
+
     FunctionDefStmt* mk_function_def(
         std::string name,
         std::vector<ParamVarDefStmt*> params,
@@ -53,7 +58,7 @@ public:
     MethodDefStmt* mk_method_def();
 
     MethodDefStmt* mk_method_def(
-        UserTypeDefStmt* owner,
+        Stmt* owner,
         FunctionDefStmt* func,
         AccessModifier access,
         Virtuality virtuality,
@@ -61,6 +66,7 @@ public:
     );
 
     ConstructorDefStmt* mk_constructor_def();
+
     ConstructorDefStmt* mk_constructor_def(
         ClassDefStmt* owner,
         std::vector<ParamVarDefStmt*> params,
@@ -69,45 +75,21 @@ public:
         AccessModifier access
     );
 
-    [[deprecated]] BaseInitializerStmt* mak_base_initializer(
-        std::string base,
-        std::vector<Expr*> args
-    );
-
-    /**
-     * TODO ako so scopom base? nemal by tu byť pointer na base class type alebo def?
-     */
-    [[deprecated]] BaseInitializerStmt* mk_base_initializer(
-        std::string base,
-        std::vector<Expr*> args
-    );
-    BaseInitializerStmt* mk_base_initializer(ClassType* type, std::vector<Expr*> args);
+    BaseInitializerStmt* mk_base_initializer(ClassType *type, std::vector<Expr*> args);
 
     SelfInitializerStmt* mk_self_initializer(std::vector<Expr*> args);
 
-    MemberInitializerStmt* mk_member_initializer(MemberVarDefStmt* member, Expr* arg);
+    MemberInitializerStmt* mk_member_initializer(MemberVarDefStmt *member, std::vector<Expr*> args);
 
     DestructorDefStmt* mk_destructor_def(ClassDefStmt* owner, CompoundStmt* body);
 
     GenericParam* mk_generic_param(std::string constraint, std::string name);
 
-    [[deprecated]] InterfaceDefStmt* mk_interface_def();
-
-    [[deprecated]] InterfaceDefStmt* mk_interface_def(std::string name);
-
-    // TODO getter for interface, function and global var
-
-    /**
-     * @brief TODO
-     */
-    InterfaceDefStmt* mk_interface_def(std::string name, Scope scope);
+    InterfaceDefStmt* mk_interface_def(const std::string &name, const Scope &scope);
 
     ClassDefStmt* get_class_def(std::string_view name, const Scope& scope);
 
-    /**
-     * @brief TODO
-     */
-    ClassDefStmt* mk_class_def(std::string name, Scope scope);
+    ClassDefStmt* mk_class_def(const std::string &name, const Scope &scope);
 
     CompoundStmt* mk_compound(std::vector<Stmt*> stmts);
 
@@ -122,7 +104,9 @@ public:
 
     DefaultCaseStmt* mk_default_case(Stmt* body);
 
-    SwitchStmt* mk_switch(Expr* expr, std::vector<CaseBaseStmt*> cases);
+    SwitchStmt* mk_switch(Expr* expr, std::vector<CaseStmt*> cases);
+
+    SwitchStmt* mk_switch(Expr* expr, std::vector<CaseStmt*> cases, DefaultCaseStmt *defaultStmt);
 
     WhileStmt* mk_while(Expr* cond, Stmt* body);
 
@@ -145,13 +129,6 @@ public:
     UnknownStmt* mk_uknown();
 
     TranslationUnit* mk_translation_unit();
-
-    [[deprecated]] TranslationUnit* mk_translation_unit(
-        std::vector<ClassDefStmt*> classes,
-        std::vector<InterfaceDefStmt*> interfaces,
-        std::vector<FunctionDefStmt*> functions,
-        std::vector<GlobalVarDefStmt*> globals
-    );
 
 public:
     /**
@@ -181,7 +158,7 @@ private:
     StmtFactory();
 
 private:
-    TypeFactory* m_typeFactory;
+    TypeFactory *m_typeFactory;
     std::vector<std::unique_ptr<Stmt>> m_otherStmts;
     std::map<std::string, InterfaceDefStmt, std::less<>> m_interfaceDefMap;
     std::map<std::string, ClassDefStmt, std::less<>> m_classDefMap;
@@ -189,6 +166,7 @@ private:
     BreakStmt m_breakStmt;
     UnknownStmt m_unknownStmt;
 };
+
 
 } // namespace astfri
 

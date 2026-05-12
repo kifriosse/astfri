@@ -9,6 +9,7 @@
 
 namespace astfri::details {
 
+
 /**
  * @brief Map-like container that supports @c find, @c begin, @c end, and @c try_emplace.
  * Semantics of the mentioned operations must match that of @c std::map operations.
@@ -35,12 +36,12 @@ concept vector_like = requires(Vector v, typename Vector::value_type x) {
  * @return Pointer to a value that was already present or pointer to a new value.
  */
 template<typename Val, map_like Map, typename Key, typename Creator>
-Val *get_or_emplace(Map& map, Key&& key, Creator creator) {
+Val *get_or_emplace(Map &map, Key &&key, Creator create) {
     const auto it = map.find(key);
     if (it != map.end()) {
         return &it->second;
     }
-    return &map.try_emplace(std::move(key), creator()).first->second;
+    return &map.try_emplace(std::move(key), create()).first->second;
 }
 
 /**
@@ -50,13 +51,14 @@ Val *get_or_emplace(Map& map, Key&& key, Creator creator) {
  * @return Pointer to the new @c T instance.
  */
 template<typename T, vector_like Vector, typename Initializer>
-T* create_store_get(Vector& store, Initializer initialize) {
+T *create_store_get(Vector &store, Initializer initialize) {
     auto e = std::make_unique<T>();
     T *raw = e.get();
     initialize(*raw);
     store.push_back(std::move(e));
     return raw;
 }
+
 
 } // namespace astfri::details
 

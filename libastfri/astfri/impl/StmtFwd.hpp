@@ -28,7 +28,6 @@ struct IfStmt;
 struct CaseStmt;
 struct DefaultCaseStmt;
 struct SwitchStmt;
-struct LoopStmt;
 struct WhileStmt;
 struct DoWhileStmt;
 struct ForStmt;

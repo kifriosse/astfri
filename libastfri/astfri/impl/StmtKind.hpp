@@ -135,10 +135,6 @@ template<> struct KindOf<SwitchStmt> {
     static constexpr StmtKind value{StmtKind::Switch};
 };
 
-template<> struct KindOf<LoopStmt> {
-    static constexpr StmtKind value{StmtKind::Loop};
-};
-
 template<> struct KindOf<WhileStmt> {
     static constexpr StmtKind value{StmtKind::While};
 };
