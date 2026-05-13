@@ -14,7 +14,7 @@ namespace astfri {
 /**
  * @brief Base for all expressions.
  */
-struct Expr : ASTNode<ExprKind> {
+struct Expr : detail::ASTNode<ExprKind> {
 };
 
 /**
@@ -25,7 +25,7 @@ struct Expr : ASTNode<ExprKind> {
  * @tparam SelfType child class type.
  */
 template<typename SelfType>
-using MakeAnExpr = MakeA<Expr, SelfType>;
+using MakeAnExpr = detail::MakeA<Expr, SelfType>;
 
 /**
  * @brief Base class for expressions representing literal values of type T.

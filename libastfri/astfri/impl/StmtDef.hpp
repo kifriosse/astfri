@@ -17,7 +17,7 @@ namespace astfri {
 /**
  * @brief Base for all statements.
  */
-struct Stmt : virtual ASTNode<StmtKind> {
+struct Stmt : detail::ASTNode<StmtKind> {
 };
 
 
@@ -29,7 +29,7 @@ struct Stmt : virtual ASTNode<StmtKind> {
  * @tparam SelfType child class type.
  */
 template<typename SelfType>
-using MakeAStmt = MakeA<Stmt, SelfType>;
+using MakeAStmt = detail::MakeA<Stmt, SelfType>;
 
 
 /**
@@ -84,40 +84,44 @@ enum class Staticity {
 /**
  * @brief TODO
  */
-template<typename SelfType>
-struct VarDefStmt : MakeAStmt<SelfType> {
+struct VarDefStmt : Stmt {
     std::string name{};
     Type *type{nullptr};
     Expr *initializer{nullptr};
 };
 
+
 /**
  * @brief TODO
  */
-struct LocalVarDefStmt : VarDefStmt<LocalVarDefStmt> {
+struct LocalVarDefStmt : VarDefStmt {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(LocalVarDefStmt)
 };
 
 
 /**
  * @brief TODO
  */
-struct ParamVarDefStmt : VarDefStmt<ParamVarDefStmt> {
+struct ParamVarDefStmt : VarDefStmt {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ParamVarDefStmt)
 };
 
 
 /**
  * @brief TODO
  */
-struct MemberVarDefStmt : VarDefStmt<MemberVarDefStmt> {
+struct MemberVarDefStmt : VarDefStmt {
     AccessModifier access{AccessModifier::UNINITIALIZED};
     Staticity staticity{Staticity::UNINITIALIZED};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(MemberVarDefStmt)
 };
 
 
 /**
  * @brief TODO
  */
-struct GlobalVarDefStmt : VarDefStmt<GlobalVarDefStmt> {
+struct GlobalVarDefStmt : VarDefStmt {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(GlobalVarDefStmt)
 };
 
 
@@ -125,7 +129,7 @@ struct GlobalVarDefStmt : VarDefStmt<GlobalVarDefStmt> {
  * @brief Definition statement that may contain multiple variable definitions
  * Covers the following situations:
  * @code
-   int x = 10, y = 20;
+ * int x = 10, y = 20;
  * @endcode
  * In this case, you would use:
  * @code
@@ -229,25 +233,25 @@ struct GenericParam : MakeAStmt<GenericParam> {
  * @brief Common base for Class and Interface
  * In the future, it could also be used for union or strong type alias
  */
-template<typename SelfType>
-struct UserTypeDefStmt : MakeAStmt<SelfType> {
+struct UserTypeDefStmt : Stmt {
     [[deprecated]] std::string name{};
 };
 
 /**
  * @brief TODO
  */
-struct InterfaceDefStmt : UserTypeDefStmt<InterfaceDefStmt> {
+struct InterfaceDefStmt : UserTypeDefStmt {
     InterfaceType *type{nullptr};
     std::vector<MethodDefStmt*> methods{};
     std::vector<GenericParam*> tparams{};
     std::vector<InterfaceDefStmt*> bases{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(InterfaceDefStmt)
 };
 
 /**
  * @brief TODO
  */
-struct ClassDefStmt : UserTypeDefStmt<ClassDefStmt> {
+struct ClassDefStmt : UserTypeDefStmt {
     ClassType* type{nullptr};
     std::vector<MemberVarDefStmt*> vars{};
     std::vector<ConstructorDefStmt*> constructors{};
@@ -257,6 +261,7 @@ struct ClassDefStmt : UserTypeDefStmt<ClassDefStmt> {
     std::vector<InterfaceDefStmt*> interfaces{}; // TODO IntefaceType
     std::vector<ClassDefStmt*> bases{};          // TODO ClassType
     // TODO incomplete bases
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ClassDefStmt)
 };
 
 /**

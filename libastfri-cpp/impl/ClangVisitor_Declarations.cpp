@@ -49,7 +49,8 @@ bool ClangVisitor::TraverseCXXConstructorDecl(clang::CXXConstructorDecl* Ctor) {
                     args.push_back(this->astfri_location.expr_);
                 }
                 auto base_init = this->stmt_factory_->mk_base_initializer(
-                    init->getBaseClass()->getAsCXXRecordDecl()->getNameAsString(),
+                    type_factory_->mk_class(init->getBaseClass()->getAsCXXRecordDecl()->getNameAsString(), {}),
+                    // init->getBaseClass()->getAsCXXRecordDecl()->getNameAsString(),
                     args
                 );
                 new_ctor->baseInit.push_back(base_init);
@@ -278,16 +279,17 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD) {
     // akcia na tomto vrchole
     Type* type          = this->get_astfri_type(VD->getType());
 
-    VarDefStmt* new_var = nullptr;
+    LocalVarDefStmt *local_var = nullptr;
+    GlobalVarDefStmt *global_var = nullptr;
     if (this->astfri_location.stmt_) {
         // premenna v compounde
-        new_var = this->stmt_factory_->mk_local_var_def(VD->getNameAsString(), type, nullptr);
-        ((DefStmt*)this->astfri_location.stmt_)->defs.push_back(new_var);
+        local_var = this->stmt_factory_->mk_local_var_def(VD->getNameAsString(), type, nullptr);
+        ((MultiLocalVarDefStmt*)this->astfri_location.stmt_)->defs.push_back(local_var);
     }
     else {
         // globalna premenna
-        new_var = this->stmt_factory_->mk_global_var_def(VD->getNameAsString(), type, nullptr);
-        this->tu_->globals.push_back((GlobalVarDefStmt*)new_var);
+        global_var = this->stmt_factory_->mk_global_var_def(VD->getNameAsString(), type, nullptr);
+        this->tu_->globals.push_back(global_var);
     }
 
     // zapamatanie AST location
@@ -295,12 +297,16 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD) {
     ClangASTLocation clang_temp   = this->clang_location;
 
     // prepisanie AST location
-    this->astfri_location.stmt_ = new_var;
+    this->astfri_location.stmt_ = local_var ? (Stmt*)local_var : (Stmt*)global_var;
     this->clang_location.decl_  = VD;
 
     if (auto init = VD->getInit()) {
         TraverseStmt(init);
-        new_var->initializer = this->astfri_location.expr_;
+        if (local_var) {
+            local_var->initializer = this->astfri_location.expr_;
+        } else {
+            global_var->initializer = this->astfri_location.expr_;
+        }
     }
 
     // vratenie AST location

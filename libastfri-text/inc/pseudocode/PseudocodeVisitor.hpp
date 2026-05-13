@@ -102,7 +102,7 @@ public:
     void visit(const MemberVarDefStmt& stmt) override;
     void visit(const GlobalVarDefStmt& stmt) override;
     void visit(const FunctionDefStmt& stmt) override;
-    void visit(const DefStmt& stmt) override;
+    void visit(const MultiLocalVarDefStmt& stmt) override;
     void visit(const MethodDefStmt& stmt) override;
     void visit(const BaseInitializerStmt& stmt) override;
     void visit(const ConstructorDefStmt& stmt) override;
@@ -114,7 +114,8 @@ public:
     void visit(const BreakStmt& stmt) override;
 
 private:
-    void process_var_def(const VarDefStmt& var, int vartype);
+    template<typename VarKind>
+    void process_var_def(const VarDefStmt<VarKind>& var, int vartype);
     void process_return_type(const Type* const& type);
     void process_generic_params_decl(const std::vector<GenericParam*>& vgeneric);
     void process_member_var_decl(const std::vector<MemberVarDefStmt*>& vmembervars);

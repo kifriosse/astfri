@@ -35,9 +35,9 @@ if (ASTFRI_BUILD_C_SHARP_INPUT)
     add_subdirectory(libastfri-cs)
 endif()
 
-if (ASTFRI_BUILD_SERIALIZED_INPUT)
-    add_subdirectory(libastfri-serialize)
-endif()
+# if (ASTFRI_BUILD_SERIALIZED_INPUT)
+#     add_subdirectory(libastfri-serialize)
+# endif()
 
 if (ASTFRI_BUILD_TEXT_OUTPUT)
     add_subdirectory(libastfri-text)

@@ -14,7 +14,7 @@ namespace astfri {
 /**
  * @brief TODO
  */
-struct Type : ASTNode<TypeKind> {
+struct Type : detail::ASTNode<TypeKind> {
 };
 
 
@@ -26,7 +26,7 @@ struct Type : ASTNode<TypeKind> {
  * @tparam SelfType child class type.
  */
 template<typename SelfType>
-using MakeAType = MakeA<Type, SelfType>;
+using MakeAType = detail::MakeA<Type, SelfType>;
 
 
 /**

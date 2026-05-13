@@ -578,7 +578,7 @@ void PseudocodeVisitor::visit(const DefaultCaseStmt& stmt) {
 
 void PseudocodeVisitor::visit(const SwitchStmt& stmt) {
     builder_->write_switch_word();
-    process_condition(stmt.expr_);
+    process_condition(stmt.expr);
     builder_->write_opening_curl_bracket();
     builder_->increase_indentation();
     for (size_t i = 0; i < stmt.cases.size(); ++i) {
@@ -681,7 +681,7 @@ void PseudocodeVisitor::visit(const FunctionDefStmt& stmt) {
     builder_->write_right_bracket("}");
 }
 
-void PseudocodeVisitor::visit(const DefStmt& stmt) {
+void PseudocodeVisitor::visit(const MultiLocalVarDefStmt& stmt) {
     if (stmt.defs.empty()) {
         builder_->write_invalid_stmt();
         return;
@@ -939,7 +939,8 @@ void PseudocodeVisitor::visit(const BreakStmt& /*stmt*/) {
 // -----
 //
 
-void PseudocodeVisitor::process_var_def(const VarDefStmt& var, int vartype) {
+template<typename VarKind>
+void PseudocodeVisitor::process_var_def(const VarDefStmt<VarKind>& var, int vartype) {
     if (configurator_->sh_other_expr() && vartype != PARAM_VAR) {
         builder_->write_define_word();
         builder_->append_space();
@@ -969,6 +970,13 @@ void PseudocodeVisitor::process_var_def(const VarDefStmt& var, int vartype) {
         }
     }
 }
+
+// MM: Temporal or permanent hack. Explicitly instantiate the template for all known variable kinds.
+// MM: This enables the definition to stay in the .cpp file.
+template void PseudocodeVisitor::process_var_def<astfri::LocalVarDefStmt>(const VarDefStmt<astfri::LocalVarDefStmt>&, int);
+template void PseudocodeVisitor::process_var_def<astfri::ParamVarDefStmt>(const VarDefStmt<astfri::ParamVarDefStmt>&, int);
+template void PseudocodeVisitor::process_var_def<astfri::GlobalVarDefStmt>(const VarDefStmt<astfri::GlobalVarDefStmt>&, int);
+template void PseudocodeVisitor::process_var_def<astfri::MemberVarDefStmt>(const VarDefStmt<astfri::MemberVarDefStmt>&, int);
 
 void PseudocodeVisitor::process_return_type(const Type* const& type) {
     builder_->append_space();

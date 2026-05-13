@@ -79,7 +79,7 @@ public:
     void visit(const MemberVarDefStmt& stmt) override    = 0;
     void visit(const GlobalVarDefStmt& stmt) override    = 0;
     void visit(const FunctionDefStmt& stmt) override     = 0;
-    void visit(const DefStmt& stmt) override             = 0;
+    void visit(const MultiLocalVarDefStmt& stmt) override= 0;
     void visit(const MethodDefStmt& stmt) override       = 0;
     void visit(const BaseInitializerStmt& stmt) override = 0;
     void visit(const ConstructorDefStmt& stmt) override  = 0;

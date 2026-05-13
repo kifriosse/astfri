@@ -298,7 +298,8 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
     TSNode switchBodyNode;
 
     astfri::Expr* condition = nullptr;
-    std::vector<astfri::CaseBaseStmt*> cases;
+    std::vector<astfri::CaseStmt*> cases;
+    astfri::DefaultCaseStmt *defaultCase = nullptr;
 
     if (! ts_node_is_null(ts_node_named_child(tsNode, 0))) {
         conditionNode = ts_node_named_child(tsNode, 0);
@@ -338,14 +339,14 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
             }
 
             if (isDefaultCase) {
-                cases.push_back(stmtFactory.mk_default_case(stmtFactory.mk_compound(stmts)));
+                defaultCase = stmtFactory.mk_default_case(stmtFactory.mk_compound(stmts));
             }
             else {
                 cases.push_back(stmtFactory.mk_case(caseExprs, stmtFactory.mk_compound(stmts)));
             }
         }
     }
-    return stmtFactory.mk_switch(condition, cases);
+    return stmtFactory.mk_switch(condition, cases, defaultCase);
 }
 
 astfri::ForStmt* StatementTransformer::transform_for_stmt_node(
@@ -531,7 +532,7 @@ FunctionType StatementTransformer::transform_function(
                 TSNode bodyChild   = ts_node_named_child(methodChild, j);
                 astfri::Stmt* stmt = this->get_stmt(bodyChild, sourceCode);
 
-                if (auto baseInitStmt = dynamic_cast<astfri::BaseInitializerStmt*>(stmt)) {
+                if (auto *baseInitStmt = astfri::as_a<astfri::BaseInitializerStmt>(stmt)) {
                     baseInit.push_back(baseInitStmt);
                 }
                 else {
@@ -690,7 +691,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
                 if (this->methodsByName.contains(methodName)) {
                     astfri::MethodDefStmt* method = this->methodsByName.at(methodName).front();
                     for (auto p : method->func->params) {
-                        if (astfri::ClassType* ct = dynamic_cast<astfri::ClassType*>(p->type)) {
+                        if (auto *ct = astfri::as_a<astfri::ClassType>(p->type)) {
                             for (auto i : this->functionalInterfaces) {
                                 if (i->type->name == ct->name) {
                                     funcInterface = i;
