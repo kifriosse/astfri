@@ -18,12 +18,6 @@ struct UserTypeDefStmt;
 } // namespace astfri
 
 namespace astfri::csharp {
-/**
- * @brief Context for tracking current type during semantic analysis
- */
-struct TypeContext {
-    std::vector<TypeBinding*> typeStack;
-};
 
 /**
  * @brief Context for tracking scopes for resolving variable references and
@@ -44,7 +38,7 @@ struct ScopeContext {
 class SemanticContext {
 private:
     ScopeContext scopeContext_{};
-    TypeContext typeContext_{};
+    std::optional<TypeBinding> typeContext_{};
     std::vector<Type*> retTypeContext_{};
     SymbolTable& symbTable_;
 
@@ -53,7 +47,7 @@ public:
 
     auto get_type_metadata() const;
 
-    void enter_type(TypeBinding* tb);
+    void enter_type(TypeBinding& tb);
     void enter_scope();
 
     void reg_return(Type* returnType);
@@ -65,7 +59,7 @@ public:
     void leave_scope();
     void unregister_return_type();
 
-    TypeBinding* current_type() const;
+    std::optional<TypeBinding> current_type() const;
     Type* current_return_type() const;
     VarDefStmt* find_var(std::string_view name, access::Qualifier qualifier) const;
     const FuncMetadata* find_func(std::string_view funcName) const;

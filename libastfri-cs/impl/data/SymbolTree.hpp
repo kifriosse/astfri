@@ -37,7 +37,13 @@ struct TypeBinding {
  * qualified name. Used whne qualified name can't be resolved
  */
 struct ExternalMarker {
-    std::string qualifiedName;
+    std::string qualifName;
+
+    /**
+     * @brief returns stored qualified name and clears it from the marker
+     * @return stored qualified name
+     */
+    std::string takeName();
 };
 
 /**
@@ -137,7 +143,7 @@ public:
      * @brief Returns content of the node
      * @return content of the node
      */
-    [[nodiscard]] const NodeData& data() const;
+    [[nodiscard]] ScopeNode::NodeData& data();
 
     ScopeNode* parent() const;
     ScopeNode* find_child(std::string_view childName) const;
@@ -195,7 +201,7 @@ public:
      */
     ScopeNode* add_type(const Scope& scope, const TypeBinding& tb);
 
-    ScopeNode* add_primitive(const std::string& name, CSPrimitiveType primitive);
+    ScopeNode* add_primitive(std::string name, CSPrimitiveType primitive);
 
     /**
      * @brief Finds a node in the symbol tree by its scope.

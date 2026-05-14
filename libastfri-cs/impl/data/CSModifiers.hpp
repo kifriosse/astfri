@@ -4,12 +4,20 @@
 #include <libastfri-cs/impl/CSFwd.hpp>
 #include <astfri/impl/StmtDef.hpp>
 
+#include <libastfri-cs/impl/CSFwd.hpp>
+
 #include <tree_sitter/api.h>
 
 #include <optional>
 #include <string_view>
 
 namespace astfri::csharp {
+
+namespace maps {
+
+class MapManager;
+
+} // namespace maps
 
 /**
  * @brief Macro used for creating bitmask for enums
@@ -53,7 +61,7 @@ enum class CSModifier : MaskType {
 class CSModifiers {
 private:
     MaskType modifier_mask{0};
-
+    static maps::MapManager& mapManager_;
 public:
     /**
      * @brief Factory method for parsing/extrating modifiers of method
@@ -116,6 +124,12 @@ public:
      * isn't reference type, original type is returned
      */
     [[nodiscard]] Type* get_indirection_type(Type* type) const;
+
+    /**
+     * @brief Get information if modifiers objekt contains static modifier or not
+     * @return \c Staticity::Static if modifiers contain static else \c Staticity::NonStatic
+     */
+    [[nodiscard]] Staticity is_static() const;
 };
 
 } // namespace astfri::csharp
