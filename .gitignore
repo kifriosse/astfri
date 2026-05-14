@@ -2,4 +2,4 @@
 build/
 external/bin/
 .clangd
-.vscode/launch.json
+.vscode/settings.json

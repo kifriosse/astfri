@@ -11,7 +11,7 @@
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
 // ASTFRI CPP
-#include <libastfri-cpp/inc/ClangManagement.hpp>
+#include <astfri-cpp/AstfriCpp.hpp>
 
 // ASTFRI Csharp
 #include <libastfri-cs/inc/ASTBuilder.hpp>
@@ -205,8 +205,7 @@ int main(int argc, const char** argv)
     {
     case InputType::Cpp:
     {
-        astfri::cpp::cpp_in input;
-        tu = input.load_file(input_file);
+        tu = astfri::cpp_in::load_file(input_file, astfri::cpp::Config());
         // if (input.fill_translation_unit(tu, input_file) != 0)
         // {
         //     if (mode_verbose)
