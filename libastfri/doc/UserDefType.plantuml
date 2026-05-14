@@ -1,0 +1,67 @@
+@startuml UserDefType
+
+
+struct Stmt
+
+struct UserTypeDefStmt {
+  + name: string <color:#FF0000><<deprecated>></color>
+}
+
+struct InterfaceDefStmt {
+    + type: InterfaceType*
+    + methods: std::vector<MethodDefStmt*>
+    + tparams: std::vector<GenericParam*>
+    + bases: std::vector<InterfaceDefStmt*>
+}
+
+struct ClassDefStmt {
+    + type: ClassType*
+    + vars: std::vector<MemberVarDefStmt*>
+    + constructors: std::vector<ConstructorDefStmt*>
+    + destructors: std::vector<DestructorDefStmt*>
+    + methods: std::vector<MethodDefStmt*>
+    + tparams: std::vector<GenericParam*>
+    + interfaces: std::vector<InterfaceDefStmt*>
+    + bases: std::vector<ClassDefStmt*>
+}
+
+
+struct Type
+
+struct ScopedType {
+  + scope: Scope
+  + name: string
+}
+
+struct ClassType {
+  + def: ClassDefStmt*
+}
+
+struct InterfaceType {
+  + def: InterfaceDefStmt*
+}
+
+
+Stmt <|-- UserTypeDefStmt
+UserTypeDefStmt <|-- InterfaceDefStmt
+UserTypeDefStmt <|-- ClassDefStmt
+
+Type <|-- ScopedType
+ScopedType <|-- ClassType
+ScopedType <|-- InterfaceType
+
+ScopedType <.r.. UserTypeDefStmt
+
+
+hide Stmt methods
+hide UserTypeDefStmt methods
+hide InterfaceDefStmt methods
+hide ClassDefStmt methods
+
+hide Type methods
+hide ScopedType methods
+hide ClassType methods
+hide InterfaceType methods
+
+
+@enduml

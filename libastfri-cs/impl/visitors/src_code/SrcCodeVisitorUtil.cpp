@@ -49,7 +49,7 @@ Stmt* SrcCodeVisitor::visit_var_def_stmt(const TSNode& node, const util::VarDefT
             case util::VarDefType::Local:
                 // todo handle const
                 varDef = stmtFact_.mk_local_var_def(std::move(name), type, init);
-                semanticContext_.reg_local_var(as_a<LocalVarDefStmt>(varDef));
+                semanticContext_.reg_local_var(as<LocalVarDefStmt>(varDef));
                 break;
             case util::VarDefType::Global:
                 // todo handle const
@@ -103,7 +103,7 @@ FunctionDefStmt* SrcCodeVisitor::make_func_stmt(const TSNode& node, const bool i
     funcDef->retType = retType;
     funcDef->name    = util::extract_text(nName, src_str());
     funcDef->params  = make_param_list(nParam, false);
-    funcDef->body    = as_a<CompoundStmt>(hBody(this, nBody));
+    funcDef->body    = as<CompoundStmt>(hBody(this, nBody));
 
     semanticContext_.leave_scope();
     semanticContext_.unregister_return_type();

@@ -55,11 +55,11 @@ void SemanticContext::leave_scope() {
         return;
 
     for (const auto scopeMemb : scopeContext_.scopeStack.back()) {
-        if (const auto param = as_a<ParamVarDefStmt>(scopeMemb))
+        if (const auto param = as<ParamVarDefStmt>(scopeMemb))
             scopeContext_.params.erase(param->name);
-        else if (const auto var = as_a<LocalVarDefStmt>(scopeMemb))
+        else if (const auto var = as<LocalVarDefStmt>(scopeMemb))
             scopeContext_.localVars.erase(var->name);
-        else if (const auto func = as_a<FunctionDefStmt>(scopeMemb)) {
+        else if (const auto func = as<FunctionDefStmt>(scopeMemb)) {
             scopeContext_.functions.erase(func->name);
         }
     }
@@ -109,7 +109,7 @@ VarDefStmt* SemanticContext::find_var(
             return nullptr;
         },
         [&](const access::Instance&) -> VarDefStmt* {
-            auto currentType = as_a<ClassDefStmt>(current_type()->def);
+            auto currentType = as<ClassDefStmt>(current_type()->def);
 
             while (currentType) {
                 if (const auto metadata = find_memb_var(name, currentType)) {
@@ -143,7 +143,7 @@ const MethodMetadata* SemanticContext::find_method(
     const MethodId& methodId,
     UserTypeDefStmt* owner
 ) const {
-    if (auto* classDef = as_a<ClassDefStmt>(owner)) {
+    if (auto* classDef = as<ClassDefStmt>(owner)) {
         ClassDefStmt* current = classDef;
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
@@ -156,7 +156,7 @@ const MethodMetadata* SemanticContext::find_method(
             current = ! current->bases.empty() ? current->bases.front() : nullptr;
         }
     }
-    else if (auto* intDef = as_a<InterfaceDefStmt>(owner)) {
+    else if (auto* intDef = as<InterfaceDefStmt>(owner)) {
         TypeMetadata* typeMeta = symbTable_.get_type_metadata(intDef);
         if (! typeMeta)
             return nullptr;
@@ -173,7 +173,7 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     UserTypeDefStmt* owner
 ) const {
     // todo add handling of records
-    if (auto* current = as_a<ClassDefStmt>(owner)) {
+    if (auto* current = as<ClassDefStmt>(owner)) {
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
             if (! typeMeta)
@@ -185,7 +185,7 @@ MemberVarMetadata* SemanticContext::find_memb_var(
             current = ! current->bases.empty() ? current->bases.front() : nullptr;
         }
     }
-    else if (is_a<InterfaceDefStmt>(owner)) {
+    else if (is<InterfaceDefStmt>(owner)) {
         TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
         if (! typeMeta)
             return nullptr;

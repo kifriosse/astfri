@@ -582,7 +582,7 @@ astfri::SwitchStmt* AstFriDeSerializer::deserialize_switch_stmt(rapidjson::Value
     std::vector<astfri::CaseStmt*> cases;
 
     for (auto& caze : value["cases"].GetArray()) {
-        cases.push_back(astfri::as_a<astfri::CaseStmt>(this->resolve_stmt(caze)));
+        cases.push_back(astfri::as<astfri::CaseStmt>(this->resolve_stmt(caze)));
     }
 
     return this->statementMaker_.mk_switch(swichEntry, std::move(cases));
@@ -808,7 +808,7 @@ void AstFriDeSerializer::resolve_interface_def_stmts() {
 }
 
 bool AstFriDeSerializer::is_class_def_stmt(astfri::Stmt* stmt) {
-    return astfri::is_a<astfri::ClassDefStmt>(stmt);
+    return astfri::is<astfri::ClassDefStmt>(stmt);
 }
 
 void AstFriDeSerializer::clear_records() {

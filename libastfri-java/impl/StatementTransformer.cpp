@@ -532,7 +532,7 @@ FunctionType StatementTransformer::transform_function(
                 TSNode bodyChild   = ts_node_named_child(methodChild, j);
                 astfri::Stmt* stmt = this->get_stmt(bodyChild, sourceCode);
 
-                if (auto *baseInitStmt = astfri::as_a<astfri::BaseInitializerStmt>(stmt)) {
+                if (auto *baseInitStmt = astfri::as<astfri::BaseInitializerStmt>(stmt)) {
                     baseInit.push_back(baseInitStmt);
                 }
                 else {
@@ -691,7 +691,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
                 if (this->methodsByName.contains(methodName)) {
                     astfri::MethodDefStmt* method = this->methodsByName.at(methodName).front();
                     for (auto p : method->func->params) {
-                        if (auto *ct = astfri::as_a<astfri::ClassType>(p->type)) {
+                        if (auto *ct = astfri::as<astfri::ClassType>(p->type)) {
                             for (auto i : this->functionalInterfaces) {
                                 if (i->type->name == ct->name) {
                                     funcInterface = i;

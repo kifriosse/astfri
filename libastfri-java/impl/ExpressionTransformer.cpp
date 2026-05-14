@@ -307,14 +307,14 @@ astfri::MethodCallExpr* ExpressionTransformer::transform_method_call_node(
             else {
                 astfri::Expr* expr = this->transform_ref_expr_node(child, sourceCode);
 
-                if (auto* memVarExpr = astfri::as_a<astfri::MemberVarRefExpr>(expr)) {
+                if (auto* memVarExpr = astfri::as<astfri::MemberVarRefExpr>(expr)) {
                     memVarExpr->owner = this->exprFactory.mk_this();
                     owner             = memVarExpr;
                 }
-                else if (auto* localVarExpr = astfri::as_a<astfri::LocalVarRefExpr>(expr)) {
+                else if (auto* localVarExpr = astfri::as<astfri::LocalVarRefExpr>(expr)) {
                     owner = localVarExpr;
                 }
-                else if (auto* paramVarExpr = astfri::as_a<astfri::ParamVarRefExpr>(expr)) {
+                else if (auto* paramVarExpr = astfri::as<astfri::ParamVarRefExpr>(expr)) {
                     owner = paramVarExpr;
                 }
             }

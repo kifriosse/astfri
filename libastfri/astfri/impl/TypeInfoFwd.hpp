@@ -21,7 +21,7 @@ struct ASTNode;
  * @return true if @p t is @c T.
  */
 template<typename T, typename KindType>
-bool is_a(detail::ASTNode<KindType> *t);
+bool is(detail::ASTNode<KindType> *t);
 
 /**
  * @brief Returns @p t casted to @c T iff @p t is @c T, otherwise returns nullptr.
@@ -29,7 +29,7 @@ bool is_a(detail::ASTNode<KindType> *t);
  * @return Typecasted @p t if @p t is @c T, otherwise nullptr.
  */
 template<typename T, typename KindType>
-T *as_a(detail::ASTNode<KindType> *t);
+T *as(detail::ASTNode<KindType> *t);
 
 
 } // namespace astfri

@@ -54,10 +54,10 @@ private:
     friend void ::astfri::detail::initialize(ASTNode<K>&);
 
     template<typename T, typename K>
-    friend bool ::astfri::is_a(ASTNode<K>*);
+    friend bool ::astfri::is(ASTNode<K>*);
 
     template<typename T, typename K>
-    friend T *::astfri::as_a(ASTNode<K>*);
+    friend T *::astfri::as(ASTNode<K>*);
 };
 
 

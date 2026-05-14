@@ -169,11 +169,11 @@ Expr* SrcCodeVisitor::visit_identifier(SrcCodeVisitor* self, const TSNode& node)
     if (! defStmt)
         return exprFact_.mk_unknown();
 
-    if (is_a<MemberVarDefStmt>(defStmt)) // todo static handling
+    if (is<MemberVarDefStmt>(defStmt)) // todo static handling
         return exprFact_.mk_member_var_ref(exprFact_.mk_this(), std::move(name));
-    if (is_a<ParamVarDefStmt>(defStmt))
+    if (is<ParamVarDefStmt>(defStmt))
         return exprFact_.mk_param_var_ref(std::move(name));
-    if (is_a<LocalVarDefStmt>(defStmt))
+    if (is<LocalVarDefStmt>(defStmt))
         return exprFact_.mk_local_var_ref(std::move(name));
 
     return exprFact_.mk_unknown();
@@ -185,14 +185,14 @@ Expr* SrcCodeVisitor::visit_memb_access(SrcCodeVisitor* self, const TSNode& node
     const ExprMapper hLeft = MapManager::get_expr_mapper(nLeft);
     std::string name       = util::extract_text(nRight, self->src_str());
     Expr* left             = hLeft(self, nLeft);
-    if (is_a<ThisExpr>(left)) {
+    if (is<ThisExpr>(left)) {
         // UserTypeDefStmt* owner = self->semantic_context_.current_type()->def;
         if ([[maybe_unused]] const auto varDef = // todo for future use
             self->semanticContext_.find_var(name, access::Instance{})) {
             return exprFact_.mk_member_var_ref(left, std::move(name));
         }
     }
-    else if ([[maybe_unused]] auto classRef = as_a<ClassRefExpr>(left)) {
+    else if ([[maybe_unused]] auto classRef = as<ClassRefExpr>(left)) {
         // todo static member access handling
     }
     // todo generic member access
@@ -250,7 +250,7 @@ Expr* SrcCodeVisitor::visit_invoc(SrcCodeVisitor* self, const TSNode& node) {
         Expr* left             = hLeft(self, nLeft);
         std::string name       = util::extract_text(nName, self->src_str());
         // it's a member of an instance - method or delegate type attribute
-        if (is_a<ThisExpr>(left)) {
+        if (is<ThisExpr>(left)) {
             InvocationId id{
                 .name       = name,
                 .paramCount = argList.size(),

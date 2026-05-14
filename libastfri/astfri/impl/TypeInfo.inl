@@ -7,12 +7,12 @@ namespace astfri {
 
 
 template<typename T, typename KindType>
-bool is_a(detail::ASTNode<KindType> *t) {
-    return as_a<T>(t) != nullptr;
+bool is(detail::ASTNode<KindType> *t) {
+    return as<T>(t) != nullptr;
 }
 
 template<typename T, typename KindType>
-T *as_a(detail::ASTNode<KindType> *t) {
+T *as(detail::ASTNode<KindType> *t) {
     return t->kind == KindOf<T>::value ? static_cast<T*>(t) : nullptr;
 }
 

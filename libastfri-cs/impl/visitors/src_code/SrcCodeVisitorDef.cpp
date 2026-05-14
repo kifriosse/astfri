@@ -22,7 +22,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
     const std::string className = util::extract_text(nClassName, src);
     const Scope scope           = util::mk_scope(node, *self->src());
     TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
-    auto* classDef              = as_a<ClassDefStmt>(tb->def);
+    auto* classDef              = as<ClassDefStmt>(tb->def);
 
     self->semanticContext_.enter_type(tb);
 
@@ -35,9 +35,9 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
         Type* type          = th(&self->typeTrs_, current);
         if (first) {
             first = false;
-            if (const auto class_t = as_a<ClassType>(type))
+            if (const auto class_t = as<ClassType>(type))
                 classDef->bases.push_back(class_t->def);
-            if (const auto interface_t = as_a<InterfaceType>(type)) {
+            if (const auto interface_t = as<InterfaceType>(type)) {
                 classDef->interfaces.push_back(interface_t->def);
             }
             else if (util::is_interface_name(name)) {
@@ -47,7 +47,7 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
             return;
         }
 
-        if (const auto interface_t = as_a<InterfaceType>(type)) {
+        if (const auto interface_t = as<InterfaceType>(type)) {
             classDef->interfaces.push_back(interface_t->def);
         }
         else if (util::is_interface_name(name)) {
@@ -90,13 +90,13 @@ Stmt* SrcCodeVisitor::visit_class_def(SrcCodeVisitor* self, const TSNode& node) 
         const StmtMapper hMemb = MapManager::get_stmt_mapper(nMember);
         Stmt* membStmt         = hMemb(self, nMember);
 
-        if (const auto varDef = as_a<MemberVarDefStmt>(membStmt))
+        if (const auto varDef = as<MemberVarDefStmt>(membStmt))
             classDef->vars.push_back(varDef);
-        else if (const auto constr = as_a<ConstructorDefStmt>(membStmt))
+        else if (const auto constr = as<ConstructorDefStmt>(membStmt))
             classDef->constructors.push_back(constr);
-        else if (const auto destr = as_a<DestructorDefStmt>(membStmt))
+        else if (const auto destr = as<DestructorDefStmt>(membStmt))
             classDef->destructors.push_back(destr);
-        else if (const auto method = as_a<MethodDefStmt>(membStmt))
+        else if (const auto method = as<MethodDefStmt>(membStmt))
             classDef->methods.push_back(method);
     };
     util::for_each_child_node(nClassBody, processMembs);
@@ -111,7 +111,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
     const std::string intfName = util::extract_text(nIntfName, src);
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
-    auto* intfDef              = as_a<InterfaceDefStmt>(tb->def);
+    auto* intfDef              = as<InterfaceDefStmt>(tb->def);
     self->semanticContext_.enter_type(tb);
 
     // handling of interface implementations
@@ -119,7 +119,7 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
         const TypeMapper th = MapManager::get_type_mapper(current);
         Type* type          = th(&self->typeTrs_, current);
 
-        if (const auto tInterface = as_a<InterfaceType>(type))
+        if (const auto tInterface = as<InterfaceType>(type))
             intfDef->bases.push_back(tInterface->def);
         else {
             // todo incomplete type
@@ -155,10 +155,10 @@ Stmt* SrcCodeVisitor::visit_interface_def(SrcCodeVisitor* self, const TSNode& no
         const StmtMapper hMemb = MapManager::get_stmt_mapper(nMember);
         Stmt* membStmt         = hMemb(self, nMember);
 
-        if ([[maybe_unused]] const auto varDef = as_a<MemberVarDefStmt>(membStmt)) {
+        if ([[maybe_unused]] const auto varDef = as<MemberVarDefStmt>(membStmt)) {
             // intfDef->vars_.push_back(varDef); // todo static variables
         }
-        else if (const auto method = as_a<MethodDefStmt>(membStmt))
+        else if (const auto method = as<MethodDefStmt>(membStmt))
             intfDef->methods.push_back(method);
     };
     util::for_each_child_node(nIntfBody, processMembs);
@@ -203,7 +203,7 @@ Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node)
         return stmtFact_.mk_uknown();
     // throw std::logic_error("Owner type not found");
 
-    const auto currentClass = as_a<ClassDefStmt>(currentType->def);
+    const auto currentClass = as<ClassDefStmt>(currentType->def);
     if (! currentClass)
         return stmtFact_.mk_uknown();
     // throw std::logic_error(
@@ -214,21 +214,21 @@ Stmt* SrcCodeVisitor::visit_constr_def(SrcCodeVisitor* self, const TSNode& node)
     const TSNode nBody       = util::child_by_field_name(node, "body");
     const TSNode nInit       = ts_node_next_sibling(nParamList);
 
-    constrDef->owner         = as_a<ClassDefStmt>(currentClass);
+    constrDef->owner         = as<ClassDefStmt>(currentClass);
     constrDef->params        = self->make_param_list(nParamList, false);
 
     const CSModifiers modifs = CSModifiers::parser_method_modifs(node, self->src_str());
     constrDef->access        = modifs.get_access_mod().value_or(AccessModifier::Private);
 
     const StmtMapper hBody   = MapManager::get_stmt_mapper(nBody);
-    constrDef->body          = as_a<CompoundStmt>(hBody(self, nBody));
+    constrDef->body          = as<CompoundStmt>(hBody(self, nBody));
 
     if (! ts_node_is_null(nInit)) {
         const StmtMapper hBaseInit = MapManager::get_stmt_mapper(nInit);
         Stmt* initStmt             = hBaseInit(self, nInit);
-        if (const auto baseInit = as_a<BaseInitializerStmt>(initStmt))
+        if (const auto baseInit = as<BaseInitializerStmt>(initStmt))
             constrDef->baseInit.push_back(baseInit);
-        else if (const auto selfInit = as_a<SelfInitializerStmt>(initStmt))
+        else if (const auto selfInit = as<SelfInitializerStmt>(initStmt))
             constrDef->selfInitializers.push_back(selfInit);
     }
 
@@ -253,7 +253,7 @@ Stmt* SrcCodeVisitor::visit_constr_init(SrcCodeVisitor* self, const TSNode& node
         return stmtFact_.mk_uknown();
     // throw std::logic_error("Owner type not found");
 
-    const auto* owner = as_a<ClassDefStmt>(currentType->def);
+    const auto* owner = as<ClassDefStmt>(currentType->def);
     // todo add records
     if (! owner)
         return stmtFact_.mk_uknown();
@@ -278,14 +278,14 @@ Stmt* SrcCodeVisitor::visit_destr_def(SrcCodeVisitor* self, const TSNode& node) 
     if (! currentType)
         // throw std::logic_error("Owner type not found");
         return stmtFact_.mk_uknown();
-    auto* owner = as_a<ClassDefStmt>(currentType->def);
+    auto* owner = as<ClassDefStmt>(currentType->def);
     if (! owner)
         // throw std::logic_error("Destructor can only be defined for class
         // type");
         return stmtFact_.mk_uknown();
 
     self->semanticContext_.unregister_return_type();
-    return stmtFact_.mk_destructor_def(owner, as_a<CompoundStmt>(body));
+    return stmtFact_.mk_destructor_def(owner, as<CompoundStmt>(body));
 }
 
 Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node) {
@@ -328,7 +328,7 @@ Stmt* SrcCodeVisitor::visit_method_def(SrcCodeVisitor* self, const TSNode& node)
         const TSNode nBody = util::child_by_field_name(methodMeta->nMethod, "body");
         if (! ts_node_is_null(nBody)) {
             const StmtMapper hBody = MapManager::get_stmt_mapper(nBody);
-            methodDef->func->body  = as_a<CompoundStmt>(hBody(self, nBody));
+            methodDef->func->body  = as<CompoundStmt>(hBody(self, nBody));
         }
 
         self->semanticContext_.leave_scope();
@@ -368,7 +368,7 @@ Stmt* SrcCodeVisitor::visit_func_stmt(SrcCodeVisitor* self, const TSNode& node) 
 
     const TSNode nBody      = util::child_by_field_name(node, "body");
     const StmtMapper hBody  = MapManager::get_stmt_mapper(nBody);
-    funcMeta->funcDef->body = as_a<CompoundStmt>(hBody(self, nBody));
+    funcMeta->funcDef->body = as<CompoundStmt>(hBody(self, nBody));
     self->semanticContext_.leave_scope();
     self->semanticContext_.unregister_return_type();
     return funcMeta->funcDef;
