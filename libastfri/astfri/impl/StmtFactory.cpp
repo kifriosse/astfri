@@ -63,18 +63,18 @@ GlobalVarDefStmt* StmtFactory::mk_global_var_def(std::string name, Type* type, E
         });
 }
 
-MultiLocalVarDefStmt *StmtFactory::mk_def() {
-    return details::create_store_get<MultiLocalVarDefStmt>(
+MultiVarDefStmt *StmtFactory::mk_def() {
+    return details::create_store_get<MultiVarDefStmt>(
         m_otherStmts,
-        [](MultiLocalVarDefStmt &m){
+        [](MultiVarDefStmt &m){
             (void)m;
         });
 }
 
-MultiLocalVarDefStmt *StmtFactory::mk_def(std::vector<LocalVarDefStmt*> defs) {
-    return details::create_store_get<MultiLocalVarDefStmt>(
+MultiVarDefStmt *StmtFactory::mk_def(std::vector<VarDefStmt*> defs) {
+    return details::create_store_get<MultiVarDefStmt>(
         m_otherStmts,
-        [&defs](MultiLocalVarDefStmt &m){
+        [&defs](MultiVarDefStmt &m){
             m.defs = std::move(defs);
         });
 }

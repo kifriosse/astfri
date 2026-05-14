@@ -14,7 +14,7 @@ AstFriDeSerializer::AstFriDeSerializer() :
     jsonChecker_(JsonFormatChecker::get_instance()) {
 }
 
-astfri::Visitable* AstFriDeSerializer::deserialize(std::string filePath) {
+astfri::Stmt* AstFriDeSerializer::deserialize(std::string filePath) {
 
     std::ifstream file(filePath);
     if (! file.is_open()) {
@@ -37,23 +37,24 @@ astfri::Visitable* AstFriDeSerializer::deserialize(std::string filePath) {
     }
 
     // first try to find node type between statements
-    auto itStmt = astfri_deserialize::strToStmtMapping.find(document_["node"].GetString());
+    // auto itStmt = astfri_deserialize::strToStmtMapping.find(document_["node"].GetString());
 
-    // if node wasnt found among statements,try to resolve type among expressions and lastly among
-    // types
-    if (itStmt == astfri_deserialize::strToStmtMapping.end()) {
-        auto itExpr = astfri_deserialize::strToExprMapping.find(document_["node"].GetString());
+    // // if node wasnt found among statements,try to resolve type among expressions and lastly among
+    // // types
+    // if (itStmt == astfri_deserialize::strToStmtMapping.end()) {
+    //     auto itExpr = astfri_deserialize::strToExprMapping.find(document_["node"].GetString());
 
-        if (itExpr == astfri_deserialize::strToExprMapping.end()) {
-            auto itType = astfri_deserialize::strToTypeMapping.find(document_["node"].GetString());
-            // if node name isnt either between expression and types throw exception
-            if (itType == astfri_deserialize::strToTypeMapping.end()) {
-                throw std::runtime_error("Invalide node type");
-            }
-            return this->resolve_type(document_);
-        }
-        return this->resolve_expr(document_);
-    }
+    //     if (itExpr == astfri_deserialize::strToExprMapping.end()) {
+    //         auto itType = astfri_deserialize::strToTypeMapping.find(document_["node"].GetString());
+    //         // if node name isnt either between expression and types throw exception
+    //         if (itType == astfri_deserialize::strToTypeMapping.end()) {
+    //             throw std::runtime_error("Invalide node type");
+    //         }
+    //         return this->resolve_type(document_);
+    //     }
+    //     return this->resolve_expr(document_);
+    // }
+    // MM: top level node should be a statement, at least for now
     astfri::Stmt* stmt = this->resolve_stmt(document_);
     this->resolve_class_def_stmts();
     this->resolve_interface_def_stmts();
@@ -201,7 +202,7 @@ astfri::LambdaExpr* AstFriDeSerializer::deserialize_lambda_expr(rapidjson::Value
     }
     astfri::Stmt* body = this->resolve_stmt(value["body"]);
 
-    return this->expressionMaker_.mk_lambda_expr(std::move(params), body);
+    return this->expressionMaker_.mk_lambda_expr(std::move(params), body, "TODO-tmp-name");
 }
 
 astfri::LambdaCallExpr* AstFriDeSerializer::deserialize_lambda_call_expr(rapidjson::Value& value) {
@@ -520,7 +521,7 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
         // if interface isnt among resolved interfaces create naked interface only with name and add
         // it among resolved interfaces
         if (it == nameWithInterfaceDefStmtMapping_.end()) {
-            astfri::InterfaceDefStmt* interface    = this->statementMaker_.mk_interface_def(name);
+            astfri::InterfaceDefStmt* interface    = this->statementMaker_.mk_interface_def(name, {});
             nameWithInterfaceDefStmtMapping_[name] = interface;
             classDefStmt->interfaces.push_back(interface);
         }
@@ -578,10 +579,10 @@ astfri::IfStmt* AstFriDeSerializer::deserialize_if_stmt(rapidjson::Value& value)
 
 astfri::SwitchStmt* AstFriDeSerializer::deserialize_switch_stmt(rapidjson::Value& value) {
     astfri::Expr* swichEntry = this->resolve_expr(value["entry"]);
-    std::vector<astfri::CaseBaseStmt*> cases;
+    std::vector<astfri::CaseStmt*> cases;
 
     for (auto& caze : value["cases"].GetArray()) {
-        cases.push_back(dynamic_cast<astfri::CaseBaseStmt*>(this->resolve_stmt(caze)));
+        cases.push_back(astfri::as_a<astfri::CaseStmt>(this->resolve_stmt(caze)));
     }
 
     return this->statementMaker_.mk_switch(swichEntry, std::move(cases));
@@ -692,11 +693,11 @@ astfri::DestructorDefStmt* AstFriDeSerializer::deserialize_destructor_def_stmt(
     );
 }
 
-astfri::DefStmt* AstFriDeSerializer::deserialize_def_stmt(rapidjson::Value& value) {
+astfri::MultiVarDefStmt* AstFriDeSerializer::deserialize_def_stmt(rapidjson::Value& value) {
     std::vector<astfri::VarDefStmt*> definitions;
     for (auto& def : value["definitions"].GetArray()) {
         //?
-        definitions.push_back(dynamic_cast<astfri::VarDefStmt*>(this->resolve_stmt(def)));
+        definitions.push_back(static_cast<astfri::VarDefStmt*>(this->resolve_stmt(def)));
     }
 
     return this->statementMaker_.mk_def(std::move(definitions));
@@ -710,8 +711,8 @@ astfri::BaseInitializerStmt* AstFriDeSerializer::deserialize_base_initializer_st
         arguments.push_back(this->resolve_expr(arg));
     }
 
-    return this->statementMaker_.mak_base_initializer(
-        value["base"].GetString(),
+    return this->statementMaker_.mk_base_initializer(
+        astfri::TypeFactory::get_instance().mk_class(value["base"].GetString(), {}),
         std::move(arguments)
     );
 }
@@ -733,7 +734,7 @@ astfri::InterfaceDefStmt* AstFriDeSerializer::deserialize_interface_def_stmt(rap
 ) {
 
     astfri::InterfaceDefStmt* interfDefStmt
-        = this->statementMaker_.mk_interface_def(std::move(value["name"].GetString()));
+        = this->statementMaker_.mk_interface_def(std::move(value["name"].GetString()), {});
 
     for (auto& base : value["bases"].GetArray()) {
         std::string name = base.GetString();
@@ -792,7 +793,7 @@ void AstFriDeSerializer::resolve_interface_def_stmts() {
         auto itResolvedInterfaceStmt = nameWithInterfaceDefStmtMapping_.find(name);
         if (itResolvedInterfaceStmt == nameWithInterfaceDefStmtMapping_.end()) {
             astfri::InterfaceDefStmt* newInterfDefStmt
-                = this->statementMaker_.mk_interface_def(std::move(name));
+                = this->statementMaker_.mk_interface_def(std::move(name), {});
             for (auto& interfaceDefStmt : it.second) {
                 interfaceDefStmt->bases.push_back(newInterfDefStmt);
             }
@@ -807,7 +808,7 @@ void AstFriDeSerializer::resolve_interface_def_stmts() {
 }
 
 bool AstFriDeSerializer::is_class_def_stmt(astfri::Stmt* stmt) {
-    return dynamic_cast<astfri::ClassDefStmt*>(stmt) != nullptr;
+    return astfri::is_a<astfri::ClassDefStmt>(stmt);
 }
 
 void AstFriDeSerializer::clear_records() {

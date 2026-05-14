@@ -133,15 +133,15 @@ struct GlobalVarDefStmt : VarDefStmt {
  * @endcode
  * In this case, you would use:
  * @code
-   DefStmt
+   MultiVarDefStmt
    |-LocalVarDefStmt
    | `-IntLiteralExpr(10)
    `-LocalVarDefStmt
      `-IntLiteralExpr(10)
  * @endcode
  */
-struct MultiLocalVarDefStmt : MakeAStmt<MultiLocalVarDefStmt> {
-    std::vector<LocalVarDefStmt*> defs{};
+struct MultiVarDefStmt : MakeAStmt<MultiVarDefStmt> {
+    std::vector<VarDefStmt*> defs{};
 };
 
 

@@ -12,7 +12,7 @@
 class AstFriDeSerializer {
 public:
     static AstFriDeSerializer& get_instance();
-    astfri::Visitable* deserialize(std::string filePath);
+    astfri::Stmt* deserialize(std::string filePath);
 
 private:
     AstFriDeSerializer();
@@ -93,7 +93,7 @@ private:
         rapidjson::Value& value,
         astfri::ClassDefStmt* owner = nullptr
     );
-    astfri::DefStmt* deserialize_def_stmt(rapidjson::Value& value);
+    astfri::MultiVarDefStmt* deserialize_def_stmt(rapidjson::Value& value);
     astfri::TranslationUnit* deserialize_translation_unit(rapidjson::Value& value);
     astfri::BreakStmt* deserialize_break_stmt();
     astfri::ContinueStmt* deserialize_continue_stmt();

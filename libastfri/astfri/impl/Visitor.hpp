@@ -75,7 +75,7 @@ struct Visitor {
     virtual void visit(const MemberVarDefStmt& stmt)      = 0;
     virtual void visit(const GlobalVarDefStmt& stmt)      = 0;
     virtual void visit(const FunctionDefStmt& stmt)       = 0;
-    virtual void visit(const MultiLocalVarDefStmt& stmt)  = 0;
+    virtual void visit(const MultiVarDefStmt& stmt)  = 0;
     virtual void visit(const MethodDefStmt& stmt)         = 0;
     virtual void visit(const BaseInitializerStmt& stmt)   = 0;
     virtual void visit(const SelfInitializerStmt& stmt)   = 0;
@@ -280,7 +280,7 @@ struct VisitorAdapter : Visitor {
     void visit(const FunctionDefStmt& /*stmt*/) override {
     }
 
-    void visit(const MultiLocalVarDefStmt& /*stmt*/) override {
+    void visit(const MultiVarDefStmt& /*stmt*/) override {
     }
 
     void visit(const MethodDefStmt& /*stmt*/) override {
@@ -557,7 +557,7 @@ struct ThrowingVisitorAdapter : Visitor {
         throw std::logic_error("Not Implemented Yet!");
     }
 
-    void visit(const MultiLocalVarDefStmt& /*stmt*/) override {
+    void visit(const MultiVarDefStmt& /*stmt*/) override {
         throw std::logic_error("Not Implemented Yet!");
     }
 

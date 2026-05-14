@@ -251,11 +251,11 @@ Stmt* SrcCodeVisitor::visit_switch(SrcCodeVisitor* self, const TSNode& node) {
     const ExprMapper hValue  = MapManager::get_expr_mapper(nValue);
     Expr* value              = hValue(self, nValue);
 
-    std::vector<CaseBaseStmt*> cases;
+    std::vector<CaseStmt*> cases;
     auto process = [self, &cases](const TSNode& nCurrent) -> void {
         const StmtMapper hStmt = MapManager::get_stmt_mapper(nCurrent);
         Stmt* stmt             = hStmt(self, nCurrent);
-        if (auto* caseStmt = as_a<CaseBaseStmt>(stmt))
+        if (auto* caseStmt = as_a<CaseStmt>(stmt))
             cases.push_back(caseStmt);
     };
     util::for_each_child_node(nSwitchBody, process);

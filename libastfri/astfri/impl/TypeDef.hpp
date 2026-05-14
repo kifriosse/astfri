@@ -69,19 +69,25 @@ struct IndirectionType : MakeAType<IndirectionType> {
 /**
  * @brief TODO
  */
-struct ClassType : MakeAType<ClassType> {
+struct ScopedType : Type {
     std::string name{};
     Scope scope{};
-    ClassDefStmt *def{nullptr};
 };
 
 /**
  * @brief TODO
  */
-struct InterfaceType : MakeAType<InterfaceType> {
-    std::string name{};
-    Scope scope{};
+struct ClassType : ScopedType {
+    ClassDefStmt *def{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ClassType)
+};
+
+/**
+ * @brief TODO
+ */
+struct InterfaceType : ScopedType {
     InterfaceDefStmt *def{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(InterfaceType)
 };
 
 /**

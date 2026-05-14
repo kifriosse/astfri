@@ -42,9 +42,9 @@ public:
     GlobalVarDefStmt *mk_global_var_def(std::string name, Type *type, Expr *initializer);
 
     // TODO rename
-    MultiLocalVarDefStmt *mk_def();
+    MultiVarDefStmt *mk_def();
 
-    MultiLocalVarDefStmt *mk_def(std::vector<LocalVarDefStmt*> defs);
+    MultiVarDefStmt *mk_def(std::vector<VarDefStmt*> defs);
 
     FunctionDefStmt *mk_function_def();
 

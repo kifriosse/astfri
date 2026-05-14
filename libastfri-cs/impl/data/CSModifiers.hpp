@@ -2,7 +2,7 @@
 #define CSHARP_CS_MODIFIERS_HPP
 
 #include <libastfri-cs/impl/CSFwd.hpp>
-#include <astfri/impl/Stmt.hpp>
+#include <astfri/impl/StmtDef.hpp>
 
 #include <tree_sitter/api.h>
 

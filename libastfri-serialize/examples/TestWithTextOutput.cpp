@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
         throw std::runtime_error("No file name given!!");
     AstFriDeSerializer& serializer        = AstFriDeSerializer::get_instance();
 
-    astfri::Visitable* node               = serializer.deserialize(argv[1]);
+    astfri::Stmt* node               = serializer.deserialize(argv[1]);
     astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
 
     // visitor.visit(*node);

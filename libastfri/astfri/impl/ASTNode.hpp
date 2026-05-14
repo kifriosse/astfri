@@ -46,21 +46,18 @@ struct ASTNode {
     void accept(Visitor &visitor);
 
 private:
-    /** @brief Enum value holding kind (type) of this node. */
-    KindType kind;
-
-    /** @brief Pointer to a function implementing accept. */
-    void(*m_accept_ptr)(void*, Visitor&);
+    KindType kind; /**< Enum value holding kind (type) of this node. */
+    void(*m_accept_ptr)(void*, Visitor&); /**< Pointer to a function implementing accept. */
 
 private:
     template<typename S, typename K>
-    friend void initialize(ASTNode<K>&);
+    friend void ::astfri::detail::initialize(ASTNode<K>&);
 
     template<typename T, typename K>
-    bool is_a(detail::ASTNode<K>*);
+    friend bool ::astfri::is_a(ASTNode<K>*);
 
     template<typename T, typename K>
-    T *as_a(detail::ASTNode<K>*);
+    friend T *::astfri::as_a(ASTNode<K>*);
 };
 
 

@@ -63,7 +63,7 @@ template<> struct KindOf<GlobalVarDefStmt> {
     static constexpr StmtKind value{StmtKind::GlobalVarDef};
 };
 
-template<> struct KindOf<MultiLocalVarDefStmt> {
+template<> struct KindOf<MultiVarDefStmt> {
     static constexpr StmtKind value{StmtKind::MultiLocalVarDef};
 };
 

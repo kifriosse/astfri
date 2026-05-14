@@ -284,7 +284,7 @@ bool ClangVisitor::TraverseVarDecl(clang::VarDecl* VD) {
     if (this->astfri_location.stmt_) {
         // premenna v compounde
         local_var = this->stmt_factory_->mk_local_var_def(VD->getNameAsString(), type, nullptr);
-        ((MultiLocalVarDefStmt*)this->astfri_location.stmt_)->defs.push_back(local_var);
+        ((MultiVarDefStmt*)this->astfri_location.stmt_)->defs.push_back(local_var);
     }
     else {
         // globalna premenna
