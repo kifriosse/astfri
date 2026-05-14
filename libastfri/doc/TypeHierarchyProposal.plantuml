@@ -1,0 +1,84 @@
+@startuml TypeHierarchyProposal
+
+hide methods
+hide attributes
+
+
+struct Type
+
+struct BuiltInType
+
+struct ArrayType
+
+struct DynamicType
+
+struct IntType
+
+struct FloatType
+
+struct CharType
+
+struct BoolType
+
+struct VoidType
+
+struct PointerType
+
+struct ReferenceType
+
+struct ClassType
+
+struct InterfaceType
+
+struct LambdaType
+
+struct DeducedType
+
+struct IncompleteType
+
+struct TypevarType
+
+struct ScopedType
+
+struct TypeAlias
+
+struct DerivedType
+
+struct ClassType
+
+struct InterfaceType
+
+struct EnumType
+
+struct UnionType
+
+
+struct QualifiedType
+
+
+Type        <|-- BuiltInType
+Type        <|-- TypevarType
+Type        <|-- ScopedType
+Type        <|-- DynamicType
+Type        <|-- DeducedType
+Type        <|-- LambdaType
+BuiltInType <|-- ArrayType
+BuiltInType <|-- PointerType
+BuiltInType <|-- ReferenceType
+BuiltInType <|-- BoolType
+BuiltInType <|-- IntType
+BuiltInType <|-- FloatType
+BuiltInType <|-- CharType
+BuiltInType <|-- VoidType
+ScopedType  <|-- DerivedType
+ScopedType  <|-- IncompleteType
+ScopedType  <|-- TypeAlias
+DerivedType <|-- ClassType
+DerivedType <|-- InterfaceType
+DerivedType <|-- UnionType
+DerivedType <|-- EnumType
+
+
+Type <-r- QualifiedType
+
+@enduml
