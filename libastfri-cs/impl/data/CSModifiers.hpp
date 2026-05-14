@@ -1,7 +1,6 @@
 #ifndef CSHARP_CS_MODIFIERS_HPP
 #define CSHARP_CS_MODIFIERS_HPP
 
-#include <libastfri-cs/impl/CSFwd.hpp>
 #include <astfri/impl/StmtDef.hpp>
 
 #include <libastfri-cs/impl/CSFwd.hpp>

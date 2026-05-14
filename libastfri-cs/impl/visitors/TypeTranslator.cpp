@@ -390,6 +390,7 @@ ScopeNode* TypeTranslator::search_parents(
     const TypeBinding& start
 ) const {
     ClassDefStmt* current = nullptr;
+    // todo add also support for records
     if (auto* classDef = as<ClassDefStmt>(start.def)) {
         current = classDef;
     }

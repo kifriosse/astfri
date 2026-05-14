@@ -40,10 +40,10 @@ TranslationUnit* SrcCodeTransformer::visit_comp_unit() {
             if (added)
                 continue;
 
-            if (is_a<ClassDefStmt>(stmt))
-                trUnit->classes.push_back(as_a<ClassDefStmt>(stmt));
-            else if (is_a<InterfaceDefStmt>(stmt))
-                trUnit->interfaces.push_back(as_a<InterfaceDefStmt>(stmt));
+            if (is<ClassDefStmt>(stmt))
+                trUnit->classes.push_back(as<ClassDefStmt>(stmt));
+            else if (is<InterfaceDefStmt>(stmt))
+                trUnit->interfaces.push_back(as<InterfaceDefStmt>(stmt));
 
             added = true;
         }

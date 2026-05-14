@@ -27,58 +27,6 @@ Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode
     self->semContext_.enter_type(*tb);
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
-    // handling of base class and interface implementations
-    bool first           = true;
-    auto processBaseList = [&](const TSNode& current) -> void {
-        std::string name    = util::extract_text(current, self->src_str());
-        const TypeMapper th = MapManager::get_type_mapper(current);
-        Type* type          = th(&self->typeTrs_, current);
-        if (first) {
-            first = false;
-            if (const auto class_t = as<ClassType>(type))
-                classDef->bases.push_back(class_t->def);
-            if (const auto interface_t = as<InterfaceType>(type)) {
-                classDef->interfaces.push_back(interface_t->def);
-            }
-            else if (util::is_interface_name(name)) {
-                classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
-                // todo might be useless if external types are imported
-            }
-            return;
-        }
-
-        if (const auto interface_t = as<InterfaceType>(type)) {
-            classDef->interfaces.push_back(interface_t->def);
-        }
-        else if (util::is_interface_name(name)) {
-            classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
-            // todo might be useless if external types are imported
-        }
-        else {
-            // todo incomplete type
-        }
-    };
-
-    // auto processGenericConstraints = [](const TSNode&) -> void { };
-
-    auto processClassHeader = [&](const TSNode& current) -> bool {
-        using enum NodeType;
-        if (ts_node_eq(current, nClassBody))
-            return false;
-
-        const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == MapManager::get_symbol(BaseList)) {
-            util::for_each_child_node(current, processBaseList);
-        }
-        else if (sCurrent == MapManager::get_symbol(TypeParamList)) {
-            classDef->tparams = util::make_generic_params(current, src);
-        }
-        else if (sCurrent == MapManager::get_symbol(TypeParamConstrClause)) {
-            // util::for_each_child_node(current, processGenericConstraints);
-        }
-        return true;
-    };
-    util::for_each_child_node(node, processClassHeader);
 
     // if its partial class doesn't have a body
     if (ts_node_is_null(nClassBody))
@@ -112,23 +60,10 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
     auto* intfDef              = as<InterfaceDefStmt>(tb->def);
-    self->semanticContext_.enter_type(tb);
+    self->semContext_.enter_type(*tb);
 
-    // handling of interface implementations
-    auto processBaseList = [&](const TSNode& current) -> void {
-        const TypeMapper th = MapManager::get_type_mapper(current);
-        Type* type          = th(&self->typeTrs_, current);
-
-        if (const auto tInterface = as<InterfaceType>(type))
-            intfDef->bases.push_back(tInterface->def);
-        else {
-            // todo incomplete type
-        }
-    };
-    // auto processGenericConstraints = [](const TSNode&) -> void { };
-
-    const TSNode nIntfBody  = util::child_by_field_name(node, "body");
-    auto processClassHeader = [&](const TSNode& current) -> bool {
+    const TSNode nIntfBody      = util::child_by_field_name(node, "body");
+    auto processInterfaceHeader = [&](const TSNode& current) -> bool {
         using enum NodeType;
         if (ts_node_eq(current, nIntfBody))
             return false;
@@ -217,12 +152,12 @@ Stmt* SrcCodeTransformer::visit_constr_def(SrcCodeTransformer* self, const TSNod
     const CSModifiers modifs = CSModifiers::parser_method_modifs(node, self->src_str());
     constrDef->access        = modifs.get_access_mod().value_or(AccessModifier::Private);
 
-    const StmtMapper hBody   = MapManager::get_stmt_mapper(nBody);
-    constrDef->body          = as<CompoundStmt>(hBody(self, nBody));
+    const StmtMapper mBody   = mapManager_.get_stmt_mapper(nBody);
+    constrDef->body          = as<CompoundStmt>(mBody(self, nBody));
 
     if (! ts_node_is_null(nInit)) {
-        const StmtMapper hBaseInit = MapManager::get_stmt_mapper(nInit);
-        Stmt* initStmt             = hBaseInit(self, nInit);
+        const StmtMapper mBaseInit = mapManager_.get_stmt_mapper(nInit);
+        Stmt* initStmt             = mBaseInit(self, nInit);
         if (const auto baseInit = as<BaseInitializerStmt>(initStmt))
             constrDef->baseInit.push_back(baseInit);
         else if (const auto selfInit = as<SelfInitializerStmt>(initStmt))

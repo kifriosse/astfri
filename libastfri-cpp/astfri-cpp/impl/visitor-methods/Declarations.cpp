@@ -1,6 +1,6 @@
 #include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 #include <clang/Basic/Specifiers.h>
-#include "astfri/impl/Stmt.hpp"
+#include <astfri/impl/StmtDef.hpp>
 
 namespace astfri::cpp {
 bool ClangVisitor::VisitNamespaceDecl(clang::NamespaceDecl* ND) {
@@ -279,9 +279,9 @@ bool ClangVisitor::TraverseCXXRecordDecl(clang::CXXRecordDecl* RD) {
             // TODO: toto by mohlo byt v cykle, ak je ich viac v jednom def stmt -> static int first, second;
             // zatial ratam s tym ze je len jeden
             MemberVarDefStmt* newStaticField = this->stmt_factory_->mk_member_var_def(
-                ((DefStmt*)this->astfri_location.stmt_)->defs[0]->name,
-                ((DefStmt*)this->astfri_location.stmt_)->defs[0]->type,
-                ((DefStmt*)this->astfri_location.stmt_)->defs[0]->initializer,
+                ((MultiVarDefStmt*)this->astfri_location.stmt_)->defs[0]->name,
+                ((MultiVarDefStmt*)this->astfri_location.stmt_)->defs[0]->type,
+                ((MultiVarDefStmt*)this->astfri_location.stmt_)->defs[0]->initializer,
                 access,
                 Staticity::Static
             );

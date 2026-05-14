@@ -241,9 +241,9 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
 void SymbTableBuilder::visit_base_list(SymbTableBuilder* self, const TSNode& node) {
     UserTypeDefStmt* userType = self->typeContext_->def;
-    if (const auto classDef = as_a<ClassDefStmt>(userType))
+    if (const auto classDef = as<ClassDefStmt>(userType))
         self->visit_base_list_class(node, classDef);
-    else if (const auto intfDef = as_a<InterfaceDefStmt>(userType))
+    else if (const auto intfDef = as<InterfaceDefStmt>(userType))
         self->visit_base_list_interface(node, intfDef);
 }
 
@@ -496,9 +496,9 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
         Type* type          = tm(&typeTrs_, current);
         if (first) {
             first = false;
-            if (const auto class_t = as_a<ClassType>(type))
+            if (const auto class_t = as<ClassType>(type))
                 classDef->bases.push_back(class_t->def);
-            if (const auto interface_t = as_a<InterfaceType>(type)) {
+            if (const auto interface_t = as<InterfaceType>(type)) {
                 classDef->interfaces.push_back(interface_t->def);
             }
             else if (util::is_interface_name(name)) {
@@ -511,7 +511,7 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
             return;
         }
 
-        if (const auto interface_t = as_a<InterfaceType>(type)) {
+        if (const auto interface_t = as<InterfaceType>(type)) {
             // bool contains = false;
             // for (auto interface : classDef->interfaces) {
             //     if (interface == interface_t->def) {
@@ -540,7 +540,7 @@ void SymbTableBuilder::visit_base_list_interface(const TSNode& node, InterfaceDe
         const TypeMapper tm = mapManager_.get_type_mapper(current);
         Type* type          = tm(&typeTrs_, current);
 
-        if (const auto tInterface = as_a<InterfaceType>(type))
+        if (const auto tInterface = as<InterfaceType>(type))
             intfDef->bases.push_back(tInterface->def);
         else {
             // todo incomplete type

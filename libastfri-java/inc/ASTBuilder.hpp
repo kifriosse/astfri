@@ -8,7 +8,7 @@
 #include <tree_sitter/tree-sitter-java.h>
 
 #include <string>
-#include "astfri/impl/Stmt.hpp"
+#include <astfri/impl/StmtDef.hpp>
 
 namespace astfri::java {
 class ASTBuilder {

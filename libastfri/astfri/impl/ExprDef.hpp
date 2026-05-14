@@ -302,7 +302,7 @@ struct FunctionCallExpr : MakeAnExpr<FunctionCallExpr> {
  * @brief Represents a call to a class or object method.
  */
 struct MethodCallExpr : MakeAnExpr<MethodCallExpr> {
-    Expr *owner{nullptr};
+    Expr *owner{nullptr}; // TODO addressee
     // TODO this should be Either<Symbol, MethodDefStmt>
     std::string name;
     std::vector<Expr*> args{};

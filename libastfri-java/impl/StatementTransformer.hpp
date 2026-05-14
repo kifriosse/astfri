@@ -12,7 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "astfri/impl/Stmt.hpp"
+#include <astfri/impl/StmtDef.hpp>
 
 namespace astfri::java {
 

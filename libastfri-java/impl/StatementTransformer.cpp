@@ -6,7 +6,7 @@
 #include <string>
 #include <cstring>
 #include <sys/types.h>
-#include "astfri/impl/Stmt.hpp"
+#include <astfri/impl/StmtDef.hpp>
 
 
 namespace astfri::java {
