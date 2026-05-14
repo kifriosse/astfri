@@ -75,7 +75,7 @@ void TextLibConfig::change_to_default()
     defaultTextStyle   = "font-family:Consolas;font-size:16px";
     unknownPhraseStyle = "";
     rowNumStyle        = "";
-    std::vector<std::string> brColors = {"red", "green", "blue"};
+    brColors = {"red", "green", "blue"};
     // 3.2 SYMBOLS
     // 3.2.1 OPERATORS
     pointerWord = "↑";
