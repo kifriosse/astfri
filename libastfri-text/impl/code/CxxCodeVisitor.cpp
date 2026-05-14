@@ -71,7 +71,7 @@ void CxxCodeVisitor::visit(const GlobalVarDefStmt& /*stmt*/) {
 void CxxCodeVisitor::visit(const FunctionDefStmt& /*stmt*/) {
 }
 
-void CxxCodeVisitor::visit(const DefStmt& /*stmt*/) {
+void CxxCodeVisitor::visit(const MultiVarDefStmt& /*stmt*/) {
 }
 
 void CxxCodeVisitor::visit(const MethodDefStmt& /*stmt*/) {

@@ -3,6 +3,7 @@
 
 namespace astfri {
 
+
 struct Type;
 struct DynamicType;
 struct IntType;
@@ -20,6 +21,7 @@ struct UnionType;
 struct IncompleteType;
 struct DeducedType;
 struct UnknownType;
+
 
 } // namespace astfri
 

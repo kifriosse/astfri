@@ -578,7 +578,7 @@ void PseudocodeVisitor::visit(const DefaultCaseStmt& stmt) {
 
 void PseudocodeVisitor::visit(const SwitchStmt& stmt) {
     builder_->write_switch_word();
-    process_condition(stmt.expr_);
+    process_condition(stmt.expr);
     builder_->write_opening_curl_bracket();
     builder_->increase_indentation();
     for (size_t i = 0; i < stmt.cases.size(); ++i) {
@@ -681,7 +681,7 @@ void PseudocodeVisitor::visit(const FunctionDefStmt& stmt) {
     builder_->write_right_bracket("}");
 }
 
-void PseudocodeVisitor::visit(const DefStmt& stmt) {
+void PseudocodeVisitor::visit(const MultiVarDefStmt& stmt) {
     if (stmt.defs.empty()) {
         builder_->write_invalid_stmt();
         return;

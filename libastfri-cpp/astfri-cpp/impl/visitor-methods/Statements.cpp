@@ -221,7 +221,7 @@ bool ClangVisitor::TraverseDoStmt(clang::DoStmt* DS) {
 
 bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS) {
     // akcia na tomto vrchole
-    auto new_switch = this->stmt_factory_->mk_switch(nullptr, std::vector<CaseBaseStmt*>{});
+    auto new_switch = this->stmt_factory_->mk_switch(nullptr, {});
     ((CompoundStmt*)this->astfri_location.stmt_)->stmts.push_back(new_switch);
 
     // zapamatanie si AST location
@@ -234,7 +234,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS) {
 
     // Nastavenie podmienky
     TraverseStmt(SS->getCond());
-    new_switch->expr_ = this->astfri_location.expr_;
+    new_switch->expr = this->astfri_location.expr_;
 
     // naplnenie new_switch
     // akcia na kazdom case
@@ -282,7 +282,7 @@ bool ClangVisitor::TraverseSwitchStmt(clang::SwitchStmt* SS) {
                 if (! ((CompoundStmt*)this->astfri_location.stmt_)->stmts.empty())
                     new_default->body = temp_compund->stmts[0];
             }
-            new_switch->cases.push_back(new_default);
+            new_switch->defaultCase = new_default;
         }
     }
 

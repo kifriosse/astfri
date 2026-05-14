@@ -5,7 +5,7 @@ error() {
   echo -e "${C_RED}Error:${C_RESET} $1"
 }
 
-files=$(find libastfri* -type f -name "*.cpp" -or -name "*.hpp" -or -name "*.inl")
+files=$(find astfri* -type f -name "*.cpp" -or -name "*.hpp" -or -name "*.inl")
 
 for file in ${files}; do
     clang-format -style=file --dry-run ${file} > /dev/null 2>&1

@@ -381,7 +381,7 @@ ScopeNode* TypeTranslator::search_parents(
     const TypeBinding& start
 ) const {
     ClassDefStmt* current = nullptr;
-    if (auto* classDef = as_a<ClassDefStmt>(start.def)) {
+    if (auto* classDef = as<ClassDefStmt>(start.def)) {
         current = classDef;
     }
 

@@ -1,41 +1,20 @@
 #include <astfri/impl/TypeInfo.hpp>
+#include <astfri/impl/ASTNode.hpp>
+#include <astfri/impl/Kind.hpp>
+
 
 namespace astfri {
 
-template<typename T>
-requires(std::derived_from<T, Type>)
-bool is_a(Type* t) {
-    return as_a<T>(t) != nullptr;
+
+template<typename T, typename KindType>
+bool is(detail::ASTNode<KindType> *t) {
+    return as<T>(t) != nullptr;
 }
 
-template<typename T>
-requires(std::derived_from<T, Type>)
-T* as_a(Type* t) {
-    return dynamic_cast<T*>(t);
+template<typename T, typename KindType>
+T *as(detail::ASTNode<KindType> *t) {
+    return t->kind == KindOf<T>::value ? static_cast<T*>(t) : nullptr;
 }
 
-template<typename T>
-requires(std::derived_from<T, Stmt>)
-bool is_a(Stmt* t) {
-    return as_a<T>(t) != nullptr;
-}
-
-template<typename T>
-requires(std::derived_from<T, Stmt>)
-T* as_a(Stmt* t) {
-    return dynamic_cast<T*>(t);
-}
-
-template<typename T>
-requires(std::derived_from<T, Expr>)
-bool is_a(Expr* t) {
-    return as_a<T>(t) != nullptr;
-}
-
-template<typename T>
-requires(std::derived_from<T, Expr>)
-T* as_a(Expr* t) {
-    return dynamic_cast<T*>(t);
-}
 
 } // namespace astfri

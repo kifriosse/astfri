@@ -50,7 +50,7 @@ Stmt* SrcCodeVisitor::visit_arrow_body(SrcCodeVisitor* self, const TSNode& node)
     Expr* expr             = hBody(self, nBody);
     Stmt* body             = nullptr;
 
-    if (is_a<VoidType>(returnType))
+    if (is<VoidType>(returnType))
         body = stmtFact_.mk_expr(expr);
     else
         body = stmtFact_.mk_return(expr);
@@ -195,9 +195,9 @@ Stmt* SrcCodeVisitor::visit_try(SrcCodeVisitor* self, const TSNode& node) {
 
         const StmtMapper hCurrent = MapManager::get_stmt_mapper(current);
         Stmt* currentStmt         = hCurrent(self, current);
-        if (is_a<CompoundStmt>(currentStmt))
+        if (is<CompoundStmt>(currentStmt))
             finally = currentStmt;
-        else if (auto* catchStmt = as_a<CatchStmt>(currentStmt))
+        else if (auto* catchStmt = as<CatchStmt>(currentStmt))
             catchStmts.push_back(catchStmt);
     };
 
@@ -216,11 +216,11 @@ Stmt* SrcCodeVisitor::visit_catch(SrcCodeVisitor* self, const TSNode& node) {
     auto process              = [&](const TSNode& n_current) -> void {
         const StmtMapper hCurrent = MapManager::get_stmt_mapper(n_current);
         Stmt* currentStmt         = hCurrent(self, n_current);
-        if (const auto var = as_a<LocalVarDefStmt>(currentStmt)) {
+        if (const auto var = as<LocalVarDefStmt>(currentStmt)) {
             catchVar = var;
             self->semanticContext_.reg_local_var(catchVar);
         }
-        else if (is_a<CompoundStmt>(currentStmt)) {
+        else if (is<CompoundStmt>(currentStmt)) {
             body = currentStmt;
         }
     };
@@ -251,11 +251,11 @@ Stmt* SrcCodeVisitor::visit_switch(SrcCodeVisitor* self, const TSNode& node) {
     const ExprMapper hValue  = MapManager::get_expr_mapper(nValue);
     Expr* value              = hValue(self, nValue);
 
-    std::vector<CaseBaseStmt*> cases;
+    std::vector<CaseStmt*> cases;
     auto process = [self, &cases](const TSNode& nCurrent) -> void {
         const StmtMapper hStmt = MapManager::get_stmt_mapper(nCurrent);
         Stmt* stmt             = hStmt(self, nCurrent);
-        if (auto* caseStmt = as_a<CaseBaseStmt>(stmt))
+        if (auto* caseStmt = as<CaseStmt>(stmt))
             cases.push_back(caseStmt);
     };
     util::for_each_child_node(nSwitchBody, process);
@@ -293,7 +293,7 @@ Stmt* SrcCodeVisitor::visit_case_stmt(SrcCodeVisitor* self, const TSNode& node) 
 
         ts_tree_cursor_delete(&cursor);
 
-        Stmt* body = bodyStmts.size() == 1 && is_a<CompoundStmt>(bodyStmts.back())
+        Stmt* body = bodyStmts.size() == 1 && is<CompoundStmt>(bodyStmts.back())
                        ? bodyStmts.back()
                        : stmtFact_.mk_compound(std::move(bodyStmts));
 

@@ -379,7 +379,7 @@ void AbstractCodeVisitor::visit(const DefaultCaseStmt& stmt) {
 
 void AbstractCodeVisitor::visit(const SwitchStmt& stmt) {
     builder_->append_text("switch");
-    process_condition(stmt.expr_);
+    process_condition(stmt.expr);
     builder_->write_opening_curl_bracket();
     for (size_t i = 0; i < stmt.cases.size(); ++i) {
         if (! try_accept_node(stmt.cases.at(i))) {

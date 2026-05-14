@@ -139,7 +139,7 @@ void JavaCodeVisitor::visit(const FunctionDefStmt& stmt) {
     builder_->append_text("}");
 }
 
-void JavaCodeVisitor::visit(const DefStmt& stmt) {
+void JavaCodeVisitor::visit(const MultiVarDefStmt& stmt) {
     if (stmt.defs.empty()) {
         builder_->write_invalid_stmt();
         return;
