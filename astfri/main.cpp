@@ -11,7 +11,7 @@
 #include <libastfri-uml/inc/UMLLibWrapper.hpp>
 
 // ASTFRI CPP
-#include <libastfri-cpp/inc/ClangManagement.hpp>
+#include <astfri-cpp/AstfriCpp.hpp>
 
 // ASTFRI Csharp
 #include <libastfri-cs/inc/ASTBuilder.hpp>
@@ -23,7 +23,7 @@
 
 #pragma region DEFINITIONS
 
-#define ASTFRI_VERSION "0.0.1"
+#define ASTFRI_CLI_VERSION "0.0.1"
 
 // exit code meanings:
 //  - 0 - OK
@@ -92,7 +92,7 @@ int main(int argc, const char** argv)
 
     cxxopts::Options options(
         "astfri",
-        "ASTFRI - CLI interface for library astfri, version " ASTFRI_VERSION
+        "ASTFRI - CLI interface for library astfri, version " ASTFRI_CLI_VERSION
     );
 
     options.add_options()
@@ -117,16 +117,16 @@ int main(int argc, const char** argv)
 #pragma region VERSION
     if (mode_version)
     {
-        std::cout << "ASTFRI version: " << ASTFRI_VERSION << "\n";
+        std::cout << "ASTFRI-CLI-WRAPPER " << ASTFRI_CLI_VERSION << "\n";
         std::cout << "Input libraries:\n";
         for (const auto& pair : input_map)
         {
-            std::cout << "  " << pair.first << " vTODO" << "\n";
+            std::cout << "  " << pair.first << "\n";
         }
         std::cout << "Output libraries:\n";
         for (const auto& pair : output_map)
         {
-            std::cout << "  " << pair.first << " vTODO" << "\n";
+            std::cout << "  " << pair.first << "\n";
         }
         exit(EXIT_OK);
     }
@@ -205,8 +205,7 @@ int main(int argc, const char** argv)
     {
     case InputType::Cpp:
     {
-        astfri::cpp::cpp_in input;
-        tu = input.load_file(input_file);
+        tu = astfri::cpp_in::load_file(input_file, astfri::cpp::Config());
         // if (input.fill_translation_unit(tu, input_file) != 0)
         // {
         //     if (mode_verbose)

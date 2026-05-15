@@ -1,5 +1,6 @@
-#include <libastfri-cs/impl/data/SymbolTree.hpp>
 #include <astfri/Astfri.hpp>
+
+#include <libastfri-cs/impl/data/SymbolTree.hpp>
 
 #include <memory>
 #include <span>
@@ -8,6 +9,10 @@
 #include <variant>
 
 namespace astfri::csharp {
+
+std::string ExternalMarker::takeName() {
+    return std::move(qualifName);
+}
 
 Nms::Nms(std::string name) :
     name_(std::move(name)) {
@@ -76,7 +81,7 @@ ScopeNode* ScopeNode::add_child(std::string name, NodeData content) {
     return it->second.get();
 }
 
-const ScopeNode::NodeData& ScopeNode::data() const {
+ScopeNode::NodeData& ScopeNode::data() {
     return data_;
 }
 
@@ -101,10 +106,10 @@ ScopeNode* SymbolTree::add_type(const Scope& scope, const TypeBinding& tb) {
     return last->add_child(tb.type->name, tb);
 }
 
-ScopeNode* SymbolTree::add_primitive(const std::string& name, CSPrimitiveType primitive) {
+ScopeNode* SymbolTree::add_primitive(std::string name, CSPrimitiveType primitive) {
     static const Scope systemScope = mk_scope("System");
     ScopeNode* last                = add_scope(systemScope);
-    return last->add_child(name, primitive);
+    return last->add_child(std::move(name), primitive);
 }
 
 ScopeNode* SymbolTree::find_node(const Scope& scope) const {

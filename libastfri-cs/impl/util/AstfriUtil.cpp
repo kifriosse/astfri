@@ -1,9 +1,10 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/CSModifiers.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/util/Utils.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -12,6 +13,10 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+namespace {
+    astfri::csharp::maps::MapManager& mapManager = astfri::csharp::maps::MapManager::get();
+} // namespace
 
 namespace astfri::csharp::util {
 
@@ -22,7 +27,7 @@ Scope mk_scope(const TSNode& node, const SourceFile& currentSrc) {
     bool foundNms   = false;
 
     while (! ts_node_is_null(nParent)) {
-        const NodeType type = MapManager::get_node_type(nParent);
+        const NodeType type = mapManager.get_node_type(nParent);
         nCurrent            = nParent;
         nParent             = ts_node_parent(nCurrent);
 
@@ -124,7 +129,7 @@ ParamVarDefStmt* mk_param_def(
 ) {
     const TSNode nType         = child_by_field_name(node, "type");
     const TSNode nName         = child_by_field_name(node, "name");
-    const TypeMapper th        = MapManager::get_type_mapper(nType);
+    const TypeMapper th        = mapManager.get_type_mapper(nType);
     const CSModifiers paramMod = CSModifiers::parse_param_modifs(node, src);
     Type* tParam               = paramMod.get_indirection_type(th(&typeTrs, nType));
 
@@ -158,7 +163,7 @@ FuncMetadata make_func_metadata(
     const TSNode nRet         = child_by_field_name(node, "type");
     const TSNode nParams      = child_by_field_name(node, "parameters");
     std::string name          = extract_text(nName, src);
-    const TypeMapper th       = MapManager::get_type_mapper(nRet);
+    const TypeMapper th       = mapManager.get_type_mapper(nRet);
     Type* retType             = th(&typeTrs, nRet);
     auto [params, paramsMeta] = discover_params(nParams, src, typeTrs);
     return FuncMetadata{

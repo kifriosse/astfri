@@ -4,8 +4,10 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <cstring>
 #include <sstream>
 
+#pragma region java
 namespace astfri::java {
 ASTBuilder::ASTBuilder() :
     stmtTransformer(new StatementTransformer()) {
@@ -31,7 +33,7 @@ std::string ASTBuilder::load_file(const std::string& path) {
     return load_stream(file);
 }
 
-std::string ASTBuilder::load_directory(const std::string& path) {
+std::string ASTBuilder::load_project(const std::string& path) {
     std::string sourceCode = "";
     const std::filesystem::path directory{path};
 
@@ -67,3 +69,33 @@ astfri::TranslationUnit* ASTBuilder::get_translation_unit(
     return translationUnit;
 }
 } // namespace astfri::java
+
+#pragma endregion
+
+#pragma region java_in
+namespace astfri {
+astfri::TranslationUnit* java_in::load_stream(std::istream& stream, const astfri::java::Config& cfg) {
+    (void) cfg;
+    astfri::java::ASTBuilder builder;
+    std::string sourceCode = builder.load_stream(stream);
+    TSTree* tree = builder.make_syntax_tree(sourceCode);
+    return builder.get_translation_unit(tree, sourceCode);
+}
+
+astfri::TranslationUnit* java_in::load_file(const std::string& path, const astfri::java::Config& cfg) {
+    (void) cfg;
+    astfri::java::ASTBuilder builder;
+    std::string sourceCode = builder.load_file(path);
+    TSTree* tree = builder.make_syntax_tree(sourceCode);
+    return builder.get_translation_unit(tree, sourceCode);
+}
+
+astfri::TranslationUnit* java_in::load_project(const std::string& path, const astfri::java::Config& cfg) {
+    (void) cfg;
+    astfri::java::ASTBuilder builder;
+    std::string sourceCode = builder.load_project(path);
+    TSTree* tree = builder.make_syntax_tree(sourceCode);
+    return builder.get_translation_unit(tree, sourceCode);
+}
+} // namespace astfri
+#pragma endregion

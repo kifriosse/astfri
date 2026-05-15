@@ -1,10 +1,11 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/AccessType.hpp>
 #include <libastfri-cs/impl/data/Identifiers.hpp>
 #include <libastfri-cs/impl/data/Metadata.hpp>
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
 #include <libastfri-cs/impl/util/Common.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <algorithm>
 #include <string>
@@ -15,8 +16,8 @@ SemanticContext::SemanticContext(SymbolTable& symbTable) :
     symbTable_(symbTable) {
 }
 
-void SemanticContext::enter_type(TypeBinding* tb) {
-    typeContext_.typeStack.push_back(tb);
+void SemanticContext::enter_type(TypeBinding& tb) {
+    typeContext_ = tb;
     enter_scope();
 }
 
@@ -45,8 +46,7 @@ void SemanticContext::reg_return(Type* returnType) {
 }
 
 void SemanticContext::leave_type() {
-    if (! typeContext_.typeStack.empty())
-        typeContext_.typeStack.pop_back();
+    typeContext_ = std::nullopt;
     leave_scope();
 }
 
@@ -55,11 +55,11 @@ void SemanticContext::leave_scope() {
         return;
 
     for (const auto scopeMemb : scopeContext_.scopeStack.back()) {
-        if (const auto param = as_a<ParamVarDefStmt>(scopeMemb))
+        if (const auto param = as<ParamVarDefStmt>(scopeMemb))
             scopeContext_.params.erase(param->name);
-        else if (const auto var = as_a<LocalVarDefStmt>(scopeMemb))
+        else if (const auto var = as<LocalVarDefStmt>(scopeMemb))
             scopeContext_.localVars.erase(var->name);
-        else if (const auto func = as_a<FunctionDefStmt>(scopeMemb)) {
+        else if (const auto func = as<FunctionDefStmt>(scopeMemb)) {
             scopeContext_.functions.erase(func->name);
         }
     }
@@ -71,9 +71,8 @@ void SemanticContext::unregister_return_type() {
         retTypeContext_.pop_back();
 }
 
-TypeBinding* SemanticContext::current_type() const {
-    auto& typeStack = typeContext_.typeStack;
-    return typeStack.empty() ? nullptr : typeStack.back();
+std::optional<TypeBinding> SemanticContext::current_type() const {
+    return typeContext_;
 }
 
 Type* SemanticContext::current_return_type() const {
@@ -97,7 +96,7 @@ VarDefStmt* SemanticContext::find_var(
                 return itParam->second;
 
             // member variables - includes both static and instance members
-            const TypeBinding* currentType = current_type();
+            const auto currentType = current_type();
 
             if (! currentType)
                 return nullptr;
@@ -109,7 +108,7 @@ VarDefStmt* SemanticContext::find_var(
             return nullptr;
         },
         [&](const access::Instance&) -> VarDefStmt* {
-            auto currentType = as_a<ClassDefStmt>(current_type()->def);
+            auto currentType = as<ClassDefStmt>(current_type()->def);
 
             while (currentType) {
                 if (const auto metadata = find_memb_var(name, currentType)) {
@@ -126,7 +125,9 @@ VarDefStmt* SemanticContext::find_var(
         },
         [&](const access::Base& base) -> VarDefStmt* {
             const auto metadata = find_memb_var(name, base.parent);
-            return metadata->varDef;
+            if (metadata)
+                return metadata->varDef;
+            return nullptr;
         },
         [&](const access::Unknown&) -> VarDefStmt* { return nullptr; }
     };
@@ -134,6 +135,7 @@ VarDefStmt* SemanticContext::find_var(
 }
 
 const FuncMetadata* SemanticContext::find_func(const std::string_view funcName) const {
+
     auto& funcs       = scopeContext_.functions;
     const auto itFunc = funcs.find(funcName);
     return itFunc == funcs.end() ? nullptr : &itFunc->second;
@@ -143,7 +145,7 @@ const MethodMetadata* SemanticContext::find_method(
     const MethodId& methodId,
     UserTypeDefStmt* owner
 ) const {
-    if (auto* classDef = as_a<ClassDefStmt>(owner)) {
+    if (auto* classDef = as<ClassDefStmt>(owner)) {
         ClassDefStmt* current = classDef;
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
@@ -156,7 +158,7 @@ const MethodMetadata* SemanticContext::find_method(
             current = ! current->bases.empty() ? current->bases.front() : nullptr;
         }
     }
-    else if (auto* intDef = as_a<InterfaceDefStmt>(owner)) {
+    else if (auto* intDef = as<InterfaceDefStmt>(owner)) {
         TypeMetadata* typeMeta = symbTable_.get_type_metadata(intDef);
         if (! typeMeta)
             return nullptr;
@@ -173,7 +175,7 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     UserTypeDefStmt* owner
 ) const {
     // todo add handling of records
-    if (auto* current = as_a<ClassDefStmt>(owner)) {
+    if (auto* current = as<ClassDefStmt>(owner)) {
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
             if (! typeMeta)
@@ -185,7 +187,7 @@ MemberVarMetadata* SemanticContext::find_memb_var(
             current = ! current->bases.empty() ? current->bases.front() : nullptr;
         }
     }
-    else if (is_a<InterfaceDefStmt>(owner)) {
+    else if (is<InterfaceDefStmt>(owner)) {
         TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
         if (! typeMeta)
             return nullptr;

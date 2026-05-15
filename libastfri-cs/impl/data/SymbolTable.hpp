@@ -25,9 +25,6 @@ struct TypeBinding;
  */
 class SymbolTable {
 private:
-    template<typename T>
-    using span = std::span<T>;
-
     std::unordered_map<UserTypeDefStmt*, TypeMetadata> userTypeMetadata_;
     std::vector<UserTypeDefStmt*> userTypes_;
     IdentifierMap<Alias> globAliases_;
@@ -110,13 +107,13 @@ public:
      * @return a view of pointers to ScopeNodes to which the global using
      * directives point
      */
-    span<const ScopeNode* const> get_glob_usings();
+    std::span<const ScopeNode* const> get_glob_usings();
     /**
      * @brief Returns a view of global static using directives
      * @return a view of type bindings which represent types used in global
      * static using directives
      */
-    span<const TypeBinding> get_glob_static_usings();
+    std::span<const TypeBinding> get_glob_static_usings();
     /**
      * @brief Gets global alias for given name
      * @param name name of alias to get

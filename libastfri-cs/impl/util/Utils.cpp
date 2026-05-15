@@ -11,12 +11,16 @@
 
 namespace astfri::csharp::util {
 
+size_t StringHash::operator()(const char* str) const noexcept {
+    return std::hash<std::string_view>()(str);
+}
+
 size_t StringHash::operator()(const std::string_view str) const noexcept {
     return std::hash<std::string_view>()(str);
 }
 
 size_t StringHash::operator()(const std::string& str) const noexcept {
-    return std::hash<std::string>()(str);
+    return std::hash<std::string_view>()(str);
 }
 
 IntSuffix get_suffix_type(const std::string_view suffix) {

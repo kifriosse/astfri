@@ -1,7 +1,21 @@
-﻿using System;
+﻿global using Alias = System.Collections.Generic;
+
+using System;
 using System.IO;
 
+
+namespace N
+{
+    using Alias = System.Collections.Generic;
+    namespace M
+    {
+        using AliasM = Alias::List<int>;
+        using static Alias.List<int>;
+    }
+}
+
 public class Program {
+
     static void Main(string[] args)
     {
         
@@ -129,6 +143,11 @@ public static class OperatorProcessor
             Console.WriteLine($"Error: Unknown operator '{operatorSymbol}'.");
             return null;
         }
+    }
+    
+    static void Test()
+    {
+        ProcessOperation(2, 4, "+");
     }
 }
 

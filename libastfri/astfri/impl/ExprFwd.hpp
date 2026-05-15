@@ -1,7 +1,9 @@
 #ifndef ASTFRI_IMPL_EXPR_FWD_HPP
 #define ASTFRI_IMPL_EXPR_FWD_HPP
 
+
 namespace astfri {
+
 
 struct Expr;
 struct IntLiteralExpr;
@@ -29,6 +31,7 @@ struct NewExpr;
 struct DeleteExpr;
 struct BracketExpr;
 struct UnknownExpr;
+
 
 } // namespace astfri
 

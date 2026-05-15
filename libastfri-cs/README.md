@@ -270,7 +270,7 @@ For Developers
 #### Prefixes
 
 - `n` - variable of `TSNode` type
-- `h` - variable of `Handler` type
+- `m` - variable of `Mapper` type
 - `q` - query related variable (could be `TSQuery`, `Query`, string representation of Tree-Sitter query or type of
   query - `QueryType`)
 - `c` - count variable
@@ -281,5 +281,5 @@ For Developers
 
 - `Fact` - factory variable
 - `Meta` - variable of Metadata type
-- `Sw` - varaible `string_view` type
+- `Sw` - variable of `string_view` type
 

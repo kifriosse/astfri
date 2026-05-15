@@ -1,12 +1,19 @@
 #ifndef CSHARP_TYPE_TRANSLATOR
 #define CSHARP_TYPE_TRANSLATOR
 
-#include <libastfri-cs/impl/data/SymbolTable.hpp>
 #include <astfri/Astfri.hpp>
+
+#include <libastfri-cs/impl/data/SymbolTable.hpp>
 
 #include <tree_sitter/api.h>
 
 namespace astfri::csharp {
+namespace maps {
+
+struct Mappers;
+class MapManager;
+
+} // namespace maps
 struct SourceFile;
 
 /**
@@ -21,6 +28,7 @@ private:
     friend maps::Mappers;
 
     static TypeFactory& typeFact_;
+    static maps::MapManager& mapManager_;
     /**
      * @brief Node used for marking types that can't be resolved. It's used as
      * a temporary storage for FQN or PQN type or namespace names that can't be
@@ -110,7 +118,7 @@ private:
      * @return type inside the wrapper
      */
     static Type* visit_wrapper(TypeTranslator* self, const TSNode& node);
-    static Type* visit_inderect(TypeTranslator* self, const TSNode& node);
+    static Type* visit_indirect(TypeTranslator* self, const TSNode& node);
     static Type* visit_array(TypeTranslator* self, const TSNode& node);
     static Type* visit_generic_name(TypeTranslator* self, const TSNode& node);
     static Type* visit_tuple(TypeTranslator* self, const TSNode& node);

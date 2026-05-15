@@ -9,10 +9,10 @@
 #include <tree_sitter/tree-sitter-java.h>
 
 #include <cstdint>
-#include <cstring>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <astfri/impl/StmtDef.hpp>
 
 namespace astfri::java {
 
@@ -35,6 +35,9 @@ private:
     std::vector<astfri::ClassDefStmt*> classes;
     std::vector<astfri::InterfaceDefStmt*> interfaces;
     std::vector<astfri::InterfaceDefStmt*> functionalInterfaces;
+
+    std::unordered_map<astfri::ClassDefStmt*, TSNode> clsNodes;  
+    std::unordered_map<astfri::InterfaceDefStmt*, TSNode> ifaceNodes;  
 
     std::unordered_map<std::string, std::vector<astfri::ClassDefStmt*>> classesByName;
     std::unordered_map<std::string, std::vector<astfri::InterfaceDefStmt*>> interfacesByName;
@@ -75,6 +78,8 @@ private:
 
     astfri::ReturnStmt* transform_return_stmt_node(TSNode tsNode, const std::string& sourceCode);
 
+    astfri::BaseInitializerStmt* transform_explicit_constructor_invocation(TSNode tsNode, const std::string& sourceCode);
+
     astfri::CompoundStmt* transform_body_node(TSNode tsNode, const std::string& sourceCode);
 
     FunctionType transform_function(TSNode tsNode, const std::string& sourceCode);
@@ -94,6 +99,16 @@ private:
     astfri::GenericParam* transform_tparam_node(TSNode tsNode, const std::string& sourceCode);
 
     astfri::Scope get_scope(TSNode tsNode, const std::string& sourceCode);
+
+    void fill_class(
+        astfri::ClassDefStmt* classDef,
+        TSNode classNode,
+        const std::string& sourceCode);
+
+    void fill_interface(
+    astfri::InterfaceDefStmt* classDef,
+    TSNode classNode,
+    const std::string& sourceCode);
 
     astfri::ClassDefStmt* transform_class(TSNode tsNode, const std::string& sourceCode);
 

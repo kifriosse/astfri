@@ -1,12 +1,12 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
-#include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
-#include <libastfri-cs/impl/visitors/src_code/SrcCodeVisitor.hpp>
+#include <libastfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 #include <libastfri-cs/impl/visitors/SymbTableBuilder.hpp>
 #include <libastfri-cs/inc/ASTBuilder.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -109,7 +109,6 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
         load_source_of_external_types(profileMap.at(SDKProfile::Core));
     }
 
-    TranslationUnit* ast = StmtFactory::get_instance().mk_translation_unit();
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(srcs_, symbTable);
 
@@ -136,13 +135,12 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
     // std::cout << "Symbol Table Building took " << duration.count() << " ms"
     //           << std::endl;
 
-    SemanticContext semanticContext(symbTable);
-    SrcCodeVisitor srcVisitor(semanticContext, symbTable);
+    SrcCodeTransformer srcVisitor(symbTable);
 
     // std::cout << "Phase 2: Building of AST" << std::endl;
     // start = std::chrono::high_resolution_clock::now();
 
-    srcVisitor.visit_comp_unit(*ast);
+    TranslationUnit* ast = srcVisitor.visit_comp_unit();
 
     // end      = std::chrono::high_resolution_clock::now();
     // duration = std::chrono::duration_cast<milli>(end - start);

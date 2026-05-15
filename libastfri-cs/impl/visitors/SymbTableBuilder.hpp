@@ -31,9 +31,10 @@ private:
     friend maps::Mappers;
 
     static StmtFactory& stmtFact_;
+    static maps::MapManager& mapManager_;
     static maps::QueryReg& queryReg_;
 
-    TypeContext typeContext_;
+    std::optional<TypeBinding> typeContext_;
     TypeTranslator typeTrs_;
     SymbolTable& symbTable_;
     std::vector<std::unique_ptr<SourceFile>>& srcs_;
@@ -89,6 +90,8 @@ private:
     static void visit_memb_var(SymbTableBuilder* self, const TSNode& node);
     static void visit_property(SymbTableBuilder* self, const TSNode& node);
     static void visit_method(SymbTableBuilder* self, const TSNode& node);
+    static void visit_base_list(SymbTableBuilder* self, const TSNode& node);
+    static void visit_type_param_constraint(SymbTableBuilder* self, const TSNode& node);
 
     /**
      * @brief Registers a single using directive.
@@ -110,6 +113,8 @@ private:
      * @return pointer to the ScopeNode created for the that Type
      */
     ScopeNode* visit_type_def(const TSNode& node, util::TypeKind type);
+    void visit_base_list_class(const TSNode& node, ClassDefStmt* classDef);
+    void visit_base_list_interface(const TSNode& node, InterfaceDefStmt* intfDef);
 
     /**
      * @brief Gets the source code currently being visited.
@@ -129,12 +134,15 @@ private:
      * @param type type of user defined type
      * @param scope scope of the type
      * @param name name of the type
+     * @param genericParams
+     * @param genericParams
      * @return type binding for that type
      */
     [[nodiscard]] static TypeBinding mk_type_binding(
         util::TypeKind type,
         Scope scope,
-        std::string name
+        std::string name,
+        std::vector<GenericParam*> genericParams
     );
 };
 

@@ -1,9 +1,11 @@
+#include <astfri/Astfri.hpp>
+
 #include <libastfri-cs/impl/data/SymbolTable.hpp>
-#include <libastfri-cs/impl/regs/Registries.hpp>
+#include <libastfri-cs/impl/regs/Maps.hpp>
 #include <libastfri-cs/impl/SemanticContext.hpp>
+#include <libastfri-cs/impl/util/AstfriUtil.hpp>
 #include <libastfri-cs/impl/util/TSUtil.hpp>
 #include <libastfri-cs/impl/visitors/TypeTranslator.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -13,6 +15,7 @@
 namespace astfri::csharp {
 
 TypeFactory& TypeTranslator::typeFact_ = TypeFactory::get_instance();
+maps::MapManager& TypeTranslator::mapManager_ = maps::MapManager::get();
 
 ScopeNode TypeTranslator::extMarkNode_(ExternalMarker{}, nullptr);
 
@@ -31,20 +34,19 @@ void TypeTranslator::set_current_namespace(ScopeNode* node) {
 
 Type* TypeTranslator::visit_predefined(TypeTranslator* self, const TSNode& node) {
     const std::string name = util::extract_text(node, self->src_str());
-    const auto result      = MapManager::get_primitive_type(name);
+    const auto result      = mapManager_.get_primitive_type(name);
     return result ? result : typeFact_.mk_unknown();
 }
 
 Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& node) {
-    const auto primitive
-        = MapManager::get_primitive_type(util::extract_text(node, self->src_str()));
-    if (primitive)
+    if (const auto primitive
+        = mapManager_.get_primitive_type(util::extract_text(node, self->src_str())))
         return primitive;
 
     // look up order form language specification
     // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#781-general
 
-    const ScopeNode* typeNode
+    ScopeNode* typeNode
         = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
 
     if (typeNode) {
@@ -52,8 +54,10 @@ Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& nod
             [](const TypeBinding& b) -> Type* { return b.type; },
             [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
-            [](const ExternalMarker&) -> Type* {
-                return typeFact_.mk_unknown(); // todo change to incomplete type
+            [](ExternalMarker& em) -> Type* {
+                if (em.qualifName.empty())
+                    return typeFact_.mk_unknown();
+                return typeFact_.mk_incomplete(em.takeName());
             },
         };
         return std::visit(overloaded, typeNode->data());
@@ -66,16 +70,17 @@ Type* TypeTranslator::visit_qualified_name(
     [[maybe_unused]] TypeTranslator* self,
     [[maybe_unused]] const TSNode& node
 ) {
-    const ScopeNode* typeNode
-        = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
+    ScopeNode* typeNode = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
 
     if (typeNode) {
         util::Overloaded overloaded{
             [](const TypeBinding& b) -> Type* { return b.type; },
             [](const CSPrimitiveType& p) -> Type* { return p.primitiveType; },
             [](const Nms&) -> Type* { return typeFact_.mk_unknown(); },
-            [](const ExternalMarker&) -> Type* {
-                return typeFact_.mk_unknown(); // todo change to incomplete type
+            [](ExternalMarker& em) -> Type* {
+                if (em.qualifName.empty())
+                    return typeFact_.mk_unknown();
+                return typeFact_.mk_incomplete(em.takeName());
             }
         };
         return std::visit(overloaded, typeNode->data());
@@ -93,15 +98,15 @@ Type* TypeTranslator::visit_implicit(
 
 Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node) {
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = MapManager::get_type_mapper(nType);
-    return th(self, nType);
+    const TypeMapper tm = mapManager_.get_type_mapper(nType);
+    return tm(self, nType);
 }
 
-Type* TypeTranslator::visit_inderect(TypeTranslator* self, const TSNode& node) {
+Type* TypeTranslator::visit_indirect(TypeTranslator* self, const TSNode& node) {
     // todo add handling of readonly
     const TSNode nType  = util::child_by_field_name(node, "type");
-    const TypeMapper th = MapManager::get_type_mapper(nType);
-    return typeFact_.mk_indirect(th(self, nType));
+    const TypeMapper tm = mapManager_.get_type_mapper(nType);
+    return typeFact_.mk_indirect(tm(self, nType));
 }
 
 Type* TypeTranslator::visit_array(
@@ -153,7 +158,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
      * Global lookup (including file usings)
      * * Checks only external aliases
      */
-    static const TSSymbol sQualifName = MapManager::get_symbol(NodeType::QualifName);
+    static const TSSymbol sQualifName = mapManager_.get_symbol(NodeType::QualifName);
 
     const std::string_view srcStr     = src_str();
     TSNode nCurrent                   = nQualif;
@@ -168,12 +173,10 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
 
     const SymbolTree& symbTree = symbTable_.symb_tree();
     ScopeNode* entryPoint      = start;
-    bool hasExplicitAlias      = false;
-    if (sCurrent == MapManager::get_symbol(NodeType::AliasQualifName)) {
+    if (sCurrent == mapManager_.get_symbol(NodeType::AliasQualifName)) {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         const TSNode nAlias        = util::child_by_field_name(nCurrent, "alias");
         const std::string aliasStr = util::extract_text(nAlias, srcStr);
-        hasExplicitAlias           = true;
         if (aliasStr == "global") {
             entryPoint = symbTree.root();
         }
@@ -185,7 +188,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
             if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
                 entryPoint = *node;
             else {
-                extMarkNode_.data<ExternalMarker>().qualifiedName
+                extMarkNode_.data<ExternalMarker>().qualifName
                     = util::extract_text(nQualif, srcStr);
                 return &extMarkNode_;
             }
@@ -198,14 +201,12 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     const std::string qualifStr = util::extract_text(nQualifs.back(), srcStr);
     nQualifs.pop_back();
 
-    if (! hasExplicitAlias) {
-        entryPoint = find_entry_point(qualifStr, searchScope, start, src());
-    }
+    entryPoint = find_entry_point(qualifStr, searchScope, entryPoint, src());
 
     ScopeNode* currentNode = entryPoint;
     for (auto& nCurrentQualif : std::views::reverse(nQualifs)) {
         if (! currentNode) {
-            extMarkNode_.data<ExternalMarker>().qualifiedName = util::extract_text(nQualif, srcStr);
+            extMarkNode_.data<ExternalMarker>().qualifName = util::extract_text(nQualif, srcStr);
             return &extMarkNode_;
         }
         std::string qualifName = util::extract_text(nCurrentQualif, srcStr);
@@ -277,6 +278,9 @@ ScopeNode* TypeTranslator::find_entry_point(
     ScopeNode* start,
     SourceFile* src
 ) const {
+    if (! start)
+        return nullptr;
+
     ScopeNode* current = start;
     using enum util::SearchScope;
     switch (searchScope) {
@@ -312,9 +316,15 @@ ScopeNode* TypeTranslator::find_entry_point(
         // check current scope for types
         if (ScopeNode* child = current->find_child(qualif))
             return child;
-        // bottom-up search from current scope
-        if (ScopeNode* node = bottom_up_search(qualif, start, src))
+        // bottom-up search from parent scope
+        current = current->parent();
+        if (ScopeNode* node = bottom_up_search(qualif, current, src))
             return node;
+        // check global aliasis
+        if (const auto* alias = symbTable_.get_glob_alias(qualif)) {
+            if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
+                return *node;
+        }
         // check global static usings for nested types
         for (const auto& b : symbTable_.get_glob_static_usings()) {
             if (ScopeNode* node = b.treeNode->find_child(qualif))
@@ -325,11 +335,8 @@ ScopeNode* TypeTranslator::find_entry_point(
     case FileUsing:
     case GlobStaticUsing:
     case GlobAlias:
-    case GlobUsing: {
-        if (ScopeNode* node = symbTable_.symb_tree().root()->find_child(qualif))
-            return node;
-        break;
-    }
+    case GlobUsing:
+        return symbTable_.symb_tree().root()->find_child(qualif);
     }
 
     return nullptr;
@@ -343,14 +350,14 @@ ScopeNode* TypeTranslator::bottom_up_search(
     ScopeNode* current = start;
     // bottom-up search from current namespace to global namespace
     while (current) {
-        // look into siblings - types defined in the same namespace/type
+        // look for types defined in current node
         if (ScopeNode* child = current->find_child(qualif))
             return child;
 
-        // if node contains type look into nested types in parent classes
+        // if node represents type look for nested types in parent classes
         if (const TypeBinding* b = current->is_a<TypeBinding>()) {
-            if (ScopeNode* inheretedChild = search_parents(qualif, *b))
-                return inheretedChild;
+            if (ScopeNode* inheritedChild = search_parents(qualif, *b))
+                return inheritedChild;
         }
         // if node is namespace
         const Nms* nms = current->is_a<Nms>();
@@ -361,9 +368,11 @@ ScopeNode* TypeTranslator::bottom_up_search(
 
         // check aliases in current namespace
         if (const Alias* alias = nms->find_alias(qualif, src)) {
-            ScopeNode* const* node = std::get_if<ScopeNode*>(alias);
-            return node ? *node : nullptr;
-            // todo return external marker instead of nullptr
+            if (ScopeNode* const* node = std::get_if<ScopeNode*>(alias))
+                return *node;
+
+            extMarkNode_.data<ExternalMarker>().qualifName = std::get<std::string>(*alias);
+            return &extMarkNode_;
         }
 
         // check nested classes in static usings
@@ -381,7 +390,8 @@ ScopeNode* TypeTranslator::search_parents(
     const TypeBinding& start
 ) const {
     ClassDefStmt* current = nullptr;
-    if (auto* classDef = as_a<ClassDefStmt>(start.def)) {
+    // todo add also support for records
+    if (auto* classDef = as<ClassDefStmt>(start.def)) {
         current = classDef;
     }
 
