@@ -2,7 +2,7 @@
 
 using namespace astfri::text;
 
-AbstractVisitor::AbstractVisitor(TextBuilder* builder) :
+AbstractVisitor::AbstractVisitor(AbstractBuilder* builder) :
     m_builder(builder)
 {
 }

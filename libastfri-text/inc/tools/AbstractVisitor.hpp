@@ -2,16 +2,16 @@
 #define LIBASTFRI_TEXT_ABSTRACT_VISITOR
 
 #include <astfri/Astfri.hpp>
-#include <libastfri-text/inc/tools/TextBuilder.hpp>
+#include <libastfri-text/inc/tools/AbstractBuilder.hpp>
 
 namespace astfri::text
 {
     class AbstractVisitor : public ThrowingVisitorAdapter
     {
     protected:
-        TextBuilder* m_builder;
+        AbstractBuilder* m_builder;
     public:
-        explicit AbstractVisitor(TextBuilder* builder);
+        explicit AbstractVisitor(AbstractBuilder* builder);
         virtual ~AbstractVisitor() = default;
         //
         void process_condition(Expr* expr);
