@@ -1,15 +1,16 @@
 add_library(astfri-text SHARED)
 
 target_sources(astfri-text PRIVATE
-  general/AbstractBuilder.cpp
-  general/AbstractVisitor.cpp
-  pseudocode/AbstractTextBuilder.cpp
   pseudocode/PlainTextBuilder.cpp
-  pseudocode/PseudocodeVisitor.cpp
-  settings/BaseStructure.cpp
-  settings/GeneralConfig.cpp
-  settings/OutputFileManager.cpp
-  settings/TextConfig.cpp
+  pseudocode/PseudocodeBuilder.cpp
+  pseudocode/PseudoExprVis.cpp
+  pseudocode/PseudoObjectStmtVis.cpp
+  pseudocode/PseudoOtherStmtVis.cpp
+  pseudocode/PseudoTypeVis.cpp
+  tools/AbstractBuilder.cpp
+  tools/AbstractVisitor.cpp
+  TextLibConfig.cpp
+  TextLibManager.cpp
 )
 
 target_include_directories(astfri-text PUBLIC ${PROJECT_SOURCE_DIR})
