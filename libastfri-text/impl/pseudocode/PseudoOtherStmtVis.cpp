@@ -124,7 +124,7 @@ void PseudocodeVisitor::visit(const ThrowStmt& stmt)
 void PseudocodeVisitor::visit(const CatchStmt& stmt)
 {
     m_builder->write_catch_word();
-    process_params_or_args(stmt.param, false);
+    //process_params_or_args(stmt.param, false); TODO fix
     process_body(stmt.body, m_config->trycatchBlockBracketNewLine);
 }
 

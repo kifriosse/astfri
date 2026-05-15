@@ -2,6 +2,12 @@
 
 using namespace astfri::text;
 
+PseudocodeVisitor::PseudocodeVisitor(PseudocodeBuilder* builder) :
+    AbstractVisitor(builder),
+    m_builder(builder)
+{
+}
+
 void PseudocodeVisitor::visit(const DynamicType& /*type*/)
 {
     m_builder->write_dynamic_type_word();

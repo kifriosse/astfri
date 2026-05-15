@@ -1,7 +1,7 @@
 #ifndef LIBASTFRI_TEXT_TEXT_LIB_MANAGER
 #define LIBASTFRI_TEXT_TEXT_LIB_MANAGER
 
-#include <libastfri-text/inc/code/AbstractCodeVisitor.hpp>
+#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 
 #include <iostream>
 
@@ -41,13 +41,13 @@ public:
     void update_configuration();
     void reload_configuration();
     // -----
-    template<astfri_node Node>
+    template<typename Node>
     void visit_and_export(const Node& node, std::ostream& ostream);
     // -----
-    template<astfri_node Node>
+    template<typename Node>
     void visit_and_export(const Node& node);
     // -----
-    template<astfri_node Node>
+    template<typename Node>
     void visit(const Node& node);
 };
 
@@ -55,13 +55,13 @@ public:
 // -----
 //
 
-template<astfri_node Node>
+template<typename Node>
 void TextLibManager::visit_and_export(const Node& node, std::ostream& ostream) {
     visit(node);
     execute_export(ostream);
 }
 
-template<astfri_node Node>
+template<typename Node>
 void TextLibManager::visit_and_export(const Node& node) {
     visit(node);
     execute_export();
@@ -69,15 +69,15 @@ void TextLibManager::visit_and_export(const Node& node) {
 
 // -----
 
-template<astfri_node Node>
+template<typename Node>
 void TextLibManager::visit(const Node& node) {
     auto* tu = dynamic_cast<const TranslationUnit*>(&node);
-    if (dynamic_cast<AbstractCodeVisitor*>(visitor_) && ! tu) {
+    if (!tu) {
         std::cout << " > Instance of TranslationUnit required to generate code.\n";
         return;
     }
     const_cast<Node&>(node).accept(*visitor_);
 }
-} // namespace astfri::text
+}
 
 #endif
