@@ -2,16 +2,16 @@
 #define LIBASTFRI_TEXT_ABSTRACT_VISITOR
 
 #include <astfri/Astfri.hpp>
-#include <libastfri-text/inc/general/AbstractBuilder.hpp>
+#include <libastfri-text/inc/tools/TextBuilder.hpp>
 
 namespace astfri::text
 {
     class AbstractVisitor : public ThrowingVisitorAdapter
     {
     protected:
-        AbstractBuilder& m_builder;
+        TextBuilder* m_builder;
     public:
-        AbstractVisitor(AbstractBuilder& builder);
+        explicit AbstractVisitor(TextBuilder* builder);
         virtual ~AbstractVisitor() = default;
         //
         void process_condition(Expr* expr);
@@ -21,13 +21,11 @@ namespace astfri::text
         void accept_node(Node* node);
         //
         template<typename Vector>
-        void process_pargs(Vector const& pargs, bool useGeneric);
+        void process_params_or_args(Vector const& pargs, bool useGeneric);
         //
         template<typename Vector>
         bool try_find_access_mod(Vector const& all, Vector& found, AccessModifier mod);
     };
-
-    // -----
 
     template<typename Node>
     void AbstractVisitor::accept_node(Node* node)
@@ -35,39 +33,34 @@ namespace astfri::text
         node->accept(*this);
     }
 
-    // -----
-
     template<typename Vector>
-    void AbstractVisitor::process_pargs(Vector const& pargs, bool useGeneric)
+    void AbstractVisitor::process_params_or_args(Vector const& pargs, bool useGeneric)
     {
         if (useGeneric)
         {
-            m_builder.write_left_bracket("<");
+            m_builder->write_left_bracket("<");
         }
         else
         {
-            m_builder.write_left_bracket("(");
+            m_builder->write_left_bracket("(");
         }
         for (size_t i = 0; i < pargs.size(); ++i)
         {
             accept_node(pargs.at(i));
             if (i < pargs.size() - 1)
             {
-                m_builder.write_separator(",");
-                m_builder.write_space();
+                m_builder->write_comma_space();
             }
         }
         if (useGeneric)
         {
-            m_builder.write_right_bracket(">");
+            m_builder->write_right_bracket(">");
         }
         else
         {
-            m_builder.write_right_bracket(")");
+            m_builder->write_right_bracket(")");
         }
     }
-
-    // -----
 
     template<typename Vector>
     bool AbstractVisitor::try_find_access_mod(Vector const& all, Vector& found, AccessModifier mod)
