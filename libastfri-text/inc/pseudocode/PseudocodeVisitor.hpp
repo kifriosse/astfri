@@ -76,7 +76,7 @@ namespace astfri::text
         void visit(const MemberVarDefStmt& stmt) override;
         void visit(const GlobalVarDefStmt& stmt) override;
         void visit(const FunctionDefStmt& stmt) override;
-        void visit(const DefStmt& stmt) override;
+        void visit(const MultiVarDefStmt& stmt) override;
         void visit(const MethodDefStmt& stmt) override;
         void visit(const BaseInitializerStmt& stmt) override;
         void visit(const SelfInitializerStmt& stmt) override;

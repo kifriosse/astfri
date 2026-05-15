@@ -26,7 +26,7 @@ void PseudocodeVisitor::visit(const FunctionDefStmt& stmt)
 {
 }
 
-void PseudocodeVisitor::visit(const DefStmt& stmt)
+void PseudocodeVisitor::visit(const MultiVarDefStmt& stmt)
 {
 }
 
