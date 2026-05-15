@@ -75,7 +75,6 @@ void TextLibConfig::change_to_default()
     defaultTextStyle   = "font-family:Consolas;font-size:16px";
     unknownPhraseStyle = "";
     rowNumStyle        = "";
-    brColors = {"red", "green", "blue"};
     // 3.2 SYMBOLS
     // 3.2.1 OPERATORS
     pointerWord = "↑";
@@ -84,6 +83,7 @@ void TextLibConfig::change_to_default()
     addressWord = "&";
     derefWord   = "*";
     opWordStyle = "";
+    brColors = {"red", "green", "blue"};
     // 3.2.2 SEPARATORS
     semicolonWord = ";";
     sepWordStyle  = "";
@@ -317,19 +317,6 @@ void TextLibConfig::process_general_text(jValue const& text)
     read_string("default_style", text, defaultTextStyle);
     read_string("unknown_phrase_style", text, unknownPhraseStyle);
     read_string("row_number_style", text, rowNumStyle);
-    jValue const* array = nullptr;
-    read_array("bracket_colors", text, array);
-    if (array)
-    {
-        brColors.clear();
-        for (size_t i = 0; i < array->Size(); ++i)
-        {
-            if (array[i].IsString())
-            {
-                brColors.push_back(array[i].GetString());
-            }
-        }
-    }
 }
 
 void TextLibConfig::process_symbols(jValue const& symbols)
@@ -343,6 +330,19 @@ void TextLibConfig::process_symbols(jValue const& symbols)
         read_string("address_word", *tmp, addressWord);
         read_string("dereference_word", *tmp, derefWord);
         read_string("default_style", *tmp, opWordStyle);
+        jValue const* array = nullptr;
+        read_array("bracket_colors", *tmp, array);
+        if (array)
+        {
+            brColors.clear();
+            for (size_t i = 0; i < array->Size(); ++i)
+            {
+                if (array[i].IsString())
+                {
+                    brColors.push_back(array[i].GetString());
+                }
+            }
+        }
     }
     if (is_object("SEPARATORS", symbols, tmp))
     {

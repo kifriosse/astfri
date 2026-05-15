@@ -53,7 +53,6 @@ namespace astfri::text
         std::string defaultTextStyle   = "font-family:Consolas;font-size:16px";
         std::string unknownPhraseStyle = "";
         std::string rowNumStyle        = "";
-        std::vector<std::string> brColors = {"red", "green", "blue"};
         // 3.2 SYMBOLS
         // 3.2.1 OPERATORS
         std::string pointerWord = "↑";
@@ -62,6 +61,7 @@ namespace astfri::text
         std::string addressWord = "&";
         std::string derefWord   = "*";
         std::string opWordStyle = "";
+        std::vector<std::string> brColors = {"red", "green", "blue"};
         // 3.2.2 SEPARATORS
         std::string semicolonWord = ";";
         std::string sepWordStyle  = "";
