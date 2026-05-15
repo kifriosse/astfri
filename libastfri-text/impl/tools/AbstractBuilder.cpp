@@ -1,30 +1,30 @@
-#include <libastfri-text/inc/tools/TextBuilder.hpp>
+#include <libastfri-text/inc/tools/AbstractBuilder.hpp>
 
 using namespace astfri::text;
 
-std::string& TextBuilder::get_builded_text()
+std::string& AbstractBuilder::get_builded_text()
 {
     return m_buildedText;
 }
 
-void TextBuilder::reset_text_builder()
+void AbstractBuilder::reset_text_builder()
 {
     m_buildedText.clear();
     m_indentationLevel = 0;
     m_isEmptyLine      = true;
 }
 
-void TextBuilder::increase_indentation()
+void AbstractBuilder::increase_indentation()
 {
     ++m_indentationLevel;
 }
 
-void TextBuilder::decrease_indentation()
+void AbstractBuilder::decrease_indentation()
 {
     --m_indentationLevel;
 }
 
-void TextBuilder::write_opening_curl_bracket(bool const& onNewLine, bool incIndent)
+void AbstractBuilder::write_opening_curl_bracket(bool const& onNewLine, bool incIndent)
 {
     if (onNewLine)
     {
@@ -42,7 +42,7 @@ void TextBuilder::write_opening_curl_bracket(bool const& onNewLine, bool incInde
     }
 }
 
-void TextBuilder::write_closing_curl_bracket(bool decIndent)
+void AbstractBuilder::write_closing_curl_bracket(bool decIndent)
 {
     write_new_line();
     if (decIndent)
@@ -52,7 +52,7 @@ void TextBuilder::write_closing_curl_bracket(bool decIndent)
     write_right_bracket("}");
 }
 
-void TextBuilder::write_comma_space()
+void AbstractBuilder::write_comma_space()
 {
     write_separator(",");
     write_space();
