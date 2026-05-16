@@ -3,18 +3,10 @@
 
 using namespace astfri::text;
 
-TextLibManager& TextLibManager::get_instance() {
-    static TextLibManager manager;
-    return manager;
-}
-
 TextLibManager::TextLibManager() :
-    visitor_(new PseudocodeVisitor(new PlainTextBuilder)) {
+    visitor_(new PseudocodeVisitor(new PlainTextBuilder))
+{
 }
-
-//
-// -----
-//
 
 void TextLibManager::change_output(const OutputFormat& format) {
     switch (format) {

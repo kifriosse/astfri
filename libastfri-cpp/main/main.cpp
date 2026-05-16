@@ -20,7 +20,7 @@ int main(int argc, const char** argv) {
     astfri::TranslationUnit tu = astfri::cpp_in::load_file(argv[1], astfri::cpp::Config());
 
     // pseudocode
-    astfri::text::TextLibManager& man = astfri::text::TextLibManager::get_instance();
+    astfri::text::TextLibManager man;
     man.visit_and_export(tu);
 
     // UML

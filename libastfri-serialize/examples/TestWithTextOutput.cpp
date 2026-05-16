@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     AstFriDeSerializer& serializer        = AstFriDeSerializer::get_instance();
 
     astfri::Stmt* node               = serializer.deserialize(argv[1]);
-    astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
+    astfri::text::TextLibManager visitor;
 
     // visitor.visit(*node);
 

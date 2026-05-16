@@ -5,7 +5,7 @@
 int main() {
     using namespace astfri;
     csharp::ASTBuilder astBuilder;
-    text::TextLibManager& manager = text::TextLibManager::get_instance();
+    text::TextLibManager manager;
     // astBuilder.load_src("../../../libastfri-cs/resources/test_src/");
     astBuilder.load_src("../../../resources/samples/csharp/");
     // for loading file from stream
