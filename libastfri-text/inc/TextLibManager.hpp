@@ -1,75 +1,48 @@
 #ifndef LIBASTFRI_TEXT_TEXT_LIB_MANAGER
 #define LIBASTFRI_TEXT_TEXT_LIB_MANAGER
 
-#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
-
-#include <iostream>
+#include <libastfri-text/inc/tools/AbstractVisitor.hpp>
+#include <libastfri-text/inc/tools/Exporter.hpp>
 
 namespace astfri::text
 {
-    enum class OutputFormat
+    enum class TextOutputFormat
     {
         CxxCode,
         JavaCode,
-        Pseudocode
+        TxtPseudocode,
+        HtmlPseudocode
     };
 
     class TextLibManager
     {
-        AbstractVisitor* visitor_;
+        TextLibConfig* const m_config;
+        AbstractBuilder* m_builder;
+        AbstractVisitor* m_visitor;
+        Exporter* const m_exporter;
+        bool m_isSetToPseudocode;
     public:
-        TextLibManager();
-        ~TextLibManager() = default;
-    public:
+        explicit TextLibManager();
+        ~TextLibManager();
+        //
         static void process_ast(TextLibConfig cfg, TranslationUnit const& root);
         static void process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream& ost);
+    private:
+        static void process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream* ost);
+    public:
+        void process_and_export_ast(TranslationUnit const& root, std::ostream& ost);
+        void process_and_export_ast(TranslationUnit const& root);
+        void process_ast(TranslationUnit const& root);
+        void export_ast(std::ostream& ost);
+        void export_ast();
         //
-        void change_output(const OutputFormat& format);
-        void execute_export(std::ostream& ostream);
-        void execute_export();
-        void clear_builder();
-        void append_text(const std::string& text);
-        void append_new_line();
-        void append_space();
-        void update_configuration();
-        void reload_configuration();
-        // -----
-        template<typename Node>
-        void visit_and_export(const Node& node, std::ostream& ostream);
-        // -----
-        template<typename Node>
-        void visit_and_export(const Node& node);
-        // -----
-        template<typename Node>
-        void visit(const Node& node);
+        void change_output_format(TextOutputFormat const& format);
+        void change_config(std::filesystem::path const& path);
+        void change_config(rapidjson::Value const& json);
+    private:
+        void change_output_format(std::string_view format);
     };
     static_assert(IsOutputLibInterface<TextLibManager, TextLibConfig, rapidjson::Value>);
-
-    template<typename Node>
-    void TextLibManager::visit_and_export(const Node& node, std::ostream& ostream)
-    {
-        visit(node);
-        execute_export(ostream);
-    }
-
-    template<typename Node>
-    void TextLibManager::visit_and_export(const Node& node)
-    {
-        visit(node);
-        execute_export();
-    }
-
-    template<typename Node>
-    void TextLibManager::visit(const Node& node)
-    {
-        auto* tu = dynamic_cast<const TranslationUnit*>(&node);
-        if (!tu)
-        {
-            std::cout << " > Instance of TranslationUnit required to generate code.\n";
-            return;
-        }
-        const_cast<Node&>(node).accept(*visitor_);
-    }
 }
 
 #endif
