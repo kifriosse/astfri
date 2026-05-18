@@ -14,7 +14,6 @@ namespace astfri::text
     public:
         virtual ~PseudocodeBuilder() = default;
         //
-        void reset_pseudocode_builder();
         void write_opening_else_word();
         void write_opening_catch_word();
         // 3.1 GENERAL

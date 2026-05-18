@@ -2,6 +2,14 @@
 
 using namespace astfri::text;
 
+void PlainTextBuilder::reset_builder()
+{
+    m_buildedText.clear();
+    m_indentationLevel = 0;
+    m_isEmptyLine      = true;
+    m_rowCount         = 1;
+}
+
 // 3.1 GENERAL
 
 void PlainTextBuilder::write_new_line()

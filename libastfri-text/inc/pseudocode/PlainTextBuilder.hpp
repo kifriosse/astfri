@@ -8,6 +8,7 @@ namespace astfri::text
     class PlainTextBuilder : public PseudocodeBuilder
     {
     public:
+        void reset_builder() override;
         // 3.1 GENERAL
         void write_new_line() override;
         void write_space() override;

@@ -7,13 +7,6 @@ std::string& AbstractBuilder::get_builded_text()
     return m_buildedText;
 }
 
-void AbstractBuilder::reset_text_builder()
-{
-    m_buildedText.clear();
-    m_indentationLevel = 0;
-    m_isEmptyLine      = true;
-}
-
 void AbstractBuilder::increase_indentation()
 {
     ++m_indentationLevel;

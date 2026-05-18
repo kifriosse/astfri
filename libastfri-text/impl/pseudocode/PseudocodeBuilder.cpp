@@ -2,12 +2,6 @@
 
 using namespace astfri::text;
 
-void PseudocodeBuilder::reset_pseudocode_builder()
-{
-    reset_text_builder();
-    m_rowCount = 1;
-}
-
 void PseudocodeBuilder::write_opening_else_word()
 {
     if (m_config->elseConditionNewLine)
@@ -20,6 +14,20 @@ void PseudocodeBuilder::write_opening_else_word()
     }
     write_else_word();
     write_opening_curl_bracket(m_config->conditionBlockBracketNewLine);
+}
+
+void PseudocodeBuilder::write_opening_catch_word()
+{
+    if (m_config->catchConditionNewLine)
+    {
+        write_new_line();
+    }
+    else
+    {
+        write_space();
+    }
+    write_catch_word();
+    write_opening_curl_bracket(m_config->trycatchBlockBracketNewLine);
 }
 
 void PseudocodeBuilder::write_text(std::string_view text)
