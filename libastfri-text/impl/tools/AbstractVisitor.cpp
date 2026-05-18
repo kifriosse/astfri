@@ -7,6 +7,11 @@ AbstractVisitor::AbstractVisitor(AbstractBuilder* builder) :
 {
 }
 
+void AbstractVisitor::replace_builder(AbstractBuilder* builder)
+{
+    m_builder = builder;
+}
+
 void AbstractVisitor::process_condition(Expr* expr)
 {
     m_builder->write_space();
