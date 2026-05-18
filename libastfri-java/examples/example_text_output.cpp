@@ -16,7 +16,7 @@ int main() {
     // code for text output
     astfri::text::TextLibManager visitor;
 
-    visitor.process_and_export_ast(*tu);
+    visitor.process_and_export_ast(*tu, nullptr);
 
     // freeing memory
     ts_tree_delete(tree);

@@ -30,11 +30,9 @@ namespace astfri::text
     private:
         static void process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream* ost);
     public:
-        void process_and_export_ast(TranslationUnit const& root, std::ostream& ost);
-        void process_and_export_ast(TranslationUnit const& root);
+        void process_and_export_ast(TranslationUnit const& root, std::ostream* ost);
         void process_ast(TranslationUnit const& root);
-        void export_ast(std::ostream& ost);
-        void export_ast();
+        void export_ast(std::ostream* ost);
         //
         void change_output_format(TextOutputFormat const& format);
         void change_config(std::filesystem::path const& path);

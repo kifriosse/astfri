@@ -281,7 +281,7 @@ int main(int argc, const char** argv)
             break;
         }
 
-        manager.process_and_export_ast(tu, std::cout);
+        manager.process_and_export_ast(tu, &std::cout);
         break;
     }
     case OutputType::UML:

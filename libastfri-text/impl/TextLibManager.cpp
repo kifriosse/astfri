@@ -35,7 +35,6 @@ void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root,
 {
     AbstractBuilder* builder = nullptr;
     AbstractVisitor* visitor = nullptr;
-    bool isPseudocode = false;
     if (cfg.fileFormat == "c++")
     {
     }
@@ -49,47 +48,19 @@ void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root,
     {
         builder = new PlainTextBuilder();
         visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(builder), &cfg);
-        isPseudocode = true;
         cfg.fileFormat = "txt";
     }
     visitor->accept_node(const_cast<TranslationUnit*>(&root));
     Exporter exporter(&cfg);
-    if (isPseudocode)
-    {
-        if (ost)
-        {
-            exporter.export_pseudocode_file(builder->get_builded_text(), *ost);
-        }
-        else
-        {
-            exporter.export_pseudocode_file(builder->get_builded_text());
-        }
-    }
-    else
-    {
-        if (ost)
-        {
-            exporter.export_code_file(builder->get_builded_text(), *ost);
-        }
-        else
-        {
-            exporter.export_code_file(builder->get_builded_text());
-        }
-    }
+    exporter.export_file(builder->get_builded_text(), ost);
     delete builder;
     delete visitor;
 }
 
-void TextLibManager::process_and_export_ast(TranslationUnit const& root, std::ostream& ost)
+void TextLibManager::process_and_export_ast(TranslationUnit const& root, std::ostream* ost)
 {
     m_visitor->accept_node(const_cast<TranslationUnit*>(&root));
     export_ast(ost);
-}
-
-void TextLibManager::process_and_export_ast(TranslationUnit const& root)
-{
-    m_visitor->accept_node(const_cast<TranslationUnit*>(&root));
-    export_ast();
 }
 
 void TextLibManager::process_ast(TranslationUnit const& root)
@@ -97,30 +68,9 @@ void TextLibManager::process_ast(TranslationUnit const& root)
     m_visitor->accept_node(const_cast<TranslationUnit*>(&root));
 }
 
-void TextLibManager::export_ast(std::ostream& ost)
+void TextLibManager::export_ast(std::ostream* ost)
 {
-    if (m_isSetToPseudocode)
-    {
-        m_exporter->export_pseudocode_file(m_builder->get_builded_text(), ost);
-    }
-    else
-    {
-        m_exporter->export_code_file(m_builder->get_builded_text(), ost);
-    }
-    m_builder->reset_builder();
-    m_visitor->reset_visitor();
-}
-
-void TextLibManager::export_ast()
-{
-    if (m_isSetToPseudocode)
-    {
-        m_exporter->export_pseudocode_file(m_builder->get_builded_text());
-    }
-    else
-    {
-        m_exporter->export_code_file(m_builder->get_builded_text());
-    }
+    m_exporter->export_file(m_builder->get_builded_text(), ost);
     m_builder->reset_builder();
     m_visitor->reset_visitor();
 }
