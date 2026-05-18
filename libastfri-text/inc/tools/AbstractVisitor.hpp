@@ -15,7 +15,7 @@ namespace astfri::text
         virtual ~AbstractVisitor() = default;
         //
         virtual void reset_visitor() = 0;
-        void replace_builder(AbstractBuilder* builder);
+        virtual void replace_builder(AbstractBuilder* builder) = 0;
         void process_condition(Expr* expr);
         void process_body(Stmt* stmt, bool const& onNewLine);
         //

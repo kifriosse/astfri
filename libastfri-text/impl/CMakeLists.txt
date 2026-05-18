@@ -3,12 +3,11 @@ add_library(astfri-text SHARED)
 target_sources(astfri-text PRIVATE
   pseudocode/PlainTextBuilder.cpp
   pseudocode/PseudocodeBuilder.cpp
-  pseudocode/PseudoExprVis.cpp
-  pseudocode/PseudoObjectStmtVis.cpp
-  pseudocode/PseudoOtherStmtVis.cpp
-  pseudocode/PseudoTypeVis.cpp
+  pseudocode/PseudocodeStmtVisitor.cpp
+  pseudocode/PseudocodeVisitor.cpp
   tools/AbstractBuilder.cpp
   tools/AbstractVisitor.cpp
+  tools/Exporter.cpp
   TextLibConfig.cpp
   TextLibManager.cpp
 )

@@ -13,8 +13,11 @@ namespace astfri::text
         bool m_isMethodCall = false;
         bool m_isConstructorCall = false;
     public:
-        PseudocodeVisitor(PseudocodeBuilder* builder);
-        // -----
+        PseudocodeVisitor(PseudocodeBuilder* builder, TextLibConfig* config);
+        //
+        void reset_visitor() override;
+        void replace_builder(AbstractBuilder* builder) override;
+        //
         void visit(const DynamicType& type) override;
         void visit(const IntType& type) override;
         void visit(const FloatType& type) override;
@@ -28,7 +31,7 @@ namespace astfri::text
         void visit(const IncompleteType& type) override;
         void visit(const DeducedType& type) override;
         void visit(const UnknownType& type) override;
-        // -----
+        //
         void visit(const IntLiteralExpr& expr) override;
         void visit(const FloatLiteralExpr& expr) override;
         void visit(const CharLiteralExpr& expr) override;
@@ -54,7 +57,7 @@ namespace astfri::text
         void visit(const DeleteExpr& expr) override;
         void visit(const BracketExpr& expr) override;
         void visit(const UnknownExpr& expr) override;
-        // -----
+        //
         void visit(const TranslationUnit& stmt) override;
         void visit(const CompoundStmt& stmt) override;
         void visit(const ReturnStmt& stmt) override;
@@ -99,14 +102,10 @@ namespace astfri::text
         void process_destructor_decl(const std::vector<DestructorDefStmt*>& vdestructors);
         void process_method_decl(const std::vector<MethodDefStmt*>& vmethods);
         void process_method(std::vector<MethodDefStmt*>& meth);
-        // -----
+        //
         template<typename VectorRelation>
         void process_relations(const VectorRelation& vrel, bool ispolym);
     };
-
-    //
-    // -----
-    //
 
     template<typename VectorRelation>
     void PseudocodeVisitor::process_relations(const VectorRelation& vrel, bool ispolym) {

@@ -21,7 +21,7 @@ int main(int argc, const char** argv) {
 
     // pseudocode
     astfri::text::TextLibManager man;
-    man.visit_and_export(tu);
+    man.process_and_export_ast(tu);
 
     // UML
     astfri::uml::UMLLibWrapper wrapper;

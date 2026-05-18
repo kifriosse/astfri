@@ -2,6 +2,10 @@
 
 using namespace astfri::text;
 
+void PseudocodeVisitor::visit(const TranslationUnit& stmt)
+{
+}
+
 void PseudocodeVisitor::visit(const CompoundStmt& stmt)
 {
     for (size_t i = 0; i < stmt.stmts.size(); ++i)
@@ -107,7 +111,7 @@ void PseudocodeVisitor::visit(const ForEachStmt& stmt)
     m_builder->write_space();
     m_builder->write_left_bracket("(");
     accept_node(stmt.var);
-    m_builder->write_text(" from container ");
+    m_builder->write_text(" from container "); // TODO: create name from config
     accept_node(stmt.container);
     m_builder->write_right_bracket(")");
     m_builder->write_space();
@@ -124,7 +128,7 @@ void PseudocodeVisitor::visit(const ThrowStmt& stmt)
 void PseudocodeVisitor::visit(const CatchStmt& stmt)
 {
     m_builder->write_catch_word();
-    //process_params_or_args(stmt.param, false); TODO fix
+    //process_params_or_args(stmt.param, false); TODO: fix catch
     process_body(stmt.body, m_config->trycatchBlockBracketNewLine);
 }
 
@@ -135,6 +139,66 @@ void PseudocodeVisitor::visit(const TryStmt& stmt)
 void PseudocodeVisitor::visit(const UnknownStmt& /*stmt*/)
 {
     m_builder->write_unknown_stmt();
+}
+
+void PseudocodeVisitor::visit(const LocalVarDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const ParamVarDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const MemberVarDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const GlobalVarDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const FunctionDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const MultiVarDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const MethodDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const BaseInitializerStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const SelfInitializerStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const MemberInitializerStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const ConstructorDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const DestructorDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const GenericParam& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const InterfaceDefStmt& stmt)
+{
+}
+
+void PseudocodeVisitor::visit(const ClassDefStmt& stmt)
+{
 }
 
 void PseudocodeVisitor::visit(const ContinueStmt& /*stmt*/)

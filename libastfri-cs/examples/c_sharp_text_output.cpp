@@ -11,5 +11,5 @@ int main() {
     // for loading file from stream
     // astBuilder.load_src(stream);
     const TranslationUnit* ast = astBuilder.mk_ast();
-    manager.visit_and_export(*ast);
+    manager.process_and_export_ast(*ast);
 }
