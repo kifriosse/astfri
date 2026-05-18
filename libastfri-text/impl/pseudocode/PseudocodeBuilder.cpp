@@ -2,6 +2,11 @@
 
 using namespace astfri::text;
 
+PseudocodeBuilder::PseudocodeBuilder(TextLibConfig* config) :
+    m_config(config)
+{
+}
+
 void PseudocodeBuilder::write_opening_else_word()
 {
     if (m_config->elseConditionNewLine)

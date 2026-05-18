@@ -9,11 +9,14 @@ namespace astfri::text
     class PseudocodeBuilder : public AbstractBuilder
     {
     protected:
-        TextLibConfig* m_config;
+        TextLibConfig* const m_config;
         int m_rowCount = 1;
     public:
+        explicit PseudocodeBuilder(TextLibConfig* config);
         virtual ~PseudocodeBuilder() = default;
-        //
+    protected:
+        virtual void add_row_numbers() = 0;
+    public:
         void write_opening_else_word();
         void write_opening_catch_word();
         // 3.1 GENERAL

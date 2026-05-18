@@ -1,6 +1,13 @@
 #include <libastfri-text/inc/pseudocode/PlainTextBuilder.hpp>
 
+#include <cmath>
+
 using namespace astfri::text;
+
+PlainTextBuilder::PlainTextBuilder(TextLibConfig* config) :
+    PseudocodeBuilder(config)
+{
+}
 
 void PlainTextBuilder::reset_builder()
 {
@@ -8,6 +15,45 @@ void PlainTextBuilder::reset_builder()
     m_indentationLevel = 0;
     m_isEmptyLine      = true;
     m_rowCount         = 1;
+}
+
+std::string& PlainTextBuilder::get_builded_text()
+{
+    add_row_numbers();
+    return m_buildedText;
+}
+
+void PlainTextBuilder::add_row_numbers()
+{
+    if (!m_config->shRowNum)
+    {
+        return;
+    }
+    int row = 1;
+    int delimiter = static_cast<int>(std::log10(m_rowCount)) + 1;
+    std::stringstream input(m_buildedText);
+    std::string newBuildedText;
+    newBuildedText.reserve(m_buildedText.size() +
+        static_cast<size_t>(m_config->rowNumMarginLeft + delimiter + 2) * static_cast<size_t>(m_rowCount));
+    std::string line;
+    while (std::getline(input, line))
+    {
+        if (!line.empty() || m_config->shRowNumOnEmptyRow)
+        {
+            newBuildedText.append(static_cast<size_t>(m_config->rowNumMarginLeft), ' ');
+            std::string rowStr = std::to_string(row);
+            newBuildedText.append(static_cast<size_t>(delimiter - rowStr.size()), ' ');
+            newBuildedText.append(rowStr);
+            if (m_config->shDotAfterRowNum)
+            {
+                newBuildedText.push_back('.');
+            }
+            ++row;
+        }
+        newBuildedText.append(line);
+        newBuildedText.push_back('\n');
+    }
+    m_buildedText = std::move(newBuildedText);
 }
 
 // 3.1 GENERAL

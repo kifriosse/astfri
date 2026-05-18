@@ -8,7 +8,13 @@ namespace astfri::text
     class PlainTextBuilder : public PseudocodeBuilder
     {
     public:
+        explicit PlainTextBuilder(TextLibConfig* config);
+        //
         void reset_builder() override;
+        std::string& get_builded_text() override;
+    private:
+        void add_row_numbers() override;
+    public:
         // 3.1 GENERAL
         void write_new_line() override;
         void write_space() override;

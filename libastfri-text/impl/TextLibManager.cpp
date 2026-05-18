@@ -6,7 +6,7 @@ using namespace astfri::text;
 
 TextLibManager::TextLibManager() :
     m_config(new TextLibConfig()),
-    m_builder(new PlainTextBuilder()),
+    m_builder(new PlainTextBuilder(m_config)),
     m_visitor(new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), m_config)),
     m_exporter(new Exporter(m_config)),
     m_isSetToPseudocode(true)
@@ -46,7 +46,7 @@ void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root,
     }
     else
     {
-        builder = new PlainTextBuilder();
+        builder = new PlainTextBuilder(&cfg);
         visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(builder), &cfg);
         cfg.fileFormat = "txt";
     }
@@ -131,7 +131,7 @@ void TextLibManager::change_output_format(std::string_view format)
             else
             {
                 delete m_builder;
-                m_builder = new PlainTextBuilder();
+                m_builder = new PlainTextBuilder(m_config);
                 m_visitor->replace_builder(m_builder);
             }
             m_visitor->reset_visitor();
@@ -140,7 +140,7 @@ void TextLibManager::change_output_format(std::string_view format)
         {
             delete m_builder;
             delete m_visitor;
-            m_builder = new PlainTextBuilder();
+            m_builder = new PlainTextBuilder(m_config);
             m_visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), m_config);
             m_isSetToPseudocode = true;
         }

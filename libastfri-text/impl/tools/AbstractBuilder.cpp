@@ -2,11 +2,6 @@
 
 using namespace astfri::text;
 
-std::string& AbstractBuilder::get_builded_text()
-{
-    return m_buildedText;
-}
-
 void AbstractBuilder::increase_indentation()
 {
     ++m_indentationLevel;

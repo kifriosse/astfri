@@ -14,8 +14,8 @@ namespace astfri::text
     public:
         virtual ~AbstractBuilder() = default;
         //
-        virtual void reset_builder() = 0;
-        std::string& get_builded_text();
+        virtual void reset_builder()            = 0;
+        virtual std::string& get_builded_text() = 0;
         void increase_indentation();
         void decrease_indentation();
         void write_opening_curl_bracket(bool const& onNewLine, bool incIndent = true);
