@@ -155,6 +155,10 @@ namespace astfri::text
         std::string returnsWord      = "returns ->";
         std::string repeatWord       = "repeat";
         std::string supportExprStyle = "";
+        // 4) OUTPUT_SETTINGS
+        std::string fileName   = "output";
+        std::string filePath   = "default";
+        std::string fileFormat = "txt";
         //
         static TextLibConfig createDefault();
         static TextLibConfig createFromArgs(int argc, char* argv[]);
@@ -174,6 +178,7 @@ namespace astfri::text
         void process_code_structure(jValue const& structure); // 1)
         void process_pseudocode_structure(jValue const& structure); // 2)
         void process_pseudocode_text(jValue const& text); // 3)
+        void process_output_settings(jValue const& settings); // 4)
         //
         void process_general_text(jValue const& text); // 3.1
         void process_symbols(jValue const& symbols); // 3.2
@@ -194,7 +199,7 @@ namespace astfri::text
         void read_bool(std::string_view name, jValue const& val, bool& m_bool);
         void read_int(std::string_view name, jValue const& val, int& m_int);
     };
-    static_assert(IsConfigClass<TextLibConfig, rapidjson::Value>, "TextLibConfig is not valid!");
+    static_assert(IsConfigClass<TextLibConfig, rapidjson::Value>);
 }
 
 #endif

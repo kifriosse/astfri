@@ -177,6 +177,10 @@ void TextLibConfig::change_to_default()
     returnsWord      = "returns ->";
     repeatWord       = "repeat";
     supportExprStyle = "";
+    // 4) OUTPUT_SETTINGS
+    fileName   = "output";
+    filePath   = "default";
+    fileFormat = "txt";
 }
 
 void TextLibConfig::change_to_java_like()
@@ -236,6 +240,10 @@ void TextLibConfig::load_from_json(rapidjson::Value const& json)
     if (is_object("PSEUDOCODE_TEXT", json, tmp))
     {
         process_pseudocode_text(*tmp);
+    }
+    if (is_object("OUTPUT_SETTINGS", json, tmp))
+    {
+        process_output_settings(*tmp);
     }
 }
 
@@ -307,6 +315,13 @@ void TextLibConfig::process_pseudocode_text(jValue const& text)
     {
         process_support_expressions(*tmp);
     }
+}
+
+void TextLibConfig::process_output_settings(jValue const& settings)
+{
+    read_string("file_name", settings, fileName);
+    read_string("file_path", settings, filePath);
+    read_string("file_format", settings, fileFormat);
 }
 
 void TextLibConfig::process_general_text(jValue const& text)

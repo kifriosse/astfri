@@ -160,5 +160,10 @@
             "repeat_word": "repeat",
             "default_style": ""
         }
+    },
+    "OUTPUT_SETTINGS": {
+        "file_name": "output",
+        "file_path": "default",
+        "file_format": "txt"
     }
 }
