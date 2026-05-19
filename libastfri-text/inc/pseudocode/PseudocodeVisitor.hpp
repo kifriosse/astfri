@@ -93,7 +93,7 @@ namespace astfri::text
         void visit(const BreakStmt& stmt) override;
     private:
         void process_var_def(const VarDefStmt& var, int vartype);
-        void process_return_type(const Type* const& type);
+        void process_return_type(Type* const& type);
         void process_generic_params_decl(const std::vector<GenericParam*>& vgeneric);
         void process_member_var_decl(const std::vector<MemberVarDefStmt*>& vmembervars);
         void process_member_var(std::vector<MemberVarDefStmt*>& vmembervars);
@@ -133,7 +133,7 @@ namespace astfri::text
                     m_builder->write_class_name("TEMPORARY SOLUTION"); // TODO ask for change
                 }
                 if (! vrel.at(i)->tparams.empty()) {
-                    process_pargs(vrel.at(i)->tparams, false);
+                    process_params_or_args(vrel.at(i)->tparams, false);
                 }
             }
         }
