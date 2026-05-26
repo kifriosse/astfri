@@ -19,11 +19,14 @@
 #include <string>
 #include <vector>
 
-namespace astfri::csharp {
+namespace astfri {
+
+namespace csharp {
 
 namespace fs = std::filesystem;
 
 namespace {
+
 const fs::path extTypesRoot                               = ASTFRI_CS_RESOURCES;
 const fs::path core                                       = extTypesRoot / "core.json";
 const fs::path winDesktop                                 = extTypesRoot / "win-desktop.json";
@@ -36,6 +39,7 @@ const std::unordered_map<SDKProfile, fs::path> profileMap = {
     {SDKProfile::WinForms, winDesktop                  },
     {SDKProfile::WPF,      winDesktop                  }
 };
+
 } // namespace
 
 ASTBuilder::ASTBuilder() :
@@ -79,7 +83,7 @@ void ASTBuilder::load_src(const path& projectDir) {
                 if (fileName.ends_with(".g.cs") || fileName.ends_with(".i.cs")
                     || fileName.ends_with(".AssemblyInfo.cs")) {
                     continue;
-                }
+                    }
                 std::ifstream fileStream(entryPath, std::ios::binary);
                 load_from_stream(fileStream, entryPath);
             }
@@ -107,7 +111,7 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
     if (profile != SDKProfile::None && profile != SDKProfile::Core
         && profile != SDKProfile::Worker) {
         load_source_of_external_types(profileMap.at(SDKProfile::Core));
-    }
+        }
 
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(srcs_, symbTable);
@@ -178,3 +182,17 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path) {
 }
 
 } // namespace astfri::csharp
+
+TranslationUnit CSharpOutput::load_file(csharp::Config cfg, std::istream& ist) {
+    return load(cfg, ist);
+}
+
+TranslationUnit CSharpOutput::load_file(csharp::Config cfg, const std::filesystem::path& path) {
+    return load(cfg, path);
+}
+
+TranslationUnit CSharpOutput::load_project(csharp::Config cfg, const std::filesystem::path& path) {
+    return load(cfg, path);
+}
+
+} // namespace astfri

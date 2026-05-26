@@ -1,15 +1,21 @@
 #ifndef CSHARP_AST_BUILDER_HPP
 #define CSHARP_AST_BUILDER_HPP
 
-#include <libastfri-cs/impl/data/SourceFile.hpp>
-#include <libastfri-cs/inc/SDKProfile.hpp>
 #include <astfri/Astfri.hpp>
+#include <astfri/impl/Concepts.hpp>
+
+#include <libastfri-cs/impl/data/SourceFile.hpp>
+#include <libastfri-cs/inc/Config.hpp>
+#include <libastfri-cs/inc/SDKProfile.hpp>
 
 #include <tree_sitter/api.h>
 
+#include <external/rapidjson/include/rapidjson/document.h>
 #include <vector>
 
-namespace astfri::csharp {
+namespace astfri {
+
+namespace csharp {
 
 /**
  * @brief Class responsible for loading C# source code and building AST from it.
@@ -66,5 +72,22 @@ private:
 };
 
 } // namespace astfri::csharp
+
+class CSharpOutput {
+public:
+    static TranslationUnit load_file(csharp::Config cfg, std::istream& ist);
+    static TranslationUnit load_file(csharp::Config cfg, const std::filesystem::path& path);
+    static TranslationUnit load_project(csharp::Config cfg, const std::filesystem::path& path);
+
+private:
+    template<typename Source>
+    static TranslationUnit load(csharp::Config& cfg, Source& source);
+};
+
+} // namespace astfri
+
+static_assert(astfri::IsInputLibInterface<astfri::CSharpOutput, astfri::csharp::Config ,rapidjson::Value>);
+
+#include <libastfri-cs/impl/ASTBuilder.inl>
 
 #endif // CSHARP_AST_BUILDER_HPP

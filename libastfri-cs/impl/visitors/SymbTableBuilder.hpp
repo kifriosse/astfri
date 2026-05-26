@@ -140,8 +140,8 @@ private:
      */
     [[nodiscard]] static TypeBinding mk_type_binding(
         util::TypeKind type,
-        Scope scope,
-        std::string name,
+        const Scope& scope,
+        const std::string& name,
         std::vector<GenericParam*> genericParams
     );
 };

@@ -60,10 +60,9 @@ constexpr std::string_view wpfSdkExclude[]{"System.IO", "System.Net.Http"};
 
 struct SourceFile;
 
-StmtFactory& SymbTableBuilder::stmtFact_    = StmtFactory::get_instance();
-maps::MapManager& SymbTableBuilder::mapManager_   = maps::MapManager::get();
-maps::QueryReg& SymbTableBuilder::queryReg_ = maps::QueryReg::get();
-
+StmtFactory& SymbTableBuilder::stmtFact_        = StmtFactory::get_instance();
+maps::MapManager& SymbTableBuilder::mapManager_ = maps::MapManager::get();
+maps::QueryReg& SymbTableBuilder::queryReg_     = maps::QueryReg::get();
 
 SymbTableBuilder::SymbTableBuilder(
     std::vector<std::unique_ptr<SourceFile>>& srcs,
@@ -346,7 +345,7 @@ void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath) {
             }
 
             // todo generic parameters for external types
-            TypeBinding tb = mk_type_binding(*typeOpt, std::move(scope), std::move(name), {});
+            TypeBinding tb = mk_type_binding(*typeOpt, scope, name, {});
 
             if (tb.type)
                 symbTable_.add_type(tb);
@@ -477,9 +476,8 @@ ScopeNode* SymbTableBuilder::visit_type_def(const TSNode& node, const util::Type
     };
     util::for_each_child_node(node, processClassHeader);
 
-    Scope scope = util::mk_scope(currentParent_, *currentSrc_);
-    const TypeBinding tb
-        = mk_type_binding(type, std::move(scope), std::move(name), std::move(genParams));
+    Scope scope          = util::mk_scope(currentParent_, *currentSrc_);
+    const TypeBinding tb = mk_type_binding(type, scope, name, std::move(genParams));
 
     if (tb.def && tb.type) {
         return symbTable_.add_type(tb, node, src());
@@ -491,9 +489,9 @@ ScopeNode* SymbTableBuilder::visit_type_def(const TSNode& node, const util::Type
 void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* classDef) {
     bool first           = true;
     auto processBaseList = [&](const TSNode& current) -> void {
-        std::string name    = util::extract_text(current, src_str());
-        const TypeMapper tm = mapManager_.get_type_mapper(current);
-        Type* type          = tm(&typeTrs_, current);
+        const std::string name = util::extract_text(current, src_str());
+        const TypeMapper tm    = mapManager_.get_type_mapper(current);
+        Type* type             = tm(&typeTrs_, current);
         if (first) {
             first = false;
             if (const auto class_t = as<ClassType>(type))
@@ -502,7 +500,7 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
                 classDef->interfaces.push_back(interface_t->def);
             }
             else if (util::is_interface_name(name)) {
-                classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
+                classDef->interfaces.push_back(stmtFact_.mk_interface_def(name, {}));
                 // todo might be useless if external types are imported
             }
             else {
@@ -524,7 +522,7 @@ void SymbTableBuilder::visit_base_list_class(const TSNode& node, ClassDefStmt* c
             // }
         }
         else if (util::is_interface_name(name)) {
-            classDef->interfaces.push_back(stmtFact_.mk_interface_def(std::move(name), {}));
+            classDef->interfaces.push_back(stmtFact_.mk_interface_def(name, {}));
             // todo might be useless if external types are imported
         }
         else {
@@ -560,21 +558,21 @@ SourceFile* SymbTableBuilder::src() const {
 
 TypeBinding SymbTableBuilder::mk_type_binding(
     const util::TypeKind type,
-    Scope scope,
-    std::string name,
+    const Scope& scope,
+    const std::string& name,
     std::vector<GenericParam*> genericParams
 ) {
     TypeBinding tb{nullptr, nullptr, nullptr};
     switch (type) {
     case util::TypeKind::Class: {
-        ClassDefStmt* classDef = stmtFact_.mk_class_def(std::move(name), std::move(scope));
+        ClassDefStmt* classDef = stmtFact_.mk_class_def(name, scope);
         classDef->tparams      = std::move(genericParams);
         tb.def                 = classDef;
         tb.type                = classDef->type;
         break;
     }
     case util::TypeKind::Interface: {
-        InterfaceDefStmt* intDef = stmtFact_.mk_interface_def(std::move(name), std::move(scope));
+        InterfaceDefStmt* intDef = stmtFact_.mk_interface_def(name, scope);
         intDef->tparams          = std::move(genericParams);
         tb.def                   = intDef;
         tb.type                  = intDef->type;
