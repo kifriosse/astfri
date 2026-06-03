@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Include io utils.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/fancy-io.sh"
+
 # Print help and die
 help_and_die() {
   echo "Provide single argument. One of:"
@@ -17,35 +21,6 @@ fi
 
 # Script mode
 MODE=$1
-
-# Fancy output
-C_RED='\033[1;31m'
-C_PURPLE='\033[1;35m'
-C_GREEN='\033[1;32m'
-C_RESET='\033[0m'
-
-# Print error
-error() {
-  echo -e "${C_RED}Error:${C_RESET} $1"
-}
-
-# Print heading
-heading() {
-  echo -e "${C_PURPLE}$1${C_RESET}"
-}
-
-# Print ok
-ok() {
-  echo -e "${C_GREEN}Done${C_RESET}"
-}
-
-# Die if error
-possibly_die() {
-  if [ $? = 1 ]; then
-    error $1
-    exit 1
-  fi
-}
 
 # Branches
 BRANCHES="dev-ak dev-jm dev-jr dev-mb dev-mm dev-mp dev-ab dev-jk"
@@ -70,7 +45,7 @@ elif [ "$MODE" = "merge" ]; then   # merge
     git merge ${branch}
     possibly_die "Failed to merge ${branch}"
   done
-  git switch main
+  # git switch main
   ok
 elif [ "$MODE" = "rebase" ]; then  # rebase
   heading "# Rebasing on main"
@@ -84,19 +59,8 @@ elif [ "$MODE" = "rebase" ]; then  # rebase
   possibly_die "Failed to switch to main"
   ok
 elif [ "$MODE" = "push" ]; then    # push
-  heading "# Pushing rebased branches"
-  for branch in ${BRANCHES}; do
-    git switch ${branch}
-    possibly_die "Failed to switch to ${branch}"
-    git push
-    possibly_die "Failed to push ${branch}"
-  done
-  ok
-  # Push main
-  git switch main
-  possibly_die "Failed to switch to main"
-  git push
-  possibly_die "Failed to push main"
+  heading "# Pushing all branches"
+  git push --all --tags
   # Switch back home
   git switch dev-mm
   possibly_die "Failed to switch to dev-mm"

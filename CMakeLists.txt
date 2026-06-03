@@ -7,19 +7,22 @@ project(
     LANGUAGES   C CXX
 )
 
-option(ASTFRI_BUILD_WRAPPER "Build module astfri-wrapper." OFF)
-option(ASTFRI_BUILD_CPP_INPUT "Build module libastri-cpp." OFF)
-option(ASTFRI_BUILD_JAVA_INPUT "Build module libastri-java." OFF)
-option(ASTFRI_BUILD_C_SHARP_INPUT "Build module libastri-cs." OFF)
-option(ASTFRI_BUILD_SERIALIZED_INPUT "Build module libastri-serialize." OFF)
-option(ASTFRI_BUILD_TEXT_OUTPUT "Build module libastri-text." OFF)
-option(ASTFRI_BUILD_UML_OUTPUT "Build module libastri-uml." OFF)
+option(ASTFRI_BUILD_CLI "Build executable astfri." OFF)
+option(ASTFRI_BUILD_CPP_INPUT "Build lib libastri-cpp." OFF)
+option(ASTFRI_BUILD_JAVA_INPUT "Build lib libastri-java." OFF)
+option(ASTFRI_BUILD_C_SHARP_INPUT "Build lib libastri-cs." OFF)
+option(ASTFRI_BUILD_SERIALIZED_INPUT "Build lib libastri-serialize." OFF)
+option(ASTFRI_BUILD_TEXT_OUTPUT "Build lib libastri-text." OFF)
+option(ASTFRI_BUILD_UML_OUTPUT "Build lib libastri-uml." OFF)
+
+option(ASTFRI_BUILD_TESTS "Build tests." OFF)
+option(ASTFRI_BUILD_EXAMPLES "Build examples." OFF)
 
 add_subdirectory(external)
 
 add_subdirectory(libastfri)
 
-if (ASTFRI_BUILD_WRAPPER)
+if (ASTFRI_BUILD_CLI)
     add_subdirectory(astfri)
 endif()
 
@@ -35,7 +38,7 @@ if (ASTFRI_BUILD_C_SHARP_INPUT)
     add_subdirectory(libastfri-cs)
 endif()
 
-if (ASTFRI_BUILD_SERIALIZED_INPUT)
+if (ASTFRI_BUILD_SERIALIZE)
     add_subdirectory(libastfri-serialize)
 endif()
 
