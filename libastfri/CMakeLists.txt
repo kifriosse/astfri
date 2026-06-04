@@ -1,4 +1,4 @@
-add_library(astfri-core SHARED)
+add_library(astfri-core)
 
 add_subdirectory(astfri/impl)
 
