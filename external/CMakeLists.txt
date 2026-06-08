@@ -59,7 +59,7 @@ ExternalProject_Add(tree-sitter-external
   UPDATE_COMMAND ""
 )
 
-add_library(tree-sitter SHARED IMPORTED GLOBAL)
+add_library(tree-sitter UNKNOWN IMPORTED GLOBAL)
 
 set_target_properties(tree-sitter PROPERTIES
   IMPORTED_LOCATION ${ASTFRI_EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libtree-sitter${ASTFRI_LIB_SUFFIX}
@@ -84,7 +84,7 @@ ExternalProject_Add(tree-sitter-java-external
   UPDATE_COMMAND ""
 )
 
-add_library(tree-sitter-java SHARED IMPORTED GLOBAL)
+add_library(tree-sitter-java UNKNOWN IMPORTED GLOBAL)
 
 set_target_properties(tree-sitter-java PROPERTIES
   IMPORTED_LOCATION ${ASTFRI_EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libtree-sitter-java${ASTFRI_LIB_SUFFIX}
@@ -108,7 +108,7 @@ ExternalProject_Add(tree-sitter-c-sharp-external
   UPDATE_COMMAND ""
 )
 
-add_library(tree-sitter-c-sharp SHARED IMPORTED GLOBAL)
+add_library(tree-sitter-c-sharp UNKNOWN IMPORTED GLOBAL)
 
 set_target_properties(tree-sitter-c-sharp PROPERTIES
   IMPORTED_LOCATION ${ASTFRI_EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libtree-sitter-c-sharp${ASTFRI_LIB_SUFFIX}
@@ -134,7 +134,7 @@ ExternalProject_Add(cxxopts-external
   UPDATE_COMMAND ""
 )
 
-add_library(cxxopts STATIC IMPORTED GLOBAL)
+add_library(cxxopts INTERFACE IMPORTED GLOBAL)
 
 set_target_properties(cxxopts PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES ${ASTFRI_EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_INCLUDEDIR}
@@ -164,8 +164,8 @@ if (ASTFRI_BUILD_TESTS)
     )
 endif()
 
-add_library(Catch2 STATIC IMPORTED GLOBAL)
-add_library(Catch2Main STATIC IMPORTED GLOBAL)
+add_library(Catch2 UNKNOWN IMPORTED GLOBAL)
+add_library(Catch2Main UNKNOWN IMPORTED GLOBAL)
 
 set_target_properties(Catch2 PROPERTIES
     IMPORTED_LOCATION ${ASTFRI_EXTERNAL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/libCatch2d${ASTFRI_LIB_SUFFIX}

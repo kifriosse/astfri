@@ -9,6 +9,5 @@ target_link_libraries(astfri PRIVATE
 	astfri-java
 	astfri-text
 	astfri-uml
+	cxxopts
 )
-
-target_include_directories(astfri PRIVATE ${CXXOPTS_INCLUDE_DIRS})
