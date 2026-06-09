@@ -14,9 +14,9 @@ int main() {
     astfri::TranslationUnit* tu = tb->get_translation_unit(tree, sourceCode);
 
     // code for text output
-    astfri::text::TextLibManager& visitor = astfri::text::TextLibManager::get_instance();
+    astfri::text::TextLibManager visitor;
 
-    visitor.visit_and_export(*tu);
+    visitor.process_and_export_ast(*tu, nullptr);
 
     // freeing memory
     ts_tree_delete(tree);

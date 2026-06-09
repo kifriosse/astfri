@@ -1,81 +1,149 @@
-#include <libastfri-text/inc/code/CxxCodeVisitor.hpp>
-#include <libastfri-text/inc/code/JavaCodeVisitor.hpp>
-#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 #include <libastfri-text/inc/TextLibManager.hpp>
+#include <libastfri-text/inc/pseudocode/PlainTextBuilder.hpp>
+#include <libastfri-text/inc/pseudocode/PseudocodeVisitor.hpp>
 
 using namespace astfri::text;
 
-TextLibManager& TextLibManager::get_instance() {
-    static TextLibManager manager;
-    return manager;
-}
-
 TextLibManager::TextLibManager() :
-    visitor_(&PseudocodeVisitor::get_instance()) {
+    m_config(new TextLibConfig()),
+    m_builder(new PlainTextBuilder(m_config)),
+    m_visitor(new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), m_config)),
+    m_exporter(new Exporter(m_config)),
+    m_isSetToPseudocode(true)
+{
 }
 
-//
-// -----
-//
+TextLibManager::~TextLibManager()
+{
+    delete m_config;
+    delete m_builder;
+    delete m_visitor;
+    delete m_exporter;
+}
 
-void TextLibManager::change_output(const OutputFormat& format) {
-    switch (format) {
-    case OutputFormat::CxxCode:
-        // TODO: implement cxx visitor
-        // visitor_ = &CxxCodeVisitor::get_instance();
-        break;
-    case OutputFormat::JavaCode:
-        visitor_ = &JavaCodeVisitor::get_instance();
-        break;
-    case OutputFormat::Pseudocode:
-        visitor_ = &PseudocodeVisitor::get_instance();
-        break;
+void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root)
+{
+    process_ast(cfg, root, nullptr);
+}
+
+void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream& ost)
+{
+    process_ast(cfg, root, &ost);
+}
+
+void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream* ost)
+{
+    AbstractBuilder* builder = nullptr;
+    AbstractVisitor* visitor = nullptr;
+    if (cfg.fileFormat == "c++")
+    {
     }
-    clear_builder();
+    else if (cfg.fileFormat == "java")
+    {
+    }
+    else if (cfg.fileFormat == "html")
+    {
+    }
+    else
+    {
+        builder = new PlainTextBuilder(&cfg);
+        visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(builder), &cfg);
+        cfg.fileFormat = "txt";
+    }
+    visitor->accept_node(const_cast<TranslationUnit*>(&root));
+    Exporter exporter(&cfg);
+    exporter.export_file(builder->get_builded_text(), ost);
+    delete builder;
+    delete visitor;
 }
 
-void TextLibManager::execute_export(std::ostream& ostream) {
-    ostream << visitor_->get_builded_text()->str();
+void TextLibManager::process_and_export_ast(TranslationUnit const& root, std::ostream* ost)
+{
+    m_visitor->accept_node(const_cast<TranslationUnit*>(&root));
+    export_ast(ost);
 }
 
-void TextLibManager::execute_export() {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->export_pseudocode();
+void TextLibManager::process_ast(TranslationUnit const& root)
+{
+    m_visitor->accept_node(const_cast<TranslationUnit*>(&root));
+}
+
+void TextLibManager::export_ast(std::ostream* ost)
+{
+    m_exporter->export_file(m_builder->get_builded_text(), ost);
+    m_builder->reset_builder();
+    m_visitor->reset_visitor();
+}
+
+void TextLibManager::change_output_format(TextOutputFormat const& format)
+{
+    switch (format)
+    {
+        case TextOutputFormat::CxxCode:
+            // TODO: implement cxx
+            break;
+        case TextOutputFormat::JavaCode:
+            // TODO: implement java
+            break;
+        case TextOutputFormat::TxtPseudocode:
+            change_output_format("txt");
+            m_config->fileFormat = "txt";
+            break;
+        case TextOutputFormat::HtmlPseudocode:
+            // TODO: implement html pseudocode
+            break;
     }
 }
 
-void TextLibManager::clear_builder() {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->clear_builder();
-    }
+void TextLibManager::change_config(std::filesystem::path const& path)
+{
+    m_config->change_to_default();
+    m_config->load_from_file(path);
+    change_output_format(m_config->fileFormat);
 }
 
-void TextLibManager::append_text(const std::string& text) {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->append_text(text);
-    }
+void TextLibManager::change_config(rapidjson::Value const& json)
+{
+    m_config->change_to_default();
+    m_config->load_from_json(json);
+    change_output_format(m_config->fileFormat);
 }
 
-void TextLibManager::append_new_line() {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->append_new_line();
+void TextLibManager::change_output_format(std::string_view format)
+{
+    if (format == "c++")
+    {
     }
-}
-
-void TextLibManager::append_space() {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->append_space();
+    else if (format == "java")
+    {
     }
-}
-
-void TextLibManager::update_configuration() {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->update_configuration();
+    else if (format == "html")
+    {
     }
-}
-
-void TextLibManager::reload_configuration() {
-    if (PseudocodeVisitor* visitor = dynamic_cast<PseudocodeVisitor*>(visitor_)) {
-        visitor->reload_configuration();
+    else
+    {
+        if (m_isSetToPseudocode)
+        {
+            if (dynamic_cast<PlainTextBuilder*>(m_builder))
+            {
+                m_builder->reset_builder();
+            }
+            else
+            {
+                delete m_builder;
+                m_builder = new PlainTextBuilder(m_config);
+                m_visitor->replace_builder(m_builder);
+            }
+            m_visitor->reset_visitor();
+        }
+        else
+        {
+            delete m_builder;
+            delete m_visitor;
+            m_builder = new PlainTextBuilder(m_config);
+            m_visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), m_config);
+            m_isSetToPseudocode = true;
+        }
+        m_config->fileFormat = "txt";
     }
 }

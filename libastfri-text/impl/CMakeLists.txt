@@ -1,22 +1,14 @@
 add_library(astfri-text SHARED)
 
 target_sources(astfri-text PRIVATE
-  code/AbstractCodeBuilder.cpp
-  code/AbstractCodeVisitor.cpp
-  code/CxxCodeBuilder.cpp
-  code/CxxCodeVisitor.cpp
-  code/JavaCodeBuilder.cpp
-  code/JavaCodeVisitor.cpp
-  pseudocode/AbstractTextBuilder.cpp
-  pseudocode/GeneralConfigurator.cpp
-  pseudocode/HtmlTextBuilder.cpp
   pseudocode/PlainTextBuilder.cpp
-  pseudocode/PlainTextExporter.cpp
+  pseudocode/PseudocodeBuilder.cpp
+  pseudocode/PseudocodeStmtVisitor.cpp
   pseudocode/PseudocodeVisitor.cpp
-  pseudocode/TextConfigurator.cpp
-  AbstractBuilder.cpp
-  AbstractVisitor.cpp
-  OutputFileManager.cpp
+  tools/AbstractBuilder.cpp
+  tools/AbstractVisitor.cpp
+  tools/Exporter.cpp
+  TextLibConfig.cpp
   TextLibManager.cpp
 )
 

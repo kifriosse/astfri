@@ -1,5 +1,5 @@
 add_subdirectory(impl)
 
-if(ON)
+if(OFF)
     add_subdirectory(examples)
 endif()

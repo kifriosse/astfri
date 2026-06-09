@@ -267,22 +267,21 @@ int main(int argc, const char** argv)
     case OutputType::Text_Pseudocode:
     case OutputType::Text_JavaCode:
     {
-        astfri::text::TextLibManager& manager
-            = astfri::text::TextLibManager::get_instance();
+        astfri::text::TextLibManager manager;
 
         switch (output_lib)
         {
         case OutputType::Text_Pseudocode:
-            manager.change_output(astfri::text::OutputFormat::Pseudocode);
+            manager.change_output_format(astfri::text::TextOutputFormat::TxtPseudocode);
             break;
         case OutputType::Text_JavaCode:
-            manager.change_output(astfri::text::OutputFormat::JavaCode);
+            manager.change_output_format(astfri::text::TextOutputFormat::JavaCode);
             break;
         default:
             break;
         }
 
-        manager.visit_and_export(tu, std::cout);
+        manager.process_and_export_ast(tu, &std::cout);
         break;
     }
     case OutputType::UML:

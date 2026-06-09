@@ -5,11 +5,11 @@
 int main() {
     using namespace astfri;
     csharp::ASTBuilder astBuilder;
-    text::TextLibManager& manager = text::TextLibManager::get_instance();
+    text::TextLibManager manager;
     // astBuilder.load_src("../../../libastfri-cs/resources/test_src/");
     astBuilder.load_src("../../../resources/samples/csharp/");
     // for loading file from stream
     // astBuilder.load_src(stream);
     const TranslationUnit* ast = astBuilder.mk_ast();
-    manager.visit_and_export(*ast);
+    manager.process_and_export_ast(*ast, nullptr);
 }

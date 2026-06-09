@@ -1,0 +1,169 @@
+{
+    "CODE_STRUCTURE": {
+        "tabulator_length": 4,
+        "namespace_block_bracket_on_new_line": false,
+        "use_namespace_tabulator": false,
+        "object_block_bracket_on_new_line": false,
+        "function_block_bracket_on_new_line": false,
+        "loop_block_bracket_on_new_line": false,
+        "dowhile_condition_on_new_line": false,
+        "condition_block_bracket_on_new_line": false,
+        "elseif_condition_on_new_line": false,
+        "else_condition_on_new_line": false,
+        "switch_block_bracket_on_new_line": false,
+        "trycatch_block_bracket_on_new_line": false,
+        "catch_condition_on_new_line": false
+    },
+    "PSEUDOCODE_STRUCTURE": {
+        "text_margin_left": 3,
+        "row_number_margin_left": 1,
+        "show_bracket_colors": true,
+        "show_row_number": true,
+        "show_dot_after_row_number": true,
+        "show_row_number_on_empty_row": true,
+        "show_global_var_declaration": true,
+        "show_template_declaration": true,
+        "show_class_declaration": true,
+        "show_class_definition": true,
+        "show_class_definition_inline": false,
+        "show_interface_declaration": true,
+        "show_interface_definition": true,
+        "show_member_var_declaration": true,
+        "show_constr_destr_meth_declaration": true,
+        "show_constr_destr_meth_definition": true,
+        "show_constr_destr_meth_owner": true,
+        "show_constr_destr_meth_template": true,
+        "show_function_declaration": true,
+        "show_function_definition": true
+    },
+    "PSEUDOCODE_TEXT": {
+        "GENERAL": {
+            "unknown_type_word": "UNKNOWN TYPE",
+            "unknown_expr_word": "UNKNOWN EXPRESSION",
+            "unknown_stmt_word": "UNKNOWN STATEMENT",
+            "default_style": "font-family:Consolas;font-size:16px",
+            "unknown_phrase_style": "",
+            "row_number_style": "",
+            "bracket_colors": ["red", "green", "blue"]
+        },
+        "SYMBOLS": {
+            "OPERATORS": {
+                "pointer_word": "↑",
+                "assign_word": "=",
+                "modulo_word": "%",
+                "address_word": "&",
+                "dereference_word": "*",
+                "default_style": ""
+            },
+            "SEPARATORS": {
+                "semicolon_word": ";",
+                "default_style": ""
+            }
+        },
+        "VALUES": {
+            "true_word": "true",
+            "false_word": "false",
+            "null_word": "nullptr",
+            "default_style": "",
+            "numeric_value_style": "",
+            "string_value_style": ""
+        },
+        "REFERENCE_NAMES": {
+            "default_style": "",
+            "template_name_style": "",
+            "class_name_style": "",
+            "interface_name_style": "",
+            "method_name_style": "",
+            "function_name_style": "",
+            "default_var_name_style": "",
+            "global_var_name_style": "",
+            "member_var_name_style": "",
+            "local_var_name_style": "",
+            "param_var_name_style": ""
+        },
+        "SYSTEM_EXPRESSIONS": {
+            "ACCESS_MODIFIERS": {
+                "public_word": "public",
+                "protected_word": "protected",
+                "private_word": "private",
+                "internal_word": "package-private",
+                "attributes_word": "attributes",
+                "constructors_word": "constructors",
+                "destructors_word": "destructors",
+                "methods_word": "methods",
+                "default_style": ""
+            },
+            "DATA_TYPES": {
+                "dynamic_type_word": "auto",
+                "int_type_word": "int",
+                "float_type_word": "float",
+                "char_type_word": "char",
+                "bool_type_word": "bool",
+                "void_type_word": "void",
+                "default_style": "",
+                "numeric_type_word_style": "",
+                "string_type_word_style": "",
+                "system_type_word_style": ""
+            },
+            "OBJECTS": {
+                "scope_word": "namespace",
+                "template_word": "template",
+                "class_word": "class",
+                "interface_word": "interface",
+                "implement_word": "implements",
+                "extend_word": "extends",
+                "virtual_word": "virtual",
+                "abstract_word": "abstract",
+                "static_word": "static",
+                "override_word": "override",
+                "this_word": "this",
+                "default_style": ""
+            },
+            "CONDITIONS": {
+                "if_word": "if",
+                "elseif_word": "else if",
+                "else_word": "else",
+                "switch_word": "switch",
+                "case_word": "case",
+                "default_word": "default",
+                "default_style": ""
+            },
+            "LOOPS": {
+                "do_word": "do",
+                "while_word": "while",
+                "for_word": "for",
+                "foreach_word": "for",
+                "default_style": ""
+            },
+            "OTHER": {
+                "return_word": "return",
+                "continue_word": "continue",
+                "break_word": "break",
+                "try_word": "try",
+                "catch_word": "catch",
+                "finally_word": "finally",
+                "throw_word": "throw",
+                "new_word": "new",
+                "delete_word": "delete",
+                "default_style": ""
+            }
+        },
+        "SUPPORT_EXPRESSIONS": {
+            "constructor_word": "constructor",
+            "destructor_word": "destructor",
+            "method_word": "method",
+            "function_word": "function",
+            "lambda_word": "λ",
+            "call_word": "call",
+            "define_word": "define",
+            "returns_word": "returns ->",
+            "repeat_word": "repeat",
+            "default_style": ""
+        }
+    },
+    "OUTPUT_SETTINGS": {
+        "file_name": "output",
+        "file_path": "default",
+        "file_format": "txt"
+    }
+}
