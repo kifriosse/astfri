@@ -60,7 +60,8 @@ elif [ "$MODE" = "rebase" ]; then  # rebase
   ok
 elif [ "$MODE" = "push" ]; then    # push
   heading "# Pushing all branches"
-  git push --all --tags
+  git push --all
+  git push --tags
   # Switch back home
   git switch dev-mm
   possibly_die "Failed to switch to dev-mm"
