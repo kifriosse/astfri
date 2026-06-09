@@ -11,3 +11,14 @@ void UMLLibWrapper::run(astfri::TranslationUnit& translationUnit) {
     translationUnit.accept(this->classVisitor_);
 }
 } // namespace astfri::uml
+
+
+namespace astfri {
+
+
+std::string_view astfri::uml_out::version() {
+    return ASTFRI_UML_VERSION;
+}
+
+
+} // namespace astfri

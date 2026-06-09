@@ -75,6 +75,7 @@ private:
 
 class CSharpOutput {
 public:
+    static std::string_view version();
     static TranslationUnit load_file(csharp::Config cfg, std::istream& ist);
     static TranslationUnit load_file(csharp::Config cfg, const std::filesystem::path& path);
     static TranslationUnit load_project(csharp::Config cfg, const std::filesystem::path& path);

@@ -1,4 +1,8 @@
+set(ASTFRI_JAVA_VERSION "0.0.2")
+
 add_library(astfri-java)
+
+target_compile_definitions(astfri-java PUBLIC ASTFRI_JAVA_VERSION="${ASTFRI_JAVA_VERSION}")
 
 target_sources(astfri-java PRIVATE
     ASTBuilder.cpp

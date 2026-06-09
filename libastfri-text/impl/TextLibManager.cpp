@@ -21,6 +21,11 @@ TextLibManager::~TextLibManager()
     delete m_exporter;
 }
 
+std::string_view TextLibManager::version()
+{
+    return ASTFRI_TEXT_VERSION;
+}
+
 void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root)
 {
     process_ast(cfg, root, nullptr);

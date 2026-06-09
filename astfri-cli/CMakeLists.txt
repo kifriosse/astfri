@@ -10,6 +10,7 @@ target_link_libraries(astfri-cli PRIVATE
 	astfri-cpp
 	astfri-cs
 	astfri-java
+	astfri-serialize
 	astfri-text
 	astfri-uml
 	cxxopts)

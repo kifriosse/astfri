@@ -49,6 +49,10 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-fno-exceptions")
 # Append no rtti option.
 # list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
 
+
+# Set the version of our library.
+set(ASTFRI_CPP_VERSION "0.0.2")
+
 # Finally, add our library and set its properties.
 add_library(astfri-cpp
     ClangManagement.cpp
@@ -61,6 +65,8 @@ add_library(astfri-cpp
     visitor-methods/Literals.cpp
     visitor-methods/Operators.cpp
 )
+
+target_compile_definitions(astfri-cpp PUBLIC ASTFRI_CPP_VERSION="${ASTFRI_CPP_VERSION}")
 
 # Private compile options.
 target_compile_options(astfri-cpp PRIVATE ${ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE})

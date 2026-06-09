@@ -25,6 +25,7 @@ namespace astfri::text
         explicit TextLibManager();
         ~TextLibManager();
         //
+        static std::string_view version();
         static void process_ast(TextLibConfig cfg, TranslationUnit const& root);
         static void process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream& ost);
     private:

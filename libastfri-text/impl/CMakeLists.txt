@@ -1,4 +1,8 @@
+set(ASTFRI_TEXT_VERSION "0.0.2")
+
 add_library(astfri-text)
+
+target_compile_definitions(astfri-text PUBLIC ASTFRI_TEXT_VERSION="${ASTFRI_TEXT_VERSION}")
 
 target_sources(astfri-text PRIVATE
   pseudocode/PlainTextBuilder.cpp

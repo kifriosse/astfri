@@ -1,6 +1,11 @@
+set(ASTFRI_CORE_VERSION "0.0.2")
+
 add_library(astfri-core)
 
 add_subdirectory(astfri/impl)
+
+target_compile_definitions(astfri-core PUBLIC ASTFRI_VERSION="${ASTFRI_VERSION}")
+target_compile_definitions(astfri-core PUBLIC ASTFRI_CORE_VERSION="${ASTFRI_CORE_VERSION}")
 
 target_compile_options(astfri-core PUBLIC
     -Wall

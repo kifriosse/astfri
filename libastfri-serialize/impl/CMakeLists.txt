@@ -1,4 +1,8 @@
+set(ASTFRI_SERIALIZE_VERSION "0.0.2")
+
 add_library(astfri-serialize)
+
+target_compile_definitions(astfri-serialize PUBLIC ASTFRI_SERIALIZE_VERSION="${ASTFRI_SERIALIZE_VERSION}")
 
 target_sources(astfri-serialize PRIVATE
     AstFriDeSerializer.cpp

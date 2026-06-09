@@ -4,6 +4,8 @@
 #include <libastfri-uml/impl/ClassVisitor.hpp>
 #include <libastfri-uml/impl/PlantUMLOutputter.hpp>
 
+#include <string_view>
+
 namespace astfri::uml {
 class UMLLibWrapper {
 private:
@@ -21,6 +23,7 @@ namespace astfri
 {
     struct uml_out
     {
+        static std::string_view version();
         static void process_ast(uml::Config cfg, const astfri::TranslationUnit& root);
         static void process_ast(uml::Config cfg, const astfri::TranslationUnit& root, std::ostream& ost);
     };

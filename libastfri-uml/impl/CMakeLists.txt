@@ -1,3 +1,5 @@
+set(ASTFRI_UML_VERSION "0.0.2")
+
 add_library(astfri-uml)
 
 target_sources(astfri-uml PRIVATE
@@ -9,6 +11,8 @@ target_sources(astfri-uml PRIVATE
     PlantUMLOutputter.cpp
     TypeConvention.cpp
 )
+
+target_compile_definitions(astfri-uml PUBLIC ASTFRI_UML_VERSION="${ASTFRI_UML_VERSION}")
 
 target_include_directories(astfri-uml PUBLIC ${PROJECT_SOURCE_DIR})
 

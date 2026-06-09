@@ -183,6 +183,10 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path) {
 
 } // namespace astfri::csharp
 
+std::string_view CSharpOutput::version() {
+    return ASTFRI_CS_VERSION;
+}
+
 TranslationUnit CSharpOutput::load_file(csharp::Config cfg, std::istream& ist) {
     return load(cfg, ist);
 }
