@@ -50,7 +50,7 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-fno-exceptions")
 # list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
 
 # Finally, add our library and set its properties.
-add_library(astfri-cpp SHARED
+add_library(astfri-cpp
     ClangManagement.cpp
     visitor-methods/ClangVisitor.cpp
     visitor-methods/Types.cpp

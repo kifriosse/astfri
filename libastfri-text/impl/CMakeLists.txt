@@ -1,4 +1,4 @@
-add_library(astfri-text SHARED)
+add_library(astfri-text)
 
 target_sources(astfri-text PRIVATE
   pseudocode/PlainTextBuilder.cpp

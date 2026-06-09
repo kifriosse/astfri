@@ -1,4 +1,4 @@
-add_library(astfri-java SHARED)
+add_library(astfri-java)
 
 target_sources(astfri-java PRIVATE
     ASTBuilder.cpp

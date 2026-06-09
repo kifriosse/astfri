@@ -1,4 +1,4 @@
-add_library(astfri-cs SHARED)
+add_library(astfri-cs)
 
 add_subdirectory(impl)
 add_subdirectory(examples)

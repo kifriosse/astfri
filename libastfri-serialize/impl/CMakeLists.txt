@@ -1,4 +1,4 @@
-add_library(astfri-serialize SHARED)
+add_library(astfri-serialize)
 
 target_sources(astfri-serialize PRIVATE
     AstFriDeSerializer.cpp
