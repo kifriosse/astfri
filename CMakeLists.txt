@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.23)
 
 SET(ASTFRI_VERSION "0.0.2")
 
@@ -25,8 +25,12 @@ add_subdirectory(external)
 
 add_subdirectory(libastfri-core)
 
+# List of targets that are build used for the installation.
+set(ASTFRI_TARGETS astfri-core)
+
 if (ASTFRI_BUILD_CLI)
     add_subdirectory(astfri-cli)
+    list(APPEND ASTFRI_TARGETS astfri-cli)
 endif()
 
 if (ASTFRI_BUILD_CLI)
@@ -56,3 +60,40 @@ endif()
 if (ASTFRI_BUILD_SERIALIZE)
     add_subdirectory(libastfri-serialize)
 endif()
+
+
+include(GNUInstallDirs)
+
+include(CMakePackageConfigHelpers)
+
+# Installs artifacts defined by the targets.
+# Installs `headers` file set defined for each target.
+# Creates AstfriTargets in-memory containing list of installed targets.
+install(TARGETS ${ASTFRI_TARGETS}
+    EXPORT AstfriTargets
+    FILE_SET headers DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+)
+
+# Materializes AstfriTargets to a file and installs it.
+install(EXPORT AstfriTargets
+    FILE AstfriTargets.cmake
+    NAMESPACE astfri::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/astfri"
+)
+
+# Writes file with the version of the project.
+write_basic_package_version_file(
+    AstfriConfigVersion.cmake
+    VERSION ${ASTFRI_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+# Installs generated version file and project config file.
+install(FILES
+    "${PROJECT_SOURCE_DIR}/cmake/AstfriConfig.cmake"
+    "${PROJECT_BINARY_DIR}/AstfriConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/astfri"
+)
