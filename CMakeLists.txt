@@ -23,7 +23,7 @@ add_subdirectory(external)
 add_subdirectory(libastfri)
 
 if (ASTFRI_BUILD_CLI)
-    add_subdirectory(astfri)
+    add_subdirectory(astfri-cli)
 endif()
 
 if (ASTFRI_BUILD_CPP_INPUT)

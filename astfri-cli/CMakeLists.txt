@@ -1,6 +1,9 @@
 add_executable(astfri)
 
-target_sources(astfri PRIVATE main.cpp)
+target_sources(astfri PRIVATE
+	main.cpp
+	args.cpp
+	version.cpp)
 
 target_link_libraries(astfri PRIVATE
   astfri-core
@@ -9,5 +12,4 @@ target_link_libraries(astfri PRIVATE
 	astfri-java
 	astfri-text
 	astfri-uml
-	cxxopts
-)
+	cxxopts)
