@@ -5,19 +5,19 @@
 #include <astfri/Astfri.hpp>
 
 // ASTFRI visitor
-#include <libastfri-text/inc/TextLibManager.hpp>
+#include <astfri-text/TextLibManager.hpp>
 
 // ASTFRI UML
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <astfri-uml/UMLLibWrapper.hpp>
 
 // ASTFRI CPP
 #include <astfri-cpp/AstfriCpp.hpp>
 
 // ASTFRI Csharp
-#include <libastfri-cs/inc/ASTBuilder.hpp>
+#include <astfri-cs/ASTBuilder.hpp>
 
 // ASTFRI Java
-#include <libastfri-java/inc/ASTBuilder.hpp>
+#include <astfri-java/ASTBuilder.hpp>
 
 #include <cxxopts.hpp>
 

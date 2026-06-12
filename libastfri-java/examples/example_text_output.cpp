@@ -1,8 +1,8 @@
 // include for java input and making of java syntax tree
-#include <libastfri-java/inc/ASTBuilder.hpp>
+#include <astfri-java/ASTBuilder.hpp>
 
 // include for text output
-#include <libastfri-text/inc/TextLibManager.hpp>
+#include <astfri-text/TextLibManager.hpp>
 
 int main() {
     // code for java source code input and making of java syntax tree

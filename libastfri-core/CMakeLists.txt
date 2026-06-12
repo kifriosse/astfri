@@ -6,7 +6,8 @@ target_sources(astfri-core PRIVATE
   astfri/impl/ExprFactory.cpp
   astfri/impl/Scope.cpp
   astfri/impl/StmtFactory.cpp
-  astfri/impl/TypeFactory.cpp)
+  astfri/impl/TypeFactory.cpp
+  astfri/impl/Visitor.cpp)
 
 target_sources(astfri-core
   PUBLIC FILE_SET headers

@@ -1,8 +1,8 @@
 // include for java input and making of java syntax tree
-#include <libastfri-java/inc/ASTBuilder.hpp>
+#include <astfri-java/ASTBuilder.hpp>
 
 // includes for uml output
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <astfri-uml/UMLLibWrapper.hpp>
 
 int main() {
     // code for java source code input and making of java syntax tree

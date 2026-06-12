@@ -1,5 +1,5 @@
-#include <libastfri-cs/inc/ASTBuilder.hpp>
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <astfri-cs/ASTBuilder.hpp>
+#include <astfri-uml/UMLLibWrapper.hpp>
 
 int main()
 {

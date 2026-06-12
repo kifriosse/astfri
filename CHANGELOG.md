@@ -1,3 +1,9 @@
+**TBD** `TBD` Michal Mrena `<michal.mrena@fri.uniza.sk>`
+- Unified directory structure of libraries.
+  - Each one has single (except libastfri-cs) "flattened" `CMakeLists.txt`, which defines the target and its sources (including headers (for installation)).
+  - Include path for each library starts in its root directory i.e., include paths look like `<astfri-cpp/Astfri.hpp>`.
+
+
 **2026-06-09** Michal Mrena `<michal.mrena@fri.uniza.sk>`
 - Added this `CHANGELOG.md` to track notable changes.
 - Added version variables to root `CMakeLists.txt` and root `CMakeLists.txt` of each library.

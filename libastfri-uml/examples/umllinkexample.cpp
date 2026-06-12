@@ -1,5 +1,5 @@
 #include <astfri-cpp/AstfriCpp.hpp>
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <astfri-uml/UMLLibWrapper.hpp>
 
 int main(int argc, const char** argv) {
     if (argc != 2) {

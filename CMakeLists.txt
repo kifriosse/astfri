@@ -33,32 +33,38 @@ if (ASTFRI_BUILD_CLI)
     list(APPEND ASTFRI_TARGETS astfri-cli)
 endif()
 
-if (ASTFRI_BUILD_CLI)
+if (ASTFRI_BUILD_SERVICE)
     add_subdirectory(astfri-service)
 endif()
 
 if (ASTFRI_BUILD_IN_CPP)
     add_subdirectory(libastfri-cpp)
+    list(APPEND ASTFRI_TARGETS astfri-cpp)
 endif()
 
 if (ASTFRI_BUILD_IN_JAVA)
     add_subdirectory(libastfri-java)
+    list(APPEND ASTFRI_TARGETS astfri-java)
 endif()
 
 if (ASTFRI_BUILD_IN_CSHARP)
     add_subdirectory(libastfri-cs)
+    list(APPEND ASTFRI_TARGETS astfri-cs)
 endif()
 
 if (ASTFRI_BUILD_OUT_TEXT)
     add_subdirectory(libastfri-text)
+    list(APPEND ASTFRI_TARGETS astfri-text)
 endif()
 
 if (ASTFRI_BUILD_OUT_UML)
     add_subdirectory(libastfri-uml)
+    list(APPEND ASTFRI_TARGETS astfri-uml)
 endif()
 
 if (ASTFRI_BUILD_SERIALIZE)
     add_subdirectory(libastfri-serialize)
+    list(APPEND ASTFRI_TARGETS astfri-serialize)
 endif()
 
 
@@ -77,10 +83,13 @@ install(TARGETS ${ASTFRI_TARGETS}
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+# TODO install resources dir using install dir for each lib into:
+#     DESTINATION ${CMAKE_INSTALL_DATADIR}/astfri-cpp/<here>
+
 # Materializes AstfriTargets to a file and installs it.
 install(EXPORT AstfriTargets
     FILE AstfriTargets.cmake
-    NAMESPACE astfri::
+    NAMESPACE astfri:: # TODO chceme tu toto?
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/astfri"
 )
 

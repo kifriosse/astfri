@@ -1,5 +1,5 @@
-#include <libastfri-cs/inc/ASTBuilder.hpp>
-#include <libastfri-text/inc/TextLibManager.hpp>
+#include <astfri-cs/ASTBuilder.hpp>
+#include <astfri-text/TextLibManager.hpp>
 #include <astfri/Astfri.hpp>
 
 int main() {

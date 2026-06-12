@@ -1,9 +1,9 @@
 #include <astfri/Astfri.hpp>
-#include <libastfri-text/inc/TextLibManager.hpp>
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
 #include <astfri-cpp/AstfriCpp.hpp>
-#include <libastfri-cs/inc/ASTBuilder.hpp>
-#include <libastfri-java/inc/ASTBuilder.hpp>
+#include <astfri-cs/ASTBuilder.hpp>
+#include <astfri-java/ASTBuilder.hpp>
+#include <astfri-text/TextLibManager.hpp>
+#include <astfri-uml/UMLLibWrapper.hpp>
 
 #include <cxxopts.hpp>
 

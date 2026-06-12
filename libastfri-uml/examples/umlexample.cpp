@@ -1,4 +1,4 @@
-#include <libastfri-uml/inc/UMLLibWrapper.hpp>
+#include <astfri-uml/UMLLibWrapper.hpp>
 
 #include <vector>
 
