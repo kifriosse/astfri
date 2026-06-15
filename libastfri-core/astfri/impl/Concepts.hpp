@@ -43,12 +43,12 @@ concept IsLibInterface = requires() {
  */
 template<typename Lib, typename Cfg, typename JsonNode>
 concept IsInputLibInterface
-    = requires(Cfg cfg, std::istream& ist, const std::filesystem::path& path) {
+    = requires(std::istream& ist, const std::filesystem::path& path) {
           requires IsConfigClass<Cfg, JsonNode>;
           requires IsLibInterface<Lib>;
-          { Lib::load_file(cfg, ist) } -> std::same_as<astfri::TranslationUnit>;
-          { Lib::load_file(cfg, path) } -> std::same_as<astfri::TranslationUnit>;
-          { Lib::load_project(cfg, path) } -> std::same_as<astfri::TranslationUnit>;
+          { Lib::load_file(Cfg::createDefault(), ist) } -> std::same_as<astfri::TranslationUnit>;
+          { Lib::load_file(Cfg::createDefault(), path) } -> std::same_as<astfri::TranslationUnit>;
+          { Lib::load_project(Cfg::createDefault(), path) } -> std::same_as<astfri::TranslationUnit>;
       };
 
 
@@ -57,11 +57,11 @@ concept IsInputLibInterface
  */
 template<typename Lib, typename Cfg, typename JsonNode>
 concept IsOutputLibInterface
-    = requires(Cfg cfg, std::ostream& ost, const astfri::TranslationUnit& root) {
+    = requires(std::ostream& ost, const astfri::TranslationUnit& root) {
           requires IsConfigClass<Cfg, JsonNode>;
           requires IsLibInterface<Lib>;
-          { Lib::process_ast(cfg, root) } -> std::same_as<void>;
-          { Lib::process_ast(cfg, root, ost) } -> std::same_as<void>;
+          { Lib::process_ast(Cfg::createDefault(), root) } -> std::same_as<void>;
+          { Lib::process_ast(Cfg::createDefault(), root, ost) } -> std::same_as<void>;
       };
 
 

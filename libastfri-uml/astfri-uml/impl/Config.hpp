@@ -1,61 +1,104 @@
 #ifndef LIBASTFRIUML_CONFIG_HPP
 #define LIBASTFRIUML_CONFIG_HPP
 
+#include <astfri/impl/Concepts.hpp>
 #include <astfri-uml/impl/TypeConvention.hpp>
 
 #include <rapidjson/document.h>
 
-#include <astfri/impl/Concepts.hpp>
 
 namespace astfri::uml {
+
+
 struct Config {
-    // type var, var : type
-    TypeConventions typeConvention_= TypeConventions::TYPE_AFTER_IDENTIFIER;
-    bool innerView_                = true;
-    bool writeToFile_              = false;
-    bool drawAccessModIcons_       = true;
-    bool handleNamespaces_         = false;
+    bool writeToFile;
+    std::string filePath;
 
-    char indirectIndicator_         = '*';
-    char destructorIndicator_       = '~';
-    std::string separator_          = " : ";
-    std::string namespaceSeparator_ = "::";
-    char accessPrefix_[4]           = {'+', '-', '#', '~'};
+    std::string intTypeName;
+    std::string floatTypeName;
+    std::string charTypeName;
+    std::string boolTypeName;
+    std::string voidTypeName;
+    char indirectIndicator;
+    std::string separator;
+    TypeConventions typeConvention;
 
-    std::string relationArrows_[4]  = {"<--", "*--", "<|--", "<|.."};
-    std::string intTypeName_        = "int";
-    std::string floatTypeName_      = "float";
-    std::string charTypeName_       = "char";
-    std::string boolTypeName_       = "bool";
-    std::string voidTypeName_       = "void";
+    bool innerView;
+    bool drawIcons;
+    char publicPrefix;
+    char privatePrefix;
+    char protectedPrefix;
+    char packagePrivatePrefix;
 
-    std::string diagramBG_          = "#FFFFFF";
-    std::string elementBG_          = "#FFDDDD";
-    std::string elementBorder_      = "#000000";
-    std::string fontColor_          = "#000000";
-    std::string arrowColor_         = "#000000";
+    std::string bgDiagram;
+    std::string bgElement;
+    std::string elementBorder;
+    std::string fontColor;
+    std::string arrowColor;
 
-    std::string outputFilePath_     = "/tmp/class_diagram";
+    std::string association;
+    std::string composition;
+    std::string extension;
+    std::string implementation;
 
-    bool parse_json(const char* path);
-    void use_default_values();
+    char destructorIndicator;
 
-    static Config createFromJson(const rapidjson::Value& node);
-    static Config createFromJson(const std::filesystem::path& path);
+    bool handleNamespaces;
+    std::string namespaceSeparator;
+
+private:
+    Config() = default;
+    Config(const Config &other) = default;
+
+public:
+    static Config createFromJson(const rapidjson::Value &node);
+    static Config createFromJson(const std::filesystem::path &path);
     static Config createDefault();
     static Config createFromArgs(int argc, char* argv[]);
 
+public:
+    void write_json(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
+    void write_json_file(const std::filesystem::path &path) const;
+
 private:
-    bool parse_file_info(const rapidjson::Value& val);
-    bool parse_types_info(const rapidjson::Value& val);
-    bool parse_access_info(const rapidjson::Value& val);
-    bool parse_colors_info(const rapidjson::Value& val);
-    bool parse_relations_info(const rapidjson::Value& val);
-    bool parse_destructor_info(const rapidjson::Value& val);
-    bool parse_namespace_info(const rapidjson::Value& val);
+    static const rapidjson::Value &safe_get(
+        const rapidjson::Value &node,
+        std::string_view key);
+
+    static char safe_get_char(
+        const rapidjson::Value &node,
+        std::string_view key);
+
+    static void add_string_member(
+        rapidjson::Value &node,
+        rapidjson::Document::AllocatorType &alloc,
+        std::string_view key,
+        std::string_view str);
+
+    static void add_string_member(
+        rapidjson::Value &node,
+        rapidjson::Document::AllocatorType &alloc,
+        std::string_view key,
+        char c);
+
+    static void add_bool_member(
+        rapidjson::Value &node,
+        rapidjson::Document::AllocatorType &alloc,
+        std::string_view key,
+        bool val);
+
+private:
+    void read_file(const rapidjson::Value &val);
+    void read_types(const rapidjson::Value &val);
+    void read_access(const rapidjson::Value &val);
+    void read_colors(const rapidjson::Value &val);
+    void read_relations(const rapidjson::Value &val);
+    void read_destructor(const rapidjson::Value &val);
+    void read_namespaces(const rapidjson::Value &val);
 };
 
 static_assert(IsConfigClass<Config, rapidjson::Value>);
+
 
 } // namespace astfri::uml
 

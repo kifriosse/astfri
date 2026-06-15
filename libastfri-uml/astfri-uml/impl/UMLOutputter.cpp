@@ -15,7 +15,7 @@ void UMLOutputter::write_to_console() {
 }
 
 void UMLOutputter::write_to_file() {
-    std::string v_path = this->config_->outputFilePath_ + this->getFileExtension();
+    std::string v_path = this->config_->filePath + this->getFileExtension();
     std::fstream v_stream;
     v_stream.open(v_path);
 

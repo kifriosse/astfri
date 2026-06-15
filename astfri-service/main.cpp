@@ -288,26 +288,7 @@ int main(int argc, const char** argv)
     {
         astfri::uml::UMLLibWrapper wrapper;
         astfri::uml::PlantUMLOutputter op;
-
-        astfri::uml::Config config;
-        if (! output_config_file.empty())
-        {
-            if (! config.parse_json(output_config_file.c_str()))
-            {
-                std::cerr << "Unable to parse JSON config file: " << output_config_file
-                          << std::endl;
-                    exit(EXIT_OUTPUT_LIB_ERROR); // TODO - debata ci exitovat nebo pokračovat s def. konfiguraciou
-
-
-                // config.use_default_values();
-                // if (mode_verbose)
-                // {
-                //     std::cout << "Unable to parse JSON config. Using default "
-                //                  "values.\n";
-                // }
-            }
-        }
-
+        auto config = astfri::uml::Config::createFromJson(output_config_file);
         wrapper.init(config, op);
         wrapper.run(tu);
         break;

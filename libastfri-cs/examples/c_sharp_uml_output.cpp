@@ -11,8 +11,8 @@ int main() {
     TranslationUnit* ast = astBuilder.mk_ast();
     uml::UMLLibWrapper umlLibWrapper;
     uml::PlantUMLOutputter plantUMLOutputter;
-    uml::Config config;
-    config.innerView_ = true;
+    uml::Config config = uml::Config::createDefault();
+    config.innerView = true;
     umlLibWrapper.init(config, plantUMLOutputter);
     umlLibWrapper.run(*ast);
 }

@@ -5,16 +5,24 @@
 
 namespace astfri::uml {
 enum class TypeConventions {
-    TYPE_BEFORE_IDENTIFIER = 0,
-    TYPE_AFTER_IDENTIFIER
+    // type var
+    TypeBeforeIdentifier = 0,
+
+    // var : type
+    TypeAfterIdentifier
 };
+
+std::string_view to_string(TypeConventions tc);
+
+TypeConventions from_string(std::string_view tcStr);
+
 
 class TypeConvention {
 public:
     static std::string get_string(
-        std::string type,
-        std::string identifier,
-        std::string separator,
+        const std::string &type,
+        const std::string &identifier,
+        const std::string &separator,
         TypeConventions conv
     );
 

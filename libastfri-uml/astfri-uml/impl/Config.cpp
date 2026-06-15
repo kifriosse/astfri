@@ -1,217 +1,256 @@
 #include <astfri-uml/impl/Config.hpp>
 
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/prettywriter.h>
+
+#include <format>
 #include <fstream>
+#include <stdexcept>
+
 
 namespace astfri::uml {
 
-Config Config::createFromJson(const rapidjson::Value& node) {
-    (void)node;
-    return *(new Config());
+
+Config Config::createFromJson(const rapidjson::Value &node) {
+    Config config;
+    config.read_file(safe_get(node, "file"));
+    config.read_types(safe_get(node, "types"));
+    config.read_access(safe_get(node, "accessMod"));
+    config.read_colors(safe_get(node, "colors"));
+    config.read_relations(safe_get(node, "relations"));
+    config.read_destructor(safe_get(node, "destructor"));
+    config.read_namespaces(safe_get(node, "namespaces"));
+    return config;
 }
 
 Config Config::createFromJson(const std::filesystem::path& path) {
-    (void)path;
-    return *(new Config());
+    std::ifstream ifst(path);
+    if (! ifst.is_open()) {
+        throw std::invalid_argument(std::format("Failed to open `{}`.", path.string()));
+    }
+    rapidjson::IStreamWrapper isw(ifst);
+    rapidjson::Document doc;
+    doc.ParseStream(isw);
+    ifst.close();
+    return Config::createFromJson(doc);
 }
 
 Config Config::createDefault() {
-    return *(new Config());
+    Config config;
+
+    config.writeToFile          = false;
+    config.filePath             = "class_diagram.puml";
+
+    config.intTypeName          = "int";
+    config.floatTypeName        = "float";
+    config.charTypeName         = "char";
+    config.boolTypeName         = "bool";
+    config.voidTypeName         = "void";
+    config.indirectIndicator    = '*';
+    config.separator            = " : ";
+    config.typeConvention       = TypeConventions::TypeAfterIdentifier;
+
+    config.innerView            = true;
+    config.drawIcons            = true;
+    config.publicPrefix         = '+';
+    config.privatePrefix        = '-';
+    config.protectedPrefix      = '#';
+    config.packagePrivatePrefix = '~';
+
+    config.bgDiagram            = "#FFFFFF";
+    config.bgElement            = "#FFDDDD";
+    config.elementBorder        = "#000000";
+    config.fontColor            = "#000000";
+    config.arrowColor           = "#000000";
+
+    config.association          = "<--";
+    config.composition          = "*--";
+    config.extension            = "<|--";
+    config.implementation       = "<|..";
+
+    config.destructorIndicator  = '~';
+
+    config.handleNamespaces     = false;
+    config.namespaceSeparator   = "::";
+
+    return config;
 }
 
 Config Config::createFromArgs(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
-    return *(new Config());
+    throw std::runtime_error("Not implemented yet.");
 }
 
-bool Config::parse_json(const char* path) {
-    std::string jsonString;
-    std::string line;
-    std::ifstream fstream(path);
-    while (std::getline(fstream, line)) {
-        jsonString += line;
+void Config::write_json(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const {
+    rapidjson::Value file;
+    file.SetObject();
+    add_bool_member(file, alloc, "writeToFile", this->writeToFile);
+    add_string_member(file, alloc, "filePath", this->filePath);
+    out.AddMember("file", file, alloc);
+
+    rapidjson::Value types;
+    types.SetObject();
+    add_string_member(types, alloc, "intTypeName", this->intTypeName);
+    add_string_member(types, alloc, "floatTypeName", this->floatTypeName);
+    add_string_member(types, alloc, "charTypeName", this->charTypeName);
+    add_string_member(types, alloc, "boolTypeName", this->boolTypeName);
+    add_string_member(types, alloc, "voidTypeName", this->voidTypeName);
+    add_string_member(types, alloc, "indirectIndicator", this->indirectIndicator);
+    add_string_member(types, alloc, "separator", this->separator);
+    add_string_member(types, alloc, "typeConvention", to_string(this->typeConvention));
+    out.AddMember("types", types, alloc);
+
+    rapidjson::Value accessMod;
+    accessMod.SetObject();
+    add_bool_member(accessMod, alloc, "innerView", this->innerView);
+    add_bool_member(accessMod, alloc, "drawIcons", this->drawIcons);
+    add_string_member(accessMod, alloc, "publicPrefix", this->publicPrefix);
+    add_string_member(accessMod, alloc, "privatePrefix", this->privatePrefix);
+    add_string_member(accessMod, alloc, "protectedPrefix", this->protectedPrefix);
+    add_string_member(accessMod, alloc, "packagePrivatePrefix", this->packagePrivatePrefix);
+    out.AddMember("accessMod", accessMod, alloc);
+
+    rapidjson::Value colors;
+    colors.SetObject();
+    add_string_member(colors, alloc, "bgDiagram", this->bgDiagram);
+    add_string_member(colors, alloc, "bgElement", this->bgElement);
+    add_string_member(colors, alloc, "elementBorder", this->elementBorder);
+    add_string_member(colors, alloc, "fontColor", this->fontColor);
+    add_string_member(colors, alloc, "arrowColor", this->arrowColor);
+    out.AddMember("colors", colors, alloc);
+
+    rapidjson::Value relations;
+    relations.SetObject();
+    add_string_member(relations, alloc, "association", this->association);
+    add_string_member(relations, alloc, "composition", this->composition);
+    add_string_member(relations, alloc, "extension", this->extension);
+    add_string_member(relations, alloc, "implementation", this->implementation);
+    out.AddMember("relations", relations, alloc);
+
+    rapidjson::Value destructor;
+    destructor.SetObject();
+    add_string_member(destructor, alloc, "destructorIndicator", this->destructorIndicator);
+    out.AddMember("destructor", destructor, alloc);
+
+    rapidjson::Value namespaces;
+    namespaces.SetObject();
+    add_bool_member(namespaces, alloc, "handleNamespaces", this->handleNamespaces);
+    add_string_member(namespaces, alloc, "namespaceSeparator", this->namespaceSeparator);
+    out.AddMember("namespaces", namespaces, alloc);
+}
+
+void Config::write_json_file(const std::filesystem::path &path) const {
+    std::ofstream ofst(path);
+    if (! ofst.is_open()) {
+        throw std::runtime_error(std::format("Failed to open `{}`.", path.string()));
     }
-    fstream.close();
-    rapidjson::Document document;
-    document.Parse(jsonString.c_str());
-    if (! document.HasMember("FILE"))
-        return false;
-    if (! this->parse_file_info(document["FILE"]))
-        return false;
-    if (! document.HasMember("TYPES"))
-        return false;
-    if (! this->parse_types_info(document["TYPES"]))
-        return false;
-    if (! document.HasMember("ACCESS_MOD"))
-        return false;
-    if (! this->parse_access_info(document["ACCESS_MOD"]))
-        return false;
-    if (! document.HasMember("COLORS"))
-        return false;
-    if (! this->parse_colors_info(document["COLORS"]))
-        return false;
-    if (! document.HasMember("RELATIONS"))
-        return false;
-    if (! this->parse_relations_info(document["RELATIONS"]))
-        return false;
-    if (! document.HasMember("DESTRUCTOR"))
-        return false;
-    if (! this->parse_destructor_info(document["DESTRUCTOR"]))
-        return false;
-    if (! document.HasMember("NAMESPACE"))
-        return false;
-    if (! this->parse_namespace_info(document["NAMESPACE"]))
-        return false;
-    return true;
+    rapidjson::Document doc;
+    doc.SetObject();
+    this->write_json(doc, doc.GetAllocator());
+    rapidjson::OStreamWrapper osw(ofst);
+    rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(osw);
+    doc.Accept(writer);
 }
 
-bool Config::parse_file_info(const rapidjson::Value& val) {
-    if (! val.HasMember("write_to_file"))
-        return false;
-    this->writeToFile_ = val["write_to_file"].GetBool();
-    if (! val.HasMember("file_path"))
-        return false;
-    this->outputFilePath_ = val["file_path"].GetString();
-    return true;
+void Config::read_file(const rapidjson::Value& val) {
+    this->writeToFile = safe_get(val, "writeToFile").GetBool();
+    this->filePath = safe_get(val, "filePath").GetString();
 }
 
-bool Config::parse_types_info(const rapidjson::Value& val) {
-    if (! val.HasMember("int"))
-        return false;
-    this->intTypeName_ = val["int"].GetString();
-    if (! val.HasMember("float"))
-        return false;
-    this->floatTypeName_ = val["float"].GetString();
-    if (! val.HasMember("char"))
-        return false;
-    this->charTypeName_ = val["char"].GetString();
-    if (! val.HasMember("bool"))
-        return false;
-    this->boolTypeName_ = val["bool"].GetString();
-    if (! val.HasMember("void"))
-        return false;
-    this->voidTypeName_ = val["void"].GetString();
-    if (! val.HasMember("indirect_indicator"))
-        return false;
-    this->indirectIndicator_ = val["indirect_indicator"].GetString()[0];
-    if (! val.HasMember("separator"))
-        return false;
-    this->separator_ = val["separator"].GetString();
-    if (! val.HasMember("type_convention"))
-        return false;
-    std::string str = val["type_convention"].GetString();
-    if (str.compare("TypeBeforeConvention") == 0)
-        this->typeConvention_ = TypeConventions::TYPE_BEFORE_IDENTIFIER;
-    if (str.compare("TypeAfterConvention") == 0)
-        this->typeConvention_ = TypeConventions::TYPE_AFTER_IDENTIFIER;
-    return true;
+void Config::read_types(const rapidjson::Value& val) {
+    this->intTypeName = safe_get(val, "intTypeName").GetString();
+    this->floatTypeName = safe_get(val, "floatTypeName").GetString();
+    this->charTypeName = safe_get(val, "charTypeName").GetString();
+    this->boolTypeName = safe_get(val, "boolTypeName").GetString();
+    this->voidTypeName = safe_get(val, "voidTypeName").GetString();
+    this->indirectIndicator = safe_get_char(val, "indirectIndicator");
+    this->separator = safe_get(val, "separator").GetString();
+    this->typeConvention = from_string(safe_get(val, "typeConvention").GetString());
 }
 
-bool Config::parse_access_info(const rapidjson::Value& val) {
-    if (! val.HasMember("inner_view"))
-        return false;
-    this->innerView_ = val["inner_view"].GetBool();
-    if (! val.HasMember("draw_icons"))
-        return false;
-    this->drawAccessModIcons_ = val["draw_icons"].GetBool();
-    if (! val.HasMember("public"))
-        return false;
-    this->accessPrefix_[0] = val["public"].GetString()[0];
-    if (! val.HasMember("private"))
-        return false;
-    this->accessPrefix_[1] = val["private"].GetString()[0];
-    if (! val.HasMember("protected"))
-        return false;
-    this->accessPrefix_[2] = val["protected"].GetString()[0];
-    if (! val.HasMember("package_private"))
-        return false;
-    this->accessPrefix_[3] = val["package_private"].GetString()[0];
-    return true;
+void Config::read_access(const rapidjson::Value& val) {
+    this->innerView = safe_get(val, "innerView").GetBool();
+    this->drawIcons = safe_get(val, "drawIcons").GetBool();
+    this->publicPrefix = safe_get_char(val, "publicPrefix");
+    this->privatePrefix = safe_get_char(val, "privatePrefix");
+    this->protectedPrefix = safe_get_char(val, "protectedPrefix");
+    this->packagePrivatePrefix = safe_get_char(val, "packagePrivatePrefix");
 }
 
-bool Config::parse_colors_info(const rapidjson::Value& val) {
-    if (! val.HasMember("bg_diagram"))
-        return false;
-    this->diagramBG_ = val["bg_diagram"].GetString();
-    if (! val.HasMember("bg_element"))
-        return false;
-    this->elementBG_ = val["bg_element"].GetString();
-    if (! val.HasMember("element_border"))
-        return false;
-    this->elementBorder_ = val["element_border"].GetString();
-    if (! val.HasMember("font_color"))
-        return false;
-    this->fontColor_ = val["font_color"].GetString();
-    if (! val.HasMember("arrow_color"))
-        return false;
-    this->arrowColor_ = val["arrow_color"].GetString();
-    return true;
+void Config::read_colors(const rapidjson::Value& val) {
+    this->bgDiagram = safe_get(val, "bgDiagram").GetString();
+    this->bgElement = safe_get(val, "bgElement").GetString();
+    this->elementBorder = safe_get(val, "elementBorder").GetString();
+    this->fontColor = safe_get(val, "fontColor").GetString();
+    this->arrowColor = safe_get(val, "arrowColor").GetString();
 }
 
-bool Config::parse_relations_info(const rapidjson::Value& val) {
-    if (! val.HasMember("association"))
-        return false;
-    this->relationArrows_[0] = val["association"].GetString();
-    if (! val.HasMember("composition"))
-        return false;
-    this->relationArrows_[1] = val["composition"].GetString();
-    if (! val.HasMember("extension"))
-        return false;
-    this->relationArrows_[2] = val["extension"].GetString();
-    if (! val.HasMember("implementation"))
-        return false;
-    this->relationArrows_[3] = val["implementation"].GetString();
-    return true;
+void Config::read_relations(const rapidjson::Value& val) {
+    this->association = safe_get(val, "association").GetString();
+    this->composition = safe_get(val, "composition").GetString();
+    this->extension = safe_get(val, "extension").GetString();
+    this->implementation = safe_get(val, "implementation").GetString();
 }
 
-bool Config::parse_destructor_info(const rapidjson::Value& val) {
-    if (! val.HasMember("indicator"))
-        return false;
-    this->destructorIndicator_ = val["indicator"].GetString()[0];
-    return true;
+void Config::read_destructor(const rapidjson::Value& val) {
+    this->destructorIndicator = safe_get_char(val, "destructorIndicator");
 }
 
-bool Config::parse_namespace_info(const rapidjson::Value& val) {
-    if (! val.HasMember("do_namespace"))
-        return false;
-    this->handleNamespaces_ = val["do_namespace"].GetBool();
-    return true;
+void Config::read_namespaces(const rapidjson::Value& val) {
+    this->handleNamespaces = safe_get(val, "handleNamespaces").GetBool();
+    this->namespaceSeparator = safe_get(val, "namespaceSeparator").GetString();
 }
 
-void Config::use_default_values() {
 
-    this->typeConvention_      = TypeConventions::TYPE_AFTER_IDENTIFIER;
-    this->innerView_           = true;
-    this->writeToFile_         = false;
-    this->drawAccessModIcons_  = true;
-    this->handleNamespaces_    = true;
-
-    this->indirectIndicator_   = '*';
-    this->destructorIndicator_ = '~';
-    this->separator_           = " : ";
-    this->namespaceSeparator_  = "::";
-    this->accessPrefix_[0]     = '+';
-    this->accessPrefix_[1]     = '-';
-    this->accessPrefix_[2]     = '#';
-    this->accessPrefix_[3]     = '~';
-
-    this->relationArrows_[0]   = "<--";
-    this->relationArrows_[1]   = "*--";
-    this->relationArrows_[2]   = "<|--";
-    this->relationArrows_[3]   = "<|..";
-    this->intTypeName_         = "int";
-    this->floatTypeName_       = "float";
-    this->charTypeName_        = "char";
-    this->boolTypeName_        = "bool";
-    this->voidTypeName_        = "void";
-
-    this->diagramBG_           = "#FFFFFF";
-    this->elementBG_           = "#FFDDDD";
-    this->elementBorder_       = "#000000";
-    this->fontColor_           = "#000000";
-    this->arrowColor_          = "#000000";
-
-    this->outputFilePath_      = "/tmp/class_diagram";
+const rapidjson::Value &Config::safe_get(const rapidjson::Value &node, std::string_view key) {
+    if (! node.HasMember(key.data())) {
+        throw std::invalid_argument(std::format("Invalid json node. Missing `{}` member.", key));
+    }
+    return node[key.data()];
 }
+
+char Config::safe_get_char(const rapidjson::Value &node, std::string_view key) {
+    std::string str = safe_get(node, key).GetString();
+    if (str.empty()) {
+        throw std::invalid_argument(std::format("Empty string in `{}`.", key));
+    }
+    return str[0];
+}
+
+void Config::add_string_member(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    std::string_view str
+) {
+    rapidjson::Value jsonKey(key.data(), key.length(), alloc);
+    rapidjson::Value jsonValue(str.data(), str.length(), alloc);
+    node.AddMember(jsonKey.Move(), jsonValue.Move(), alloc);
+}
+
+void Config::add_string_member(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    char c
+) {
+    rapidjson::Value jsonKey(key.data(), key.length(), alloc);
+    rapidjson::Value jsonValue(&c, 1, alloc);
+    node.AddMember(jsonKey.Move(), jsonValue.Move(), alloc);
+}
+
+void Config::add_bool_member(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    bool val
+) {
+    rapidjson::Value jsonKey(key.data(), key.length(), alloc);
+    node.AddMember(jsonKey.Move(), val, alloc);
+}
+
+
 
 } // namespace astfri::uml

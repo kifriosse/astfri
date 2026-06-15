@@ -26,9 +26,8 @@ int main(int argc, const char** argv) {
 
     // UML
     astfri::uml::UMLLibWrapper wrapper;
-    astfri::uml::Config config;
+    astfri::uml::Config config = astfri::uml::Config::createDefault();
     astfri::uml::PlantUMLOutputter op;
-    config.separator_ = ':';
     wrapper.init(config, op);
     wrapper.run(tu);
 

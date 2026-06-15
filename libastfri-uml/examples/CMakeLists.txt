@@ -1,16 +1,19 @@
-add_executable(uml-example)
+add_executable(uml-example-standalone)
 
-target_sources(uml-example PRIVATE umlexample.cpp)
+target_sources(uml-example-standalone PRIVATE ExampleStandalone.cpp)
 
-target_link_libraries(uml-example PRIVATE astfri-uml)
+target_link_libraries(uml-example-standalone PRIVATE astfri-uml)
 
 
-add_executable(uml-example-link)
+add_executable(uml-example-cpp)
 
-target_sources(uml-example-link PRIVATE umllinkexample.cpp)
+target_sources(uml-example-cpp PRIVATE ExampleCpp.cpp)
 
-target_link_libraries(uml-example-link PRIVATE astfri-uml astfri-cpp)
+target_link_libraries(uml-example-cpp PRIVATE astfri-uml astfri-cpp)
 
-add_executable(uml-cs-link)
-target_sources(uml-cs-link PRIVATE example_cs_link.cpp)
-target_link_libraries(uml-cs-link PRIVATE astfri-uml astfri-cs)
+
+add_executable(uml-example-cs)
+
+target_sources(uml-example-cs PRIVATE ExampleCs.cpp)
+
+target_link_libraries(uml-example-cs PRIVATE astfri-uml astfri-cs)

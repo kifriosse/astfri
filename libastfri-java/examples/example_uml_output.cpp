@@ -14,8 +14,8 @@ int main() {
     astfri::TranslationUnit* tu = tb->get_translation_unit(tree, sourceCode);
 
     // code for uml output
-    astfri::uml::Config conf;
-    conf.innerView_ = true;
+    astfri::uml::Config conf = astfri::uml::Config::createDefault();
+    conf.innerView = true;
 
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::UMLLibWrapper uml;

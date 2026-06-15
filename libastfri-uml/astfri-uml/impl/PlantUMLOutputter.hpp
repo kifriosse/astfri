@@ -4,6 +4,8 @@
 #include <astfri-uml/impl/UMLOutputter.hpp>
 
 namespace astfri::uml {
+
+
 class PlantUMLOutputter : public UMLOutputter {
 private:
     void open(const ClassStruct& cs);
@@ -26,7 +28,12 @@ public:
     virtual void add_destructor(DestructorStruct d) override;
 
     virtual void add_relation(RelationStruct r) override;
+
+private:
+    char access_mod_to_char(AccessModifier am) const;
+    std::string relation_to_arrow(RelationType rt) const;
 };
+
 
 } // namespace astfri::uml
 

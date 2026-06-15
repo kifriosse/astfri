@@ -2,9 +2,24 @@
 
 #include <vector>
 
-int main(int argc, char** argv) {
-    auto& statements = astfri::StmtFactory::get_instance();
-    // auto& expressions = astfri::ExprFactory::get_instance();
+
+astfri::TranslationUnit prepareTU();
+
+
+int main(int argc, char *argv[]) {
+    astfri::TranslationUnit tu = prepareTU();
+    astfri::uml::Config conf = argc > 1
+        ? astfri::uml::Config::createFromJson(argv[1])
+        : astfri::uml::Config::createDefault();
+    astfri::uml::PlantUMLOutputter op;
+    astfri::uml::UMLLibWrapper uml;
+    uml.init(conf, op);
+    uml.run(tu);
+}
+
+
+astfri::TranslationUnit prepareTU() {
+    auto& statements                  = astfri::StmtFactory::get_instance();
     auto& types                       = astfri::TypeFactory::get_instance();
 
     astfri::Scope scope               = astfri::mk_scope("Global");
@@ -18,12 +33,10 @@ int main(int argc, char** argv) {
     astfri::ClassType* classTypeFoo    = types.mk_class("Foo", scope);
     astfri::ClassType* classTypeBar    = types.mk_class("Bar", scope);
     astfri::ClassType* classTypeParent = types.mk_class("Parent", scope);
-    // astfri::InterfaceType* interfaceTypeIVisitable = types.mk_interface("IVisitable", scope);
 
     classFoo->type    = classTypeFoo;
     classBar->type    = classTypeBar;
     classParent->type = classTypeParent;
-    // interfaceIVisitable->type_ = interfaceTypeIVisitable;
 
     std::vector<astfri::GenericParam*> genericParamsFoo;
     genericParamsFoo.push_back(statements.mk_generic_param("", "T"));
@@ -52,8 +65,7 @@ int main(int argc, char** argv) {
         types.mk_class("std::string", astfri::mk_scope()),
         nullptr,
         astfri::AccessModifier::Private,
-        astfri::Staticity::NonStatic
-    );
+        astfri::Staticity::NonStatic);
     fieldsBar.push_back(memberBar);
     classBar->vars = fieldsBar;
 
@@ -62,17 +74,18 @@ int main(int argc, char** argv) {
     classFoo->interfaces = interfacesFoo;
 
     std::vector<astfri::MemberVarDefStmt*> fieldsFoo;
-    fieldsFoo.push_back(
-        statements
-            .mk_member_var_def("number_", types.mk_int(), nullptr, astfri::AccessModifier::Private, astfri::Staticity::NonStatic)
-    );
+    fieldsFoo.push_back(statements.mk_member_var_def(
+        "number_",
+        types.mk_int(),
+        nullptr,
+        astfri::AccessModifier::Private,
+        astfri::Staticity::NonStatic));
     fieldsFoo.push_back(statements.mk_member_var_def(
         "bar_",
         types.mk_indirect(types.mk_class("Bar", astfri::mk_scope())),
         nullptr,
         astfri::AccessModifier::Private,
-        astfri::Staticity::NonStatic
-    ));
+        astfri::Staticity::NonStatic));
     classFoo->vars = fieldsFoo;
 
     auto func      = statements.mk_function_def();
@@ -92,30 +105,10 @@ int main(int argc, char** argv) {
     classFoo->methods = methodsFoo;
 
     astfri::TranslationUnit tu;
-    std::vector<astfri::ClassDefStmt*> classes;
-    classes.push_back(classFoo);
-    classes.push_back(classBar);
-    classes.push_back(classParent);
-    std::vector<astfri::InterfaceDefStmt*> interfaces;
-    interfaces.push_back(interfaceIVisitable);
+    tu.classes.push_back(classFoo);
+    tu.classes.push_back(classBar);
+    tu.classes.push_back(classParent);
+    tu.interfaces.push_back(interfaceIVisitable);
 
-    tu.classes    = classes;
-    tu.interfaces = interfaces;
-
-    std::string config_file;
-    if (argc > 1) {
-        config_file = argv[1];
-    }
-    else {
-        config_file = "../libastfri-uml/examples/default_config.json";
-    }
-
-    astfri::uml::Config conf = astfri::uml::Config::createDefault();
-    // config can be changed at any point before calling run
-    // either by directly accessing its member variables
-    // or using its parse_json method
-    astfri::uml::PlantUMLOutputter op;
-    astfri::uml::UMLLibWrapper uml;
-    uml.init(conf, op);
-    uml.run(tu);
+    return tu;
 }

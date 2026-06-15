@@ -29,7 +29,7 @@ bool ClassVisitor::find_interface(std::string name) {
 }
 
 void ClassVisitor::finish() {
-    if (this->config_->writeToFile_) {
+    if (this->config_->writeToFile) {
         this->outputter_->write_to_file();
     }
     else {
@@ -46,23 +46,23 @@ void ClassVisitor::set_outputter(const UMLOutputter& outputter) {
 }
 
 void ClassVisitor::visit(const astfri::IntType& /*type*/) {
-    this->currentVariable_.type_ = this->config_->intTypeName_;
+    this->currentVariable_.type_ = this->config_->intTypeName;
 }
 
 void ClassVisitor::visit(const astfri::FloatType& /*type*/) {
-    this->currentVariable_.type_ = this->config_->floatTypeName_;
+    this->currentVariable_.type_ = this->config_->floatTypeName;
 }
 
 void ClassVisitor::visit(const astfri::CharType& /*type*/) {
-    this->currentVariable_.type_ = this->config_->charTypeName_;
+    this->currentVariable_.type_ = this->config_->charTypeName;
 }
 
 void ClassVisitor::visit(const astfri::BoolType& /*type*/) {
-    this->currentVariable_.type_ = this->config_->boolTypeName_;
+    this->currentVariable_.type_ = this->config_->boolTypeName;
 }
 
 void ClassVisitor::visit(const astfri::VoidType& /*type*/) {
-    this->currentVariable_.type_ = this->config_->voidTypeName_;
+    this->currentVariable_.type_ = this->config_->voidTypeName;
 }
 
 void ClassVisitor::visit(const astfri::ClassType& type) {
@@ -95,7 +95,7 @@ void ClassVisitor::visit(const astfri::ParamVarDefStmt& stmt) {
 }
 
 void ClassVisitor::visit(const astfri::MemberVarDefStmt& stmt) {
-    if (! this->config_->innerView_ && stmt.access == astfri::AccessModifier::Private)
+    if (! this->config_->innerView && stmt.access == astfri::AccessModifier::Private)
         return;
     stmt.type->accept(*this);
     this->currentVariable_.name_      = stmt.name;
@@ -118,7 +118,7 @@ void ClassVisitor::visit(const astfri::FunctionDefStmt& stmt) {
 }
 
 void ClassVisitor::visit(const astfri::MethodDefStmt& stmt) {
-    if (! this->config_->innerView_ && stmt.access == astfri::AccessModifier::Private)
+    if (! this->config_->innerView && stmt.access == astfri::AccessModifier::Private)
         return;
     stmt.func->accept(*this);
     this->currentMethod_.accessMod_ = stmt.access;
@@ -150,7 +150,7 @@ void ClassVisitor::visit(const astfri::GenericParam& stmt) {
 
 void ClassVisitor::visit(const astfri::ClassDefStmt& stmt) {
     this->currentClass_.name_ = stmt.type->name;
-    if (this->config_->handleNamespaces_) {
+    if (this->config_->handleNamespaces) {
         this->currentClass_.namespace_
             = astfri::mk_fqn(stmt.type->scope, this->currentClass_.name_);
     }
