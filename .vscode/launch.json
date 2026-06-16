@@ -43,6 +43,25 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "[text] text-example-standalone",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/libastfri-text/examples/text-example-standalone",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

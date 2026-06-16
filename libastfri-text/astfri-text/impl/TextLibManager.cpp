@@ -5,17 +5,17 @@
 using namespace astfri::text;
 
 TextLibManager::TextLibManager() :
-    m_config(new TextLibConfig()), // TODO MM: Do not use new here.
-    m_builder(new PlainTextBuilder(m_config)),
-    m_visitor(new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), m_config)),
-    m_exporter(new Exporter(m_config)),
+    m_config(Config::createDefault()),
+    m_builder(new PlainTextBuilder(&m_config)),
+    m_visitor(new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), &m_config)),
+    m_exporter(new Exporter(&m_config)),
     m_isSetToPseudocode(true)
 {
 }
 
 TextLibManager::~TextLibManager()
 {
-    delete m_config; // TODO MM: Won't be neccessary.
+    // TODO MM: Use smart pointers or values.
     delete m_builder;
     delete m_visitor;
     delete m_exporter;
@@ -26,17 +26,17 @@ std::string_view TextLibManager::version()
     return ASTFRI_TEXT_VERSION;
 }
 
-void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root)
+void TextLibManager::process_ast(Config cfg, TranslationUnit const& root)
 {
     process_ast(cfg, root, nullptr);
 }
 
-void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream& ost)
+void TextLibManager::process_ast(Config cfg, TranslationUnit const& root, std::ostream& ost)
 {
     process_ast(cfg, root, &ost);
 }
 
-void TextLibManager::process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream* ost)
+void TextLibManager::process_ast(Config cfg, TranslationUnit const& root, std::ostream* ost)
 {
     AbstractBuilder* builder = nullptr;
     AbstractVisitor* visitor = nullptr;
@@ -92,7 +92,7 @@ void TextLibManager::change_output_format(TextOutputFormat const& format)
             break;
         case TextOutputFormat::TxtPseudocode:
             change_output_format("txt");
-            m_config->fileFormat = "txt";
+            m_config.fileFormat = "txt";
             break;
         case TextOutputFormat::HtmlPseudocode:
             // TODO: implement html pseudocode
@@ -102,18 +102,17 @@ void TextLibManager::change_output_format(TextOutputFormat const& format)
 
 void TextLibManager::change_config(std::filesystem::path const& path)
 {
-    m_config->change_to_default();
-    m_config->load_from_file(path);
-    change_output_format(m_config->fileFormat);
+    m_config = Config::createFromJson(path);
+    change_output_format(m_config.fileFormat);
 }
 
 void TextLibManager::change_config(rapidjson::Value const& json)
 {
-    m_config->change_to_default();
-    m_config->load_from_json(json);
-    change_output_format(m_config->fileFormat);
+    m_config = Config::createFromJson(json);
+    change_output_format(m_config.fileFormat);
 }
 
+// TODO MM: We can simplify this.
 void TextLibManager::change_output_format(std::string_view format)
 {
     if (format == "c++")
@@ -136,7 +135,7 @@ void TextLibManager::change_output_format(std::string_view format)
             else
             {
                 delete m_builder;
-                m_builder = new PlainTextBuilder(m_config);
+                m_builder = new PlainTextBuilder(&m_config);
                 m_visitor->replace_builder(m_builder);
             }
             m_visitor->reset_visitor();
@@ -145,10 +144,10 @@ void TextLibManager::change_output_format(std::string_view format)
         {
             delete m_builder;
             delete m_visitor;
-            m_builder = new PlainTextBuilder(m_config);
-            m_visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), m_config);
+            m_builder = new PlainTextBuilder(&m_config);
+            m_visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), &m_config);
             m_isSetToPseudocode = true;
         }
-        m_config->fileFormat = "txt";
+        m_config.fileFormat = "txt";
     }
 }

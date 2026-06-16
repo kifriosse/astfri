@@ -1,195 +1,207 @@
 #include <astfri-text/TextLibConfig.hpp>
+#include <astfri-common/RapidjsonUtils.hpp>
 
 #include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/prettywriter.h>
 
-#include <fstream>
 
-using namespace astfri::text;
+namespace astfri::text {
 
-TextLibConfig TextLibConfig::createDefault()
-{
-    return TextLibConfig();
-}
 
-TextLibConfig TextLibConfig::createFromArgs(int /*argc*/, char* /*argv*/[])
-{
-    throw std::logic_error("Not implemented yet!");
-}
-
-TextLibConfig TextLibConfig::createFromJson(rapidjson::Value const& node)
-{
-    TextLibConfig config;
-    config.load_from_json(node);
+Config Config::createFromJson(const rapidjson::Value &node) {
+    Config config;
+    config.read_code_structure(common::get_object(node, "codeStructure"));
+    config.read_pseudocode_structure(common::get_object(node, "pseudocodeStructure"));
+    config.read_pseudocode_text(common::get_object(node, "pseudocodeText"));
+    config.read_output_settings(common::get_object(node, "outputSettings"));
     return config;
 }
 
-TextLibConfig TextLibConfig::createFromJson(std::filesystem::path const& path)
-{
-    TextLibConfig config;
-    config.load_from_file(path);
-    return config;
+Config Config::createFromJson(std::filesystem::path const& path) {
+    return Config::createFromJson(common::read_document(path));
 }
 
-void TextLibConfig::change_to_default()
-{
+Config Config::createDefault() {
+    Config config;
+
     // 1) CODE_STRUCTURE
-    tabulatorLength              = 4;
-    namespaceBlockBracketNewLine = false;
-    useNamespaceTabulator        = false;
-    objectBlockBracketNewLine    = false;
-    functionBlockBracketNewLine  = false;
-    loopBlockBracketNewLine      = false;
-    dowhileConditionNewLine      = false;
-    conditionBlockBracketNewLine = false;
-    elseifConditionNewLine       = false;
-    elseConditionNewLine         = false;
-    switchBlockBracketNewLine    = false;
-    trycatchBlockBracketNewLine  = false;
-    catchConditionNewLine        = false;
+    config.tabulatorLength              = 4;
+    config.namespaceBlockBracketNewLine = false;
+    config.useNamespaceTabulator        = false;
+    config.objectBlockBracketNewLine    = false;
+    config.functionBlockBracketNewLine  = false;
+    config.loopBlockBracketNewLine      = false;
+    config.dowhileConditionNewLine      = false;
+    config.conditionBlockBracketNewLine = false;
+    config.elseifConditionNewLine       = false;
+    config.elseConditionNewLine         = false;
+    config.switchBlockBracketNewLine    = false;
+    config.trycatchBlockBracketNewLine  = false;
+    config.catchConditionNewLine        = false;
     // 2) PSEUDOCODE_STRUCTURE
-    textMarginLeft     = 3;
-    rowNumMarginLeft   = 1;
-    shBrColors         = true;
-    shRowNum           = true;
-    shDotAfterRowNum   = true;
-    shRowNumOnEmptyRow = true;
-    shGlobVarDeclar    = true;
-    shTemplateDeclar   = true;
-    shClassDeclar      = true;
-    shClassDefin       = true;
-    shClassDefinInl    = false;
-    shInterfDeclar     = true;
-    shInterfDefin      = true;
-    shMembVarDeclar    = true;
-    shCoDeMeDeclar     = true;
-    shCoDeMeDefin      = true;
-    shCoDeMeOwner      = true;
-    shCoDeMeTemplate   = true;
-    shFuncDeclar       = true;
-    shFuncDefin        = true;
+    config.textMarginLeft     = 3;
+    config.rowNumMarginLeft   = 1;
+    config.shBrColors         = true;
+    config.shRowNum           = true;
+    config.shDotAfterRowNum   = true;
+    config.shRowNumOnEmptyRow = true;
+    config.shGlobVarDeclar    = true;
+    config.shTemplateDeclar   = true;
+    config.shClassDeclar      = true;
+    config.shClassDefin       = true;
+    config.shClassDefinInl    = false;
+    config.shInterfDeclar     = true;
+    config.shInterfDefin      = true;
+    config.shMembVarDeclar    = true;
+    config.shCoDeMeDeclar     = true;
+    config.shCoDeMeDefin      = true;
+    config.shCoDeMeOwner      = true;
+    config.shCoDeMeTemplate   = true;
+    config.shFuncDeclar       = true;
+    config.shFuncDefin        = true;
     // 3) PSEUDOCODE_TEXT
     // 3.1 GENERAL
-    unknownTypeWord    = "UNKNOWN TYPE";
-    unknownExprWord    = "UNKNOWN EXPRESSION";
-    unknownStmtWord    = "UNKNOWN STATEMENT";
-    defaultTextStyle   = "font-family:Consolas;font-size:16px";
-    unknownPhraseStyle = "";
-    rowNumStyle        = "";
+    config.unknownTypeWord    = "UNKNOWN TYPE";
+    config.unknownExprWord    = "UNKNOWN EXPRESSION";
+    config.unknownStmtWord    = "UNKNOWN STATEMENT";
+    config.defaultTextStyle   = "font-family:Consolas;font-size:16px";
+    config.unknownPhraseStyle = "";
+    config.rowNumStyle        = "";
     // 3.2 SYMBOLS
     // 3.2.1 OPERATORS
-    pointerWord = "↑";
-    assignWord  = "=";
-    moduloWord  = "%";
-    addressWord = "&";
-    derefWord   = "*";
-    opWordStyle = "";
-    brColors = {"red", "green", "blue"};
+    config.pointerWord = "↑";
+    config.assignWord  = "=";
+    config.moduloWord  = "%";
+    config.addressWord = "&";
+    config.derefWord   = "*";
+    config.opWordStyle = "";
+    config.brColors = {"red", "green", "blue"};
     // 3.2.2 SEPARATORS
-    semicolonWord = ";";
-    sepWordStyle  = "";
+    config.semicolonWord = ";";
+    config.sepWordStyle  = "";
     // 3.3 VALUES
-    trueWord          = "true";
-    falseWord         = "false";
-    nullWord          = "nullptr";
-    valueStyle        = "";
-    numericValueStyle = "";
-    stringValueStyle  = "";
+    config.trueWord          = "true";
+    config.falseWord         = "false";
+    config.nullWord          = "nullptr";
+    config.valueStyle        = "";
+    config.numericValueStyle = "";
+    config.stringValueStyle  = "";
     // 3.4 REFERENCE_NAMES
-    defaultRefNameStyle = "";
-    templateNameStyle   = "";
-    classNameStyle      = "";
-    interfaceNameStyle  = "";
-    methodNameStyle     = "";
-    functionNameStyle   = "";
-    defaultVarNameStyle = "";
-    globalVarNameStyle  = "";
-    memberVarNameStyle  = "";
-    localVarNameStyle   = "";
-    paramVarNameStyle   = "";
+    config.defaultRefNameStyle = "";
+    config.templateNameStyle   = "";
+    config.classNameStyle      = "";
+    config.interfaceNameStyle  = "";
+    config.methodNameStyle     = "";
+    config.functionNameStyle   = "";
+    config.defaultVarNameStyle = "";
+    config.globalVarNameStyle  = "";
+    config.memberVarNameStyle  = "";
+    config.localVarNameStyle   = "";
+    config.paramVarNameStyle   = "";
     // 3.5 SYSTEM_EXPRESSIONS
     // 3.5.1 ACCESS_MODIFIERS
-    publicWord       = "public";
-    protectedWord    = "protected";
-    privateWord      = "private";
-    internalWord     = "package-private";
-    attributesWord   = "attributes";
-    constructorsWord = "constructors";
-    destructorsWord  = "destructors";
-    methodsWord      = "methods";
-    accessModifStyle = "";
+    config.publicWord       = "public";
+    config.protectedWord    = "protected";
+    config.privateWord      = "private";
+    config.internalWord     = "package-private";
+    config.attributesWord   = "attributes";
+    config.constructorsWord = "constructors";
+    config.destructorsWord  = "destructors";
+    config.methodsWord      = "methods";
+    config.accessModifStyle = "";
     // 3.5.2 DATA_TYPES
-    dynamicTypeWord      = "auto";
-    intTypeWord          = "int";
-    floatTypeWord        = "float";
-    charTypeWord         = "char";
-    boolTypeWord         = "bool";
-    voidTypeWord         = "void";
-    typeWordStyle        = "";
-    numericTypeWordStyle = "";
-    stringTypeWordStyle  = "";
-    systemTypeWordStyle  = "";
+    config.dynamicTypeWord      = "auto";
+    config.intTypeWord          = "int";
+    config.floatTypeWord        = "float";
+    config.charTypeWord         = "char";
+    config.boolTypeWord         = "bool";
+    config.voidTypeWord         = "void";
+    config.typeWordStyle        = "";
+    config.numericTypeWordStyle = "";
+    config.stringTypeWordStyle  = "";
+    config.systemTypeWordStyle  = "";
     // 3.5.3 OBJECTS
-    scopeWord       = "namespace";
-    templateWord    = "template";
-    classWord       = "class";
-    interfaceWord   = "interface";
-    implementWord   = "implements";
-    extendWord      = "extends";
-    virtualWord     = "virtual";
-    abstractWord    = "abstract";
-    staticWord      = "static";
-    overrideWord    = "override";
-    thisWord        = "this";
-    objectWordStyle = "";
+    config.scopeWord       = "namespace";
+    config.templateWord    = "template";
+    config.classWord       = "class";
+    config.interfaceWord   = "interface";
+    config.implementWord   = "implements";
+    config.extendWord      = "extends";
+    config.virtualWord     = "virtual";
+    config.abstractWord    = "abstract";
+    config.staticWord      = "static";
+    config.overrideWord    = "override";
+    config.thisWord        = "this";
+    config.objectWordStyle = "";
     // 3.5.4 CONDITIONS
-    ifWord             = "if";
-    elseifWord         = "else if";
-    elseWord           = "else";
-    switchWord         = "switch";
-    caseWord           = "case";
-    defaultWord        = "default";
-    conditionWordStyle = "";
+    config.ifWord             = "if";
+    config.elseifWord         = "else if";
+    config.elseWord           = "else";
+    config.switchWord         = "switch";
+    config.caseWord           = "case";
+    config.defaultWord        = "default";
+    config.conditionWordStyle = "";
     // 3.5.5 LOOPS
-    doWord        = "do";
-    whileWord     = "while";
-    forWord       = "for";
-    foreachWord   = "for";
-    loopWordStyle = "";
+    config.doWord        = "do";
+    config.whileWord     = "while";
+    config.forWord       = "for";
+    config.foreachWord   = "for";
+    config.loopWordStyle = "";
     // 3.5.6 OTHER
-    returnWord     = "return";
-    continueWord   = "continue";
-    breakWord      = "break";
-    tryWord        = "try";
-    catchWord      = "catch";
-    finallyWord    = "finally";
-    throwWord      = "throw";
-    newWord        = "new";
-    deleteWord     = "delete";
-    otherExprStyle = "";
+    config.returnWord     = "return";
+    config.continueWord   = "continue";
+    config.breakWord      = "break";
+    config.tryWord        = "try";
+    config.catchWord      = "catch";
+    config.finallyWord    = "finally";
+    config.throwWord      = "throw";
+    config.newWord        = "new";
+    config.deleteWord     = "delete";
+    config.otherExprStyle = "";
     // 3.6 SUPPORT_EXPRESSIONS
-    constructorWord  = "constructor";
-    destructorWord   = "destructor";
-    methodWord       = "method";
-    functionWord     = "function";
-    lambdaWord       = "λ";
-    callWord         = "call";
-    defineWord       = "define";
-    returnsWord      = "returns ->";
-    repeatWord       = "repeat";
-    supportExprStyle = "";
+    config.constructorWord  = "constructor";
+    config.destructorWord   = "destructor";
+    config.methodWord       = "method";
+    config.functionWord     = "function";
+    config.lambdaWord       = "λ";
+    config.callWord         = "call";
+    config.defineWord       = "define";
+    config.returnsWord      = "returns ->";
+    config.repeatWord       = "repeat";
+    config.supportExprStyle = "";
     // 4) OUTPUT_SETTINGS
-    fileName   = "output";
-    filePath   = "default";
-    fileFormat = "txt";
+    config.fileName   = "output";
+    config.filePath   = "default";
+    config.fileFormat = "txt";
+
+    return config;
 }
 
-void TextLibConfig::change_to_java_like()
-{
-    change_to_default();
+Config Config::createFromArgs(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+    throw std::runtime_error("Not implemented yet.");
 }
 
-void TextLibConfig::change_to_cxx_like()
-{
+void Config::write_json(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const {
+    this->write_code_structure(common::add_object(out, alloc, "codeStructure"), alloc);
+    this->write_pseudocode_structure(common::add_object(out, alloc, "pseudocodeStructure"), alloc);
+    this->write_pseudocode_text(common::add_object(out, alloc, "pseudocodeText"), alloc);
+    this->write_output_settings(common::add_object(out, alloc, "outputSettings"), alloc);
+}
+
+void Config::write_json_file(const std::filesystem::path &path) const {
+    rapidjson::Document doc = common::create_document();
+    this->write_json(doc, doc.GetAllocator());
+    common::write_document(path, doc);
+}
+
+void Config::change_to_java_like() {
+    // TODO MM:
+}
+
+void Config::change_to_cxx_like() {
     tabulatorLength              = 4;
     namespaceBlockBracketNewLine = true;
     useNamespaceTabulator        = true;
@@ -205,343 +217,395 @@ void TextLibConfig::change_to_cxx_like()
     catchConditionNewLine        = true;
 }
 
-bool TextLibConfig::try_create_json(std::filesystem::path const& path, rapidjson::Document& doc)
-{
-    std::ifstream jsonFile(path);
-    if (!jsonFile)
-    {
-        return false;
+void Config::read_code_structure(const rapidjson::Value &structure) {
+    tabulatorLength              = common::get_int(structure, "tabulatorLength");
+    namespaceBlockBracketNewLine = common::get_bool(structure, "namespaceBlockBracketNewLine");
+    useNamespaceTabulator        = common::get_bool(structure, "useNamespaceTabulator");
+    objectBlockBracketNewLine    = common::get_bool(structure, "objectBlockBracketNewLine");
+    functionBlockBracketNewLine  = common::get_bool(structure, "functionBlockBracketNewLine");
+    loopBlockBracketNewLine      = common::get_bool(structure, "loopBlockBracketNewLine");
+    dowhileConditionNewLine      = common::get_bool(structure, "dowhileConditionNewLine");
+    conditionBlockBracketNewLine = common::get_bool(structure, "conditionBlockBracketNewLine");
+    elseifConditionNewLine       = common::get_bool(structure, "elseifConditionNewLine");
+    elseConditionNewLine         = common::get_bool(structure, "elseConditionNewLine");
+    switchBlockBracketNewLine    = common::get_bool(structure, "switchBlockBracketNewLine");
+    trycatchBlockBracketNewLine  = common::get_bool(structure, "trycatchBlockBracketNewLine");
+    catchConditionNewLine        = common::get_bool(structure, "catchConditionNewLine");
+}
+
+void Config::read_pseudocode_structure(const rapidjson::Value &structure) {
+    textMarginLeft     = common::get_int(structure, "textMarginLeft");
+    rowNumMarginLeft   = common::get_int(structure, "rowNumMarginLeft");
+    shBrColors         = common::get_bool(structure, "shBrColors");
+    shRowNum           = common::get_bool(structure, "shRowNum");
+    shDotAfterRowNum   = common::get_bool(structure, "shDotAfterRowNum");
+    shRowNumOnEmptyRow = common::get_bool(structure, "shRowNumOnEmptyRow");
+    shGlobVarDeclar    = common::get_bool(structure, "shGlobVarDeclar");
+    shTemplateDeclar   = common::get_bool(structure, "shTemplateDeclar");
+    shClassDeclar      = common::get_bool(structure, "shClassDeclar");
+    shClassDefin       = common::get_bool(structure, "shClassDefin");
+    shClassDefinInl    = common::get_bool(structure, "shClassDefinInl");
+    shInterfDeclar     = common::get_bool(structure, "shInterfDeclar");
+    shInterfDefin      = common::get_bool(structure, "shInterfDefin");
+    shMembVarDeclar    = common::get_bool(structure, "shMembVarDeclar");
+    shCoDeMeDeclar     = common::get_bool(structure, "shCoDeMeDeclar");
+    shCoDeMeDefin      = common::get_bool(structure, "shCoDeMeDefin");
+    shCoDeMeOwner      = common::get_bool(structure, "shCoDeMeOwner");
+    shCoDeMeTemplate   = common::get_bool(structure, "shCoDeMeTemplate");
+    shFuncDeclar       = common::get_bool(structure, "shFuncDeclar");
+    shFuncDefin        = common::get_bool(structure, "shFuncDefin");
+}
+
+void Config::read_pseudocode_text(const rapidjson::Value &text) {
+    read_general_text(common::get_object(text, "general"));
+    read_symbols(common::get_object(text, "symbols"));
+    read_values(common::get_object(text, "values"));
+    read_reference_names(common::get_object(text, "referenceNames"));
+    read_system_expressions(common::get_object(text, "systemExpressions"));
+    read_support_expressions(common::get_object(text, "supportExpressions"));
+}
+
+void Config::read_output_settings(const rapidjson::Value &settings) {
+    fileName   = common::get_string(settings, "fileName");
+    filePath   = common::get_string(settings, "filePath");
+    fileFormat = common::get_string(settings, "fileFormat");
+}
+
+void Config::read_general_text(const rapidjson::Value &text) {
+    unknownTypeWord    = common::get_string(text, "unknownTypeWord");
+    unknownExprWord    = common::get_string(text, "unknownExprWord");
+    unknownStmtWord    = common::get_string(text, "unknownStmtWord");
+    defaultTextStyle   = common::get_string(text, "defaultTextStyle");
+    unknownPhraseStyle = common::get_string(text, "unknownPhraseStyle");
+    rowNumStyle        = common::get_string(text, "rowNumStyle");
+}
+
+void Config::read_symbols(const rapidjson::Value &symbols) {
+    const rapidjson::Value &operators = common::get_object(symbols, "operators");
+    const rapidjson::Value &separators = common::get_object(symbols, "separators");
+    pointerWord = common::get_string(operators, "pointerWord");
+    assignWord  = common::get_string(operators, "assignWord");
+    moduloWord  = common::get_string(operators, "moduloWord");
+    addressWord = common::get_string(operators, "addressWord");
+    derefWord   = common::get_string(operators, "derefWord");
+    opWordStyle = common::get_string(operators, "opWordStyle");
+    std::vector<const rapidjson::Value*> bc = common::get_array(operators, "brColors");
+    for (const rapidjson::Value *cVal : bc) {
+        brColors.push_back(common::as_string(*cVal));
     }
-    rapidjson::IStreamWrapper wrapper(jsonFile);
-    doc.ParseStream(wrapper);
-    return !doc.HasParseError();
+    semicolonWord = common::get_string(separators, "semicolonWord");
+    sepWordStyle  = common::get_string(separators, "sepWordStyle");
 }
 
-void TextLibConfig::load_from_file(std::filesystem::path const& path)
-{
-    rapidjson::Document doc;
-    if (try_create_json(path, doc))
-    {
-        load_from_json(doc);
-    }
+void Config::read_values(const rapidjson::Value &values) {
+    trueWord          = common::get_string(values, "trueWord");
+    falseWord         = common::get_string(values, "falseWord");
+    nullWord          = common::get_string(values, "nullWord");
+    valueStyle        = common::get_string(values, "valueStyle");
+    numericValueStyle = common::get_string(values, "numericValueStyle");
+    stringValueStyle  = common::get_string(values, "stringValueStyle");
 }
 
-void TextLibConfig::load_from_json(rapidjson::Value const& json)
-{
-    jValue const* tmp;
-    if (is_object("CODE_STRUCTURE", json, tmp))
-    {
-        process_code_structure(*tmp);
-    }
-    if (is_object("PSEUDOCODE_STRUCTURE", json, tmp))
-    {
-        process_pseudocode_structure(*tmp);
-    }
-    if (is_object("PSEUDOCODE_TEXT", json, tmp))
-    {
-        process_pseudocode_text(*tmp);
-    }
-    if (is_object("OUTPUT_SETTINGS", json, tmp))
-    {
-        process_output_settings(*tmp);
-    }
+void Config::read_reference_names(const rapidjson::Value &names) {
+    defaultRefNameStyle = common::get_string(names, "defaultRefNameStyle");
+    templateNameStyle   = common::get_string(names, "templateNameStyle");
+    classNameStyle      = common::get_string(names, "classNameStyle");
+    interfaceNameStyle  = common::get_string(names, "interfaceNameStyle");
+    methodNameStyle     = common::get_string(names, "methodNameStyle");
+    functionNameStyle   = common::get_string(names, "functionNameStyle");
+    defaultVarNameStyle = common::get_string(names, "defaultVarNameStyle");
+    globalVarNameStyle  = common::get_string(names, "globalVarNameStyle");
+    memberVarNameStyle  = common::get_string(names, "memberVarNameStyle");
+    localVarNameStyle   = common::get_string(names, "localVarNameStyle");
+    paramVarNameStyle   = common::get_string(names, "paramVarNameStyle");
 }
 
-void TextLibConfig::process_code_structure(jValue const& structure)
-{
-    read_int("tabulator_length", structure, tabulatorLength);
-    read_bool("namespace_block_bracket_on_new_line", structure, namespaceBlockBracketNewLine);
-    read_bool("use_namespace_tabulator", structure, useNamespaceTabulator);
-    read_bool("object_block_bracket_on_new_line", structure, objectBlockBracketNewLine);
-    read_bool("function_block_bracket_on_new_line", structure, functionBlockBracketNewLine);
-    read_bool("loop_block_bracket_on_new_line", structure, loopBlockBracketNewLine);
-    read_bool("dowhile_condition_on_new_line", structure, dowhileConditionNewLine);
-    read_bool("condition_block_bracket_on_new_line", structure, conditionBlockBracketNewLine);
-    read_bool("elseif_condition_on_new_line", structure, elseifConditionNewLine);
-    read_bool("else_condition_on_new_line", structure, elseConditionNewLine);
-    read_bool("switch_block_bracket_on_new_line", structure, switchBlockBracketNewLine);
-    read_bool("trycatch_block_bracket_on_new_line", structure, trycatchBlockBracketNewLine);
-    read_bool("catch_condition_on_new_line", structure, catchConditionNewLine);
+void Config::read_system_expressions(const rapidjson::Value &expressions) {
+    read_access_modifiers(common::get_object(expressions, "accessModifiers"));
+    read_data_types(common::get_object(expressions, "dataTypes"));
+    read_objects(common::get_object(expressions, "objects"));
+    read_conditions(common::get_object(expressions, "conditions"));
+    read_loops(common::get_object(expressions, "loops"));
+    read_other(common::get_object(expressions, "other"));
 }
 
-void TextLibConfig::process_pseudocode_structure(jValue const& structure)
-{
-    read_int("text_margin_left", structure, textMarginLeft);
-    read_int("row_number_margin_left", structure, rowNumMarginLeft);
-    read_bool("show_bracket_colors", structure, shBrColors);
-    read_bool("show_row_number", structure, shRowNum);
-    read_bool("show_dot_after_row_number", structure, shDotAfterRowNum);
-    read_bool("show_row_number_on_empty_row", structure, shRowNumOnEmptyRow);
-    read_bool("show_global_var_declaration", structure, shGlobVarDeclar);
-    read_bool("show_template_declaration", structure, shTemplateDeclar);
-    read_bool("show_class_declaration", structure, shClassDeclar);
-    read_bool("show_class_definition", structure, shClassDefin);
-    read_bool("show_class_definition_inline", structure, shClassDefinInl);
-    read_bool("show_interface_declaration", structure, shInterfDeclar);
-    read_bool("show_interface_definition", structure, shInterfDefin);
-    read_bool("show_member_var_declaration", structure, shMembVarDeclar);
-    read_bool("show_constr_destr_meth_declaration", structure, shCoDeMeDeclar);
-    read_bool("show_constr_destr_meth_definition", structure, shCoDeMeDefin);
-    read_bool("show_constr_destr_meth_owner", structure, shCoDeMeOwner);
-    read_bool("show_constr_destr_meth_template", structure, shCoDeMeTemplate);
-    read_bool("show_function_declaration", structure, shFuncDeclar);
-    read_bool("show_function_definition", structure, shFuncDefin);
+void Config::read_access_modifiers(const rapidjson::Value &modifiers) {
+    publicWord       = common::get_string(modifiers, "publicWord");
+    protectedWord    = common::get_string(modifiers, "protectedWord");
+    privateWord      = common::get_string(modifiers, "privateWord");
+    internalWord     = common::get_string(modifiers, "internalWord");
+    attributesWord   = common::get_string(modifiers, "attributesWord");
+    constructorsWord = common::get_string(modifiers, "constructorsWord");
+    destructorsWord  = common::get_string(modifiers, "destructorsWord");
+    methodsWord      = common::get_string(modifiers, "methodsWord");
+    accessModifStyle = common::get_string(modifiers, "accessModifStyle");
 }
 
-void TextLibConfig::process_pseudocode_text(jValue const& text)
-{
-    jValue const* tmp;
-    if (is_object("GENERAL", text, tmp))
-    {
-        process_general_text(*tmp);
-    }
-    if (is_object("SYMBOLS", text, tmp))
-    {
-        process_symbols(*tmp);
-    }
-    if (is_object("VALUES", text, tmp))
-    {
-        process_values(*tmp);
-    }
-    if (is_object("REFERENCE_NAMES", text, tmp))
-    {
-        process_reference_names(*tmp);
-    }
-    if (is_object("SYSTEM_EXPRESSIONS", text, tmp))
-    {
-        process_system_expressions(*tmp);
-    }
-    if (is_object("SUPPORT_EXPRESSIONS", text, tmp))
-    {
-        process_support_expressions(*tmp);
-    }
+void Config::read_data_types(const rapidjson::Value &types) {
+    dynamicTypeWord      = common::get_string(types, "dynamicTypeWord");
+    intTypeWord          = common::get_string(types, "intTypeWord");
+    floatTypeWord        = common::get_string(types, "floatTypeWord");
+    charTypeWord         = common::get_string(types, "charTypeWord");
+    boolTypeWord         = common::get_string(types, "boolTypeWord");
+    voidTypeWord         = common::get_string(types, "voidTypeWord");
+    typeWordStyle        = common::get_string(types, "typeWordStyle");
+    numericTypeWordStyle = common::get_string(types, "numericTypeWordStyle");
+    stringTypeWordStyle  = common::get_string(types, "stringTypeWordStyle");
+    systemTypeWordStyle  = common::get_string(types, "systemTypeWordStyle");
 }
 
-void TextLibConfig::process_output_settings(jValue const& settings)
-{
-    read_string("file_name", settings, fileName);
-    read_string("file_path", settings, filePath);
-    read_string("file_format", settings, fileFormat);
+void Config::read_objects(const rapidjson::Value &objects) {
+    scopeWord       = common::get_string(objects, "scopeWord");
+    templateWord    = common::get_string(objects, "templateWord");
+    classWord       = common::get_string(objects, "classWord");
+    interfaceWord   = common::get_string(objects, "interfaceWord");
+    implementWord   = common::get_string(objects, "implementWord");
+    extendWord      = common::get_string(objects, "extendWord");
+    virtualWord     = common::get_string(objects, "virtualWord");
+    abstractWord    = common::get_string(objects, "abstractWord");
+    staticWord      = common::get_string(objects, "staticWord");
+    overrideWord    = common::get_string(objects, "overrideWord");
+    thisWord        = common::get_string(objects, "thisWord");
+    objectWordStyle = common::get_string(objects, "objectWordStyle");
 }
 
-void TextLibConfig::process_general_text(jValue const& text)
-{
-    read_string("unknown_type_word", text, unknownTypeWord);
-    read_string("unknown_expr_word", text, unknownExprWord);
-    read_string("unknown_stmt_word", text, unknownStmtWord);
-    read_string("default_style", text, defaultTextStyle);
-    read_string("unknown_phrase_style", text, unknownPhraseStyle);
-    read_string("row_number_style", text, rowNumStyle);
+void Config::read_conditions(const rapidjson::Value &conditions) {
+    ifWord             = common::get_string(conditions, "ifWord");
+    elseifWord         = common::get_string(conditions, "elseifWord");
+    elseWord           = common::get_string(conditions, "elseWord");
+    switchWord         = common::get_string(conditions, "switchWord");
+    caseWord           = common::get_string(conditions, "caseWord");
+    defaultWord        = common::get_string(conditions, "defaultWord");
+    conditionWordStyle = common::get_string(conditions, "conditionWordStyle");
 }
 
-void TextLibConfig::process_symbols(jValue const& symbols)
-{
-    jValue const* tmp;
-    if (is_object("OPERATORS", symbols, tmp))
-    {
-        read_string("pointer_word", *tmp, pointerWord);
-        read_string("assign_word", *tmp, assignWord);
-        read_string("modulo_word", *tmp, moduloWord);
-        read_string("address_word", *tmp, addressWord);
-        read_string("dereference_word", *tmp, derefWord);
-        read_string("default_style", *tmp, opWordStyle);
-        jValue const* array = nullptr;
-        read_array("bracket_colors", *tmp, array);
-        if (array)
-        {
-            brColors.clear();
-            for (size_t i = 0; i < array->Size(); ++i)
-            {
-                if (array[i].IsString())
-                {
-                    brColors.push_back(array[i].GetString());
-                }
-            }
-        }
-    }
-    if (is_object("SEPARATORS", symbols, tmp))
-    {
-        read_string("semicolon_word", *tmp, semicolonWord);
-        read_string("default_style", *tmp, sepWordStyle);
-    }
+void Config::read_loops(const rapidjson::Value &loops) {
+    doWord        = common::get_string(loops, "doWord");
+    whileWord     = common::get_string(loops, "whileWord");
+    forWord       = common::get_string(loops, "forWord");
+    foreachWord   = common::get_string(loops, "foreachWord");
+    loopWordStyle = common::get_string(loops, "loopWordStyle");
 }
 
-void TextLibConfig::process_values(jValue const& values)
-{
-    read_string("true_word", values, trueWord);
-    read_string("false_word", values, falseWord);
-    read_string("null_word", values, nullWord);
-    read_string("default_style", values, valueStyle);
-    read_string("numeric_value_style", values, numericValueStyle);
-    read_string("string_value_style", values, stringValueStyle);
+void Config::read_other(const rapidjson::Value &other) {
+    returnWord     = common::get_string(other, "returnWord");
+    continueWord   = common::get_string(other, "continueWord");
+    breakWord      = common::get_string(other, "breakWord");
+    tryWord        = common::get_string(other, "tryWord");
+    catchWord      = common::get_string(other, "catchWord");
+    finallyWord    = common::get_string(other, "finallyWord");
+    throwWord      = common::get_string(other, "throwWord");
+    newWord        = common::get_string(other, "newWord");
+    deleteWord     = common::get_string(other, "deleteWord");
+    otherExprStyle = common::get_string(other, "otherExprStyle");
 }
 
-void TextLibConfig::process_reference_names(jValue const& names)
-{
-    read_string("default_style", names, defaultRefNameStyle);
-    read_string("template_name_style", names, templateNameStyle);
-    read_string("class_name_style", names, classNameStyle);
-    read_string("interface_name_style", names, interfaceNameStyle);
-    read_string("method_name_style", names, methodNameStyle);
-    read_string("function_name_style", names, functionNameStyle);
-    read_string("default_var_name_style", names, defaultVarNameStyle);
-    read_string("global_var_name_style", names, globalVarNameStyle);
-    read_string("member_var_name_style", names, memberVarNameStyle);
-    read_string("local_var_name_style", names, localVarNameStyle);
-    read_string("param_var_name_style", names, paramVarNameStyle);
+void Config::read_support_expressions(const rapidjson::Value &expressions) {
+    constructorWord  = common::get_string(expressions, "constructorWord");
+    destructorWord   = common::get_string(expressions, "destructorWord");
+    methodWord       = common::get_string(expressions, "methodWord");
+    functionWord     = common::get_string(expressions, "functionWord");
+    lambdaWord       = common::get_string(expressions, "lambdaWord");
+    callWord         = common::get_string(expressions, "callWord");
+    defineWord       = common::get_string(expressions, "defineWord");
+    returnsWord      = common::get_string(expressions, "returnsWord");
+    repeatWord       = common::get_string(expressions, "repeatWord");
+    supportExprStyle = common::get_string(expressions, "supportExprStyle");
 }
 
-void TextLibConfig::process_system_expressions(jValue const& expr)
-{
-    jValue const* tmp;
-    if (is_object("ACCESS_MODIFIERS", expr, tmp))
-    {
-        process_access_modifiers(*tmp);
-    }
-    if (is_object("DATA_TYPES", expr, tmp))
-    {
-        process_data_types(*tmp);
-    }
-    if (is_object("OBJECTS", expr, tmp))
-    {
-        process_objects(*tmp);
-    }
-    if (is_object("CONDITIONS", expr, tmp))
-    {
-        process_conditions(*tmp);
-    }
-    if (is_object("LOOPS", expr, tmp))
-    {
-        process_loops(*tmp);
-    }
-    if (is_object("OTHER", expr, tmp))
-    {
-        process_other(*tmp);
-    }
+void Config::write_code_structure(rapidjson::Value &structure, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_int(structure, alloc, "tabulatorLength", tabulatorLength);
+    common::add_bool(structure, alloc, "namespaceBlockBracketNewLine", namespaceBlockBracketNewLine);
+    common::add_bool(structure, alloc, "useNamespaceTabulator", useNamespaceTabulator);
+    common::add_bool(structure, alloc, "objectBlockBracketNewLine", objectBlockBracketNewLine);
+    common::add_bool(structure, alloc, "functionBlockBracketNewLine", functionBlockBracketNewLine);
+    common::add_bool(structure, alloc, "loopBlockBracketNewLine", loopBlockBracketNewLine);
+    common::add_bool(structure, alloc, "dowhileConditionNewLine", dowhileConditionNewLine);
+    common::add_bool(structure, alloc, "conditionBlockBracketNewLine", conditionBlockBracketNewLine);
+    common::add_bool(structure, alloc, "elseifConditionNewLine", elseifConditionNewLine);
+    common::add_bool(structure, alloc, "elseConditionNewLine", elseConditionNewLine);
+    common::add_bool(structure, alloc, "switchBlockBracketNewLine", switchBlockBracketNewLine);
+    common::add_bool(structure, alloc, "trycatchBlockBracketNewLine", trycatchBlockBracketNewLine);
+    common::add_bool(structure, alloc, "catchConditionNewLine", catchConditionNewLine);
 }
 
-void TextLibConfig::process_access_modifiers(jValue const& modifiers)
-{
-    read_string("public_word", modifiers, publicWord);
-    read_string("protected_word", modifiers, protectedWord);
-    read_string("private_word", modifiers, privateWord);
-    read_string("internal_word", modifiers, internalWord);
-    read_string("attributes_word", modifiers, attributesWord);
-    read_string("constructors_word", modifiers, constructorsWord);
-    read_string("destructors_word", modifiers, destructorsWord);
-    read_string("methods_word", modifiers, methodsWord);
-    read_string("default_style", modifiers, accessModifStyle);
+void Config::write_pseudocode_structure(rapidjson::Value &structure, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_int(structure, alloc, "textMarginLeft", textMarginLeft);
+    common::add_int(structure, alloc, "rowNumMarginLeft", rowNumMarginLeft);
+    common::add_bool(structure, alloc, "shBrColors", shBrColors);
+    common::add_bool(structure, alloc, "shRowNum", shRowNum);
+    common::add_bool(structure, alloc, "shDotAfterRowNum", shDotAfterRowNum);
+    common::add_bool(structure, alloc, "shRowNumOnEmptyRow", shRowNumOnEmptyRow);
+    common::add_bool(structure, alloc, "shGlobVarDeclar", shGlobVarDeclar);
+    common::add_bool(structure, alloc, "shTemplateDeclar", shTemplateDeclar);
+    common::add_bool(structure, alloc, "shClassDeclar", shClassDeclar);
+    common::add_bool(structure, alloc, "shClassDefin", shClassDefin);
+    common::add_bool(structure, alloc, "shClassDefinInl", shClassDefinInl);
+    common::add_bool(structure, alloc, "shInterfDeclar", shInterfDeclar);
+    common::add_bool(structure, alloc, "shInterfDefin", shInterfDefin);
+    common::add_bool(structure, alloc, "shMembVarDeclar", shMembVarDeclar);
+    common::add_bool(structure, alloc, "shCoDeMeDeclar", shCoDeMeDeclar);
+    common::add_bool(structure, alloc, "shCoDeMeDefin", shCoDeMeDefin);
+    common::add_bool(structure, alloc, "shCoDeMeOwner", shCoDeMeOwner);
+    common::add_bool(structure, alloc, "shCoDeMeTemplate", shCoDeMeTemplate);
+    common::add_bool(structure, alloc, "shFuncDeclar", shFuncDeclar);
+    common::add_bool(structure, alloc, "shFuncDefin", shFuncDefin);
 }
 
-void TextLibConfig::process_data_types(jValue const& types)
-{
-    read_string("dynamic_type_word", types, dynamicTypeWord);
-    read_string("int_type_word", types, intTypeWord);
-    read_string("float_type_word", types, floatTypeWord);
-    read_string("char_type_word", types, charTypeWord);
-    read_string("bool_type_word", types, boolTypeWord);
-    read_string("void_type_word", types, voidTypeWord);
-    read_string("default_style", types, typeWordStyle);
-    read_string("numeric_type_word_style", types, numericTypeWordStyle);
-    read_string("string_type_word_style", types, stringTypeWordStyle);
-    read_string("system_type_word_style", types, systemTypeWordStyle);
+void Config::write_pseudocode_text(rapidjson::Value &text, rapidjson::Document::AllocatorType &alloc) const {
+    this->write_general_text(common::add_object(text, alloc, "general"), alloc);
+    this->write_symbols(common::add_object(text, alloc, "symbols"), alloc);
+    this->write_values(common::add_object(text, alloc, "values"), alloc);
+    this->write_reference_names(common::add_object(text, alloc, "referenceNames"), alloc);
+    this->write_system_expressions(common::add_object(text, alloc, "systemExpressions"), alloc);
+    this->write_support_expressions(common::add_object(text, alloc, "supportExpressions"), alloc);
 }
 
-void TextLibConfig::process_objects(jValue const& objects)
-{
-    read_string("scope_word", objects, scopeWord);
-    read_string("template_word", objects, templateWord);
-    read_string("class_word", objects, classWord);
-    read_string("interface_word", objects, interfaceWord);
-    read_string("implement_word", objects, implementWord);
-    read_string("extend_word", objects, extendWord);
-    read_string("virtual_word", objects, virtualWord);
-    read_string("abstract_word", objects, abstractWord);
-    read_string("static_word", objects, staticWord);
-    read_string("override_word", objects, overrideWord);
-    read_string("this_word", objects, thisWord);
-    read_string("default_style", objects, objectWordStyle);
+void Config::write_general_text(rapidjson::Value &text, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_string(text, alloc, "unknownTypeWord", unknownTypeWord);
+    common::add_string(text, alloc, "unknownExprWord", unknownExprWord);
+    common::add_string(text, alloc, "unknownStmtWord", unknownStmtWord);
+    common::add_string(text, alloc, "defaultTextStyle", defaultTextStyle);
+    common::add_string(text, alloc, "unknownPhraseStyle",unknownPhraseStyle);
+    common::add_string(text, alloc, "rowNumStyle", rowNumStyle);
 }
 
-void TextLibConfig::process_conditions(jValue const& conditions)
-{
-    read_string("if_word", conditions, ifWord);
-    read_string("elseif_word", conditions, elseifWord);
-    read_string("else_word", conditions, elseWord);
-    read_string("switch_word", conditions, switchWord);
-    read_string("case_word", conditions, caseWord);
-    read_string("default_word", conditions, defaultWord);
-    read_string("default_style", conditions, conditionWordStyle);
+void Config::write_symbols(rapidjson::Value &symbols, rapidjson::Document::AllocatorType &alloc) const {
+    rapidjson::Value &operators = common::add_object(symbols, alloc, "operators");
+    common::add_string(operators, alloc, "pointerWord", pointerWord);
+    common::add_string(operators, alloc, "assignWord", assignWord);
+    common::add_string(operators, alloc, "moduloWord", moduloWord);
+    common::add_string(operators, alloc, "addressWord", addressWord);
+    common::add_string(operators, alloc, "derefWord", derefWord);
+    common::add_string(operators, alloc, "opWordStyle", opWordStyle);
+    common::add_array(operators, alloc, "brColors", brColors);
+
+    rapidjson::Value &separators = common::add_object(symbols, alloc, "separators");
+    common::add_string(separators, alloc, "semicolonWord", semicolonWord);
+    common::add_string(separators, alloc, "sepWordStyle", sepWordStyle);
 }
 
-void TextLibConfig::process_loops(jValue const& loops)
-{
-    read_string("do_word", loops, doWord);
-    read_string("while_word", loops, whileWord);
-    read_string("for_word", loops, forWord);
-    read_string("foreach_word", loops, foreachWord);
-    read_string("default_style", loops, loopWordStyle);
+void Config::write_values(rapidjson::Value &values, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_string(values, alloc, "trueWord", trueWord);
+    common::add_string(values, alloc, "falseWord", falseWord);
+    common::add_string(values, alloc, "nullWord", nullWord);
+    common::add_string(values, alloc, "valueStyle", valueStyle);
+    common::add_string(values, alloc, "numericValueStyle", numericValueStyle);
+    common::add_string(values, alloc, "stringValueStyle", stringValueStyle);
 }
 
-void TextLibConfig::process_other(jValue const& other)
-{
-    read_string("return_word", other, returnWord);
-    read_string("continue_word", other, continueWord);
-    read_string("break_word", other, breakWord);
-    read_string("try_word", other, tryWord);
-    read_string("catch_word", other, catchWord);
-    read_string("finally_word", other, finallyWord);
-    read_string("throw_word", other, throwWord);
-    read_string("new_word", other, newWord);
-    read_string("delete_word", other, deleteWord);
-    read_string("default_style", other, otherExprStyle);
+void Config::write_reference_names(rapidjson::Value &names, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_string(names, alloc, "defaultRefNameStyle", defaultRefNameStyle);
+    common::add_string(names, alloc, "templateNameStyle", templateNameStyle);
+    common::add_string(names, alloc, "classNameStyle", classNameStyle);
+    common::add_string(names, alloc, "interfaceNameStyle", interfaceNameStyle);
+    common::add_string(names, alloc, "methodNameStyle", methodNameStyle);
+    common::add_string(names, alloc, "functionNameStyle", functionNameStyle);
+    common::add_string(names, alloc, "defaultVarNameStyle", defaultVarNameStyle);
+    common::add_string(names, alloc, "globalVarNameStyle", globalVarNameStyle);
+    common::add_string(names, alloc, "memberVarNameStyle", memberVarNameStyle);
+    common::add_string(names, alloc, "localVarNameStyle", localVarNameStyle);
+    common::add_string(names, alloc, "paramVarNameStyle", paramVarNameStyle);
 }
 
-void TextLibConfig::process_support_expressions(jValue const& expr)
-{
-    read_string("constructor_word", expr, constructorWord);
-    read_string("destructor_word", expr, destructorWord);
-    read_string("method_word", expr, methodWord);
-    read_string("function_word", expr, functionWord);
-    read_string("lambda_word", expr, lambdaWord);
-    read_string("call_word", expr, callWord);
-    read_string("define_word", expr, defineWord);
-    read_string("returns_word", expr, returnsWord);
-    read_string("repeat_word", expr, repeatWord);
-    read_string("default_style", expr, supportExprStyle);
+void Config::write_system_expressions(rapidjson::Value &expr, rapidjson::Document::AllocatorType &alloc) const {
+    this->write_access_modifiers(common::add_object(expr, alloc, "accessModifiers"), alloc);
+    this->write_data_types(common::add_object(expr, alloc, "dataTypes"), alloc);
+    this->write_objects(common::add_object(expr, alloc, "objects"), alloc);
+    this->write_conditions(common::add_object(expr, alloc, "conditions"), alloc);
+    this->write_loops(common::add_object(expr, alloc, "loops"), alloc);
+    this->write_other(common::add_object(expr, alloc, "other"), alloc);
 }
 
-bool TextLibConfig::is_object(std::string_view name, jValue const& val, jValue const*& val_out)
-{
-    auto const& it = val.FindMember(name.data());
-    if (it == val.MemberEnd()) {
-        return false;
-    }
-    val_out = &it->value;
-    return val_out->IsObject() && !val_out->ObjectEmpty();
+void Config::write_access_modifiers(rapidjson::Value &modifiers, rapidjson::Document::AllocatorType& alloc) const {
+    common::add_string(modifiers, alloc, "publicWord", publicWord);
+    common::add_string(modifiers, alloc, "protectedWord", protectedWord);
+    common::add_string(modifiers, alloc, "privateWord", privateWord);
+    common::add_string(modifiers, alloc, "internalWord", internalWord);
+    common::add_string(modifiers, alloc, "attributesWord", attributesWord);
+    common::add_string(modifiers, alloc, "constructorsWord", constructorsWord);
+    common::add_string(modifiers, alloc, "destructorsWord", destructorsWord);
+    common::add_string(modifiers, alloc, "methodsWord", methodsWord);
+    common::add_string(modifiers, alloc, "accessModifStyle", accessModifStyle);
 }
 
-void TextLibConfig::read_array(std::string_view name, jValue const& val, jValue const*& val_out)
-{
-    auto const& it = val.FindMember(name.data());
-    val_out = (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : nullptr;
+void Config::write_data_types(rapidjson::Value &types, rapidjson::Document::AllocatorType& alloc) const {
+    common::add_string(types, alloc, "dynamicTypeWord", dynamicTypeWord);
+    common::add_string(types, alloc, "intTypeWord", intTypeWord);
+    common::add_string(types, alloc, "floatTypeWord", floatTypeWord);
+    common::add_string(types, alloc, "charTypeWord", charTypeWord);
+    common::add_string(types, alloc, "boolTypeWord", boolTypeWord);
+    common::add_string(types, alloc, "voidTypeWord", voidTypeWord);
+    common::add_string(types, alloc, "typeWordStyle", typeWordStyle);
+    common::add_string(types, alloc, "numericTypeWordStyle", numericTypeWordStyle);
+    common::add_string(types, alloc, "stringTypeWordStyle", stringTypeWordStyle);
+    common::add_string(types, alloc, "systemTypeWordStyle", systemTypeWordStyle);
 }
 
-void TextLibConfig::read_string(std::string_view name, jValue const& val, std::string& m_string)
-{
-    auto const& it = val.FindMember(name.data());
-    m_string = (it != val.MemberEnd() && it->value.IsString()) ? it->value.GetString() : m_string;
+void Config::write_objects(rapidjson::Value &objects, rapidjson::Document::AllocatorType& alloc) const {
+    common::add_string(objects, alloc, "scopeWord", scopeWord);
+    common::add_string(objects, alloc, "templateWord", templateWord);
+    common::add_string(objects, alloc, "classWord", classWord);
+    common::add_string(objects, alloc, "interfaceWord", interfaceWord);
+    common::add_string(objects, alloc, "implementWord", implementWord);
+    common::add_string(objects, alloc, "extendWord", extendWord);
+    common::add_string(objects, alloc, "virtualWord", virtualWord);
+    common::add_string(objects, alloc, "abstractWord", abstractWord);
+    common::add_string(objects, alloc, "staticWord", staticWord);
+    common::add_string(objects, alloc, "overrideWord", overrideWord);
+    common::add_string(objects, alloc, "thisWord", thisWord);
+    common::add_string(objects, alloc, "objectWordStyle", objectWordStyle);
 }
 
-void TextLibConfig::read_bool(std::string_view name, jValue const& val, bool& m_bool)
-{
-    auto const& it = val.FindMember(name.data());
-    m_bool = (it != val.MemberEnd() && it->value.IsBool()) ? it->value.GetBool() : m_bool;
+void Config::write_conditions(rapidjson::Value &conditions, rapidjson::Document::AllocatorType& alloc) const {
+    common::add_string(conditions, alloc, "ifWord", ifWord);
+    common::add_string(conditions, alloc, "elseifWord", elseifWord);
+    common::add_string(conditions, alloc, "elseWord", elseWord);
+    common::add_string(conditions, alloc, "switchWord", switchWord);
+    common::add_string(conditions, alloc, "caseWord", caseWord);
+    common::add_string(conditions, alloc, "defaultWord", defaultWord);
+    common::add_string(conditions, alloc, "conditionWordStyle", conditionWordStyle);
 }
 
-void TextLibConfig::read_int(std::string_view name, jValue const& val, int& m_int)
-{
-    auto const& it = val.FindMember(name.data());
-    m_int = (it != val.MemberEnd() && it->value.IsInt() && it->value.GetInt() >= 0) ?
-        it->value.GetInt() : m_int;
+void Config::write_loops(rapidjson::Value &loops, rapidjson::Document::AllocatorType& alloc) const {
+    common::add_string(loops, alloc, "doWord", doWord);
+    common::add_string(loops, alloc, "whileWord", whileWord);
+    common::add_string(loops, alloc, "forWord", forWord);
+    common::add_string(loops, alloc, "foreachWord", foreachWord);
+    common::add_string(loops, alloc, "loopWordStyle", loopWordStyle);
 }
+
+void Config::write_other(rapidjson::Value &other, rapidjson::Document::AllocatorType& alloc) const {
+    common::add_string(other, alloc, "returnWord", returnWord);
+    common::add_string(other, alloc, "continueWord", continueWord);
+    common::add_string(other, alloc, "breakWord", breakWord);
+    common::add_string(other, alloc, "tryWord", tryWord);
+    common::add_string(other, alloc, "catchWord", catchWord);
+    common::add_string(other, alloc, "finallyWord", finallyWord);
+    common::add_string(other, alloc, "throwWord", throwWord);
+    common::add_string(other, alloc, "newWord", newWord);
+    common::add_string(other, alloc, "deleteWord", deleteWord);
+    common::add_string(other, alloc, "otherExprStyle", otherExprStyle);
+}
+
+void Config::write_support_expressions(rapidjson::Value &expr, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_string(expr, alloc, "constructorWord", constructorWord);
+    common::add_string(expr, alloc, "destructorWord", destructorWord);
+    common::add_string(expr, alloc, "methodWord", methodWord);
+    common::add_string(expr, alloc, "functionWord", functionWord);
+    common::add_string(expr, alloc, "lambdaWord", lambdaWord);
+    common::add_string(expr, alloc, "callWord", callWord);
+    common::add_string(expr, alloc, "defineWord", defineWord);
+    common::add_string(expr, alloc, "returnsWord", returnsWord);
+    common::add_string(expr, alloc, "repeatWord", repeatWord);
+    common::add_string(expr, alloc, "supportExprStyle", supportExprStyle);
+}
+
+void Config::write_output_settings(rapidjson::Value &settings, rapidjson::Document::AllocatorType &alloc) const {
+    common::add_string(settings, alloc, "fileName", fileName);
+    common::add_string(settings, alloc, "filePath", filePath);
+    common::add_string(settings, alloc, "fileFormat", fileFormat);
+}
+
+
+} // namespace astfri::text

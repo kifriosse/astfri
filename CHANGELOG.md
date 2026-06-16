@@ -6,6 +6,14 @@
   - Removed default config json file and moved it to the code.
   - Unified key and values names in json and code.
   - Refactored examples acordingly.
+- `astfri-common` added new library.
+  - Contains code shared by multiple libraries.
+  - Currently contains rapidjson utilities.
+- `astfri-text` refactored config.
+  - Removed default config json file and moved it to the code.
+  - Unified key and values names in json and code.
+  - Refactored examples acordingly.
+  - Added example with bubblesort.
 
 
 **2026-06-09** Michal Mrena `<michal.mrena@fri.uniza.sk>`

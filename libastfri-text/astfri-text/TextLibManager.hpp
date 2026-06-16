@@ -16,7 +16,7 @@ namespace astfri::text
 
     class TextLibManager
     {
-        TextLibConfig* const m_config;
+        Config m_config;
         AbstractBuilder* m_builder;
         AbstractVisitor* m_visitor;
         Exporter* const m_exporter;
@@ -26,10 +26,10 @@ namespace astfri::text
         ~TextLibManager();
         //
         static std::string_view version();
-        static void process_ast(TextLibConfig cfg, TranslationUnit const& root);
-        static void process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream& ost);
+        static void process_ast(Config cfg, TranslationUnit const& root);
+        static void process_ast(Config cfg, TranslationUnit const& root, std::ostream& ost);
     private:
-        static void process_ast(TextLibConfig cfg, TranslationUnit const& root, std::ostream* ost);
+        static void process_ast(Config cfg, TranslationUnit const& root, std::ostream* ost);
     public:
         void process_and_export_ast(TranslationUnit const& root, std::ostream* ost);
         void process_ast(TranslationUnit const& root);
@@ -41,7 +41,7 @@ namespace astfri::text
     private:
         void change_output_format(std::string_view format);
     };
-    static_assert(IsOutputLibInterface<TextLibManager, TextLibConfig, rapidjson::Value>);
+    static_assert(IsOutputLibInterface<TextLibManager, Config, rapidjson::Value>);
 }
 
 #endif

@@ -9,11 +9,11 @@ namespace astfri::text
     class PseudocodeVisitor : public AbstractVisitor
     {
         PseudocodeBuilder* m_builder;
-        TextLibConfig* m_config;
+        Config* m_config;
         bool m_isMethodCall = false;
         bool m_isConstructorCall = false;
     public:
-        PseudocodeVisitor(PseudocodeBuilder* builder, TextLibConfig* config);
+        PseudocodeVisitor(PseudocodeBuilder* builder, Config* config);
         //
         void reset_visitor() override;
         void replace_builder(AbstractBuilder* builder) override;

@@ -32,8 +32,8 @@ target_include_directories(astfri-text PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_link_libraries(astfri-text PUBLIC astfri-core rapidjson)
+target_link_libraries(astfri-text PUBLIC astfri-core astfri-common rapidjson)
 
-# if (ASTFRI_BUILD_EXAMPLES)
-#     add_subdirectory(examples)
-# endif()
+if (ASTFRI_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()

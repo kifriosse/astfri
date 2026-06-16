@@ -4,7 +4,7 @@
 
 using namespace astfri::text;
 
-Exporter::Exporter(TextLibConfig* config) :
+Exporter::Exporter(Config* config) :
     m_config(config)
 {
     std::filesystem::path cp = std::filesystem::current_path();

@@ -2,7 +2,7 @@
 
 using namespace astfri::text;
 
-PseudocodeBuilder::PseudocodeBuilder(TextLibConfig* config) :
+PseudocodeBuilder::PseudocodeBuilder(Config* config) :
     m_config(config)
 {
 }

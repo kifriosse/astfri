@@ -4,7 +4,7 @@
 
 using namespace astfri::text;
 
-PlainTextBuilder::PlainTextBuilder(TextLibConfig* config) :
+PlainTextBuilder::PlainTextBuilder(Config* config) :
     PseudocodeBuilder(config)
 {
 }

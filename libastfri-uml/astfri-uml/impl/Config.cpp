@@ -71,7 +71,7 @@ Config Config::createDefault() {
 
     config.destructorIndicator  = '~';
 
-    config.handleNamespaces     = false;
+    config.handleNamespaces     = true;
     config.namespaceSeparator   = "::";
 
     return config;

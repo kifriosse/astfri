@@ -2,7 +2,7 @@
 
 using namespace astfri::text;
 
-PseudocodeVisitor::PseudocodeVisitor(PseudocodeBuilder* builder, TextLibConfig* config) :
+PseudocodeVisitor::PseudocodeVisitor(PseudocodeBuilder* builder, Config* config) :
     AbstractVisitor(builder),
     m_builder(builder),
     m_config(config),

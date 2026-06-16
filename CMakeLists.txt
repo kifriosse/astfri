@@ -25,8 +25,12 @@ add_subdirectory(external)
 
 add_subdirectory(libastfri-core)
 
+add_subdirectory(libastfri-common)
+
 # List of targets that are build used for the installation.
-set(ASTFRI_TARGETS astfri-core)
+set(ASTFRI_TARGETS "")
+list(APPEND ASTFRI_TARGETS astfri-core)
+list(APPEND ASTFRI_TARGETS astfri-common)
 
 if (ASTFRI_BUILD_CLI)
     add_subdirectory(astfri-cli)
