@@ -61,33 +61,6 @@ public:
     void write_json_file(const std::filesystem::path &path) const;
 
 private:
-    static const rapidjson::Value &safe_get(
-        const rapidjson::Value &node,
-        std::string_view key);
-
-    static char safe_get_char(
-        const rapidjson::Value &node,
-        std::string_view key);
-
-    static void add_string_member(
-        rapidjson::Value &node,
-        rapidjson::Document::AllocatorType &alloc,
-        std::string_view key,
-        std::string_view str);
-
-    static void add_string_member(
-        rapidjson::Value &node,
-        rapidjson::Document::AllocatorType &alloc,
-        std::string_view key,
-        char c);
-
-    static void add_bool_member(
-        rapidjson::Value &node,
-        rapidjson::Document::AllocatorType &alloc,
-        std::string_view key,
-        bool val);
-
-private:
     void read_file(const rapidjson::Value &val);
     void read_types(const rapidjson::Value &val);
     void read_access(const rapidjson::Value &val);

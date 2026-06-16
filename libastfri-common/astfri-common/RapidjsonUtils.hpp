@@ -107,6 +107,19 @@ void add_string(
     std::string_view val);
 
 /**
+ * @brief Adds single character string attribute @p key to @p node.
+ * @param node Node to add attribute to.
+ * @param alloc Document allocator.
+ * @param key Attribute name.
+ * @param val Attribute value.
+ */
+void add_string(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    char val);
+
+/**
  * @brief Adds bool attribute @p key to @p node.
  * @param node Node to add attribute to.
  * @param alloc Document allocator.

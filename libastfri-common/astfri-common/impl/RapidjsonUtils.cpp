@@ -110,6 +110,18 @@ void add_string(
 }
 
 
+void add_string(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    char val
+) {
+    rapidjson::Value jsonKey(key.data(), key.length(), alloc);
+    rapidjson::Value jsonValue(&val, 1, alloc);
+    node.AddMember(jsonKey.Move(), jsonValue.Move(), alloc);
+}
+
+
 void add_bool(
     rapidjson::Value &node,
     rapidjson::Document::AllocatorType &alloc,
