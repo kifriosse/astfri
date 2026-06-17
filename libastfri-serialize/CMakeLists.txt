@@ -1,4 +1,4 @@
-set(ASTFRI_SERIALIZE_VERSION "0.0.2")
+set(ASTFRI_SERIALIZE_VERSION "0.1.0")
 
 add_library(astfri-serialize)
 

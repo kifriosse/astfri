@@ -47,7 +47,7 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-std=.*")
 list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
 
 # Set the version of our library.
-set(ASTFRI_CPP_VERSION "0.0.2")
+set(ASTFRI_CPP_VERSION "0.1.0")
 
 # Finally, add our library.
 add_library(astfri-cpp)

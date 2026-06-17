@@ -1,4 +1,4 @@
-**TBD** `TBD` Michal Mrena `<michal.mrena@fri.uniza.sk>`
+**2026-06-17** `0.1.0` Michal Mrena `<michal.mrena@fri.uniza.sk>`
 - Unified directory structure of libraries.
   - Each one has single (except libastfri-cs) "flattened" `CMakeLists.txt`, which defines the target and its sources (including headers (for installation)).
   - Include path for each library starts in its root directory i.e., include paths look like `<astfri-cpp/AstfriCpp.hpp>`.
@@ -14,6 +14,7 @@
   - Unified key and values names in json and code.
   - Refactored examples acordingly.
   - Added example with bubblesort.
+- Refactored examples in each library to use the same conventions.
 
 
 **2026-06-09** Michal Mrena `<michal.mrena@fri.uniza.sk>`
