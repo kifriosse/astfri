@@ -189,6 +189,8 @@ char PlantUMLOutputter::access_mod_to_char(AccessModifier am) const {
             return config_->privatePrefix;
         case AccessModifier::Protected:
             return config_->protectedPrefix;
+        case AccessModifier::Internal:
+            return config_->packagePrivatePrefix;
         default:
             throw std::runtime_error(
                 "Unhandled enum value in `PlantUMLOutputter::access_mod_to_char`.");

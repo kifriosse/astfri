@@ -19,7 +19,7 @@ abstract class AbstractShape implements Shape, Printable {
     protected boolean visible;
 
     public AbstractShape(String color) {
-        this.color  = color;                         
+        this.color  = color;
         this.visible = true;
     }
 
@@ -36,6 +36,7 @@ abstract class AbstractShape implements Shape, Printable {
         System.out.println(describe());
     }
 }
+
 class Circle extends AbstractShape {
 
     private double radius;
@@ -72,7 +73,7 @@ class Rectangle extends AbstractShape {
 
     @Override
     public double area() {
-        return width * height;    
+        return width * height;
     }
 
     @Override
@@ -116,7 +117,7 @@ class ShapeProcessor {
         double result = 0.0;
         int i = 0;
 
-        while (i < iterations / 2) {              
+        while (i < iterations / 2) {
             result += shape.area();
             i++;
         }
@@ -177,11 +178,9 @@ public class ASTDemo {
         double scaled = ShapeProcessor.computeScaledArea(shapes.get(0), 10);
         System.out.println("Scaled area result: " + scaled);
 
-        
         AbstractShape r = new Rectangle("purple", 6.0, 3.0);
         r.toggleVisibility();
 
-        
         if (!r.isVisible()) {
             System.out.println("Shape is hidden");
         }

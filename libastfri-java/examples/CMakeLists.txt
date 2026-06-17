@@ -1,19 +1,12 @@
-# add_executable(ts-java)
+add_executable(java-example-pseudocode)
 
-# target_sources(ts-java PRIVATE java.cpp)
+target_sources(java-example-pseudocode PRIVATE ExamplePseudocode.cpp)
 
-# target_link_libraries(ts-java PRIVATE astfri-java astfri-text astfri-uml)
-
-
-add_executable(example_to)
-
-target_sources(example_to PRIVATE example_text_output.cpp)
-
-target_link_libraries(example_to PRIVATE astfri-java astfri-text)
+target_link_libraries(java-example-pseudocode PRIVATE astfri-java astfri-text)
 
 
-add_executable(example_umlo)
+add_executable(java-example-uml)
 
-target_sources(example_umlo PRIVATE example_uml_output.cpp)
+target_sources(java-example-uml PRIVATE ExampleUml.cpp)
 
-target_link_libraries(example_umlo PRIVATE astfri-java astfri-uml)
+target_link_libraries(java-example-uml PRIVATE astfri-java astfri-uml)

@@ -26,11 +26,11 @@
             ]
         },
         {
-            "name": "[java] java-examples",
+            "name": "[java] java-example-pseudocode",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/libastfri-java/examples/example_to",
-            "args": [],
+            "program": "${workspaceFolder}/build/libastfri-java/examples/java-example-pseudocode",
+            "args": ["../resources/samples/java/Main.java"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
             "environment": [],

@@ -1,6 +1,5 @@
 #include <astfri-cs/ASTBuilder.hpp>
 #include <astfri-uml/UMLLibWrapper.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <iostream>
 
@@ -13,9 +12,9 @@ int main(int argc, char *argv[]) {
     astfri::csharp::ASTBuilder astBuilder;
     astfri::TranslationUnit* ast = astBuilder.mk_ast();
     astBuilder.load_src(argv[1]);
-    astfri::uml::UMLLibWrapper umlLibWrapper;
-    astfri::uml::PlantUMLOutputter plantUMLOutputter;
+    astfri::uml::UMLLibWrapper umlLib;
+    astfri::uml::PlantUMLOutputter plantUMLOut;
     astfri::uml::Config config = astfri::uml::Config::createDefault();
-    umlLibWrapper.init(config, plantUMLOutputter);
-    umlLibWrapper.run(*ast);
+    umlLib.init(config, plantUMLOut);
+    umlLib.run(*ast);
 }

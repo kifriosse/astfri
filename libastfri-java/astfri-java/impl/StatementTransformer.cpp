@@ -152,7 +152,7 @@ astfri::LocalVarDefStmt* StatementTransformer::transform_local_var_node(
     TSNode tsNode,
     const std::string& sourceCode
 ) {
-    astfri::Type* type     = nullptr;
+    astfri::Type* type     = astfri::TypeFactory::get_instance().mk_unknown();
     std::string name       = "";
     astfri::Expr* init     = nullptr;
 
