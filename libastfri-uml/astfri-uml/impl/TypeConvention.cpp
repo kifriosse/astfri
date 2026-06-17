@@ -6,7 +6,7 @@
 namespace astfri::uml {
 
 
-std::string_view to_string(TypeConventions tc) {
+std::string_view type_conventions_to_string(TypeConventions tc) {
     switch (tc) {
         case TypeConventions::TypeAfterIdentifier:
             return "TypeAfterIdentifier";
@@ -16,12 +16,12 @@ std::string_view to_string(TypeConventions tc) {
 
         default:
             throw std::runtime_error(
-                "Unhandled enum value in `to_string(TypeConventions)`.");
+                "Unhandled enum value in `type_conventions_to_string`.");
     }
 }
 
 
-TypeConventions from_string(std::string_view tcStr) {
+TypeConventions type_conventions_from_string(std::string_view tcStr) {
     if (tcStr == "TypeBeforeIdentifier") {
         return TypeConventions::TypeBeforeIdentifier;
     }
@@ -30,7 +30,7 @@ TypeConventions from_string(std::string_view tcStr) {
     }
     else {
         throw std::runtime_error(
-            "Invalid enum string value in `TypeConventions from_string(std::string_view)`.");
+            "Invalid enum string value in `type_conventions_from_string`.");
     }
 }
 

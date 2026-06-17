@@ -10,8 +10,8 @@ astfri::TranslationUnit prepareTU();
 int main(int argc, char *argv[]) {
     astfri::TranslationUnit tu = prepareTU();
     astfri::text::Config conf = argc > 1
-        ? astfri::text::Config::createFromJson(argv[1])
-        : astfri::text::Config::createDefault();
+        ? astfri::text::Config::create_from_json(argv[1])
+        : astfri::text::Config::create_default();
     astfri::text::TextLibManager manager;
     manager.process_and_export_ast(tu, &std::cout);
 }

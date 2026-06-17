@@ -4,7 +4,7 @@ add_library(astfri-text)
 
 target_sources(astfri-text PRIVATE
     astfri-text/impl/PlainTextBuilder.cpp
-    astfri-text/impl/TextLibConfig.cpp
+    astfri-text/impl/Config.cpp
     astfri-text/impl/AbstractVisitor.cpp
     astfri-text/impl/TextLibManager.cpp
     astfri-text/impl/PseudocodeBuilder.cpp
@@ -15,7 +15,6 @@ target_sources(astfri-text PRIVATE
 )
 
 target_sources(astfri-text PUBLIC FILE_SET headers TYPE HEADERS FILES
-    astfri-text/TextLibConfig.hpp
     astfri-text/impl/PseudocodeVisitor.hpp
     astfri-text/impl/PseudocodeBuilder.hpp
     astfri-text/impl/PlainTextBuilder.hpp
@@ -23,6 +22,7 @@ target_sources(astfri-text PUBLIC FILE_SET headers TYPE HEADERS FILES
     astfri-text/impl/Exporter.hpp
     astfri-text/impl/AbstractVisitor.hpp
     astfri-text/TextLibManager.hpp
+    astfri-text/Config.hpp
 )
 
 target_compile_definitions(astfri-text PUBLIC ASTFRI_TEXT_VERSION="${ASTFRI_TEXT_VERSION}")

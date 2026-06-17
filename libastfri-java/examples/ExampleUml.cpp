@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     std::string sourceCode = astBuilder.load_file(argv[1]);
     TSTree* tree = astBuilder.make_syntax_tree(sourceCode);
     astfri::TranslationUnit* tu = astBuilder.get_translation_unit(tree, sourceCode);
-    astfri::uml::Config config = astfri::uml::Config::createDefault();
+    astfri::uml::Config config = astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter plantUMLOut;
     astfri::uml::UMLLibWrapper umlLib;
     umlLib.init(config, plantUMLOut);

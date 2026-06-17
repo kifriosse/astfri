@@ -1,7 +1,7 @@
 #ifndef LIBASTFRIUML_UML_OUTPUTTER_HPP
 #define LIBASTFRIUML_UML_OUTPUTTER_HPP
 
-#include <astfri-uml/impl/Config.hpp>
+#include <astfri-uml/Config.hpp>
 #include <astfri-uml/impl/ElementStructs.hpp>
 
 #include <fstream>
@@ -10,7 +10,7 @@
 namespace astfri::uml {
 class UMLOutputter {
 private:
-    virtual std::string assemble_param(VarStruct p) = 0;
+    virtual std::string assemble_param(VarStruct p) = 0; // TODO MM: use const references
 
 protected:
     Config* config_;

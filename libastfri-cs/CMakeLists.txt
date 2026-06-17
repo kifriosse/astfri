@@ -4,6 +4,7 @@ add_library(astfri-cs)
 
 target_sources(astfri-cs PRIVATE
     astfri-cs/impl/ASTBuilder.cpp
+    astfri-cs/impl/SDKProfile.cpp
     astfri-cs/impl/SemanticContext.cpp
     astfri-cs/impl/Config.cpp
     astfri-cs/impl/regs/Maps.cpp
@@ -71,6 +72,7 @@ target_compile_definitions(astfri-cs PRIVATE
 
 target_link_libraries(astfri-cs PUBLIC
     astfri-core
+    astfri-common
     rapidjson
     tree-sitter
     tree-sitter-c-sharp

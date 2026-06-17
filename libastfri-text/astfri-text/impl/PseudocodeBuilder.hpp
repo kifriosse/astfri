@@ -2,7 +2,7 @@
 #define LIBASTFRI_TEXT_PSEUDOCODE_BUILDER
 
 #include <astfri-text/impl/AbstractBuilder.hpp>
-#include <astfri-text/TextLibConfig.hpp>
+#include <astfri-text/Config.hpp>
 
 namespace astfri::text
 {

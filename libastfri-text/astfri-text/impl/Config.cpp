@@ -1,4 +1,4 @@
-#include <astfri-text/TextLibConfig.hpp>
+#include <astfri-text/Config.hpp>
 #include <astfri-common/RapidjsonUtils.hpp>
 
 #include <rapidjson/istreamwrapper.h>
@@ -9,7 +9,7 @@
 namespace astfri::text {
 
 
-Config Config::createFromJson(const rapidjson::Value &node) {
+Config Config::create_from_json(const rapidjson::Value &node) {
     Config config;
     config.read_code_structure(common::get_object(node, "codeStructure"));
     config.read_pseudocode_structure(common::get_object(node, "pseudocodeStructure"));
@@ -18,11 +18,11 @@ Config Config::createFromJson(const rapidjson::Value &node) {
     return config;
 }
 
-Config Config::createFromJson(std::filesystem::path const& path) {
-    return Config::createFromJson(common::read_document(path));
+Config Config::create_from_json(std::filesystem::path const& path) {
+    return Config::create_from_json(common::read_document(path));
 }
 
-Config Config::createDefault() {
+Config Config::create_default() {
     Config config;
 
     // 1) CODE_STRUCTURE
@@ -178,7 +178,7 @@ Config Config::createDefault() {
     return config;
 }
 
-Config Config::createFromArgs(int argc, char* argv[]) {
+Config Config::create_from_args(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
     throw std::runtime_error("Not implemented yet.");
@@ -191,7 +191,7 @@ void Config::write_json(rapidjson::Value &out, rapidjson::Document::AllocatorTyp
     this->write_output_settings(common::add_object(out, alloc, "outputSettings"), alloc);
 }
 
-void Config::write_json_file(const std::filesystem::path &path) const {
+void Config::write_json(const std::filesystem::path &path) const {
     rapidjson::Document doc = common::create_document();
     this->write_json(doc, doc.GetAllocator());
     common::write_document(path, doc);
@@ -478,7 +478,7 @@ void Config::write_symbols(rapidjson::Value &symbols, rapidjson::Document::Alloc
     common::add_string(operators, alloc, "addressWord", addressWord);
     common::add_string(operators, alloc, "derefWord", derefWord);
     common::add_string(operators, alloc, "opWordStyle", opWordStyle);
-    common::add_array(operators, alloc, "brColors", brColors);
+    common::add_array_of_strings(operators, alloc, "brColors", brColors);
 
     rapidjson::Value &separators = common::add_object(symbols, alloc, "separators");
     common::add_string(separators, alloc, "semicolonWord", semicolonWord);

@@ -1,6 +1,12 @@
 #ifndef CSHARP_SDK_PROFILE_HPP
 #define CSHARP_SDK_PROFILE_HPP
 
+#include <string_view>
+
+
+namespace astfri::csharp {
+
+
 /**
  * @brief Enum representing default SDK profiles in C#. Used for determining
  * which standard implicit usings to use
@@ -14,13 +20,13 @@ enum class SDKProfile {
     None,
     /**
      * @brief Microsoft.NET.Sdk profile. Includes this usings:
-     * - \code System\endcode
-     * - \code System.Collections.Generic\endcode
-     * - \code System.IO\endcode
-     * - \code System.Linq\endcode
-     * - \code System.Net.Http\endcode
-     * - \code System.Threading\endcode
-     * - \code System.Threading.Tasks\endcode
+     * - \code System \endcode
+     * - \code System.Collections.Generic \endcode
+     * - \code System.IO \endcode
+     * - \code System.Linq \endcode
+     * - \code System.Net.Http \endcode
+     * - \code System.Threading \endcode
+     * - \code System.Threading.Tasks \endcode
      */
     Core,
     /**
@@ -41,26 +47,33 @@ enum class SDKProfile {
     /**
      * @brief Microsoft.NET.Sdk.Worker profile. Includes all usings from
      * \c SDKProfile::NET profile and following additional usings:
-     * - \code Microsoft.Extensions.Configuration\endcode
-     * - \code Microsoft.Extensions.DependencyInjection\endcode
-     * - \code Microsoft.Extensions.Hosting\endcode
-     * - \code Microsoft.Extensions.Logging\endcode
+     * - \code Microsoft.Extensions.Configuration \endcode
+     * - \code Microsoft.Extensions.DependencyInjection \endcode
+     * - \code Microsoft.Extensions.Hosting \endcode
+     * - \code Microsoft.Extensions.Logging \endcode
      */
     Worker,
     /**
      * @brief Microsoft.NET.Sdk.WindowsDesktop profile. Includes all usings from
      * \c SDKProfile::NET profile and following additional usings:
-     * - \code System.Drawing\endcode
-     * - \code System.Windows.Forms\endcode
+     * - \code System.Drawing \endcode
+     * - \code System.Windows.Forms \endcode
      */
     WinForms,
     /**
      * @brief Microsoft.NET.Sdk.WindowsDesktop profile. Includes all usings from
      * \c SDKProfile::NET profile, but excludes:
-     * - \code System.IO\endcode
-     * - \code System.Net.Http\endcode
+     * - \code System.IO \endcode
+     * - \code System.Net.Http \endcode
      */
     WPF
 };
+
+std::string_view sdk_profile_to_string(SDKProfile s);
+
+SDKProfile sdk_profile_from_string(std::string_view sStr);
+
+
+} // namespace astfri::csharp
 
 #endif // CSHARP_SDK_PROFILE_HPP

@@ -2,6 +2,7 @@
 #define LIBASTFRIUML_TYPE_CONVENTION_HPP
 
 #include <string>
+#include <string_view>
 
 namespace astfri::uml {
 enum class TypeConventions {
@@ -12,9 +13,9 @@ enum class TypeConventions {
     TypeAfterIdentifier
 };
 
-std::string_view to_string(TypeConventions tc);
+std::string_view type_conventions_to_string(TypeConventions tc);
 
-TypeConventions from_string(std::string_view tcStr);
+TypeConventions type_conventions_from_string(std::string_view tcStr);
 
 
 class TypeConvention {

@@ -5,7 +5,7 @@
 using namespace astfri::text;
 
 TextLibManager::TextLibManager() :
-    m_config(Config::createDefault()),
+    m_config(Config::create_default()),
     m_builder(new PlainTextBuilder(&m_config)),
     m_visitor(new PseudocodeVisitor(static_cast<PlainTextBuilder*>(m_builder), &m_config)),
     m_exporter(new Exporter(&m_config)),
@@ -102,13 +102,13 @@ void TextLibManager::change_output_format(TextOutputFormat const& format)
 
 void TextLibManager::change_config(std::filesystem::path const& path)
 {
-    m_config = Config::createFromJson(path);
+    m_config = Config::create_from_json(path);
     change_output_format(m_config.fileFormat);
 }
 
 void TextLibManager::change_config(rapidjson::Value const& json)
 {
-    m_config = Config::createFromJson(json);
+    m_config = Config::create_from_json(json);
     change_output_format(m_config.fileFormat);
 }
 

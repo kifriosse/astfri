@@ -48,17 +48,19 @@ struct Config {
 
 private:
     Config() = default;
+
+public:
     Config(const Config &other) = default;
 
 public:
-    static Config createFromJson(const rapidjson::Value &node);
-    static Config createFromJson(const std::filesystem::path &path);
-    static Config createDefault();
-    static Config createFromArgs(int argc, char* argv[]);
+    static Config create_from_json(const rapidjson::Value &node);
+    static Config create_from_json(const std::filesystem::path &path);
+    static Config create_default();
+    static Config create_from_args(int argc, char* argv[]);
 
 public:
     void write_json(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
-    void write_json_file(const std::filesystem::path &path) const;
+    void write_json(const std::filesystem::path &path) const;
 
 private:
     void read_file(const rapidjson::Value &val);

@@ -82,6 +82,18 @@ std::string get_string(const rapidjson::Value &node, std::string_view key);
 std::vector<const rapidjson::Value*> get_array(const rapidjson::Value &node, std::string_view key);
 
 /**
+ * @brief Reads array attribute @p key of @p node.
+ * @throw std::invalid_argument if @p node is not an object or misses @p key attribute.
+ * @param node Node to read attribute from.
+ * @param key Attribute name.
+ * @return Array value of the attribute.
+ */
+std::vector<std::filesystem::path> get_array_of_paths(
+    const rapidjson::Value &node,
+    std::string_view key
+);
+
+/**
  * @brief Creates and adds object attribute @p key to @p node and returns reference to it.
  * @param node Node to add attribute to.
  * @param alloc Document allocator.
@@ -152,11 +164,24 @@ void add_int(
  * @param key Attribute name.
  * @param val Attribute value.
  */
-void add_array(
+void add_array_of_strings(
     rapidjson::Value &node,
     rapidjson::Document::AllocatorType &alloc,
     std::string_view key,
     const std::vector<std::string> &val);
+
+/**
+ * @brief Adds array of paths attribute @p key to @p node.
+ * @param node Node to add attribute to.
+ * @param alloc Document allocator.
+ * @param key Attribute name.
+ * @param val Attribute value.
+ */
+void add_array_of_paths(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    const std::vector<std::filesystem::path> &val);
 
 /**
  * @brief Creates json document object.

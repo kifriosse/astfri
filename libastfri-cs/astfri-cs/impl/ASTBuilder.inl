@@ -6,7 +6,7 @@ namespace astfri {
 template<typename Source>
 TranslationUnit CSharpOutput::load(csharp::Config& cfg, Source& source) {
     csharp::ASTBuilder builder;
-    for (auto& ext : cfg.external_type_sources) {
+    for (auto& ext : cfg.externalTypeSources) {
         builder.load_source_of_external_types(ext);
     }
     builder.load_src(source);

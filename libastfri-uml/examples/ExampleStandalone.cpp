@@ -9,8 +9,8 @@ astfri::TranslationUnit prepareTU();
 int main(int argc, char *argv[]) {
     astfri::TranslationUnit tu = prepareTU();
     astfri::uml::Config conf = argc > 1
-        ? astfri::uml::Config::createFromJson(argv[1])
-        : astfri::uml::Config::createDefault();
+        ? astfri::uml::Config::create_from_json(argv[1])
+        : astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::UMLLibWrapper uml;
     uml.init(conf, op);

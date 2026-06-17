@@ -1,19 +1,17 @@
-#include <astfri-uml/impl/Config.hpp>
+#include <astfri-uml/Config.hpp>
 #include <astfri-common/RapidjsonUtils.hpp>
 
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/prettywriter.h>
 
-#include <format>
-#include <fstream>
 #include <stdexcept>
 
 
 namespace astfri::uml {
 
 
-Config Config::createFromJson(const rapidjson::Value &node) {
+Config Config::create_from_json(const rapidjson::Value &node) {
     Config config;
     config.read_file(common::get_object(node, "file"));
     config.read_types(common::get_object(node, "types"));
@@ -25,19 +23,11 @@ Config Config::createFromJson(const rapidjson::Value &node) {
     return config;
 }
 
-Config Config::createFromJson(const std::filesystem::path& path) {
-    std::ifstream ifst(path);
-    if (! ifst.is_open()) {
-        throw std::invalid_argument(std::format("Failed to open `{}`.", path.string()));
-    }
-    rapidjson::IStreamWrapper isw(ifst);
-    rapidjson::Document doc;
-    doc.ParseStream(isw);
-    ifst.close();
-    return Config::createFromJson(doc);
+Config Config::create_from_json(const std::filesystem::path& path) {
+    return Config::create_from_json(common::read_document(path));
 }
 
-Config Config::createDefault() {
+Config Config::create_default() {
     Config config;
 
     config.writeToFile          = false;
@@ -78,7 +68,7 @@ Config Config::createDefault() {
     return config;
 }
 
-Config Config::createFromArgs(int argc, char* argv[]) {
+Config Config::create_from_args(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
     throw std::runtime_error("Not implemented yet.");
@@ -97,7 +87,7 @@ void Config::write_json(rapidjson::Value &out, rapidjson::Document::AllocatorTyp
     common::add_string(types, alloc, "voidTypeName", this->voidTypeName);
     common::add_string(types, alloc, "indirectIndicator", this->indirectIndicator);
     common::add_string(types, alloc, "separator", this->separator);
-    common::add_string(types, alloc, "typeConvention", to_string(this->typeConvention));
+    common::add_string(types, alloc, "typeConvention", type_conventions_to_string(this->typeConvention));
 
     rapidjson::Value &accessMod = common::add_object(out, alloc, "accessMod");
     common::add_bool(accessMod, alloc, "innerView", this->innerView);
@@ -128,17 +118,10 @@ void Config::write_json(rapidjson::Value &out, rapidjson::Document::AllocatorTyp
     common::add_string(namespaces, alloc, "namespaceSeparator", this->namespaceSeparator);
 }
 
-void Config::write_json_file(const std::filesystem::path &path) const {
-    std::ofstream ofst(path);
-    if (! ofst.is_open()) {
-        throw std::runtime_error(std::format("Failed to open `{}`.", path.string()));
-    }
-    rapidjson::Document doc;
-    doc.SetObject();
+void Config::write_json(const std::filesystem::path &path) const {
+    rapidjson::Document doc = common::create_document();
     this->write_json(doc, doc.GetAllocator());
-    rapidjson::OStreamWrapper osw(ofst);
-    rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(osw);
-    doc.Accept(writer);
+    common::write_document(path, doc);
 }
 
 void Config::read_file(const rapidjson::Value& val) {
@@ -154,7 +137,7 @@ void Config::read_types(const rapidjson::Value& val) {
     this->voidTypeName = common::get_string(val, "voidTypeName");
     this->indirectIndicator = common::get_char(val, "indirectIndicator");
     this->separator = common::get_string(val, "separator");
-    this->typeConvention = from_string(common::get_string(val, "typeConvention"));
+    this->typeConvention = type_conventions_from_string(common::get_string(val, "typeConvention"));
 }
 
 void Config::read_access(const rapidjson::Value& val) {

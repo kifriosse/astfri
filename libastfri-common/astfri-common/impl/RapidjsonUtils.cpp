@@ -4,6 +4,7 @@
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/prettywriter.h>
 
+#include <cstring>
 #include <format>
 #include <fstream>
 #include <stdexcept>
@@ -79,8 +80,31 @@ std::vector<const rapidjson::Value*> get_array(const rapidjson::Value &node, std
         throw std::invalid_argument(std::format("Attribute `{}` is not an array.", key));
     }
     std::vector<const rapidjson::Value*> arr;
+    arr.reserve(obj.Capacity());
     for (const rapidjson::Value &e : obj.GetArray()) {
         arr.push_back(&e);
+    }
+    return arr;
+}
+
+
+std::vector<std::filesystem::path> get_array_of_paths(
+    const rapidjson::Value &node,
+    std::string_view key
+) {
+    const rapidjson::Value &obj = get_attribute(node, key);
+    if (! obj.IsArray()) {
+        throw std::invalid_argument(std::format("Attribute `{}` is not an array.", key));
+    }
+    std::vector<std::filesystem::path> arr;
+    arr.reserve(obj.Capacity());
+    for (const rapidjson::Value &e : obj.GetArray()) {
+        if (! e.IsString()) {
+            throw std::invalid_argument(std::format(
+                "Array `{}` does not contain strings.",
+                key));
+        }
+        arr.push_back(std::filesystem::path(e.GetString()));
     }
     return arr;
 }
@@ -144,7 +168,7 @@ void add_int(
 }
 
 
-void add_array(
+void add_array_of_strings(
     rapidjson::Value &node,
     rapidjson::Document::AllocatorType &alloc,
     std::string_view key,
@@ -156,6 +180,23 @@ void add_array(
     for (const std::string &v : val) {
         rapidjson::Value sv;
         sv.SetString(v.c_str(), v.length(), alloc);
+        jsonVal.PushBack(sv.Move(), alloc);
+    }
+    node.AddMember(jsonKey.Move(), jsonVal.Move(), alloc);
+}
+
+void add_array_of_paths(
+    rapidjson::Value &node,
+    rapidjson::Document::AllocatorType &alloc,
+    std::string_view key,
+    const std::vector<std::filesystem::path> &val
+) {
+    rapidjson::Value jsonKey(key.data(), key.length(), alloc);
+    rapidjson::Value jsonVal(rapidjson::kArrayType);
+    jsonVal.Reserve(static_cast<rapidjson::SizeType>(val.size()), alloc);
+    for (const std::filesystem::path &v : val) {
+        rapidjson::Value sv;
+        sv.SetString(v.c_str(), std::strlen(v.c_str()), alloc);
         jsonVal.PushBack(sv.Move(), alloc);
     }
     node.AddMember(jsonKey.Move(), jsonVal.Move(), alloc);

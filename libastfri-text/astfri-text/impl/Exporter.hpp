@@ -1,7 +1,7 @@
 #ifndef LIBASTFRI_TEXT_EXPORTER
 #define LIBASTFRI_TEXT_EXPORTER
 
-#include <astfri-text/TextLibConfig.hpp>
+#include <astfri-text/Config.hpp>
 
 namespace astfri::text
 {

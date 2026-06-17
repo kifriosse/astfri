@@ -17,8 +17,8 @@ target_sources(astfri-uml PUBLIC FILE_SET headers TYPE HEADERS FILES
     astfri-uml/impl/ClassVisitor.hpp
     astfri-uml/impl/TypeConvention.hpp
     astfri-uml/impl/PlantUMLOutputter.hpp
-    astfri-uml/impl/Config.hpp
     astfri-uml/impl/UMLOutputter.hpp
+    astfri-uml/Config.hpp
     astfri-uml/UMLLibWrapper.hpp
 )
 

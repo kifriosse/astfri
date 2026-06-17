@@ -1,4 +1,4 @@
-set(ASTFRI_CORE_VERSION "0.0.2")
+set(ASTFRI_CORE_VERSION "0.1.0")
 
 add_library(astfri-core)
 

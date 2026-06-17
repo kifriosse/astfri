@@ -1,33 +1,41 @@
-
 #ifndef CSHARP_CONFIG_HPP
 #define CSHARP_CONFIG_HPP
-#include <astfri/impl/Concepts.hpp>
 
+#include <astfri/impl/Concepts.hpp>
 #include <astfri-cs/SDKProfile.hpp>
 
 #include <rapidjson/document.h>
+
 #include <vector>
+
 
 namespace astfri::csharp {
 
+
 struct Config {
+    SDKProfile profile;
+    std::vector<std::filesystem::path> externalTypeSources;
 
-    SDKProfile profile = SDKProfile::Core;
-    std::vector<std::filesystem::path> external_type_sources;
-
+private:
     Config() = default;
-    explicit Config(const rapidjson::Value& path);
-    explicit Config(const std::filesystem::path& path);
-    Config(int argc, char* argv[]);
 
-    static Config createFromJson(const rapidjson::Value& json);
-    static Config createFromJson(const std::filesystem::path& path);
-    static Config createDefault();
-    static Config createFromArgs(int argc, char* argv[]);
+public:
+    Config(const Config &other) = default;
+
+public:
+    static Config create_from_json(const rapidjson::Value& json);
+    static Config create_from_json(const std::filesystem::path& path);
+    static Config create_default();
+    static Config create_from_args(int argc, char* argv[]);
+
+public:
+    void write_json(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
+    void write_json(const std::filesystem::path &path) const;
 };
 
-} // namespace astfri::csharp
-
 static_assert(astfri::IsConfigClass<astfri::csharp::Config, rapidjson::Value>);
+
+
+} // namespace astfri::csharp
 
 #endif // CSHARP_CONFIG_HPP

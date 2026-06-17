@@ -288,7 +288,7 @@ int main(int argc, const char** argv)
     {
         astfri::uml::UMLLibWrapper wrapper;
         astfri::uml::PlantUMLOutputter op;
-        auto config = astfri::uml::Config::createFromJson(output_config_file);
+        auto config = astfri::uml::Config::create_from_json(output_config_file);
         wrapper.init(config, op);
         wrapper.run(tu);
         break;

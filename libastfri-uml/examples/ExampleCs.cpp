@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
     astfri::TranslationUnit *tu = builder.mk_ast();
 
-    astfri::uml::Config conf = astfri::uml::Config::createDefault();
+    astfri::uml::Config conf = astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::UMLLibWrapper umlout;
     umlout.init(conf, op);

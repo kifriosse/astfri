@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     astBuilder.load_src(argv[1]);
     astfri::uml::UMLLibWrapper umlLib;
     astfri::uml::PlantUMLOutputter plantUMLOut;
-    astfri::uml::Config config = astfri::uml::Config::createDefault();
+    astfri::uml::Config config = astfri::uml::Config::create_default();
     umlLib.init(config, plantUMLOut);
     umlLib.run(*ast);
 }

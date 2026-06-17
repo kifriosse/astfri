@@ -16,7 +16,7 @@ The best way to start is to use the default config created using `Config::create
 ```c++
 auto config = astfri::uml::Config::create_default();
 config.intTypeName = "integer";
-config.write_json_file("config.json");
+config.write_json("config.json");
 
 auto myConfig = astfri::uml::create_from_json("config.json");
 ```

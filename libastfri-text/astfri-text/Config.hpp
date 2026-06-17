@@ -162,15 +162,21 @@ struct Config {
     std::string filePath;
     std::string fileFormat;
 
+private:
+    Config() = default;
+
 public:
-    static Config createDefault();
-    static Config createFromArgs(int argc, char* argv[]);
-    static Config createFromJson(const rapidjson::Value &node);
-    static Config createFromJson(const std::filesystem::path &path);
+    Config(const Config &other) = default;
+
+public:
+    static Config create_default();
+    static Config create_from_args(int argc, char* argv[]);
+    static Config create_from_json(const rapidjson::Value &node);
+    static Config create_from_json(const std::filesystem::path &path);
 
 public:
     void write_json(rapidjson::Value &out, rapidjson::Document::AllocatorType &alloc) const;
-    void write_json_file(const std::filesystem::path &path) const;
+    void write_json(const std::filesystem::path &path) const;
 
     void change_to_java_like();
     void change_to_cxx_like();

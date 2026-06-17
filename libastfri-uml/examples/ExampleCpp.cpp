@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 
     astfri::TranslationUnit tu = astfri::cpp_in::load_file(argv[1], astfri::cpp::Config());
 
-    astfri::uml::Config conf = astfri::uml::Config::createDefault();
+    astfri::uml::Config conf = astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::UMLLibWrapper uml;
     uml.init(conf, op);
