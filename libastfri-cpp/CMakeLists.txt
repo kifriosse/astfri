@@ -1,11 +1,3 @@
-option(ASTFRI_CPP_TEST "Build test for CPP lib" ON)
-
-# TODO MM: Unify `dev` directory across all libraries.
-# toto som dal, nech sa ostatným zbytočne nebuilduje môj test
-if (ASTFRI_CPP_TEST)
-    add_subdirectory(dev)
-endif()
-
 # Obtain LLVM cmake dir from their config tool.
 execute_process(
     COMMAND llvm-config --cmakedir
@@ -101,3 +93,7 @@ target_link_libraries(astfri-cpp PUBLIC
     clang-cpp
     LLVM
 )
+
+if (ASTFRI_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
