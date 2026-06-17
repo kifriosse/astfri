@@ -43,6 +43,7 @@ public:
     void visit(const astfri::InterfaceType& type) override;
     void visit(const astfri::IndirectionType& type) override;
     void visit(const astfri::IncompleteType& type) override;
+    void visit(const astfri::UnknownType& type) override;
 
     void visit(const astfri::ParamVarDefStmt& stmt) override;
     void visit(const astfri::MemberVarDefStmt& stmt) override;

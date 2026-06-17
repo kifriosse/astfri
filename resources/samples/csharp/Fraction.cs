@@ -7,15 +7,15 @@ public class Fraction : IEquatable<Fraction> {
     public Fraction(long numerator, long denominator) {
         if (denominator == 0) 
             throw new ArgumentException("Denominator cannot be 0");
-        
+
         long common = Gcd(Math.Abs(numerator), Math.Abs(denominator));
-        
+
         _numerator = numerator / common;
         _denominator = denominator / common;
-        
+
         if (_denominator >= 0) 
             return;
-        
+
         _numerator = -_numerator;
         _denominator = -_denominator;
     }
@@ -35,7 +35,7 @@ public class Fraction : IEquatable<Fraction> {
         long factor2 = lcm / other._denominator;
         return new Fraction(factor1 * _numerator + factor2 * other._numerator, lcm);
     }
-    
+
     public static Fraction operator -(Fraction fraction) => new(-fraction._numerator, fraction._denominator);
 
     public static Fraction operator +(Fraction first, Fraction second) => first.Add(second);
@@ -67,12 +67,12 @@ public class Fraction : IEquatable<Fraction> {
             : new Fraction(scalar * f._denominator, f._numerator);
 
     public static implicit operator Fraction(long number) => new(number);
-    
+
     public static bool operator ==(Fraction a, Fraction b) => 
         a._numerator == b._numerator && a._denominator == b._denominator;
-    
+
     public static bool operator !=(Fraction a, Fraction b) => !(a == b);
-    
+
     public override bool Equals(object? obj) => obj is Fraction f && this == f;
     public bool Equals(Fraction other) => _numerator == other._numerator && _denominator == other._denominator;
     public override int GetHashCode() => HashCode.Combine(_numerator, _denominator);

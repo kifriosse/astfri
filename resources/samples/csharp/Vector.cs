@@ -18,7 +18,7 @@ public class Vector : IComparable<Vector>, IEquatable<Vector>
     {
         _elements = new float[n];
     }
-    
+
     public Vector(params float[] elements) : this(elements.Length)
     {
         elements.CopyTo(this._elements);

@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "[cpp] main",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/libastfri-cpp/main/main_CPP",
-            "args": ["./resources/samples/cpp/test_examples/example_inheritance.cpp"],
+            "args": ["../resources/samples/cpp/test_examples/example_inheritance.cpp"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -26,13 +26,13 @@
             ]
         },
         {
-            "name": "[java] astfri-cs-examples",
+            "name": "[java] java-examples",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/libastfri-java/examples/example_to",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -41,7 +41,13 @@
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
                 }
+
             ]
         },
         {
@@ -51,7 +57,7 @@
             "program": "${workspaceFolder}/build/libastfri-text/examples/text-example-standalone",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -59,6 +65,36 @@
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+
+            ]
+        },
+        {
+            "name": "[cs] cs-example-uml",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/libastfri-cs/examples/cs-example-uml",
+            "args": ["../resources/samples/csharp"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
             ]

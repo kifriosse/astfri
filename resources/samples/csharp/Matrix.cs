@@ -12,7 +12,7 @@ public class Matrix {
     public Matrix(Fraction[,] matrix) {
         _matrix = matrix;
     }
-    
+
     public Fraction this[int x, int y] {
         get {
             if (y >= _matrix.GetLength(0) || x >= _matrix.GetLength(1)) 
@@ -29,7 +29,7 @@ public class Matrix {
     public Matrix Add(Matrix other) {
         if (Size == other.Size)
             throw new ArgumentException("Input matrices have to have the same size");
-        
+
         Matrix result = new Fraction[SizeY, other.SizeX];
         for (int i = 0; i < result.SizeY; ++i) {
             for (int j = 0; j < result.SizeY; ++j) {
@@ -42,7 +42,7 @@ public class Matrix {
     public Matrix Multiply(Matrix other) {
         if (SizeX != other.SizeY)
             throw new ArgumentException("Input matrices have incorrect size for multiplication");
-        
+
         Matrix result = new Fraction[other.SizeY, SizeX];
         for (int i = 0; i < result.SizeY; i++) {
             for (int j = 0; j < result.SizeX; j++) {
@@ -63,6 +63,6 @@ public class Matrix {
     public static Matrix operator *(Matrix first, Matrix second) {
         return first.Multiply(second);
     }
-    
+
     public static implicit operator Matrix(Fraction[,] matrix)  => new (matrix);
 }

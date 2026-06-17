@@ -88,6 +88,11 @@ void ClassVisitor::visit(const astfri::IncompleteType& type) {
     this->currentVariable_.type_ = type.name;
 }
 
+void ClassVisitor::visit(const astfri::UnknownType& type) {
+    (void)type;
+    this->currentVariable_.type_ = "Unknown";
+}
+
 void ClassVisitor::visit(const astfri::ParamVarDefStmt& stmt) {
     stmt.type->accept(*this);
     this->currentVariable_.name_ = stmt.name;
