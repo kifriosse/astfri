@@ -2,7 +2,7 @@
 #define LIBASTFRI_TEXT_PSEUDOCODE_VISITOR
 
 #include <astfri-text/impl/AbstractVisitor.hpp>
-#include <astfri-text/impl/PseudocodeBuilder.hpp>
+#include <astfri-text/impl/pseudocode/PseudocodeBuilder.hpp>
 
 namespace astfri::text
 {

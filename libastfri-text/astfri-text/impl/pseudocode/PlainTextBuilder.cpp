@@ -1,4 +1,4 @@
-#include <astfri-text/impl/PlainTextBuilder.hpp>
+#include <astfri-text/impl/pseudocode/PlainTextBuilder.hpp>
 
 #include <cmath>
 

@@ -1,6 +1,6 @@
 #include <astfri-text/TextLibManager.hpp>
-#include <astfri-text/impl/PlainTextBuilder.hpp>
-#include <astfri-text/impl/PseudocodeVisitor.hpp>
+#include <astfri-text/impl/pseudocode/PlainTextBuilder.hpp>
+#include <astfri-text/impl/pseudocode/PseudocodeVisitor.hpp>
 
 using namespace astfri::text;
 

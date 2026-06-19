@@ -1,7 +1,7 @@
 #ifndef LIBASTFRI_TEXT_PLAIN_TEXT_BUILDER
 #define LIBASTFRI_TEXT_PLAIN_TEXT_BUILDER
 
-#include <astfri-text/impl/PseudocodeBuilder.hpp>
+#include <astfri-text/impl/pseudocode/PseudocodeBuilder.hpp>
 
 namespace astfri::text
 {

@@ -1,4 +1,4 @@
-#include <astfri-text/impl/PseudocodeVisitor.hpp>
+#include <astfri-text/impl/pseudocode/PseudocodeVisitor.hpp>
 
 using namespace astfri::text;
 

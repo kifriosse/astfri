@@ -1,4 +1,4 @@
-#include <astfri-text/impl/PseudocodeBuilder.hpp>
+#include <astfri-text/impl/pseudocode/PseudocodeBuilder.hpp>
 
 using namespace astfri::text;
 
