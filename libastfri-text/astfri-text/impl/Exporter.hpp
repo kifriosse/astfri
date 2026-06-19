@@ -7,10 +7,10 @@ namespace astfri::text
 {
     class Exporter
     {
-        Config* const m_config;
+        Config const& m_config;
         std::filesystem::path m_defPath;
     public:
-        explicit Exporter(Config* config);
+        explicit Exporter(Config const& config);
         //
         void export_file(std::string_view text, std::ostream* ost) const;
     private:
