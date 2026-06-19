@@ -8,15 +8,14 @@ namespace astfri::text
 {
     class PseudocodeVisitor : public AbstractVisitor
     {
-        PseudocodeBuilder* m_builder;
-        Config* m_config;
+        PseudocodeBuilder& m_builder;
+        Config const& m_config;
         bool m_isMethodCall = false;
         bool m_isConstructorCall = false;
     public:
-        PseudocodeVisitor(PseudocodeBuilder* builder, Config* config);
+        PseudocodeVisitor(PseudocodeBuilder& builder, Config const& config);
         //
         void reset_visitor() override;
-        void replace_builder(AbstractBuilder* builder) override;
         //
         void visit(const DynamicType& type) override;
         void visit(const IntType& type) override;
@@ -110,27 +109,27 @@ namespace astfri::text
     template<typename VectorRelation>
     void PseudocodeVisitor::process_relations(const VectorRelation& vrel, bool ispolym) {
         for (size_t i = 0; i < vrel.size(); ++i) {
-            m_builder->write_new_line();
-            m_builder->write_space();
-            m_builder->write_separator("->");
-            m_builder->write_space();
+            m_builder.write_new_line();
+            m_builder.write_space();
+            m_builder.write_separator("->");
+            m_builder.write_space();
             if (ispolym) {
-                m_builder->write_implement_word();
+                m_builder.write_implement_word();
             }
             else {
-                m_builder->write_extend_word();
+                m_builder.write_extend_word();
             }
-            m_builder->write_space();
+            m_builder.write_space();
             if (vrel.at(i)) {
                 if (ispolym) {
-                    // m_builder->write_interface_name(vrel.at(i)->name_);
-                    // m_builder->write_interface_name(vrel.at(i)->type->name_);
-                    m_builder->write_interface_name("TEMPORARY SOLUTION"); // TODO ask for change
+                    // m_builder.write_interface_name(vrel.at(i)->name_);
+                    // m_builder.write_interface_name(vrel.at(i)->type->name_);
+                    m_builder.write_interface_name("TEMPORARY SOLUTION"); // TODO ask for change
                 }
                 else {
-                    // m_builder->write_class_name(vrel.at(i)->name_);
-                    // m_builder->write_class_name(vrel.at(i)->m_type_->name_);
-                    m_builder->write_class_name("TEMPORARY SOLUTION"); // TODO ask for change
+                    // m_builder.write_class_name(vrel.at(i)->name_);
+                    // m_builder.write_class_name(vrel.at(i)->m_type_->name_);
+                    m_builder.write_class_name("TEMPORARY SOLUTION"); // TODO ask for change
                 }
                 if (! vrel.at(i)->tparams.empty()) {
                     process_params_or_args(vrel.at(i)->tparams, false);
