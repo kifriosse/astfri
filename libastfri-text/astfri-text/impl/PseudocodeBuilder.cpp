@@ -2,14 +2,14 @@
 
 using namespace astfri::text;
 
-PseudocodeBuilder::PseudocodeBuilder(Config* config) :
+PseudocodeBuilder::PseudocodeBuilder(Config const& config) :
     m_config(config)
 {
 }
 
 void PseudocodeBuilder::write_opening_else_word()
 {
-    if (m_config->elseConditionNewLine)
+    if (m_config.elseConditionNewLine)
     {
         write_new_line();
     }
@@ -18,12 +18,12 @@ void PseudocodeBuilder::write_opening_else_word()
         write_space();
     }
     write_else_word();
-    write_opening_curl_bracket(m_config->conditionBlockBracketNewLine);
+    write_opening_curl_bracket(m_config.conditionBlockBracketNewLine);
 }
 
 void PseudocodeBuilder::write_opening_catch_word()
 {
-    if (m_config->catchConditionNewLine)
+    if (m_config.catchConditionNewLine)
     {
         write_new_line();
     }
@@ -32,18 +32,18 @@ void PseudocodeBuilder::write_opening_catch_word()
         write_space();
     }
     write_catch_word();
-    write_opening_curl_bracket(m_config->trycatchBlockBracketNewLine);
+    write_opening_curl_bracket(m_config.trycatchBlockBracketNewLine);
 }
 
 void PseudocodeBuilder::write_text(std::string_view text)
 {
     if (m_isEmptyLine)
     {
-        for (int i = 0; i < m_config->textMarginLeft; ++i)
+        for (int i = 0; i < m_config.textMarginLeft; ++i)
         {
             write_space();
         }
-        for (int i = 0; i < m_indentationLevel * m_config->tabulatorLength; ++i)
+        for (int i = 0; i < m_indentationLevel * m_config.tabulatorLength; ++i)
         {
             write_space();
         }

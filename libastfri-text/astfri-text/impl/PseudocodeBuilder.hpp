@@ -9,10 +9,10 @@ namespace astfri::text
     class PseudocodeBuilder : public AbstractBuilder
     {
     protected:
-        Config* const m_config;
+        Config const& m_config;
         int m_rowCount = 1;
     public:
-        explicit PseudocodeBuilder(Config* config);
+        explicit PseudocodeBuilder(Config const& config);
         virtual ~PseudocodeBuilder() = default;
     protected:
         virtual void add_row_numbers() = 0;
