@@ -122,7 +122,7 @@ void HtmlTextBuilder::add_row_numbers()
 
 void HtmlTextBuilder::write_new_line()
 {
-    m_buildedText.append("<br>/\n");
+    m_buildedText.append("<br>\n");
     m_isEmptyLine = true;
     ++m_rowCount;
 }
