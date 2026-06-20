@@ -1,4 +1,5 @@
 #include <astfri-text/TextLibManager.hpp>
+#include <astfri-text/impl/pseudocode/HtmlTextBuilder.hpp>
 #include <astfri-text/impl/pseudocode/PlainTextBuilder.hpp>
 #include <astfri-text/impl/pseudocode/PseudocodeVisitor.hpp>
 
@@ -46,6 +47,8 @@ void TextLibManager::process_ast(Config cfg, TranslationUnit const& root, std::o
     }
     else if (cfg.fileFormat == "html")
     {
+        builder = new HtmlTextBuilder(cfg);
+        visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder&>(*builder), cfg);
     }
     else
     {
@@ -125,7 +128,8 @@ void TextLibManager::change_output_format(std::string_view format)
     else if (format == "html")
     {
         m_config.fileFormat = "html";
-        // TODO: implement html pseudocode
+        m_builder = new HtmlTextBuilder(m_config);
+        m_visitor = new PseudocodeVisitor(static_cast<PlainTextBuilder&>(*m_builder), m_config);
     }
     else
     {

@@ -3,6 +3,7 @@ set(ASTFRI_TEXT_VERSION "0.1.0")
 add_library(astfri-text)
 
 target_sources(astfri-text PRIVATE
+    astfri-text/impl/pseudocode/HtmlTextBuilder.cpp
     astfri-text/impl/pseudocode/PlainTextBuilder.cpp
     astfri-text/impl/TextLibConfig.cpp
     astfri-text/impl/AbstractVisitor.cpp
@@ -18,6 +19,7 @@ target_sources(astfri-text PUBLIC FILE_SET headers TYPE HEADERS FILES
     astfri-text/TextLibConfig.hpp
     astfri-text/impl/pseudocode/PseudocodeVisitor.hpp
     astfri-text/impl/pseudocode/PseudocodeBuilder.hpp
+    astfri-text/impl/pseudocode/HtmlTextBuilder.hpp
     astfri-text/impl/pseudocode/PlainTextBuilder.hpp
     astfri-text/impl/AbstractBuilder.hpp
     astfri-text/impl/Exporter.hpp
