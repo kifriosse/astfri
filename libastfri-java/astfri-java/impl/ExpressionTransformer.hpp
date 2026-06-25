@@ -1,23 +1,37 @@
-#ifndef EXPRESSION_TRANSFORMER_CLASS_HPP
-#define EXPRESSION_TRANSFORMER_CLASS_HPP
+#ifndef ASTFRI_JAVA_IMPL_EXPRESSION_TRANSFORMER_HPP
+#define ASTFRI_JAVA_IMPL_EXPRESSION_TRANSFORMER_HPP
+
+#include <astfri/impl/ExprFwd.hpp>
+#include <astfri/impl/StmtFwd.hpp>
+#include <astfri/impl/TypeFwd.hpp>
 
 #include <astfri-java/impl/NodeMapper.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 
+#include <string>
+
+
 namespace astfri::java {
+
 
 class StatementTransformer;
 
-class ExpressionTransformer {
-private:
-    astfri::TypeFactory& typeFactory;
-    astfri::ExprFactory& exprFactory;
-    NodeMapper* nodeMapper;
-    StatementTransformer* stmtTr;
 
+class ExpressionTransformer {
+public:
+    ExpressionTransformer(
+        astfri::ExprFactory *exprFactory,
+        astfri::TypeFactory *typeFactory,
+        StatementTransformer *stmtTr,
+        NodeMapper *nodeMapper);
+
+    std::string get_node_text(const TSNode& node, const std::string& sourceCode);
+
+    astfri::Expr* get_expr(TSNode tsNode, const std::string& sourceCode);
+
+private:
     astfri::BinOpExpr* transform_bin_op_expr_node(TSNode tsNode, const std::string& sourceCode);
 
     astfri::UnaryOpExpr* transform_un_op_expr_node(TSNode tsNode, const std::string& sourceCode);
@@ -33,14 +47,14 @@ private:
 
     astfri::IfExpr* transform_ternary_expr_node(TSNode tsNode, const std::string& sourceCode);
 
-public:
-    ExpressionTransformer(StatementTransformer* stmtTr);
-    ~ExpressionTransformer();
-
-    std::string get_node_text(const TSNode& node, const std::string& sourceCode);
-
-    astfri::Expr* get_expr(TSNode tsNode, const std::string& sourceCode);
+private:
+    astfri::ExprFactory *m_exprFactory;
+    astfri::TypeFactory *m_typeFactory;
+    StatementTransformer *m_stmtTr;
+    NodeMapper *m_nodeMapper;
 };
 
+
 } // namespace astfri::java
-#endif // EXPRESSION_TRANSFORMER_CLASS_HPP
+
+#endif // ASTFRI_JAVA_IMPL_EXPRESSION_TRANSFORMER_HPP

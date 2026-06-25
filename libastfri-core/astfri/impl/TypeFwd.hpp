@@ -22,6 +22,8 @@ struct IncompleteType;
 struct DeducedType;
 struct UnknownType;
 
+class TypeFactory;
+
 
 } // namespace astfri
 

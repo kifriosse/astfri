@@ -1,0 +1,33 @@
+@startuml astfri-java
+
+class ASTBuilder
+class ExpressionTransformer
+class StatementTransformer
+class NodeMapper
+
+together {
+  class ExprFactory #Lavender
+  class StmtFactory #Lavender
+  class TypeFactory #Lavender
+}
+
+ASTBuilder *-- ExpressionTransformer
+ASTBuilder *-- StatementTransformer
+ASTBuilder *-- NodeMapper
+
+StatementTransformer <-- ExpressionTransformer
+NodeMapper <-- ExpressionTransformer
+
+ExpressionTransformer <-- StatementTransformer
+NodeMapper <-- StatementTransformer
+
+TypeFactory <-d- NodeMapper
+TypeFactory <-d- ExpressionTransformer
+ExprFactory <-d- ExpressionTransformer
+ExprFactory <-d- StatementTransformer
+StmtFactory <-d- StatementTransformer
+TypeFactory <-d- StatementTransformer
+
+hide empty members
+
+@enduml

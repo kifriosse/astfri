@@ -1,27 +1,36 @@
 #include <astfri-java/impl/StatementTransformer.hpp>
 
+#include <astfri/impl/ExprFactory.hpp>
+#include <astfri/impl/StmtFactory.hpp>
+#include <astfri/impl/TypeFactory.hpp>
+#include <astfri/impl/TypeInfo.hpp>
+
+#include <astfri-java/impl/ExpressionTransformer.hpp>
+
 #include <tree_sitter/api.h>
 
 #include <cstdint>
-#include <string>
 #include <cstring>
-#include <sys/types.h>
-#include <astfri/impl/StmtDef.hpp>
+#include <optional>
+#include <string>
 
 
 namespace astfri::java {
-StatementTransformer::StatementTransformer() :
-    stmtFactory(astfri::StmtFactory::get_instance()),
-    exprTransformer(new ExpressionTransformer(this)),
-    nodeMapper(new NodeMapper()),
-    classes(),
-    interfaces(),
-    functionalInterfaces() {
-}
 
-StatementTransformer::~StatementTransformer() {
-    delete this->exprTransformer;
-    delete this->nodeMapper;
+
+StatementTransformer::StatementTransformer(
+    astfri::ExprFactory *exprFactory,
+    astfri::StmtFactory *stmtFactory,
+    astfri::TypeFactory *typeFactory,
+    ExpressionTransformer *exprTransformer,
+    NodeMapper *nodeMapper
+) :
+    m_exprFactory(exprFactory),
+    m_stmtFactory(stmtFactory),
+    m_typeFactory(typeFactory),
+    m_exprTransformer(exprTransformer),
+    m_nodeMapper(nodeMapper)
+{
 }
 
 astfri::Stmt* StatementTransformer::get_stmt(TSNode tsNode, const std::string& sourceCode) {
@@ -57,19 +66,19 @@ astfri::Stmt* StatementTransformer::get_stmt(TSNode tsNode, const std::string& s
         return this->transform_return_stmt_node(tsNode, sourceCode);
     }
     else if (nodeType == "break_statement") {
-        return stmtFactory.mk_break();
+        return m_stmtFactory->mk_break();
     }
     else if (nodeType == "continue_statement") {
-        return stmtFactory.mk_continue();
+        return m_stmtFactory->mk_continue();
     }
     else if (nodeType == "line_comment") {
-        return stmtFactory.mk_expr(this->exprTransformer->get_expr(tsNode, sourceCode));
+        return m_stmtFactory->mk_expr(m_exprTransformer->get_expr(tsNode, sourceCode));
     }
     else if (nodeType == "explicit_constructor_invocation") {
         return this->transform_explicit_constructor_invocation(tsNode, sourceCode);
     }
     else {
-        return stmtFactory.mk_uknown();
+        return m_stmtFactory->mk_uknown();
     }
 }
 
@@ -82,42 +91,45 @@ astfri::AccessModifier StatementTransformer::get_access_modifier(
     for (uint32_t j = 0; j < modifiersCount; j++) {
         TSNode modifierNode = ts_node_child(tsNode, j);
         std::string modifierNodeName
-            = this->exprTransformer->get_node_text(modifierNode, sourceCode);
+            = m_exprTransformer->get_node_text(modifierNode, sourceCode);
 
-        access = this->nodeMapper->get_modMap().contains(modifierNodeName)
-                   ? this->nodeMapper->get_modMap().at(modifierNodeName)
-                   : access;
+        const std::optional<astfri::AccessModifier> accessModOpt =
+            m_nodeMapper->map_access_mod(modifierNodeName);
+        if (accessModOpt) {
+            access = *accessModOpt;
+        }
     }
     return access;
 }
 
 astfri::Type* StatementTransformer::get_return_type(TSNode tsNode, const std::string& sourceCode) {
-    astfri::Type* type       = astfri::TypeFactory::get_instance().mk_unknown();
+    astfri::Type* type       = m_typeFactory->mk_unknown();
     std::string typeNodeType = ts_node_type(tsNode);
-    std::string typeNodeText = this->exprTransformer->get_node_text(tsNode, sourceCode);
+    std::string typeNodeText = m_exprTransformer->get_node_text(tsNode, sourceCode);
 
-    if (this->nodeMapper->get_typeMap().contains(typeNodeText)) {
-        type = this->nodeMapper->get_typeMap().at(typeNodeText);
+    const std::optional<astfri::Type*> typeOpt = m_nodeMapper->map_type(typeNodeText);
+    if (typeOpt) {
+        type = *typeOpt;
     }
     else {
-        if (this->classesByName.contains(typeNodeText)) {
-            astfri::ClassDefStmt* c = this->classesByName.at(typeNodeText).front();
+        if (m_classesByName.contains(typeNodeText)) {
+            astfri::ClassDefStmt* c = m_classesByName.at(typeNodeText).front();
             std::string className   = c->type->name;
-            if (this->classScope.contains(c)) {
-                astfri::Scope scope = this->classScope.at(c);
-                type = astfri::TypeFactory::get_instance().mk_class(className, scope);
+            if (m_classScope.contains(c)) {
+                astfri::Scope scope = m_classScope.at(c);
+                type = m_typeFactory->mk_class(className, scope);
             }
         }
-        else if (this->interfacesByName.contains(typeNodeText)) {
-            astfri::InterfaceDefStmt* i = this->interfacesByName.at(typeNodeText).front();
+        else if (m_interfacesByName.contains(typeNodeText)) {
+            astfri::InterfaceDefStmt* i = m_interfacesByName.at(typeNodeText).front();
             std::string interfaceName   = i->type->name;
-            if (this->interfaceScope.contains(i)) {
-                astfri::Scope scope = this->interfaceScope.at(i);
-                type = astfri::TypeFactory::get_instance().mk_class(interfaceName, scope);
+            if (m_interfaceScope.contains(i)) {
+                astfri::Scope scope = m_interfaceScope.at(i);
+                type = m_typeFactory->mk_class(interfaceName, scope);
             }
         }
         else {
-            type = astfri::TypeFactory::get_instance().mk_incomplete(typeNodeText);
+            type = m_typeFactory->mk_incomplete(typeNodeText);
         }
     }
 
@@ -142,17 +154,17 @@ astfri::ParamVarDefStmt* StatementTransformer::transform_param_node(
             type = this->get_return_type(paramNode, sourceCode);
         }
         else if (paramNodeType == "identifier") {
-            name = this->exprTransformer->get_node_text(paramNode, sourceCode);
+            name = m_exprTransformer->get_node_text(paramNode, sourceCode);
         }
     }
-    return stmtFactory.mk_param_var_def(name, type, nullptr);
+    return m_stmtFactory->mk_param_var_def(name, type, nullptr);
 }
 
 astfri::LocalVarDefStmt* StatementTransformer::transform_local_var_node(
     TSNode tsNode,
     const std::string& sourceCode
 ) {
-    astfri::Type* type     = astfri::TypeFactory::get_instance().mk_unknown();
+    astfri::Type* type     = m_typeFactory->mk_unknown();
     std::string name       = "";
     astfri::Expr* init     = nullptr;
 
@@ -170,17 +182,17 @@ astfri::LocalVarDefStmt* StatementTransformer::transform_local_var_node(
         else if (fieldName != nullptr && std::strcmp(fieldName, "declarator") == 0) {
             uint32_t declaratorChildCount = ts_node_named_child_count(child);
             if (declaratorChildCount > 0) {
-                name = exprTransformer->get_node_text(ts_node_named_child(child, 0), sourceCode);
+                name = m_exprTransformer->get_node_text(ts_node_named_child(child, 0), sourceCode);
             }
             if (declaratorChildCount > 1) {
-                init = exprTransformer->get_expr(ts_node_named_child(child, 1), sourceCode);
+                init = m_exprTransformer->get_expr(ts_node_named_child(child, 1), sourceCode);
             }
         }
         else if (fieldName != nullptr && std::strcmp(fieldName, "name") == 0) {
-            name = exprTransformer->get_node_text(child, sourceCode);
+            name = m_exprTransformer->get_node_text(child, sourceCode);
         }
     }
-    return stmtFactory.mk_local_var_def(name, type, init);
+    return m_stmtFactory->mk_local_var_def(name, type, init);
 }
 
 astfri::ExprStmt* StatementTransformer::transform_expr_stmt_node(
@@ -191,9 +203,9 @@ astfri::ExprStmt* StatementTransformer::transform_expr_stmt_node(
 
     TSNode child          = ts_node_named_child(tsNode, 0);
     std::string childType = ts_node_type(child);
-    expr                  = exprTransformer->get_expr(child, sourceCode);
+    expr                  = m_exprTransformer->get_expr(child, sourceCode);
 
-    return stmtFactory.mk_expr(expr);
+    return m_stmtFactory->mk_expr(expr);
 }
 
 astfri::IfStmt* StatementTransformer::transform_if_stmt_node(
@@ -210,7 +222,7 @@ astfri::IfStmt* StatementTransformer::transform_if_stmt_node(
         std::string childType = ts_node_type(child);
         const char* fieldName = ts_node_field_name_for_named_child(tsNode, i);
         if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0) {
-            condition = exprTransformer->get_expr(child, sourceCode);
+            condition = m_exprTransformer->get_expr(child, sourceCode);
         }
         else if (fieldName != nullptr && std::strcmp(fieldName, "consequence") == 0) {
             iftrue = this->transform_body_node(child, sourceCode);
@@ -225,7 +237,7 @@ astfri::IfStmt* StatementTransformer::transform_if_stmt_node(
         }
     }
 
-    return stmtFactory.mk_if(condition, iftrue, iffalse);
+    return m_stmtFactory->mk_if(condition, iftrue, iffalse);
 }
 
 astfri::TryStmt* StatementTransformer::transform_try_stmt_node(
@@ -252,7 +264,7 @@ astfri::TryStmt* StatementTransformer::transform_try_stmt_node(
         }
     }
 
-    return this->stmtFactory.mk_try(body, finally, catches);
+    return m_stmtFactory->mk_try(body, finally, catches);
 }
 
 astfri::CatchStmt* StatementTransformer::transform_catch_clause_node(
@@ -275,7 +287,7 @@ astfri::CatchStmt* StatementTransformer::transform_catch_clause_node(
         }
     }
 
-    return this->stmtFactory.mk_catch(param, body);
+    return m_stmtFactory->mk_catch(param, body);
 }
 
 astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
@@ -291,7 +303,7 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
 
     if (! ts_node_is_null(ts_node_named_child(tsNode, 0))) {
         conditionNode = ts_node_named_child(tsNode, 0);
-        condition     = exprTransformer->get_expr(conditionNode, sourceCode);
+        condition     = m_exprTransformer->get_expr(conditionNode, sourceCode);
     }
     if (! ts_node_is_null(ts_node_named_child(tsNode, 1))) {
         switchBodyNode     = ts_node_named_child(tsNode, 1);
@@ -306,7 +318,7 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
 
             for (uint32_t j = 0; j < switchCaseChildren; j++) {
                 TSNode child          = ts_node_named_child(caseNode, j);
-                std::string childText = exprTransformer->get_node_text(child, sourceCode);
+                std::string childText = m_exprTransformer->get_node_text(child, sourceCode);
 
                 if (childText.find("case") == 0) {
                     TSNode caseChild          = ts_node_named_child(child, 0);
@@ -314,7 +326,7 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
                     uint32_t exprCount        = ts_node_named_child_count(child);
                     for (uint32_t k = 0; k < exprCount; k++) {
                         TSNode exprNode    = ts_node_named_child(child, k);
-                        astfri::Expr* expr = this->exprTransformer->get_expr(exprNode, sourceCode);
+                        astfri::Expr* expr = m_exprTransformer->get_expr(exprNode, sourceCode);
                         caseExprs.push_back(expr);
                     }
                 }
@@ -327,14 +339,14 @@ astfri::SwitchStmt* StatementTransformer::transform_switch_stmt_node(
             }
 
             if (isDefaultCase) {
-                defaultCase = stmtFactory.mk_default_case(stmtFactory.mk_compound(stmts));
+                defaultCase = m_stmtFactory->mk_default_case(m_stmtFactory->mk_compound(stmts));
             }
             else {
-                cases.push_back(stmtFactory.mk_case(caseExprs, stmtFactory.mk_compound(stmts)));
+                cases.push_back(m_stmtFactory->mk_case(caseExprs, m_stmtFactory->mk_compound(stmts)));
             }
         }
     }
-    return stmtFactory.mk_switch(condition, cases, defaultCase);
+    return m_stmtFactory->mk_switch(condition, cases, defaultCase);
 }
 
 astfri::ForStmt* StatementTransformer::transform_for_stmt_node(
@@ -356,17 +368,17 @@ astfri::ForStmt* StatementTransformer::transform_for_stmt_node(
             init = this->transform_local_var_node(child, sourceCode);
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0) {
-            condition = exprTransformer->get_expr(child, sourceCode);
+            condition = m_exprTransformer->get_expr(child, sourceCode);
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "update") == 0) {
-            step = stmtFactory.mk_expr(exprTransformer->get_expr(child, sourceCode));
+            step = m_stmtFactory->mk_expr(m_exprTransformer->get_expr(child, sourceCode));
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0) {
             body = this->transform_body_node(child, sourceCode);
         }
     }
 
-    return stmtFactory.mk_for(init, condition, step, body);
+    return m_stmtFactory->mk_for(init, condition, step, body);
 }
 
 astfri::WhileStmt* StatementTransformer::transform_while_stmt_node(
@@ -383,14 +395,14 @@ astfri::WhileStmt* StatementTransformer::transform_while_stmt_node(
         const char* fieldName = ts_node_field_name_for_named_child(tsNode, i);
 
         if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0) {
-            condition = exprTransformer->get_expr(child, sourceCode);
+            condition = m_exprTransformer->get_expr(child, sourceCode);
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0) {
             body = this->transform_body_node(child, sourceCode);
         }
     }
 
-    return stmtFactory.mk_while(condition, body);
+    return m_stmtFactory->mk_while(condition, body);
 }
 
 astfri::DoWhileStmt* StatementTransformer::transform_do_while_stmt_node(
@@ -410,11 +422,11 @@ astfri::DoWhileStmt* StatementTransformer::transform_do_while_stmt_node(
             body = this->transform_body_node(child, sourceCode);
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "condition") == 0) {
-            condition = exprTransformer->get_expr(child, sourceCode);
+            condition = m_exprTransformer->get_expr(child, sourceCode);
         }
     }
 
-    return stmtFactory.mk_do_while(condition, body);
+    return m_stmtFactory->mk_do_while(condition, body);
 }
 
 astfri::ForEachStmt* StatementTransformer::transform_foreach_stmt_node(
@@ -435,14 +447,14 @@ astfri::ForEachStmt* StatementTransformer::transform_foreach_stmt_node(
             localVar = this->transform_local_var_node(child, sourceCode);
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "value") == 0) {
-            container = exprTransformer->get_expr(child, sourceCode);
+            container = m_exprTransformer->get_expr(child, sourceCode);
         }
         if (fieldName != nullptr && std::strcmp(fieldName, "body") == 0) {
             body = this->transform_body_node(child, sourceCode);
         }
     }
 
-    return stmtFactory.mk_for_each(localVar, container, body);
+    return m_stmtFactory->mk_for_each(localVar, container, body);
 }
 
 astfri::ReturnStmt* StatementTransformer::transform_return_stmt_node(
@@ -454,10 +466,10 @@ astfri::ReturnStmt* StatementTransformer::transform_return_stmt_node(
     if (! ts_node_is_null(ts_node_named_child(tsNode, 0))) {
         TSNode child          = ts_node_named_child(tsNode, 0);
         std::string childType = ts_node_type(child);
-        expr                  = exprTransformer->get_expr(child, sourceCode);
+        expr                  = m_exprTransformer->get_expr(child, sourceCode);
     }
 
-    return stmtFactory.mk_return(expr);
+    return m_stmtFactory->mk_return(expr);
 }
 
 astfri::BaseInitializerStmt* StatementTransformer::transform_explicit_constructor_invocation(
@@ -470,15 +482,15 @@ astfri::BaseInitializerStmt* StatementTransformer::transform_explicit_constructo
         for (uint32_t i = 0; i < argsCount; i++) {
             TSNode argNode          = ts_node_named_child(argumentsListNode, i);
             std::string argNodeType = ts_node_type(argNode);
-            args.push_back(exprTransformer->get_expr(argNode, sourceCode));
+            args.push_back(m_exprTransformer->get_expr(argNode, sourceCode));
         }
         
         TSNode classNode = ts_node_parent(ts_node_parent(tsNode));
-        std::string className = exprTransformer->get_node_text(ts_node_named_child(classNode, 1), sourceCode);
+        std::string className = m_exprTransformer->get_node_text(ts_node_named_child(classNode, 1), sourceCode);
 
-        astfri::ClassDefStmt* classDef = this->classesByName.at(className).front()->bases.front();
+        astfri::ClassDefStmt* classDef = m_classesByName.at(className).front()->bases.front();
 
-        return stmtFactory.mk_base_initializer(classDef->type, args);
+        return m_stmtFactory->mk_base_initializer(classDef->type, args);
 }
 
 astfri::CompoundStmt* StatementTransformer::transform_body_node(
@@ -493,7 +505,7 @@ astfri::CompoundStmt* StatementTransformer::transform_body_node(
         std::string childType = ts_node_type(child);
         statements.push_back(this->get_stmt(child, sourceCode));
     }
-    return stmtFactory.mk_compound(statements);
+    return m_stmtFactory->mk_compound(statements);
 }
 
 FunctionType StatementTransformer::transform_function(
@@ -523,7 +535,7 @@ FunctionType StatementTransformer::transform_function(
             typeSet = true;
         }
         else if (methodChildType == "identifier") {
-            name = exprTransformer->get_node_text(methodChild, sourceCode);
+            name = m_exprTransformer->get_node_text(methodChild, sourceCode);
         }
         else if (methodChildType == "formal_parameters") {
             uint32_t paramtersCount = ts_node_named_child_count(methodChild);
@@ -548,7 +560,7 @@ FunctionType StatementTransformer::transform_function(
                     bodyStatements.push_back(stmt);
                 }
             }
-            body = stmtFactory.mk_compound(bodyStatements);
+            body = m_stmtFactory->mk_compound(bodyStatements);
         }
     }
 
@@ -572,11 +584,11 @@ astfri::MethodDefStmt* StatementTransformer::transform_method_node(
     params                        = std::get<std::vector<astfri::ParamVarDefStmt*>>(methodBody);
     body                          = std::get<astfri::CompoundStmt*>(methodBody);
 
-    astfri::FunctionDefStmt* func = this->stmtFactory.mk_function_def(name, params, type, body);
+    astfri::FunctionDefStmt* func = m_stmtFactory->mk_function_def(name, params, type, body);
     astfri::MethodDefStmt* method
-        = this->stmtFactory.mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual, astfri::Staticity::NonStatic);
+        = m_stmtFactory->mk_method_def(nullptr, func, access, astfri::Virtuality::NotVirtual, astfri::Staticity::NonStatic);
 
-    this->methodsByName[name].push_back(method);
+    m_methodsByName[name].push_back(method);
 
     return method;
 }
@@ -598,7 +610,7 @@ astfri::ConstructorDefStmt* StatementTransformer::transform_constructor_node(
     params                     = std::get<std::vector<astfri::ParamVarDefStmt*>>(methodBody);
     body                       = std::get<astfri::CompoundStmt*>(methodBody);
 
-    return stmtFactory.mk_constructor_def(nullptr, params, baseInit, body, access);
+    return m_stmtFactory->mk_constructor_def(nullptr, params, baseInit, body, access);
 }
 
 astfri::MemberVarDefStmt* StatementTransformer::transform_attribute_node(
@@ -629,16 +641,16 @@ astfri::MemberVarDefStmt* StatementTransformer::transform_attribute_node(
                 std::string declaratorChildType = ts_node_type(declaratorChild);
 
                 if (declaratorChildType == "identifier" && k == 0) {
-                    name = exprTransformer->get_node_text(declaratorChild, sourceCode);
+                    name = m_exprTransformer->get_node_text(declaratorChild, sourceCode);
                 }
                 else {
-                    init = exprTransformer->get_expr(declaratorChild, sourceCode);
+                    init = m_exprTransformer->get_expr(declaratorChild, sourceCode);
                 }
             }
         }
     }
 
-    return stmtFactory.mk_member_var_def(name, type, init, access, Staticity::NonStatic);
+    return m_stmtFactory->mk_member_var_def(name, type, init, access, Staticity::NonStatic);
 }
 
 astfri::GenericParam* StatementTransformer::transform_tparam_node(
@@ -654,14 +666,14 @@ astfri::GenericParam* StatementTransformer::transform_tparam_node(
         std::string childType = ts_node_type(child);
 
         if (childType.find("identifier") != std::string::npos) {
-            name = exprTransformer->get_node_text(child, sourceCode);
+            name = m_exprTransformer->get_node_text(child, sourceCode);
         }
         else if (childType == "type_bound") {
-            constraint = exprTransformer->get_node_text(child, sourceCode);
+            constraint = m_exprTransformer->get_node_text(child, sourceCode);
         }
     }
 
-    return stmtFactory.mk_generic_param(constraint, name);
+    return m_stmtFactory->mk_generic_param(constraint, name);
 }
 
 astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
@@ -681,8 +693,8 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
         if (lambdaGreatParentType == "local_variable_declaration") {
             TSNode typeNode = ts_node_named_child(lambdaGreatParent, 0);
 
-            for (auto i : this->functionalInterfaces) {
-                std::string typeName = exprTransformer->get_node_text(typeNode, sourceCode);
+            for (auto i : m_functionalInterfaces) {
+                std::string typeName = m_exprTransformer->get_node_text(typeNode, sourceCode);
                 if (i->type->name == typeName) {
                     funcInterface = i;
                     break;
@@ -696,12 +708,12 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
             }
 
             if (! ts_node_is_null(child)) {
-                std::string methodName = this->exprTransformer->get_node_text(child, sourceCode);
-                if (this->methodsByName.contains(methodName)) {
-                    astfri::MethodDefStmt* method = this->methodsByName.at(methodName).front();
+                std::string methodName = m_exprTransformer->get_node_text(child, sourceCode);
+                if (m_methodsByName.contains(methodName)) {
+                    astfri::MethodDefStmt* method = m_methodsByName.at(methodName).front();
                     for (auto p : method->func->params) {
                         if (auto *ct = astfri::as<astfri::ClassType>(p->type)) {
-                            for (auto i : this->functionalInterfaces) {
+                            for (auto i : m_functionalInterfaces) {
                                 if (i->type->name == ct->name) {
                                     funcInterface = i;
                                     break;
@@ -732,8 +744,8 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
             uint32_t parameterCount = ts_node_named_child_count(lambdaChild);
             for (uint32_t j = 0; j < parameterCount; j++) {
                 TSNode parameterNode = ts_node_named_child(lambdaChild, j);
-                lambdaParams.push_back(stmtFactory.mk_param_var_def(
-                    exprTransformer->get_node_text(parameterNode, sourceCode),
+                lambdaParams.push_back(m_stmtFactory->mk_param_var_def(
+                    m_exprTransformer->get_node_text(parameterNode, sourceCode),
                     funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[j]->type,
                     nullptr
                 ));
@@ -741,8 +753,8 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
             continue;
         }
         else if (lambdaChildType == "identifier") {
-            lambdaParams.push_back(stmtFactory.mk_param_var_def(
-                exprTransformer->get_node_text(lambdaChild, sourceCode),
+            lambdaParams.push_back(m_stmtFactory->mk_param_var_def(
+                m_exprTransformer->get_node_text(lambdaChild, sourceCode),
                 funcInterfaceParams.empty() ? nullptr : funcInterfaceParams[0]->type,
                 nullptr
             ));
@@ -759,8 +771,7 @@ astfri::LambdaExpr* StatementTransformer::transform_lambda_expr_node(
         }
     }
 
-    return astfri::ExprFactory::get_instance()
-        .mk_lambda_expr(lambdaParams, lambdaBody, std::to_string(this->lambdaID++));
+    return m_exprFactory->mk_lambda_expr(lambdaParams, lambdaBody, std::to_string(this->lambdaID++));
 }
 
 astfri::Scope StatementTransformer::get_scope(TSNode tsNode, const std::string& sourceCode) {
@@ -785,7 +796,7 @@ astfri::Scope StatementTransformer::get_scope(TSNode tsNode, const std::string& 
             uint32_t childCount = ts_node_named_child_count(child);
             for (uint32_t j = 0; j < childCount; j++) {
                 if (std::string(ts_node_type(ts_node_named_child(child, j))) == "identifier") {
-                    scope.names.push_back(this->exprTransformer->get_node_text(
+                    scope.names.push_back(m_exprTransformer->get_node_text(
                         ts_node_named_child(child, j),
                         sourceCode
                     ));
@@ -823,7 +834,7 @@ void StatementTransformer::fill_class(
         }
         else if (classChildType == "superclass") {
             std::string baseClassName =
-                exprTransformer->get_node_text(ts_node_named_child(classChild, 0), sourceCode);
+                m_exprTransformer->get_node_text(ts_node_named_child(classChild, 0), sourceCode);
             
             // removing tparams from superclass name
             char delimiter = '<';
@@ -833,7 +844,7 @@ void StatementTransformer::fill_class(
                 baseClassName = baseClassName.substr(0, pos);
             }
 
-            classDef->bases.push_back(this->classesByName.at(baseClassName).front());
+            classDef->bases.push_back(m_classesByName.at(baseClassName).front());
         }
         else if (classChildType == "super_interfaces") {
             TSNode typeListNode = ts_node_named_child(classChild, 0);
@@ -841,10 +852,10 @@ void StatementTransformer::fill_class(
             for (uint32_t k = 0; k < typeListChildCount; k++) {
                 TSNode typeListChild = ts_node_named_child(typeListNode, k);
                 std::string interfaceName =
-                    exprTransformer->get_node_text(typeListChild, sourceCode);
+                    m_exprTransformer->get_node_text(typeListChild, sourceCode);
                 
-                if (this->interfacesByName.contains(interfaceName)) {
-                    interfaces.push_back(this->interfacesByName.at(interfaceName).front());
+                if (m_interfacesByName.contains(interfaceName)) {
+                    interfaces.push_back(m_interfacesByName.at(interfaceName).front());
                 }
             }
         }
@@ -897,12 +908,12 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
             continue;
         }
         else if (classChildType == "identifier") {
-            className = exprTransformer->get_node_text(classChild, sourceCode);
+            className = m_exprTransformer->get_node_text(classChild, sourceCode);
         }
         
     }
 
-    astfri::ClassDefStmt* classDef = stmtFactory.mk_class_def(className, scope);
+    astfri::ClassDefStmt* classDef = m_stmtFactory->mk_class_def(className, scope);
     classDef->type->name           = className;
     classDef->vars                 = {};
     classDef->methods              = {};
@@ -911,9 +922,9 @@ astfri::ClassDefStmt* StatementTransformer::transform_class(
     classDef->bases                = {};
     classDef->interfaces           = {};
 
-    this->classScope.emplace(classDef, scope);
-    this->classesByName[classDef->type->name].push_back(classDef);
-    this->clsNodes.emplace(classDef, classNode);
+    m_classScope.emplace(classDef, scope);
+    m_classesByName[classDef->type->name].push_back(classDef);
+    m_clsNodes.emplace(classDef, classNode);
 
     return classDef;
 }
@@ -945,11 +956,11 @@ void StatementTransformer::fill_interface(
             for (uint32_t k = 0; k < typeListChildCount; k++) {
                 TSNode typeListChild = ts_node_named_child(interfaceChild, k);
                 std::string interfaceName
-                    = exprTransformer->get_node_text(typeListChild, sourceCode);
+                    = m_exprTransformer->get_node_text(typeListChild, sourceCode);
                 
-                if (this->interfacesByName.contains(interfaceName)) {
+                if (m_interfacesByName.contains(interfaceName)) {
                     astfri::InterfaceDefStmt* interfaceDef
-                        = this->interfacesByName.at(interfaceName).front();
+                        = m_interfacesByName.at(interfaceName).front();
                     interfaces.push_back(interfaceDef);
                 }
             }
@@ -998,7 +1009,7 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
                 for (uint32_t k = 0; k < modifiersChildrenCount; ++k) {
                     TSNode modChild          = ts_node_child(interfaceChild, k);
                     std::string modChildType = ts_node_type(modChild);
-                    std::string annotation   = exprTransformer->get_node_text(modChild, sourceCode);
+                    std::string annotation   = m_exprTransformer->get_node_text(modChild, sourceCode);
                     if (modChildType == "marker_annotation"
                         && annotation == "@FunctionalInterface") {
                         funcInterface = true;
@@ -1007,22 +1018,22 @@ astfri::InterfaceDefStmt* StatementTransformer::transform_interface(
             }
         }
         else if (interfaceChildType == "identifier") {
-            interfaceName = exprTransformer->get_node_text(interfaceChild, sourceCode);
+            interfaceName = m_exprTransformer->get_node_text(interfaceChild, sourceCode);
         }
     }
 
-    astfri::InterfaceDefStmt* interfaceDef = stmtFactory.mk_interface_def(interfaceName, scope);
+    astfri::InterfaceDefStmt* interfaceDef = m_stmtFactory->mk_interface_def(interfaceName, scope);
     interfaceDef->type->name               = interfaceName;
     interfaceDef->methods                  = {};
     interfaceDef->tparams                  = {};
     interfaceDef->bases                    = {};
 
-    this->interfaceScope.emplace(interfaceDef, scope);
-    this->interfacesByName[interfaceDef->type->name].push_back(interfaceDef);
-    this->ifaceNodes.emplace(interfaceDef, interfaceNode);
+    m_interfaceScope.emplace(interfaceDef, scope);
+    m_interfacesByName[interfaceDef->type->name].push_back(interfaceDef);
+    m_ifaceNodes.emplace(interfaceDef, interfaceNode);
 
     if (funcInterface) {
-        this->functionalInterfaces.push_back(interfaceDef);
+        m_functionalInterfaces.push_back(interfaceDef);
         funcInterface = false;
     }
 
@@ -1041,10 +1052,10 @@ std::vector<astfri::ClassDefStmt*> StatementTransformer::transform_classes(
         std::string childType = ts_node_type(child);
 
         if (childType == "class_declaration") {
-            this->classes.push_back(this->transform_class(child, sourceCode));
+            m_classes.push_back(this->transform_class(child, sourceCode));
         }
     }
-    return this->classes;
+    return m_classes;
 }
 
 std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interfaces(
@@ -1059,29 +1070,31 @@ std::vector<astfri::InterfaceDefStmt*> StatementTransformer::transform_interface
         std::string childType = ts_node_type(child);
 
         if (childType == "interface_declaration") {
-            this->interfaces.push_back(this->transform_interface(child, sourceCode));
+            m_interfaces.push_back(this->transform_interface(child, sourceCode));
         }
     }
-    return this->interfaces;
+    return m_interfaces;
 }
 
-astfri::TranslationUnit* StatementTransformer::fill_translation_unit(
-    TSTree* tree,
-    const std::string& sourceCode
+astfri::TranslationUnit StatementTransformer::fill_translation_unit(
+    TSTree *tree,
+    const std::string &sourceCode
 ) {
     this->transform_interfaces(tree, sourceCode);
     this->transform_classes(tree, sourceCode);
 
-    for (auto cls : this->classes) {
-        this->fill_class(cls, this->clsNodes.at(cls), sourceCode);
+    for (auto cls : m_classes) {
+        this->fill_class(cls, m_clsNodes.at(cls), sourceCode);
     }
-    for (auto iface : this->interfaces) {
-        this->fill_interface(iface, this->ifaceNodes.at(iface), sourceCode);
+    for (auto iface : m_interfaces) {
+        this->fill_interface(iface, m_ifaceNodes.at(iface), sourceCode);
     }
 
-    astfri::TranslationUnit* tu = this->stmtFactory.mk_translation_unit();
-    tu->interfaces = this->interfaces;
-    tu->classes    = this->classes;
+    astfri::TranslationUnit tu;
+    tu.interfaces = m_interfaces;
+    tu.classes    = m_classes;
     return tu;
 }
+
+
 } // namespace astfri::java

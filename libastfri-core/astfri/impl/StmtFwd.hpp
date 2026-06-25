@@ -40,6 +40,10 @@ struct BreakStmt;
 struct UnknownStmt;
 struct TranslationUnit;
 
+class StmtFactory;
+
+enum class AccessModifier;
+
 
 } // namespace astfri
 

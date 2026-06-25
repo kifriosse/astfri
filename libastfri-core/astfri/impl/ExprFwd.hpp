@@ -32,6 +32,12 @@ struct DeleteExpr;
 struct BracketExpr;
 struct UnknownExpr;
 
+class ExprFactory;
+
+enum class BinOpType;
+
+enum class UnaryOpType;
+
 
 } // namespace astfri
 

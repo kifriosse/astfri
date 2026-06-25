@@ -1,22 +1,28 @@
-#ifndef STATEMENT_TRANSFORMER_CLASS_HPP
-#define STATEMENT_TRANSFORMER_CLASS_HPP
+#ifndef ASTFRI_IMPL_STATEMENT_TRANSFORMER_HPP
+#define ASTFRI_IMPL_STATEMENT_TRANSFORMER_HPP
 
-#include <astfri-java/impl/ExpressionTransformer.hpp>
-#include <astfri-java/impl/NodeMapper.hpp>
-#include <astfri/Astfri.hpp>
+#include <astfri/impl/ExprFwd.hpp>
+#include <astfri/impl/Scope.hpp>
+#include <astfri/impl/StmtFwd.hpp>
+#include <astfri/impl/TypeFwd.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-java.h>
 
-#include <cstdint>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <astfri/impl/StmtDef.hpp>
+
 
 namespace astfri::java {
 
+
 class ExpressionTransformer;
+
+
+class NodeMapper;
+
 
 using FunctionType = std::tuple<
     astfri::AccessModifier,
@@ -26,27 +32,20 @@ using FunctionType = std::tuple<
     std::vector<astfri::BaseInitializerStmt*>,
     astfri::CompoundStmt*>;
 
+
 class StatementTransformer {
+public:
+    StatementTransformer(
+        astfri::ExprFactory *exprFactory,
+        astfri::StmtFactory *stmtFactory,
+        astfri::TypeFactory *typeFactory,
+        ExpressionTransformer *exprTransformer,
+        NodeMapper *nodeMapper);
+
+    astfri::TranslationUnit fill_translation_unit(TSTree *tree, const std::string &sourceCode);
+
 private:
-    astfri::StmtFactory& stmtFactory;
-    ExpressionTransformer* exprTransformer;
-    NodeMapper* nodeMapper;
-
-    std::vector<astfri::ClassDefStmt*> classes;
-    std::vector<astfri::InterfaceDefStmt*> interfaces;
-    std::vector<astfri::InterfaceDefStmt*> functionalInterfaces;
-
-    std::unordered_map<astfri::ClassDefStmt*, TSNode> clsNodes;  
-    std::unordered_map<astfri::InterfaceDefStmt*, TSNode> ifaceNodes;  
-
-    std::unordered_map<std::string, std::vector<astfri::ClassDefStmt*>> classesByName;
-    std::unordered_map<std::string, std::vector<astfri::InterfaceDefStmt*>> interfacesByName;
-    std::unordered_map<astfri::ClassDefStmt*, astfri::Scope> classScope;
-    std::unordered_map<astfri::InterfaceDefStmt*, astfri::Scope> interfaceScope;
-
-    std::unordered_map<std::string, std::vector<astfri::MethodDefStmt*>> methodsByName;
-
-    uint32_t lambdaID{0};
+    astfri::LambdaExpr* transform_lambda_expr_node(TSNode tsNode, const std::string& sourceCode);
 
     astfri::Stmt* get_stmt(TSNode tsNode, const std::string& sourceCode);
 
@@ -124,14 +123,31 @@ private:
         const std::string& sourceCode
     );
 
-public:
-    StatementTransformer();
-    ~StatementTransformer();
+private:
+    long long lambdaID{0};
 
-    astfri::LambdaExpr* transform_lambda_expr_node(TSNode tsNode, const std::string& sourceCode);
+    astfri::ExprFactory *m_exprFactory;
+    astfri::StmtFactory *m_stmtFactory;
+    astfri::TypeFactory *m_typeFactory;
+    ExpressionTransformer *m_exprTransformer;
+    NodeMapper *m_nodeMapper;
 
-    astfri::TranslationUnit* fill_translation_unit(TSTree* tree, const std::string& sourceCode);
+    std::vector<astfri::ClassDefStmt*> m_classes;
+    std::vector<astfri::InterfaceDefStmt*> m_interfaces;
+    std::vector<astfri::InterfaceDefStmt*> m_functionalInterfaces;
+
+    std::unordered_map<astfri::ClassDefStmt*, TSNode> m_clsNodes;
+    std::unordered_map<astfri::InterfaceDefStmt*, TSNode> m_ifaceNodes;
+
+    std::unordered_map<std::string, std::vector<astfri::ClassDefStmt*>> m_classesByName;
+    std::unordered_map<std::string, std::vector<astfri::InterfaceDefStmt*>> m_interfacesByName;
+    std::unordered_map<astfri::ClassDefStmt*, astfri::Scope> m_classScope;
+    std::unordered_map<astfri::InterfaceDefStmt*, astfri::Scope> m_interfaceScope;
+
+    std::unordered_map<std::string, std::vector<astfri::MethodDefStmt*>> m_methodsByName;
 };
 
+
 } // namespace astfri::java
-#endif // STATEMENT_TRANSFORMER_CLASS_HPP
+
+#endif // ASTFRI_IMPL_STATEMENT_TRANSFORMER_HPP

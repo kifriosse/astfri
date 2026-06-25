@@ -1,19 +1,31 @@
+**2026-06-24** `0.1.1` Michal Mrena `<michal.mrena@fri.uniza.sk>`
+- `astfri-core` extended forward declarations.
+  - Moved version to `0.1.1`.
+  - `StmtFwd.hpp` now forward-declares access modifier enum and `StmtFactory`.
+  - `ExprFwd.hpp` now forward-declares binary and unary operator types `ExprFactory`.
+  - `TypeFwd.hpp` now forward-declares `TypeFactory`.
+- `astfri-java` refactored library structures.
+  - Moved version to `0.1.1`.
+  - Added UML diagram into `doc/`.
+  - TODO
+
+
 **2026-06-17** `0.1.0` Michal Mrena `<michal.mrena@fri.uniza.sk>`
 - Unified directory structure of libraries.
-  - Each one has single (except libastfri-cs) "flattened" `CMakeLists.txt`, which defines the target and its sources (including headers (for installation)).
+  - Each one has single (except `libastfri-cs`) "flattened" `CMakeLists.txt`, which defines the target and its sources (including headers (for installation)).
   - Include path for each library starts in its root directory i.e., include paths look like `<astfri-cpp/AstfriCpp.hpp>`.
 - `astfri-uml` refactored config.
   - Removed default config json file and moved it to the code.
   - Unified key and values names in json and code.
-  - Refactored examples acordingly.
+  - Refactored examples accordingly.
 - `astfri-common` added new library.
   - Contains code shared by multiple libraries.
-  - Currently contains rapidjson utilities.
+  - Currently, contains rapidjson utilities.
 - `astfri-text` refactored config.
   - Removed default config json file and moved it to the code.
   - Unified key and values names in json and code.
-  - Refactored examples acordingly.
-  - Added example with bubblesort.
+  - Refactored examples accordingly.
+  - Added example with bubble sort.
 - Refactored examples in each library to use the same conventions.
 
 

@@ -1,45 +1,51 @@
-#ifndef JAVA_SYNTAX_TREE_BUILDER_HPP
-#define JAVA_SYNTAX_TREE_BUILDER_HPP
+#ifndef ASTFRI_JAVA_ASTBUILDER_HPP
+#define ASTFRI_JAVA_ASTBUILDER_HPP
 
-#include <astfri-java/impl/StatementTransformer.hpp>
+#include <astfri/impl/ExprFactory.hpp>
 #include <astfri/impl/StmtFactory.hpp>
+#include <astfri/impl/TypeFactory.hpp>
 
-#include <tree_sitter/api.h>
-#include <tree_sitter/tree-sitter-java.h>
+#include <astfri-java/Config.hpp>
+#include <astfri-java/impl/ExpressionTransformer.hpp>
+#include <astfri-java/impl/NodeMapper.hpp>
+#include <astfri-java/impl/StatementTransformer.hpp>
 
+#include <filesystem>
+#include <iosfwd>
 #include <string>
-#include <astfri/impl/StmtDef.hpp>
+#include <vector>
+
 
 namespace astfri::java {
+
+
 class ASTBuilder {
-private:
-    StatementTransformer* stmtTransformer;
+public:
+    static ASTBuilder create(astfri::java::Config config);
 
 public:
-    ASTBuilder();
-    ~ASTBuilder();
+    astfri::TranslationUnit load_file(std::istream &ist);
 
-    std::string load_stream(std::istream& stream);
+    astfri::TranslationUnit load_file(const std::filesystem::path &path);
 
-    std::string load_file(const std::string& path);
+    std::vector<astfri::TranslationUnit> load_project(const std::filesystem::path &path);
 
-    std::string load_project(const std::string& path);
+private:
+    ASTBuilder(astfri::java::Config config);
 
-    TSTree* make_syntax_tree(const std::string& sourceCodeString);
+private:
+    astfri::java::Config m_config;
 
-    astfri::TranslationUnit* get_translation_unit(TSTree* tree, const std::string& sourceCode);
+    astfri::ExprFactory *m_exprFactory;
+    astfri::StmtFactory *m_stmtFactory;
+    astfri::TypeFactory *m_typeFactory;
+
+    NodeMapper m_nodeMapper;
+    ExpressionTransformer m_exprTransformer;
+    StatementTransformer m_stmtTransformer;
 };
 
-class Config {};
+
 } // namespace astfri::java
 
-namespace astfri {
-    struct java_in
-    {
-        static astfri::TranslationUnit* load_stream(std::istream& stream, const astfri::java::Config &cfg);
-        static astfri::TranslationUnit* load_file(const std::string& path, const astfri::java::Config &cfg);
-        static astfri::TranslationUnit* load_project(const std::string& path, const astfri::java::Config &cfg);
-    };
-} // namespace astfri
-
-#endif // JAVA_SYNTAX_TREE_BUILDER_HPP
+#endif // ASTFRI_JAVA_ASTBUILDER_HPP

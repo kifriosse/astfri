@@ -4,6 +4,7 @@ add_library(astfri-java)
 
 target_sources(astfri-java PRIVATE
     astfri-java/impl/ASTBuilder.cpp
+    astfri-java/impl/Config.cpp
     astfri-java/impl/ExpressionTransformer.cpp
     astfri-java/impl/NodeMapper.cpp
     astfri-java/impl/StatementTransformer.cpp
@@ -22,6 +23,7 @@ target_link_libraries(astfri-java PUBLIC
     astfri-core
     tree-sitter
     tree-sitter-java
+    rapidjson
 )
 
 target_include_directories(astfri-java PUBLIC
