@@ -17,7 +17,7 @@ void AbstractVisitor::process_condition(Expr* expr)
 
 void AbstractVisitor::process_body(Stmt* stmt, bool const& onNewLine)
 {
-    m_builder.write_opening_curl_bracket(onNewLine);
+    m_builder.write_opening_curl_bracket(onNewLine, true);
     accept_node(stmt);
-    m_builder.write_closing_curl_bracket();
+    m_builder.write_closing_curl_bracket(true);
 }

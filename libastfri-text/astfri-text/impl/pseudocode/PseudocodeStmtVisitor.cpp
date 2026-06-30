@@ -104,7 +104,8 @@ void PseudocodeVisitor::visit(const IfStmt& stmt)
     process_body(stmt.iftrue, m_config.conditionBlockBracketNewLine);
     if (stmt.iffalse)
     {
-        m_builder.write_opening_else_word();
+        m_builder.write_new_line_or_space(m_config.elseConditionNewLine);
+        m_builder.write_else_word();
         process_body(stmt.iffalse, m_config.conditionBlockBracketNewLine);
     }
 }
@@ -138,8 +139,7 @@ void PseudocodeVisitor::visit(const SwitchStmt& stmt)
 {
     m_builder.write_switch_word();
     process_condition(stmt.expr);
-    m_builder.write_opening_curl_bracket(m_config.switchBlockBracketNewLine);
-    m_builder.increase_indentation();
+    m_builder.write_opening_curl_bracket(m_config.switchBlockBracketNewLine, true);
     for (size_t i = 0; i < stmt.cases.size(); ++i)
     {
         accept_node(stmt.cases.at(i));
@@ -148,9 +148,7 @@ void PseudocodeVisitor::visit(const SwitchStmt& stmt)
             m_builder.write_new_line();
         }
     }
-    m_builder.decrease_indentation();
-    m_builder.write_new_line();
-    m_builder.write_right_bracket("}");
+    m_builder.write_closing_curl_bracket(true);
 }
 
 void PseudocodeVisitor::visit(const WhileStmt& stmt)
@@ -311,7 +309,7 @@ void PseudocodeVisitor::visit(const MethodDefStmt& stmt)
     m_builder.write_space();
     if (m_config.shCoDeMeOwner && stmt.owner)
     {
-        // m_builder.write_class_name(stmt.owner_->name_); // TODO what's next
+        m_builder.write_class_name(ownerClass->type->name); // TODO what's next
         if (! ownerClass->tparams.empty() && m_config.shCoDeMeTemplate)
         {
             if (m_config.shTemplateDeclar)
@@ -449,13 +447,13 @@ void PseudocodeVisitor::visit(const InterfaceDefStmt& stmt)
     {
         process_relations(stmt.bases, true);
     }
-    m_builder.write_opening_curl_bracket(m_config.objectBlockBracketNewLine);
+    m_builder.write_opening_curl_bracket(m_config.objectBlockBracketNewLine, true);
     if (m_config.shInterfDefin && m_config.shCoDeMeDeclar
         && ! stmt.methods.empty())
     {
         process_method_decl(stmt.methods);
     }
-    m_builder.write_right_bracket("}");
+    m_builder.write_closing_curl_bracket(true);
     m_builder.write_new_line();
 }
 
@@ -481,7 +479,7 @@ void PseudocodeVisitor::visit(const ClassDefStmt& stmt)
         {
             process_relations(stmt.bases, false);
         }
-        m_builder.write_opening_curl_bracket(m_config.objectBlockBracketNewLine);
+        m_builder.write_opening_curl_bracket(m_config.objectBlockBracketNewLine, true);
         if (m_config.shClassDefin)
         {
             if (m_config.shMembVarDeclar && ! stmt.vars.empty())
@@ -504,7 +502,7 @@ void PseudocodeVisitor::visit(const ClassDefStmt& stmt)
                 }
             }
         }
-        m_builder.write_right_bracket("}");
+        m_builder.write_closing_curl_bracket(true);
         m_builder.write_new_line();
     }
     if (m_config.shCoDeMeDefin)
