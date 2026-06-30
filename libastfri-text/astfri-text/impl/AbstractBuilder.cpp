@@ -12,28 +12,21 @@ void AbstractBuilder::decrease_indentation()
     --m_indentationLevel;
 }
 
-void AbstractBuilder::write_opening_curl_bracket(bool const& onNewLine, bool incIndent)
+void AbstractBuilder::write_opening_curl_bracket(NewLineOrCurrent option, UsingIndentation decision)
 {
-    if (onNewLine)
-    {
-        write_new_line();
-    }
-    else
-    {
-        write_space();
-    }
+    write_new_line_or_space(option);
     write_left_bracket("{");
     write_new_line();
-    if (incIndent)
+    if (decision)
     {
         ++m_indentationLevel;
     }
 }
 
-void AbstractBuilder::write_closing_curl_bracket(bool decIndent)
+void AbstractBuilder::write_closing_curl_bracket(UsingIndentation decision)
 {
     write_new_line();
-    if (decIndent)
+    if (decision)
     {
         --m_indentationLevel;
     }
@@ -43,5 +36,15 @@ void AbstractBuilder::write_closing_curl_bracket(bool decIndent)
 void AbstractBuilder::write_comma_space()
 {
     write_separator(",");
+    write_space();
+}
+
+void AbstractBuilder::write_new_line_or_space(NewLineOrCurrent option)
+{
+    if (option == NEW_LINE)
+    {
+        write_new_line();
+        return;
+    }
     write_space();
 }
