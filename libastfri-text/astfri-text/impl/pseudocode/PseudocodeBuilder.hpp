@@ -17,28 +17,21 @@ namespace astfri::text
     protected:
         virtual void add_row_numbers() = 0;
     public:
-        void write_opening_else_word();
-        void write_opening_catch_word();
         // 3.1 GENERAL
         void write_text(std::string_view text) override;
-        virtual void write_new_line() override = 0;
-        virtual void write_space() override    = 0;
-        virtual void write_unknown_type()      = 0;
-        virtual void write_unknown_expr()      = 0;
-        virtual void write_unknown_stmt()      = 0;
+        virtual void write_unknown_type() = 0;
+        virtual void write_unknown_expr() = 0;
+        virtual void write_unknown_stmt() = 0;
         // 3.2 SYMBOLS
         // 3.2.1 OPERATORS
-        virtual void write_operator(std::string_view op)               = 0;
-        virtual void write_left_bracket(std::string_view br) override  = 0;
-        virtual void write_right_bracket(std::string_view br) override = 0;
-        virtual void write_pointer_operator()                          = 0;
-        virtual void write_assign_operator()                           = 0;
-        virtual void write_modulo_operator()                           = 0;
-        virtual void write_address_operator()                          = 0;
-        virtual void write_deref_operator()                            = 0;
+        virtual void write_operator(std::string_view op) = 0;
+        virtual void write_pointer_operator()            = 0;
+        virtual void write_assign_operator()             = 0;
+        virtual void write_modulo_operator()             = 0;
+        virtual void write_address_operator()            = 0;
+        virtual void write_deref_operator()              = 0;
         // 3.2.2 SEPARATORS
-        virtual void write_separator(std::string_view sep) override = 0;
-        virtual void write_semicolon_separator()                    = 0;
+        virtual void write_semicolon_separator() = 0;
         // 3.3 VALUES
         virtual void write_bool_val(bool const& val)        = 0;
         virtual void write_null_val()                       = 0;

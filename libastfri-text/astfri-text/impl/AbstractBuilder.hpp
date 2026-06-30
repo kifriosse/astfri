@@ -26,6 +26,7 @@ namespace astfri::text
         void increase_indentation();
         void decrease_indentation();
         //
+        void write_new_line_or_space(NewLineOrCurrent option);
         void write_opening_curl_bracket(NewLineOrCurrent option, UsingIndentation decision);
         void write_closing_curl_bracket(UsingIndentation decision);
         void write_comma_space();
@@ -38,8 +39,6 @@ namespace astfri::text
         virtual void write_right_bracket(std::string_view br) = 0;
         // 3.2.2 SEPARATORS
         virtual void write_separator(std::string_view sep) = 0;
-    protected:
-        void write_new_line_or_space(NewLineOrCurrent option);
     };
 }
 

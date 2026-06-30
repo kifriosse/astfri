@@ -7,34 +7,6 @@ PseudocodeBuilder::PseudocodeBuilder(Config const& config) :
 {
 }
 
-void PseudocodeBuilder::write_opening_else_word()
-{
-    if (m_config.elseConditionNewLine)
-    {
-        write_new_line();
-    }
-    else
-    {
-        write_space();
-    }
-    write_else_word();
-    write_opening_curl_bracket(m_config.conditionBlockBracketNewLine);
-}
-
-void PseudocodeBuilder::write_opening_catch_word()
-{
-    if (m_config.catchConditionNewLine)
-    {
-        write_new_line();
-    }
-    else
-    {
-        write_space();
-    }
-    write_catch_word();
-    write_opening_curl_bracket(m_config.trycatchBlockBracketNewLine);
-}
-
 void PseudocodeBuilder::write_text(std::string_view text)
 {
     if (m_isEmptyLine)
