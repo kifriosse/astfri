@@ -230,14 +230,7 @@ int main(int argc, const char** argv)
     case InputType::Java:
     {
         auto tb = astfri::java::ASTBuilder::create(astfri::java::Config::create_default());
-
-        std::string sourceCode       = tb.load_file(input_file);
-        TSTree* tree                 = tb.make_syntax_tree(sourceCode);
-        astfri::TranslationUnit* tu_ptr = tb.get_translation_unit(tree, sourceCode);
-        tu = *tu_ptr;
-
-        // freeing memory
-        ts_tree_delete(tree);
+        tu = tb.load_file(input_file);
         break;
     }
     case InputType::Unknown:

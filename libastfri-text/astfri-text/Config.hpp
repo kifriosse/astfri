@@ -224,7 +224,7 @@ private:
     void write_output_settings(rapidjson::Value &settings, rapidjson::Document::AllocatorType &alloc) const; // 4)
 };
 
-static_assert(IsConfigClass<Config, rapidjson::Value>);
+static_assert(astfri::detail::IsConfig<Config, rapidjson::Value>);
 
 
 } // namespace astfri::text

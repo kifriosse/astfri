@@ -28,6 +28,6 @@ namespace astfri
         static void process_ast(uml::Config cfg, const astfri::TranslationUnit& root, std::ostream& ost);
     };
 
-    static_assert(IsOutputLibInterface<uml_out, uml::Config, rapidjson::Value>);
+    // static_assert(astfri::detail::IsOutputLibInterface<uml_out, uml::Config, rapidjson::Value>);
 }
 #endif

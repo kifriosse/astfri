@@ -2,12 +2,13 @@
 - `astfri-core` extended forward declarations.
   - Moved version to `0.1.1`.
   - `StmtFwd.hpp` now forward-declares access modifier enum and `StmtFactory`.
-  - `ExprFwd.hpp` now forward-declares binary and unary operator types `ExprFactory`.
+  - `ExprFwd.hpp` now forward-declares binary and unary operator types and `ExprFactory`.
   - `TypeFwd.hpp` now forward-declares `TypeFactory`.
-- `astfri-java` refactored library structures.
+  - `Concepts.hpp` redefined in and out library concepts.
+- `astfri-java` refactored library structure.
   - Moved version to `0.1.1`.
   - Added UML diagram into `doc/`.
-  - TODO
+  - Refactored library interface to satisfy concepts.
 
 
 **2026-06-17** `0.1.0` Michal Mrena `<michal.mrena@fri.uniza.sk>`

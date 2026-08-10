@@ -44,7 +44,6 @@ public:
 
     astfri::TranslationUnit fill_translation_unit(TSTree *tree, const std::string &sourceCode);
 
-private:
     astfri::LambdaExpr* transform_lambda_expr_node(TSNode tsNode, const std::string& sourceCode);
 
     astfri::Stmt* get_stmt(TSNode tsNode, const std::string& sourceCode);
@@ -97,6 +96,7 @@ private:
 
     astfri::GenericParam* transform_tparam_node(TSNode tsNode, const std::string& sourceCode);
 
+private:
     astfri::Scope get_scope(TSNode tsNode, const std::string& sourceCode);
 
     void fill_class(

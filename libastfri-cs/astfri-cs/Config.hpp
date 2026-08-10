@@ -33,7 +33,7 @@ public:
     void write_json(const std::filesystem::path &path) const;
 };
 
-static_assert(astfri::IsConfigClass<astfri::csharp::Config, rapidjson::Value>);
+static_assert(astfri::detail::IsConfig<astfri::csharp::Config, rapidjson::Value>);
 
 
 } // namespace astfri::csharp

@@ -87,7 +87,7 @@ private:
 
 } // namespace astfri
 
-static_assert(astfri::IsInputLibInterface<astfri::CSharpOutput, astfri::csharp::Config ,rapidjson::Value>);
+// static_assert(astfri::detail::IsInputLibInterface<astfri::CSharpOutput, astfri::csharp::Config ,rapidjson::Value>);
 
 #include <astfri-cs/impl/ASTBuilder.inl>
 

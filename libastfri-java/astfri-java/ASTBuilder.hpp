@@ -1,9 +1,10 @@
 #ifndef ASTFRI_JAVA_ASTBUILDER_HPP
 #define ASTFRI_JAVA_ASTBUILDER_HPP
 
-#include <astfri/impl/ExprFactory.hpp>
+#include <astfri/impl/Concepts.hpp>
+#include <astfri/impl/ExprFwd.hpp>
 #include <astfri/impl/StmtFactory.hpp>
-#include <astfri/impl/TypeFactory.hpp>
+#include <astfri/impl/TypeFwd.hpp>
 
 #include <astfri-java/Config.hpp>
 #include <astfri-java/impl/ExpressionTransformer.hpp>
@@ -12,7 +13,7 @@
 
 #include <filesystem>
 #include <iosfwd>
-#include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -23,6 +24,8 @@ class ASTBuilder {
 public:
     static ASTBuilder create(astfri::java::Config config);
 
+    static std::string_view version();
+
 public:
     astfri::TranslationUnit load_file(std::istream &ist);
 
@@ -32,6 +35,11 @@ public:
 
 private:
     ASTBuilder(astfri::java::Config config);
+    ASTBuilder() = delete;
+    ASTBuilder(const ASTBuilder &other) = delete;
+    ASTBuilder(ASTBuilder &&other) = delete;
+    ASTBuilder &operator=(const ASTBuilder &other) = delete;
+    ASTBuilder &operator=(ASTBuilder &&other) = delete;
 
 private:
     astfri::java::Config m_config;
@@ -44,6 +52,12 @@ private:
     ExpressionTransformer m_exprTransformer;
     StatementTransformer m_stmtTransformer;
 };
+
+static_assert(
+    astfri::detail::IsInputLib<
+        ASTBuilder,
+        astfri::java::Config,
+        rapidjson::Value>);
 
 
 } // namespace astfri::java

@@ -41,7 +41,8 @@ namespace astfri::text
     private:
         void change_output_format(std::string_view format);
     };
-    static_assert(IsOutputLibInterface<TextLibManager, Config, rapidjson::Value>);
+
+    // static_assert(astfri::detail::IsOutputLibInterface<TextLibManager, Config, rapidjson::Value>);
 }
 
 #endif

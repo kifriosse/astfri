@@ -10,15 +10,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     auto astBuilder = astfri::java::ASTBuilder::create(astfri::java::Config::create_default());
-    std::string sourceCode = astBuilder.load_file(std::string(argv[1]));
-    TSTree* tree = astBuilder.make_syntax_tree(sourceCode);
-    astfri::TranslationUnit* tu = astBuilder.get_translation_unit(tree, sourceCode);
+    astfri::TranslationUnit tu = astBuilder.load_file(std::string(argv[1]));
     astfri::uml::Config config = astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter plantUMLOut;
     astfri::uml::UMLLibWrapper umlLib;
     umlLib.init(config, plantUMLOut);
-    umlLib.run(*tu);
-
-    // freeing memory
-    ts_tree_delete(tree); // TODO MM: RAII
+    umlLib.run(tu);
 }

@@ -72,7 +72,7 @@ private:
     void read_namespaces(const rapidjson::Value &val);
 };
 
-static_assert(IsConfigClass<Config, rapidjson::Value>);
+static_assert(astfri::detail::IsConfig<Config, rapidjson::Value>);
 
 
 } // namespace astfri::uml

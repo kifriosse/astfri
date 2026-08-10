@@ -1,5 +1,11 @@
 #include <astfri-java/ASTBuilder.hpp>
 
+#include <astfri/impl/ExprFactory.hpp>
+#include <astfri/impl/TypeFactory.hpp>
+
+#include <tree_sitter/api.h>
+#include <tree_sitter/tree-sitter-java.h>
+
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -8,15 +14,16 @@
 #include <iterator>
 #include <stdexcept>
 
-#include <tree_sitter/api.h>
-#include <tree_sitter/tree-sitter-java.h>
-
 
 namespace astfri::java {
 
 
 ASTBuilder ASTBuilder::create(astfri::java::Config config) {
     return ASTBuilder(std::move(config));
+}
+
+std::string_view ASTBuilder::version() {
+    return ASTFRI_JAVA_VERSION;
 }
 
 ASTBuilder::ASTBuilder(astfri::java::Config config) :
@@ -56,7 +63,7 @@ std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const std::filesys
     for (const std::filesystem::directory_entry& dirEntry :
             std::filesystem::recursive_directory_iterator(path)) {
         if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".java") {
-            ifsts.emplace_back(dirEntry.path());
+            paths.emplace_back(dirEntry.path());
         }
     }
 
@@ -70,7 +77,7 @@ std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const std::filesys
     std::vector<astfri::TranslationUnit> tus;
     tus.reserve(ifsts.size());
     for (std::ifstream &ifst : ifsts) {
-        this->load_file(ifst);
+        tus.push_back(this->load_file(ifst));
     }
 
     return tus;

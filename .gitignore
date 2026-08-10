@@ -2,4 +2,5 @@
 build/
 external/bin/
 .clangd
+.vscode/ltex.*
 .vscode/settings.json

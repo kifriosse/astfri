@@ -9,13 +9,8 @@ int main(int argc, char *argv[]) {
         std::cerr << "Provide path to a file with Java source code.\n";
         return 1;
     }
-    auto tb = astfri::java::ASTBuilder::create(astfri::java::Config::create_default());
-    std::string sourceCode = tb.load_file(std::string(argv[1]));
-    TSTree* tree = tb.make_syntax_tree(sourceCode);
-    astfri::TranslationUnit* tu = tb.get_translation_unit(tree, sourceCode);
+    auto astBuilder = astfri::java::ASTBuilder::create(astfri::java::Config::create_default());
+    astfri::TranslationUnit tu = astBuilder.load_file(std::string(argv[1]));
     astfri::text::TextLibManager visitor;
-    visitor.process_and_export_ast(*tu, &std::cout);
-
-    // freeing memory
-    ts_tree_delete(tree); // TODO MM: RAII
+    visitor.process_and_export_ast(tu, &std::cout);
 }
