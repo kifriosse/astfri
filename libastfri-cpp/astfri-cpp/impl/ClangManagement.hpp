@@ -1,12 +1,8 @@
-#ifndef CLANGMANAGEMENT_HPP
-#define CLANGMANAGEMENT_HPP
+#ifndef ASTFRI_CPP_IMPL_CLANGMANAGEMENT_HPP
+#define ASTFRI_CPP_IMPL_CLANGMANAGEMENT_HPP
 
-// std
-#include <filesystem>
-// astfri
 #include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
-#include <astfri/Astfri.hpp>
-// clang
+
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Decl.h>
@@ -14,57 +10,56 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Tooling/Tooling.h>
+
 #include <memory>
 
+
 namespace astfri::cpp {
+
+
+/**
+ * @brief AST Consumer.
+ */
 class CppASTConsumer : public clang::ASTConsumer {
 public:
     CppASTConsumer(astfri::TranslationUnit& _tu);
     void HandleTranslationUnit(clang::ASTContext& Context) override;
 
 private:
-    astfri::cpp::ClangVisitor Visitor;
+    astfri::cpp::ClangVisitor m_visitor;
 };
 
-// Frontend Action
+
+/**
+ * @brief Frontend Action.
+ */
 class CppFrontendAction : public clang::ASTFrontendAction {
 public:
-    CppFrontendAction(astfri::TranslationUnit& _tu);
+    CppFrontendAction(astfri::TranslationUnit &_tu);
+
     std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
-        clang::CompilerInstance& CI,
-        clang::StringRef file
-    ) override;
+        clang::CompilerInstance &CI,
+        clang::StringRef file) override;
 
 private:
-    astfri::TranslationUnit& tu;
+    astfri::TranslationUnit *m_tu;
 };
 
-// Custom Frontend Action Factory
+
+/**
+ * @brief Custom Frontend Action Factory.
+ */
 class CppFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 public:
-    CppFrontendActionFactory(astfri::TranslationUnit& _tu);
+    CppFrontendActionFactory(astfri::TranslationUnit &tu);
 
     std::unique_ptr<clang::FrontendAction> create() override;
 
 private:
-    astfri::TranslationUnit& tu;
+    astfri::TranslationUnit *m_tu;
 };
 
-// do buducna sa moze nastavit, co je treba z ast prejst, zatial prazdne
-class Config {
-};
 
 } // namespace astfri::cpp
 
-namespace astfri {
-// musi byt v namespace astfri, preto je von z astfri::cpp
-struct cpp_in
-{
-    static astfri::TranslationUnit load_file(const std::filesystem::path& file_path, const astfri::cpp::Config &cfg);
-    static astfri::TranslationUnit load_file(std::istream& is, const astfri::cpp::Config &cfg);
-    static astfri::TranslationUnit load_project(std::filesystem::path& path, const astfri::cpp::Config &cfg);
-};
-// static_assert(astfri::IsInputLibInterface<cpp_in, cpp::Config>, "");
-} // namespace astfri
-
-#endif // CLANGMANAGEMENT_HPP
+#endif // ASTFRI_CPP_IMPL_CLANGMANAGEMENT_HPP

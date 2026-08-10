@@ -1,4 +1,4 @@
-#include <astfri-cpp/AstfriCpp.hpp>
+#include <astfri-cpp/ASTBuilder.hpp>
 #include <astfri-text/TextLibManager.hpp>
 
 #include <iostream>
@@ -9,7 +9,8 @@ int main(int argc, const char** argv) {
         std::cerr << "Provide path to a file with C++ source code.\n";
         return 1;
     }
-    astfri::TranslationUnit tu = astfri::cpp_in::load_file(argv[1], astfri::cpp::Config());
+    auto astBuilder = astfri::cpp::ASTBuilder::create(astfri::cpp::Config::create_default());
+    astfri::TranslationUnit tu = astBuilder.load_file(std::string(argv[1]));
     astfri::text::TextLibManager visitor;
     visitor.process_and_export_ast(tu, &std::cout);
 }

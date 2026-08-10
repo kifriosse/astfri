@@ -43,18 +43,23 @@ list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-I.*")
 # Remove standard, it is inherited from astfri-core.
 list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-std=.*")
 
+# Remove no exceptions, we use them in our code.
+list(FILTER ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE EXCLUDE REGEX "-fno-exceptions")
+
 # Append no rtti option.
-list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE -fno-rtti)
+list(APPEND ASTFRI_CPP_COMPILE_OPTIONS_PRIVATE "-fno-rtti")
 
 # Set the version of our library.
-set(ASTFRI_CPP_VERSION "0.1.0")
+set(ASTFRI_CPP_VERSION "0.1.1")
 
 # Finally, add our library.
 add_library(astfri-cpp)
 
 # Add sources.
 target_sources(astfri-cpp PRIVATE
+    astfri-cpp/impl/ASTBuilder.cpp
     astfri-cpp/impl/ClangManagement.cpp
+    astfri-cpp/impl/Config.cpp
     astfri-cpp/impl/visitor-methods/ClangVisitor.cpp
     astfri-cpp/impl/visitor-methods/Types.cpp
     astfri-cpp/impl/visitor-methods/Declarations.cpp
@@ -69,7 +74,8 @@ target_sources(astfri-cpp PRIVATE
 target_sources(astfri-cpp PUBLIC FILE_SET headers TYPE HEADERS FILES
     astfri-cpp/impl/ClangManagement.hpp
     astfri-cpp/impl/visitor-methods/ClangVisitor.hpp
-    astfri-cpp/AstfriCpp.hpp
+    astfri-cpp/ASTBuilder.hpp
+    astfri-cpp/Config.hpp
 )
 
 # Make the version macro available in the code.
@@ -92,6 +98,7 @@ target_link_libraries(astfri-cpp PUBLIC
     astfri-core
     clang-cpp
     LLVM
+    rapidjson
 )
 
 if (ASTFRI_BUILD_EXAMPLES)

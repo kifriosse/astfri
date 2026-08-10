@@ -1,51 +1,56 @@
-#include <astfri-java/ASTBuilder.hpp>
+#include <astfri-cpp/ASTBuilder.hpp>
 
 #include <astfri/impl/ExprFactory.hpp>
 #include <astfri/impl/TypeFactory.hpp>
 
-#include <tree_sitter/api.h>
-#include <tree_sitter/tree-sitter-java.h>
+#include <astfri-cpp/impl/ClangManagement.hpp>
 
-#include <cstdlib>
-#include <cstring>
+#include <clang/Tooling/CompilationDatabase.h>
+#include <clang/Tooling/Tooling.h>
+
 #include <format>
 #include <fstream>
-#include <iterator>
 #include <stdexcept>
 
 
-namespace astfri::java {
+namespace astfri::cpp {
 
 
-ASTBuilder ASTBuilder::create(astfri::java::Config config) {
+ASTBuilder ASTBuilder::create(astfri::cpp::Config config) {
     return ASTBuilder(std::move(config));
 }
 
 std::string_view ASTBuilder::version() {
-    return ASTFRI_JAVA_VERSION;
+    return ASTFRI_CPP_VERSION;
 }
 
-ASTBuilder::ASTBuilder(astfri::java::Config config) :
+ASTBuilder::ASTBuilder(astfri::cpp::Config config) :
     m_config(std::move(config)),
     m_exprFactory(&astfri::ExprFactory::get_instance()),
     m_stmtFactory(&astfri::StmtFactory::get_instance()),
-    m_typeFactory(&astfri::TypeFactory::get_instance()),
-    m_nodeMapper(m_typeFactory),
-    m_exprTransformer(m_exprFactory, m_typeFactory, &m_stmtTransformer, &m_nodeMapper),
-    m_stmtTransformer(m_exprFactory, m_stmtFactory, m_typeFactory, &m_exprTransformer, &m_nodeMapper)
+    m_typeFactory(&astfri::TypeFactory::get_instance())
 {
 }
 
 astfri::TranslationUnit ASTBuilder::load_file(std::istream &ist) {
-    std::string str(
-        std::istreambuf_iterator<std::istream::char_type>(ist),
-        std::istreambuf_iterator<std::istream::char_type>{});
-    const char* sourceCode = str.c_str();
-    TSParser* parser = ts_parser_new();
-    ts_parser_set_language(parser, tree_sitter_java());
-    TSTree* tree = ts_parser_parse_string(parser, NULL, sourceCode, strlen(sourceCode));
-    ts_parser_delete(parser);
-    return m_stmtTransformer.fill_translation_unit(tree, sourceCode);
+    std::string content(
+      std::istreambuf_iterator<std::istream::char_type>(ist),
+      std::istreambuf_iterator<std::istream::char_type>{});
+    std::string virtual_file_name = "input_from_stream.cpp";
+
+    // Just a fixed empty compilation database for now.
+    std::vector<std::string> compilations = {};
+    clang::tooling::FixedCompilationDatabase Compilations(".", compilations);
+
+    clang::tooling::ClangTool Tool(Compilations, {virtual_file_name});
+
+    // Makes sure that the file is not seeked on the disc.
+    Tool.mapVirtualFile(virtual_file_name, content);
+
+    astfri::TranslationUnit tu;
+    auto action = std::make_unique<cpp::CppFrontendActionFactory>(tu);
+    Tool.run(action.get());
+    return tu;
 }
 
 astfri::TranslationUnit ASTBuilder::load_file(const std::filesystem::path &path) {
@@ -61,7 +66,7 @@ std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const std::filesys
     std::vector<std::ifstream> ifsts;
     for (const std::filesystem::directory_entry& dirEntry :
             std::filesystem::recursive_directory_iterator(path)) {
-        if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".java") {
+        if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".cpp") {
             paths.emplace_back(dirEntry.path());
         }
     }
@@ -83,4 +88,4 @@ std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const std::filesys
 }
 
 
-} // namespace astfri::java
+} // namespace astfri::cpp

@@ -1,4 +1,4 @@
-set(ASTFRI_JAVA_VERSION "0.1.0")
+set(ASTFRI_JAVA_VERSION "0.1.1")
 
 add_library(astfri-java)
 
@@ -15,6 +15,7 @@ target_sources(astfri-java PUBLIC FILE_SET headers TYPE HEADERS FILES
     astfri-java/impl/StatementTransformer.hpp
     astfri-java/impl/ExpressionTransformer.hpp
     astfri-java/ASTBuilder.hpp
+    astfri-java/Config.hpp
 )
 
 target_compile_definitions(astfri-java PUBLIC ASTFRI_JAVA_VERSION="${ASTFRI_JAVA_VERSION}")

@@ -1,10 +1,22 @@
 #include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 
+
 namespace astfri::cpp {
+
+
+ClangVisitor::ClangVisitor(TranslationUnit &visitedTranslationUnit, clang::SourceManager *pSM) :
+    m_SM(pSM),
+    m_tu(&visitedTranslationUnit),
+    m_stmt_factory(&StmtFactory::get_instance()),
+    m_expr_factory(&ExprFactory::get_instance()),
+    m_type_factory(&TypeFactory::get_instance()),
+    m_expr_as_stmt(false) {
+}
+
 bool ClangVisitor::isInMainFile(clang::SourceLocation Loc) const {
     if (Loc.isInvalid())
         return false;
-    return this->SM->getFileID(this->SM->getExpansionLoc(Loc)) == this->MainFileID;
+    return m_SM->getFileID(m_SM->getExpansionLoc(Loc)) == m_MainFileID;
 }
 
 clang::NamespaceDecl* ClangVisitor::get_desired_namespace(clang::TranslationUnitDecl* TU) {
@@ -19,27 +31,20 @@ clang::NamespaceDecl* ClangVisitor::get_desired_namespace(clang::TranslationUnit
 }
 
 void ClangVisitor::setSM(clang::SourceManager* pSM) {
-    this->SM = pSM;
+    m_SM = pSM;
 }
 
 clang::SourceManager* ClangVisitor::getSM() {
-    return this->SM;
+    return m_SM;
 }
 
 void ClangVisitor::setMainFileID(clang::FileID MFID) {
-    this->MainFileID = MFID;
+    m_MainFileID = MFID;
 }
 
 clang::FileID ClangVisitor::getMFID() {
-    return this->MainFileID;
+    return m_MainFileID;
 }
 
-ClangVisitor::ClangVisitor(TranslationUnit& visitedTranslationUnit, clang::SourceManager* pSM) :
-    tu_(&visitedTranslationUnit) {
-    this->SM            = pSM;
-    this->stmt_factory_ = &StmtFactory::get_instance();
-    this->expr_factory_ = &ExprFactory::get_instance();
-    this->type_factory_ = &TypeFactory::get_instance();
-    this->expr_as_stmt  = false;
-}
+
 } // namespace astfri::cpp

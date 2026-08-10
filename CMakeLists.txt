@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-SET(ASTFRI_VERSION "0.1.0")
+SET(ASTFRI_VERSION "0.1.1")
 
 project(
     astfri

@@ -1,4 +1,4 @@
-#include <astfri-cpp/AstfriCpp.hpp>
+#include <astfri-cpp/ASTBuilder.hpp>
 #include <astfri-uml/UMLLibWrapper.hpp>
 
 
@@ -7,7 +7,8 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    astfri::TranslationUnit tu = astfri::cpp_in::load_file(argv[1], astfri::cpp::Config());
+    auto astBuilder = astfri::cpp::ASTBuilder::create(astfri::cpp::Config::create_default());
+    astfri::TranslationUnit tu = astBuilder.load_file(argv[1]);
 
     astfri::uml::Config conf = astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter op;

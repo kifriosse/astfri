@@ -1,8 +1,10 @@
 #include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 
-#include <iostream>
+#include <stdexcept>
+
 
 namespace astfri::cpp {
+
 
 clang::BuiltinType::Kind get_clang_type_from_builtin(const clang::BuiltinType* builtin) {
     // malo by prejst vzdy
@@ -24,7 +26,7 @@ clang::BuiltinType::Kind get_clang_type_from_builtin(const clang::BuiltinType* b
         return clang::BuiltinType::Int;
     }
     // nieco je zle ak som sa dostal sem
-    std::cout << "\n\n\nError in finding builtin type: astfri_cpp project\n\n\n";
+    throw std::logic_error("Error in finding builtin type: astfri_cpp project.");
     return clang::BuiltinType::Char32;
 }
 
@@ -33,26 +35,26 @@ astfri::Type* ClangVisitor::get_astfri_type_from_clang_builtintype(const clang::
     switch (get_clang_type_from_builtin(builtin)) {
     case clang::BuiltinType::Void: {
         // std::cout << "Void\n\n\n";
-        return this->type_factory_->mk_void();
+        return this->m_type_factory->mk_void();
     } break;
     case clang::BuiltinType::Bool: {
         // std::cout << "Bool\n\n\n";
-        return this->type_factory_->mk_bool();
+        return this->m_type_factory->mk_bool();
     } break;
     case clang::BuiltinType::Char8: {
         // std::cout << "Char\n\n\n";
-        return this->type_factory_->mk_char();
+        return this->m_type_factory->mk_char();
     } break;
     case clang::BuiltinType::Float: {
         // std::cout << "Float\n\n\n";
-        return this->type_factory_->mk_float();
+        return this->m_type_factory->mk_float();
     } break;
     case clang::BuiltinType::Int: {
         // std::cout << "Int\n\n\n";
-        return this->type_factory_->mk_int();
+        return this->m_type_factory->mk_int();
     } break;
     default:
-        return this->type_factory_->mk_unknown();
+        return this->m_type_factory->mk_unknown();
         break;
     }
 }
@@ -70,21 +72,21 @@ astfri::Type* ClangVisitor::get_astfri_pointee(const clang::PointerType* pointer
     // ak je to Record, koniec rekurzie
     if (pointee->isRecordType()) {
         auto record = pointee->getAsCXXRecordDecl();
-        return this->type_factory_->mk_class(record->getNameAsString(), {});
+        return this->m_type_factory->mk_class(record->getNameAsString(), {});
     }
 
     // ak je to template
     if (pointee->isTemplateTypeParmType()) {
         auto template_type = pointee->getContainedAutoType();
-        return this->type_factory_->mk_class(template_type->getTypeClassName(), {});
+        return this->m_type_factory->mk_class(template_type->getTypeClassName(), {});
     }
 
     // ak je pointee pointer
     if (auto pointer_as_pointee = llvm::dyn_cast<clang::PointerType>(pointee)) {
-        return this->type_factory_->mk_indirect(this->get_astfri_pointee(pointer_as_pointee));
+        return this->m_type_factory->mk_indirect(this->get_astfri_pointee(pointer_as_pointee));
     }
 
-    std::cout << "Error in returning pointee in project astfri_cpp\n";
+    throw std::logic_error("Error in returning pointee in project astfri_cpp.");
     return nullptr;
 }
 
@@ -101,23 +103,24 @@ astfri::Type* ClangVisitor::get_astfri_type(clang::QualType QT) {
     // ak je to Record tak sa vrati rovno to
     if (clangType->isRecordType()) {
         auto record = clangType->getAsCXXRecordDecl();
-        auto type   = this->type_factory_->mk_class(record->getNameAsString(), {});
+        auto type   = this->m_type_factory->mk_class(record->getNameAsString(), {});
         return type;
     }
 
     // ak je to template tak sa vrati rovno to
     if (auto template_type = llvm::dyn_cast<clang::TemplateTypeParmType>(clangType)) {
-        auto type = this->type_factory_->mk_class(template_type->getDecl()->getNameAsString(), {});
+        auto type = this->m_type_factory->mk_class(template_type->getDecl()->getNameAsString(), {});
         return type;
     }
 
     // ak je to pointer, bude sa spustat rekurzivne pokym bude pointer
     if (auto pointer = llvm::dyn_cast<clang::PointerType>(clangType)) {
-        return this->type_factory_->mk_indirect(this->get_astfri_pointee(pointer));
+        return this->m_type_factory->mk_indirect(this->get_astfri_pointee(pointer));
     }
 
-    std::cout << "Error in finding builtin type: astfri_cpp project\n";
+    throw std::logic_error("Error in finding builtin type: astfri_cpp project.");
     return nullptr;
 }
+
 
 } // namespace astfri::cpp

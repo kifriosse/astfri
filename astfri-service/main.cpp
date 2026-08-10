@@ -11,7 +11,7 @@
 #include <astfri-uml/UMLLibWrapper.hpp>
 
 // ASTFRI CPP
-#include <astfri-cpp/AstfriCpp.hpp>
+#include <astfri-cpp/ASTBuilder.hpp>
 
 // ASTFRI Csharp
 #include <astfri-cs/ASTBuilder.hpp>
@@ -205,17 +205,9 @@ int main(int argc, const char** argv)
     {
     case InputType::Cpp:
     {
-        tu = astfri::cpp_in::load_file(input_file, astfri::cpp::Config());
-        // if (input.fill_translation_unit(tu, input_file) != 0)
-        // {
-        //     if (mode_verbose)
-        //     {
-        //         std::cerr
-        //             << "Error filling translation unit from C++ source file: "
-        //             << input_file << std::endl;
-        //     }
-        //     return EXIT_INPUT_LIB_ERROR;
-        // }
+        auto astBuilder = astfri::cpp::ASTBuilder::create(
+            astfri::cpp::Config::create_default());
+        tu = astBuilder.load_file(input_file);
         break;
     }
     case InputType::Csharp:
@@ -229,8 +221,9 @@ int main(int argc, const char** argv)
     }
     case InputType::Java:
     {
-        auto tb = astfri::java::ASTBuilder::create(astfri::java::Config::create_default());
-        tu = tb.load_file(input_file);
+        auto astBuilder = astfri::java::ASTBuilder::create(
+            astfri::java::Config::create_default());
+        tu = astBuilder.load_file(input_file);
         break;
     }
     case InputType::Unknown:

@@ -1,6 +1,11 @@
 #include <astfri-cpp/impl/visitor-methods/ClangVisitor.hpp>
 
+#include <stdexcept>
+
+
 namespace astfri::cpp {
+
+
 astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind clang_type) {
     // TODO:
     // {lhs} // {rhs}, {lhs} div {rhs}
@@ -107,7 +112,7 @@ astfri::BinOpType ClangVisitor::get_astfri_bin_op_type(clang::BinaryOperatorKind
         return astfri::BinOpType::Comma;
         break; // ,
     default: {
-        std::cerr << "\n\n\nErrorin finding right Binary operator: astfri_cpp project.\n\n\n";
+        throw std::logic_error("Error in finding right Binary operator: astfri_cpp project");
     } break;
     }
     return BinOpType::Assign;
@@ -131,7 +136,7 @@ astfri::AccessModifier ClangVisitor::getAccessModifier(clang::Decl* decl) {
 }
 
 astfri::ClassDefStmt* ClangVisitor::get_existing_class(std::string name) {
-    for (auto cls : this->tu_->classes) {
+    for (auto cls : this->m_tu->classes) {
         if (cls->type->name.compare(name) == 0) {
             return cls;
         }
@@ -172,9 +177,11 @@ astfri::UnaryOpType ClangVisitor::get_astfri_un_op_type(clang::UnaryOperatorKind
         return UnaryOpType::LogicalNot;
         break;
     default: {
-        std::cerr << "\n\n\nError in finding right Unary operator: astfri_cpp project.\n\n\n";
+        throw std::logic_error("Error in finding right Unary operator: astfri_cpp project.");
     } break;
     }
     return UnaryOpType::Plus;
 }
+
+
 } // namespace astfri::cpp

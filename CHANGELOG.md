@@ -9,6 +9,9 @@
   - Moved version to `0.1.1`.
   - Added UML diagram into `doc/`.
   - Refactored library interface to satisfy concepts.
+- `astfri-cpp` refactored library structure.
+  - Moved version to `0.1.1`.
+  - Refactored library interface to satisfy concepts.
 
 
 **2026-06-17** `0.1.0` Michal Mrena `<michal.mrena@fri.uniza.sk>`
