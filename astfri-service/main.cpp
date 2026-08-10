@@ -212,11 +212,9 @@ int main(int argc, const char** argv)
     }
     case InputType::Csharp:
     {
-        astfri::csharp::ASTBuilder astBuilder;
-        std::ifstream stream(input_file);
-        astBuilder.load_src(stream);
-
-        tu = *(astBuilder.mk_ast());
+        auto astBuilder = astfri::csharp::ASTBuilder::create(
+            astfri::csharp::Config::create_default());
+        tu = astBuilder.load_file(input_file);
         break;
     }
     case InputType::Java:

@@ -7,16 +7,14 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    astfri::csharp::ASTBuilder builder;
-    builder.load_src(argv[1]);
-
-    astfri::TranslationUnit *tu = builder.mk_ast();
+    auto astBuilder = astfri::csharp::ASTBuilder::create(astfri::csharp::Config::create_default());
+    astfri::TranslationUnit tu = astBuilder.load_file(argv[1]);
 
     astfri::uml::Config conf = astfri::uml::Config::create_default();
     astfri::uml::PlantUMLOutputter op;
     astfri::uml::UMLLibWrapper umlout;
     umlout.init(conf, op);
-    umlout.run(*tu);
+    umlout.run(tu);
 
     return 0;
 }

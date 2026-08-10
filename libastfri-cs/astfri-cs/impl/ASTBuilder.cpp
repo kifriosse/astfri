@@ -13,19 +13,24 @@
 
 #include <rapidjson/document.h>
 
-#include <algorithm>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 #include <vector>
 
+
 namespace astfri {
+
 
 namespace csharp {
 
+
 namespace fs = std::filesystem;
 
+
 namespace {
+
 
 const fs::path extTypesRoot                               = ASTFRI_CS_RESOURCES;
 const fs::path core                                       = extTypesRoot / "core.json";
@@ -40,26 +45,30 @@ const std::unordered_map<SDKProfile, fs::path> profileMap = {
     {SDKProfile::WPF,      winDesktop                  }
 };
 
+
 } // namespace
 
-ASTBuilder::ASTBuilder() :
-    lang_(tree_sitter_c_sharp()),
-    parser_(ts_parser_new()) {
-    ts_parser_set_language(parser_, lang_);
+
+ASTBuilder::ASTBuilder(astfri::csharp::Config config) :
+    m_lang(tree_sitter_c_sharp()),
+    m_parser(ts_parser_new()),
+    m_config(std::move(config)) {
+    ts_parser_set_language(m_parser, m_lang);
 }
 
 ASTBuilder::~ASTBuilder() {
-    ts_language_delete(lang_);
-    ts_parser_delete(parser_);
+    ts_language_delete(m_lang);
+    ts_parser_delete(m_parser);
 }
 
-void ASTBuilder::load_src(const path& projectDir) {
+std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const path& projectDir) {
     if (is_regular_file(projectDir)) {
         if (projectDir.extension() == ".cs") {
             std::ifstream fileStream(projectDir, std::ios::binary);
-            load_from_stream(fileStream, projectDir);
+            this->load_from_stream(fileStream, projectDir);
+            return {this->mk_ast()};
         }
-        return;
+        return {};
     }
 
     std::vector<std::filesystem::path> dirs;
@@ -89,17 +98,28 @@ void ASTBuilder::load_src(const path& projectDir) {
             }
         }
     }
+
+    return {this->mk_ast()};
 }
 
-void ASTBuilder::load_src(std::istream& inputStream) {
-    load_from_stream(inputStream);
+astfri::TranslationUnit ASTBuilder::load_file(const std::filesystem::path &path) {
+    std::ifstream file(path);
+    if (! file.is_open()) {
+        throw std::runtime_error(std::format("Failed to open `{}`.", path.string()));
+    }
+    return this->load_file(file);
+}
+
+astfri::TranslationUnit ASTBuilder::load_file(std::istream& inputStream) {
+    this->load_from_stream(inputStream);
+    return this->mk_ast();
 }
 
 void ASTBuilder::load_source_of_external_types(const path& jsonPath) {
-    externalTypeSources_.push_back(jsonPath);
+    m_externalTypeSources.push_back(jsonPath);
 }
 
-TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
+TranslationUnit ASTBuilder::mk_ast(SDKProfile profile) {
     // using milli          = std::chrono::milliseconds;
     const auto it = profileMap.find(profile);
     if (it == profileMap.end())
@@ -114,9 +134,9 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
         }
 
     SymbolTable symbTable;
-    SymbTableBuilder symbTableBuilder(srcs_, symbTable);
+    SymbTableBuilder symbTableBuilder(m_srcs, symbTable);
 
-    for (auto& extTypeSource : externalTypeSources_) {
+    for (auto& extTypeSource : m_externalTypeSources) {
         symbTableBuilder.load_external_types(extTypeSource);
     }
 
@@ -144,7 +164,7 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
     // std::cout << "Phase 2: Building of AST" << std::endl;
     // start = std::chrono::high_resolution_clock::now();
 
-    TranslationUnit* ast = srcVisitor.visit_comp_unit();
+    TranslationUnit ast = srcVisitor.visit_comp_unit();
 
     // end      = std::chrono::high_resolution_clock::now();
     // duration = std::chrono::duration_cast<milli>(end - start);
@@ -158,12 +178,12 @@ TranslationUnit* ASTBuilder::mk_ast(SDKProfile profile) {
 
 void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path) {
     std::string src((std::istreambuf_iterator(inputStream)), std::istreambuf_iterator<char>());
-    TSTree* tree      = util::make_tree(parser_, src);
+    TSTree* tree      = util::make_tree(m_parser, src);
     const TSNode root = ts_tree_root_node(tree);
     src               = util::remove_comments(root, std::move(src), path);
     ts_tree_delete(tree);
-    ts_parser_reset(parser_);
-    tree = util::make_tree(parser_, src);
+    ts_parser_reset(m_parser);
+    tree = util::make_tree(m_parser, src);
 
     TSNode nNms{};
     util::for_each_match(
@@ -177,26 +197,21 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path) {
         const std::string nmsQualif = util::extract_text(nNmsName, src);
         fileNms                     = util::mk_scope(nmsQualif);
     }
-    srcs_.emplace_back(std::make_unique<SourceFile>(std::move(src), tree, std::move(fileNms)));
-    ts_parser_reset(parser_);
+    m_srcs.emplace_back(std::make_unique<SourceFile>(std::move(src), tree, std::move(fileNms)));
+    ts_parser_reset(m_parser);
 }
 
-} // namespace astfri::csharp
+ASTBuilder ASTBuilder::create(astfri::csharp::Config config) {
+    return ASTBuilder(std::move(config));
+}
 
-std::string_view CSharpOutput::version() {
+std::string_view ASTBuilder::version() {
     return ASTFRI_CS_VERSION;
 }
 
-TranslationUnit CSharpOutput::load_file(csharp::Config cfg, std::istream& ist) {
-    return load(cfg, ist);
-}
 
-TranslationUnit CSharpOutput::load_file(csharp::Config cfg, const std::filesystem::path& path) {
-    return load(cfg, path);
-}
+} // namespace astfri::csharp
 
-TranslationUnit CSharpOutput::load_project(csharp::Config cfg, const std::filesystem::path& path) {
-    return load(cfg, path);
-}
 
 } // namespace astfri
+

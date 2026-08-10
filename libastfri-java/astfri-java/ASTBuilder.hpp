@@ -1,5 +1,5 @@
-#ifndef ASTFRI_JAVA_ASTBUILDER_HPP
-#define ASTFRI_JAVA_ASTBUILDER_HPP
+#ifndef ASTFRI_JAVA_ASTBUI_LDER_HPP
+#define ASTFRI_JAVA_ASTBUI_LDER_HPP
 
 #include <astfri/impl/Concepts.hpp>
 #include <astfri/impl/ExprFwd.hpp>

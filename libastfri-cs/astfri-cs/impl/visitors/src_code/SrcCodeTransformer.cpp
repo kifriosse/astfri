@@ -24,8 +24,8 @@ SrcCodeTransformer::SrcCodeTransformer(SymbolTable& symbTable) :
     lang_(tree_sitter_c_sharp()) {
 }
 
-TranslationUnit* SrcCodeTransformer::visit_comp_unit() {
-    TranslationUnit* trUnit = stmtFact_.mk_translation_unit();
+TranslationUnit SrcCodeTransformer::visit_comp_unit() {
+    TranslationUnit trUnit;
     for (const auto metadata : this->semContext_.get_type_metadata()) {
         typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
         bool added = false;
@@ -41,9 +41,9 @@ TranslationUnit* SrcCodeTransformer::visit_comp_unit() {
                 continue;
 
             if (is<ClassDefStmt>(stmt))
-                trUnit->classes.push_back(as<ClassDefStmt>(stmt));
+                trUnit.classes.push_back(as<ClassDefStmt>(stmt));
             else if (is<InterfaceDefStmt>(stmt))
-                trUnit->interfaces.push_back(as<InterfaceDefStmt>(stmt));
+                trUnit.interfaces.push_back(as<InterfaceDefStmt>(stmt));
 
             added = true;
         }

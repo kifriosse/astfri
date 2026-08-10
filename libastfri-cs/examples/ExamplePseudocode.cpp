@@ -10,9 +10,10 @@ int main(int argc, char *argv[]) {
         std::cerr << "Provide path to a directory with C# source files.\n";
         return 1;
     }
-    astfri::csharp::ASTBuilder astBuilder;
-    astBuilder.load_src(argv[1]);
-    const astfri::TranslationUnit* ast = astBuilder.mk_ast();
+
+    auto astBuilder = astfri::csharp::ASTBuilder::create(astfri::csharp::Config::create_default());
+    astfri::TranslationUnit ast = astBuilder.load_project(argv[1])[0];
+
     astfri::text::TextLibManager manager;
-    manager.process_and_export_ast(*ast, &std::cout);
+    manager.process_and_export_ast(ast, &std::cout);
 }

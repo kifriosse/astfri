@@ -1,4 +1,4 @@
-set(ASTFRI_CS_VERSION "0.1.0")
+set(ASTFRI_CS_VERSION "0.1.1")
 
 add_library(astfri-cs)
 

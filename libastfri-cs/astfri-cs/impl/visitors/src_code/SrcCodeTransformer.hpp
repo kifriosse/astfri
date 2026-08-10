@@ -42,7 +42,7 @@ public:
      * @brief Visits the root node of a tree-sitter tree and fills up
      * TranslationUnit argument with top level definitions and statements.
      */
-    TranslationUnit* visit_comp_unit();
+    TranslationUnit visit_comp_unit();
 
 private:
     // Expressions
