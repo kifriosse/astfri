@@ -195,8 +195,9 @@ void add_array_of_paths(
     rapidjson::Value jsonVal(rapidjson::kArrayType);
     jsonVal.Reserve(static_cast<rapidjson::SizeType>(val.size()), alloc);
     for (const std::filesystem::path &v : val) {
+        std::string path_str = v.string();
         rapidjson::Value sv;
-        sv.SetString(v.c_str(), std::strlen(v.c_str()), alloc);
+        sv.SetString(path_str.c_str(), path_str.length(), alloc);
         jsonVal.PushBack(sv.Move(), alloc);
     }
     node.AddMember(jsonKey.Move(), jsonVal.Move(), alloc);

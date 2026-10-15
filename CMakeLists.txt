@@ -9,6 +9,8 @@ project(
     LANGUAGES   C CXX
 )
 
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+
 option(ASTFRI_BUILD_CLI "Build executable astfri-cli." OFF)
 option(ASTFRI_BUILD_SERVICE "Build executable astfri-service." OFF)
 option(ASTFRI_BUILD_IN_CPP "Build lib libastri-cpp." OFF)
