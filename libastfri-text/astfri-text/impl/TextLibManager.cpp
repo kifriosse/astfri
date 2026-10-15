@@ -23,7 +23,7 @@ TextLibManager::~TextLibManager()
 
 std::string_view TextLibManager::version()
 {
-    return ASTFRI_TEXT_VERSION;
+    return ASTFRI_VERSION;
 }
 
 void TextLibManager::process_ast(Config cfg, TranslationUnit const& root)

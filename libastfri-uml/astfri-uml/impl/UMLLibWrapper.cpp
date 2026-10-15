@@ -17,7 +17,7 @@ namespace astfri {
 
 
 std::string_view astfri::uml_out::version() {
-    return ASTFRI_UML_VERSION;
+    return ASTFRI_VERSION;
 }
 
 

@@ -206,7 +206,7 @@ ASTBuilder ASTBuilder::create(astfri::csharp::Config config) {
 }
 
 std::string_view ASTBuilder::version() {
-    return ASTFRI_CS_VERSION;
+    return ASTFRI_VERSION;
 }
 
 

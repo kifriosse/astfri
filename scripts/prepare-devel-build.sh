@@ -14,8 +14,9 @@ cd build
 cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
       -DCMAKE_BUILD_TYPE=Debug             \
-      -DBUILD_SHARED_LIBS=ON               \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON   \
+      -DCMAKE_COLOR_DIAGNOSTICS=ON         \
+      -DBUILD_SHARED_LIBS=ON               \
       -DASTFRI_BUILD_CLI=ON                \
       -DASTFRI_BUILD_SERVICE=ON            \
       -DASTFRI_BUILD_IN_CPP=ON             \

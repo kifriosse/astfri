@@ -21,7 +21,7 @@ ASTBuilder ASTBuilder::create(astfri::cpp::Config config) {
 }
 
 std::string_view ASTBuilder::version() {
-    return ASTFRI_CPP_VERSION;
+    return ASTFRI_VERSION;
 }
 
 ASTBuilder::ASTBuilder(astfri::cpp::Config config) :

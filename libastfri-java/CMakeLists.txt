@@ -1,30 +1,19 @@
-set(ASTFRI_JAVA_VERSION "0.1.1")
-
 add_library(astfri-java)
 
 target_sources(astfri-java PRIVATE
-    astfri-java/impl/ASTBuilder.cpp
-    astfri-java/impl/Config.cpp
-    astfri-java/impl/ExpressionTransformer.cpp
-    astfri-java/impl/NodeMapper.cpp
-    astfri-java/impl/StatementTransformer.cpp
+  astfri-java/impl/ASTBuilder.cpp
+  astfri-java/impl/Config.cpp
+  astfri-java/impl/ExpressionTransformer.cpp
+  astfri-java/impl/NodeMapper.cpp
+  astfri-java/impl/StatementTransformer.cpp
 )
 
 target_sources(astfri-java PUBLIC FILE_SET headers TYPE HEADERS FILES
-    astfri-java/impl/NodeMapper.hpp
-    astfri-java/impl/StatementTransformer.hpp
-    astfri-java/impl/ExpressionTransformer.hpp
-    astfri-java/ASTBuilder.hpp
-    astfri-java/Config.hpp
-)
-
-target_compile_definitions(astfri-java PUBLIC ASTFRI_JAVA_VERSION="${ASTFRI_JAVA_VERSION}")
-
-target_link_libraries(astfri-java PUBLIC
-    astfri-core
-    tree-sitter
-    tree-sitter-java
-    rapidjson
+  astfri-java/impl/NodeMapper.hpp
+  astfri-java/impl/StatementTransformer.hpp
+  astfri-java/impl/ExpressionTransformer.hpp
+  astfri-java/ASTBuilder.hpp
+  astfri-java/Config.hpp
 )
 
 target_include_directories(astfri-java PUBLIC
@@ -32,6 +21,15 @@ target_include_directories(astfri-java PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+target_link_libraries(astfri-java PUBLIC
+  astfri-core
+  tree-sitter
+  tree-sitter-java
+  rapidjson
+)
+
+apply_common_properties(astfri-java)
+
 if (ASTFRI_BUILD_EXAMPLES)
-    add_subdirectory(examples)
+  add_subdirectory(examples)
 endif()

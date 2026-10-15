@@ -1,5 +1,3 @@
-set(ASTFRI_CORE_VERSION "0.1.0")
-
 add_library(astfri-core)
 
 target_sources(astfri-core PRIVATE
@@ -7,7 +5,8 @@ target_sources(astfri-core PRIVATE
   astfri/impl/Scope.cpp
   astfri/impl/StmtFactory.cpp
   astfri/impl/TypeFactory.cpp
-  astfri/impl/Visitor.cpp)
+  astfri/impl/Visitor.cpp
+)
 
 target_sources(astfri-core
   PUBLIC FILE_SET headers
@@ -42,21 +41,17 @@ target_sources(astfri-core
       astfri/impl/tools/OptPtr.hpp
       astfri/impl/tools/OptPtr.inl
       astfri/impl/tools/ReqPtr.hpp
-      astfri/impl/tools/ReqPtr.inl)
+      astfri/impl/tools/ReqPtr.inl
+)
 
 target_compile_definitions(astfri-core PUBLIC ASTFRI_VERSION="${ASTFRI_VERSION}")
 
-target_compile_definitions(astfri-core PUBLIC ASTFRI_CORE_VERSION="${ASTFRI_CORE_VERSION}")
-
-target_compile_options(astfri-core PUBLIC
-  "-Wall"
-  "-Wextra"
-  "-Wpedantic"
-  "-std=c++20")
-
 target_include_directories(astfri-core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+apply_common_properties(astfri-core)
 
 if (ASTFRI_BUILD_TESTS)
   add_subdirectory(tests)

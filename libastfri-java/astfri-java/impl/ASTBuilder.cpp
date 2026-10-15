@@ -22,7 +22,7 @@ ASTBuilder ASTBuilder::create(astfri::java::Config config) {
 }
 
 std::string_view ASTBuilder::version() {
-    return ASTFRI_JAVA_VERSION;
+    return ASTFRI_VERSION;
 }
 
 ASTBuilder::ASTBuilder(astfri::java::Config config) :
