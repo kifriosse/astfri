@@ -27,14 +27,11 @@ option(ASTFRI_BUILD_EXAMPLES   "Build examples."                  OFF)
 
 add_subdirectory(external)
 
-add_subdirectory(libastfri-common)
-
 add_subdirectory(libastfri-core)
 
-# List of targets that are build used for the installation.
+# List of targets that are build. Used for the installation.
 set(ASTFRI_TARGETS "")
 list(APPEND ASTFRI_TARGETS astfri-core)
-list(APPEND ASTFRI_TARGETS astfri-common)
 
 if (ASTFRI_BUILD_CLI)
   add_subdirectory(astfri-cli)
@@ -73,6 +70,12 @@ endif()
 if (ASTFRI_BUILD_SERIALIZE)
   add_subdirectory(libastfri-serialize)
   list(APPEND ASTFRI_TARGETS astfri-serialize)
+endif()
+
+list(LENGTH ASTFRI_TARGETS ASTFRI_TARGET_COUNT)
+if ("${ASTFRI_TARGET_COUNT}" GREATER 1)
+  add_subdirectory(libastfri-common)
+  list(APPEND ASTFRI_TARGETS astfri-common)
 endif()
 
 

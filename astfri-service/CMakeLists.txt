@@ -11,3 +11,5 @@ target_link_libraries(astfri-service PRIVATE
 	astfri-uml
 	cxxopts
 )
+
+apply_common_properties(astfri-service)

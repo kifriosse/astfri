@@ -10,3 +10,5 @@ target_sources(astfri-core-tests PRIVATE
 )
 
 target_link_libraries(astfri-core-tests PRIVATE astfri-core Catch2)
+
+apply_common_properties(astfri-core-tests)

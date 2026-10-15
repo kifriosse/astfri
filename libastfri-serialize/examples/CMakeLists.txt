@@ -1,13 +1,16 @@
-add_executable(testWithTextOutput)
+add_executable(astfri-serialize-example-text)
 
-target_sources(testWithTextOutput PRIVATE TestWithTextOutput.cpp)
+target_sources(astfri-serialize-example-text PRIVATE TestWithTextOutput.cpp)
 
-target_link_libraries(testWithTextOutput PRIVATE astfri-serialize astfri-text)
+target_link_libraries(astfri-serialize-example-text PRIVATE astfri-serialize astfri-text)
+
+apply_common_properties(astfri-serialize-example-text)
 
 
-add_executable(testWithUmlOutput)
+add_executable(astfri-serialize-example-uml)
 
-target_sources(testWithUmlOutput PRIVATE TestWithUmlOutput.cpp)
+target_sources(astfri-serialize-example-uml PRIVATE TestWithUmlOutput.cpp)
 
-target_link_libraries(testWithUmlOutput PRIVATE astfri-serialize astfri-uml)
+target_link_libraries(astfri-serialize-example-uml PRIVATE astfri-serialize astfri-uml)
 
+apply_common_properties(astfri-serialize-example-uml)

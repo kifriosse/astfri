@@ -13,4 +13,7 @@ target_link_libraries(astfri-cli PRIVATE
 	astfri-serialize
 	astfri-text
 	astfri-uml
-	cxxopts)
+	cxxopts
+)
+
+apply_common_properties(astfri-cli)
