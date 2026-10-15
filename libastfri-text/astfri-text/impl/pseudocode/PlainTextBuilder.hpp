@@ -1,14 +1,14 @@
 #ifndef LIBASTFRI_TEXT_PLAIN_TEXT_BUILDER
 #define LIBASTFRI_TEXT_PLAIN_TEXT_BUILDER
 
-#include <astfri-text/impl/PseudocodeBuilder.hpp>
+#include <astfri-text/impl/pseudocode/PseudocodeBuilder.hpp>
 
 namespace astfri::text
 {
     class PlainTextBuilder : public PseudocodeBuilder
     {
     public:
-        explicit PlainTextBuilder(Config* config);
+        explicit PlainTextBuilder(Config const& config);
         //
         void reset_builder() override;
         std::string& get_builded_text() override;

@@ -17,10 +17,9 @@ namespace astfri::text
     class TextLibManager
     {
         Config m_config;
+        Exporter m_exporter;
         AbstractBuilder* m_builder;
         AbstractVisitor* m_visitor;
-        Exporter* const m_exporter;
-        bool m_isSetToPseudocode;
     public:
         explicit TextLibManager();
         ~TextLibManager();

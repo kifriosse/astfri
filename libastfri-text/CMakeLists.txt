@@ -1,24 +1,26 @@
 add_library(astfri-text)
 
 target_sources(astfri-text PRIVATE
-  astfri-text/impl/PlainTextBuilder.cpp
-  astfri-text/impl/Config.cpp
-  astfri-text/impl/AbstractVisitor.cpp
-  astfri-text/impl/TextLibManager.cpp
-  astfri-text/impl/PseudocodeBuilder.cpp
-  astfri-text/impl/Exporter.cpp
-  astfri-text/impl/PseudocodeStmtVisitor.cpp
   astfri-text/impl/AbstractBuilder.cpp
-  astfri-text/impl/PseudocodeVisitor.cpp
+  astfri-text/impl/AbstractVisitor.cpp
+  astfri-text/impl/Config.cpp
+  astfri-text/impl/Exporter.cpp
+  astfri-text/impl/TextLibManager.cpp
+  astfri-text/impl/pseudocode/HtmlTextBuilder.cpp
+  astfri-text/impl/pseudocode/PlainTextBuilder.cpp
+  astfri-text/impl/pseudocode/PseudocodeBuilder.cpp
+  astfri-text/impl/pseudocode/PseudocodeStmtVisitor.cpp
+  astfri-text/impl/pseudocode/PseudocodeVisitor.cpp
 )
 
 target_sources(astfri-text PUBLIC FILE_SET headers TYPE HEADERS FILES
-  astfri-text/impl/PseudocodeVisitor.hpp
-  astfri-text/impl/PseudocodeBuilder.hpp
-  astfri-text/impl/PlainTextBuilder.hpp
+  astfri-text/impl/pseudocode/HtmlTextBuilder.hpp
+  astfri-text/impl/pseudocode/PlainTextBuilder.hpp
+  astfri-text/impl/pseudocode/PseudocodeBuilder.hpp
+  astfri-text/impl/pseudocode/PseudocodeVisitor.hpp
   astfri-text/impl/AbstractBuilder.hpp
-  astfri-text/impl/Exporter.hpp
   astfri-text/impl/AbstractVisitor.hpp
+  astfri-text/impl/Exporter.hpp
   astfri-text/TextLibManager.hpp
   astfri-text/Config.hpp
 )

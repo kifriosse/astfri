@@ -4,7 +4,7 @@
 
 using namespace astfri::text;
 
-Exporter::Exporter(Config* config) :
+Exporter::Exporter(Config const& config) :
     m_config(config)
 {
     std::filesystem::path cp = std::filesystem::current_path();
@@ -40,17 +40,17 @@ void Exporter::export_file(std::string_view text, std::ostream* ost) const
         return;
     }
     std::filesystem::path directory;
-    if (m_config->filePath == "default")
+    if (m_config.filePath == "default")
     {
         directory = m_defPath;
     }
-    else if (m_config->filePath.empty())
+    else if (m_config.filePath.empty())
     {
         directory = std::filesystem::current_path() / "text_output";
     }
     else
     {
-        directory = m_config->filePath;
+        directory = m_config.filePath;
         directory /= "text_output";
     }
     std::filesystem::create_directories(directory);
@@ -66,20 +66,20 @@ void Exporter::export_file(std::string_view text, std::ostream* ost) const
 
 std::string Exporter::create_file_name() const
 {
-    if (m_config->fileFormat == "c++")
+    if (m_config.fileFormat == "c++")
     {
-        return m_config->fileName + ".hpp";
+        return m_config.fileName + ".hpp";
     }
-    else if (m_config->fileFormat == "java")
+    else if (m_config.fileFormat == "java")
     {
-        return m_config->fileName + ".java";
+        return m_config.fileName + ".java";
     }
-    else if (m_config->fileFormat == "html")
+    else if (m_config.fileFormat == "html")
     {
-        return m_config->fileName + ".html";
+        return m_config.fileName + ".html";
     }
     else
     {
-        return m_config->fileName + ".txt";
+        return m_config.fileName + ".txt";
     }
 }
