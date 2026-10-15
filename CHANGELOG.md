@@ -1,3 +1,12 @@
+**2026-10-15** `0.2.0` Michal Mrena `<michal.mrena@fri.uniza.sk>`
+- Simplified versioning to a single project version.
+- Generalized `external/CMakeLists.txt` to support Windows builds.
+- Refactored `CMakeLists`s to use consistent target naming.
+- Changed binary output directory to `build/out/bin` to make running examples
+and tests simpler and also to simlify `.dll` dependencies on Windows.
+- Updated project `README.md`.
+
+
 **2026-06-24** `0.1.1` Michal Mrena `<michal.mrena@fri.uniza.sk>`
 - `astfri-core` extended forward declarations.
   - Moved version to `0.1.1`.
