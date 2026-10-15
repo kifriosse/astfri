@@ -34,6 +34,11 @@ xbps-install -Su llvm19-devel
 sudo pacman -S llvm clang
 ```
 
+**Fedora 40+**
+```sh
+dnf install clang clang-devel llvm-devel
+```
+
 **MSYS2/UCRT64**
 ```sh
 pacman -S \
