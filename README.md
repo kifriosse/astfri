@@ -37,14 +37,14 @@ sudo pacman -S llvm clang
 **MSYS2/UCRT64**
 ```sh
 pacman -S \
-  mingw-w64-clang-x86_64-llvm-libs 22.1.8-2 \
-  mingw-w64-clang-x86_64-llvm-tools 22.1.8-2 \
-  mingw-w64-ucrt-x86_64-llvm 22.1.8-2 \
-  mingw-w64-ucrt-x86_64-llvm-libs 22.1.8-2 \
-  mingw-w64-ucrt-x86_64-llvm-tools 22.1.8-2 \
-  mingw-w64-ucrt-x86_64-clang 22.1.8-2 \
-  mingw-w64-ucrt-x86_64-clang-libs 22.1.8-2 \
-  mingw-w64-ucrt-x86_64-clang-tools-extra 22.1.8-2 \
+  mingw-w64-clang-x86_64-llvm-libs \
+  mingw-w64-clang-x86_64-llvm-tools \
+  mingw-w64-ucrt-x86_64-llvm \
+  mingw-w64-ucrt-x86_64-llvm-libs \
+  mingw-w64-ucrt-x86_64-llvm-tools \
+  mingw-w64-ucrt-x86_64-clang \
+  mingw-w64-ucrt-x86_64-clang-libs \
+  mingw-w64-ucrt-x86_64-clang-tools-extra \
   mingw-w64-ucrt-x86_64-tree-sitter
   # Installing tree-sitter should not be necessary, but it is for now...
 ```
