@@ -472,7 +472,7 @@ TSSymbol MapManager::get_symbol(const NodeType type) const {
 
 Stmt* MapManager::default_stmt_visit(SrcCodeTransformer*, const TSNode&) {
     // todo remove this when type is fixed
-    return StmtFactory::get_instance().mk_uknown();
+    return StmtFactory::get_instance().mk_unknown();
 }
 
 } // namespace maps

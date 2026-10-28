@@ -117,7 +117,7 @@ Stmt* SrcCodeTransformer::visit_for_each(SrcCodeTransformer* self, const TSNode&
 
     if (ts_node_is_null(nType)) {
         // todo handle deconstruction syntax
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     }
 
     std::string name        = util::extract_text(hLeft, self->src_str());
@@ -178,7 +178,7 @@ Stmt* SrcCodeTransformer::visit_if(SrcCodeTransformer* self, const TSNode& node)
 
 Stmt* SrcCodeTransformer::visit_try(SrcCodeTransformer* self, const TSNode& node) {
     if (ts_node_child_count(node) < 2)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
 
     const TSNode nBody     = util::child_by_field_name(node, "body");
     const StmtMapper mBody = mapManager_.get_stmt_mapper(nBody);
@@ -301,7 +301,7 @@ Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode
     }
 
     ts_tree_cursor_delete(&cursor);
-    return stmtFact_.mk_uknown();
+    return stmtFact_.mk_unknown();
 }
 
 Stmt* SrcCodeTransformer::visit_expr_stmt(SrcCodeTransformer* self, const TSNode& node) {

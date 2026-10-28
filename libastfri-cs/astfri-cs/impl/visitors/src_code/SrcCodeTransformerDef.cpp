@@ -132,12 +132,12 @@ Stmt* SrcCodeTransformer::visit_constr_def(SrcCodeTransformer* self, const TSNod
 
     const auto currentType        = self->semContext_.current_type();
     if (! currentType)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     // throw std::logic_error("Owner type not found");
 
     const auto currentClass = as<ClassDefStmt>(currentType->def);
     if (! currentClass)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     // throw std::logic_error(
     //     "Constructor can only be defined for class type"
     // );
@@ -182,20 +182,20 @@ Stmt* SrcCodeTransformer::visit_constr_init(SrcCodeTransformer* self, const TSNo
 
     const auto currentType = self->semContext_.current_type();
     if (! currentType)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     // throw std::logic_error("Owner type not found");
 
     const auto* owner = as<ClassDefStmt>(currentType->def);
     // todo add records
     if (! owner)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     // throw std::logic_error(
     //     "Constructor can only be defined for class type"
     // );
 
     // todo fix this for Incomplete types
     if (owner->bases.empty())
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     const ClassDefStmt* base = owner->bases.back();
     return stmtFact_.mk_base_initializer(base->type, std::move(args));
 }
@@ -209,12 +209,12 @@ Stmt* SrcCodeTransformer::visit_destr_def(SrcCodeTransformer* self, const TSNode
 
     if (! currentType)
         // throw std::logic_error("Owner type not found");
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     auto* owner = as<ClassDefStmt>(currentType->def);
     if (! owner)
         // throw std::logic_error("Destructor can only be defined for class
         // type");
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
 
     self->semContext_.unregister_return_type();
     return stmtFact_.mk_destructor_def(owner, as<CompoundStmt>(body));
@@ -223,7 +223,7 @@ Stmt* SrcCodeTransformer::visit_destr_def(SrcCodeTransformer* self, const TSNode
 Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNode& node) {
     const auto currentType = self->semContext_.current_type();
     if (! currentType)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     // throw std::logic_error("Owner type not found");
 
     const TSNode nParams        = util::child_by_field_name(node, "parameters");
@@ -280,7 +280,7 @@ Stmt* SrcCodeTransformer::visit_func_stmt(SrcCodeTransformer* self, const TSNode
     const std::string name       = util::extract_text(nName, self->src_str());
     const FuncMetadata* funcMeta = self->semContext_.find_func(name);
     if (! funcMeta)
-        return stmtFact_.mk_uknown();
+        return stmtFact_.mk_unknown();
     // throw std::logic_error("Local function \'" + name + "\' not found");
 
     if (! funcMeta->funcDef)
