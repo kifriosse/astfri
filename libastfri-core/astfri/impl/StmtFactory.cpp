@@ -417,6 +417,10 @@ UnknownStmt* StmtFactory::mk_uknown() {
     return &m_unknownStmt;
 }
 
+UnknownStmt* StmtFactory::mk_unknown() {
+    return &m_unknownStmt;
+}
+
 TranslationUnit* StmtFactory::mk_translation_unit() {
     return details::create_store_get<TranslationUnit>(
         m_otherStmts,

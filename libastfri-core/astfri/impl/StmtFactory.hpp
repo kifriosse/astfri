@@ -133,7 +133,9 @@ public:
 
     BreakStmt *mk_break();
 
-    UnknownStmt *mk_uknown();
+    [[deprecated]] UnknownStmt *mk_uknown();
+
+    UnknownStmt *mk_unknown();
 
     TranslationUnit *mk_translation_unit();
 
