@@ -29,6 +29,8 @@ enum class StmtKind {
     Return,
     Expr,
     If,
+    Goto,
+    Label,
     Case,
     DefaultCase,
     Switch,
@@ -121,6 +123,14 @@ template<> struct KindOf<ExprStmt> {
 
 template<> struct KindOf<IfStmt> {
     static constexpr StmtKind value{StmtKind::If};
+};
+
+template<> struct KindOf<LabelStmt> {
+    static constexpr StmtKind value{StmtKind::Label};
+};
+
+template<> struct KindOf<GotoStmt> {
+    static constexpr StmtKind value{StmtKind::Goto};
 };
 
 template<> struct KindOf<CaseStmt> {

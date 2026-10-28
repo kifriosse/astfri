@@ -273,6 +273,22 @@ IfStmt *StmtFactory::mk_if(Expr *cond, Stmt *iftrue, Stmt *iffalse) {
         });
 }
 
+LabelStmt* StmtFactory::mk_label(const std::string& name) {
+    return details::create_store_get<LabelStmt>(
+        m_otherStmts,
+        [name](LabelStmt &l){
+            l.name = name;
+        });
+}
+
+GotoStmt* StmtFactory::mk_goto(LabelStmt* label) {
+    return details::create_store_get<GotoStmt>(
+        m_otherStmts,
+        [label](GotoStmt &g){
+            g.label = label;
+        });
+}
+
 CaseStmt *StmtFactory::mk_case(Expr *expr, Stmt *body) {
     return details::create_store_get<CaseStmt>(
         m_otherStmts,

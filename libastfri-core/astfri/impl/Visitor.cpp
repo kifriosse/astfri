@@ -178,6 +178,14 @@ void ThrowingVisitorAdapter::visit(const IfStmt& /*stmt*/) {
     throw std::logic_error("Not Implemented Yet!");
 }
 
+void ThrowingVisitorAdapter::visit(const LabelStmt&) {
+    throw std::logic_error("Not Implemented Yet!");
+}
+
+void ThrowingVisitorAdapter::visit(const GotoStmt&) {
+    throw std::logic_error("Not Implemented Yet!");
+}
+
 void ThrowingVisitorAdapter::visit(const CaseStmt& /*stmt*/) {
     throw std::logic_error("Not Implemented Yet!");
 }

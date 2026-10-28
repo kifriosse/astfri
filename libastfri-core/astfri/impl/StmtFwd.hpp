@@ -25,6 +25,8 @@ struct CompoundStmt;
 struct ReturnStmt;
 struct ExprStmt;
 struct IfStmt;
+struct LabelStmt;
+struct GotoStmt;
 struct CaseStmt;
 struct DefaultCaseStmt;
 struct SwitchStmt;

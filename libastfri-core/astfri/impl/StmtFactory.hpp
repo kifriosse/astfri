@@ -101,6 +101,10 @@ public:
 
     IfStmt *mk_if(Expr *cond, Stmt *iftrue, Stmt *iffalse);
 
+    LabelStmt *mk_label(const std::string &name);
+
+    GotoStmt *mk_goto(LabelStmt *label);
+
     CaseStmt *mk_case(Expr *expr, Stmt *body);
 
     CaseStmt *mk_case(std::vector<Expr*> exprs, Stmt *body);

@@ -297,6 +297,14 @@ struct IfStmt : MakeAStmt<IfStmt> {
     // OptPtr<Stmt> iffalse;
 };
 
+struct LabelStmt : MakeAStmt<LabelStmt> {
+    std::string name;
+};
+
+struct GotoStmt : MakeAStmt<GotoStmt> {
+    LabelStmt *label{nullptr};
+};
+
 /**
  * @brief Case option in switch statement
  */

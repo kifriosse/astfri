@@ -58,6 +58,8 @@ struct Visitor {
     virtual void visit(const ReturnStmt& stmt)            = 0;
     virtual void visit(const ExprStmt& stmt)              = 0;
     virtual void visit(const IfStmt& stmt)                = 0;
+    virtual void visit(const LabelStmt& stmt)             = 0;
+    virtual void visit(const GotoStmt& stmt)              = 0;
     virtual void visit(const CaseStmt& stmt)              = 0;
     virtual void visit(const DefaultCaseStmt& stmt)       = 0;
     virtual void visit(const SwitchStmt& stmt)            = 0;
@@ -74,7 +76,7 @@ struct Visitor {
     virtual void visit(const MemberVarDefStmt& stmt)      = 0;
     virtual void visit(const GlobalVarDefStmt& stmt)      = 0;
     virtual void visit(const FunctionDefStmt& stmt)       = 0;
-    virtual void visit(const MultiVarDefStmt& stmt)  = 0;
+    virtual void visit(const MultiVarDefStmt& stmt)       = 0;
     virtual void visit(const MethodDefStmt& stmt)         = 0;
     virtual void visit(const BaseInitializerStmt& stmt)   = 0;
     virtual void visit(const SelfInitializerStmt& stmt)   = 0;
@@ -229,6 +231,12 @@ struct VisitorAdapter : Visitor {
     }
 
     void visit(const IfStmt& /*stmt*/) override {
+    }
+
+    void visit(const LabelStmt& /*stmt*/) override {
+    }
+
+    void visit(const GotoStmt& /*stmt*/) override {
     }
 
     void visit(const CaseStmt& /*stmt*/) override {
@@ -405,6 +413,10 @@ struct ThrowingVisitorAdapter : Visitor {
     void visit(const ExprStmt& /*stmt*/) override;
 
     void visit(const IfStmt& /*stmt*/) override;
+
+    void visit(const LabelStmt& /*stmt*/) override;
+
+    void visit(const GotoStmt& /*stmt*/) override;
 
     void visit(const CaseStmt& /*stmt*/) override;
 
