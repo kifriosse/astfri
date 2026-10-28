@@ -52,7 +52,7 @@ const std::unordered_map<SDKProfile, fs::path> profileMap = {
 ASTBuilder::ASTBuilder(astfri::csharp::Config config) :
     m_lang(tree_sitter_c_sharp()),
     m_parser(ts_parser_new()),
-    m_config(std::move(config)) {
+    m_config(config) {
     ts_parser_set_language(m_parser, m_lang);
 }
 
