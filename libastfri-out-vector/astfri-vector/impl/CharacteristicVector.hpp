@@ -1,6 +1,9 @@
 #ifndef LIBASTFRI_OUT_VECTOR_CHARACTERISTIC_VECTOR_HPP
 #define LIBASTFRI_OUT_VECTOR_CHARACTERISTIC_VECTOR_HPP
 
+#include <astfri/impl/ASTNode.hpp>
+
+#include <optional>
 #include <vector>
 
 namespace astfri::vector {
@@ -26,6 +29,7 @@ enum class VectorComponent : size_t {
     MemoryOp,             // NewExpr, DeleteExpr | UnaryOpExpr: * (dereference), & (address-of)
 };
 
+
 class CharacteristicVector {
 public:
     static constexpr size_t VECTOR_SIZE = 18;    
@@ -35,7 +39,8 @@ public:
 
     void increment(VectorComponent comp);
     int get(VectorComponent comp) const;
-    int total_token() const;
+    int total_tokens() const;
+    bool is_empty() const;
 
     CharacteristicVector& operator+=(const CharacteristicVector& rhs);
     CharacteristicVector operator+(const CharacteristicVector& rhs) const;
@@ -44,6 +49,20 @@ public:
 
 private:
     std::vector<int> m_characteristicVector;
+};
+
+
+struct VectorTreeNode {
+    std::optional<VectorComponent> component = std::nullopt;
+    CharacteristicVector subtreeVector;
+    std::vector<VectorTreeNode*> children;
+ 
+public:
+    VectorTreeNode(std::optional<VectorComponent> comp);
+    ~VectorTreeNode();
+
+public:
+    bool is_non_terminal() const;    
 };
 
 }

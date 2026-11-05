@@ -21,12 +21,16 @@ int CharacteristicVector::get(VectorComponent comp) const {
     return 0;
 }
 
-int CharacteristicVector::total_token() const {
+int CharacteristicVector::total_tokens() const {
     int size = 0;
-    for (int index : m_characteristicVector) {
-        size += index;
+    for (int count : m_characteristicVector) {
+        size += count;
     }
     return size;
+}
+
+bool CharacteristicVector::is_empty() const {
+    return this->total_tokens() == 0;
 }
 
 CharacteristicVector& CharacteristicVector::operator+=(const CharacteristicVector &rhs) {
@@ -48,6 +52,23 @@ bool CharacteristicVector::operator==(const CharacteristicVector& rhs) const {
 
 bool CharacteristicVector::operator!=(const CharacteristicVector& rhs) const {
     return !(*this == rhs);
+}
+
+
+
+
+VectorTreeNode::VectorTreeNode(std::optional<VectorComponent> comp) : 
+    component(comp)    
+{}
+
+VectorTreeNode::~VectorTreeNode() {
+    for (VectorTreeNode* child : children) {
+        delete child;
+    }
+}
+
+bool VectorTreeNode::is_non_terminal() const {
+    return !children.empty();
 }
 
 }
