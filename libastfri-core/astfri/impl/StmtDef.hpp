@@ -172,7 +172,6 @@ struct MethodDefStmt : MakeAStmt<MethodDefStmt> {
  * @brief Initializer of a base class called at the begining of a constructor
  */
 struct BaseInitializerStmt : MakeAStmt<BaseInitializerStmt> {
-    [[deprecated]] std::string base_{}; // TODO type
     ClassType* type{nullptr};
     std::vector<Expr*> args{};
 };
@@ -233,8 +232,7 @@ struct GenericParam : MakeAStmt<GenericParam> {
  * @brief Common base for Class and Interface
  * In the future, it could also be used for union or strong type alias
  */
-struct UserTypeDefStmt : Stmt {
-    [[deprecated]] std::string name{};
+struct [[deprecated]] UserTypeDefStmt : Stmt {
 };
 
 /**

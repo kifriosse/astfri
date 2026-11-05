@@ -138,10 +138,8 @@ InterfaceDefStmt* StmtFactory::mk_interface_def(const std::string &name, const S
     auto *i = details::get_or_emplace<InterfaceDefStmt>(
         m_interfaceDefMap,
         mk_fqn(scope, name),
-        [&name](){
-            InterfaceDefStmt i;
-            i.name = std::move(name);
-            return i;
+        [] {
+            return InterfaceDefStmt();
         });
     i->type = m_typeFactory->mk_interface(name, scope, i);
     return i;
@@ -156,10 +154,8 @@ ClassDefStmt *StmtFactory::mk_class_def(const std::string &name, const Scope &sc
     auto *c = details::get_or_emplace<ClassDefStmt>(
         m_classDefMap,
         mk_fqn(scope, name),
-        [&name](){
-            ClassDefStmt c;
-            c.name = name;
-            return c;
+        [] {
+            return ClassDefStmt();
         });
     c->type = m_typeFactory->mk_class(name, scope, c);
     return c;
