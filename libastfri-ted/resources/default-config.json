@@ -1,0 +1,41 @@
+{
+  "costs": {
+    "remove": 1,
+    "insert": 1,
+    "rename": 1
+  },
+  "attributes": {
+    "IntLiteralExpr":        { "val": true },
+    "FloatLiteralExpr":      { "val": true },
+    "CharLiteralExpr":       { "val": true },
+    "StringLiteralExpr":     { "val": true },
+    "BoolLiteralExpr":       { "val": true },
+    "BinOpExpr":             { "op": true },
+    "UnaryOpExpr":           { "op": true },
+    "ParamVarRefExpr":       { "name": false },
+    "LocalVarRefExpr":       { "name": false },
+    "MemberVarRefExpr":      { "name": false },
+    "GlobalVarRefExpr":      { "name": false },
+    "ClassRefExpr":          { "name": false },
+    "FunctionCallExpr":      { "name": false },
+    "MethodCallExpr":        { "name": false },
+
+    "LocalVarDefStmt":       { "name": false },
+    "ParamVarDefStmt":       { "name": false },
+    "GlobalVarDefStmt":      { "name": false },
+    "MemberVarDefStmt":      { "name": false, "access": true, "staticity": true },
+    "FunctionDefStmt":       { "name": false },
+    "MethodDefStmt":         { "access": true, "virtuality": true, "staticity": true },
+    "ConstructorDefStmt":    { "access": true },
+    "GenericParam":          { "name": false, "constraint": false },
+    "ClassDefStmt":          { "name": false },
+    "InterfaceDefStmt":      { "name": false },
+    "BaseInitializerStmt":   { "name": false },
+    "MemberInitializerStmt": { "name": false },
+
+    "ClassType":             { "name": false, "scope": false },
+    "InterfaceType":         { "name": false, "scope": false },
+    "LambdaType":            { "name": false },
+    "IncompleteType":        { "name": false }
+  }
+}
