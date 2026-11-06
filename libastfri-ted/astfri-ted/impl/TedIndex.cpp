@@ -3,7 +3,7 @@
 namespace astfri::ted {
 
 int TedIndex::node_count() const {
-    return this->label.size() - 1;
+    return this->nodes.size() - 1;
 }
 
 } // namespace astfri::ted

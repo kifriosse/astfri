@@ -4,10 +4,11 @@
 
 namespace astfri::ted {
 
-ZhangShasha::ZhangShasha(const TedIndex& tedIndex1, const TedIndex& tedIndex2, Costs costs) :
+ZhangShasha::ZhangShasha(const TedIndex& tedIndex1, const TedIndex& tedIndex2, Costs costs, NodeComparator& comparator) :
     m_tedIndex1(tedIndex1),
     m_tedIndex2(tedIndex2),
     m_costs(costs),
+    m_comparator(comparator),
     m_td(tedIndex1.node_count(),
                std::vector<int>(tedIndex2.node_count(), 0)),
 
@@ -30,7 +31,7 @@ int ZhangShasha::calculate_treedistance() {
 // private
 
 bool ZhangShasha::are_nodes_equal(int i, int j) const {
-    return this->m_tedIndex1.label[i].compare(this->m_tedIndex2.label[j]) == 0;
+    return this->m_comparator.equal(this->m_tedIndex1.nodes[i], this->m_tedIndex2.nodes[j]);
 }
 
 void ZhangShasha::calculate_treedistance(int i, int j) {

@@ -1,15 +1,15 @@
 #ifndef ASTFRI_TED_IMPL_TED_INDEX_HPP
 #define ASTFRI_TED_IMPL_TED_INDEX_HPP
 
-#include <string>
+#include <astfri-ted/impl/NodeReference.hpp>
+
 #include <vector>
 
 namespace astfri::ted {
 
 struct TedIndex {
     // identifikator pre porovnavanie rovnosti 2 uzlov 
-    // (cost operacie 0 ak sa rovnaju)
-    std::vector<std::string> label; // 1 - indexovany
+    std::vector<NodeReference> nodes; // 1 - indexovany
 
     // postorder cislo najlavejsieho listu v podstrome uzla i
     std::vector<int> l; // 1 - indexovany

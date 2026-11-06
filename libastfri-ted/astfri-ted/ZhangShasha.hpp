@@ -1,14 +1,19 @@
 #ifndef ASTFRI_TED_ZHANG_SHASHA_HPP
 #define ASTFRI_TED_ZHANG_SHASHA_HPP
 
-#include <vector>
 #include <astfri-ted/impl/TedIndex.hpp>
 #include <astfri-ted/Costs.hpp>
+#include <astfri-ted/impl/NodeComparator.hpp>
+
+#include <vector>
 
 namespace astfri::ted {
 class ZhangShasha {
 public:
-    ZhangShasha(const TedIndex& tedIndex1, const TedIndex& tedIndex2, Costs costs);
+    ZhangShasha(const TedIndex& tedIndex1,
+        const TedIndex& tedIndex2,
+        Costs costs,
+        NodeComparator& comparator);
     
     int calculate_treedistance();
 
@@ -20,6 +25,7 @@ private:
     const TedIndex& m_tedIndex1;
     const TedIndex& m_tedIndex2;
     const Costs m_costs;
+    const NodeComparator& m_comparator;
 
     // treedistance (nema nulte riadky pre prazdne stromy)
     std::vector<std::vector<int>> m_td;

@@ -3,55 +3,12 @@
 
 #include <astfri-ted/Costs.hpp>
 #include <astfri/impl/Concepts.hpp>
-
 #include <rapidjson/document.h>
+#include <astfri-ted/impl/AttributeConfig.hpp>
 
 #include <filesystem>
 
 namespace astfri::ted {
-
-struct AttributeConfig {
-    // Expr
-    bool intLiteralVal          = true;
-    bool floatLiteralVal        = true;
-    bool charLiteralVal         = true;
-    bool stringLiteralVal       = true;
-    bool boolLiteralVal         = true;
-    bool binOpOp                = true;
-    bool unaryOpOp              = true;
-    bool paramVarRefName        = false;
-    bool localVarRefName        = false;
-    bool memberVarRefName       = false;
-    bool globalVarRefName       = false;
-    bool classRefName           = false;
-    bool functionCallName       = false;
-    bool methodCallName         = false;
-    // Stmt
-    bool localVarDefName        = false;
-    bool paramVarDefName        = false;
-    bool globalVarDefName       = false;
-    bool memberVarDefName       = false;
-    bool memberVarDefAccess     = true;
-    bool memberVarDefStaticity  = true;
-    bool functionDefName        = false;
-    bool methodDefAccess        = true;
-    bool methodDefVirtuality    = true;
-    bool methodDefStaticity     = true;
-    bool constructorDefAccess   = true;
-    bool genericParamName       = false;
-    bool genericParamConstraint = false;
-    bool classDefName           = false;
-    bool interfaceDefName       = false;
-    bool baseInitializerName    = false;
-    bool memberInitializerName  = false;
-    // Type
-    bool classTypeName          = false;
-    bool classTypeScope         = false;
-    bool interfaceTypeName      = false;
-    bool interfaceTypeScope     = false;
-    bool lambdaTypeName         = false;
-    bool incompleteTypeName     = false;
-};
 
 struct Config {
     Costs costs;
