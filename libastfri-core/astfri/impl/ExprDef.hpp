@@ -17,52 +17,57 @@ namespace astfri {
 struct Expr : detail::ASTNode<ExprKind> {
 };
 
-/**
- * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Expr.
- *
- * See @c MakeA doc for more details.
- *
- * @tparam SelfType child class type.
- */
-template<typename SelfType>
-using MakeAnExpr = detail::MakeA<Expr, SelfType>;
+// /**
+//  * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Expr.
+//  *
+//  * See @c MakeA doc for more details.
+//  *
+//  * @tparam SelfType child class type.
+//  */
+// template<typename SelfType>
+// using MakeAnExpr = detail::MakeA<Expr, SelfType>;
 
 /**
  * @brief Base class for expressions representing literal values of type T.
  */
-template<typename SelfType, typename T>
-struct Literal : MakeAnExpr<SelfType> {
+template<typename T>
+struct Literal : Expr {
     T val{};
 };
 
 /**
  * @brief Represents an integer literal expression.
  */
-struct IntLiteralExpr : Literal<IntLiteralExpr, int> {
+struct IntLiteralExpr : Literal<int> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(IntLiteralExpr)
 };
 
 /**
  * @brief Represents a floating-point literal expression.
  */
-struct FloatLiteralExpr : Literal<FloatLiteralExpr, float> {
+struct FloatLiteralExpr : Literal<float> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(FloatLiteralExpr)
 };
 
 /**
  * @brief Represents a character literal expression.
  */
-struct CharLiteralExpr : Literal<CharLiteralExpr, char> {
+struct CharLiteralExpr : Literal<char> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(CharLiteralExpr)
 };
 
 /**
  * @brief Represents a string literal expression.
  */
-struct StringLiteralExpr : Literal<StringLiteralExpr, std::string> {
+struct StringLiteralExpr : Literal<std::string> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(StringLiteralExpr)
 };
 
 /**
  * @brief Represents a boolean literal expression.
  */
-struct BoolLiteralExpr : Literal<BoolLiteralExpr, bool> {
+struct BoolLiteralExpr : Literal<bool> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(BoolLiteralExpr)
 };
 
 /**
