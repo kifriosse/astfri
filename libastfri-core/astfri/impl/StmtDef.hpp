@@ -320,7 +320,7 @@ struct GotoStmt : MakeAStmt<GotoStmt> {
  * @brief Case option in switch statement
  */
 struct CaseStmt : LabelStmt {
-    Stmt *body{nullptr};
+    [[deprecated]] Stmt *body{nullptr};
     std::vector<Expr*> exprs{};
     ASTFRI_ADD_NODE_CONSTRUCTOR(CaseStmt);
 };
@@ -337,9 +337,10 @@ struct DefaultCaseStmt : LabelStmt {
  * @brief TODO
  */
 struct SwitchStmt : MakeAStmt<SwitchStmt> {
+    [[deprecated]] DefaultCaseStmt *defaultCase{nullptr};
+    [[deprecated]] std::vector<CaseStmt*> cases{};
     Expr *expr{nullptr};
-    DefaultCaseStmt *defaultCase{nullptr};
-    std::vector<CaseStmt*> cases{};
+    // CompoundStmt* body{nullptr};
 };
 
 /**
@@ -427,6 +428,7 @@ struct TranslationUnit : MakeAStmt<TranslationUnit> {
     std::vector<InterfaceDefStmt*> interfaces{};
     std::vector<FunctionDefStmt*> functions{};
     std::vector<GlobalVarDefStmt*> globals{};
+    std::vector<Stmt*> content{};
 };
 
 
