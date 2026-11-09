@@ -131,7 +131,7 @@ TranslationUnit ASTBuilder::mk_ast(SDKProfile profile) {
     if (profile != SDKProfile::None && profile != SDKProfile::Core
         && profile != SDKProfile::Worker) {
         load_source_of_external_types(profileMap.at(SDKProfile::Core));
-        }
+    }
 
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(m_srcs, symbTable);

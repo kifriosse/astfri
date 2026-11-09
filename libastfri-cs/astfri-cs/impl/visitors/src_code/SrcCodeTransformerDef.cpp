@@ -10,7 +10,6 @@
 #include <tree_sitter/api.h>
 
 #include <algorithm>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -28,13 +27,14 @@ Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode
 
     const TSNode nClassBody = util::child_by_field_name(node, "body");
 
-    // if its partial class doesn't have a body
+    // if its partial class and doesn't have a body
     if (ts_node_is_null(nClassBody))
         return classDef;
 
-    auto processMembs = [classDef, self](const TSNode& nMember) -> void {
+    auto processMembers = [classDef, self](const TSNode& nMember) -> void {
         if (util::is_type_decl(nMember))
             return;
+
         const StmtMapper mMemb = mapManager_.get_stmt_mapper(nMember);
         Stmt* membStmt         = mMemb(self, nMember);
 
@@ -47,7 +47,7 @@ Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode
         else if (const auto method = as<MethodDefStmt>(membStmt))
             classDef->methods.push_back(method);
     };
-    util::for_each_child_node(nClassBody, processMembs);
+    util::for_each_child_node(nClassBody, processMembers);
 
     self->semContext_.leave_type();
     return classDef;
