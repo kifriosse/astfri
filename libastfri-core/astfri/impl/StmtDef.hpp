@@ -340,7 +340,7 @@ struct SwitchStmt : MakeAStmt<SwitchStmt> {
     [[deprecated]] DefaultCaseStmt *defaultCase{nullptr};
     [[deprecated]] std::vector<CaseStmt*> cases{};
     Expr *expr{nullptr};
-    // CompoundStmt* body{nullptr};
+    CompoundStmt* body{nullptr};
 };
 
 /**
