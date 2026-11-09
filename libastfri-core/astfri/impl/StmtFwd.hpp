@@ -26,6 +26,7 @@ struct ReturnStmt;
 struct ExprStmt;
 struct IfStmt;
 struct LabelStmt;
+struct GotoLabelStmt;
 struct GotoStmt;
 struct CaseStmt;
 struct DefaultCaseStmt;

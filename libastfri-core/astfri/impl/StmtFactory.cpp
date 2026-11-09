@@ -269,10 +269,10 @@ IfStmt *StmtFactory::mk_if(Expr *cond, Stmt *iftrue, Stmt *iffalse) {
         });
 }
 
-LabelStmt* StmtFactory::mk_label(const std::string& name) {
-    return details::create_store_get<LabelStmt>(
+LabelStmt* StmtFactory::mk_goto_label(const std::string& name) {
+    return details::create_store_get<GotoLabelStmt>(
         m_otherStmts,
-        [name](LabelStmt &l){
+        [name](GotoLabelStmt &l){
             l.name = name;
         });
 }

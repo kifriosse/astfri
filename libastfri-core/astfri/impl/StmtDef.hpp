@@ -295,10 +295,23 @@ struct IfStmt : MakeAStmt<IfStmt> {
     // OptPtr<Stmt> iffalse;
 };
 
+/**
+ * @brief Base class for all label statements
+ */
 struct LabelStmt : MakeAStmt<LabelStmt> {
-    std::string name;
 };
 
+/**
+ * @brief Standard goto label (also used for java labels)
+ */
+struct GotoLabelStmt : LabelStmt {
+    std::string name;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(GotoLabelStmt);
+};
+
+/**
+ * @brief Goto statement used to jump to a label
+ */
 struct GotoStmt : MakeAStmt<GotoStmt> {
     LabelStmt *label{nullptr};
 };
@@ -306,16 +319,18 @@ struct GotoStmt : MakeAStmt<GotoStmt> {
 /**
  * @brief Case option in switch statement
  */
-struct CaseStmt : MakeAStmt<CaseStmt> {
+struct CaseStmt : LabelStmt {
     Stmt *body{nullptr};
     std::vector<Expr*> exprs{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(CaseStmt);
 };
 
 /**
  * @brief Default option in switch statement
  */
-struct DefaultCaseStmt : MakeAStmt<DefaultCaseStmt> {
+struct DefaultCaseStmt : LabelStmt {
     Stmt *body{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(DefaultCaseStmt);
 };
 
 /**
