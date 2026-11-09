@@ -18,52 +18,65 @@ struct Type : detail::ASTNode<TypeKind> {
 };
 
 
-/**
- * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Type.
- *
- * See @c MakeA doc for more details.
- *
- * @tparam SelfType child class type.
- */
-template<typename SelfType>
-using MakeAType = detail::MakeA<Type, SelfType>;
+// /**
+//  * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Type.
+//  *
+//  * See @c MakeA doc for more details.
+//  *
+//  * @tparam SelfType child class type.
+//  */
+// template<typename SelfType>
+// using MakeAType = detail::MakeA<Type, SelfType>;
 
 
 /**
  * @brief TODO
  */
-struct DynamicType : MakeAType<DynamicType> { };
+struct DynamicType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(DynamicType)
+};
 
 /**
  * @brief TODO
  */
-struct IntType : MakeAType<IntType> { };
+struct IntType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(IntType)
+};
 
 /**
  * @brief TODO
  */
-struct FloatType : MakeAType<FloatType> { };
+struct FloatType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(FloatType)
+};
 
 /**
  * @brief TODO
  */
-struct CharType : MakeAType<CharType> { };
+struct CharType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(CharType)
+};
 
 /**
  * @brief TODO
  */
-struct BoolType : MakeAType<BoolType> { };
+struct BoolType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(BoolType)
+};
 
 /**
  * @brief TODO
  */
-struct VoidType : MakeAType<VoidType> { };
+struct VoidType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(VoidType)
+};
 
 /**
  * @brief TODO
  */
-struct IndirectionType : MakeAType<IndirectionType> {
+struct IndirectionType : Type {
     Type *indirect{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(IndirectionType)
 };
 
 /**
@@ -93,9 +106,10 @@ struct InterfaceType : ScopedType {
 /**
  * @brief TODO
  */
-struct LambdaType : MakeAType<LambdaType> {
-    std::string name;
-    LambdaExpr *def;
+struct LambdaType : Type {
+    std::string name{};
+    LambdaExpr *def{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(LambdaType)
 };
 
 /**
@@ -103,50 +117,53 @@ struct LambdaType : MakeAType<LambdaType> {
  * Not to be confused with @c DynamicType. Can be used as type of variables declared using
  * keywords such as @c var, @c auto, @c let, ...
  */
-struct DeducedType : MakeAType<DeducedType> {
+struct DeducedType : Type {
     /**
      * @brief Real type if available, otherwise @c Type::NULL.
      */
-    Type* realType;
+    Type* realType{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(DeducedType)
 };
 
 // /**
 //  * @brief TODO
 //  */
-// struct EnumType : ScopedType, details::MkVisitable<EnumType>
-// {
+// struct EnumType : ScopedType {
+//      ASTFRI_ADD_NODE_CONSTRUCTOR(EnumType);
 // };
 
 // /**
 //  * @brief Product type
 //  */
-// struct RecordType : ScopedType, details::MkVisitable<RecordType>
-// {
+// struct RecordType : ScopedType {
 //     std::vector<Type*> types_;
+//     ASTFRI_ADD_NODE_CONSTRUCTOR(RecordType);
 // };
 
 // /**
 //  * @brief Sum type
 //  */
-// struct UnionType : ScopedType, details::MkVisitable<UnionType>
-// {
+// struct UnionType : ScopedType {
 //     std::vector<Type*> types_; // TODO otazka ci by mali mat aj typy
+//     ASTFRI_ADD_NODE_CONSTRUCTOR(UnionType);
 // };
 
 /**
  * @brief Represents type that is unknown. Only its name is available.
  */
-struct IncompleteType : MakeAType<IncompleteType> {
+struct IncompleteType : Type {
     /**
      * @brief Name of the type.
      */
-    std::string name;
+    std::string name{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(IncompleteType)
 };
 
 /**
  * @brief TODO, tento pojde prec, namiesto neho bude nullptr a test to vyhlasi za bug
  */
-struct UnknownType : MakeAType<UnknownType> {
+struct UnknownType : Type {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(UnknownType)
 };
 
 
