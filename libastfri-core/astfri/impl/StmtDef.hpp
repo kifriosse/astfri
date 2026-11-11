@@ -310,8 +310,7 @@ struct IfStmt : Stmt {
 /**
  * @brief Base class for all label statements
  */
-struct LabelStmt : Stmt {
-};
+struct LabelStmt : Stmt { };
 
 /**
  * @brief Standard goto label (also used for java labels)
@@ -342,7 +341,7 @@ struct CaseStmt : LabelStmt {
  * @brief Default option in switch statement
  */
 struct DefaultCaseStmt : LabelStmt {
-    Stmt *body{nullptr};
+    [[deprecated]] Stmt *body{nullptr};
     ASTFRI_ADD_NODE_CONSTRUCTOR(DefaultCaseStmt)
 };
 
