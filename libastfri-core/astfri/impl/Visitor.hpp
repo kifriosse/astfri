@@ -51,6 +51,7 @@ struct Visitor {
     virtual void visit(const NewExpr& expr)               = 0;
     virtual void visit(const DeleteExpr& expr)            = 0;
     virtual void visit(const BracketExpr& expr)           = 0;
+    virtual void visit(const NamedExpr& expr)             = 0;
     virtual void visit(const UnknownExpr& expr)           = 0;
 
     virtual void visit(const TranslationUnit& stmt)       = 0;
@@ -58,7 +59,7 @@ struct Visitor {
     virtual void visit(const ReturnStmt& stmt)            = 0;
     virtual void visit(const ExprStmt& stmt)              = 0;
     virtual void visit(const IfStmt& stmt)                = 0;
-    virtual void visit(const LabelStmt& stmt)             = 0;
+    virtual void visit(const GotoLabelStmt& stmt)         = 0;
     virtual void visit(const GotoStmt& stmt)              = 0;
     virtual void visit(const CaseStmt& stmt)              = 0;
     virtual void visit(const DefaultCaseStmt& stmt)       = 0;
@@ -104,6 +105,10 @@ struct Visitable {
  * @brief TODO
  */
 struct VisitorAdapter : Visitor {
+    // --------------------------------------------------
+    // Types
+    //--------------------------------------------------
+
     void visit(const DynamicType& /*type*/) override {
     }
 
@@ -142,6 +147,10 @@ struct VisitorAdapter : Visitor {
 
     void visit(const UnknownType& /*type*/) override {
     }
+
+    // --------------------------------------------------
+    // Expressions
+    //--------------------------------------------------
 
     void visit(const IntLiteralExpr& /*expr*/) override {
     }
@@ -215,8 +224,14 @@ struct VisitorAdapter : Visitor {
     void visit(const BracketExpr& /*expr*/) override {
     }
 
+    void visit(const NamedExpr& /*expr*/) override;
+
     void visit(const UnknownExpr& /*expr*/) override {
     }
+
+    // --------------------------------------------------
+    // Statements
+    //--------------------------------------------------
 
     void visit(const TranslationUnit& /*stmt*/) override {
     }
@@ -233,7 +248,7 @@ struct VisitorAdapter : Visitor {
     void visit(const IfStmt& /*stmt*/) override {
     }
 
-    void visit(const LabelStmt& /*stmt*/) override {
+    void visit(const GotoLabelStmt&) override {
     }
 
     void visit(const GotoStmt& /*stmt*/) override {
@@ -328,6 +343,9 @@ struct VisitorAdapter : Visitor {
  * @brief TODO
  */
 struct ThrowingVisitorAdapter : Visitor {
+    // --------------------------------------------------
+    // Types
+    //--------------------------------------------------
     void visit(const DynamicType& /*type*/) override;
 
     void visit(const IntType& /*type*/) override;
@@ -353,6 +371,10 @@ struct ThrowingVisitorAdapter : Visitor {
     void visit(const DeducedType& /*type*/) override;
 
     void visit(const UnknownType& /*type*/) override;
+
+    // --------------------------------------------------
+    // Expressions
+    //--------------------------------------------------
 
     void visit(const IntLiteralExpr& /*expr*/) override;
 
@@ -402,7 +424,13 @@ struct ThrowingVisitorAdapter : Visitor {
 
     void visit(const BracketExpr& /*expr*/) override;
 
+    void visit(const NamedExpr& /*expr*/) override;
+
     void visit(const UnknownExpr& /*expr*/) override;
+
+    // --------------------------------------------------
+    // Statements
+    //--------------------------------------------------
 
     void visit(const TranslationUnit& /*stmt*/) override;
 
@@ -414,7 +442,7 @@ struct ThrowingVisitorAdapter : Visitor {
 
     void visit(const IfStmt& /*stmt*/) override;
 
-    void visit(const LabelStmt& /*stmt*/) override;
+    void visit(const GotoLabelStmt&) override;
 
     void visit(const GotoStmt& /*stmt*/) override;
 

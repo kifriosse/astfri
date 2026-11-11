@@ -391,6 +391,21 @@ struct BracketExpr : Expr {
     ASTFRI_ADD_NODE_CONSTRUCTOR(BracketExpr)
 };
 
+/**
+ * @brief Expression associated with a specific parameter name in CallExpression.
+ *
+ * C# example:
+ * @code{.cs}
+ *  void CreateUser(string username, int age, bool admin)
+ *  { ... }
+ * CreateUser(username: "alice", age: 30, isAdmin: true);
+ * @endcode
+ */
+struct NamedExpr : Expr {
+    std::string name{};
+    Expr* expr{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(NamedExpr)
+};
 
 // TODO
 struct SwitchExpr // : Expr

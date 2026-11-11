@@ -216,6 +216,14 @@ public:
     BracketExpr* mk_bracket(Expr* expr);
 
     /**
+     * @brief Returns new instance of @c NamedExpr
+     * @param name Name of exprerssion
+     * @param expr Expression
+     * @return New instance of @c NamedExpr
+     */
+    NamedExpr* mk_named(std::string name, Expr* expr);
+
+    /**
      * @brief Returns singleton instance of @c UnknownExpr.
      * @return Singleton instance of @c UnknownExpr.
      */

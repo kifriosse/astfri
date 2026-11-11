@@ -30,6 +30,7 @@ struct ConstructorCallExpr;
 struct NewExpr;
 struct DeleteExpr;
 struct BracketExpr;
+struct NamedExpr;
 struct UnknownExpr;
 
 class ExprFactory;

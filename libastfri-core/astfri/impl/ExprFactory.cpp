@@ -203,6 +203,13 @@ BracketExpr* ExprFactory::mk_bracket(Expr* expr) {
     });
 }
 
+NamedExpr* ExprFactory::mk_named(std::string name, Expr* expr) {
+    return details::create_store_get<NamedExpr>(m_otherExpressions, [&](NamedExpr &n) {
+        n.expr = expr;
+        n.name = std::move(name);
+    });
+}
+
 UnknownExpr* ExprFactory::mk_unknown() {
     return &m_unknownExpr;
 }

@@ -154,6 +154,10 @@ void ThrowingVisitorAdapter::visit(const BracketExpr& /*expr*/) {
     throw std::logic_error("Not Implemented Yet!");
 }
 
+void ThrowingVisitorAdapter::visit(const NamedExpr& /*expr*/) {
+    throw std::logic_error("Not Implemented Yet!");
+}
+
 void ThrowingVisitorAdapter::visit(const UnknownExpr& /*expr*/) {
     throw std::logic_error("Not Implemented Yet!");
 }
@@ -178,7 +182,7 @@ void ThrowingVisitorAdapter::visit(const IfStmt& /*stmt*/) {
     throw std::logic_error("Not Implemented Yet!");
 }
 
-void ThrowingVisitorAdapter::visit(const LabelStmt&) {
+void ThrowingVisitorAdapter::visit(const GotoLabelStmt&) {
     throw std::logic_error("Not Implemented Yet!");
 }
 
