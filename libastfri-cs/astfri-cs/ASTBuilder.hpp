@@ -32,6 +32,7 @@ public:
 
 private:
     using path = std::filesystem::path;
+
     const TSLanguage* m_lang;
     TSParser* m_parser;
     std::vector<std::unique_ptr<SourceFile>> m_srcs;
@@ -39,7 +40,7 @@ private:
     astfri::csharp::Config m_config;
 
 public:
-    ASTBuilder(astfri::csharp::Config config);
+    explicit ASTBuilder(astfri::csharp::Config config);
     ~ASTBuilder();
     ASTBuilder(const ASTBuilder& other)      = delete;
     ASTBuilder(ASTBuilder&& other)           = delete;
@@ -47,13 +48,13 @@ public:
     ASTBuilder& operator=(ASTBuilder&&other) = delete;
 
     /**
-     * @brief Loads souce code of a project into AST Builder
+     * @brief Loads source code of a project into AST Builder
      * @param projectDir path to directory that contains C# source code
      */
     std::vector<astfri::TranslationUnit> load_project(const path& projectDir);
 
     /**
-     * @brief Loads souce code from a file
+     * @brief Loads source code from a file
      * @param path Path to the file with C# source code
      */
     astfri::TranslationUnit load_file(const path &path);
@@ -102,4 +103,4 @@ static_assert(
 
 } // namespace astfri
 
-#endif // CSHARP_AST_BUILDER_HPP
+#endif // ASTFRI_CSHARP_AST_BUILDER_HPP

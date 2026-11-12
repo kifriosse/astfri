@@ -18,6 +18,9 @@ struct Config {
 
 private:
     Config() = default;
+    explicit Config(const rapidjson::Value& json);
+    explicit Config(const std::filesystem::path& path);
+    Config(int argc, char* argv[]);
 
 public:
     Config(const Config &other) = default;

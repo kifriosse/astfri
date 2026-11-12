@@ -138,10 +138,8 @@ InterfaceDefStmt* StmtFactory::mk_interface_def(const std::string &name, const S
     auto *i = details::get_or_emplace<InterfaceDefStmt>(
         m_interfaceDefMap,
         mk_fqn(scope, name),
-        [&name](){
-            InterfaceDefStmt i;
-            i.name = std::move(name);
-            return i;
+        [] {
+            return InterfaceDefStmt();
         });
     i->type = m_typeFactory->mk_interface(name, scope, i);
     return i;
@@ -156,10 +154,8 @@ ClassDefStmt *StmtFactory::mk_class_def(const std::string &name, const Scope &sc
     auto *c = details::get_or_emplace<ClassDefStmt>(
         m_classDefMap,
         mk_fqn(scope, name),
-        [&name](){
-            ClassDefStmt c;
-            c.name = name;
-            return c;
+        [] {
+            return ClassDefStmt();
         });
     c->type = m_typeFactory->mk_class(name, scope, c);
     return c;
@@ -221,7 +217,6 @@ MemberInitializerStmt *StmtFactory::mk_member_initializer(
 }
 
 DestructorDefStmt *StmtFactory::mk_destructor_def(ClassDefStmt *owner, CompoundStmt *body) {
-
     return details::create_store_get<DestructorDefStmt>(
         m_otherStmts,
         [owner, body](DestructorDefStmt &d){
@@ -273,6 +268,22 @@ IfStmt *StmtFactory::mk_if(Expr *cond, Stmt *iftrue, Stmt *iffalse) {
         });
 }
 
+GotoLabelStmt* StmtFactory::mk_goto_label(const std::string& name) {
+    return details::create_store_get<GotoLabelStmt>(
+        m_otherStmts,
+        [name](GotoLabelStmt &l){
+            l.name = name;
+        });
+}
+
+GotoStmt* StmtFactory::mk_goto(LabelStmt* label) {
+    return details::create_store_get<GotoStmt>(
+        m_otherStmts,
+        [label](GotoStmt &g){
+            g.label = label;
+        });
+}
+
 CaseStmt *StmtFactory::mk_case(Expr *expr, Stmt *body) {
     return details::create_store_get<CaseStmt>(
         m_otherStmts,
@@ -291,12 +302,32 @@ CaseStmt *StmtFactory::mk_case(std::vector<Expr*> exprs, Stmt *body) {
         });
 }
 
+CaseStmt* StmtFactory::mk_case(Expr* expr) {
+    return details::create_store_get<CaseStmt>(
+        m_otherStmts,
+        [expr](CaseStmt &c) {
+            c.exprs = {expr};
+        });
+}
+
+CaseStmt* StmtFactory::mk_case(std::vector<Expr*> exprs) {
+    return details::create_store_get<CaseStmt>(
+        m_otherStmts,
+        [&exprs](CaseStmt &c) {
+            c.exprs = exprs;
+        });
+}
+
 DefaultCaseStmt *StmtFactory::mk_default_case(Stmt *body) {
     return details::create_store_get<DefaultCaseStmt>(
         m_otherStmts,
         [body](DefaultCaseStmt &d){
             d.body = body;
         });
+}
+
+DefaultCaseStmt* StmtFactory::mk_default_case() {
+    return &m_defaultCaseStmt;
 }
 
 SwitchStmt *StmtFactory::mk_switch(Expr *expr, std::vector<CaseStmt*> cases) {
@@ -320,6 +351,15 @@ SwitchStmt *StmtFactory::mk_switch(
             s.expr = expr;
             s.cases = std::move(cases);
             s.defaultCase = defaultStmt;
+        });
+}
+
+SwitchStmt* StmtFactory::mk_switch(Expr* expr, CompoundStmt* body) {
+    return details::create_store_get<SwitchStmt>(
+        m_otherStmts,
+        [expr, body](SwitchStmt &s){
+            s.expr = expr;
+            s.body = body;
         });
 }
 
@@ -398,6 +438,10 @@ BreakStmt* StmtFactory::mk_break() {
 }
 
 UnknownStmt* StmtFactory::mk_uknown() {
+    return &m_unknownStmt;
+}
+
+UnknownStmt* StmtFactory::mk_unknown() {
     return &m_unknownStmt;
 }
 

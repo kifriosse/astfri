@@ -17,67 +17,74 @@ namespace astfri {
 struct Expr : detail::ASTNode<ExprKind> {
 };
 
-/**
- * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Expr.
- *
- * See @c MakeA doc for more details.
- *
- * @tparam SelfType child class type.
- */
-template<typename SelfType>
-using MakeAnExpr = detail::MakeA<Expr, SelfType>;
+// /**
+//  * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Expr.
+//  *
+//  * See @c MakeA doc for more details.
+//  *
+//  * @tparam SelfType child class type.
+//  */
+// template<typename SelfType>
+// using MakeAnExpr = detail::MakeA<Expr, SelfType>;
 
 /**
  * @brief Base class for expressions representing literal values of type T.
  */
-template<typename SelfType, typename T>
-struct Literal : MakeAnExpr<SelfType> {
+template<typename T>
+struct Literal : Expr {
     T val{};
 };
 
 /**
  * @brief Represents an integer literal expression.
  */
-struct IntLiteralExpr : Literal<IntLiteralExpr, int> {
+struct IntLiteralExpr : Literal<int> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(IntLiteralExpr)
 };
 
 /**
  * @brief Represents a floating-point literal expression.
  */
-struct FloatLiteralExpr : Literal<FloatLiteralExpr, float> {
+struct FloatLiteralExpr : Literal<float> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(FloatLiteralExpr)
 };
 
 /**
  * @brief Represents a character literal expression.
  */
-struct CharLiteralExpr : Literal<CharLiteralExpr, char> {
+struct CharLiteralExpr : Literal<char> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(CharLiteralExpr)
 };
 
 /**
  * @brief Represents a string literal expression.
  */
-struct StringLiteralExpr : Literal<StringLiteralExpr, std::string> {
+struct StringLiteralExpr : Literal<std::string> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(StringLiteralExpr)
 };
 
 /**
  * @brief Represents a boolean literal expression.
  */
-struct BoolLiteralExpr : Literal<BoolLiteralExpr, bool> {
+struct BoolLiteralExpr : Literal<bool> {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(BoolLiteralExpr)
 };
 
 /**
  * @brief Represents a null literal expression.
  */
-struct NullLiteralExpr : MakeAnExpr<NullLiteralExpr> {
+struct NullLiteralExpr : Expr {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(NullLiteralExpr)
 };
 
 /**
  * @brief Represents a conditional expression (ternary operator).
  */
-struct IfExpr : MakeAnExpr<IfExpr> {
+struct IfExpr : Expr {
     Expr *cond{nullptr};
     Expr *iftrue{nullptr};
     Expr *iffalse{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(IfExpr)
 };
 
 /**
@@ -195,10 +202,11 @@ enum class BinOpType {
 /**
  * @brief Represents binary operator expression.
  */
-struct BinOpExpr : MakeAnExpr<BinOpExpr> {
+struct BinOpExpr : Expr {
     Expr *left{nullptr};
     Expr *right{nullptr};
     BinOpType op{BinOpType::UNINITIALIZED};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(BinOpExpr)
 };
 
 /**
@@ -241,42 +249,47 @@ enum class UnaryOpType {
 /**
  * @brief Represents unary operator expression.
  */
-struct UnaryOpExpr : MakeAnExpr<UnaryOpExpr> {
+struct UnaryOpExpr : Expr {
     Expr *arg{nullptr};
     UnaryOpType op{UnaryOpType::UNINITIALIZED};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(UnaryOpExpr)
 };
 
 /**
  * @brief Represents a reference to a function parameter.
  */
-struct ParamVarRefExpr : MakeAnExpr<ParamVarRefExpr> {
+struct ParamVarRefExpr : Expr {
     // TODO this should be Either<ReqPtr<Symbol>, ReqPtr<ParamVarDef>>
     std::string param;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ParamVarRefExpr)
 };
 
 /**
  * @brief Represents a reference to a local variable.
  */
-struct LocalVarRefExpr : MakeAnExpr<LocalVarRefExpr> {
+struct LocalVarRefExpr : Expr {
     // TODO this should be Either<Symbol, LocalVarDef>
     std::string var;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(LocalVarRefExpr)
 };
 
 /**
  * @brief Represents a reference to a member variable of an object or class.
  */
-struct MemberVarRefExpr : MakeAnExpr<MemberVarRefExpr> {
+struct MemberVarRefExpr : Expr {
     Expr *owner{nullptr};
     // TODO this should be Either<Symbol, MemberVarDef>
     std::string member;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(MemberVarRefExpr)
 };
 
 /**
  * @brief Represents a reference to a global variable.
  */
-struct GlobalVarRefExpr : MakeAnExpr<GlobalVarRefExpr> {
+struct GlobalVarRefExpr : Expr {
     // TODO this should be Either<Symbol, GlobalVarDef>
     std::string global;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(GlobalVarRefExpr)
 };
 
 /**
@@ -284,105 +297,135 @@ struct GlobalVarRefExpr : MakeAnExpr<GlobalVarRefExpr> {
  *
  * This type is mainly used as @c owner for static method calls
  */
-struct ClassRefExpr : MakeAnExpr<ClassRefExpr> {
+struct ClassRefExpr : Expr {
     // TODO this should be Either<Symbol, ClassType>
     std::string name;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ClassRefExpr)
 };
 
 /**
  * @brief Represents a call to a standalone function.
  */
-struct FunctionCallExpr : MakeAnExpr<FunctionCallExpr> {
+struct FunctionCallExpr : Expr {
     // TODO this should be Either<Symbol, FunctionDefStmt>
     std::string name;
     std::vector<Expr*> args;
+    ASTFRI_ADD_NODE_CONSTRUCTOR(FunctionCallExpr)
 };
 
 /**
  * @brief Represents a call to a class or object method.
  */
-struct MethodCallExpr : MakeAnExpr<MethodCallExpr> {
+struct MethodCallExpr : Expr {
     Expr *owner{nullptr}; // TODO addressee
     // TODO this should be Either<Symbol, MethodDefStmt>
     std::string name;
     std::vector<Expr*> args{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(MethodCallExpr)
 };
 
 /**
  * @brief Represents an invocation of a lambda expression.
  */
-struct LambdaCallExpr : MakeAnExpr<LambdaCallExpr> {
+struct LambdaCallExpr : Expr {
     Expr* lambda{nullptr};
     std::vector<Expr*> args{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(LambdaCallExpr)
 };
 
 /**
  * @brief Represents the definition of a lambda expression.
  */
-struct LambdaExpr : MakeAnExpr<LambdaExpr> {
+struct LambdaExpr : Expr{
     LambdaType *type{nullptr};
     Type *returnType{nullptr};
     Stmt *body{nullptr};
     std::vector<ParamVarDefStmt*> params{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(LambdaExpr)
 };
 
 /**
  * @brief Represents a reference to the current instance e.g., `this` or `self` keywords.
  */
-struct ThisExpr : MakeAnExpr<ThisExpr> {
+struct ThisExpr : Expr {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ThisExpr)
 };
 
 /**
  * @brief Represents a reference to the base class e.g., `super` or `base` keywords.
  */
-struct BaseExpr : MakeAnExpr<BaseExpr> {
+struct BaseExpr : Expr {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(BaseExpr)
 };
 
 /**
  * @brief Constructor call
  */
-struct ConstructorCallExpr : MakeAnExpr<ConstructorCallExpr> {
+struct ConstructorCallExpr : Expr {
     Type* type{nullptr};
     std::vector<Expr*> args{};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(ConstructorCallExpr)
 };
 
 /**
  * @brief Operator new that allocates and initializes it using a constructor
  */
-struct NewExpr : MakeAnExpr<NewExpr> {
+struct NewExpr : Expr {
     ConstructorCallExpr* init{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(NewExpr)
 };
 
 /**
  * @brief Operator delete that frees allocated memory.
  */
-struct DeleteExpr : MakeAnExpr<DeleteExpr> {
+struct DeleteExpr : Expr {
     Expr* arg{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(DeleteExpr)
 };
 
 /**
  * @brief Brackets prioritizing part of an expression.
  */
-struct BracketExpr : MakeAnExpr<BracketExpr> {
+struct BracketExpr : Expr {
     Expr* expr{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(BracketExpr)
 };
 
-
-// TODO
-struct SwitchExpr
-{
+/**
+ * @brief Expression associated with a specific parameter name in CallExpression.
+ *
+ * C# example:
+ * @code{.cs}
+ *  void CreateUser(string username, int age, bool admin)
+ *  { ... }
+ * CreateUser(username: "alice", age: 30, isAdmin: true);
+ * @endcode
+ */
+struct NamedExpr : Expr {
+    std::string name{};
+    Expr* expr{nullptr};
+    ASTFRI_ADD_NODE_CONSTRUCTOR(NamedExpr)
 };
 
 // TODO
-struct Sink
+struct SwitchExpr // : Expr
 {
+    // ASTFRI_ADD_NODE_CONSTRUCTOR(SwitchExpr)
+};
+
+// TODO
+struct Sink // : Expr
+{
+    // ASTFRI_ADD_NODE_CONSTRUCTOR(Sink)
     // _
 };
 
 /**
  * @brief Represents an expression whose content or type is currently unknown.
  */
-struct UnknownExpr : MakeAnExpr<UnknownExpr> { };
+struct UnknownExpr : Expr {
+    ASTFRI_ADD_NODE_CONSTRUCTOR(UnknownExpr)
+};
 
 
 } // namespace astfri

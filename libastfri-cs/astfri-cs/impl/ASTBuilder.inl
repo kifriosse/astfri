@@ -9,7 +9,7 @@ TranslationUnit CSharpOutput::load(csharp::Config& cfg, Source& source) {
     for (auto& ext : cfg.externalTypeSources) {
         builder.load_source_of_external_types(ext);
     }
-    builder.load_src(source);
+    builder.load_file(source);
     return *builder.mk_ast(cfg.profile);
 }
 

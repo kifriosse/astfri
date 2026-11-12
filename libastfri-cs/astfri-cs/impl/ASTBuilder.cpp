@@ -52,7 +52,7 @@ const std::unordered_map<SDKProfile, fs::path> profileMap = {
 ASTBuilder::ASTBuilder(astfri::csharp::Config config) :
     m_lang(tree_sitter_c_sharp()),
     m_parser(ts_parser_new()),
-    m_config(std::move(config)) {
+    m_config(config) {
     ts_parser_set_language(m_parser, m_lang);
 }
 
@@ -131,7 +131,7 @@ TranslationUnit ASTBuilder::mk_ast(SDKProfile profile) {
     if (profile != SDKProfile::None && profile != SDKProfile::Core
         && profile != SDKProfile::Worker) {
         load_source_of_external_types(profileMap.at(SDKProfile::Core));
-        }
+    }
 
     SymbolTable symbTable;
     SymbTableBuilder symbTableBuilder(m_srcs, symbTable);

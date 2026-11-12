@@ -101,15 +101,31 @@ public:
 
     IfStmt *mk_if(Expr *cond, Stmt *iftrue, Stmt *iffalse);
 
-    CaseStmt *mk_case(Expr *expr, Stmt *body);
+    GotoLabelStmt* mk_goto_label(const std::string& name);
 
-    CaseStmt *mk_case(std::vector<Expr*> exprs, Stmt *body);
+    GotoStmt *mk_goto(LabelStmt *label);
 
-    DefaultCaseStmt *mk_default_case(Stmt *body);
+    [[deprecated]] CaseStmt *mk_case(Expr *expr, Stmt *body);
 
-    SwitchStmt *mk_switch(Expr *expr, std::vector<CaseStmt*> cases);
+    [[deprecated]] CaseStmt *mk_case(std::vector<Expr*> exprs, Stmt *body);
 
-    SwitchStmt *mk_switch(Expr *expr, std::vector<CaseStmt*> cases, DefaultCaseStmt *defaultStmt);
+    CaseStmt *mk_case(Expr *expr);
+
+    CaseStmt *mk_case(std::vector<Expr*> exprs);
+
+    [[deprecated]] DefaultCaseStmt *mk_default_case(Stmt *body);
+
+    DefaultCaseStmt *mk_default_case();
+
+    [[deprecated]] SwitchStmt *mk_switch(Expr *expr, std::vector<CaseStmt*> cases);
+
+    [[deprecated]] SwitchStmt* mk_switch(
+        Expr* expr,
+        std::vector<CaseStmt*> cases,
+        DefaultCaseStmt* defaultStmt
+    );
+
+    SwitchStmt *mk_switch(Expr *expr, CompoundStmt* body);
 
     WhileStmt *mk_while(Expr *cond, Stmt *body);
 
@@ -129,7 +145,9 @@ public:
 
     BreakStmt *mk_break();
 
-    UnknownStmt *mk_uknown();
+    [[deprecated]] UnknownStmt *mk_uknown();
+
+    UnknownStmt *mk_unknown();
 
     TranslationUnit *mk_translation_unit();
 
@@ -168,6 +186,7 @@ private:
     ContinueStmt m_continueStmt;
     BreakStmt m_breakStmt;
     UnknownStmt m_unknownStmt;
+    DefaultCaseStmt m_defaultCaseStmt;
 };
 
 
