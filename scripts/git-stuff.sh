@@ -23,7 +23,7 @@ fi
 MODE=$1
 
 # Branches
-BRANCHES="dev-ab dev-ak dev-jr dev-mb dev-mm dev-mp"
+BRANCHES="dev-ab dev-tb dev-lk dev-mh dev-mm dev-ak dev-jr dev-mb dev-mp"
 
 if [ "$MODE" = "pull" ]; then    # pull
   heading "# Pulling changes"
