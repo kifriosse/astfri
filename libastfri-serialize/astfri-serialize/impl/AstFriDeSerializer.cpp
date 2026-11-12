@@ -544,7 +544,7 @@ astfri::ClassDefStmt* AstFriDeSerializer::deserialize_class_def_stmt(rapidjson::
         }
     }
 
-    nameWithClassDefStmtMapping_[classDefStmt->name] = classDefStmt;
+    nameWithClassDefStmtMapping_[classDefStmt->type->name] = classDefStmt;
     return classDefStmt;
 }
 
@@ -755,7 +755,7 @@ astfri::InterfaceDefStmt* AstFriDeSerializer::deserialize_interface_def_stmt(rap
         interfDefStmt->tparams.push_back(this->deserialize_generic_param(genericParam));
     }
 
-    nameWithInterfaceDefStmtMapping_[interfDefStmt->name] = interfDefStmt;
+    nameWithInterfaceDefStmtMapping_[interfDefStmt->type->name] = interfDefStmt;
     return interfDefStmt;
 }
 
