@@ -21,16 +21,6 @@ struct Stmt : detail::ASTNode<StmtKind> {
 };
 
 
-// /**
-//  * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Stmt.
-//  *
-//  * See @c MakeA doc for more details.
-//  *
-//  * @tparam SelfType child class type.
-//  */
-// template<typename SelfType>
-// using MakeAStmt = detail::MakeA<Stmt, SelfType>;
-
 
 /**
  * @brief Defines access modifier of a class member.

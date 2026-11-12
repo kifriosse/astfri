@@ -25,12 +25,6 @@ void initialize(ASTNode<KindType> &node) {
 }
 
 
-template<typename BaseType, typename SelfType>
-MakeA<BaseType, SelfType>::MakeA() {
-    initialize<SelfType>(*this);
-}
-
-
 } // namespace detail
 
 

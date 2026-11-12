@@ -62,26 +62,7 @@ private:
 
 
 /**
- * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c BaseType.
- *
- * The hierarchy will look like this:
- * ASTNode <|-- BaseType <|-- MakeA <|-- SelfType
- *
- * Initializes self using @c initialize.
- *
- * @tparam BaseType Base class type.
- * @tparam SelfType Child class type.
- */
-template<typename BaseType, typename SelfType>
-struct MakeA : BaseType {
-    MakeA();
-};
-
-
-/**
  * @brief Adds a constructor that calls intialize.
- *
- * Can be used as an alternative to @c MakeA. See @c LocalVarDefStmt for an example.
  */
 #define ASTFRI_ADD_NODE_CONSTRUCTOR(SelfType) SelfType() {\
   ::astfri::detail::initialize<SelfType>(*this);\
