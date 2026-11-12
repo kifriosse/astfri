@@ -1,3 +1,12 @@
+**2026-11-12** `0.2.1` Michal Mrena `<michal.mrena@fri.uniza.sk>`
+- (ab) Prepared removal of `UserType` as common base of `ClassDefStmt` and
+`InterfaceDefStmt`.
+- (ab) Added new `SwitchStmt` members (new switch implementation) and
+deprecated old members.
+- (ab) Simplified node base definitions by removing `MakeA*` helpers.
+- (mm) Merged `out-vector` and `ted` libs.
+
+
 **2026-10-15** `0.2.0` Michal Mrena `<michal.mrena@fri.uniza.sk>`
 - Simplified versioning to a single project version.
 - Generalized `external/CMakeLists.txt` to support Windows builds.
