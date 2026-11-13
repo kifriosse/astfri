@@ -41,7 +41,7 @@ DynamicType *TypeFactory::mk_dynamic() {
 }
 
 IndirectionType *TypeFactory::mk_indirect(Type *type) {
-    return details::get_or_emplace<IndirectionType>(
+    return detail::get_or_emplace<IndirectionType>(
         m_indirectTypeMap,
         type,
         [type](){
@@ -56,7 +56,7 @@ ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope) {
 }
 
 ClassType *TypeFactory::mk_class(const std::string &name, const Scope &scope, ClassDefStmt *def) {
-    ClassType *t = details::get_or_emplace<ClassType>(
+    ClassType *t = detail::get_or_emplace<ClassType>(
         m_classTypeMap,
         mk_fqn(scope, name),
         [&name, &scope, def](){
@@ -89,7 +89,7 @@ InterfaceType *TypeFactory::mk_interface(
     const Scope &scope,
     InterfaceDefStmt *def
 ) {
-    InterfaceType *i = details::get_or_emplace<InterfaceType>(
+    InterfaceType *i = detail::get_or_emplace<InterfaceType>(
         m_interfaceTypeMap,
         mk_fqn(scope, name),
         [&name, &scope, def](){
@@ -114,7 +114,7 @@ InterfaceType *TypeFactory::mk_interface(
 }
 
 LambdaType *TypeFactory::mk_lambda(std::string name, LambdaExpr *def) {
-    return details::create_store_get<LambdaType>(
+    return detail::create_store_get<LambdaType>(
         m_otherTypes,
         [&name, def](LambdaType &l){
             l.name = std::move(name);
@@ -123,7 +123,7 @@ LambdaType *TypeFactory::mk_lambda(std::string name, LambdaExpr *def) {
 }
 
 DeducedType *TypeFactory::mk_deduced(Type *realType) {
-    return details::get_or_emplace<DeducedType>(
+    return detail::get_or_emplace<DeducedType>(
         m_deducedTypeMap,
         realType,
         [realType](){
@@ -134,7 +134,7 @@ DeducedType *TypeFactory::mk_deduced(Type *realType) {
 }
 
 IncompleteType *TypeFactory::mk_incomplete(const std::string &name) {
-    return details::get_or_emplace<IncompleteType>(
+    return detail::get_or_emplace<IncompleteType>(
         m_incompleteTypeMap,
         name,
         [&name](){

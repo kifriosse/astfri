@@ -17,7 +17,7 @@ ExprFactory::ExprFactory() :
 }
 
 IntLiteralExpr* ExprFactory::mk_int_literal(const int val) {
-    return details::get_or_emplace<IntLiteralExpr>(
+    return detail::get_or_emplace<IntLiteralExpr>(
         m_intLiterals,
         val,
         [val](){
@@ -28,7 +28,7 @@ IntLiteralExpr* ExprFactory::mk_int_literal(const int val) {
 }
 
 FloatLiteralExpr* ExprFactory::mk_float_literal(float val) {
-    return details::create_store_get<FloatLiteralExpr>(
+    return detail::create_store_get<FloatLiteralExpr>(
         m_otherExpressions,
         [val](FloatLiteralExpr &l){
             l.val = val;
@@ -37,7 +37,7 @@ FloatLiteralExpr* ExprFactory::mk_float_literal(float val) {
 }
 
 CharLiteralExpr* ExprFactory::mk_char_literal(const char val) {
-    return details::get_or_emplace<CharLiteralExpr>(
+    return detail::get_or_emplace<CharLiteralExpr>(
         m_charLiterals,
         val,
         [val](){
@@ -48,7 +48,7 @@ CharLiteralExpr* ExprFactory::mk_char_literal(const char val) {
 }
 
 StringLiteralExpr* ExprFactory::mk_string_literal(const std::string& val) {
-    return details::get_or_emplace<StringLiteralExpr>(
+    return detail::get_or_emplace<StringLiteralExpr>(
         m_stringLiterals,
         val,
         [val](){
@@ -67,7 +67,7 @@ NullLiteralExpr* ExprFactory::mk_null_literal() {
 }
 
 IfExpr* ExprFactory::mk_if(Expr* cond, Expr* iftrue, Expr* iffalse) {
-    return details::create_store_get<IfExpr>(m_otherExpressions, [=](IfExpr &i){
+    return detail::create_store_get<IfExpr>(m_otherExpressions, [=](IfExpr &i){
         i.cond = cond;
         i.iftrue = iftrue;
         i.iffalse = iffalse;
@@ -75,7 +75,7 @@ IfExpr* ExprFactory::mk_if(Expr* cond, Expr* iftrue, Expr* iffalse) {
 }
 
 BinOpExpr* ExprFactory::mk_bin_on(Expr* left, BinOpType op, Expr* right) {
-    return details::create_store_get<BinOpExpr>(m_otherExpressions, [=](BinOpExpr &e){
+    return detail::create_store_get<BinOpExpr>(m_otherExpressions, [=](BinOpExpr &e){
         e.left = left;
         e.op = op;
         e.right = right;
@@ -83,52 +83,52 @@ BinOpExpr* ExprFactory::mk_bin_on(Expr* left, BinOpType op, Expr* right) {
 }
 
 UnaryOpExpr* ExprFactory::mk_unary_op(UnaryOpType op, Expr* arg) {
-    return details::create_store_get<UnaryOpExpr>(m_otherExpressions, [=](UnaryOpExpr &u){
+    return detail::create_store_get<UnaryOpExpr>(m_otherExpressions, [=](UnaryOpExpr &u){
         u.op = op;
         u.arg = arg;
     });
 }
 
 ParamVarRefExpr* ExprFactory::mk_param_var_ref(std::string param) {
-    return details::create_store_get<ParamVarRefExpr>(m_otherExpressions, [&](ParamVarRefExpr &e){
+    return detail::create_store_get<ParamVarRefExpr>(m_otherExpressions, [&](ParamVarRefExpr &e){
         e.param = std::move(param);
     });
 }
 
 LocalVarRefExpr* ExprFactory::mk_local_var_ref(std::string var) {
-    return details::create_store_get<LocalVarRefExpr>(m_otherExpressions, [&](LocalVarRefExpr &r){
+    return detail::create_store_get<LocalVarRefExpr>(m_otherExpressions, [&](LocalVarRefExpr &r){
         r.var = std::move(var);
     });
 }
 
 MemberVarRefExpr* ExprFactory::mk_member_var_ref(Expr* owner, std::string member) {
-    return details::create_store_get<MemberVarRefExpr>(m_otherExpressions, [&](MemberVarRefExpr &r){
+    return detail::create_store_get<MemberVarRefExpr>(m_otherExpressions, [&](MemberVarRefExpr &r){
         r.owner = owner;
         r.member = std::move(member);
     });
 }
 
 GlobalVarRefExpr* ExprFactory::mk_global_var_ref(std::string global) {
-    return details::create_store_get<GlobalVarRefExpr>(m_otherExpressions, [&](GlobalVarRefExpr &r){
+    return detail::create_store_get<GlobalVarRefExpr>(m_otherExpressions, [&](GlobalVarRefExpr &r){
         r.global = std::move(global);
     });
 }
 
 ClassRefExpr* ExprFactory::mk_class_ref(std::string name) {
-    return details::create_store_get<ClassRefExpr>(m_otherExpressions, [&](ClassRefExpr &r){
+    return detail::create_store_get<ClassRefExpr>(m_otherExpressions, [&](ClassRefExpr &r){
         r.name = std::move(name);
     });
 }
 
 FunctionCallExpr* ExprFactory::mk_function_call(std::string name, std::vector<Expr*> args) {
-    return details::create_store_get<FunctionCallExpr>(m_otherExpressions, [&](FunctionCallExpr &r){
+    return detail::create_store_get<FunctionCallExpr>(m_otherExpressions, [&](FunctionCallExpr &r){
         r.name = std::move(name);
         r.args = std::move(args);
     });
 }
 
 MethodCallExpr* ExprFactory::mk_method_call(Expr* owner, std::string name, std::vector<Expr*> args){
-    return details::create_store_get<MethodCallExpr>(m_otherExpressions, [&](MethodCallExpr &c){
+    return detail::create_store_get<MethodCallExpr>(m_otherExpressions, [&](MethodCallExpr &c){
         c.owner = owner;
         c.name = std::move(name);
         c.args = std::move(args);
@@ -136,13 +136,13 @@ MethodCallExpr* ExprFactory::mk_method_call(Expr* owner, std::string name, std::
 }
 
 LambdaCallExpr* ExprFactory::mk_lambda_call() {
-    return details::create_store_get<LambdaCallExpr>(m_otherExpressions, [](LambdaCallExpr &l){
+    return detail::create_store_get<LambdaCallExpr>(m_otherExpressions, [](LambdaCallExpr &l){
         (void)l;
     });
 }
 
 LambdaCallExpr* ExprFactory::mk_lambda_call(Expr* lambda, std::vector<Expr*> args) {
-    return details::create_store_get<LambdaCallExpr>(m_otherExpressions, [&](LambdaCallExpr &l){
+    return detail::create_store_get<LambdaCallExpr>(m_otherExpressions, [&](LambdaCallExpr &l){
         l.lambda = lambda;
         l.args = std::move(args);
     });
@@ -158,7 +158,7 @@ LambdaExpr* ExprFactory::mk_lambda_expr(
     Stmt* body,
     std::string name
 ) {
-    LambdaExpr* e = details::get_or_emplace<LambdaExpr>(m_lambdaExprs, name, [&](){
+    LambdaExpr* e = detail::get_or_emplace<LambdaExpr>(m_lambdaExprs, name, [&](){
         LambdaExpr l;
         l.body = body;
         l.params = std::move(params);
@@ -178,7 +178,7 @@ BaseExpr* ExprFactory::mk_base() {
 }
 
 ConstructorCallExpr* ExprFactory::mk_constructor_call(Type* type, std::vector<Expr*> args) {
-    return details::create_store_get<ConstructorCallExpr>(m_otherExpressions,
+    return detail::create_store_get<ConstructorCallExpr>(m_otherExpressions,
     [&](ConstructorCallExpr &c){
         c.type = type;
         c.args = std::move(args);
@@ -186,25 +186,25 @@ ConstructorCallExpr* ExprFactory::mk_constructor_call(Type* type, std::vector<Ex
 }
 
 NewExpr* ExprFactory::mk_new(ConstructorCallExpr* init) {
-    return details::create_store_get<NewExpr>(m_otherExpressions, [=](NewExpr &n){
+    return detail::create_store_get<NewExpr>(m_otherExpressions, [=](NewExpr &n){
         n.init = init;
     });
 }
 
 DeleteExpr* ExprFactory::mk_delete(Expr* arg) {
-    return details::create_store_get<DeleteExpr>(m_otherExpressions, [=](DeleteExpr &d){
+    return detail::create_store_get<DeleteExpr>(m_otherExpressions, [=](DeleteExpr &d){
         d.arg = arg;
     });
 }
 
 BracketExpr* ExprFactory::mk_bracket(Expr* expr) {
-    return details::create_store_get<BracketExpr>(m_otherExpressions, [=](BracketExpr &b){
+    return detail::create_store_get<BracketExpr>(m_otherExpressions, [=](BracketExpr &b){
         b.expr = expr;
     });
 }
 
 NamedExpr* ExprFactory::mk_named(std::string name, Expr* expr) {
-    return details::create_store_get<NamedExpr>(m_otherExpressions, [&](NamedExpr &n) {
+    return detail::create_store_get<NamedExpr>(m_otherExpressions, [&](NamedExpr &n) {
         n.expr = expr;
         n.name = std::move(name);
     });

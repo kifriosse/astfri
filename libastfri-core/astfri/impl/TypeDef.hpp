@@ -2,8 +2,11 @@
 #define ASTFRI_IMPL_TYPE_DEF_HPP
 
 #include <astfri/impl/ASTNode.hpp>
+#include <astfri/impl/ExprFwd.hpp>
 #include <astfri/impl/Scope.hpp>
-#include <astfri/impl/TypeKind.hpp>
+#include <astfri/impl/StmtFwd.hpp>
+#include <astfri/impl/TypeInfo.hpp>
+#include <astfri/impl/Visitor.hpp>
 
 #include <string>
 
@@ -14,70 +17,82 @@ namespace astfri {
 /**
  * @brief TODO
  */
-struct Type : detail::ASTNode<TypeKind> {
+struct Type : ASTNode {
 };
-
-
-// /**
-//  * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c Type.
-//  *
-//  * See @c MakeA doc for more details.
-//  *
-//  * @tparam SelfType child class type.
-//  */
-// template<typename SelfType>
-// using MakeAType = detail::MakeA<Type, SelfType>;
+ASTFRI_REGISTER_TYPE(Type,ASTNode)
 
 
 /**
  * @brief TODO
  */
 struct DynamicType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(DynamicType)
+    DynamicType();
 };
+ASTFRI_REGISTER_TYPE(DynamicType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(DynamicType)
+
 
 /**
  * @brief TODO
  */
 struct IntType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(IntType)
+    IntType();
 };
+ASTFRI_REGISTER_TYPE(IntType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(IntType)
+
 
 /**
  * @brief TODO
  */
 struct FloatType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(FloatType)
+    FloatType();
 };
+ASTFRI_REGISTER_TYPE(FloatType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(FloatType)
+
 
 /**
  * @brief TODO
  */
 struct CharType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(CharType)
+    CharType();
 };
+ASTFRI_REGISTER_TYPE(CharType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(CharType)
+
 
 /**
  * @brief TODO
  */
 struct BoolType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(BoolType)
+    BoolType();
 };
+ASTFRI_REGISTER_TYPE(BoolType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(BoolType)
+
 
 /**
  * @brief TODO
  */
 struct VoidType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(VoidType)
+    VoidType();
 };
+ASTFRI_REGISTER_TYPE(VoidType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(VoidType)
+
 
 /**
  * @brief TODO
  */
 struct IndirectionType : Type {
     Type *indirect{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(IndirectionType)
+
+    IndirectionType();
 };
+ASTFRI_REGISTER_TYPE(IndirectionType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(IndirectionType)
+
 
 /**
  * @brief TODO
@@ -86,22 +101,32 @@ struct ScopedType : Type {
     std::string name{};
     Scope scope{};
 };
+ASTFRI_REGISTER_TYPE(ScopedType,Type)
+
 
 /**
  * @brief TODO
  */
 struct ClassType : ScopedType {
     ClassDefStmt *def{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ClassType)
+
+    ClassType();
 };
+ASTFRI_REGISTER_TYPE(ClassType,ScopedType)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ClassType)
+
 
 /**
  * @brief TODO
  */
 struct InterfaceType : ScopedType {
     InterfaceDefStmt *def{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(InterfaceType)
+
+    InterfaceType();
 };
+ASTFRI_REGISTER_TYPE(InterfaceType,ScopedType)
+ASTFRI_ADD_NODE_CONSTRUCTOR(InterfaceType)
+
 
 /**
  * @brief TODO
@@ -109,8 +134,12 @@ struct InterfaceType : ScopedType {
 struct LambdaType : Type {
     std::string name{};
     LambdaExpr *def{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(LambdaType)
+
+    LambdaType();
 };
+ASTFRI_REGISTER_TYPE(LambdaType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(LambdaType)
+
 
 /**
  * @brief Represents type deduced by compiler.
@@ -122,8 +151,12 @@ struct DeducedType : Type {
      * @brief Real type if available, otherwise @c Type::NULL.
      */
     Type* realType{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(DeducedType)
+
+    DeducedType();
 };
+ASTFRI_REGISTER_TYPE(DeducedType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(DeducedType)
+
 
 // /**
 //  * @brief TODO
@@ -156,15 +189,21 @@ struct IncompleteType : Type {
      * @brief Name of the type.
      */
     std::string name{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(IncompleteType)
+
+    IncompleteType();
 };
+ASTFRI_REGISTER_TYPE(IncompleteType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(IncompleteType)
+
 
 /**
  * @brief TODO, tento pojde prec, namiesto neho bude nullptr a test to vyhlasi za bug
  */
 struct UnknownType : Type {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(UnknownType)
+    UnknownType();
 };
+ASTFRI_REGISTER_TYPE(UnknownType,Type)
+ASTFRI_ADD_NODE_CONSTRUCTOR(UnknownType)
 
 
 } // namespace astfri

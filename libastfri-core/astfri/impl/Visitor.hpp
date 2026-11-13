@@ -10,7 +10,7 @@ namespace astfri {
 
 
 /**
- * @brief TODO
+ * @brief Visitor interface for ASTNodes.
  */
 struct Visitor {
     virtual void visit(const DynamicType& type)           = 0;

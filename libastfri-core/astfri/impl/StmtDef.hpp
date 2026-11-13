@@ -1,11 +1,12 @@
 #ifndef ASTFRI_IMPL_STMT_DEF_HPP
 #define ASTFRI_IMPL_STMT_DEF_HPP
 
-#include <astfri/impl/tools/ReqPtr.hpp>
-#include <astfri/impl/tools/OptPtr.hpp>
 #include <astfri/impl/ASTNode.hpp>
-#include <astfri/impl/StmtKind.hpp>
-#include <astfri/impl/TypeDef.hpp>
+#include <astfri/impl/ExprFwd.hpp>
+#include <astfri/impl/StmtFwd.hpp>
+#include <astfri/impl/TypeFwd.hpp>
+#include <astfri/impl/TypeInfo.hpp>
+#include <astfri/impl/Visitor.hpp>
 
 #include <string>
 #include <vector>
@@ -17,9 +18,9 @@ namespace astfri {
 /**
  * @brief Base for all statements.
  */
-struct Stmt : detail::ASTNode<StmtKind> {
+struct Stmt : ASTNode {
 };
-
+ASTFRI_REGISTER_TYPE(Stmt,ASTNode)
 
 
 /**
@@ -79,22 +80,27 @@ struct VarDefStmt : Stmt {
     Type *type{nullptr};
     Expr *initializer{nullptr};
 };
+ASTFRI_REGISTER_TYPE(VarDefStmt,Stmt)
 
 
 /**
- * @brief TODO
- */
+* @brief TODO
+*/
 struct LocalVarDefStmt : VarDefStmt {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(LocalVarDefStmt)
+    LocalVarDefStmt();
 };
+ASTFRI_REGISTER_TYPE(LocalVarDefStmt,VarDefStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(LocalVarDefStmt)
 
 
 /**
  * @brief TODO
  */
 struct ParamVarDefStmt : VarDefStmt {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ParamVarDefStmt)
+    ParamVarDefStmt();
 };
+ASTFRI_REGISTER_TYPE(ParamVarDefStmt,VarDefStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ParamVarDefStmt)
 
 
 /**
@@ -103,16 +109,21 @@ struct ParamVarDefStmt : VarDefStmt {
 struct MemberVarDefStmt : VarDefStmt {
     AccessModifier access{AccessModifier::UNINITIALIZED};
     Staticity staticity{Staticity::UNINITIALIZED};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(MemberVarDefStmt)
+
+    MemberVarDefStmt();
 };
+ASTFRI_REGISTER_TYPE(MemberVarDefStmt,VarDefStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(MemberVarDefStmt)
 
 
 /**
  * @brief TODO
  */
 struct GlobalVarDefStmt : VarDefStmt {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(GlobalVarDefStmt)
+    GlobalVarDefStmt();
 };
+ASTFRI_REGISTER_TYPE(GlobalVarDefStmt,VarDefStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(GlobalVarDefStmt)
 
 
 /**
@@ -132,8 +143,11 @@ struct GlobalVarDefStmt : VarDefStmt {
  */
 struct MultiVarDefStmt : Stmt {
     std::vector<VarDefStmt*> defs{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(MultiVarDefStmt)
+
+    MultiVarDefStmt();
 };
+ASTFRI_REGISTER_TYPE(MultiVarDefStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(MultiVarDefStmt)
 
 
 /**
@@ -144,8 +158,11 @@ struct FunctionDefStmt : Stmt {
     std::vector<ParamVarDefStmt*> params{};
     Type* retType{nullptr};
     CompoundStmt* body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(FunctionDefStmt)
+
+    FunctionDefStmt();
 };
+ASTFRI_REGISTER_TYPE(FunctionDefStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(FunctionDefStmt)
 
 
 /**
@@ -157,8 +174,11 @@ struct MethodDefStmt : Stmt {
     AccessModifier access{AccessModifier::Public};
     Virtuality virtuality{Virtuality::NotVirtual};
     Staticity staticity{Staticity::NonStatic};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(MethodDefStmt)
+
+    MethodDefStmt();
 };
+ASTFRI_REGISTER_TYPE(MethodDefStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(MethodDefStmt)
 
 
 /**
@@ -167,8 +187,11 @@ struct MethodDefStmt : Stmt {
 struct BaseInitializerStmt : Stmt {
     ClassType* type{nullptr};
     std::vector<Expr*> args{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(BaseInitializerStmt)
+
+    BaseInitializerStmt();
 };
+ASTFRI_REGISTER_TYPE(BaseInitializerStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(BaseInitializerStmt)
 
 
 /**
@@ -176,8 +199,11 @@ struct BaseInitializerStmt : Stmt {
  */
 struct SelfInitializerStmt : Stmt {
     std::vector<Expr*> args{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(SelfInitializerStmt)
+
+    SelfInitializerStmt();
 };
+ASTFRI_REGISTER_TYPE(SelfInitializerStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(SelfInitializerStmt)
 
 
 /**
@@ -186,8 +212,11 @@ struct SelfInitializerStmt : Stmt {
 struct MemberInitializerStmt : Stmt {
     MemberVarDefStmt *member{nullptr};
     std::vector<Expr*> args{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(MemberInitializerStmt)
+
+    MemberInitializerStmt();
 };
+ASTFRI_REGISTER_TYPE(MemberInitializerStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(MemberInitializerStmt)
 
 
 /**
@@ -201,8 +230,11 @@ struct ConstructorDefStmt : Stmt {
     std::vector<MemberInitializerStmt*> memberInitializers{};
     CompoundStmt* body{nullptr};
     AccessModifier access{AccessModifier::UNINITIALIZED};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ConstructorDefStmt)
+
+    ConstructorDefStmt();
 };
+ASTFRI_REGISTER_TYPE(ConstructorDefStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ConstructorDefStmt)
 
 
 /**
@@ -211,8 +243,11 @@ struct ConstructorDefStmt : Stmt {
 struct DestructorDefStmt : Stmt {
     ClassDefStmt* owner{nullptr};
     CompoundStmt* body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(DestructorDefStmt)
+
+    DestructorDefStmt();
 };
+ASTFRI_REGISTER_TYPE(DestructorDefStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(DestructorDefStmt)
 
 
 /**
@@ -222,8 +257,11 @@ struct GenericParam : Stmt {
     // TODO later, this could be pointer to a concept
     std::string constraint{};
     std::string name{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(GenericParam)
+
+    GenericParam();
 };
+ASTFRI_REGISTER_TYPE(GenericParam,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(GenericParam)
 
 
 /**
@@ -232,6 +270,8 @@ struct GenericParam : Stmt {
  * In the future, it could also be used for union or strong type alias
  */
 struct [[deprecated]] UserTypeDefStmt : Stmt { };
+ASTFRI_REGISTER_TYPE(UserTypeDefStmt,Stmt)
+
 
 /**
  * @brief TODO
@@ -241,8 +281,12 @@ struct InterfaceDefStmt : UserTypeDefStmt {
     std::vector<MethodDefStmt*> methods{};
     std::vector<GenericParam*> tparams{};
     std::vector<InterfaceDefStmt*> bases{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(InterfaceDefStmt)
+
+    InterfaceDefStmt();
 };
+ASTFRI_REGISTER_TYPE(InterfaceDefStmt,UserTypeDefStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(InterfaceDefStmt)
+
 
 /**
  * @brief TODO
@@ -257,32 +301,48 @@ struct ClassDefStmt : UserTypeDefStmt {
     std::vector<InterfaceDefStmt*> interfaces{}; // TODO IntefaceType
     std::vector<ClassDefStmt*> bases{};          // TODO ClassType
     // TODO incomplete bases
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ClassDefStmt)
+
+    ClassDefStmt();
 };
+ASTFRI_REGISTER_TYPE(ClassDefStmt,UserTypeDefStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ClassDefStmt)
+
 
 /**
  * @brief TODO
  */
 struct CompoundStmt : Stmt {
     std::vector<Stmt*> stmts{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(CompoundStmt)
+
+    CompoundStmt();
 };
+ASTFRI_REGISTER_TYPE(CompoundStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(CompoundStmt)
+
 
 /**
  * @brief TODO
  */
 struct ReturnStmt : Stmt {
     Expr* val{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ReturnStmt)
+
+    ReturnStmt();
 };
+ASTFRI_REGISTER_TYPE(ReturnStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ReturnStmt)
+
 
 /**
  * @brief TODO
  */
 struct ExprStmt : Stmt {
     Expr* expr {nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ExprStmt)
+
+    ExprStmt();
 };
+ASTFRI_REGISTER_TYPE(ExprStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ExprStmt)
+
 
 /**
  * @brief TODO
@@ -294,29 +354,43 @@ struct IfStmt : Stmt {
     // ReqPtr<Expr> cond;
     // ReqPtr<Stmt> iftrue;
     // OptPtr<Stmt> iffalse;
-    ASTFRI_ADD_NODE_CONSTRUCTOR(IfStmt)
+
+    IfStmt();
 };
+ASTFRI_REGISTER_TYPE(IfStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(IfStmt)
+
 
 /**
  * @brief Base class for all label statements
  */
 struct LabelStmt : Stmt { };
+ASTFRI_REGISTER_TYPE(LabelStmt,Stmt)
+
 
 /**
  * @brief Standard goto label (also used for java labels)
  */
 struct GotoLabelStmt : LabelStmt {
     std::string name;
-    ASTFRI_ADD_NODE_CONSTRUCTOR(GotoLabelStmt)
+
+    GotoLabelStmt();
 };
+ASTFRI_REGISTER_TYPE(GotoLabelStmt,LabelStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(GotoLabelStmt)
+
 
 /**
  * @brief Goto statement used to jump to a label
  */
 struct GotoStmt : Stmt {
     LabelStmt *label{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(GotoStmt)
+
+    GotoStmt();
 };
+ASTFRI_REGISTER_TYPE(GotoStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(GotoStmt)
+
 
 /**
  * @brief Case option in switch statement
@@ -324,16 +398,24 @@ struct GotoStmt : Stmt {
 struct CaseStmt : LabelStmt {
     [[deprecated]] Stmt *body{nullptr};
     std::vector<Expr*> exprs{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(CaseStmt)
+
+    CaseStmt();
 };
+ASTFRI_REGISTER_TYPE(CaseStmt,LabelStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(CaseStmt)
+
 
 /**
  * @brief Default option in switch statement
  */
 struct DefaultCaseStmt : LabelStmt {
     [[deprecated]] Stmt *body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(DefaultCaseStmt)
+
+    DefaultCaseStmt();
 };
+ASTFRI_REGISTER_TYPE(DefaultCaseStmt,LabelStmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(DefaultCaseStmt)
+
 
 /**
  * @brief TODO
@@ -343,8 +425,12 @@ struct SwitchStmt : Stmt {
     [[deprecated]] std::vector<CaseStmt*> cases{};
     Expr *expr{nullptr};
     CompoundStmt* body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(SwitchStmt)
+
+    SwitchStmt();
 };
+ASTFRI_REGISTER_TYPE(SwitchStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(SwitchStmt)
+
 
 /**
  * @brief TODO
@@ -352,8 +438,12 @@ struct SwitchStmt : Stmt {
 struct WhileStmt : Stmt {
     Expr *cond{nullptr};
     Stmt *body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(WhileStmt)
+
+    WhileStmt();
 };
+ASTFRI_REGISTER_TYPE(WhileStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(WhileStmt)
+
 
 /**
  * @brief TODO
@@ -361,8 +451,12 @@ struct WhileStmt : Stmt {
 struct DoWhileStmt : Stmt {
     Expr *cond{nullptr};
     Stmt *body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(DoWhileStmt)
+
+    DoWhileStmt();
 };
+ASTFRI_REGISTER_TYPE(DoWhileStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(DoWhileStmt)
+
 
 /**
  * @brief TODO
@@ -372,8 +466,12 @@ struct ForStmt : Stmt {
     Expr *cond{nullptr};
     Stmt *step{nullptr};
     Stmt *body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ForStmt)
+
+    ForStmt();
 };
+ASTFRI_REGISTER_TYPE(ForStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ForStmt)
+
 
 /**
  * @brief TODO
@@ -382,16 +480,24 @@ struct ForEachStmt : Stmt {
     LocalVarDefStmt *var{nullptr};
     Expr *container{nullptr};
     Stmt *body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ForEachStmt)
+
+    ForEachStmt();
 };
+ASTFRI_REGISTER_TYPE(ForEachStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ForEachStmt)
+
 
 /**
  * @brief TODO
  */
 struct ThrowStmt : Stmt {
     Expr *val{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ThrowStmt)
+
+    ThrowStmt();
 };
+ASTFRI_REGISTER_TYPE(ThrowStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ThrowStmt)
+
 
 /**
  * @brief TODO
@@ -399,8 +505,12 @@ struct ThrowStmt : Stmt {
 struct CatchStmt : Stmt {
     LocalVarDefStmt *param{nullptr};
     Stmt *body{nullptr};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(CatchStmt)
+
+    CatchStmt();
 };
+ASTFRI_REGISTER_TYPE(CatchStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(CatchStmt)
+
 
 /**
  * @brief TODO
@@ -409,29 +519,42 @@ struct TryStmt : Stmt {
     Stmt *body{nullptr};
     Stmt *finally{nullptr};
     std::vector<CatchStmt*> catches{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(TryStmt)
+
+    TryStmt();
 };
+ASTFRI_REGISTER_TYPE(TryStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(TryStmt)
+
 
 /**
  * @brief Break statement used to terminate a loop
  */
 struct BreakStmt : Stmt {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(BreakStmt)
+    BreakStmt();
 };
+ASTFRI_REGISTER_TYPE(BreakStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(BreakStmt)
+
 
 /**
  * @brief Continue statement used to skip rest of a loop
  */
 struct ContinueStmt : Stmt {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(ContinueStmt)
+    ContinueStmt();
 };
+ASTFRI_REGISTER_TYPE(ContinueStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(ContinueStmt)
+
 
 /**
  * @brief TODO
  */
 struct UnknownStmt : Stmt {
-    ASTFRI_ADD_NODE_CONSTRUCTOR(UnknownStmt)
+    UnknownStmt();
 };
+ASTFRI_REGISTER_TYPE(UnknownStmt,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(UnknownStmt)
+
 
 /**
  * @brief TODO
@@ -442,8 +565,11 @@ struct TranslationUnit : Stmt {
     std::vector<FunctionDefStmt*> functions{};
     std::vector<GlobalVarDefStmt*> globals{};
     std::vector<Stmt*> content{};
-    ASTFRI_ADD_NODE_CONSTRUCTOR(TranslationUnit)
+
+    TranslationUnit();
 };
+ASTFRI_REGISTER_TYPE(TranslationUnit,Stmt)
+ASTFRI_ADD_NODE_CONSTRUCTOR(TranslationUnit)
 
 
 } // namespace astfri
