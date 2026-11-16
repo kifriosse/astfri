@@ -5,7 +5,7 @@ namespace astfri::csharp::util {
 
 template<typename... Args>
 bool has_all(const rapidjson::Value& val, Args... args) {
-    return (... && val.HasMember(args));
+    return val.IsObject() && (... && val.HasMember(args));
 }
 
 } // namespace astfri::csharp::util
