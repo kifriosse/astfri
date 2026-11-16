@@ -1,100 +1,86 @@
 #ifndef ASTFRI_IMPL_AST_NODE_HPP
 #define ASTFRI_IMPL_AST_NODE_HPP
 
-#include <astfri/impl/TypeInfoFwd.hpp>
-#include <astfri/impl/Kind.hpp>
-#include <astfri/impl/Visitor.hpp>
-
 
 namespace astfri {
-
-
-namespace detail {
-
-
-template<typename KindType>
-struct ASTNode;
-
-
-/**
- * @brief Initializes ASTNode.
- *
- * Initializes @c kind member of the @c ASTNode base.
- * Initializes @c m_accept_ptr member of the @c ASTNode base.
- *
- * @tparam KindType enum of kinds (ExprKind, StmtKind, TypeKind)
- * @tparam SelfType Real (childmost) type of @p node.
- * @param node Node to initialize.
- */
-template<typename SelfType, typename KindType>
-void initialize(ASTNode<KindType> &node);
 
 
 /**
  * @brief Base class for all AST nodes.
  *
- * Holds kind of the node and implements visitor dispatch.
- *
- * @tparam KindType enum of kinds (ExprKind, StmtKind, TypeKind)
+ * Holds type tag of the node and implements visitor dispatch.
  */
-template<typename KindType>
+struct ASTNode;
+
+
+/**
+ * @brief Visitor intrface for ASTNodes.
+ */
+class Visitor;
+
+
+/**
+ * @brief Type tags for each ASTNode type.
+ */
+enum class ASTNodeType;
+
+
+/**
+ * @brief Base class for all AST nodes.
+ *
+ * Holds type tag of the node and implements visitor dispatch.
+ */
 struct ASTNode {
     /**
      * @brief Accepts visitor by calling its corresponding @c visit method.
      * @param visitor Visitor to be accepted.
      */
-    void accept(Visitor &visitor);
+    void accept(Visitor &visitor) {
+        m_accept_ptr(this, visitor);
+    }
 
-private:
-    KindType kind; /**< Enum value holding kind (type) of this node. */
-    void(*m_accept_ptr)(void*, Visitor&); /**< Pointer to a function implementing accept. */
+    /**
+     * @brief Returns type tag of the real node type.
+     * @return Type tag of this node real (childmost) type.
+     */
+    ASTNodeType type() const {
+        return m_type;
+    }
 
-private:
-    template<typename S, typename K>
-    friend void ::astfri::detail::initialize(ASTNode<K>&);
+protected:
+    /**
+     * Enum value holding type tag of this node.
+     */
+    ASTNodeType m_type;
 
-    template<typename T, typename K>
-    friend bool ::astfri::is(ASTNode<K>*);
-
-    template<typename T, typename K>
-    friend T *::astfri::as(ASTNode<K>*);
-};
-
-
-/**
- * @brief Helper CRTP base. Indirectly inherits @c SelfType from @c BaseType.
- *
- * The hierarchy will look like this:
- * ASTNode <|-- BaseType <|-- MakeA <|-- SelfType
- *
- * Initializes self using @c initialize.
- *
- * @tparam BaseType Base class type.
- * @tparam SelfType Child class type.
- */
-template<typename BaseType, typename SelfType>
-struct MakeA : BaseType {
-    MakeA();
+    /**
+     * Pointer to a function implementing accept for the this nodes real type.
+     */
+    void(*m_accept_ptr)(void*, Visitor&);
 };
 
 
 /**
  * @brief Adds a constructor that calls intialize.
- *
- * Can be used as an alternative to @c MakeA. See @c LocalVarDefStmt for an example.
  */
-#define ASTFRI_ADD_NODE_CONSTRUCTOR(SelfType) SelfType() {\
-  ::astfri::detail::initialize<SelfType>(*this);\
-}
-
-
-} // namespace detail
+/**
+ * @brief Adds a constructor definition that initializes ASTNode.
+ *
+ * Initializes @c m_type member of the @c ASTNode base.
+ * Initializes @c m_accept_ptr member of the @c ASTNode base.
+ *
+ * @tparam T Real (childmost) type of @p node.
+ * @param node Node to initialize.
+ */
+#define ASTFRI_ADD_NODE_CONSTRUCTOR(T) inline T::T() {\
+    this->m_type = ::astfri::detail::TypeOf<T>::value;\
+    this->m_accept_ptr = +[](void *self, Visitor &visitor){\
+        visitor.visit(*static_cast<T*>(self));\
+    };\
+}\
 
 
 } // namespace astfri
-
-
-#include <astfri/impl/ASTNode.inl>
 
 
 #endif

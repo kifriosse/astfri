@@ -26,6 +26,7 @@ cmake -DCMAKE_C_COMPILER=${C_COMPILER}     \
       -DASTFRI_BUILD_OUT_UML=ON            \
       -DASTFRI_BUILD_OUT_VECTOR=ON         \
       -DASTFRI_BUILD_SERIALIZE=ON          \
+      -DASTFRI_BUILD_TED=ON                \
       -DASTFRI_BUILD_TESTS=ON              \
       -DASTFRI_BUILD_EXAMPLES=ON           \
       ..

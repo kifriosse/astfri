@@ -7,6 +7,7 @@ target_sources(astfri-core-tests PRIVATE
   TypeFactoryTest.cpp
   OptPtrTest.cpp
   ReqPtrTest.cpp
+  TypeInfoTest.cpp
 )
 
 target_link_libraries(astfri-core-tests PRIVATE astfri-core Catch2)

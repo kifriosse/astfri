@@ -1,13 +1,14 @@
 #ifndef ASTFRI_IMPL_UTILS_HPP
 #define ASTFRI_IMPL_UTILS_HPP
 
-#include <astfri/impl/Visitor.hpp>
-
 #include <memory>
 #include <utility>
 
 
-namespace astfri::details {
+namespace astfri {
+
+
+namespace detail {
 
 
 /**
@@ -60,6 +61,9 @@ T *create_store_get(Vector &store, Initializer initialize) {
 }
 
 
-} // namespace astfri::details
+} // namespace detail
+
+
+} // namespace astfri
 
 #endif

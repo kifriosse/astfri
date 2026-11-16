@@ -5,6 +5,7 @@ target_sources(astfri-core PRIVATE
   astfri/impl/Scope.cpp
   astfri/impl/StmtFactory.cpp
   astfri/impl/TypeFactory.cpp
+  astfri/impl/TypeInfo.cpp
   astfri/impl/Visitor.cpp
 )
 
@@ -14,26 +15,20 @@ target_sources(astfri-core
     FILES
       astfri/Astfri.hpp
       astfri/impl/ASTNode.hpp
-      astfri/impl/ASTNode.inl
       astfri/impl/Concepts.hpp
       astfri/impl/ExprDef.hpp
       astfri/impl/ExprFactory.hpp
       astfri/impl/ExprFwd.hpp
-      astfri/impl/ExprKind.hpp
-      astfri/impl/Kind.hpp
       astfri/impl/Scope.hpp
       astfri/impl/Scope.inl
       astfri/impl/StmtDef.hpp
       astfri/impl/StmtFactory.hpp
       astfri/impl/StmtFwd.hpp
-      astfri/impl/StmtKind.hpp
       astfri/impl/TypeDef.hpp
       astfri/impl/TypeFactory.hpp
       astfri/impl/TypeFwd.hpp
       astfri/impl/TypeInfo.hpp
       astfri/impl/TypeInfo.inl
-      astfri/impl/TypeInfoFwd.hpp
-      astfri/impl/TypeKind.hpp
       astfri/impl/Utils.hpp
       astfri/impl/Visitor.hpp
       astfri/impl/tools/Either.hpp

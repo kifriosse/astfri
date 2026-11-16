@@ -1,3 +1,15 @@
+**2026-11-16** `0.2.2` Michal Mrena `<michal.mrena@fri.uniza.sk>`
+- Simplified type internal type system.
+  - `ASTNode` is no longer a template.
+  - `ASTNode::type()` returns type tag (`ASTNodeType`) of the node.
+  - Added `is_a` type query (TypeInfo.hpp) for the "is-a" OOP relationship.
+  - Added tests for type queries.
+  - Refactored node definitions -- they use macros to add constructor
+(`ASTFRI_ADD_NODE_CONSTRUCTOR` only for leaves) and to register its tag
+(`ASTFRI_REGISTER_TYPE` all nodes).
+- Implemented `PostOrderVisitor` (ref #52).
+
+
 **2026-11-12** `0.2.1` Michal Mrena `<michal.mrena@fri.uniza.sk>`
 - (ab) Prepared removal of `UserType` as common base of `ClassDefStmt` and
 `InterfaceDefStmt`.
