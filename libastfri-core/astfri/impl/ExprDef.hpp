@@ -216,6 +216,9 @@ enum class BinOpType {
     // {lhs} <<= {rhs}
     BitShiftLeftAssign,
 
+    // {lhs} >>>= {rhs}
+    BitShiftRightUnsignedAssign,
+
     // {lhs} &= {rhs}
     BitAndAssign,
 
