@@ -211,7 +211,7 @@ ASTFRI_ADD_NODE_CONSTRUCTOR(SelfInitializerStmt)
  */
 struct MemberInitializerStmt : Stmt {
     MemberVarDefStmt *member{nullptr};
-    std::vector<Expr*> args{nullptr};
+    std::vector<Expr*> args{};
 
     MemberInitializerStmt();
 };
