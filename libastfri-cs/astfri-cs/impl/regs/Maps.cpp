@@ -66,7 +66,6 @@ constexpr MappingRule mappingRules_[] = {
     {"continue_statement",                ContinueStmt,                true },
     {"if_statement",                      IfStmt,                      true },
     {"switch_statement",                  SwitchStmt,                  true },
-    {"switch_section",                    SwitchSection,               true },
     {"try_statement",                     TryStmt,                     true },
     {"catch_clause",                      CatchClause,                 true },
     {"finally_clause",                    FinallyClause,               true },
@@ -299,7 +298,7 @@ Operations::Operations() :
          {ModuloAssign, BinOpType::ModuloAssign},
          {BitShiftRightAssign, BinOpType::BitShiftRightAssign},
          {BitShiftLeftAssign, BinOpType::BitShiftLeftAssign},
-        // todo add right unsigned bit shift assign
+         {BitShiftRightUnsignedAssign, BinOpType::BitShiftRightUnsignedAssign},
          {BitAndAssign, BinOpType::BitAndAssign},
          {BitOrAssign, BinOpType::BitOrAssign},
          {BitXorAssign, BinOpType::BitXorAssign}}
@@ -393,7 +392,7 @@ StmtMapper MapManager::get_stmt_mapper(const TSNode& node) {
 
 StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType) {
     // todo redo this when the typo is fixed
-    const StmtMapper def = default_stmt_visit;
+    constexpr StmtMapper def = default_visit<StmtFactory, SrcCodeTransformer, Stmt*>;
     return get_or_default(handlers_.stmts, nodeType, def);
 }
 
@@ -402,7 +401,7 @@ ExprMapper MapManager::get_expr_mapper(const TSNode& node) {
 }
 
 ExprMapper MapManager::get_expr_mapper(const NodeType nodeType) {
-    const ExprMapper def = default_visit<ExprFactory, SrcCodeTransformer, Expr*>;
+    constexpr ExprMapper def = default_visit<ExprFactory, SrcCodeTransformer, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, def);
 }
 
@@ -411,7 +410,7 @@ TypeMapper MapManager::get_type_mapper(const TSNode& node) {
 }
 
 TypeMapper MapManager::get_type_mapper(const NodeType nodeType) {
-    const TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
+    constexpr TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, def);
 }
 
@@ -467,11 +466,6 @@ NodeType MapManager::get_node_type(const TSNode& node) const {
 
 TSSymbol MapManager::get_symbol(const NodeType type) const {
     return nodeTypes_.get_symbol(type);
-}
-
-Stmt* MapManager::default_stmt_visit(SrcCodeTransformer*, const TSNode&) {
-    // todo remove this when type is fixed
-    return StmtFactory::get_instance().mk_unknown();
 }
 
 } // namespace maps

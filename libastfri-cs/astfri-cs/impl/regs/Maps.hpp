@@ -154,7 +154,6 @@ public:
     TSSymbol get_symbol(NodeType type) const;
 
 private:
-    static Stmt* default_stmt_visit(SrcCodeTransformer*, const TSNode&);
     /**
      * Default visit function that returns an instance of unknown
      * @tparam Factory Factory class with \c get_instance() and \c mk_unknown()
