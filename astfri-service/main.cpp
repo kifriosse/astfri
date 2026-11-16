@@ -4,24 +4,10 @@
 // astfri headers
 #include <astfri/Astfri.hpp>
 
-// ASTFRI visitor
-#include <astfri-text/TextLibManager.hpp>
-
-// ASTFRI UML
-#include <astfri-uml/UMLLibWrapper.hpp>
-
-// ASTFRI CPP
-#include <astfri-cpp/ASTBuilder.hpp>
-
-// ASTFRI Csharp
-#include <astfri-cs/ASTBuilder.hpp>
-
-// ASTFRI Java
-#include <astfri-java/ASTBuilder.hpp>
-
 #include <cxxopts.hpp>
 
-#pragma region DEFINITIONS
+#include "input.hpp"
+#include "output.hpp"
 
 #define ASTFRI_CLI_VERSION "0.0.1"
 
@@ -35,86 +21,37 @@
 #define EXIT_INPUT_LIB_ERROR 20
 #define EXIT_OUTPUT_LIB_ERROR 30
 
-#pragma region INPUT ENUM
-enum class InputType
-{
-    Cpp,
-    Csharp,
-    Java,
-    Unknown // default
-};
+using astfri::service::InputType;
 const std::map<std::string, InputType> input_map = {
     {"cpp",    InputType::Cpp   },
     {"csharp", InputType::Csharp},
     {"java",   InputType::Java  }
 };
-#pragma endregion INPUT ENUM
 
-#pragma region OUTPUT ENUM
-enum class OutputType
-{
-    Text_Pseudocode,
-    Text_JavaCode,
-    UML,
-    Unknown // default
-};
+using astfri::service::OutputType;
 const std::map<std::string, OutputType> output_map = {
     {"text-pseudocode", OutputType::Text_Pseudocode},
     {"text-javacode",   OutputType::Text_JavaCode  },
     {"uml",             OutputType::UML            }
 };
-#pragma endregion OUTPUT ENUM
-
-#pragma region HELPERS
-
-// map keys to string (separated by ,)
-template<typename T>
-std::string map_keys_to_string(const std::map<std::string, T>& map)
-{
-    std::string result;
-    for (const auto& pair : map)
-    {
-        if (! result.empty())
-        {
-            result += ", ";
-        }
-        result += pair.first;
-    }
-    return result;
-}
-
-#pragma endregion HELPERS
-#pragma endregion DEFINITIONS
 
 int main(int argc, const char** argv)
 {
 #pragma region ARGS
 
-    cxxopts::Options options(
-        "astfri",
-        "ASTFRI - CLI interface for library astfri, version " ASTFRI_CLI_VERSION
-    );
+    cxxopts::Options options("astfri");
 
     options.add_options()
-        ("h,help", "Print help")
         ("version", "Print version of ASTFRI and input/output libraries. Then exit.")
-        ("v,verbose", "Verbose mode - advanced logging. Not suitable for API use")
-        ("i,input", "Type of input library. Possible values: " + map_keys_to_string(input_map), cxxopts::value<std::string>()->default_value("cpp"))
-        ("if,input-file", "Input source file", cxxopts::value<std::string>())
-        ("o,output", "Type of output library. Possible values: " + map_keys_to_string(output_map), cxxopts::value<std::string>()->default_value("text"))
-        ("ocf,output-config-file", "Output config file", cxxopts::value<std::string>()->default_value(""))
+        ("input", "Type of input library", cxxopts::value<std::string>())
+        ("input-file", "Input source file", cxxopts::value<std::string>())
+        ("output", "Type of output library", cxxopts::value<std::string>())
+        ("output-config-file", "Output config file", cxxopts::value<std::string>()->default_value(""))
     ;
 
     auto result = options.parse(argc, argv);
 
-    if (result.count("help"))
-    {
-        std::cout << options.help() << std::endl;
-        exit(EXIT_OK);
-    }
-
     auto mode_version = result.count("version");
-#pragma region VERSION
     if (mode_version)
     {
         std::cout << "ASTFRI-CLI-WRAPPER " << ASTFRI_CLI_VERSION << "\n";
@@ -130,22 +67,21 @@ int main(int argc, const char** argv)
         }
         exit(EXIT_OK);
     }
-#pragma endregion VERSION
-    auto mode_verbose = result.count("verbose");
 
     // parse input lib
-    auto input_lib_str = result["input"].as<std::string>();
-    auto input_lib     = InputType::Unknown;
-    if (input_map.find(input_lib_str) != input_map.end())
+    if (result.count("input") == 0)
     {
-        input_lib = input_map.at(input_lib_str);
+        std::cerr << "Input library not specified!" << std::endl;
+        exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
-    else
+    auto input_lib_str = result["input"].as<std::string>();
+    if (input_map.find(input_lib_str) == input_map.end())
     {
         std::cerr << "Unknown input library type: " << input_lib_str
                   << std::endl;
         exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
+    auto input_lib = input_map.at(input_lib_str);
     // input file check
     if (result.count("input-file") == 0)
     {
@@ -165,18 +101,19 @@ int main(int argc, const char** argv)
     }
 
     // parse output lib
-    auto output_lib_str = result["output"].as<std::string>();
-    auto output_lib     = OutputType::Unknown;
-    if (output_map.find(output_lib_str) != output_map.end())
+    if (result.count("output") == 0)
     {
-        output_lib = output_map.at(output_lib_str);
+        std::cerr << "Output library not specified!" << std::endl;
+        exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
-    else
+    auto output_lib_str = result["output"].as<std::string>();
+    if (output_map.find(output_lib_str) == output_map.end())
     {
         std::cerr << "Unknown output library type: " << output_lib_str
                   << std::endl;
         exit(EXIT_ASTFRI_WRAPPER_ERROR);
     }
+    auto output_lib = output_map.at(output_lib_str);
     // output config file
     auto output_config_file = result["output-config-file"].as<std::string>();
     // if output config file is specified, verify that it exists
@@ -192,101 +129,8 @@ int main(int argc, const char** argv)
     }
 #pragma endregion ARGS
 
-#pragma region INPUT
-
-    if (mode_verbose)
-    {
-        std::cout << "Input type: " << input_lib_str << std::endl;
-        std::cout << "Input file: " << input_file << std::endl;
-    }
-
-    astfri::TranslationUnit tu;
-    switch (input_lib)
-    {
-    case InputType::Cpp:
-    {
-        auto astBuilder = astfri::cpp::ASTBuilder::create(
-            astfri::cpp::Config::create_default());
-        tu = astBuilder.load_file(input_file);
-        break;
-    }
-    case InputType::Csharp:
-    {
-        auto astBuilder = astfri::csharp::ASTBuilder::create(
-            astfri::csharp::Config::create_default());
-        tu = astBuilder.load_file(input_file);
-        break;
-    }
-    case InputType::Java:
-    {
-        auto astBuilder = astfri::java::ASTBuilder::create(
-            astfri::java::Config::create_default());
-        tu = astBuilder.load_file(input_file);
-        break;
-    }
-    case InputType::Unknown:
-        std::cerr << "Input library not implemented yet!" << std::endl;
-        return EXIT_INPUT_LIB_ERROR;
-    }
-
-    if (mode_verbose)
-    {
-        std::cout << "Translation unit loaded." << std::endl;
-    }
-#pragma endregion INPUT
-
-#pragma region OUTPUT
-    if (mode_verbose)
-    {
-        std::cout << "Output type: " << output_lib_str << std::endl;
-        std::cout << "Output config file: "
-                  << (output_config_file.empty() ? "none" : output_config_file)
-                  << std::endl;
-    }
-
-    switch (output_lib)
-    {
-    case OutputType::Text_Pseudocode:
-    case OutputType::Text_JavaCode:
-    {
-        astfri::text::TextLibManager manager;
-
-        switch (output_lib)
-        {
-        case OutputType::Text_Pseudocode:
-            manager.change_output_format(astfri::text::TextOutputFormat::TxtPseudocode);
-            break;
-        case OutputType::Text_JavaCode:
-            manager.change_output_format(astfri::text::TextOutputFormat::JavaCode);
-            break;
-        default:
-            break;
-        }
-
-        manager.process_and_export_ast(tu, &std::cout);
-        break;
-    }
-    case OutputType::UML:
-    {
-        astfri::uml::UMLLibWrapper wrapper;
-        astfri::uml::PlantUMLOutputter op;
-        auto config = astfri::uml::Config::create_from_json(output_config_file);
-        wrapper.init(config, op);
-        wrapper.run(tu);
-        break;
-    }
-    case OutputType::Unknown:
-    {
-        std::cerr << "Output library not implemented yet!" << std::endl;
-        return EXIT_OUTPUT_LIB_ERROR;
-    }
-    }
-
-    if (mode_verbose)
-    {
-        std::cout << "Output generated." << std::endl;
-    }
-#pragma endregion OUTPUT
+    astfri::TranslationUnit tu = astfri::service::load_input(input_lib, input_file);
+    astfri::service::write_output(output_lib, tu, output_config_file);
 
     return EXIT_OK;
 }

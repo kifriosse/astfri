@@ -1,6 +1,9 @@
 add_executable(astfri-service)
 
-target_sources(astfri-service PRIVATE main.cpp)
+target_sources(astfri-service PRIVATE
+	main.cpp
+	input.cpp
+	output.cpp)
 
 target_link_libraries(astfri-service PRIVATE
   astfri-core
