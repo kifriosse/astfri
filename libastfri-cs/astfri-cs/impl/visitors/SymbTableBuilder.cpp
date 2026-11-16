@@ -329,11 +329,10 @@ void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath) {
             if (! vName.IsString() || ! vNms.IsString() || ! vArity.IsInt() || ! vType.IsString()) {
                 continue;
             }
-            std::string name = item["Name"].GetString();
-            Scope scope      = util::mk_scope(item["Nms"].GetString());
-            // int arity        = item["Arity"].GetInt();
-            // std::string type =
-            auto typeOpt = util::get_type_kind(item["Type"].GetString());
+            std::string name = vName.GetString();
+            Scope scope      = util::mk_scope(vNms.GetString());
+            // int arity        = vArity.GetInt();
+            auto typeOpt = util::get_type_kind(vType.GetString());
 
             if (! typeOpt)
                 continue;
