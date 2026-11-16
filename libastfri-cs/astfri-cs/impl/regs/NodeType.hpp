@@ -45,7 +45,6 @@ enum class NodeType : TSSymbol {
     ContinueStmt,
     IfStmt,
     SwitchStmt,
-    SwitchSection,
     TryStmt,
     CatchClause,
     CatchDecl,

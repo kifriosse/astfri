@@ -202,7 +202,6 @@ Mappers::Mappers() :
         {FinallyClause,   SrcCodeTransformer::visit_finally      },
         {CatchDecl,       SrcCodeTransformer::visit_catch_decl   },
         {SwitchStmt,      SrcCodeTransformer::visit_switch       },
-        {SwitchSection,   SrcCodeTransformer::visit_case_stmt    },
         {ExprStmt,        SrcCodeTransformer::visit_expr_stmt    },
         {ReturnStmt,      SrcCodeTransformer::visit_return       },
         {ThrowStmt,       SrcCodeTransformer::visit_throw        },

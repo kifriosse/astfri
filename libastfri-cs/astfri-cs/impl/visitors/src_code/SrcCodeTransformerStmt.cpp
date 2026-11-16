@@ -17,9 +17,8 @@ namespace astfri::csharp {
 Stmt* SrcCodeTransformer::visit_block(SrcCodeTransformer* self, const TSNode& node) {
     self->semContext_.enter_scope();
     auto discoverFunc = [self](const TSNode& current) -> void {
-        using enum NodeType;
         if (! ts_node_is_named(current)
-            || ts_node_symbol(current) != mapManager_.get_symbol(LocalFuncDecl))
+            || ts_node_symbol(current) != mapManager_.get_symbol(NodeType::LocalFuncDecl))
             return;
 
         self->semContext_.reg_local_func(
@@ -48,7 +47,7 @@ Stmt* SrcCodeTransformer::visit_arrow_body(SrcCodeTransformer* self, const TSNod
     const ExprMapper mBody = mapManager_.get_expr_mapper(nBody);
     Type* returnType       = self->semContext_.current_return_type();
     Expr* expr             = mBody(self, nBody);
-    Stmt* body             = nullptr;
+    Stmt* body;
 
     if (is<VoidType>(returnType))
         body = stmtFact_.mk_expr(expr);
@@ -248,21 +247,14 @@ Stmt* SrcCodeTransformer::visit_switch(SrcCodeTransformer* self, const TSNode& n
     const ExprMapper mValue  = mapManager_.get_expr_mapper(nValue);
     Expr* value              = mValue(self, nValue);
 
-    std::vector<CaseStmt*> cases;
-    auto process = [self, &cases](const TSNode& nCurrent) -> void {
-        const StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
-        Stmt* stmt             = mStmt(self, nCurrent);
-        if (auto* caseStmt = as<CaseStmt>(stmt))
-            cases.push_back(caseStmt);
-    };
-    util::for_each_child_node(nSwitchBody, process);
-    return stmtFact_.mk_switch(value, std::move(cases));
-}
+    std::vector<Stmt*> switchBody = {};
+    auto processCase = [self, &switchBody](const TSNode& nCase) -> void {
+        TSTreeCursor cursor = ts_tree_cursor_new(nCase);
+        if (! ts_tree_cursor_goto_first_child(&cursor)) {
+            ts_tree_cursor_delete(&cursor);
+            return;
+        }
 
-Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode& node) {
-    TSTreeCursor cursor = ts_tree_cursor_new(node);
-    if (ts_tree_cursor_goto_first_child(&cursor)) {
-        std::vector<Stmt*> bodyStmts;
         Expr* pattern = nullptr;
         TSNode nCurrent;
         do {
@@ -278,6 +270,11 @@ Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode
         }
         while (ts_tree_cursor_goto_next_sibling(&cursor));
 
+        if (pattern)
+            switchBody.push_back(stmtFact_.mk_case(pattern));
+        else
+            switchBody.push_back(stmtFact_.mk_default_case());
+
         while (ts_tree_cursor_goto_next_sibling(&cursor)) {
             nCurrent = ts_tree_cursor_current_node(&cursor);
             if (! ts_node_is_named(nCurrent))
@@ -285,23 +282,19 @@ Stmt* SrcCodeTransformer::visit_case_stmt(SrcCodeTransformer* self, const TSNode
 
             StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
             Stmt* stmt       = mStmt(self, nCurrent);
-            bodyStmts.push_back(stmt);
+            switchBody.push_back(stmt);
         }
 
         ts_tree_cursor_delete(&cursor);
+    };
 
-        Stmt* body = bodyStmts.size() == 1 && is<CompoundStmt>(bodyStmts.back())
-                       ? bodyStmts.back()
-                       : stmtFact_.mk_compound(std::move(bodyStmts));
+    auto process = [&processCase](const TSNode& nCurrent) -> void {
+        processCase(nCurrent);
+    };
 
-        if (pattern)
-            return stmtFact_.mk_case(pattern, body);
-
-        return stmtFact_.mk_default_case(body);
-    }
-
-    ts_tree_cursor_delete(&cursor);
-    return stmtFact_.mk_unknown();
+    util::for_each_child_node(nSwitchBody, process);
+    SwitchStmt* stmt = stmtFact_.mk_switch(value, stmtFact_.mk_compound(std::move(switchBody)));
+    return stmt;
 }
 
 Stmt* SrcCodeTransformer::visit_expr_stmt(SrcCodeTransformer* self, const TSNode& node) {

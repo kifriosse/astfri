@@ -116,7 +116,6 @@ private:
     static Stmt* visit_finally(SrcCodeTransformer* self, const TSNode& node);
     static Stmt* visit_catch_decl(SrcCodeTransformer* self, const TSNode& node);
     static Stmt* visit_switch(SrcCodeTransformer* self, const TSNode& node);
-    static Stmt* visit_case_stmt(SrcCodeTransformer* self, const TSNode& node);
 
     // other
     static Stmt* visit_expr_stmt(SrcCodeTransformer* self, const TSNode& node);

@@ -21,6 +21,7 @@ class Switch
             break;
             case string s:
                 Console.WriteLine($"String: {s}");
+                Console.WriteLine("something");
                 break;
             case null:
                 Console.WriteLine("Null");
@@ -30,8 +31,16 @@ class Switch
         switch (value)
         {
             case 1:
+            break;
+            my_label:
+
+            break;
             case 2:
                 break;
+            case 3:
+                goto my_label;
+            case >= 0  and < 18:
+            break;
         }
 
         {
