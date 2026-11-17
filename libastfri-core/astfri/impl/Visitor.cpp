@@ -468,6 +468,9 @@ void PostOrderVisitor::visit(const LocalVarRefExpr &expr) {
 
 void PostOrderVisitor::visit(const MemberVarRefExpr &expr) {
     this->on_enter(expr);
+    if (expr.owner) {
+        expr.owner->accept(*this);
+    }
     this->process(expr);
     this->on_exit(expr);
 }
@@ -495,6 +498,9 @@ void PostOrderVisitor::visit(const FunctionCallExpr &expr) {
 
 void PostOrderVisitor::visit(const MethodCallExpr &expr) {
     this->on_enter(expr);
+    if (expr.owner) {
+        expr.owner->accept(*this);
+    }
     for (auto *item : expr.args) {
         item->accept(*this);
     }
