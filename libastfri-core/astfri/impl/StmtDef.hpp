@@ -303,6 +303,10 @@ struct ClassDefStmt : UserTypeDefStmt {
     [[deprecated]] std::vector<ClassDefStmt*> bases{};          // TODO remove this
     std::vector<ClassType*> baseTypes{};                        // TODO rename this when bases are removed
     std::vector<InterfaceType*> interfaceTypes{};               // TODO rename this wehn interfaces are removed
+    /**
+     * @brief Bases which can't be resolved to a type.
+     */
+    std::vector<IncompleteType*> incompleteBases{};
 
     ClassDefStmt();
 };
