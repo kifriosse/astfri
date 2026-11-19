@@ -280,7 +280,8 @@ struct InterfaceDefStmt : UserTypeDefStmt {
     InterfaceType *type{nullptr};
     std::vector<MethodDefStmt*> methods{};
     std::vector<GenericParam*> tparams{};
-    std::vector<InterfaceDefStmt*> bases{};
+    [[deprecated]] std::vector<InterfaceDefStmt*> bases{}; // TODO remove this
+    std::vector<InterfaceType*> baseTypes{};               // TODO remove this when bases are removed
 
     InterfaceDefStmt();
 };
@@ -298,9 +299,10 @@ struct ClassDefStmt : UserTypeDefStmt {
     std::vector<DestructorDefStmt*> destructors{};
     std::vector<MethodDefStmt*> methods{};
     std::vector<GenericParam*> tparams{};
-    std::vector<InterfaceDefStmt*> interfaces{}; // TODO IntefaceType
-    std::vector<ClassDefStmt*> bases{};          // TODO ClassType
-    // TODO incomplete bases
+    [[deprecated]] std::vector<InterfaceDefStmt*> interfaces{}; // TODO remove this
+    [[deprecated]] std::vector<ClassDefStmt*> bases{};          // TODO remove this
+    std::vector<ClassType*> baseTypes{};                        // TODO rename this when bases are removed
+    std::vector<InterfaceType*> interfaceTypes{};               // TODO rename this wehn interfaces are removed
 
     ClassDefStmt();
 };
