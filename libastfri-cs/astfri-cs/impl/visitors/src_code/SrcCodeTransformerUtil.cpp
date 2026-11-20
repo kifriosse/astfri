@@ -41,7 +41,7 @@ Stmt* SrcCodeTransformer::visit_var_def_stmt(const TSNode& node, const util::Var
             switch (defType) {
             case util::VarDefType::Member: {
                 MemberVarMetadata* varMeta
-                    = semContext_.find_memb_var(name, semContext_.current_type()->def);
+                    = semContext_.find_memb_var(name, semContext_.current_type()->type);
 
                 varDef              = varMeta->varDef;
                 varDef->initializer = init;

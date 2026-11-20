@@ -15,13 +15,16 @@
 #include <vector>
 
 namespace astfri::csharp {
+
+
 Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode& node) {
     const std::string_view src  = self->src_str();
     const TSNode nClassName     = util::child_by_field_name(node, "name");
     const std::string className = util::extract_text(nClassName, src);
     const Scope scope           = util::mk_scope(node, *self->src());
     TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
-    auto* classDef              = as<ClassDefStmt>(tb->def);
+    ClassType* classType        = as<ClassType>(tb->type);
+    ClassDefStmt* classDef      = classType->def;
 
     self->semContext_.enter_type(*tb);
 
@@ -59,7 +62,9 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
     const std::string intfName = util::extract_text(nIntfName, src);
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
-    auto* intfDef              = as<InterfaceDefStmt>(tb->def);
+    InterfaceType* intfType    = as<InterfaceType>(tb->type);
+    auto* intfDef              = intfType->def;
+
     self->semContext_.enter_type(*tb);
 
     const TSNode nIntfBody      = util::child_by_field_name(node, "body");
@@ -70,7 +75,7 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
 
         const TSSymbol sCurrent = ts_node_symbol(current);
         if (sCurrent == mapManager_.get_symbol(TypeParamList)) {
-            intfDef->tparams = util::make_generic_params(current, src);
+            intfDef->tparams = util::mk_generic_params(current, src);
         }
         else if (sCurrent == mapManager_.get_symbol(TypeParamConstrClause)) {
             // util::for_each_child_node(current, processGenericConstraints);
@@ -135,7 +140,7 @@ Stmt* SrcCodeTransformer::visit_constr_def(SrcCodeTransformer* self, const TSNod
         return stmtFact_.mk_unknown();
     // throw std::logic_error("Owner type not found");
 
-    const auto currentClass = as<ClassDefStmt>(currentType->def);
+    const auto currentClass = as<ClassType>(currentType->type);
     if (! currentClass)
         return stmtFact_.mk_unknown();
     // throw std::logic_error(
@@ -146,7 +151,7 @@ Stmt* SrcCodeTransformer::visit_constr_def(SrcCodeTransformer* self, const TSNod
     const TSNode nBody       = util::child_by_field_name(node, "body");
     const TSNode nInit       = ts_node_next_sibling(nParamList);
 
-    constrDef->owner         = as<ClassDefStmt>(currentClass);
+    constrDef->owner         = currentClass->def;
     constrDef->params        = self->make_param_list(nParamList, false);
 
     const CSModifiers modifs = CSModifiers::parser_method_modifs(node, self->src_str());
@@ -185,7 +190,7 @@ Stmt* SrcCodeTransformer::visit_constr_init(SrcCodeTransformer* self, const TSNo
         return stmtFact_.mk_unknown();
     // throw std::logic_error("Owner type not found");
 
-    const auto* owner = as<ClassDefStmt>(currentType->def);
+    const auto* owner = as<ClassType>(currentType->type);
     // todo add records
     if (! owner)
         return stmtFact_.mk_unknown();
@@ -193,11 +198,13 @@ Stmt* SrcCodeTransformer::visit_constr_init(SrcCodeTransformer* self, const TSNo
     //     "Constructor can only be defined for class type"
     // );
 
+
     // todo fix this for Incomplete types
-    if (owner->bases.empty())
+    ClassDefStmt* ownerDef = owner->def;
+    if (ownerDef->baseTypes.empty())
         return stmtFact_.mk_unknown();
-    const ClassDefStmt* base = owner->bases.back();
-    return stmtFact_.mk_base_initializer(base->type, std::move(args));
+    ClassType* base = ownerDef->baseTypes.back();
+    return stmtFact_.mk_base_initializer(base, std::move(args));
 }
 
 Stmt* SrcCodeTransformer::visit_destr_def(SrcCodeTransformer* self, const TSNode& node) {
@@ -210,14 +217,14 @@ Stmt* SrcCodeTransformer::visit_destr_def(SrcCodeTransformer* self, const TSNode
     if (! currentType)
         // throw std::logic_error("Owner type not found");
         return stmtFact_.mk_unknown();
-    auto* owner = as<ClassDefStmt>(currentType->def);
+    auto* owner = as<ClassType>(currentType->type);
     if (! owner)
         // throw std::logic_error("Destructor can only be defined for class
         // type");
         return stmtFact_.mk_unknown();
 
     self->semContext_.unregister_return_type();
-    return stmtFact_.mk_destructor_def(owner, as<CompoundStmt>(body));
+    return stmtFact_.mk_destructor_def(owner->def, as<CompoundStmt>(body));
 }
 
 Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNode& node) {
@@ -239,7 +246,7 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
         .isStatic   = modifs.has(CSModifier::Static)
     };
 
-    const MethodMetadata* methodMeta = self->semContext_.find_method(methodId, currentType->def);
+    const MethodMetadata* methodMeta = self->semContext_.find_method(methodId, currentType->type);
 
     // if method could be resolved
     if (methodMeta && methodMeta->methodDef) {
@@ -269,7 +276,13 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
 
     // if it wansn't able to resolve method
     MethodDefStmt* methodDef = stmtFact_.mk_method_def();
-    methodDef->owner         = currentType->def;
+    if (auto* classType = as<ClassType>(currentType->type))
+        methodDef->owner = classType->def;
+    else if (auto* intfType = as<InterfaceType>(currentType->type))
+        methodDef->owner = intfType->def;
+    else
+        return stmtFact_.mk_unknown();
+
     methodDef->func          = self->make_func_stmt(node, true);
     methodDef->access        = modifs.get_access_mod().value_or(AccessModifier::Internal);
     return methodDef;

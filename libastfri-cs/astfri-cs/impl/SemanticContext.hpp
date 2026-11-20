@@ -63,8 +63,8 @@ public:
     Type* current_return_type() const;
     VarDefStmt* find_var(std::string_view name, access::Qualifier qualifier) const;
     const FuncMetadata* find_func(std::string_view funcName) const;
-    const MethodMetadata* find_method(const MethodId& methodId, UserTypeDefStmt* owner) const;
-    MemberVarMetadata* find_memb_var(std::string_view name, UserTypeDefStmt* owner) const;
+    const MethodMetadata* find_method(const MethodId& methodId, ScopedType* owner) const;
+    MemberVarMetadata* find_memb_var(std::string_view name, ScopedType* owner) const;
     InvocationType find_invoc_type(InvocationId id, access::Qualifier quelifier) const;
 };
 

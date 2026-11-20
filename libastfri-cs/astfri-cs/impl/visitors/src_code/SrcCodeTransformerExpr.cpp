@@ -353,10 +353,6 @@ Expr* SrcCodeTransformer::visit_ref_expr(SrcCodeTransformer* self, const TSNode&
 }
 
 Expr* SrcCodeTransformer::visit_binary_opr(SrcCodeTransformer* self, const TSNode& node) {
-    util::print_child_nodes_types(node, true);
-    std::cout << std::endl;
-
-    // return exprFact_.mk_unknown();
     const TSNode nLeft      = ts_node_child(node, 0);
     const TSNode nOp        = ts_node_child(node, 1);
     const TSNode nRight     = ts_node_child(node, 2);

@@ -25,10 +25,10 @@ void SymbolTable::add_glob_alias(std::string name, Alias alias) {
 }
 
 ScopeNode* SymbolTable::add_type(const TypeBinding& tb, const TSNode& node, SourceFile* src) {
-    auto [it, inserted] = userTypeMetadata_.try_emplace(tb.def, tb);
+    auto [it, inserted] = typeMetadata_.try_emplace(tb.type, tb);
     if (inserted) {
         it->second.type_binding().treeNode = add_type(tb);
-        userTypes_.push_back(tb.def);
+        types_.push_back(tb.type);
     }
     it->second.add_def(node, src);
     return it->second.type_binding().treeNode;
@@ -42,9 +42,9 @@ ScopeNode* SymbolTable::add_primitive(std::string name, const CSPrimitiveType pr
     return symbTree_.add_primitive(std::move(name), primitive);
 }
 
-TypeMetadata* SymbolTable::get_type_metadata(UserTypeDefStmt* def) {
-    const auto it = userTypeMetadata_.find(def);
-    return it != userTypeMetadata_.end() ? &it->second : nullptr;
+TypeMetadata* SymbolTable::get_type_metadata(ScopedType* def) {
+    const auto it = typeMetadata_.find(def);
+    return it != typeMetadata_.end() ? &it->second : nullptr;
 }
 
 std::span<const ScopeNode* const> SymbolTable::get_glob_usings() {

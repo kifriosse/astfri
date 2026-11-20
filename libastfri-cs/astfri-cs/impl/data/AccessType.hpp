@@ -1,6 +1,7 @@
 #ifndef CSHARP_ACCESS_TYPE_HPP
 #define CSHARP_ACCESS_TYPE_HPP
 
+#include <astfri/Astfri.hpp>
 #include <variant>
 
 namespace astfri {
@@ -28,14 +29,14 @@ struct Instance { };
  * @brief When member access has \c ClassRef prefix
  */
 struct Static {
-    UserTypeDefStmt* owner{nullptr};
+    ScopedType* owner{nullptr};
 };
 
 /**
  * @brief When member access has \c base prefix
  */
 struct Base {
-    UserTypeDefStmt* parent{nullptr};
+    ScopedType* parent{nullptr};
 };
 
 /**

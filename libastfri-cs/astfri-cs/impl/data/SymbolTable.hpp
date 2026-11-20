@@ -25,8 +25,8 @@ struct TypeBinding;
  */
 class SymbolTable {
 private:
-    std::unordered_map<UserTypeDefStmt*, TypeMetadata> userTypeMetadata_;
-    std::vector<UserTypeDefStmt*> userTypes_;
+    std::unordered_map<ScopedType*, TypeMetadata> typeMetadata_;
+    std::vector<ScopedType*> types_;
     IdentifierMap<Alias> globAliases_;
     std::vector<ScopeNode*> globUsings_;
     std::vector<TypeBinding> globStaticUsings_;
@@ -101,7 +101,7 @@ public:
      * @return pointer to type metadata of given user defined type if it exists
      * in symbol table, nullptr otherwise
      */
-    TypeMetadata* get_type_metadata(UserTypeDefStmt* def);
+    TypeMetadata* get_type_metadata(ScopedType* def);
     /**
      * @brief Returns a view of global using directives
      * @return a view of pointers to ScopeNodes to which the global using

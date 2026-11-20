@@ -174,7 +174,7 @@ FuncMetadata make_func_metadata(
     };
 }
 
-std::vector<GenericParam*> make_generic_params(const TSNode& node, const std::string_view src) {
+std::vector<GenericParam*> mk_generic_params(const TSNode& node, const std::string_view src) {
     static auto& stmtFact = StmtFactory::get_instance();
     std::vector<GenericParam*> tparams;
     auto processGenericParam = [&](const TSNode& current) -> void {
@@ -185,5 +185,13 @@ std::vector<GenericParam*> make_generic_params(const TSNode& node, const std::st
     };
     for_each_child_node(node, processGenericParam);
     return tparams;
+}
+
+ClassType* get_base(ClassType* subType) {
+    if (!subType)
+        return nullptr;
+
+    const auto def = subType->def;
+    return ! def->baseTypes.empty() ? def->baseTypes.front() : nullptr;
 }
 } // namespace astfri::csharp::util

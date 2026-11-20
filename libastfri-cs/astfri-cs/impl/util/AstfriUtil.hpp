@@ -81,7 +81,9 @@ ParamSignature discover_params(const TSNode& node, std::string_view src, TypeTra
 
 FuncMetadata make_func_metadata(const TSNode& node, std::string_view src, TypeTranslator& typeTrs);
 
-std::vector<GenericParam*> make_generic_params(const TSNode& node, std::string_view src);
+std::vector<GenericParam*> mk_generic_params(const TSNode& node, std::string_view src);
+
+ClassType* get_base(ClassType* subType);
 
 } // namespace astfri::csharp::util
 

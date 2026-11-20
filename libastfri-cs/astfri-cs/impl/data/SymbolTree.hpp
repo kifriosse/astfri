@@ -29,7 +29,6 @@ class ScopeNode;
 struct TypeBinding {
     ScopeNode* treeNode{nullptr};
     ScopedType* type;
-    UserTypeDefStmt* def;
 };
 
 /**
@@ -43,7 +42,7 @@ struct ExternalMarker {
      * @brief returns stored qualified name and clears it from the marker
      * @return stored qualified name
      */
-    std::string takeName();
+    std::string take_name();
 };
 
 /**

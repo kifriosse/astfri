@@ -1,14 +1,15 @@
-#include <astfri/Astfri.hpp>
-
 #include <astfri-cs/impl/data/AccessType.hpp>
 #include <astfri-cs/impl/data/Identifiers.hpp>
 #include <astfri-cs/impl/data/Metadata.hpp>
 #include <astfri-cs/impl/data/SymbolTable.hpp>
 #include <astfri-cs/impl/SemanticContext.hpp>
 #include <astfri-cs/impl/util/Common.hpp>
+#include <astfri/Astfri.hpp>
 
 #include <algorithm>
 #include <string>
+
+#include "util/AstfriUtil.hpp"
 
 namespace astfri::csharp {
 
@@ -101,20 +102,20 @@ VarDefStmt* SemanticContext::find_var(
             if (! currentType)
                 return nullptr;
 
-            if (auto* typeMeta = symbTable_.get_type_metadata(currentType->def)) {
+            if (auto* typeMeta = symbTable_.get_type_metadata(currentType->type)) {
                 if (const auto* varMeta = typeMeta->find_memb_var(name))
                     return varMeta->varDef;
             }
             return nullptr;
         },
         [&](const access::Instance&) -> VarDefStmt* {
-            auto currentType = as<ClassDefStmt>(current_type()->def);
+            auto currentType = as<ClassType>(current_type()->type);
 
             while (currentType) {
                 if (const auto metadata = find_memb_var(name, currentType)) {
                     return metadata->varDef;
                 }
-                currentType = ! currentType->bases.empty() ? currentType->bases.front() : nullptr;
+                currentType = util::get_base(currentType);
             }
             // todo handle properties
             return nullptr;
@@ -135,7 +136,6 @@ VarDefStmt* SemanticContext::find_var(
 }
 
 const FuncMetadata* SemanticContext::find_func(const std::string_view funcName) const {
-
     auto& funcs       = scopeContext_.functions;
     const auto itFunc = funcs.find(funcName);
     return itFunc == funcs.end() ? nullptr : &itFunc->second;
@@ -143,10 +143,13 @@ const FuncMetadata* SemanticContext::find_func(const std::string_view funcName) 
 
 const MethodMetadata* SemanticContext::find_method(
     const MethodId& methodId,
-    UserTypeDefStmt* owner
+    ScopedType* owner
 ) const {
-    if (auto* classDef = as<ClassDefStmt>(owner)) {
-        ClassDefStmt* current = classDef;
+
+    // TODO should also check interfaces for static methods
+
+    if (auto* classDef = as<ClassType>(owner)) {
+        ClassType* current = classDef;
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
             if (! typeMeta)
@@ -155,11 +158,11 @@ const MethodMetadata* SemanticContext::find_method(
             if (const auto* methodMeta = typeMeta->find_method(methodId))
                 return methodMeta;
 
-            current = ! current->bases.empty() ? current->bases.front() : nullptr;
+            current = util::get_base(current);
         }
     }
-    else if (auto* intDef = as<InterfaceDefStmt>(owner)) {
-        TypeMetadata* typeMeta = symbTable_.get_type_metadata(intDef);
+    else if (is<InterfaceType>(owner)) {
+        TypeMetadata* typeMeta = symbTable_.get_type_metadata(owner);
         if (! typeMeta)
             return nullptr;
 
@@ -172,10 +175,10 @@ const MethodMetadata* SemanticContext::find_method(
 
 MemberVarMetadata* SemanticContext::find_memb_var(
     const std::string_view name,
-    UserTypeDefStmt* owner
+    ScopedType* owner
 ) const {
     // todo add handling of records
-    if (auto* current = as<ClassDefStmt>(owner)) {
+    if (auto* current = as<ClassType>(owner)) {
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
             if (! typeMeta)
@@ -184,14 +187,13 @@ MemberVarMetadata* SemanticContext::find_memb_var(
             if (auto* varMeta = typeMeta->find_memb_var(name))
                 return varMeta;
 
-            current = ! current->bases.empty() ? current->bases.front() : nullptr;
+            ClassDefStmt* def = current->def;
+            current = util::get_base(current);
         }
     }
-    else if (is<InterfaceDefStmt>(owner)) {
+    else if (is<InterfaceType>(owner)) {
         TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
-        if (! typeMeta)
-            return nullptr;
-        return typeMeta->find_memb_var(name);
+        return typeMeta ? typeMeta->find_memb_var(name) : nullptr;
     }
 
     return nullptr;
@@ -223,13 +225,13 @@ InvocationType SemanticContext::find_invoc_type(
 
             const auto currentType = this->current_type();
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType->def)) {
+                = find_method(methodId, currentType->type)) {
                 return InvocationType::Method;
             }
 
             methodId.isStatic = true;
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType->def)) {
+                = find_method(methodId, currentType->type)) {
                 return InvocationType::StaticMethod;
             }
 
@@ -244,7 +246,7 @@ InvocationType SemanticContext::find_invoc_type(
             };
 
             if ([[maybe_unused]] const MethodMetadata* metadata
-                = find_method(methodId, currentType->def)) {
+                = find_method(methodId, currentType->type)) {
                 return InvocationType::Method;
             }
 

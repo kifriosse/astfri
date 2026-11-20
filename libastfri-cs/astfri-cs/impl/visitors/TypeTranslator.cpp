@@ -57,7 +57,7 @@ Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& nod
             [](ExternalMarker& em) -> Type* {
                 if (em.qualifName.empty())
                     return typeFact_.mk_unknown();
-                return typeFact_.mk_incomplete(em.takeName());
+                return typeFact_.mk_incomplete(em.take_name());
             },
         };
         return std::visit(overloaded, typeNode->data());
@@ -80,7 +80,7 @@ Type* TypeTranslator::visit_qualified_name(
             [](ExternalMarker& em) -> Type* {
                 if (em.qualifName.empty())
                     return typeFact_.mk_unknown();
-                return typeFact_.mk_incomplete(em.takeName());
+                return typeFact_.mk_incomplete(em.take_name());
             }
         };
         return std::visit(overloaded, typeNode->data());
@@ -389,15 +389,16 @@ ScopeNode* TypeTranslator::search_parents(
     const std::string_view qualif,
     const TypeBinding& start
 ) const {
-    ClassDefStmt* current = nullptr;
+    ClassType* current = nullptr;
     // todo add also support for records
-    if (auto* classDef = as<ClassDefStmt>(start.def)) {
+    if (auto* classDef = as<ClassType>(start.type)) {
         current = classDef;
     }
 
     while (current) {
-        if (! current->bases.empty()) {
-            current             = current->bases.back();
+        ClassDefStmt* def = current->def;
+        if (! def->baseTypes.empty()) {
+            current             = def->baseTypes.back();
             const auto metadata = symbTable_.get_type_metadata(current);
             if (! metadata)
                 continue;
