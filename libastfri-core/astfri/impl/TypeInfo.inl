@@ -26,7 +26,7 @@ bool is_a(ASTNode *node) {
 
 template<typename T>
 T *as(ASTNode *node) {
-    return node->type() == detail::TypeOf<T>::value
+    return node && node->type() == detail::TypeOf<T>::value
         ? static_cast<T*>(node)
         : nullptr;
 }
