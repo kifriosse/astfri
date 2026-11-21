@@ -39,10 +39,16 @@ TranslationUnit SrcCodeTransformer::visit_comp_unit() {
             if (added)
                 continue;
 
-            if (auto cls = as<ClassDefStmt>(stmt))
-                trUnit.classes.push_back(cls);
-            else if (auto intf = as<InterfaceDefStmt>(stmt))
-                trUnit.interfaces.push_back(intf);
+            switch (stmt->type()) {
+            case ASTNodeType::ClassDefStmt:
+                trUnit.classes.push_back(as<ClassDefStmt>(stmt));
+                break;
+            case ASTNodeType::InterfaceDefStmt:
+                trUnit.interfaces.push_back(as<InterfaceDefStmt>(stmt));
+                break;
+            default:
+                break;
+            }
             trUnit.content.push_back(stmt);
 
             added = true;

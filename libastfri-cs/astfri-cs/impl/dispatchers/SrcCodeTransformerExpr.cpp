@@ -178,8 +178,9 @@ Expr* SrcCodeTransformer::visit_identifier(SrcCodeTransformer* self, const TSNod
     if (! defStmt)
         return exprFact_.mk_unknown();
 
-    // todo prepisat na switch
-    if (const auto membVar = as<MemberVarDefStmt>(defStmt)) {
+    switch (defStmt->type()) {
+    case ASTNodeType::MemberVarDefStmt: {
+        const auto* membVar = as<MemberVarDefStmt>(defStmt);
         if (membVar->staticity == Staticity::NonStatic)
             return exprFact_.mk_member_var_ref(exprFact_.mk_this(), std::move(name));
 
@@ -190,12 +191,13 @@ Expr* SrcCodeTransformer::visit_identifier(SrcCodeTransformer* self, const TSNod
             );
         return exprFact_.mk_unknown();
     }
-    if (is<ParamVarDefStmt>(defStmt))
+    case ASTNodeType::ParamVarDefStmt:
         return exprFact_.mk_param_var_ref(std::move(name));
-    if (is<LocalVarDefStmt>(defStmt))
+    case ASTNodeType::LocalVarDefStmt:
         return exprFact_.mk_local_var_ref(std::move(name));
-
-    return exprFact_.mk_unknown();
+    default:
+        return exprFact_.mk_unknown();
+    }
 }
 
 Expr* SrcCodeTransformer::visit_memb_access(SrcCodeTransformer* self, const TSNode& node) {
@@ -206,15 +208,22 @@ Expr* SrcCodeTransformer::visit_memb_access(SrcCodeTransformer* self, const TSNo
     Expr* left             = mLeft(self, nLeft);
 
     access::Qualifier qualif;
-    // todo prepisat na switch
-    if (is<BaseExpr>(left))
+
+    switch (left->type()) {
+    case ASTNodeType::BaseExpr:
         qualif = access::Base{};
-    else if (is<ThisExpr>(left))
+        break;
+    case ASTNodeType::ThisExpr:
         qualif = access::Instance{};
-    else if (is<UnknownExpr>(left))
-        return left;
-    // else if (is_a<ClassRefExpr>(left))
+        break;
+    // case ASTNodeType::ClassRefExpr:
     //     qualif = access::Static{};
+    //     break;
+    case ASTNodeType::UnknownExpr:
+        return left;
+    default:
+        break;
+    }
 
     // todo for future use
     if ([[maybe_unused]] const auto varDef = self->semContext_.find_var(name, qualif)) {
@@ -228,9 +237,9 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
     const TSNode nFunc         = util::child_by_field_name(node, "function");
     const TSNode nArgList      = util::child_by_field_name(node, "arguments");
     std::vector<Expr*> argList = self->visit_arg_list(nArgList);
+    switch (mapManager_.get_node_type(nFunc)) {
     // if it doesn't have a left side - it is not a member access node in tree sitter
-    // todo prepisat na switch
-    if (mapManager_.is_a(nFunc, NodeType::Identifier)) {
+    case NodeType::Identifier: {
         std::string name = util::extract_text(nFunc, self->src_str());
         InvocationId id{
             .name       = name,
@@ -265,7 +274,7 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
         }
     }
     // accessing a member of some variable - also includes `this`
-    if (mapManager_.is_a(nFunc, NodeType::MemberAccess)) {
+    case NodeType::MemberAccess: {
         const TSNode nName     = util::child_by_field_name(nFunc, "name");
         const TSNode nLeft     = util::child_by_field_name(nFunc, "expression");
         const ExprMapper mLeft = mapManager_.get_expr_mapper(nLeft);
@@ -273,16 +282,20 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
         std::string name       = util::extract_text(nName, self->src_str());
         // it's a member of an instance - method or delegate type attribute
         access::Qualifier qualif;
-        // TODO prepisat na switch
-        if (is<BaseExpr>(left))
+        switch (left->type()) {
+        case ASTNodeType::BaseExpr:
             qualif = access::Base{};
-        else if (is<ThisExpr>(left))
+            break;
+        case ASTNodeType::ThisExpr:
             qualif = access::Instance{};
-        // else if (is_a<ClassRefExpr>(left))
+            break;
+        // case ASTNodeType::ClassRefExpr:
         //     qualif = access::Static{};
+        //     break;
         // todo accessing of static members left side is a Usertype Reference
-        else
+        default:
             return exprFact_.mk_unknown();
+        }
 
         InvocationId id{
             .name       = name,
@@ -302,15 +315,16 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
             return exprFact_.mk_unknown();
         }
     }
-    // left side is an anonymous lambda
-    TSNode nLambda;
-    TSNode nDelegate;
-    if (util::is_anonymous_lambda(nFunc, &nLambda, &nDelegate)) {
-        // todo add lambda parsing
-        return exprFact_.mk_lambda_call(exprFact_.mk_unknown(), std::move(argList));
+    default:
+        TSNode nLambda;
+        TSNode nDelegate;
+        // left side is an anonymous lambda
+        if (util::is_anonymous_lambda(nFunc, &nLambda, &nDelegate)) {
+            // todo add lambda parsing
+            return exprFact_.mk_lambda_call(exprFact_.mk_unknown(), std::move(argList));
+        }
+        return exprFact_.mk_unknown();
     }
-
-    return exprFact_.mk_unknown();
 }
 
 Expr* SrcCodeTransformer::visit_prefix_unary_opr(SrcCodeTransformer* self, const TSNode& node) {
@@ -332,23 +346,21 @@ Expr* SrcCodeTransformer::visit_prefix_unary_opr(SrcCodeTransformer* self, const
 
 Expr* SrcCodeTransformer::visit_postfix_unary_opr(SrcCodeTransformer* self, const TSNode& node) {
     const TSNode nLeft     = ts_node_child(node, 0);
-    const TSNode nOp       = ts_node_child(node, 1);
-    const std::string op   = util::extract_text(nOp, self->src_str());
     const ExprMapper mLeft = mapManager_.get_expr_mapper(nLeft);
     Expr* left             = mLeft(self, nLeft);
 
-    UnaryOpType opType;
-    // todo prepisat na switch
-    if (op == "++")
-        opType = UnaryOpType::PostIncrement;
-    else if (op == "--")
-        opType = UnaryOpType::PostDecrement;
-    else if (op == "!")
+    switch (mapManager_.get_node_type(ts_node_child(node, 1))) {
+    case NodeType::IncrementOp:
+        return exprFact_.mk_unary_op(UnaryOpType::PostIncrement, left);
+    case NodeType::DecrementOp:
+        return exprFact_.mk_unary_op(UnaryOpType::PostDecrement, left);
+    // not a logical not operator, but a null-forgiving operator
+    // which is represented with exclamation mark same as logical not operator
+    case NodeType::LogicalNotOp:
         return left;
-    else
+    default:
         return exprFact_.mk_unknown();
-
-    return exprFact_.mk_unary_op(opType, left);
+    }
 }
 
 Expr* SrcCodeTransformer::visit_ref_expr(SrcCodeTransformer* self, const TSNode& node) {
@@ -364,29 +376,26 @@ Expr* SrcCodeTransformer::visit_binary_opr(SrcCodeTransformer* self, const TSNod
     const ExprMapper mLeft  = mapManager_.get_expr_mapper(nLeft);
     const ExprMapper mRight = mapManager_.get_expr_mapper(nRight);
 
-    const auto opOpt        = mapManager_.get_bin_op(nOp);
-    if (! opOpt) {
-        const std::string op = util::extract_text(nOp, self->src_str());
-        // `a ?? b` same as `a != null ? a : b`
-        Expr* left = mLeft(self, nLeft);
-        BinOpExpr* cond
-            = exprFact_.mk_bin_on(left, BinOpType::NotEqual, exprFact_.mk_null_literal());
-        IfExpr* ternary = exprFact_.mk_if(cond, left, mRight(self, nRight));
-        if (op == "\?\?") {
-            return ternary;
-        }
-        if (op == "\?\?=") {
-            // `a ??= b` is the same as `a = a ?? b` which is the same as `a = a
-            // != null ? a : b`
-            return exprFact_.mk_bin_on(left, BinOpType::Assign, ternary);
-        }
+    if (const auto opOpt = mapManager_.get_bin_op(nOp))
+        return exprFact_.mk_bin_on(mLeft(self, nLeft), *opOpt, mRight(self, nRight));
 
-        // throw std::runtime_error("Operation \"" + op + "\" is not
-        // implemented");
-        return exprFact_.mk_unknown();
+    const std::string op = util::extract_text(nOp, self->src_str());
+    // `a ?? b` same as `a != null ? a : b`
+    Expr* left      = mLeft(self, nLeft);
+    BinOpExpr* cond = exprFact_.mk_bin_on(left, BinOpType::NotEqual, exprFact_.mk_null_literal());
+    IfExpr* ternary = exprFact_.mk_if(cond, left, mRight(self, nRight));
+    if (op == "\?\?") {
+        return ternary;
+    }
+    if (op == "\?\?=") {
+        // `a ??= b` is the same as `a = a ?? b` which is the same as `a = a
+        // != null ? a : b`
+        return exprFact_.mk_bin_on(left, BinOpType::Assign, ternary);
     }
 
-    return exprFact_.mk_bin_on(mLeft(self, nLeft), *opOpt, mRight(self, nRight));
+    // throw std::runtime_error("Operation \"" + op + "\" is not
+    // implemented");
+    return exprFact_.mk_unknown();
 }
 
 Expr* SrcCodeTransformer::visit_ternary_expr(SrcCodeTransformer* self, const TSNode& node) {

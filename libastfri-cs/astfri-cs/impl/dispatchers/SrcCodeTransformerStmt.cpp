@@ -190,7 +190,8 @@ Stmt* SrcCodeTransformer::visit_try(SrcCodeTransformer* self, const TSNode& node
             return;
 
         const StmtMapper mCurrent = mapManager_.get_stmt_mapper(current);
-        if (Stmt* currentStmt = mCurrent(self, current); is<CompoundStmt>(currentStmt))
+        Stmt* currentStmt = mCurrent(self, current);
+        if (is<CompoundStmt>(currentStmt))
             finally = currentStmt;
         else if (auto* catchStmt = as<CatchStmt>(currentStmt))
             catchStmts.push_back(catchStmt);

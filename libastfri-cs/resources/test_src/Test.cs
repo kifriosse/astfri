@@ -13,7 +13,9 @@ public class TestBase
     protected int shadowedField = 1;
     public virtual void VirtualMethod()
     {
-        
+        int? nullableInt = null;
+        // write code that uses null forging unary operator
+        int nonNullableInt = nullableInt!;
     }
 
     public void BaseMethod()

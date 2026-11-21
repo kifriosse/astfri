@@ -216,15 +216,18 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
     auto [params, paramsMeta] = util::discover_params(nParams, srcStr, self->typeTrs_);
     const TypeMapper tm       = mapManager_.get_type_mapper(nRetType);
-    Stmt* def                 = nullptr;
+    Stmt* def;
 
-    if (const auto* classType = as<ClassType>(self->typeContext_->type))
-        def = classType->def;
-    else if (const auto* intfType = as<InterfaceType>(self->typeContext_->type))
-        def = intfType->def;
-
-    if (! def)
+    switch (self->typeContext_->type->type()) {
+    case ASTNodeType::ClassType:
+        def = as<ClassType>(self->typeContext_->type)->def;
+        break;
+    case ASTNodeType::InterfaceType:
+        def = as<InterfaceType>(self->typeContext_->type)->def;
+        break;
+    default:
         return;
+    }
 
     MethodDefStmt* methodDef = stmtFact_.mk_method_def(
         def,
@@ -249,10 +252,16 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
 void SymbTableBuilder::visit_base_list(SymbTableBuilder* self, const TSNode& node) {
     ScopedType* type = self->typeContext_->type;
-    if (const auto classType = as<ClassType>(type))
-        self->visit_base_list_class(node, classType);
-    else if (const auto intfType = as<InterfaceType>(type))
-        self->visit_base_list_interface(node, intfType);
+    switch (type->type()) {
+    case ASTNodeType::ClassType:
+        self->visit_base_list_class(node, as<ClassType>(type));
+        break;
+    case ASTNodeType::InterfaceType:
+        self->visit_base_list_interface(node, as<InterfaceType>(type));
+        break;
+    default:
+        break;
+    }
 }
 
 void SymbTableBuilder::visit_type_param_constraint(

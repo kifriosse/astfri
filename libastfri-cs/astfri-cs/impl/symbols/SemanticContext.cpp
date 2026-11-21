@@ -55,12 +55,18 @@ void SemanticContext::leave_scope() {
         return;
 
     for (const auto scopeMemb : scopeContext_.scopeStack.back()) {
-        if (const auto param = as<ParamVarDefStmt>(scopeMemb))
-            scopeContext_.params.erase(param->name);
-        else if (const auto var = as<LocalVarDefStmt>(scopeMemb))
-            scopeContext_.localVars.erase(var->name);
-        else if (const auto func = as<FunctionDefStmt>(scopeMemb)) {
-            scopeContext_.functions.erase(func->name);
+        switch (scopeMemb->type()) {
+        case ASTNodeType::LocalVarDefStmt:
+            scopeContext_.localVars.erase(as<LocalVarDefStmt>(scopeMemb)->name);
+            break;
+        case ASTNodeType::ParamVarDefStmt:
+            scopeContext_.params.erase(as<ParamVarDefStmt>(scopeMemb)->name);
+            break;
+        case ASTNodeType::FunctionDefStmt:
+            scopeContext_.functions.erase(as<FunctionDefStmt>(scopeMemb)->name);
+            break;
+        default:
+            break;
         }
     }
     scopeContext_.scopeStack.pop_back();
@@ -143,9 +149,9 @@ const MethodMetadata* SemanticContext::find_method(
     const MethodId& methodId,
     ScopedType* owner
 ) const {
-
-    if (auto* classDef = as<ClassType>(owner)) {
-        ClassType* current = classDef;
+    switch (owner->type()) {
+    case ASTNodeType::ClassType: {
+        auto* current = as<ClassType>(owner);
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
             if (! typeMeta)
@@ -157,7 +163,7 @@ const MethodMetadata* SemanticContext::find_method(
             current = util::get_base(current);
         }
     }
-    else if (is<InterfaceType>(owner)) {
+    case ASTNodeType::InterfaceType: {
         TypeMetadata* typeMeta = symbTable_.get_type_metadata(owner);
         if (! typeMeta)
             return nullptr;
@@ -165,16 +171,18 @@ const MethodMetadata* SemanticContext::find_method(
         if (const auto* methodMeta = typeMeta->find_method(methodId))
             return methodMeta;
     }
-
-    return nullptr;
+    default :
+        return nullptr;
+    }
 }
 
 MemberVarMetadata* SemanticContext::find_memb_var(
     const std::string_view name,
     ScopedType* owner
 ) const {
-    // todo add handling of records
-    if (auto* current = as<ClassType>(owner)) {
+    switch (owner->type()) {
+    case ASTNodeType::ClassType: {
+        auto* current = as<ClassType>(owner);
         while (current) {
             TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
             if (! typeMeta)
@@ -187,12 +195,13 @@ MemberVarMetadata* SemanticContext::find_memb_var(
             current = util::get_base(current);
         }
     }
-    else if (is<InterfaceType>(owner)) {
-        TypeMetadata* typeMeta = symbTable_.get_type_metadata(current);
+    case ASTNodeType::InterfaceType: {
+        TypeMetadata* typeMeta = symbTable_.get_type_metadata(owner);
         return typeMeta ? typeMeta->find_memb_var(name) : nullptr;
     }
-
-    return nullptr;
+    default:
+        return nullptr;
+    }
 }
 
 InvocationType SemanticContext::find_invoc_type(

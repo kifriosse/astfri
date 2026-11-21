@@ -107,10 +107,10 @@ enum class NodeType : TSSymbol {
     BitOrAssign,
     BitXorAssign,
     // Unary
-    LogicalNot,
-    Increment,
-    Decrement,
-    BitFlip,
+    LogicalNotOp,
+    IncrementOp,
+    DecrementOp,
+    BitFlipOp,
     // Patterns
     /**
      * @brief Node for constant patterns in switch, e.g. \code case 5: \endcode

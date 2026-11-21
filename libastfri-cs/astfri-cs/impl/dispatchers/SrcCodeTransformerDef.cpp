@@ -22,8 +22,7 @@ Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode
     const std::string className = util::extract_text(nClassName, src);
     const Scope scope           = util::mk_scope(node, *self->src());
     TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
-    const auto* classType       = as<ClassType>(tb->type);
-    ClassDefStmt* classDef      = classType->def;
+    ClassDefStmt* classDef      = as<ClassType>(tb->type)->def;
 
     self->semContext_.enter_type(*tb);
 
@@ -40,14 +39,22 @@ Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode
         const StmtMapper mMemb = mapManager_.get_stmt_mapper(nMember);
         Stmt* membStmt         = mMemb(self, nMember);
 
-        if (const auto varDef = as<MemberVarDefStmt>(membStmt))
-            classDef->vars.push_back(varDef);
-        else if (const auto constr = as<ConstructorDefStmt>(membStmt))
-            classDef->constructors.push_back(constr);
-        else if (const auto destr = as<DestructorDefStmt>(membStmt))
-            classDef->destructors.push_back(destr);
-        else if (const auto method = as<MethodDefStmt>(membStmt))
-            classDef->methods.push_back(method);
+        switch (membStmt->type()) {
+        case ASTNodeType::MemberVarDefStmt:
+            classDef->vars.push_back(as<MemberVarDefStmt>(membStmt));
+            break;
+        case ASTNodeType::ConstructorDefStmt:
+            classDef->constructors.push_back(as<ConstructorDefStmt>(membStmt));
+            break;
+        case ASTNodeType::DestructorDefStmt:
+            classDef->destructors.push_back(as<DestructorDefStmt>(membStmt));
+            break;
+        case ASTNodeType::MethodDefStmt:
+            classDef->methods.push_back(as<MethodDefStmt>(membStmt));
+            break;
+        default:
+            break;
+        }
     };
     util::for_each_child_node(nClassBody, processMembers);
 
@@ -61,8 +68,7 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
     const std::string intfName = util::extract_text(nIntfName, src);
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
-    const auto* intfType       = as<InterfaceType>(tb->type);
-    auto* intfDef              = intfType->def;
+    auto* intfDef              = as<InterfaceType>(tb->type)->def;
 
     self->semContext_.enter_type(*tb);
 
@@ -164,10 +170,16 @@ Stmt* SrcCodeTransformer::visit_constr_def(SrcCodeTransformer* self, const TSNod
     if (! ts_node_is_null(nInit)) {
         const StmtMapper mBaseInit = mapManager_.get_stmt_mapper(nInit);
         Stmt* initStmt             = mBaseInit(self, nInit);
-        if (const auto baseInit = as<BaseInitializerStmt>(initStmt))
-            constrDef->baseInit.push_back(baseInit);
-        else if (const auto selfInit = as<SelfInitializerStmt>(initStmt))
-            constrDef->selfInitializers.push_back(selfInit);
+        switch (initStmt->type()) {
+        case ASTNodeType::BaseInitializerStmt:
+            constrDef->baseInit.push_back(as<BaseInitializerStmt>(initStmt));
+            break;
+        case ASTNodeType::SelfInitializerStmt:
+            constrDef->selfInitializers.push_back(as<SelfInitializerStmt>(initStmt));
+            break;
+        default:
+            break;
+        }
     }
 
     self->semContext_.leave_scope();
@@ -200,7 +212,7 @@ Stmt* SrcCodeTransformer::visit_constr_init(SrcCodeTransformer* self, const TSNo
     // );
 
     // todo fix this for Incomplete types
-    ClassDefStmt* ownerDef = owner->def;
+    const ClassDefStmt* ownerDef = owner->def;
     if (ownerDef->baseTypes.empty())
         return stmtFact_.mk_unknown();
     ClassType* base = ownerDef->baseTypes.back();
@@ -217,7 +229,8 @@ Stmt* SrcCodeTransformer::visit_destr_def(SrcCodeTransformer* self, const TSNode
     if (! currentType)
         // throw std::logic_error("Owner type not found");
         return stmtFact_.mk_unknown();
-    auto* owner = as<ClassType>(currentType->type);
+
+    const auto* owner = as<ClassType>(currentType->type);
     if (! owner)
         // throw std::logic_error("Destructor can only be defined for class
         // type");
@@ -256,8 +269,8 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
 
         for (auto& [paramDef, nParam, nInit] : methodMeta->params) {
             if (! ts_node_is_null(nInit)) {
-                ExprMapper mInit      = mapManager_.get_expr_mapper(nInit);
-                paramDef->initializer = mInit(self, nInit);
+                const ExprMapper mInit = mapManager_.get_expr_mapper(nInit);
+                paramDef->initializer  = mInit(self, nInit);
             }
             self->semContext_.reg_param(paramDef);
             // util::print_child_nodes_types(param_node, self->get_src_code());
@@ -276,12 +289,16 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
 
     // if it wansn't able to resolve method
     MethodDefStmt* methodDef = stmtFact_.mk_method_def();
-    if (const auto* classType = as<ClassType>(currentType->type))
-        methodDef->owner = classType->def;
-    else if (const auto* intfType = as<InterfaceType>(currentType->type))
-        methodDef->owner = intfType->def;
-    else
+    switch (currentType->type->type()) {
+    case ASTNodeType::ClassType:
+        methodDef->owner = as<ClassType>(currentType->type)->def;
+        break;
+    case ASTNodeType::InterfaceType:
+        methodDef->owner = as<InterfaceType>(currentType->type)->def;
+        break;
+    default:
         return stmtFact_.mk_unknown();
+    }
 
     methodDef->func   = self->make_func_stmt(node, true);
     methodDef->access = modifs.get_access_mod().value_or(AccessModifier::Internal);
