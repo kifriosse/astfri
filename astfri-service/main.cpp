@@ -130,7 +130,7 @@ int main(int argc, const char** argv)
 #pragma endregion ARGS
 
     astfri::TranslationUnit tu = astfri::service::load_input(input_lib, input_file);
-    astfri::service::write_output(output_lib, tu, output_config_file);
+    astfri::service::write_cli_output(output_lib, tu, output_config_file);
 
     return EXIT_OK;
 }
