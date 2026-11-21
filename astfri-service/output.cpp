@@ -1,5 +1,4 @@
 #include "output.hpp"
-#include "plantuml_stream_outputter.hpp"
 
 // ASTFRI visitor
 #include <astfri-text/TextLibManager.hpp>
@@ -89,11 +88,22 @@ void write_output(
         }
 
         astfri::uml::UMLLibWrapper wrapper;
-        PlantUMLStreamOutputter op(out);
+        astfri::uml::PlantUMLOutputter op;
         auto config = astfri::uml::Config::create_from_json(doc);
         config.writeToFile = false;
         wrapper.init(config, op);
-        wrapper.run(tu);
+
+        std::streambuf* original = std::cout.rdbuf(out.rdbuf());
+        try
+        {
+            wrapper.run(tu);
+        }
+        catch (...)
+        {
+            std::cout.rdbuf(original);
+            throw;
+        }
+        std::cout.rdbuf(original);
         break;
     }
     }

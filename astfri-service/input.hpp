@@ -4,6 +4,7 @@
 #include <astfri/Astfri.hpp>
 
 #include <filesystem>
+#include <iosfwd>
 
 namespace astfri::service {
 
@@ -14,7 +15,9 @@ enum class InputType
     Java
 };
 
-astfri::TranslationUnit load_input(InputType type, const std::filesystem::path& input_file);
+astfri::TranslationUnit load_cli_input(InputType type, const std::filesystem::path& input_file);
+
+astfri::TranslationUnit load_input(InputType type, std::istream& input);
 
 } // namespace astfri::service
 

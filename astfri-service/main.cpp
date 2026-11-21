@@ -8,6 +8,7 @@
 
 #include "input.hpp"
 #include "output.hpp"
+#include "shm_server.hpp"
 
 #define ASTFRI_CLI_VERSION "0.0.1"
 
@@ -47,6 +48,7 @@ int main(int argc, const char** argv)
         ("input-file", "Input source file", cxxopts::value<std::string>())
         ("output", "Type of output library", cxxopts::value<std::string>())
         ("output-config-file", "Output config file", cxxopts::value<std::string>()->default_value(""))
+        ("shm-serve", "Run as shared-memory server on the given block file", cxxopts::value<std::string>())
     ;
 
     auto result = options.parse(argc, argv);
@@ -66,6 +68,13 @@ int main(int argc, const char** argv)
             std::cout << "  " << pair.first << "\n";
         }
         exit(EXIT_OK);
+    }
+
+    if (result.count("shm-serve"))
+    {
+        return astfri::service::run_shm_server(result["shm-serve"].as<std::string>())
+            ? EXIT_OK
+            : EXIT_ASTFRI_WRAPPER_ERROR;
     }
 
     // parse input lib
@@ -129,7 +138,7 @@ int main(int argc, const char** argv)
     }
 #pragma endregion ARGS
 
-    astfri::TranslationUnit tu = astfri::service::load_input(input_lib, input_file);
+    astfri::TranslationUnit tu = astfri::service::load_cli_input(input_lib, input_file);
     astfri::service::write_cli_output(output_lib, tu, output_config_file);
 
     return EXIT_OK;
