@@ -149,6 +149,9 @@ const MethodMetadata* SemanticContext::find_method(
     const MethodId& methodId,
     ScopedType* owner
 ) const {
+    if (!owner)
+        return nullptr;
+
     switch (owner->type()) {
     case ASTNodeType::ClassType: {
         auto* current = as<ClassType>(owner);
@@ -180,6 +183,9 @@ MemberVarMetadata* SemanticContext::find_memb_var(
     const std::string_view name,
     ScopedType* owner
 ) const {
+    if (!owner)
+        return nullptr;
+
     switch (owner->type()) {
     case ASTNodeType::ClassType: {
         auto* current = as<ClassType>(owner);
