@@ -63,7 +63,7 @@ PropertyNode* TypeMetadata::find_property(const std::string_view name) {
     return nullptr;
 }
 
-TypeBinding& TypeMetadata::type_binding() {
+TypeBinding& TypeMetadata::tb() {
     return tb_;
 }
 

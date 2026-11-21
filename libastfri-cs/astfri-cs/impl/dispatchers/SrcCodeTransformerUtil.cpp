@@ -2,9 +2,10 @@
 
 #include <astfri-cs/impl/CSFwd.hpp>
 #include <astfri-cs/impl/data/CSModifiers.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
+#include <astfri-cs/impl/registries/QueryRegistry.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -33,14 +34,14 @@ Stmt* SrcCodeTransformer::visit_var_def_stmt(const TSNode& node, const util::Var
             std::string name          = util::extract_text(n_varName, src_str());
             Expr* init                = nullptr;
             if (! ts_node_is_null(nInit)) {
-                ExprMapper mInit = mapManager_.get_expr_mapper(nInit);
-                init             = mInit(this, nInit);
+                const ExprMapper mInit = mapManager_.get_expr_mapper(nInit);
+                init                   = mInit(this, nInit);
             }
 
             VarDefStmt* varDef = nullptr;
             switch (defType) {
             case util::VarDefType::Member: {
-                MemberVarMetadata* varMeta
+                const MemberVarMetadata* varMeta
                     = semContext_.find_memb_var(name, semContext_.current_type()->type);
 
                 varDef              = varMeta->varDef;

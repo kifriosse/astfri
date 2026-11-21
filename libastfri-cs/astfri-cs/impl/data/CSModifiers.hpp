@@ -61,6 +61,7 @@ class CSModifiers {
 private:
     MaskType modifier_mask{0};
     static maps::MapManager& mapManager_;
+
 public:
     /**
      * @brief Factory method for parsing/extrating modifiers of method

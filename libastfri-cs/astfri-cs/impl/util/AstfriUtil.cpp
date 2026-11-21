@@ -1,7 +1,7 @@
 #include <astfri/Astfri.hpp>
 
 #include <astfri-cs/impl/data/CSModifiers.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
 #include <astfri-cs/impl/util/Utils.hpp>
@@ -10,12 +10,15 @@
 
 #include <deque>
 #include <functional>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace {
-    astfri::csharp::maps::MapManager& mapManager = astfri::csharp::maps::MapManager::get();
+
+astfri::csharp::maps::MapManager& mapManager = astfri::csharp::maps::MapManager::get();
+
 } // namespace
 
 namespace astfri::csharp::util {
@@ -170,7 +173,7 @@ FuncMetadata make_func_metadata(
         .params  = std::move(paramsMeta),
         .funcDef = StmtFactory::get_instance()
                        .mk_function_def(std::move(name), std::move(params), retType, nullptr),
-        .nFunc = node,
+        .nFunc   = node,
     };
 }
 
@@ -188,7 +191,7 @@ std::vector<GenericParam*> mk_generic_params(const TSNode& node, const std::stri
 }
 
 ClassType* get_base(ClassType* subType) {
-    if (!subType)
+    if (! subType)
         return nullptr;
 
     const auto def = subType->def;

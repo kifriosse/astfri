@@ -2,7 +2,7 @@
 #define CSHARP_SYMBOL_TABLE_HPP
 
 #include <astfri-cs/impl/CSFwd.hpp>
-#include <astfri-cs/impl/data/SymbolTree.hpp>
+#include <astfri-cs/impl/symbols/SymbolTree.hpp>
 
 #include <ranges>
 #include <span>
@@ -125,6 +125,6 @@ public:
 
 } // namespace astfri::csharp
 
-#include <astfri-cs/impl/data/SymbolTable.inl>
+#include <astfri-cs/impl/symbols/SymbolTable.inl>
 
 #endif // CSHARP_SYMBOL_TABLE_HPP

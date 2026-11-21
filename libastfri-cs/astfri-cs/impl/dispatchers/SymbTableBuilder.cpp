@@ -1,12 +1,12 @@
 #include <astfri/Astfri.hpp>
 
 #include <astfri-cs/impl/data/CSModifiers.hpp>
-#include <astfri-cs/impl/data/SymbolTable.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/dispatchers/SymbTableBuilder.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
+#include <astfri-cs/impl/symbols/SymbolTable.hpp>
 #include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/RapidJsonUtil.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/SymbTableBuilder.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -70,8 +70,7 @@ SymbTableBuilder::SymbTableBuilder(
 ) :
     typeTrs_(symbTable),
     symbTable_(symbTable),
-    srcs_(srcs),
-    lang_(tree_sitter_c_sharp()) {
+    srcs_(srcs) {
 }
 
 void SymbTableBuilder::reg_user_types() {
@@ -112,11 +111,11 @@ void SymbTableBuilder::reg_members() {
     };
 
     for (auto* metadata : symbTable_.get_type_metadata()) {
-        typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
+        typeTrs_.set_current_namespace(metadata->tb().treeNode);
         for (auto& [node, src] : metadata->defs()) {
             currentSrc_ = src;
             typeTrs_.set_current_src(src);
-            typeContext_ = metadata->type_binding();
+            typeContext_ = metadata->tb();
             // processing header - base list and generic param constraints
             util::for_each_child_node(node, process);
             const TSNode nClassBody = util::child_by_field_name(node, "body");
@@ -217,14 +216,14 @@ void SymbTableBuilder::visit_method(SymbTableBuilder* self, const TSNode& node) 
 
     auto [params, paramsMeta] = util::discover_params(nParams, srcStr, self->typeTrs_);
     const TypeMapper tm       = mapManager_.get_type_mapper(nRetType);
-    Stmt* def = nullptr;
+    Stmt* def                 = nullptr;
 
-    if (auto* classType = as<ClassType>(self->typeContext_->type))
+    if (const auto* classType = as<ClassType>(self->typeContext_->type))
         def = classType->def;
-    else if (auto* intfType = as<InterfaceType>(self->typeContext_->type))
+    else if (const auto* intfType = as<InterfaceType>(self->typeContext_->type))
         def = intfType->def;
 
-    if (!def)
+    if (! def)
         return;
 
     MethodDefStmt* methodDef = stmtFact_.mk_method_def(
@@ -280,8 +279,7 @@ void SymbTableBuilder::load_implicit_usings(const SDKProfile profile) {
     };
 
     for (auto qualif : netSdk) {
-        const auto end = std::end(wpfSdkExclude);
-        if (profile == WPF && std::ranges::find(wpfSdkExclude, qualif) != end)
+        if (profile == WPF && std::ranges::find(wpfSdkExclude, qualif) != std::end(wpfSdkExclude))
             continue;
 
         addToScope(qualif);
@@ -355,7 +353,6 @@ void SymbTableBuilder::load_external_types(std::filesystem::path& jsonPath) {
 
             // todo generic parameters for external types
             TypeBinding tb = mk_type_binding(*typeOpt, scope, name, {});
-
             if (tb.type)
                 symbTable_.add_type(tb);
         }
@@ -372,11 +369,16 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective) {
     bool isStatic                 = false;
 
     auto process                  = [&isGlobal, &isStatic](const TSNode& current) {
-        const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == mapManager_.get_symbol(NodeType::Static))
-            isGlobal = true;
-        else if (sCurrent == mapManager_.get_symbol(NodeType::Global))
+        switch (mapManager_.get_node_type(current)) {
+        case NodeType::Static:
             isStatic = true;
+            break;
+        case NodeType::Global:
+            isGlobal = true;
+            break;
+        default:
+            break;
+        }
     };
 
     util::for_each_child_node(nUsingDirective, process, false);
@@ -416,8 +418,7 @@ void SymbTableBuilder::reg_using_directive(const TSNode& nUsingDirective) {
     else {
         const auto seachScope = isGlobal ? GlobAlias : LocalAlias;
         const TSNode nQualif  = ts_node_next_named_sibling(nAliasName);
-        ScopeNode* node       = typeTrs_.resolve_qualif_name(nQualif, seachScope, searchStart);
-        if (node) {
+        if (ScopeNode* node = typeTrs_.resolve_qualif_name(nQualif, seachScope, searchStart)) {
             auto* ext             = node->is_a<ExternalMarker>();
             Alias alias           = ext ? Alias{ext->take_name()} : Alias{node};
             std::string aliasName = util::extract_text(nAliasName, srcStr);
@@ -444,17 +445,16 @@ void SymbTableBuilder::collect_types(const TSTree* tree) {
     stack.emplace_back(ts_tree_root_node(tree), root);
 
     auto process = [this, &stack](const TSNode& node) {
-        const TSSymbol sCurrent = ts_node_symbol(node);
-        TSNode body             = util::child_by_field_name(node, "body");
+        TSNode body = util::child_by_field_name(node, "body");
         if (ts_node_is_null(body))
             return;
 
-        if (util::is_type_decl(sCurrent)) {
+        if (util::is_type_decl(node)) {
             const TypeCollector collector = mapManager_.get_type_collector(node);
             if (ScopeNode* scopeNode = collector(this, node))
                 stack.emplace_back(body, scopeNode);
         }
-        else if (sCurrent == mapManager_.get_symbol(NodeType::NamespaceDecl)) {
+        else if (mapManager_.is_a(node, NodeType::NamespaceDecl)) {
             const TSNode nName = util::child_by_field_name(node, "name");
             std::string name   = util::extract_text(nName, src_str());
             Nms nms(name);
@@ -472,20 +472,19 @@ void SymbTableBuilder::collect_types(const TSTree* tree) {
 }
 
 ScopeNode* SymbTableBuilder::visit_type_def(const TSNode& node, const util::TypeKind type) {
-    const TSNode nName = util::child_by_field_name(node, "name");
-    std::string name   = util::extract_text(nName, src_str());
+    const TSNode nName     = util::child_by_field_name(node, "name");
+    const std::string name = util::extract_text(nName, src_str());
 
     std::vector<GenericParam*> genParams;
 
     auto processClassHeader = [&](const TSNode& current) -> void {
-        const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == mapManager_.get_symbol(NodeType::TypeParamList)) {
+        if (mapManager_.is_a(current, NodeType::TypeParamList)) {
             genParams = util::mk_generic_params(current, src_str());
         }
     };
     util::for_each_child_node(node, processClassHeader);
 
-    Scope scope          = util::mk_scope(currentParent_, *currentSrc_);
+    const Scope scope    = util::mk_scope(currentParent_, *currentSrc_);
     const TypeBinding tb = mk_type_binding(type, scope, name, std::move(genParams));
 
     return tb.type ? symbTable_.add_type(tb, node, src()) : nullptr;
@@ -552,7 +551,7 @@ TypeBinding SymbTableBuilder::mk_type_binding(
     const std::string& name,
     std::vector<GenericParam*> genericParams
 ) {
-    TypeBinding tb{nullptr, nullptr};
+    TypeBinding tb{.treeNode = nullptr, .type = nullptr};
     switch (type) {
     case util::TypeKind::Class: {
         ClassDefStmt* classDef = stmtFact_.mk_class_def(name, scope);

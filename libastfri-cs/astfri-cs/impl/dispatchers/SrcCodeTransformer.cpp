@@ -3,9 +3,8 @@
 #include <astfri-cs/impl/CSFwd.hpp>
 #include <astfri-cs/impl/data/Metadata.hpp>
 #include <astfri-cs/impl/data/SourceFile.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
-#include <astfri-cs/impl/SemanticContext.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 
 #include <tree_sitter/tree-sitter-c-sharp.h>
 
@@ -27,7 +26,7 @@ SrcCodeTransformer::SrcCodeTransformer(SymbolTable& symbTable) :
 TranslationUnit SrcCodeTransformer::visit_comp_unit() {
     TranslationUnit trUnit;
     for (const auto metadata : this->semContext_.get_type_metadata()) {
-        typeTrs_.set_current_namespace(metadata->type_binding().treeNode);
+        typeTrs_.set_current_namespace(metadata->tb().treeNode);
         bool added = false;
         for (auto& [node, src] : metadata->defs()) {
             if (! src)

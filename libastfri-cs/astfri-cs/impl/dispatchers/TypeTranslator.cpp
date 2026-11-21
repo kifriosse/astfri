@@ -1,11 +1,10 @@
 #include <astfri/Astfri.hpp>
 
-#include <astfri-cs/impl/data/SymbolTable.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
-#include <astfri-cs/impl/SemanticContext.hpp>
+#include <astfri-cs/impl/dispatchers/TypeTranslator.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
+#include <astfri-cs/impl/symbols/SymbolTable.hpp>
 #include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/TypeTranslator.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -14,7 +13,7 @@
 
 namespace astfri::csharp {
 
-TypeFactory& TypeTranslator::typeFact_ = TypeFactory::get_instance();
+TypeFactory& TypeTranslator::typeFact_        = TypeFactory::get_instance();
 maps::MapManager& TypeTranslator::mapManager_ = maps::MapManager::get();
 
 ScopeNode TypeTranslator::extMarkNode_(ExternalMarker{}, nullptr);
@@ -66,11 +65,9 @@ Type* TypeTranslator::visit_identitifier(TypeTranslator* self, const TSNode& nod
     return typeFact_.mk_unknown();
 }
 
-Type* TypeTranslator::visit_qualified_name(
-    [[maybe_unused]] TypeTranslator* self,
-    [[maybe_unused]] const TSNode& node
-) {
-    ScopeNode* typeNode = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
+Type* TypeTranslator::visit_qualified_name(TypeTranslator* self, const TSNode& node) {
+    ScopeNode* typeNode
+        = self->resolve_qualif_name(node, util::SearchScope::UserTypeRef, self->currentScope_);
 
     if (typeNode) {
         util::Overloaded overloaded{
@@ -93,7 +90,7 @@ Type* TypeTranslator::visit_implicit(
     [[maybe_unused]] TypeTranslator* self,
     [[maybe_unused]] const TSNode& node
 ) {
-    return typeFact_.mk_unknown(); // todo add deduced type
+    return typeFact_.mk_deduced(nullptr);
 }
 
 Type* TypeTranslator::visit_wrapper(TypeTranslator* self, const TSNode& node) {
@@ -158,22 +155,19 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
      * Global lookup (including file usings)
      * * Checks only external aliases
      */
-    static const TSSymbol sQualifName = mapManager_.get_symbol(NodeType::QualifName);
 
-    const std::string_view srcStr     = src_str();
-    TSNode nCurrent                   = nQualif;
+    const std::string_view srcStr = src_str();
+    TSNode nCurrent               = nQualif;
     std::vector<TSNode> nQualifs;
 
-    TSSymbol sCurrent = ts_node_symbol(nCurrent);
-    while (sCurrent == sQualifName) {
+    while (mapManager_.is_a(nCurrent, NodeType::QualifName)) {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         nCurrent = util::child_by_field_name(nCurrent, "qualifier");
-        sCurrent = ts_node_symbol(nCurrent);
     }
 
     const SymbolTree& symbTree = symbTable_.symb_tree();
     ScopeNode* entryPoint      = start;
-    if (sCurrent == mapManager_.get_symbol(NodeType::AliasQualifName)) {
+    if (mapManager_.is_a(nCurrent, NodeType::AliasQualifName)) {
         nQualifs.push_back(util::child_by_field_name(nCurrent, "name"));
         const TSNode nAlias        = util::child_by_field_name(nCurrent, "alias");
         const std::string aliasStr = util::extract_text(nAlias, srcStr);
@@ -201,7 +195,7 @@ ScopeNode* TypeTranslator::resolve_qualif_name(
     const std::string qualifStr = util::extract_text(nQualifs.back(), srcStr);
     nQualifs.pop_back();
 
-    entryPoint = find_entry_point(qualifStr, searchScope, entryPoint, src());
+    entryPoint             = find_entry_point(qualifStr, searchScope, entryPoint, src());
 
     ScopeNode* currentNode = entryPoint;
     for (auto& nCurrentQualif : std::views::reverse(nQualifs)) {
@@ -376,7 +370,7 @@ ScopeNode* TypeTranslator::bottom_up_search(
         }
 
         // check nested classes in static usings
-        for (const TypeBinding& statUsing : nms->get_static_usings(src)) {
+        for (const auto& statUsing : nms->get_static_usings(src)) {
             if (ScopeNode* node = statUsing.treeNode->find_child(qualif))
                 return node;
         }
@@ -396,14 +390,14 @@ ScopeNode* TypeTranslator::search_parents(
     }
 
     while (current) {
-        ClassDefStmt* def = current->def;
+        const ClassDefStmt* def = current->def;
         if (! def->baseTypes.empty()) {
             current             = def->baseTypes.back();
             const auto metadata = symbTable_.get_type_metadata(current);
             if (! metadata)
                 continue;
 
-            const ScopeNode* scope = metadata->type_binding().treeNode;
+            const ScopeNode* scope = metadata->tb().treeNode;
             if (ScopeNode* nestedType = scope->find_child(qualif))
                 return nestedType;
         }

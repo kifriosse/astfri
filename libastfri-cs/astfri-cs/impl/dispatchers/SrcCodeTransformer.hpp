@@ -4,8 +4,8 @@
 #include <astfri/Astfri.hpp>
 
 #include <astfri-cs/impl/data/SourceFile.hpp>
-#include <astfri-cs/impl/SemanticContext.hpp>
-#include <astfri-cs/impl/visitors/TypeTranslator.hpp>
+#include <astfri-cs/impl/dispatchers/TypeTranslator.hpp>
+#include <astfri-cs/impl/symbols/SemanticContext.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -90,12 +90,18 @@ private:
     static Stmt* visit_local_var_def(SrcCodeTransformer* self, const TSNode& node);
     static Stmt* visit_global_var_def_stmt(SrcCodeTransformer* self, const TSNode& node);
     static Stmt* visit_param_def(SrcCodeTransformer* self, const TSNode& node);
-    static Stmt* visit_constr_def(SrcCodeTransformer* self,
-                                  const TSNode& node); // constructor def stmt
-    static Stmt* visit_constr_init(SrcCodeTransformer* self,
-                                   const TSNode& node); // base initializer
-    static Stmt* visit_destr_def(SrcCodeTransformer* self,
-                                 const TSNode& node); // destructor def stmt
+    static Stmt* visit_constr_def(
+        SrcCodeTransformer* self,
+        const TSNode& node
+    ); // constructor def stmt
+    static Stmt* visit_constr_init(
+        SrcCodeTransformer* self,
+        const TSNode& node
+    ); // base initializer
+    static Stmt* visit_destr_def(
+        SrcCodeTransformer* self,
+        const TSNode& node
+    ); // destructor def stmt
     static Stmt* visit_method_def(SrcCodeTransformer* self,
                                   const TSNode& node); // method def stmt
 

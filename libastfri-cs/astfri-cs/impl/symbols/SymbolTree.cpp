@@ -1,6 +1,6 @@
 #include <astfri/Astfri.hpp>
 
-#include <astfri-cs/impl/data/SymbolTree.hpp>
+#include <astfri-cs/impl/symbols/SymbolTree.hpp>
 
 #include <memory>
 #include <span>

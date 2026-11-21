@@ -3,12 +3,13 @@
 
 #include <astfri-cs/impl/CSFwd.hpp>
 #include <astfri-cs/impl/data/Identifiers.hpp>
-#include <astfri-cs/impl/data/SourceFile.hpp>
-#include <astfri-cs/impl/data/SymbolTable.hpp>
+#include <astfri-cs/impl/symbols/SymbolTree.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <unordered_map>
+
+#include "astfri-cs/impl/data/SourceFile.hpp"
 
 namespace astfri {
 
@@ -123,7 +124,11 @@ public:
      * nullptr otherwise
      */
     PropertyNode* find_property(std::string_view name);
-    TypeBinding& type_binding();
+    /**
+     * @brief Returns reference to type binding of this type metadata
+     * @return reference to type binding of this type metadata
+     */
+    TypeBinding& tb();
 };
 
 } // namespace astfri::csharp

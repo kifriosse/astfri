@@ -6,7 +6,6 @@
 #ifndef CSHARP_FWD_H
 #define CSHARP_FWD_H
 
-#include <astfri-cs/impl/regs/NodeType.hpp>
 #include <astfri-cs/impl/util/Utils.hpp>
 
 #include <tree_sitter/api.h>
@@ -23,6 +22,7 @@ struct Expr;
 
 namespace astfri::csharp {
 // Forward declarations
+enum class NodeType : TSSymbol;
 class ScopeNode;
 class TypeTranslator;
 class SrcCodeTransformer;
@@ -87,6 +87,7 @@ using RegistryMap = std::unordered_map<NodeType, Value>;
  */
 template<typename Value>
 using RegistryStrViewMap = std::unordered_map<std::string_view, Value>;
+
 /**
  * @brief Map with heterogenous/transparent look up with string as keys, to improve perfomence for
  * string views and string literals when used on this map.

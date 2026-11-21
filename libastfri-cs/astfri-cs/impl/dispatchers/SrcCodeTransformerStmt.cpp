@@ -1,10 +1,10 @@
 #include <astfri/Astfri.hpp>
 
 #include <astfri-cs/impl/CSFwd.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -30,10 +30,10 @@ Stmt* SrcCodeTransformer::visit_block(SrcCodeTransformer* self, const TSNode& no
 
     std::vector<Stmt*> stmts;
     auto processBody = [self, &stmts](const TSNode& nCurrent) -> void {
-        if (ts_node_is_named(nCurrent)) {
-            const StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
-            stmts.push_back(mStmt(self, nCurrent));
-        }
+        if (! ts_node_is_named(nCurrent))
+            return;
+        const StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
+        stmts.push_back(mStmt(self, nCurrent));
     };
     util::for_each_child_node(node, processBody);
 
@@ -161,15 +161,15 @@ Stmt* SrcCodeTransformer::visit_if(SrcCodeTransformer* self, const TSNode& node)
     while (! nIfs.empty()) {
         const TSNode ifNode = nIfs.back();
         nIfs.pop_back();
-        const TSNode nTrue = util::child_by_field_name(ifNode, "consequence");
-        const TSNode nCond = util::child_by_field_name(ifNode, "condition");
-        StmtMapper mTrue   = mapManager_.get_stmt_mapper(nTrue);
-        ExprMapper mCond   = mapManager_.get_expr_mapper(nCond);
+        const TSNode nTrue     = util::child_by_field_name(ifNode, "consequence");
+        const TSNode nCond     = util::child_by_field_name(ifNode, "condition");
+        const StmtMapper mTrue = mapManager_.get_stmt_mapper(nTrue);
+        const ExprMapper mCond = mapManager_.get_expr_mapper(nCond);
 
-        Stmt* trueStmt     = mTrue(self, nTrue);
-        Expr* condExpr     = mCond(self, nCond);
-        IfStmt* ifStmt     = stmtFact_.mk_if(condExpr, trueStmt, currentElse);
-        currentElse        = ifStmt;
+        Stmt* trueStmt         = mTrue(self, nTrue);
+        Expr* condExpr         = mCond(self, nCond);
+        IfStmt* ifStmt         = stmtFact_.mk_if(condExpr, trueStmt, currentElse);
+        currentElse            = ifStmt;
     }
 
     return currentElse;
@@ -190,8 +190,7 @@ Stmt* SrcCodeTransformer::visit_try(SrcCodeTransformer* self, const TSNode& node
             return;
 
         const StmtMapper mCurrent = mapManager_.get_stmt_mapper(current);
-        Stmt* currentStmt         = mCurrent(self, current);
-        if (is<CompoundStmt>(currentStmt))
+        if (Stmt* currentStmt = mCurrent(self, current); is<CompoundStmt>(currentStmt))
             finally = currentStmt;
         else if (auto* catchStmt = as<CatchStmt>(currentStmt))
             catchStmts.push_back(catchStmt);
@@ -242,13 +241,13 @@ Stmt* SrcCodeTransformer::visit_catch_decl(SrcCodeTransformer* self, const TSNod
 }
 
 Stmt* SrcCodeTransformer::visit_switch(SrcCodeTransformer* self, const TSNode& node) {
-    const TSNode nValue      = util::child_by_field_name(node, "value");
-    const TSNode nSwitchBody = util::child_by_field_name(node, "body");
-    const ExprMapper mValue  = mapManager_.get_expr_mapper(nValue);
-    Expr* value              = mValue(self, nValue);
+    const TSNode nValue           = util::child_by_field_name(node, "value");
+    const TSNode nSwitchBody      = util::child_by_field_name(node, "body");
+    const ExprMapper mValue       = mapManager_.get_expr_mapper(nValue);
+    Expr* value                   = mValue(self, nValue);
 
     std::vector<Stmt*> switchBody = {};
-    auto processCase = [self, &switchBody](const TSNode& nCase) -> void {
+    auto processCase              = [self, &switchBody](const TSNode& nCase) -> void {
         TSTreeCursor cursor = ts_tree_cursor_new(nCase);
         if (! ts_tree_cursor_goto_first_child(&cursor)) {
             ts_tree_cursor_delete(&cursor);
@@ -280,17 +279,15 @@ Stmt* SrcCodeTransformer::visit_switch(SrcCodeTransformer* self, const TSNode& n
             if (! ts_node_is_named(nCurrent))
                 continue;
 
-            StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
-            Stmt* stmt       = mStmt(self, nCurrent);
+            const StmtMapper mStmt = mapManager_.get_stmt_mapper(nCurrent);
+            Stmt* stmt             = mStmt(self, nCurrent);
             switchBody.push_back(stmt);
         }
 
         ts_tree_cursor_delete(&cursor);
     };
 
-    auto process = [&processCase](const TSNode& nCurrent) -> void {
-        processCase(nCurrent);
-    };
+    auto process = [&processCase](const TSNode& nCurrent) -> void { processCase(nCurrent); };
 
     util::for_each_child_node(nSwitchBody, process);
     SwitchStmt* stmt = stmtFact_.mk_switch(value, stmtFact_.mk_compound(std::move(switchBody)));
@@ -330,9 +327,9 @@ Stmt* SrcCodeTransformer::visit_return(SrcCodeTransformer* self, const TSNode& n
 Stmt* SrcCodeTransformer::visit_throw(SrcCodeTransformer* self, const TSNode& node) {
     Expr* expr = nullptr;
     if (ts_node_named_child_count(node) > 0) {
-        const TSNode nExpr      = ts_node_named_child(node, 0);
+        const TSNode nExpr     = ts_node_named_child(node, 0);
         const ExprMapper mExpr = mapManager_.get_expr_mapper(nExpr);
-        expr                    = mExpr(self, nExpr);
+        expr                   = mExpr(self, nExpr);
     }
     return stmtFact_.mk_throw(expr);
 }

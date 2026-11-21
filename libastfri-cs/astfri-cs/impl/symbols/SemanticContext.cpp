@@ -1,15 +1,14 @@
+#include <astfri/Astfri.hpp>
+
 #include <astfri-cs/impl/data/AccessType.hpp>
 #include <astfri-cs/impl/data/Identifiers.hpp>
 #include <astfri-cs/impl/data/Metadata.hpp>
-#include <astfri-cs/impl/data/SymbolTable.hpp>
-#include <astfri-cs/impl/SemanticContext.hpp>
+#include <astfri-cs/impl/symbols/SemanticContext.hpp>
+#include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/Common.hpp>
-#include <astfri/Astfri.hpp>
 
 #include <algorithm>
 #include <string>
-
-#include "util/AstfriUtil.hpp"
 
 namespace astfri::csharp {
 
@@ -125,8 +124,7 @@ VarDefStmt* SemanticContext::find_var(
             return metadata->varDef;
         },
         [&](const access::Base& base) -> VarDefStmt* {
-            const auto metadata = find_memb_var(name, base.parent);
-            if (metadata)
+            if (const auto metadata = find_memb_var(name, base.parent))
                 return metadata->varDef;
             return nullptr;
         },
@@ -145,8 +143,6 @@ const MethodMetadata* SemanticContext::find_method(
     const MethodId& methodId,
     ScopedType* owner
 ) const {
-
-    // TODO should also check interfaces for static methods
 
     if (auto* classDef = as<ClassType>(owner)) {
         ClassType* current = classDef;

@@ -1,12 +1,11 @@
 #include <astfri/Astfri.hpp>
 
-#include <astfri-cs/impl/data/SymbolTable.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/ASTBuilder.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/dispatchers/SymbTableBuilder.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
-#include <astfri-cs/impl/visitors/SymbTableBuilder.hpp>
-#include <astfri-cs/ASTBuilder.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -19,18 +18,13 @@
 #include <string>
 #include <vector>
 
-
 namespace astfri {
-
 
 namespace csharp {
 
-
 namespace fs = std::filesystem;
 
-
 namespace {
-
 
 const fs::path extTypesRoot                               = ASTFRI_CS_RESOURCES;
 const fs::path core                                       = extTypesRoot / "core.json";
@@ -45,9 +39,7 @@ const std::unordered_map<SDKProfile, fs::path> profileMap = {
     {SDKProfile::WPF,      winDesktop                  }
 };
 
-
 } // namespace
-
 
 ASTBuilder::ASTBuilder(astfri::csharp::Config config) :
     m_lang(tree_sitter_c_sharp()),
@@ -92,7 +84,7 @@ std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const path& projec
                 if (fileName.ends_with(".g.cs") || fileName.ends_with(".i.cs")
                     || fileName.ends_with(".AssemblyInfo.cs")) {
                     continue;
-                    }
+                }
                 std::ifstream fileStream(entryPath, std::ios::binary);
                 load_from_stream(fileStream, entryPath);
             }
@@ -102,7 +94,7 @@ std::vector<astfri::TranslationUnit> ASTBuilder::load_project(const path& projec
     return {this->mk_ast()};
 }
 
-astfri::TranslationUnit ASTBuilder::load_file(const std::filesystem::path &path) {
+astfri::TranslationUnit ASTBuilder::load_file(const std::filesystem::path& path) {
     std::ifstream file(path);
     if (! file.is_open()) {
         throw std::runtime_error(std::format("Failed to open `{}`.", path.string()));
@@ -202,16 +194,13 @@ void ASTBuilder::load_from_stream(std::istream& inputStream, const path& path) {
 }
 
 ASTBuilder ASTBuilder::create(astfri::csharp::Config config) {
-    return ASTBuilder(std::move(config));
+    return ASTBuilder(config);
 }
 
 std::string_view ASTBuilder::version() {
     return ASTFRI_VERSION;
 }
 
-
-} // namespace astfri::csharp
-
+} // namespace csharp
 
 } // namespace astfri
-

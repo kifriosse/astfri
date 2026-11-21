@@ -2,10 +2,10 @@
 
 #include <astfri-cs/impl/CSFwd.hpp>
 #include <astfri-cs/impl/data/CSModifiers.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/AstfriUtil.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -16,14 +16,13 @@
 
 namespace astfri::csharp {
 
-
 Stmt* SrcCodeTransformer::visit_class_def(SrcCodeTransformer* self, const TSNode& node) {
     const std::string_view src  = self->src_str();
     const TSNode nClassName     = util::child_by_field_name(node, "name");
     const std::string className = util::extract_text(nClassName, src);
     const Scope scope           = util::mk_scope(node, *self->src());
     TypeBinding* tb             = self->typeTrs_.get_type(className, scope);
-    ClassType* classType        = as<ClassType>(tb->type);
+    const auto* classType       = as<ClassType>(tb->type);
     ClassDefStmt* classDef      = classType->def;
 
     self->semContext_.enter_type(*tb);
@@ -62,23 +61,25 @@ Stmt* SrcCodeTransformer::visit_interface_def(SrcCodeTransformer* self, const TS
     const std::string intfName = util::extract_text(nIntfName, src);
     const Scope scope          = util::mk_scope(node, *self->src());
     TypeBinding* tb            = self->typeTrs_.get_type(intfName, scope);
-    InterfaceType* intfType    = as<InterfaceType>(tb->type);
+    const auto* intfType       = as<InterfaceType>(tb->type);
     auto* intfDef              = intfType->def;
 
     self->semContext_.enter_type(*tb);
 
     const TSNode nIntfBody      = util::child_by_field_name(node, "body");
     auto processInterfaceHeader = [&](const TSNode& current) -> bool {
-        using enum NodeType;
         if (ts_node_eq(current, nIntfBody))
             return false;
 
-        const TSSymbol sCurrent = ts_node_symbol(current);
-        if (sCurrent == mapManager_.get_symbol(TypeParamList)) {
+        switch (mapManager_.get_node_type(current)) {
+        case NodeType::TypeParamList:
             intfDef->tparams = util::mk_generic_params(current, src);
-        }
-        else if (sCurrent == mapManager_.get_symbol(TypeParamConstrClause)) {
+            break;
+        case NodeType::TypeParamConstrClause:
             // util::for_each_child_node(current, processGenericConstraints);
+            break;
+        default:
+            break;
         }
         return true;
     };
@@ -198,7 +199,6 @@ Stmt* SrcCodeTransformer::visit_constr_init(SrcCodeTransformer* self, const TSNo
     //     "Constructor can only be defined for class type"
     // );
 
-
     // todo fix this for Incomplete types
     ClassDefStmt* ownerDef = owner->def;
     if (ownerDef->baseTypes.empty())
@@ -276,15 +276,15 @@ Stmt* SrcCodeTransformer::visit_method_def(SrcCodeTransformer* self, const TSNod
 
     // if it wansn't able to resolve method
     MethodDefStmt* methodDef = stmtFact_.mk_method_def();
-    if (auto* classType = as<ClassType>(currentType->type))
+    if (const auto* classType = as<ClassType>(currentType->type))
         methodDef->owner = classType->def;
-    else if (auto* intfType = as<InterfaceType>(currentType->type))
+    else if (const auto* intfType = as<InterfaceType>(currentType->type))
         methodDef->owner = intfType->def;
     else
         return stmtFact_.mk_unknown();
 
-    methodDef->func          = self->make_func_stmt(node, true);
-    methodDef->access        = modifs.get_access_mod().value_or(AccessModifier::Internal);
+    methodDef->func   = self->make_func_stmt(node, true);
+    methodDef->access = modifs.get_access_mod().value_or(AccessModifier::Internal);
     return methodDef;
 }
 
@@ -302,9 +302,8 @@ Stmt* SrcCodeTransformer::visit_func_stmt(SrcCodeTransformer* self, const TSNode
     self->semContext_.enter_scope();
     self->semContext_.reg_return(funcMeta->funcDef->retType);
     for (const auto& paramMeta : funcMeta->params) {
-        const TSNode nInit = paramMeta.nInit;
-        if (! ts_node_is_null(nInit)) {
-            ExprMapper mInit                = mapManager_.get_expr_mapper(nInit);
+        if (const TSNode nInit = paramMeta.nInit; ! ts_node_is_null(nInit)) {
+            const ExprMapper mInit          = mapManager_.get_expr_mapper(nInit);
             paramMeta.paramDef->initializer = mInit(self, nInit);
         }
         self->semContext_.reg_param(paramMeta.paramDef);

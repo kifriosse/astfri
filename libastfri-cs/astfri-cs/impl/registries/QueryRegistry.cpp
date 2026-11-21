@@ -1,5 +1,5 @@
-#include <astfri-cs/impl/regs/Queries.h>
-#include <astfri-cs/impl/regs/QueryRegistry.hpp>
+#include <astfri-cs/impl/registries/Queries.h>
+#include <astfri-cs/impl/registries/QueryRegistry.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>

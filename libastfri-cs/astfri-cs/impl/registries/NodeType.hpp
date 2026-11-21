@@ -9,7 +9,7 @@ namespace astfri::csharp {
  * @brief Enum for representing tree-sitter node type
  */
 enum class NodeType : TSSymbol {
-    Unknown,
+    Unknown = 0,
     CompilationUnit,
     // Definitions
     NamespaceDecl,

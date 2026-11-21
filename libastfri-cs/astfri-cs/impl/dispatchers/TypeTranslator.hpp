@@ -3,7 +3,7 @@
 
 #include <astfri/Astfri.hpp>
 
-#include <astfri-cs/impl/data/SymbolTable.hpp>
+#include <astfri-cs/impl/symbols/SymbolTree.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -14,6 +14,7 @@ struct Mappers;
 class MapManager;
 
 } // namespace maps
+
 struct SourceFile;
 
 /**

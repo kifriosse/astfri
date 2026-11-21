@@ -5,20 +5,18 @@
 #include <astfri/impl/Concepts.hpp>
 
 #include <astfri-cs/Config.hpp>
-#include <astfri-cs/SDKProfile.hpp>
 #include <astfri-cs/impl/data/SourceFile.hpp>
+#include <astfri-cs/SDKProfile.hpp>
 
 #include <tree_sitter/api.h>
 
 #include <rapidjson/document.h>
-#include <vector>
 
+#include <vector>
 
 namespace astfri {
 
-
 namespace csharp {
-
 
 /**
  * @brief Class responsible for loading C# source code and building AST from it.
@@ -42,10 +40,10 @@ private:
 public:
     explicit ASTBuilder(astfri::csharp::Config config);
     ~ASTBuilder();
-    ASTBuilder(const ASTBuilder& other)      = delete;
-    ASTBuilder(ASTBuilder&& other)           = delete;
-    ASTBuilder& operator=(ASTBuilder& other) = delete;
-    ASTBuilder& operator=(ASTBuilder&&other) = delete;
+    ASTBuilder(const ASTBuilder& other)       = delete;
+    ASTBuilder(ASTBuilder&& other)            = delete;
+    ASTBuilder& operator=(ASTBuilder& other)  = delete;
+    ASTBuilder& operator=(ASTBuilder&& other) = delete;
 
     /**
      * @brief Loads source code of a project into AST Builder
@@ -57,7 +55,7 @@ public:
      * @brief Loads source code from a file
      * @param path Path to the file with C# source code
      */
-    astfri::TranslationUnit load_file(const path &path);
+    astfri::TranslationUnit load_file(const path& path);
 
     /**
      * @brief Loads souce code from a stream into AST Builder
@@ -90,16 +88,11 @@ private:
     void load_from_stream(std::istream& inputStream, const path& path = {});
 };
 
-
 static_assert(
-    astfri::detail::IsInputLib<
-        astfri::csharp::ASTBuilder,
-        astfri::csharp::Config,
-        rapidjson::Value>);
+    astfri::detail::IsInputLib<astfri::csharp::ASTBuilder, astfri::csharp::Config, rapidjson::Value>
+);
 
-
-} // namespace astfri::csharp
-
+} // namespace csharp
 
 } // namespace astfri
 

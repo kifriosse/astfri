@@ -23,8 +23,8 @@ struct SourceFile;
 class ScopeNode;
 
 /**
- * @brief Helper struct to group type and its definition statement.
- * Also contains pointer to node in symbol tree where type is stored.
+ * @brief Helper struct to group type binding and pointer to node in symbol tree where type is
+ * stored.
  */
 struct TypeBinding {
     ScopeNode* treeNode{nullptr};
@@ -228,6 +228,6 @@ TypeBinding* type_from_alias(const Alias& alias);
 
 } // namespace astfri::csharp
 
-#include <astfri-cs/impl/data/SymbolTree.inl>
+#include <astfri-cs/impl/symbols/SymbolTree.inl>
 
 #endif // CSHARP_SYMB_TREE_HPP

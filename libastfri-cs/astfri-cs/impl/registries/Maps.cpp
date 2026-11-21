@@ -1,11 +1,11 @@
 #include <astfri/Astfri.hpp>
 
 #include <astfri-cs/impl/data/CSModifiers.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/dispatchers/SymbTableBuilder.hpp>
+#include <astfri-cs/impl/dispatchers/TypeTranslator.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
-#include <astfri-cs/impl/visitors/SymbTableBuilder.hpp>
-#include <astfri-cs/impl/visitors/TypeTranslator.hpp>
 
 #include <tree_sitter/api.h>
 #include <tree_sitter/tree-sitter-c-sharp.h>
@@ -380,54 +380,53 @@ Types::Types() :
 }) {
 }
 
-
 MapManager& MapManager::get() {
     static MapManager mapMnger;
     return mapMnger;
 }
 
-StmtMapper MapManager::get_stmt_mapper(const TSNode& node) {
+StmtMapper MapManager::get_stmt_mapper(const TSNode& node) const {
     return get_stmt_mapper(nodeTypes_.get_node_type(node));
 }
 
-StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType) {
+StmtMapper MapManager::get_stmt_mapper(const NodeType nodeType) const {
     // todo redo this when the typo is fixed
     constexpr StmtMapper def = default_visit<StmtFactory, SrcCodeTransformer, Stmt*>;
     return get_or_default(handlers_.stmts, nodeType, def);
 }
 
-ExprMapper MapManager::get_expr_mapper(const TSNode& node) {
+ExprMapper MapManager::get_expr_mapper(const TSNode& node) const {
     return get_expr_mapper(nodeTypes_.get_node_type(node));
 }
 
-ExprMapper MapManager::get_expr_mapper(const NodeType nodeType) {
+ExprMapper MapManager::get_expr_mapper(const NodeType nodeType) const {
     constexpr ExprMapper def = default_visit<ExprFactory, SrcCodeTransformer, Expr*>;
     return get_or_default(handlers_.exprs, nodeType, def);
 }
 
-TypeMapper MapManager::get_type_mapper(const TSNode& node) {
+TypeMapper MapManager::get_type_mapper(const TSNode& node) const {
     return get_type_mapper(nodeTypes_.get_node_type(node));
 }
 
-TypeMapper MapManager::get_type_mapper(const NodeType nodeType) {
+TypeMapper MapManager::get_type_mapper(const NodeType nodeType) const {
     constexpr TypeMapper def = default_visit<TypeFactory, TypeTranslator, Type*>;
     return get_or_default(handlers_.types, nodeType, def);
 }
 
-TypeCollector MapManager::get_type_collector(const TSNode& node) {
+TypeCollector MapManager::get_type_collector(const TSNode& node) const {
     return get_type_collector(nodeTypes_.get_node_type(node));
 }
 
-TypeCollector MapManager::get_type_collector(const NodeType nodeType) {
-    const TypeCollector def = [](auto*, const auto &) -> ScopeNode* { return nullptr; };
+TypeCollector MapManager::get_type_collector(const NodeType nodeType) const {
+    const TypeCollector def = [](auto*, const auto&) -> ScopeNode* { return nullptr; };
     return get_or_default(handlers_.typeCollectors, nodeType, def);
 }
 
-MemberCollector MapManager::get_symb_collector(const TSNode& node) {
+MemberCollector MapManager::get_symb_collector(const TSNode& node) const {
     return get_symb_collector(nodeTypes_.get_node_type(node));
 }
 
-MemberCollector MapManager::get_symb_collector(const NodeType nodeType) {
+MemberCollector MapManager::get_symb_collector(const NodeType nodeType) const {
     const MemberCollector def = [](auto*, const auto&) { };
     return get_or_default(handlers_.symbCollectors, nodeType, def);
 }
@@ -440,7 +439,7 @@ std::optional<BinOpType> MapManager::get_bin_op(const TSNode& op) const {
     return get_opt(operations_.binaryOps, get_node_type(op));
 }
 
-Type* MapManager::get_primitive_type(const std::string_view nodeType) {
+Type* MapManager::get_primitive_type(const std::string_view nodeType) const {
     return get_opt(types_.types, nodeType).value_or(nullptr);
 }
 
@@ -456,8 +455,12 @@ bool MapManager::is_expr(const TSNode& node) const {
     return handlers_.exprs.contains(nodeTypes_.get_node_type(node));
 }
 
-bool MapManager::is_stmt(const TSNode& node) {
+bool MapManager::is_stmt(const TSNode& node) const {
     return handlers_.stmts.contains(nodeTypes_.get_node_type(node));
+}
+
+bool MapManager::is_a(const TSNode& node, const NodeType type) const {
+    return nodeTypes_.get_node_type(node) == type;
 }
 
 NodeType MapManager::get_node_type(const TSNode& node) const {

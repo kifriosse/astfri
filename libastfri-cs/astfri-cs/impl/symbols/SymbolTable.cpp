@@ -1,6 +1,8 @@
-#include <astfri-cs/impl/data/Metadata.hpp>
-#include <astfri-cs/impl/data/SymbolTable.hpp>
 #include <astfri/Astfri.hpp>
+
+#include <astfri-cs/impl/data/Metadata.hpp>
+#include <astfri-cs/impl/symbols/SymbolTable.hpp>
+#include <astfri-cs/impl/symbols/SymbolTree.hpp>
 
 namespace astfri::csharp {
 
@@ -27,11 +29,11 @@ void SymbolTable::add_glob_alias(std::string name, Alias alias) {
 ScopeNode* SymbolTable::add_type(const TypeBinding& tb, const TSNode& node, SourceFile* src) {
     auto [it, inserted] = typeMetadata_.try_emplace(tb.type, tb);
     if (inserted) {
-        it->second.type_binding().treeNode = add_type(tb);
+        it->second.tb().treeNode = add_type(tb);
         types_.push_back(tb.type);
     }
     it->second.add_def(node, src);
-    return it->second.type_binding().treeNode;
+    return it->second.tb().treeNode;
 }
 
 ScopeNode* SymbolTable::add_type(const TypeBinding& tb) {

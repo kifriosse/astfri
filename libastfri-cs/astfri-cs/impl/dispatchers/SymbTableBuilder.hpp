@@ -2,9 +2,8 @@
 #define CSHARP_SYMBOL_TABLE_BUILDER_HPP
 
 #include <astfri-cs/impl/data/SourceFile.hpp>
-#include <astfri-cs/impl/regs/QueryRegistry.hpp>
-#include <astfri-cs/impl/SemanticContext.hpp>
-#include <astfri-cs/impl/visitors/TypeTranslator.hpp>
+#include <astfri-cs/impl/dispatchers/TypeTranslator.hpp>
+#include <astfri-cs/impl/registries/QueryRegistry.hpp>
 #include <astfri-cs/SDKProfile.hpp>
 
 #include <tree_sitter/api.h>
@@ -26,7 +25,6 @@ namespace astfri::csharp {
  * Caller has to ensure that both objects live longer than SymbolTableBuilder
  */
 class SymbTableBuilder {
-
 private:
     friend maps::Mappers;
 
@@ -40,7 +38,6 @@ private:
     std::vector<std::unique_ptr<SourceFile>>& srcs_;
     SourceFile* currentSrc_{nullptr};
     ScopeNode* currentParent_{nullptr};
-    const TSLanguage* lang_;
 
 public:
     /**

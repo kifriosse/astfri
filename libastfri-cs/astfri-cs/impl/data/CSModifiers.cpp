@@ -1,7 +1,8 @@
 #include <astfri/Astfri.hpp>
 
 #include <astfri-cs/impl/data/CSModifiers.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
+#include <astfri-cs/impl/registries/QueryRegistry.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
 
 #include <tree_sitter/api.h>

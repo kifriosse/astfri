@@ -3,7 +3,6 @@
 
 namespace astfri::csharp::maps {
 
-
 template<class Self, class RetType>
 RetType Mappers::visit_error(Self*, const TSNode& node) {
     const auto [row, column] = ts_node_start_point(node);
@@ -25,13 +24,13 @@ Type MapManager::get_or_default(const RegistryMap<Type>& map, NodeType nodeType,
     return it != map.end() ? it->second : nDefVal;
 }
 
-template <typename Map>
+template<typename Map>
 auto MapManager::get_opt(const Map& map, const typename Map::key_type& key)
     -> std::optional<typename Map::mapped_type> {
     const auto it = map.find(key);
     return it != map.end() ? std::optional{it->second} : std::nullopt;
 }
 
-} // namespace astfri::csharp
+} // namespace astfri::csharp::maps
 
 #endif // CSHARP_REGISTRIES_INL

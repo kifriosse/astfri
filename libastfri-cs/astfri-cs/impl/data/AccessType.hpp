@@ -2,6 +2,7 @@
 #define CSHARP_ACCESS_TYPE_HPP
 
 #include <astfri/Astfri.hpp>
+
 #include <variant>
 
 namespace astfri {
@@ -49,7 +50,6 @@ struct Unknown {
 /**
  * @brief Qualifier of member access - \code this, base, ClassRef, expr \endcode
  */
-
 
 using Qualifier = std::variant<None, Instance, Static, Base, Unknown>;
 

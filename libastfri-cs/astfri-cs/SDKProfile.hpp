@@ -3,9 +3,7 @@
 
 #include <string_view>
 
-
 namespace astfri::csharp {
-
 
 /**
  * @brief Enum representing default SDK profiles in C#. Used for determining
@@ -72,7 +70,6 @@ enum class SDKProfile {
 std::string_view sdk_profile_to_string(SDKProfile s);
 
 SDKProfile sdk_profile_from_string(std::string_view sStr);
-
 
 } // namespace astfri::csharp
 

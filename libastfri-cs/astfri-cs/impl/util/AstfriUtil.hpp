@@ -7,8 +7,9 @@
 #ifndef CSHARP_ASTFRI_UTIL_H
 #define CSHARP_ASTFRI_UTIL_H
 
-#include <astfri-cs/impl/data/Metadata.hpp>
 #include <astfri/Astfri.hpp>
+
+#include <astfri-cs/impl/data/Metadata.hpp>
 
 #include <tree_sitter/api.h>
 

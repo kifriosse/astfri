@@ -1,5 +1,4 @@
-#include <astfri-cs/impl/regs/Maps.hpp>
-#include <astfri-cs/impl/regs/QueryRegistry.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
 
 #include <tree_sitter/api.h>
@@ -12,7 +11,7 @@
 #include <unordered_set>
 
 namespace {
-    const astfri::csharp::maps::MapManager& mapManager = astfri::csharp::maps::MapManager::get();
+const astfri::csharp::maps::MapManager& mapManager = astfri::csharp::maps::MapManager::get();
 } // namespace
 
 namespace astfri::csharp::util {

@@ -6,7 +6,7 @@
 #ifndef CSHARP_TS_UTIL_HPP
 #define CSHARP_TS_UTIL_HPP
 
-#include <astfri-cs/impl/regs/QueryRegistry.hpp>
+#include <astfri-cs/impl/registries/QueryRegistry.hpp>
 
 #include <tree_sitter/api.h>
 

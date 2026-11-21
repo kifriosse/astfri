@@ -3,11 +3,11 @@
 #include <astfri-cs/impl/CSFwd.hpp>
 #include <astfri-cs/impl/data/AccessType.hpp>
 #include <astfri-cs/impl/data/Identifiers.hpp>
-#include <astfri-cs/impl/regs/Maps.hpp>
+#include <astfri-cs/impl/dispatchers/SrcCodeTransformer.hpp>
+#include <astfri-cs/impl/registries/Maps.hpp>
 #include <astfri-cs/impl/util/Common.hpp>
 #include <astfri-cs/impl/util/TSUtil.hpp>
 #include <astfri-cs/impl/util/Utils.hpp>
-#include <astfri-cs/impl/visitors/src_code/SrcCodeTransformer.hpp>
 
 #include <tree_sitter/api.h>
 
@@ -178,6 +178,7 @@ Expr* SrcCodeTransformer::visit_identifier(SrcCodeTransformer* self, const TSNod
     if (! defStmt)
         return exprFact_.mk_unknown();
 
+    // todo prepisat na switch
     if (const auto membVar = as<MemberVarDefStmt>(defStmt)) {
         if (membVar->staticity == Staticity::NonStatic)
             return exprFact_.mk_member_var_ref(exprFact_.mk_this(), std::move(name));
@@ -205,6 +206,7 @@ Expr* SrcCodeTransformer::visit_memb_access(SrcCodeTransformer* self, const TSNo
     Expr* left             = mLeft(self, nLeft);
 
     access::Qualifier qualif;
+    // todo prepisat na switch
     if (is<BaseExpr>(left))
         qualif = access::Base{};
     else if (is<ThisExpr>(left))
@@ -227,7 +229,8 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
     const TSNode nArgList      = util::child_by_field_name(node, "arguments");
     std::vector<Expr*> argList = self->visit_arg_list(nArgList);
     // if it doesn't have a left side - it is not a member access node in tree sitter
-    if (ts_node_symbol(nFunc) == mapManager_.get_symbol(NodeType::Identifier)) {
+    // todo prepisat na switch
+    if (mapManager_.is_a(nFunc, NodeType::Identifier)) {
         std::string name = util::extract_text(nFunc, self->src_str());
         InvocationId id{
             .name       = name,
@@ -262,7 +265,7 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
         }
     }
     // accessing a member of some variable - also includes `this`
-    if (ts_node_symbol(nFunc) == mapManager_.get_symbol(NodeType::MemberAccess)) {
+    if (mapManager_.is_a(nFunc, NodeType::MemberAccess)) {
         const TSNode nName     = util::child_by_field_name(nFunc, "name");
         const TSNode nLeft     = util::child_by_field_name(nFunc, "expression");
         const ExprMapper mLeft = mapManager_.get_expr_mapper(nLeft);
@@ -270,6 +273,7 @@ Expr* SrcCodeTransformer::visit_invoc(SrcCodeTransformer* self, const TSNode& no
         std::string name       = util::extract_text(nName, self->src_str());
         // it's a member of an instance - method or delegate type attribute
         access::Qualifier qualif;
+        // TODO prepisat na switch
         if (is<BaseExpr>(left))
             qualif = access::Base{};
         else if (is<ThisExpr>(left))
@@ -334,6 +338,7 @@ Expr* SrcCodeTransformer::visit_postfix_unary_opr(SrcCodeTransformer* self, cons
     Expr* left             = mLeft(self, nLeft);
 
     UnaryOpType opType;
+    // todo prepisat na switch
     if (op == "++")
         opType = UnaryOpType::PostIncrement;
     else if (op == "--")

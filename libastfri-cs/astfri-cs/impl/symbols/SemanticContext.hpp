@@ -4,7 +4,7 @@
 #include <astfri-cs/impl/CSFwd.hpp>
 #include <astfri-cs/impl/data/AccessType.hpp>
 #include <astfri-cs/impl/data/Metadata.hpp>
-#include <astfri-cs/impl/data/SymbolTable.hpp>
+#include <astfri-cs/impl/symbols/SymbolTable.hpp>
 
 #include <unordered_map>
 #include <vector>
